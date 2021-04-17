@@ -1,0 +1,16 @@
+[
+{
+  "modid": "epicfight",
+  "name": "Epic Fight Mod",
+  "description": "Super intense battle!",
+  "version": "2.0.0",
+  "mcversion": "1.12.2",
+  "url": "",
+  "updateUrl": "",
+  "authorList": ["ManInHome"],
+  "credits": "",
+  "logoFile": "",
+  "screenshots": [],
+  "dependencies": []
+}
+]

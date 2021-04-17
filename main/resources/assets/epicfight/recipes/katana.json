@@ -1,0 +1,21 @@
+{
+    "type": "minecraft:crafting_shaped",
+    "pattern":
+    [
+        "  B",
+        " B ",
+        "S  "
+    ],
+    
+    "key":
+    {
+        "B": { "item" : "minecraft:diamond" },
+        "S": { "item" : "minecraft:iron_ingot" }
+    },
+    
+    "result":
+    {
+        "item" : "epicfight:katana",
+        "count" : 1
+    }
+}

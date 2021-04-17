@@ -1,0 +1,57 @@
+{
+    "entity.hit.blunt":
+    {
+        "category":"entity",
+        "subtitle":"entity.hit.blunt",
+        "sounds":[{"name":"epicfight:entity/hit/blunt_hit1","stream":true}, {"name":"epicfight:entity/hit/blunt_hit2","stream":true}, {"name":"epicfight:entity/hit/blunt_hit3","stream":true}]
+    },
+    
+    "entity.hit.blunt_hard":
+    {
+        "category":"entity",
+        "subtitle":"entity.hit.blunt_hard",
+        "sounds":[{"name":"epicfight:entity/hit/blunt_hit_hard","stream":true}]
+    },
+    
+    "entity.hit.blade":
+    {
+        "category":"entity",
+        "subtitle":"entity.hit.blade",
+        "sounds":[{"name":"epicfight:entity/hit/blade_hit1","stream":true}, {"name":"epicfight:entity/hit/blade_hit2","stream":true}, {"name":"epicfight:entity/hit/blade_hit3","stream":true}]
+    },
+    
+    "entity.common.whoosh":
+    {
+        "category":"master",
+        "subtitle":"entity.common.whoosh",
+        "sounds":[{"name":"epicfight:entity/common/whoosh","stream":true}]
+    },
+    
+    "entity.common.whoosh_hard":
+    {
+        "category":"master",
+        "subtitle":"entity.common.whoosh_hard",
+        "sounds":[{"name":"epicfight:entity/common/whoosh_hard","stream":true}]
+    },
+    
+    "entity.common.whoosh_sharp":
+    {
+        "category":"master",
+        "subtitle":"entity.common.whoosh_sharp",
+        "sounds":[{"name":"epicfight:entity/common/whoosh_sharp","stream":true}]
+    },
+    
+    "entity.common.clash":
+    {
+        "category":"master",
+        "subtitle":"entity.common.clash",
+        "sounds":[{"name":"epicfight:entity/common/clash","stream":true}]
+    },
+    
+    "entity.common.sword_in":
+    {
+        "category":"master",
+        "subtitle":"entity.common.sword_in",
+        "sounds":[{"name":"epicfight:entity/common/sword_in","stream":true}]
+    }
+}
