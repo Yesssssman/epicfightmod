@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <asset>
+    <contributor>
+      <author>Blender User</author>
+      <authoring_tool>Blender 2.79.0 commit date:2018-03-22, commit time:14:10, hash:f4dc9f9d68b</authoring_tool>
+    </contributor>
+    <created>2021-06-24T00:22:16</created>
+    <modified>2021-06-24T00:22:16</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_images/>
+  <library_geometries>
+    <geometry id="Cube-mesh" name="Cube">
+      <mesh>
+        <source id="Cube-mesh-positions">
+          <float_array id="Cube-mesh-positions-array" count="12">-0.2474986 0.2475 2.685679 0.2475011 0.2475001 2.685679 -0.2474988 0.2474999 2.190679 0.2475012 0.2475 2.190679</float_array>
+          <technique_common>
+            <accessor source="#Cube-mesh-positions-array" count="4" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Cube-mesh-normals">
+          <float_array id="Cube-mesh-normals-array" count="3">-2.40827e-7 1 -2.42043e-7</float_array>
+          <technique_common>
+            <accessor source="#Cube-mesh-normals-array" count="1" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Cube-mesh-map-0">
+          <float_array id="Cube-mesh-map-0-array" count="8">0.125 0.5 0.125 0.75 0.25 0.75 0.25 0.5</float_array>
+          <technique_common>
+            <accessor source="#Cube-mesh-map-0-array" count="4" stride="2">
+              <param name="S" type="float"/>
+              <param name="T" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Cube-mesh-vertices">
+          <input semantic="POSITION" source="#Cube-mesh-positions"/>
+        </vertices>
+        <polylist count="1">
+          <input semantic="VERTEX" source="#Cube-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Cube-mesh-normals" offset="1"/>
+          <input semantic="TEXCOORD" source="#Cube-mesh-map-0" offset="2" set="0"/>
+          <vcount>4 </vcount>
+          <p>2 0 0 0 0 1 1 0 2 3 0 3</p>
+        </polylist>
+      </mesh>
+    </geometry>
+  </library_geometries>
+  <library_controllers>
+    <controller id="Armature_Cube-skin" name="Armature">
+      <skin source="#Cube-mesh">
+        <bind_shape_matrix>1 0 0 0 0 1 0 0 0 0 1 2.40108e-5 0 0 0 1</bind_shape_matrix>
+        <source id="Armature_Cube-skin-joints">
+          <Name_array id="Armature_Cube-skin-joints-array" count="17">Root Thigh_R Leg_R Thigh_L Leg_L Torso Chest Shoulder_R Arm_R Hand_R Tool_R Shoulder_L Arm_L Hand_L Tool_L Head Head_Top</Name_array>
+          <technique_common>
+            <accessor source="#Armature_Cube-skin-joints-array" count="17" stride="1">
+              <param name="JOINT" type="name"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Armature_Cube-skin-bind_poses">
+          <float_array id="Armature_Cube-skin-bind_poses-array" count="272">1 0 0 4.60446e-6 0 0 1 -1.505674 0 -1 0 -1.01584e-6 0 0 0 1 1 0 -1.2666e-7 -0.1249891 0 3.4376e-7 -1 1.444159 0 1 0 -1.09738e-5 0 0 0 1 1 -6.51683e-7 0 -0.1249892 1.83309e-7 2.47199e-7 -1 0.7497299 6.51683e-7 1 0 -1.09791e-5 0 0 0 1 1 0 -1.3411e-7 0.1250109 0 3.4376e-7 -1 1.444159 0 1 0 -1.09663e-5 0 0 0 1 1 -6.51683e-7 0 0.1250107 1.9076e-7 2.47199e-7 -1 0.7497299 6.51683e-7 1 0 -1.08162e-5 0 0 0 1 1 0 0 4.60446e-6 0 0 1 -1.555674 0 -1 0 -1.01584e-6 0 0 0 1 1 0 0 4.60446e-6 0 0 1 -1.855674 0 -1 0 -1.01584e-6 0 0 0 1 0 -0.9999999 1.56987e-7 -1.36995e-6 0.9635815 0 -0.2674145 0.6032041 0.2674145 1.67527e-7 0.9635816 -2.173524 0 0 0 1 0.9999999 -3.65332e-7 0 -0.3134397 0 0 -0.9999998 2.168685 2.70205e-7 0.9999998 0 8.83812e-7 0 0 0 1 0.9999999 -2.37487e-7 0 -0.3134397 0 -0.03839069 -0.9992626 1.368495 1.43362e-7 0.9992626 -0.03839057 0.05257707 0 0 0 1 0.9999999 0 0 -0.3134397 0 0.06920593 0.9976023 -0.5851528 0 -0.9975833 0.0692051 -0.07066541 0 0 0 1 0 0.9999999 -2.71855e-7 1.62906e-6 -0.9635815 0 -0.2674145 0.6031954 -0.2674146 2.83185e-7 0.9635815 -2.173526 0 0 0 1 0.9999998 0 0 0.3134487 0 -1.39323e-7 -0.9999998 2.168685 2.06632e-7 0.9999998 0 1.08849e-6 0 0 0 1 0.9999998 -2.37487e-7 0 0.3134487 0 -0.03839075 -0.9992626 1.368495 3.33816e-7 0.9992626 -0.03839057 0.05257725 0 0 0 1 0.9999998 0 0 0.3134487 0 0.06920599 0.9976023 -0.5851528 0 -0.9975838 0.06920516 -0.07066547 0 0 0 1 1 0 0 4.60446e-6 0 0 1 -2.255673 0 -1 0 -1.01584e-6 0 0 0 1 1 0 0 4.60446e-6 0 0 1 -2.452049 0 -1 0 -1.01584e-6 0 0 0 1</float_array>
+          <technique_common>
+            <accessor source="#Armature_Cube-skin-bind_poses-array" count="17" stride="16">
+              <param name="TRANSFORM" type="float4x4"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Armature_Cube-skin-weights">
+          <float_array id="Armature_Cube-skin-weights-array" count="4">1 1 1 1</float_array>
+          <technique_common>
+            <accessor source="#Armature_Cube-skin-weights-array" count="4" stride="1">
+              <param name="WEIGHT" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <joints>
+          <input semantic="JOINT" source="#Armature_Cube-skin-joints"/>
+          <input semantic="INV_BIND_MATRIX" source="#Armature_Cube-skin-bind_poses"/>
+        </joints>
+        <vertex_weights count="4">
+          <input semantic="JOINT" source="#Armature_Cube-skin-joints" offset="0"/>
+          <input semantic="WEIGHT" source="#Armature_Cube-skin-weights" offset="1"/>
+          <vcount>1 1 1 1 </vcount>
+          <v>16 0 16 1 16 2 16 3</v>
+        </vertex_weights>
+      </skin>
+    </controller>
+  </library_controllers>
+</COLLADA>

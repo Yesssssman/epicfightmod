@@ -1,0 +1,720 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <asset>
+    <contributor>
+      <author>Blender User</author>
+      <authoring_tool>Blender 2.79.0 commit date:2018-03-22, commit time:14:10, hash:f4dc9f9d68b</authoring_tool>
+    </contributor>
+    <created>2021-07-28T18:55:33</created>
+    <modified>2021-07-28T18:55:33</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_images/>
+  <library_animations>
+    <animation id="Armature_Root_pose_matrix">
+      <source id="Armature_Root_pose_matrix-input">
+        <float_array id="Armature_Root_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Root_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Root_pose_matrix-output">
+        <float_array id="Armature_Root_pose_matrix-output-array" count="128">1 0 0 -4.60446e-6 0 0 -1 -0.4862819 0 1 0 0.5558062 0 0 0 1 1 0 0 -4.60446e-6 0 0 -1 -0.8265164 0 1 0 0.2911412 0 0 0 1 1 0 0 -4.60446e-6 0 -0.9987263 -0.0504553 -1.039151 0 0.0504553 -0.9987263 0.1646174 0 0 0 1 1 0 0 -4.60446e-6 0 -0.9987263 -0.0504553 -1.039151 0 0.0504553 -0.9987263 0.1139359 0 0 0 1 1 0 0 -4.60446e-6 0 -0.9987263 -0.0504553 -1.039151 0 0.0504553 -0.9987263 0.1303914 0 0 0 1 1 0 0 -4.60446e-6 0 -0.9987263 -0.0504553 -1.039151 0 0.0504553 -0.9987263 0.1139359 0 0 0 1 1 0 0 -4.60446e-6 0 -0.9987263 -0.0504553 -1.039151 0 0.0504553 -0.9987263 0.1139359 0 0 0 1 1 0 0 -4.60446e-6 0 -0.9987263 -0.0504553 -1.039151 0 0.0504553 -0.9987263 0.1139359 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Root_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Root_pose_matrix-interpolation">
+        <Name_array id="Armature_Root_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Root_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Root_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Root_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Root_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Root_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Root_pose_matrix-sampler" target="Armature_Root/transform"/>
+    </animation>
+    <animation id="Armature_Thigh_R_pose_matrix">
+      <source id="Armature_Thigh_R_pose_matrix-input">
+        <float_array id="Armature_Thigh_R_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Thigh_R_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Thigh_R_pose_matrix-output">
+        <float_array id="Armature_Thigh_R_pose_matrix-output-array" count="128">0.9999999 -3.48229e-5 5.77467e-5 0.1249939 -6.69824e-5 -0.5639734 0.8257927 -0.002830744 3.8112e-6 -0.8257919 -0.5639742 -1.18464e-5 0 0 0 1 0.9999999 -4.43078e-5 7.49819e-5 0.1249939 -8.54026e-5 -0.3499441 0.9367706 -0.002830744 -1.52668e-5 -0.9367698 -0.3499447 -1.18464e-5 0 0 0 1 0.9995602 0.02964301 -7.19409e-4 0.1249939 0.02960998 -0.9991386 -0.02904731 -0.002830744 -0.001579853 0.02901368 -0.9995778 -1.18688e-5 0 0 0 1 0.9989617 0.04537629 0.004040421 0.1249939 0.04544896 -0.9987638 -0.0200917 -0.002830744 0.00312372 0.02025493 -0.9997899 -1.18688e-5 0 0 0 1 0.9981099 0.05936867 0.01586877 0.1249939 0.05932132 -0.9982322 0.003461573 -0.002830863 0.01604621 -0.002513215 -0.9998681 -1.18762e-5 0 0 0 1 0.9972807 0.06839987 0.02743337 0.1249939 0.06765877 -0.9973395 0.02710311 -0.002830863 0.02921423 -0.02517282 -0.9992561 -1.18688e-5 0 0 0 1 0.996956 0.07118091 0.03180967 0.1249939 0.07002313 -0.9968893 0.03615075 -0.002830863 0.03428396 -0.03381282 -0.99884 -1.18539e-5 0 0 0 1 0.996956 0.07118091 0.03180967 0.1249939 0.07002313 -0.9968893 0.03615075 -0.002830863 0.03428396 -0.03381282 -0.99884 -1.18539e-5 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Thigh_R_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Thigh_R_pose_matrix-interpolation">
+        <Name_array id="Armature_Thigh_R_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Thigh_R_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Thigh_R_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Thigh_R_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Thigh_R_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Thigh_R_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Thigh_R_pose_matrix-sampler" target="Armature_Thigh_R/transform"/>
+    </animation>
+    <animation id="Armature_Leg_R_pose_matrix">
+      <source id="Armature_Leg_R_pose_matrix-input">
+        <float_array id="Armature_Leg_R_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Leg_R_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Leg_R_pose_matrix-output">
+        <float_array id="Armature_Leg_R_pose_matrix-output-array" count="128">1 -2.29105e-7 8.64267e-7 -1.49012e-8 -2.07569e-7 0.8882016 0.4594546 0.3747201 -8.77306e-7 -0.4594553 0.8882004 7.45058e-9 0 0 0 1 1 -1.07568e-7 6.38887e-7 -1.49012e-8 9.41218e-8 0.9999492 0.01013702 0.3747201 -6.44475e-7 -0.01013704 0.9999478 7.45058e-9 0 0 0 1 1 -6.66478e-8 4.84288e-7 -1.49012e-8 5.42495e-8 0.9999863 0.005354259 0.3747201 -4.84288e-7 -0.005354263 0.9999849 7.45058e-9 0 0 0 1 1 4.94765e-9 3.68804e-7 -1.49012e-8 -1.47847e-8 0.9999955 0.003180159 0.3747201 -3.68804e-7 -0.003180165 0.9999942 7.45058e-9 0 0 0 1 1 7.38655e-8 2.73809e-7 -1.49012e-8 -9.08622e-8 0.9999985 0.002083296 0.3747201 -2.75671e-7 -0.002083294 0.9999971 7.45058e-9 0 0 0 1 1 1.44646e-7 2.16067e-7 -1.49012e-8 -1.5134e-7 0.9999991 0.001732586 0.3747201 -2.19792e-7 -0.001732586 0.9999977 7.45058e-9 0 0 0 1 1 1.54483e-7 2.01166e-7 -1.49012e-8 -1.6659e-7 0.9999992 0.001691632 0.3747201 -2.01166e-7 -0.001691634 0.9999978 7.45058e-9 0 0 0 1 1 1.54483e-7 2.01166e-7 -1.49012e-8 -1.6659e-7 0.9999992 0.001691632 0.3747201 -2.01166e-7 -0.001691634 0.9999978 7.45058e-9 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Leg_R_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Leg_R_pose_matrix-interpolation">
+        <Name_array id="Armature_Leg_R_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Leg_R_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Leg_R_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Leg_R_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Leg_R_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Leg_R_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Leg_R_pose_matrix-sampler" target="Armature_Leg_R/transform"/>
+    </animation>
+    <animation id="Armature_Knee_R_pose_matrix">
+      <source id="Armature_Knee_R_pose_matrix-input">
+        <float_array id="Armature_Knee_R_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Knee_R_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Knee_R_pose_matrix-output">
+        <float_array id="Armature_Knee_R_pose_matrix-output-array" count="128">0.9999999 2.92435e-7 -2.3446e-7 0 -2.47092e-7 6.37025e-7 -0.9999999 0.4344181 -2.94298e-7 1 5.94184e-7 0.00204251 0 0 0 1 0.9999999 2.92435e-7 -2.3446e-7 0 -2.47092e-7 6.37025e-7 -0.9999999 0.4344181 -2.94298e-7 1 5.94184e-7 0.00204251 0 0 0 1 0.9999999 2.92435e-7 -2.3446e-7 0 -2.47092e-7 6.37025e-7 -0.9999999 0.4344181 -2.94298e-7 1 5.94184e-7 0.00204251 0 0 0 1 0.9999999 2.92435e-7 -2.3446e-7 0 -2.47092e-7 6.37025e-7 -0.9999999 0.4344181 -2.94298e-7 1 5.94184e-7 0.00204251 0 0 0 1 0.9999999 2.92435e-7 -2.3446e-7 0 -2.47092e-7 6.37025e-7 -0.9999999 0.4344181 -2.94298e-7 1 5.94184e-7 0.00204251 0 0 0 1 0.9999999 2.92435e-7 -2.3446e-7 0 -2.47092e-7 6.37025e-7 -0.9999999 0.4344181 -2.94298e-7 1 5.94184e-7 0.00204251 0 0 0 1 0.9999999 2.92435e-7 -2.3446e-7 0 -2.47092e-7 6.37025e-7 -0.9999999 0.4344181 -2.94298e-7 1 5.94184e-7 0.00204251 0 0 0 1 0.9999999 2.92435e-7 -2.3446e-7 0 -2.47092e-7 6.37025e-7 -0.9999999 0.4344181 -2.94298e-7 1 5.94184e-7 0.00204251 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Knee_R_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Knee_R_pose_matrix-interpolation">
+        <Name_array id="Armature_Knee_R_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Knee_R_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Knee_R_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Knee_R_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Knee_R_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Knee_R_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Knee_R_pose_matrix-sampler" target="Armature_Knee_R/transform"/>
+    </animation>
+    <animation id="Armature_Thigh_L_pose_matrix">
+      <source id="Armature_Thigh_L_pose_matrix-input">
+        <float_array id="Armature_Thigh_L_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Thigh_L_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Thigh_L_pose_matrix-output">
+        <float_array id="Armature_Thigh_L_pose_matrix-output-array" count="128">0.9999999 -3.48221e-5 5.778e-5 -0.1250061 -6.70095e-5 -0.5639738 0.8257925 -0.002830744 3.83059e-6 -0.8257924 -0.5639741 -1.18464e-5 0 0 0 1 0.9999999 -4.56581e-5 8.57029e-5 -0.1250061 -9.44959e-5 -0.2696201 0.9629664 -0.002830744 -2.086e-5 -0.9629665 -0.2696205 -1.18464e-5 0 0 0 1 0.9985397 -0.006444801 0.05363499 -0.125006 -0.004728182 -0.9994745 -0.03206472 -0.002830744 0.05381348 0.03176478 -0.9980454 -1.18464e-5 0 0 0 1 0.9996833 -0.02007221 -0.01517816 -0.125006 -0.01754957 -0.9883554 0.1511466 -0.002831101 -0.01803526 -0.1508319 -0.9883946 -1.18576e-5 0 0 0 1 0.9989968 -0.03407888 -0.02905157 -0.1250061 -0.03354958 -0.9992656 0.01850445 -0.002830982 -0.02966084 -0.01751076 -0.9994064 -1.18427e-5 0 0 0 1 0.998878 -0.04292879 -0.01999291 -0.1250061 -0.04240194 -0.9987607 0.02605335 -0.002830863 -0.02108656 -0.02517593 -0.9994604 -1.18464e-5 0 0 0 1 0.998898 -0.04563213 -0.0109698 -0.1250061 -0.04524192 -0.9984145 0.03348861 -0.002830863 -0.01248054 -0.03295495 -0.9993786 -1.18539e-5 0 0 0 1 0.998898 -0.04563213 -0.0109698 -0.1250061 -0.04524192 -0.9984145 0.03348861 -0.002830863 -0.01248054 -0.03295495 -0.9993786 -1.18539e-5 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Thigh_L_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Thigh_L_pose_matrix-interpolation">
+        <Name_array id="Armature_Thigh_L_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Thigh_L_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Thigh_L_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Thigh_L_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Thigh_L_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Thigh_L_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Thigh_L_pose_matrix-sampler" target="Armature_Thigh_L/transform"/>
+    </animation>
+    <animation id="Armature_Leg_L_pose_matrix">
+      <source id="Armature_Leg_L_pose_matrix-input">
+        <float_array id="Armature_Leg_L_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Leg_L_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Leg_L_pose_matrix-output">
+        <float_array id="Armature_Leg_L_pose_matrix-output-array" count="128">1 -2.30037e-7 8.77306e-7 1.49012e-8 -1.96e-7 0.888201 0.4594552 0.3747202 -8.86619e-7 -0.4594547 0.8882014 -7.45058e-9 0 0 0 1 1 -1.10012e-7 6.46338e-7 1.49012e-8 1.01703e-7 0.9999551 0.009455603 0.3747202 -6.50063e-7 -0.009455601 0.9999555 -7.45058e-9 0 0 0 1 1 -6.49306e-8 2.97092e-7 1.49012e-8 6.95145e-8 0.9999998 1.75089e-7 0.3747202 -3.00817e-7 -1.84402e-7 1 -7.45058e-9 0 0 0 1 1 -1.66707e-7 4.03263e-7 1.49012e-8 7.18283e-8 0.974422 0.2247253 0.3747202 -4.33065e-7 -0.2247251 0.9744225 -7.45058e-9 0 0 0 1 1 -1.35711e-7 2.97092e-7 1.49012e-8 1.4031e-7 0.9999998 1.75089e-7 0.3747202 -3.00817e-7 -1.84402e-7 1 -7.45058e-9 0 0 0 1 1 -1.35711e-7 2.97092e-7 1.49012e-8 1.4031e-7 0.9999998 1.75089e-7 0.3747202 -3.00817e-7 -1.84402e-7 1 -7.45058e-9 0 0 0 1 1 -7.61065e-8 2.97092e-7 1.49012e-8 8.06904e-8 0.9999998 1.75089e-7 0.3747202 -3.00817e-7 -1.84402e-7 1 -7.45058e-9 0 0 0 1 1 -7.61065e-8 2.97092e-7 1.49012e-8 8.06904e-8 0.9999998 1.75089e-7 0.3747202 -3.00817e-7 -1.84402e-7 1 -7.45058e-9 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Leg_L_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Leg_L_pose_matrix-interpolation">
+        <Name_array id="Armature_Leg_L_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Leg_L_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Leg_L_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Leg_L_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Leg_L_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Leg_L_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Leg_L_pose_matrix-sampler" target="Armature_Leg_L/transform"/>
+    </animation>
+    <animation id="Armature_Knee_L_pose_matrix">
+      <source id="Armature_Knee_L_pose_matrix-input">
+        <float_array id="Armature_Knee_L_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Knee_L_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Knee_L_pose_matrix-output">
+        <float_array id="Armature_Knee_L_pose_matrix-output-array" count="128">0.9999999 2.97092e-7 -2.40005e-7 1.49012e-8 -2.36032e-7 6.37025e-7 -1 0.3747202 -2.99886e-7 0.9999999 6.01634e-7 -7.45058e-9 0 0 0 1 0.9999999 2.97092e-7 -2.40005e-7 1.49012e-8 -2.36032e-7 6.37025e-7 -1 0.3747202 -2.99886e-7 0.9999999 6.01634e-7 -7.45058e-9 0 0 0 1 0.9999999 2.97092e-7 -2.40005e-7 1.49012e-8 -2.36032e-7 6.37025e-7 -1 0.3747202 -2.99886e-7 0.9999999 6.01634e-7 -7.45058e-9 0 0 0 1 0.9999999 2.97092e-7 -2.40005e-7 1.49012e-8 -2.36032e-7 6.37025e-7 -1 0.3747202 -2.99886e-7 0.9999999 6.01634e-7 -7.45058e-9 0 0 0 1 0.9999999 2.97092e-7 -2.40005e-7 1.49012e-8 -2.36032e-7 6.37025e-7 -1 0.3747202 -2.99886e-7 0.9999999 6.01634e-7 -7.45058e-9 0 0 0 1 0.9999999 2.97092e-7 -2.40005e-7 1.49012e-8 -2.36032e-7 6.37025e-7 -1 0.3747202 -2.99886e-7 0.9999999 6.01634e-7 -7.45058e-9 0 0 0 1 0.9999999 2.97092e-7 -2.40005e-7 1.49012e-8 -2.36032e-7 6.37025e-7 -1 0.3747202 -2.99886e-7 0.9999999 6.01634e-7 -7.45058e-9 0 0 0 1 0.9999999 2.97092e-7 -2.40005e-7 1.49012e-8 -2.36032e-7 6.37025e-7 -1 0.3747202 -2.99886e-7 0.9999999 6.01634e-7 -7.45058e-9 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Knee_L_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Knee_L_pose_matrix-interpolation">
+        <Name_array id="Armature_Knee_L_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Knee_L_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Knee_L_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Knee_L_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Knee_L_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Knee_L_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Knee_L_pose_matrix-sampler" target="Armature_Knee_L/transform"/>
+    </animation>
+    <animation id="Armature_Torso_pose_matrix">
+      <source id="Armature_Torso_pose_matrix-input">
+        <float_array id="Armature_Torso_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Torso_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Torso_pose_matrix-output">
+        <float_array id="Armature_Torso_pose_matrix-output-array" count="128">1 0 0 -4.54747e-13 0 0.961727 0.2740096 0.05000031 0 -0.2740095 0.9617269 3.72529e-9 0 0 0 1 1 0 0 -4.54747e-13 0 0.9158254 -0.4015772 0.05000031 0 0.4015771 0.9158252 3.72529e-9 0 0 0 1 1 0 -1.4106e-14 -4.54747e-13 9.99913e-16 0.9974845 0.0708857 0.05000031 1.40705e-14 -0.07088569 0.9974844 3.72529e-9 0 0 0 1 1 0 -4.26295e-14 -4.54747e-13 -1.68126e-15 0.9992221 -0.039439 0.05000031 4.25963e-14 0.03943899 0.999222 3.72529e-9 0 0 0 1 1 0 4.44951e-14 -4.54747e-13 -3.49894e-15 0.9969034 0.07863647 0.05000031 -4.43573e-14 -0.07863645 0.9969033 3.72529e-9 0 0 0 1 1 0 -1.42095e-14 -4.54747e-13 -5.60407e-16 0.9992221 -0.039439 0.05000031 1.41984e-14 0.03943899 0.999222 3.72529e-9 0 0 0 1 1 0 -1.42095e-14 -4.54747e-13 -5.60407e-16 0.9992221 -0.039439 0.05000031 1.41984e-14 0.03943899 0.999222 3.72529e-9 0 0 0 1 1 0 -1.42095e-14 -4.54747e-13 -5.60407e-16 0.9992221 -0.039439 0.05000031 1.41984e-14 0.03943899 0.999222 3.72529e-9 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Torso_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Torso_pose_matrix-interpolation">
+        <Name_array id="Armature_Torso_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Torso_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Torso_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Torso_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Torso_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Torso_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Torso_pose_matrix-sampler" target="Armature_Torso/transform"/>
+    </animation>
+    <animation id="Armature_Chest_pose_matrix">
+      <source id="Armature_Chest_pose_matrix-input">
+        <float_array id="Armature_Chest_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Chest_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Chest_pose_matrix-output">
+        <float_array id="Armature_Chest_pose_matrix-output-array" count="128">1 2.63138e-16 -3.54417e-15 -4.54747e-13 0 0.994261 0.1069808 0.3 0 -0.1069808 0.994261 0 0 0 0 1 1 1.95959e-15 -2.96486e-15 -4.54747e-13 0 0.8155587 0.5786742 0.3 0 -0.5786741 0.8155587 0 0 0 0 1 1 7.066e-16 -3.48297e-15 -4.54747e-13 0 0.9729242 0.231124 0.3 0 -0.231124 0.9729242 0 0 0 0 1 1 0 1.96739e-15 -4.54747e-13 0 0.9999116 0.01328688 0.3 -5.52013e-15 -0.01328688 0.9999117 0 0 0 0 1 1 0 1.96739e-15 -4.54747e-13 0 0.9999115 0.01329136 0.3 -5.52013e-15 -0.01329136 0.9999116 0 0 0 0 1 1 0 1.97634e-15 -4.54747e-13 0 0.9999115 0.01329585 0.3 -5.52908e-15 -0.01329585 0.9999115 0 0 0 0 1 1 0 1.97634e-15 -4.54747e-13 0 0.9999115 0.01329585 0.3 -5.52908e-15 -0.01329585 0.9999115 0 0 0 0 1 1 0 1.97634e-15 -4.54747e-13 0 0.9999115 0.01329585 0.3 -5.52908e-15 -0.01329585 0.9999115 0 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Chest_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Chest_pose_matrix-interpolation">
+        <Name_array id="Armature_Chest_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Chest_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Chest_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Chest_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Chest_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Chest_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Chest_pose_matrix-sampler" target="Armature_Chest/transform"/>
+    </animation>
+    <animation id="Armature_Head_pose_matrix">
+      <source id="Armature_Head_pose_matrix-input">
+        <float_array id="Armature_Head_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Head_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Head_pose_matrix-output">
+        <float_array id="Armature_Head_pose_matrix-output-array" count="128">1 -2.12898e-13 -8.00876e-14 0 0 0.9359692 0.3520822 0.3999999 0 -0.3520822 0.9359692 0 0 0 0 1 1 -2.12898e-13 -8.00876e-14 0 0 0.9359692 0.352082 0.3999999 0 -0.352082 0.9359692 0 0 0 0 1 1 -1.83181e-13 -1.65686e-13 0 1.82813e-14 0.8053279 0.5928298 0.3999999 2.48342e-14 -0.5928298 0.805328 0 0 0 0 1 1 -2.27196e-13 -2.12587e-14 0 4.95967e-16 0.9988274 0.04841433 0.3999999 1.02322e-14 -0.04841434 0.9988274 0 0 0 0 1 1 -2.21709e-13 -5.99373e-15 0 -1.27024e-14 0.9747021 -0.2235087 0.3999999 5.5394e-14 0.2235087 0.9747021 0 0 0 0 1 1 -2.26477e-13 -1.41013e-14 0 -6.563e-16 0.9956655 0.09300725 0.3999999 -7.02586e-15 -0.09300726 0.9956655 0 0 0 0 1 1 -2.27196e-13 -3.92798e-15 0 -3.43089e-16 0.9988274 0.04841434 0.3999999 -7.07822e-15 -0.04841434 0.9988274 0 0 0 0 1 1 -2.27196e-13 -3.92798e-15 0 -3.43089e-16 0.9988274 0.04841434 0.3999999 -7.07822e-15 -0.04841434 0.9988274 0 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Head_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Head_pose_matrix-interpolation">
+        <Name_array id="Armature_Head_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Head_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Head_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Head_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Head_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Head_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Head_pose_matrix-sampler" target="Armature_Head/transform"/>
+    </animation>
+    <animation id="Armature_Ear_R_pose_matrix">
+      <source id="Armature_Ear_R_pose_matrix-input">
+        <float_array id="Armature_Ear_R_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Ear_R_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Ear_R_pose_matrix-output">
+        <float_array id="Armature_Ear_R_pose_matrix-output-array" count="128">0.4376228 0.722548 0.5351737 0.2979339 -0.6363556 -0.1716165 0.7520636 0.3387281 0.6352467 -0.6696815 0.3846944 -7.85803e-9 0 0 0 1 0.5468552 0.398077 0.7365354 0.2979339 -0.836053 0.2130671 0.5055868 0.3387281 0.04433067 -0.8922657 0.4493305 -7.85803e-9 0 0 0 1 0.4572095 0.4342352 0.776144 0.2979339 -0.8543536 -0.02798563 0.5189383 0.3387281 0.2470619 -0.9003655 0.3581953 -7.85803e-9 0 0 0 1 0.4440053 0.5554337 0.7031024 0.2980112 -0.8690267 0.07576906 0.4889295 0.3386158 0.2182942 -0.8281025 0.5163287 3.50855e-4 0 0 0 1 0.448585 0.7623537 0.4664639 0.2981724 -0.8913563 0.343523 0.2957633 0.3383814 0.06523485 -0.5484608 0.8336285 8.61115e-4 0 0 0 1 0.4508377 0.8749321 -0.1767458 0.298382 -0.8862906 0.4152712 -0.2050333 0.3380765 -0.1059931 0.2490851 0.9626646 0.001054696 0 0 0 1 0.4715862 0.6794098 -0.5621471 0.2985076 -0.864148 0.2290723 -0.4480792 0.3378938 -0.1756579 0.6970862 0.6951381 0.001088894 0 0 0 1 0.4715862 0.6794098 -0.5621471 0.2985076 -0.864148 0.2290723 -0.4480792 0.3378938 -0.1756579 0.6970862 0.6951381 0.001088894 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Ear_R_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Ear_R_pose_matrix-interpolation">
+        <Name_array id="Armature_Ear_R_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Ear_R_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Ear_R_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Ear_R_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Ear_R_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Ear_R_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Ear_R_pose_matrix-sampler" target="Armature_Ear_R/transform"/>
+    </animation>
+    <animation id="Armature_Ear_L_pose_matrix">
+      <source id="Armature_Ear_L_pose_matrix-input">
+        <float_array id="Armature_Ear_L_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Ear_L_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Ear_L_pose_matrix-output">
+        <float_array id="Armature_Ear_L_pose_matrix-output-array" count="128">0.4687614 -0.7758449 -0.422288 -0.2956934 0.6018984 -0.06935227 0.7955552 0.3314587 -0.6465142 -0.6270996 0.4344698 7.04313e-9 0 0 0 1 0.5830178 -0.3179827 -0.7476476 -0.2956934 0.7916085 0.4294667 0.4346421 0.3314587 0.1828806 -0.845248 0.5021044 7.04313e-9 0 0 0 1 0.4931474 -0.3720053 -0.7863953 -0.2956934 0.8688811 0.1659199 0.4663858 0.3314587 -0.04301976 -0.9132804 0.4050512 7.04313e-9 0 0 0 1 0.5072533 -0.5088876 -0.695505 -0.2956097 0.8602127 0.250074 0.4444058 0.3315662 -0.05222531 -0.8237082 0.5646022 -3.50856e-4 0 0 0 1 0.5307419 -0.7326026 -0.4261529 -0.2954348 0.8474864 0.4640305 0.2577638 0.3317906 0.008909173 -0.4979647 0.8671508 -8.61116e-4 0 0 0 1 0.5101374 -0.8361517 0.2015193 -0.2952076 0.8529591 0.4617108 -0.2434819 0.3320826 0.1105437 0.2960969 0.9487388 -0.001054697 0 0 0 1 0.5218191 -0.6654503 0.5337423 -0.2950713 0.8348067 0.2696253 -0.48 0.3322574 0.1755055 0.6960442 0.6962177 -0.001088851 0 0 0 1 0.5218191 -0.6654503 0.5337423 -0.2950713 0.8348067 0.2696253 -0.48 0.3322574 0.1755055 0.6960442 0.6962177 -0.001088851 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Ear_L_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Ear_L_pose_matrix-interpolation">
+        <Name_array id="Armature_Ear_L_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Ear_L_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Ear_L_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Ear_L_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Ear_L_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Ear_L_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Ear_L_pose_matrix-sampler" target="Armature_Ear_L/transform"/>
+    </animation>
+    <animation id="Armature_Shoulder_R_pose_matrix">
+      <source id="Armature_Shoulder_R_pose_matrix-input">
+        <float_array id="Armature_Shoulder_R_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Shoulder_R_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Shoulder_R_pose_matrix-output">
+        <float_array id="Armature_Shoulder_R_pose_matrix-output-array" count="128">0.09347907 0.9521137 0.2911025 0 0.2911025 -0.3057433 0.906521 0.3999999 0.9521139 2.98023e-8 -0.3057433 0 0 0 0 1 0.09347907 0.9521137 0.2911025 0 0.2911025 -0.3057433 0.906521 0.3999999 0.9521139 2.98023e-8 -0.3057433 0 0 0 0 1 0.09347907 0.9521137 0.2911025 0 0.2911025 -0.3057433 0.906521 0.3999999 0.9521139 2.98023e-8 -0.3057433 0 0 0 0 1 0.09347907 0.9521137 0.2911025 0 0.2911025 -0.3057433 0.906521 0.3999999 0.9521139 2.98023e-8 -0.3057433 0 0 0 0 1 0.09347907 0.9521137 0.2911025 0 0.2911025 -0.3057433 0.906521 0.3999999 0.9521139 2.98023e-8 -0.3057433 0 0 0 0 1 0.09347907 0.9521137 0.2911025 0 0.2911025 -0.3057433 0.906521 0.3999999 0.9521139 2.98023e-8 -0.3057433 0 0 0 0 1 0.09347907 0.9521137 0.2911025 0 0.2911025 -0.3057433 0.906521 0.3999999 0.9521139 2.98023e-8 -0.3057433 0 0 0 0 1 0.09347907 0.9521137 0.2911025 0 0.2911025 -0.3057433 0.906521 0.3999999 0.9521139 2.98023e-8 -0.3057433 0 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Shoulder_R_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Shoulder_R_pose_matrix-interpolation">
+        <Name_array id="Armature_Shoulder_R_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Shoulder_R_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Shoulder_R_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Shoulder_R_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Shoulder_R_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Shoulder_R_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Shoulder_R_pose_matrix-sampler" target="Armature_Shoulder_R/transform"/>
+    </animation>
+    <animation id="Armature_Arm_R_pose_matrix">
+      <source id="Armature_Arm_R_pose_matrix-input">
+        <float_array id="Armature_Arm_R_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Arm_R_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Arm_R_pose_matrix-output">
+        <float_array id="Armature_Arm_R_pose_matrix-output-array" count="128">0.09347841 -0.68214 0.7252221 5.96046e-8 0.9521142 -0.1517279 -0.2654384 0.3938604 0.2911025 0.715307 0.6352917 0 0 0 0 1 0.2236114 -0.6384467 0.7364675 5.96046e-8 0.9029337 -0.1488394 -0.4031846 0.3938604 0.3670271 0.7551379 0.5431927 0 0 0 0 1 0.2499106 -0.9477689 0.1981894 5.96046e-8 0.9461718 0.195558 -0.2579076 0.3938604 0.2056792 0.2519751 0.945624 0 0 0 0 1 0.6019928 -0.7776569 0.1812592 5.96046e-8 0.7980407 0.5936516 -0.1034851 0.3938604 -0.02712886 0.2069495 0.9779755 0 0 0 0 1 0.9274001 -0.2093829 0.3099804 5.96046e-8 0.2568026 0.9589118 -0.1205848 0.3938604 -0.2719956 0.1914341 0.9430648 0 0 0 0 1 0.9347968 0.06253637 0.3496352 5.96046e-8 8.5087e-4 0.9839811 -0.1782719 0.3938604 -0.3551828 0.1669457 0.9197688 0 0 0 0 1 0.9347968 0.06253637 0.3496352 5.96046e-8 8.5087e-4 0.9839811 -0.1782719 0.3938604 -0.3551828 0.1669457 0.9197688 0 0 0 0 1 0.9347968 0.06253637 0.3496352 5.96046e-8 8.5087e-4 0.9839811 -0.1782719 0.3938604 -0.3551828 0.1669457 0.9197688 0 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Arm_R_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Arm_R_pose_matrix-interpolation">
+        <Name_array id="Armature_Arm_R_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Arm_R_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Arm_R_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Arm_R_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Arm_R_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Arm_R_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Arm_R_pose_matrix-sampler" target="Armature_Arm_R/transform"/>
+    </animation>
+    <animation id="Armature_Hand_R_pose_matrix">
+      <source id="Armature_Hand_R_pose_matrix-input">
+        <float_array id="Armature_Hand_R_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Hand_R_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Hand_R_pose_matrix-output">
+        <float_array id="Armature_Hand_R_pose_matrix-output-array" count="128">1 -1.11759e-8 9.68575e-8 -1.49012e-8 -1.86265e-9 0.9939376 0.1099473 0.3000003 -1.06171e-7 -0.1099473 0.9939374 1.19209e-7 0 0 0 1 1 -1.11759e-8 9.68575e-8 -1.49012e-8 -1.86265e-9 0.9939376 0.1099473 0.3000003 -1.06171e-7 -0.1099473 0.9939374 1.19209e-7 0 0 0 1 1 -1.11759e-8 9.68575e-8 -1.49012e-8 -1.86265e-9 0.9939376 0.1099473 0.3000003 -1.06171e-7 -0.1099473 0.9939374 1.19209e-7 0 0 0 1 1 -1.11759e-8 9.68575e-8 -1.49012e-8 -1.86265e-9 0.9939376 0.1099473 0.3000003 -1.06171e-7 -0.1099473 0.9939374 1.19209e-7 0 0 0 1 1 -1.11759e-8 9.68575e-8 -1.49012e-8 -1.86265e-9 0.9939376 0.1099473 0.3000003 -1.06171e-7 -0.1099473 0.9939374 1.19209e-7 0 0 0 1 1 -1.11759e-8 9.68575e-8 -1.49012e-8 -1.86265e-9 0.9939376 0.1099473 0.3000003 -1.06171e-7 -0.1099473 0.9939374 1.19209e-7 0 0 0 1 1 -1.11759e-8 9.68575e-8 -1.49012e-8 -1.86265e-9 0.9939376 0.1099473 0.3000003 -1.06171e-7 -0.1099473 0.9939374 1.19209e-7 0 0 0 1 1 -1.11759e-8 9.68575e-8 -1.49012e-8 -1.86265e-9 0.9939376 0.1099473 0.3000003 -1.06171e-7 -0.1099473 0.9939374 1.19209e-7 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Hand_R_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Hand_R_pose_matrix-interpolation">
+        <Name_array id="Armature_Hand_R_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Hand_R_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Hand_R_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Hand_R_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Hand_R_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Hand_R_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Hand_R_pose_matrix-sampler" target="Armature_Hand_R/transform"/>
+    </animation>
+    <animation id="Armature_Tool_R_pose_matrix">
+      <source id="Armature_Tool_R_pose_matrix-input">
+        <float_array id="Armature_Tool_R_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Tool_R_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Tool_R_pose_matrix-output">
+        <float_array id="Armature_Tool_R_pose_matrix-output-array" count="128">1 9.31323e-10 -3.72529e-9 0 -9.31323e-10 -0.9998358 0.01812224 0.2728579 1.86265e-9 -0.01812226 -0.9992416 1.19209e-7 0 0 0 1 1 9.31323e-10 -3.72529e-9 0 -9.31323e-10 -0.9998358 0.01812224 0.2728579 1.86265e-9 -0.01812226 -0.9992416 1.19209e-7 0 0 0 1 1 9.31323e-10 -3.72529e-9 0 -9.31323e-10 -0.9998358 0.01812224 0.2728579 1.86265e-9 -0.01812226 -0.9992416 1.19209e-7 0 0 0 1 1 9.31323e-10 -3.72529e-9 0 -9.31323e-10 -0.9998358 0.01812224 0.2728579 1.86265e-9 -0.01812226 -0.9992416 1.19209e-7 0 0 0 1 1 9.31323e-10 -3.72529e-9 0 -9.31323e-10 -0.9998358 0.01812224 0.2728579 1.86265e-9 -0.01812226 -0.9992416 1.19209e-7 0 0 0 1 1 9.31323e-10 -3.72529e-9 0 -9.31323e-10 -0.9998358 0.01812224 0.2728579 1.86265e-9 -0.01812226 -0.9992416 1.19209e-7 0 0 0 1 1 3.72529e-9 -3.72529e-9 0 1.86265e-9 -0.9998358 0.01812224 0.2728579 3.72529e-9 -0.01812226 -0.9992416 1.19209e-7 0 0 0 1 1 3.72529e-9 -3.72529e-9 0 1.86265e-9 -0.9998358 0.01812224 0.2728579 3.72529e-9 -0.01812226 -0.9992416 1.19209e-7 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Tool_R_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Tool_R_pose_matrix-interpolation">
+        <Name_array id="Armature_Tool_R_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Tool_R_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Tool_R_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Tool_R_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Tool_R_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Tool_R_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Tool_R_pose_matrix-sampler" target="Armature_Tool_R/transform"/>
+    </animation>
+    <animation id="Armature_Elbow_R_pose_matrix">
+      <source id="Armature_Elbow_R_pose_matrix-input">
+        <float_array id="Armature_Elbow_R_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Elbow_R_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Elbow_R_pose_matrix-output">
+        <float_array id="Armature_Elbow_R_pose_matrix-output-array" count="128">-1 -1.02445e-7 -4.28408e-8 -2.98023e-8 4.93601e-8 -1.95578e-8 -0.9999999 0.1941344 1.11759e-7 -0.9999997 1.03668e-7 2.38419e-7 0 0 0 1 -1 -1.02445e-7 -4.28408e-8 -2.98023e-8 4.93601e-8 -1.95578e-8 -0.9999999 0.1941344 1.11759e-7 -0.9999997 1.03668e-7 2.38419e-7 0 0 0 1 -1 -1.02445e-7 -4.28408e-8 -2.98023e-8 4.93601e-8 -1.95578e-8 -0.9999999 0.1941344 1.11759e-7 -0.9999997 1.03668e-7 2.38419e-7 0 0 0 1 -1 -1.02445e-7 -4.28408e-8 -2.98023e-8 4.93601e-8 -1.95578e-8 -0.9999999 0.1941344 1.11759e-7 -0.9999997 1.03668e-7 2.38419e-7 0 0 0 1 -1 -1.02445e-7 -4.28408e-8 -2.98023e-8 4.93601e-8 -1.95578e-8 -0.9999999 0.1941344 1.11759e-7 -0.9999997 1.03668e-7 2.38419e-7 0 0 0 1 -1 -1.02445e-7 -4.28408e-8 -2.98023e-8 4.93601e-8 -1.95578e-8 -0.9999999 0.1941344 1.11759e-7 -0.9999997 1.03668e-7 2.38419e-7 0 0 0 1 -1 -1.02445e-7 -4.28408e-8 -2.98023e-8 4.93601e-8 -1.95578e-8 -0.9999999 0.1941344 1.11759e-7 -0.9999997 1.03668e-7 2.38419e-7 0 0 0 1 -1 -1.02445e-7 -4.28408e-8 -2.98023e-8 4.93601e-8 -1.95578e-8 -0.9999999 0.1941344 1.11759e-7 -0.9999997 1.03668e-7 2.38419e-7 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Elbow_R_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Elbow_R_pose_matrix-interpolation">
+        <Name_array id="Armature_Elbow_R_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Elbow_R_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Elbow_R_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Elbow_R_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Elbow_R_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Elbow_R_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Elbow_R_pose_matrix-sampler" target="Armature_Elbow_R/transform"/>
+    </animation>
+    <animation id="Armature_Shoulder_L_pose_matrix">
+      <source id="Armature_Shoulder_L_pose_matrix-input">
+        <float_array id="Armature_Shoulder_L_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Shoulder_L_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Shoulder_L_pose_matrix-output">
+        <float_array id="Armature_Shoulder_L_pose_matrix-output-array" count="128">0.09347903 -0.9521139 -0.2911026 0 -0.2911026 -0.3057435 0.906521 0.3999999 -0.952114 6.98492e-9 -0.3057435 0 0 0 0 1 0.09347903 -0.9521139 -0.2911026 0 -0.2911026 -0.3057435 0.906521 0.3999999 -0.952114 6.98492e-9 -0.3057435 0 0 0 0 1 0.09347903 -0.9521139 -0.2911026 0 -0.2911026 -0.3057435 0.906521 0.3999999 -0.952114 6.98492e-9 -0.3057435 0 0 0 0 1 0.09347903 -0.9521139 -0.2911026 0 -0.2911026 -0.3057435 0.906521 0.3999999 -0.952114 6.98492e-9 -0.3057435 0 0 0 0 1 0.09347903 -0.9521139 -0.2911026 0 -0.2911026 -0.3057435 0.906521 0.3999999 -0.952114 6.98492e-9 -0.3057435 0 0 0 0 1 0.09347903 -0.9521139 -0.2911026 0 -0.2911026 -0.3057435 0.906521 0.3999999 -0.952114 6.98492e-9 -0.3057435 0 0 0 0 1 0.09347904 -0.9521139 -0.2911026 0 -0.2911026 -0.3057435 0.906521 0.3999999 -0.952114 0 -0.3057435 0 0 0 0 1 0.09347904 -0.9521139 -0.2911026 0 -0.2911026 -0.3057435 0.906521 0.3999999 -0.952114 0 -0.3057435 0 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Shoulder_L_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Shoulder_L_pose_matrix-interpolation">
+        <Name_array id="Armature_Shoulder_L_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Shoulder_L_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Shoulder_L_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Shoulder_L_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Shoulder_L_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Shoulder_L_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Shoulder_L_pose_matrix-sampler" target="Armature_Shoulder_L/transform"/>
+    </animation>
+    <animation id="Armature_Arm_L_pose_matrix">
+      <source id="Armature_Arm_L_pose_matrix-input">
+        <float_array id="Armature_Arm_L_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Arm_L_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Arm_L_pose_matrix-output">
+        <float_array id="Armature_Arm_L_pose_matrix-output-array" count="128">0.09347938 0.8802493 -0.4652131 -5.96046e-8 -0.9521139 -0.05758315 -0.3002722 0.3938603 -0.2911027 0.4710051 0.8327146 0 0 0 0 1 0.3351421 0.8124379 -0.4771004 -5.96046e-8 -0.9031623 0.1328354 -0.408231 0.3938603 -0.2682865 0.5677145 0.7782818 0 0 0 0 1 0.227576 0.9537263 -0.1965081 -5.96046e-8 -0.9489166 0.1719134 -0.2645808 0.3938603 -0.2185552 0.2466821 0.9441299 0 0 0 0 1 0.5430303 0.8214282 -0.1742809 -5.96046e-8 -0.8372654 0.5138218 -0.1870131 0.3938603 -0.06406847 0.2474732 0.9667739 0 0 0 0 1 0.9255967 0.2399817 -0.292711 -5.96046e-8 -0.2933728 0.943486 -0.1541636 0.3938603 0.2391724 0.2285667 0.9436914 0 0 0 0 1 0.9367494 -0.05693742 -0.3453393 -5.96046e-8 -0.006089712 0.9838786 -0.1787347 0.3938603 0.3499485 0.1695329 0.9213005 0 0 0 0 1 0.9367494 -0.05693742 -0.3453393 -5.96046e-8 -0.006089712 0.9838786 -0.1787347 0.3938603 0.3499485 0.1695329 0.9213005 0 0 0 0 1 0.9367494 -0.05693742 -0.3453393 -5.96046e-8 -0.006089712 0.9838786 -0.1787347 0.3938603 0.3499485 0.1695329 0.9213005 0 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Arm_L_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Arm_L_pose_matrix-interpolation">
+        <Name_array id="Armature_Arm_L_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Arm_L_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Arm_L_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Arm_L_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Arm_L_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Arm_L_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Arm_L_pose_matrix-sampler" target="Armature_Arm_L/transform"/>
+    </animation>
+    <animation id="Armature_Hand_L_pose_matrix">
+      <source id="Armature_Hand_L_pose_matrix-input">
+        <float_array id="Armature_Hand_L_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Hand_L_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Hand_L_pose_matrix-output">
+        <float_array id="Armature_Hand_L_pose_matrix-output-array" count="128">1 -6.0536e-9 5.96046e-8 2.98023e-8 0 0.9939374 0.1099474 0.3000002 -5.21541e-8 -0.1099474 0.9939376 1.19209e-7 0 0 0 1 1 -6.0536e-9 5.96046e-8 2.98023e-8 0 0.9939374 0.1099474 0.3000002 -5.21541e-8 -0.1099474 0.9939376 1.19209e-7 0 0 0 1 1 -6.0536e-9 5.96046e-8 2.98023e-8 0 0.9939374 0.1099474 0.3000002 -5.21541e-8 -0.1099474 0.9939376 1.19209e-7 0 0 0 1 1 -6.0536e-9 5.96046e-8 2.98023e-8 0 0.9939374 0.1099474 0.3000002 -5.21541e-8 -0.1099474 0.9939376 1.19209e-7 0 0 0 1 1 -6.0536e-9 5.96046e-8 2.98023e-8 0 0.9939374 0.1099474 0.3000002 -5.21541e-8 -0.1099474 0.9939376 1.19209e-7 0 0 0 1 1 -6.0536e-9 5.96046e-8 2.98023e-8 0 0.9939374 0.1099474 0.3000002 -5.21541e-8 -0.1099474 0.9939376 1.19209e-7 0 0 0 1 1 -6.28643e-9 5.96046e-8 2.98023e-8 0 0.9939374 0.1099474 0.3000002 -5.21541e-8 -0.1099474 0.9939376 1.19209e-7 0 0 0 1 1 -6.28643e-9 5.96046e-8 2.98023e-8 0 0.9939374 0.1099474 0.3000002 -5.21541e-8 -0.1099474 0.9939376 1.19209e-7 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Hand_L_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Hand_L_pose_matrix-interpolation">
+        <Name_array id="Armature_Hand_L_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Hand_L_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Hand_L_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Hand_L_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Hand_L_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Hand_L_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Hand_L_pose_matrix-sampler" target="Armature_Hand_L/transform"/>
+    </animation>
+    <animation id="Armature_Tool_L_pose_matrix">
+      <source id="Armature_Tool_L_pose_matrix-input">
+        <float_array id="Armature_Tool_L_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Tool_L_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Tool_L_pose_matrix-output">
+        <float_array id="Armature_Tool_L_pose_matrix-output-array" count="128">1 2.8871e-8 3.72529e-9 1.49012e-8 3.21306e-8 -0.9998357 0.01812225 0.272858 -1.86265e-9 -0.01812225 -0.9992449 0 0 0 0 1 1 2.8871e-8 3.72529e-9 1.49012e-8 3.21306e-8 -0.9998357 0.01812225 0.272858 -1.86265e-9 -0.01812225 -0.9992449 0 0 0 0 1 1 2.8871e-8 3.72529e-9 1.49012e-8 3.21306e-8 -0.9998357 0.01812225 0.272858 -1.86265e-9 -0.01812225 -0.9992449 0 0 0 0 1 1 2.8871e-8 3.72529e-9 1.49012e-8 3.21306e-8 -0.9998357 0.01812225 0.272858 -1.86265e-9 -0.01812225 -0.9992449 0 0 0 0 1 1 2.8871e-8 3.72529e-9 1.49012e-8 3.21306e-8 -0.9998357 0.01812225 0.272858 -1.86265e-9 -0.01812225 -0.9992449 0 0 0 0 1 1 2.8871e-8 3.72529e-9 1.49012e-8 3.21306e-8 -0.9998357 0.01812225 0.272858 -1.86265e-9 -0.01812225 -0.9992449 0 0 0 0 1 1 2.79397e-8 3.72529e-9 1.49012e-8 3.11993e-8 -0.9998357 0.01812225 0.272858 -1.86265e-9 -0.01812225 -0.9992449 0 0 0 0 1 1 2.79397e-8 3.72529e-9 1.49012e-8 3.11993e-8 -0.9998357 0.01812225 0.272858 -1.86265e-9 -0.01812225 -0.9992449 0 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Tool_L_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Tool_L_pose_matrix-interpolation">
+        <Name_array id="Armature_Tool_L_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Tool_L_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Tool_L_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Tool_L_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Tool_L_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Tool_L_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Tool_L_pose_matrix-sampler" target="Armature_Tool_L/transform"/>
+    </animation>
+    <animation id="Armature_Elbow_L_pose_matrix">
+      <source id="Armature_Elbow_L_pose_matrix-input">
+        <float_array id="Armature_Elbow_L_pose_matrix-input-array" count="8">0 0.1333333 0.25 0.3333333 0.4166666 0.5 0.5833333 1.166667</float_array>
+        <technique_common>
+          <accessor source="#Armature_Elbow_L_pose_matrix-input-array" count="8" stride="1">
+            <param name="TIME" type="float"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Elbow_L_pose_matrix-output">
+        <float_array id="Armature_Elbow_L_pose_matrix-output-array" count="128">-1 -6.14673e-8 -9.77889e-8 0 9.82545e-8 -1.64146e-8 -0.9999999 0.1934275 5.58794e-8 -1 6.54254e-8 1.19209e-7 0 0 0 1 -1 -6.14673e-8 -9.77889e-8 0 9.82545e-8 -1.64146e-8 -0.9999999 0.1934275 5.58794e-8 -1 6.54254e-8 1.19209e-7 0 0 0 1 -1 -6.14673e-8 -9.77889e-8 0 9.82545e-8 -1.64146e-8 -0.9999999 0.1934275 5.58794e-8 -1 6.54254e-8 1.19209e-7 0 0 0 1 -1 -6.14673e-8 -9.77889e-8 0 9.82545e-8 -1.64146e-8 -0.9999999 0.1934275 5.58794e-8 -1 6.54254e-8 1.19209e-7 0 0 0 1 -1 -6.14673e-8 -9.77889e-8 0 9.82545e-8 -1.64146e-8 -0.9999999 0.1934275 5.58794e-8 -1 6.54254e-8 1.19209e-7 0 0 0 1 -1 -6.14673e-8 -9.77889e-8 0 9.82545e-8 -1.64146e-8 -0.9999999 0.1934275 5.58794e-8 -1 6.54254e-8 1.19209e-7 0 0 0 1 -1 -6.14673e-8 -9.77889e-8 0 9.82545e-8 -1.64146e-8 -0.9999999 0.1934275 5.58794e-8 -1 6.54254e-8 1.19209e-7 0 0 0 1 -1 -6.14673e-8 -9.77889e-8 0 9.82545e-8 -1.64146e-8 -0.9999999 0.1934275 5.58794e-8 -1 6.54254e-8 1.19209e-7 0 0 0 1</float_array>
+        <technique_common>
+          <accessor source="#Armature_Elbow_L_pose_matrix-output-array" count="8" stride="16">
+            <param name="TRANSFORM" type="float4x4"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <source id="Armature_Elbow_L_pose_matrix-interpolation">
+        <Name_array id="Armature_Elbow_L_pose_matrix-interpolation-array" count="8">LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR LINEAR</Name_array>
+        <technique_common>
+          <accessor source="#Armature_Elbow_L_pose_matrix-interpolation-array" count="8" stride="1">
+            <param name="INTERPOLATION" type="name"/>
+          </accessor>
+        </technique_common>
+      </source>
+      <sampler id="Armature_Elbow_L_pose_matrix-sampler">
+        <input semantic="INPUT" source="#Armature_Elbow_L_pose_matrix-input"/>
+        <input semantic="OUTPUT" source="#Armature_Elbow_L_pose_matrix-output"/>
+        <input semantic="INTERPOLATION" source="#Armature_Elbow_L_pose_matrix-interpolation"/>
+      </sampler>
+      <channel source="#Armature_Elbow_L_pose_matrix-sampler" target="Armature_Elbow_L/transform"/>
+    </animation>
+  </library_animations>
+</COLLADA>
