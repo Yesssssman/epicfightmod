@@ -5,23 +5,24 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import maninhouse.epicfight.capabilities.entity.mob.EndermanData;
 import maninhouse.epicfight.client.model.ClientModels;
 import maninhouse.epicfight.client.renderer.layer.EyeLayer;
-import maninhouse.epicfight.client.renderer.layer.HeldItemLayer;
 import maninhouse.epicfight.model.Armature;
-import maninhouse.epicfight.utils.math.Vec3f;
 import maninhouse.epicfight.utils.math.OpenMatrix4f;
+import maninhouse.epicfight.utils.math.Vec3f;
+import net.minecraft.client.renderer.entity.layers.EndermanEyesLayer;
+import net.minecraft.client.renderer.entity.model.EndermanModel;
 import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class EndermanRenderer extends ArmatureRenderer<EndermanEntity, EndermanData> {
+public class EndermanRenderer extends ArmatureRenderer<EndermanEntity, EndermanData, EndermanModel<EndermanEntity>> {
 	private static final ResourceLocation ENDERMAN_TEXTURE = new ResourceLocation("textures/entity/enderman/enderman.png");
 	private static final ResourceLocation ENDERMAN_EYE_TEXTURE = new ResourceLocation("textures/entity/enderman/enderman_eyes.png");
 	
 	public EndermanRenderer() {
-		this.layers.add(new EyeLayer<>(ENDERMAN_EYE_TEXTURE, ClientModels.LOGICAL_CLIENT.ENTITY_ENDERMAN_FACE));
-		this.layers.add(new HeldItemLayer<>());
+		this.layerRendererReplace.put(EndermanEyesLayer.class, new EyeLayer<>(ENDERMAN_EYE_TEXTURE, ClientModels.LOGICAL_CLIENT.ENTITY_ENDERMAN_FACE));
+		//this.layerRendererReplace.put(HeldBlockLayer.class, new HeldItemAnimatedLayer<>());
 	}
 	
 	@Override

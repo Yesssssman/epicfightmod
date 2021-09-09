@@ -4,13 +4,14 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 
 import maninhouse.epicfight.capabilities.entity.mob.CreeperData;
 import maninhouse.epicfight.model.Armature;
+import net.minecraft.client.renderer.entity.model.CreeperModel;
 import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class CreeperRenderer extends ArmatureRenderer<CreeperEntity, CreeperData> {
+public class CreeperRenderer extends ArmatureRenderer<CreeperEntity, CreeperData, CreeperModel<CreeperEntity>> {
 	public static final ResourceLocation CREEPER_TEXTURE = new ResourceLocation("textures/entity/creeper/creeper.png");
 	private final ResourceLocation customTexture;
 	

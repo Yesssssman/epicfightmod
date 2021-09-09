@@ -1,23 +1,17 @@
 package maninhouse.epicfight.client.renderer.entity;
 
 import maninhouse.epicfight.capabilities.entity.LivingData;
-import net.minecraft.client.renderer.entity.model.BipedModel;
+import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class SimpleTextureBipedRenderer<E extends LivingEntity, T extends LivingData<E>, M extends BipedModel<E>> extends BipedRenderer<E, T, M> {
+public class SimpleTextureRenderer<E extends LivingEntity, T extends LivingData<E>, M extends EntityModel<E>> extends ArmatureRenderer<E, T, M> {
 	public final ResourceLocation textureLocation;
 	
-	public SimpleTextureBipedRenderer(String texturePath) {
-		this(texturePath, EquipmentSlotType.values());
-	}
-	
-	public SimpleTextureBipedRenderer(String texturePath, EquipmentSlotType... renderSlots) {
-		super(renderSlots);
+	public SimpleTextureRenderer(String texturePath) {
 		this.textureLocation = new ResourceLocation(texturePath);
 	}
 	

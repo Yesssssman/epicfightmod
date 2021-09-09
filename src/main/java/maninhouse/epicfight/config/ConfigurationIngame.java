@@ -15,6 +15,7 @@ public class ConfigurationIngame {
 	public final DoubleOption aimHelperColor;
 	public final Option<Boolean> enableAimHelperPointer;
 	public final Option<Boolean> cameraAutoSwitch;
+	public final Option<Boolean> autoPreparation;
 	public int aimHelperRealColor;
 	
 	public ConfigurationIngame() {
@@ -27,6 +28,7 @@ public class ConfigurationIngame {
 		this.enableAimHelperPointer = new Option<Boolean>(config.enableAimHelper.get());
 		this.aimHelperRealColor = ColorSlider.toColorInteger(config.aimHelperColor.get());
 		this.cameraAutoSwitch = new Option<Boolean>(config.cameraAutoSwitch.get());
+		this.autoPreparation = new Option<Boolean>(config.autoPreparation.get());
 	}
 	
 	public void resetSettings() {
@@ -37,6 +39,7 @@ public class ConfigurationIngame {
 		this.aimHelperColor.setDefaultValue();
 		this.enableAimHelperPointer.setDefaultValue();
 		this.cameraAutoSwitch.setDefaultValue();
+		this.autoPreparation.setDefaultValue();
 		this.aimHelperRealColor = ColorSlider.toColorInteger(this.aimHelperColor.getValue());
 	}
 	
@@ -48,6 +51,7 @@ public class ConfigurationIngame {
 		ConfigManager.INGAME_CONFIG.aimHelperColor.set(this.aimHelperColor.getValue());
 		ConfigManager.INGAME_CONFIG.enableAimHelper.set(this.enableAimHelperPointer.getValue());
 		ConfigManager.INGAME_CONFIG.cameraAutoSwitch.set(this.cameraAutoSwitch.getValue());
+		ConfigManager.INGAME_CONFIG.autoPreparation.set(this.autoPreparation.getValue());
 		this.aimHelperRealColor = ColorSlider.toColorInteger(this.aimHelperColor.getValue());
 	}
 }

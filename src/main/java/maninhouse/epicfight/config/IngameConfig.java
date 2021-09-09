@@ -13,6 +13,7 @@ public class IngameConfig {
 	public final DoubleValue aimHelperColor;
 	public final BooleanValue enableAimHelper;
 	public final BooleanValue cameraAutoSwitch;
+	public final BooleanValue autoPreparation;
 	
 	public IngameConfig(ForgeConfigSpec.Builder config) {
 		this.longPressCountConfig = config.defineInRange("ingame.long_press_count", 2, 1, 10);
@@ -22,5 +23,6 @@ public class IngameConfig {
 		this.aimHelperColor = config.defineInRange("ingame.laser_pointer_color", 0.328125D, 0.0D, 1.0D);
 		this.enableAimHelper = config.define("ingame.enable_laser_pointer", () -> true);
 		this.cameraAutoSwitch = config.define("ingame.camera_auto_switch", () -> false);
+		this.autoPreparation = config.define("ingame.auto_preparation", () -> false);
 	}
 }

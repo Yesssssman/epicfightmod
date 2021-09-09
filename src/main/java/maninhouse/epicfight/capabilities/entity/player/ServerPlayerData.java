@@ -162,12 +162,12 @@ public class ServerPlayerData extends PlayerData<ServerPlayerEntity> {
 	}
 	
 	@Override
-	public boolean attackEntityFrom(LivingAttackEvent event) {
+	public boolean hurtBy(LivingAttackEvent event) {
 		HitEvent hitEvent = new HitEvent(this, event);
 		if (this.getEventListener().activateEvents(EventType.HIT_EVENT, hitEvent)) {
 			return false;
 		} else {
-			return super.attackEntityFrom(event);
+			return super.hurtBy(event);
 		}
 	}
 	

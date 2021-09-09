@@ -4,13 +4,14 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 
 import maninhouse.epicfight.capabilities.entity.mob.RavagerData;
 import maninhouse.epicfight.model.Armature;
+import net.minecraft.client.renderer.entity.model.RavagerModel;
 import net.minecraft.entity.monster.RavagerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class RavagerRenderer extends ArmatureRenderer<RavagerEntity, RavagerData> {
+public class RavagerRenderer extends ArmatureRenderer<RavagerEntity, RavagerData, RavagerModel> {
 	public static final ResourceLocation RAVABER_TEXTURE = new ResourceLocation("textures/entity/illager/ravager.png");
 	
 	@Override

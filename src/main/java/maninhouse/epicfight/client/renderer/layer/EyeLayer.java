@@ -8,13 +8,15 @@ import maninhouse.epicfight.client.model.ClientModel;
 import maninhouse.epicfight.utils.math.OpenMatrix4f;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.layers.AbstractEyesLayer;
+import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class EyeLayer<E extends LivingEntity, T extends LivingData<E>> extends Layer<E, T> {
+public class EyeLayer<E extends LivingEntity, T extends LivingData<E>, M extends EntityModel<E>> extends AnimatedLayer<E, T, M, AbstractEyesLayer<E, M>> {
 	private final RenderType renderType;
 	private final ClientModel eyeModel;
 	
@@ -24,7 +26,7 @@ public class EyeLayer<E extends LivingEntity, T extends LivingData<E>> extends L
 	}
 	
 	@Override
-	public void renderLayer(T entitydata, E entityliving, MatrixStack matrixStackIn, IRenderTypeBuffer buffer, int packedLightIn, OpenMatrix4f[] poses, float partialTicks) {
+	public void renderLayer(T entitydata, E entityliving, AbstractEyesLayer<E, M> originalRenderer, MatrixStack matrixStackIn, IRenderTypeBuffer buffer, int packedLightIn, OpenMatrix4f[] poses, float netYawHead, float pitchHead, float partialTicks) {
 		IVertexBuilder ivertexbuilder = buffer.getBuffer(this.renderType);
 		this.eyeModel.draw(matrixStackIn, ivertexbuilder, 15728640, 1.0F, 1.0F, 1.0F, 1.0F, poses);
 	}

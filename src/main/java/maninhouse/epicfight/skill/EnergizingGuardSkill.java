@@ -33,6 +33,7 @@ public class EnergizingGuardSkill extends GuardSkill {
 		if (event.getForgeEvent().getSource().isExplosion()) {
 			impact = event.getForgeEvent().getAmount();
 		}
+		
 		boolean guard = super.guard(container, itemCapapbility, event, knockback, impact, reinforce);
 		if (guard && isSpecialDamageSource(event.getForgeEvent().getSource())) {
 			event.getPlayerData().getOriginalEntity().attackEntityFrom(DamageSource.GENERIC, event.getForgeEvent().getAmount() * 0.2F);
@@ -69,7 +70,7 @@ public class EnergizingGuardSkill extends GuardSkill {
 	}
 	
 	@Override
-	protected boolean isHighTierSkill() {
+	protected boolean isHighTierGuard() {
 		return true;
 	}
 	

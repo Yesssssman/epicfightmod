@@ -23,7 +23,7 @@ public class ModRenderTypes extends RenderType {
 					.depthTest(DEPTH_EQUAL)
 					.transparency(GLINT_TRANSPARENCY)
 					.texturing(ENTITY_GLINT_TEXTURING)
-					.layer(field_239235_M_)
+					.layer(VIEW_OFFSET_Z_LAYERING)
 					.build(false)
 			);
 	
@@ -50,7 +50,7 @@ public class ModRenderTypes extends RenderType {
 		RenderType.State rendertype$state = RenderType.State.getBuilder()
 				.texture(new RenderState.TextureState(locationIn, false, false))
 				.transparency(TRANSLUCENT_TRANSPARENCY)
-				.target(field_241712_U_)
+				.target(ITEM_ENTITY_TARGET)
 				.diffuseLighting(DIFFUSE_LIGHTING_ENABLED)
 				.alpha(DEFAULT_ALPHA)
 				.lightmap(LIGHTMAP_ENABLED)
@@ -83,21 +83,10 @@ public class ModRenderTypes extends RenderType {
 				.cull(CULL_DISABLED)
 				.lightmap(LIGHTMAP_ENABLED)
 				.overlay(OVERLAY_ENABLED)
-				.layer(field_239235_M_)
+				.layer(VIEW_OFFSET_Z_LAYERING)
 				.build(true);
 		
 		return makeType(EpicFightMod.MODID + ":animated_armor_model", DefaultVertexFormats.ENTITY, GL11.GL_TRIANGLES, 256, true, false, state);
-	}
-	
-	public static RenderType getEyes(ResourceLocation locationIn) {
-		RenderType.State state = RenderType.State.getBuilder()
-				.texture(new RenderState.TextureState(locationIn, false, false))
-				.transparency(ADDITIVE_TRANSPARENCY)
-				.writeMask(COLOR_WRITE)
-				.fog(BLACK_FOG)
-				.build(false);
-		
-		return makeType(EpicFightMod.MODID + ":eyes", DefaultVertexFormats.ENTITY, GL11.GL_QUADS, 256, false, true, state);
 	}
 	
 	public static RenderType getEntityCutoutNoCull(ResourceLocation locationIn) {

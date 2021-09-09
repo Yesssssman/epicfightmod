@@ -45,7 +45,7 @@ public class SkillDescriptionGui extends Screen {
 		Skill priorSkill = this.skill.getPriorSkill();
 		boolean condition = priorSkill == null ? true : playerdata.getSkill(priorSkill.getCategory()).getContaining() == priorSkill;
 		
-		Button.ITooltip tooltip = Button.field_238486_s_;
+		Button.ITooltip tooltip = Button.EMPTY_TOOLTIP;
 		
 		if (!isUsing) {
 			if (condition) {

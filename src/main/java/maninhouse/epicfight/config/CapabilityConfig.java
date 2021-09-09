@@ -27,6 +27,7 @@ import maninhouse.epicfight.capabilities.item.CapabilityItem.HoldStyle;
 import maninhouse.epicfight.capabilities.item.CrossbowCapability;
 import maninhouse.epicfight.capabilities.item.KnuckleCapability;
 import maninhouse.epicfight.capabilities.item.ModWeaponCapability;
+import maninhouse.epicfight.capabilities.item.TridentCapability;
 import maninhouse.epicfight.gamedata.Animations;
 import maninhouse.epicfight.gamedata.Colliders;
 import maninhouse.epicfight.gamedata.Skills;
@@ -260,6 +261,7 @@ public class CapabilityConfig {
 				.addStyleCombo(HoldStyle.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
 				.addStyleCombo(HoldStyle.MOUNT, Animations.SWORD_MOUNT_ATTACK)
 				.addStyleSpecialAttack(HoldStyle.ONE_HAND, Skills.GUILLOTINE_AXE)
+				.addLivingMotionModifier(HoldStyle.ONE_HAND, LivingMotion.BLOCK, Animations.SWORD_GUARD)
 			);
 			return cap;
 		}),
@@ -299,11 +301,12 @@ public class CapabilityConfig {
 				.setStyleGetter((playerdata) -> playerdata.getHeldItemCapability(Hand.OFF_HAND).getWeaponCategory() == WeaponCategory.SWORD ? HoldStyle.TWO_HAND : HoldStyle.ONE_HAND)
 				.setWeaponCollider(Colliders.sword)
 				.setHitSound(Sounds.BLADE_HIT)
-				.addStyleCombo(HoldStyle.ONE_HAND, Animations.SWORD_AUTO_1, Animations.SWORD_AUTO_2, Animations.SWORD_AUTO_3, Animations.SWORD_DASH)
-				.addStyleCombo(HoldStyle.TWO_HAND, Animations.SWORD_DUAL_AUTO_1, Animations.SWORD_DUAL_AUTO_2, Animations.SWORD_DUAL_AUTO_3, Animations.SWORD_DUAL_DASH)
+				.addStyleCombo(HoldStyle.ONE_HAND, Animations.SWORD_AUTO_1, Animations.SWORD_AUTO_2, Animations.SWORD_AUTO_3, Animations.SWORD_DASH, Animations.SWORD_AIR_SLASH)
+				.addStyleCombo(HoldStyle.TWO_HAND, Animations.SWORD_DUAL_AUTO_1, Animations.SWORD_DUAL_AUTO_2, Animations.SWORD_DUAL_AUTO_3, Animations.SWORD_DUAL_DASH, Animations.SWORD_DUAL_AIR_SLASH)
 				.addStyleCombo(HoldStyle.MOUNT, Animations.SWORD_MOUNT_ATTACK)
 				.addStyleSpecialAttack(HoldStyle.ONE_HAND, Skills.SWEEPING_EDGE)
 				.addStyleSpecialAttack(HoldStyle.TWO_HAND, Skills.DANCING_EDGE)
+				.addLivingMotionModifier(HoldStyle.ONE_HAND, LivingMotion.BLOCK, Animations.SWORD_GUARD)
 			);
 			return cap;
 		}),
@@ -314,13 +317,14 @@ public class CapabilityConfig {
 				.setWeaponCollider(Colliders.spear)
 				.setHitSound(Sounds.BLADE_HIT)
 				.setHoldOption(HoldOption.MAINHAND_ONLY)
-				.addStyleCombo(HoldStyle.ONE_HAND, Animations.SPEAR_ONEHAND_AUTO, Animations.SPEAR_DASH)
-				.addStyleCombo(HoldStyle.TWO_HAND, Animations.SPEAR_TWOHAND_AUTO_1, Animations.SPEAR_TWOHAND_AUTO_2, Animations.SPEAR_DASH)
+				.addStyleCombo(HoldStyle.ONE_HAND, Animations.SPEAR_ONEHAND_AUTO, Animations.SPEAR_DASH, Animations.SPEAR_ONEHAND_AIR_SLASH)
+				.addStyleCombo(HoldStyle.TWO_HAND, Animations.SPEAR_TWOHAND_AUTO_1, Animations.SPEAR_TWOHAND_AUTO_2, Animations.SPEAR_DASH, Animations.SPEAR_TWOHAND_AIR_SLASH)
 				.addStyleCombo(HoldStyle.MOUNT, Animations.SPEAR_MOUNT_ATTACK)
 				.addStyleSpecialAttack(HoldStyle.ONE_HAND, Skills.HEARTPIERCER)
 				.addStyleSpecialAttack(HoldStyle.TWO_HAND, Skills.SLAUGHTER_STANCE)
 				.addLivingMotionModifier(HoldStyle.ONE_HAND, LivingMotion.RUN, Animations.BIPED_RUN_SPEAR)
 				.addLivingMotionModifier(HoldStyle.TWO_HAND, LivingMotion.RUN, Animations.BIPED_RUN_SPEAR)
+				.addLivingMotionModifier(HoldStyle.TWO_HAND, LivingMotion.BLOCK, Animations.SPEAR_GUARD)
 			);
 			return cap;
 		}),
@@ -332,7 +336,7 @@ public class CapabilityConfig {
 				.setSmashingSound(Sounds.WHOOSH_BIG)
 				.setHitSound(Sounds.BLADE_HIT)
 				.setHoldOption(HoldOption.TWO_HANDED)
-				.addStyleCombo(HoldStyle.TWO_HAND, Animations.GREATSWORD_AUTO_1, Animations.GREATSWORD_AUTO_2, Animations.GREATSWORD_DASH)
+				.addStyleCombo(HoldStyle.TWO_HAND, Animations.GREATSWORD_AUTO_1, Animations.GREATSWORD_AUTO_2, Animations.GREATSWORD_DASH, Animations.GREATSWORD_AIR_SLASH)
 				.addStyleSpecialAttack(HoldStyle.TWO_HAND, Skills.GIANT_WHIRLWIND)
 				.addLivingMotionModifier(HoldStyle.TWO_HAND, LivingMotion.IDLE, Animations.BIPED_IDLE_GREATSWORD)
 				.addLivingMotionModifier(HoldStyle.TWO_HAND, LivingMotion.WALK, Animations.BIPED_IDLE_GREATSWORD)
@@ -340,6 +344,7 @@ public class CapabilityConfig {
 	    		.addLivingMotionModifier(HoldStyle.TWO_HAND, LivingMotion.JUMP, Animations.BIPED_IDLE_GREATSWORD)
 	    		.addLivingMotionModifier(HoldStyle.TWO_HAND, LivingMotion.KNEEL, Animations.BIPED_IDLE_GREATSWORD)
 	    		.addLivingMotionModifier(HoldStyle.TWO_HAND, LivingMotion.SNEAK, Animations.BIPED_IDLE_GREATSWORD)
+	    		.addLivingMotionModifier(HoldStyle.TWO_HAND, LivingMotion.BLOCK, Animations.GREATSWORD_GUARD)
 			);
 			return cap;
 		}),
@@ -372,6 +377,7 @@ public class CapabilityConfig {
 			    .addLivingMotionModifier(HoldStyle.SHEATH, LivingMotion.SWIM, Animations.BIPED_MOVE_SHEATHING)
 			    .addLivingMotionModifier(HoldStyle.SHEATH, LivingMotion.FLOAT, Animations.BIPED_MOVE_SHEATHING)
 			    .addLivingMotionModifier(HoldStyle.SHEATH, LivingMotion.FALL, Animations.BIPED_MOVE_SHEATHING)
+			    .addLivingMotionModifier(HoldStyle.TWO_HAND, LivingMotion.BLOCK, Animations.KATANA_GUARD)
 			);
 			return cap;
 		}),
@@ -382,7 +388,7 @@ public class CapabilityConfig {
 				.setWeaponCollider(Colliders.katana)
 				.setHitSound(Sounds.BLADE_HIT)
 				.setHoldOption(HoldOption.TWO_HANDED)
-				.addStyleCombo(HoldStyle.TWO_HAND, Animations.LONGSWORD_AUTO_1, Animations.LONGSWORD_AUTO_2, Animations.LONGSWORD_AUTO_3, Animations.TACHI_DASH)
+				.addStyleCombo(HoldStyle.TWO_HAND, Animations.LONGSWORD_AUTO_1, Animations.LONGSWORD_AUTO_2, Animations.LONGSWORD_AUTO_3, Animations.TACHI_DASH, Animations.LONGSWORD_AIR_SLASH)
 				.addStyleCombo(HoldStyle.MOUNT, Animations.SWORD_MOUNT_ATTACK)
 				.addStyleSpecialAttack(HoldStyle.TWO_HAND, Skills.LETHAL_SLICING)
 				.addLivingMotionModifier(HoldStyle.TWO_HAND, LivingMotion.IDLE, Animations.BIPED_IDLE_TACHI)
@@ -393,6 +399,7 @@ public class CapabilityConfig {
 				.addLivingMotionModifier(HoldStyle.TWO_HAND, LivingMotion.SWIM, Animations.BIPED_IDLE_TACHI)
 				.addLivingMotionModifier(HoldStyle.TWO_HAND, LivingMotion.FLOAT, Animations.BIPED_IDLE_TACHI)
 				.addLivingMotionModifier(HoldStyle.TWO_HAND, LivingMotion.FALL, Animations.BIPED_IDLE_TACHI)
+				.addLivingMotionModifier(HoldStyle.TWO_HAND, LivingMotion.BLOCK, Animations.LONGSWORD_GUARD)
 			);
 			return cap;
 		}),
@@ -428,6 +435,8 @@ public class CapabilityConfig {
 				.addLivingMotionModifier(HoldStyle.LIECHTENHAUER, LivingMotion.SNEAK, Animations.BIPED_WALK_LONGSWORD)
 				.addLivingMotionModifier(HoldStyle.LIECHTENHAUER, LivingMotion.KNEEL, Animations.BIPED_WALK_LONGSWORD)
 				.addLivingMotionModifier(HoldStyle.LIECHTENHAUER, LivingMotion.JUMP, Animations.BIPED_WALK_LONGSWORD)
+				.addLivingMotionModifier(HoldStyle.TWO_HAND, LivingMotion.BLOCK, Animations.LONGSWORD_GUARD)
+				.addLivingMotionModifier(HoldStyle.LIECHTENHAUER, LivingMotion.BLOCK, Animations.LONGSWORD_GUARD)
 			);
 			return weaponCapability;
 		}),
@@ -446,7 +455,8 @@ public class CapabilityConfig {
 			return weaponCapability;
 		}),
 		BOW(BowCapability::new),
-		CROSSBOW(CrossbowCapability::new);
+		CROSSBOW(CrossbowCapability::new),
+		TRIDENT(TridentCapability::new);
 		
 		Function<Item, CapabilityItem> capabilitySupplier;
 		

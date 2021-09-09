@@ -2,19 +2,19 @@ package maninhouse.epicfight.animation;
 
 public enum LivingMotion {
 	IDLE, ANGRY, FLOAT, WALK, RUN, SWIM, FLY, SNEAK, KNEEL, FALL, MOUNT, DEATH, CHASE, SPELLCAST, JUMP, CELEBRATE,
-	ADMIRE, CLIMB, SLEEP, DRINK, NONE, AIM, BLOCK, RELOAD, SHOT;
+	ADMIRE, CLIMB, SLEEP, DRINK, NONE, AIM, BLOCK, BLOCK_SHIELD, RELOAD, SHOT;
 	
 	final int id;
 	
 	LivingMotion() {
-		this.id = Cls.LAST_ID++;
+		this.id = Count.LAST_ID++;
 	}
 	
 	public int getId() {
 		return id;
 	}
 	
-	static class Cls {
+	static class Count {
 		static int LAST_ID = 0;
 	}
 }

@@ -51,10 +51,10 @@ public class ArmorCapability extends CapabilityItem {
 	@Override
 	public void modifyItemTooltip(List<ITextComponent> itemTooltip, LivingData<?> entitydata) {
 		itemTooltip.add(1, new StringTextComponent(TextFormatting.BLUE + " +" + (int)this.weight + " ")
-				.append(new TranslationTextComponent(ModAttributes.WEIGHT.get().getAttributeName()).mergeStyle(TextFormatting.BLUE)));
+				.appendSibling(new TranslationTextComponent(ModAttributes.WEIGHT.get().getAttributeName()).mergeStyle(TextFormatting.BLUE)));
 		if(this.stunArmor > 0.0F) {
 			itemTooltip.add(1, new StringTextComponent(TextFormatting.BLUE + " +" + ItemStack.DECIMALFORMAT.format(this.stunArmor) + " ")
-				.append(new TranslationTextComponent(ModAttributes.STUN_ARMOR.get().getAttributeName()).mergeStyle(TextFormatting.BLUE)));
+				.appendSibling(new TranslationTextComponent(ModAttributes.STUN_ARMOR.get().getAttributeName()).mergeStyle(TextFormatting.BLUE)));
 		}
 	}
 	

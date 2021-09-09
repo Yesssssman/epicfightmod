@@ -17,13 +17,11 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class RenderKatana extends RenderItemBase
-{
+public class RenderKatana extends RenderItemBase {
 	private final ItemStack sheathStack = new ItemStack(ModItems.KATANA_SHEATH.get());
 	
 	@Override
-	public void renderItemInHand(ItemStack stack, LivingData<?> itemHolder, Hand hand, IRenderTypeBuffer buffer, MatrixStack viewMatrixStack, int packedLight)
-	{
+	public void renderItemInHand(ItemStack stack, LivingData<?> itemHolder, Hand hand, IRenderTypeBuffer buffer, MatrixStack viewMatrixStack, int packedLight) {
 		viewMatrixStack.push();
 		OpenMatrix4f modelMatrix = new OpenMatrix4f(correctionMatrix);
 		OpenMatrix4f.mul(itemHolder.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().findJointByName("Tool_R").getAnimatedTransform(), modelMatrix, modelMatrix);

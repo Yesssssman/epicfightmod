@@ -5,6 +5,8 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.function.BiFunction;
 
+import javax.annotation.Nullable;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -95,8 +97,9 @@ public class GuardSkill extends Skill {
 		});
 		
 		container.executer.getEventListener().addEventListener(EventType.HIT_EVENT, EVENT_UUID, (event) -> {
-			CapabilityItem itemCapapbility = event.getPlayerData().getHeldItemCapability(Hand.MAIN_HAND);
-			if (event.getPlayerData().getOriginalEntity().isHandActive() && this.isExecutableState(event.getPlayerData())) {
+			CapabilityItem itemCapability = event.getPlayerData().getHeldItemCapability(event.getPlayerData().getOriginalEntity().getActiveHand());
+			if (this.getHitMotion(event.getPlayerData(), itemCapability, 0) != null && event.getPlayerData().getOriginalEntity().isHandActive()
+					&& this.isExecutableState(event.getPlayerData())) {
 				DamageSource damageSource = event.getForgeEvent().getSource();
 				boolean isFront = false;
 				Vector3d damageLocation = damageSource.getDamageLocation();
@@ -118,14 +121,14 @@ public class GuardSkill extends Skill {
 						knockback += impact * 0.1F;
 					}
 					
-					return this.guard(container, itemCapapbility, event, knockback, impact, false);
+					return this.guard(container, itemCapability, event, knockback, impact, false);
 				}
 			}
 			return false;
 		});
 	}
 	
-	public boolean guard(SkillContainer container, CapabilityItem itemCapapbility, HitEvent event, float knockback, float impact, boolean reinforced) {
+	public boolean guard(SkillContainer container, CapabilityItem itemCapability, HitEvent event, float knockback, float impact, boolean reinforced) {
 		DamageSource damageSource = event.getForgeEvent().getSource();
 		if (this.isBlockableSource(event.getForgeEvent().getSource(), reinforced)) {
 			event.getPlayerData().playSound(Sounds.CLASH, -0.05F, 0.1F);
@@ -137,13 +140,13 @@ public class GuardSkill extends Skill {
 				knockback += EnchantmentHelper.getKnockbackModifier((LivingEntity)damageSource.getImmediateSource()) * 0.1F;
 			}
 			
-			float penalty = container.getDataManager().getDataValue(PENALTY) + this.getPenaltyStamina(itemCapapbility);
+			float penalty = container.getDataManager().getDataValue(PENALTY) + this.getPenaltyStamina(itemCapability);
 			event.getPlayerData().knockBackEntity(damageSource.getImmediateSource(), knockback);
 			float stamina = event.getPlayerData().getStamina() - penalty * impact;
 			event.getPlayerData().setStamina(stamina);
 			container.getDataManager().setDataSync(PENALTY, penalty, event.getPlayerData().getOriginalEntity());
 			
-			StaticAnimation animation = this.getAvailableWeaponTypes(stamina >= 0.0F ? 0 : 1).get(itemCapapbility.getWeaponCategory()).apply(itemCapapbility, container.executer);
+			StaticAnimation animation = this.getHitMotion(event.getPlayerData(), itemCapability, stamina >= 0 ? 1 : 0);
 			
 			if (animation != null) {
 				event.getPlayerData().playAnimationSynchronize(animation, 0);
@@ -161,6 +164,11 @@ public class GuardSkill extends Skill {
 	
 	protected Map<WeaponCategory, BiFunction<CapabilityItem, PlayerData<?>, StaticAnimation>> getAvailableWeaponTypes(int meta) {
 		return AVAILABLE_WEAPON_TYPES;
+	}
+	
+	@Nullable
+	protected StaticAnimation getHitMotion(PlayerData<?> playerdata, CapabilityItem itemCapability, int meta) {
+		return this.getAvailableWeaponTypes(meta).getOrDefault(itemCapability.getWeaponCategory(), (a, b) -> null).apply(itemCapability, playerdata);
 	}
 	
 	@Override
@@ -224,7 +232,7 @@ public class GuardSkill extends Skill {
 		gui.font.drawStringWithShadow(matStackIn, String.format("x%.1f", container.getDataManager().getDataValue(PENALTY)), ((float)width - x), ((float)height - y+6), 16777215);
 	}
 	
-	protected boolean isHighTierSkill() {
+	protected boolean isHighTierGuard() {
 		return false;
 	}
 }

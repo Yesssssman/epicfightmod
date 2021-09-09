@@ -90,13 +90,12 @@ public class LiechtenauerSkill extends SpecialAttackSkill {
 				ClientPlayerEntity clientPlayer = event.getPlayerData().getOriginalEntity();
 				clientPlayer.setSprinting(false);
 				clientPlayer.sprintToggleTimer = -1;
-				ClientEngine.INSTANCE.inputController.setKeyBind(Minecraft.getInstance().gameSettings.keyBindSprint, false);
+				Minecraft mc = Minecraft.getInstance();
+				ClientEngine.INSTANCE.inputController.setKeyBind(mc.gameSettings.keyBindSprint, false);
 			}
 			
 			return false;
 		});
-		
-		
 	}
 	
 	@Override

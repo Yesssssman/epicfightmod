@@ -29,7 +29,7 @@ public class HealthBarIndicator extends EntityIndicator {
 	public boolean shouldDraw(LivingEntity entityIn) {
 		if (!EpicFightMod.CLIENT_INGAME_CONFIG.showHealthIndicator.getValue()) {
 			return false;
-		} else if (!entityIn.isNonBoss() || entityIn.isInvisible() || entityIn == Minecraft.getInstance().player.getRidingEntity()) {
+		} else if (!entityIn.canChangeDimension() || entityIn.isInvisible() || entityIn == Minecraft.getInstance().player.getRidingEntity()) {
 			return false;
 		} else if (entityIn.getDistanceSq(Minecraft.getInstance().getRenderViewEntity()) >= 400) {
 			return false;

@@ -7,6 +7,7 @@ import maninhouse.epicfight.skill.SkillContainer;
 import net.minecraft.nbt.CompoundNBT;
 
 public class CapabilitySkill {
+	public static final CapabilitySkill EMPTY = new CapabilitySkill(null);
 	public SkillContainer[] skills;
 	
 	public CapabilitySkill(PlayerData<?> player) {

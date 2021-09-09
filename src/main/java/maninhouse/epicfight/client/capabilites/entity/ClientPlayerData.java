@@ -21,6 +21,7 @@ import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.event.entity.living.LivingAttackEvent;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientPlayerData extends RemoteClientPlayerData<ClientPlayerEntity> {
@@ -92,6 +93,15 @@ public class ClientPlayerData extends RemoteClientPlayerData<ClientPlayerEntity>
 		} else {
 			this.getSkill(SkillCategory.WEAPON_PASSIVE).setSkill(null);
 		}
+	}
+	
+	@Override
+	public boolean hurtBy(LivingAttackEvent event) {
+		boolean hurt = super.hurtBy(event);
+		if (EpicFightMod.CLIENT_INGAME_CONFIG.autoPreparation.getValue() && hurt && !ClientEngine.INSTANCE.isBattleMode()) {
+			ClientEngine.INSTANCE.toggleActingMode();
+		}
+		return hurt;
 	}
 	
 	@Override

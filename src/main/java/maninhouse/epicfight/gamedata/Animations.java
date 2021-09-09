@@ -566,7 +566,7 @@ public final class Animations {
 		GOLEM_DEATH = new LongHitAnimation(3204, 0.11F, "iron_golem/death.dae").loadAnimation(iron_golem, dist);
 		
 		VINDICATOR_SWING_AXE1 = new AttackAnimation(3300, 0.2F, 0.25F, 0.35F, 0.46F, 0.71F, false, Colliders.tools, "111213", "illager/swing_axe1.dae").loadAnimation(biped, dist);
-		VINDICATOR_SWING_AXE2 = new AttackAnimation(3301, 0.2F, 0.25F, 0.35F, 0.46F, 0.71F, false, Colliders.tools, "111213", "illager/swing_axe2.dae").loadAnimation(biped, dist);
+		VINDICATOR_SWING_AXE2 = new AttackAnimation(3301, 0.2F, 0.25F, 0.3F, 0.41F, 0.71F, false, Colliders.tools, "111213", "illager/swing_axe2.dae").loadAnimation(biped, dist);
 		VINDICATOR_SWING_AXE3 = new AttackAnimation(3302, 0.05F, 0.50F, 0.62F, 0.75F, 1F, true, Colliders.tools, "111213", "illager/swing_axe3.dae").loadAnimation(biped, dist);
 		
 		PIGLIN_DEATH = new LongHitAnimation(6000, 0.16F, "piglin/death.dae").loadAnimation(piglin, dist);

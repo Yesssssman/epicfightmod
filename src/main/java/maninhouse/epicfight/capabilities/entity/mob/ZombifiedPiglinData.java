@@ -50,7 +50,7 @@ public class ZombifiedPiglinData extends BipedMobData<ZombifiedPiglinEntity> {
 	}
 	
 	@Override
-	public boolean attackEntityFrom(LivingAttackEvent event) {
+	public boolean hurtBy(LivingAttackEvent event) {
 		if (event.getSource().getTrueSource() instanceof ZombifiedPiglinEntity) {
 			return false;
 		}

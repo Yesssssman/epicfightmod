@@ -56,11 +56,6 @@ public class EndermanData extends BipedMobData<EndermanEntity> {
 	}
 	
 	@Override
-	public void onEntityConstructed(EndermanEntity entityIn) {
-		super.onEntityConstructed(entityIn);
-	}
-	
-	@Override
 	protected void initAttributes() {
 		super.initAttributes();
 		this.orgEntity.getAttribute(ModAttributes.STUN_ARMOR.get()).setBaseValue(8.0F);
@@ -131,34 +126,36 @@ public class EndermanData extends BipedMobData<EndermanEntity> {
 	}
 	
 	@Override
-	public boolean attackEntityFrom(LivingAttackEvent event) {
-		if (event.getSource() instanceof EntityDamageSource && !this.isRaging()) {
-			IExtendedDamageSource extDamageSource = null;
-			if (event.getSource() instanceof IExtendedDamageSource) {
-				extDamageSource = ((IExtendedDamageSource)event.getSource());
-			}
-			
-			if (extDamageSource == null || extDamageSource.getStunType() != StunType.HOLD) {
-				int percentage = this.getServerAnimator().getPlayerFor(null).getPlay() instanceof AttackAnimation ? 10 : 3;
-				if (this.orgEntity.getRNG().nextInt(percentage) == 0) {
-					for (int i = 0; i < 9; i++) {
-						if (this.teleportRandomly()) {
-							if (event.getSource().getTrueSource() instanceof LivingEntity) {
-								this.orgEntity.setRevengeTarget((LivingEntity) event.getSource().getTrueSource());
-							}
+	public boolean hurtBy(LivingAttackEvent event) {
+		if (!this.orgEntity.world.isRemote) {
+			if (event.getSource() instanceof EntityDamageSource && !this.isRaging()) {
+				IExtendedDamageSource extDamageSource = null;
+				if (event.getSource() instanceof IExtendedDamageSource) {
+					extDamageSource = ((IExtendedDamageSource)event.getSource());
+				}
+				
+				if (extDamageSource == null || extDamageSource.getStunType() != StunType.HOLD) {
+					int percentage = this.getServerAnimator().getPlayerFor(null).getPlay() instanceof AttackAnimation ? 10 : 3;
+					if (this.orgEntity.getRNG().nextInt(percentage) == 0) {
+						for (int i = 0; i < 9; i++) {
+							if (this.teleportRandomly()) {
+								if (event.getSource().getTrueSource() instanceof LivingEntity) {
+									this.orgEntity.setRevengeTarget((LivingEntity) event.getSource().getTrueSource());
+								}
 
-							if (this.state.isInaction()) {
-								this.playAnimationSynchronize(Animations.ENDERMAN_TP_EMERGENCE, 0.0F);
+								if (this.state.isInaction()) {
+									this.playAnimationSynchronize(Animations.ENDERMAN_TP_EMERGENCE, 0.0F);
+								}
+								
+								return false;
 							}
-							
-							return false;
 						}
 					}
 				}
 			}
 		}
 		
-		return super.attackEntityFrom(event);
+		return super.hurtBy(event);
 	}
 	
 	protected boolean teleportRandomly() {
@@ -217,10 +214,10 @@ public class EndermanData extends BipedMobData<EndermanEntity> {
 			}
 		}
 	}
-
+	
 	protected void convertNormal() {
 		this.onRage = false;
-
+		
 		if (this.isRemote()) {
 			this.getClientAnimator().addLivingAnimation(LivingMotion.IDLE, Animations.ENDERMAN_IDLE);
 			this.getClientAnimator().addLivingAnimation(LivingMotion.WALK, Animations.ENDERMAN_WALK);

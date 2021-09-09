@@ -65,7 +65,7 @@ public class STCGameruleChange {
 	
 	public static enum Gamerules {
 		HAS_FALL_ANIMATION(0, ValueType.BOOLEAN, ModGamerules.HAS_FALL_ANIMATION), 
-		SPEED_PENALTY_PERCENT(1, ValueType.INTEGER, ModGamerules.ATTACK_SPEED_PENALTY);
+		SPEED_PENALTY_PERCENT(1, ValueType.INTEGER, ModGamerules.WEIGHT_PENALTY);
 		
 		ValueType valueType;
 		RuleKey<?> key;

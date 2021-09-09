@@ -122,10 +122,8 @@ public class AttackAnimation extends ActionAnimation {
 								if (entity.world.rayTraceBlocks(new RayTraceContext(new Vector3d(e.getPosX(), e.getPosY() + (double)e.getEyeHeight(), e.getPosZ()),
 										new Vector3d(entity.getPosX(), entity.getPosY() + entity.getHeight() * 0.5F, entity.getPosZ()), 
 										RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, entity)).getType() == RayTraceResult.Type.MISS) {
-									
 									IExtendedDamageSource source = this.getDamageSourceExt(entitydata, e, phase);
 									float damage = this.getDamageTo(entitydata, trueEntity, phase, source);
-									
 									if (entitydata.hurtEntity(e, phase.hand, source, damage)) {
 										if (entitydata instanceof ServerPlayerData) {
 											ServerPlayerData playerdata = ((ServerPlayerData)entitydata);
@@ -136,7 +134,7 @@ public class AttackAnimation extends ActionAnimation {
 										e.world.playSound(null, e.getPosX(), e.getPosY(), e.getPosZ(), this.getHitSound(entitydata, phase), e.getSoundCategory(), 1.0F, 1.0F);
 										this.spawnHitParticle(((ServerWorld)e.world), entitydata, e, phase);
 										if (flag1 && entitydata instanceof PlayerData) {
-											entitydata.getOriginalEntity().getHeldItem(phase.hand).hitEntity(trueEntity, ((PlayerData<?>)entitydata).getOriginalEntity());
+											entity.getHeldItem(phase.hand).hitEntity(trueEntity, (PlayerEntity)entity);
 											flag1 = false;
 										}
 									}
@@ -230,7 +228,7 @@ public class AttackAnimation extends ActionAnimation {
 	
 	protected int getMaxStrikes(LivingData<?> entitydata, Phase phase) {
 		return phase.getProperty(AttackPhaseProperty.MAX_STRIKES).map((valueCorrector) -> valueCorrector.get(entitydata.getHitEnemies(phase.hand)))
-				.orElse(new Float(entitydata.getHitEnemies(phase.hand))).intValue();
+				.orElse(Float.valueOf(entitydata.getHitEnemies(phase.hand))).intValue();
 	}
 	
 	protected float getDamageTo(LivingData<?> entitydata, LivingEntity target, Phase phase, IExtendedDamageSource source) {

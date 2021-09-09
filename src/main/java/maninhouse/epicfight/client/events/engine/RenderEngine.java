@@ -17,8 +17,6 @@ import maninhouse.epicfight.capabilities.entity.mob.PiglinBruteData;
 import maninhouse.epicfight.capabilities.entity.mob.PiglinData;
 import maninhouse.epicfight.capabilities.entity.mob.PillagerData;
 import maninhouse.epicfight.capabilities.entity.mob.SkeletonData;
-import maninhouse.epicfight.capabilities.entity.mob.VindicatorData;
-import maninhouse.epicfight.capabilities.entity.mob.WitchData;
 import maninhouse.epicfight.capabilities.entity.mob.WitherSkeletonData;
 import maninhouse.epicfight.capabilities.entity.mob.ZoglinData;
 import maninhouse.epicfight.capabilities.entity.mob.ZombieData;
@@ -38,16 +36,17 @@ import maninhouse.epicfight.client.renderer.entity.CreeperRenderer;
 import maninhouse.epicfight.client.renderer.entity.DrownedRenderer;
 import maninhouse.epicfight.client.renderer.entity.EndermanRenderer;
 import maninhouse.epicfight.client.renderer.entity.HoglinRenderer;
+import maninhouse.epicfight.client.renderer.entity.IllagerRenderer;
 import maninhouse.epicfight.client.renderer.entity.IronGolemRenderer;
 import maninhouse.epicfight.client.renderer.entity.RavagerRenderer;
 import maninhouse.epicfight.client.renderer.entity.SimpleTextureBipedRenderer;
 import maninhouse.epicfight.client.renderer.entity.SpiderRenderer;
 import maninhouse.epicfight.client.renderer.entity.VexRenderer;
+import maninhouse.epicfight.client.renderer.entity.VindicatorRenderer;
+import maninhouse.epicfight.client.renderer.entity.WitchRenderer;
 import maninhouse.epicfight.client.renderer.entity.ZombieVillagerRenderer;
 import maninhouse.epicfight.client.renderer.item.RenderBow;
 import maninhouse.epicfight.client.renderer.item.RenderCrossbow;
-import maninhouse.epicfight.client.renderer.item.RenderElytra;
-import maninhouse.epicfight.client.renderer.item.RenderHat;
 import maninhouse.epicfight.client.renderer.item.RenderItemBase;
 import maninhouse.epicfight.client.renderer.item.RenderKatana;
 import maninhouse.epicfight.client.renderer.item.RenderShield;
@@ -67,9 +66,12 @@ import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GLAllocation;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.EntityRendererManager;
+import net.minecraft.client.renderer.entity.LivingRenderer;
+import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.EntityModel;
+import net.minecraft.client.renderer.entity.model.PiglinModel;
+import net.minecraft.client.renderer.entity.model.SkeletonModel;
+import net.minecraft.client.renderer.entity.model.ZombieModel;
 import net.minecraft.client.settings.PointOfView;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.CreatureAttribute;
@@ -85,7 +87,6 @@ import net.minecraft.entity.monster.HuskEntity;
 import net.minecraft.entity.monster.PillagerEntity;
 import net.minecraft.entity.monster.SkeletonEntity;
 import net.minecraft.entity.monster.StrayEntity;
-import net.minecraft.entity.monster.WitchEntity;
 import net.minecraft.entity.monster.WitherSkeletonEntity;
 import net.minecraft.entity.monster.ZoglinEntity;
 import net.minecraft.entity.monster.ZombieEntity;
@@ -93,10 +94,8 @@ import net.minecraft.entity.monster.ZombifiedPiglinEntity;
 import net.minecraft.entity.monster.piglin.PiglinBruteEntity;
 import net.minecraft.entity.monster.piglin.PiglinEntity;
 import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.BlockItem;
 import net.minecraft.item.BowItem;
 import net.minecraft.item.CrossbowItem;
-import net.minecraft.item.ElytraItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.Items;
 import net.minecraft.item.ShieldItem;
@@ -123,6 +122,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
 
+@SuppressWarnings("rawtypes")
 @OnlyIn(Dist.CLIENT)
 public class RenderEngine {
 	private static final Vec3f AIMING_CORRECTION = new Vec3f(-1.5F, 0.0F, 1.25F);
@@ -130,7 +130,6 @@ public class RenderEngine {
 	public AimHelperRenderer aimHelper;
 	public BattleModeGui guiSkillBar = new BattleModeGui();
 	private Minecraft minecraft;
-	private EntityRendererManager entityRendererManager;
 	private OpenMatrix4f projectionMatrix;
 	private Map<EntityType<?>, ArmatureRenderer> entityRendererMap;
 	private Map<Item, RenderItemBase> itemRendererMapByInstance;
@@ -149,7 +148,6 @@ public class RenderEngine {
 		RenderItemBase.renderEngine = this;
 		EntityIndicator.init();
 		this.minecraft = Minecraft.getInstance();
-		this.entityRendererManager = minecraft.getRenderManager();
 		this.entityRendererMap = new HashMap<EntityType<?>, ArmatureRenderer>();
 		this.itemRendererMapByInstance = new HashMap<Item, RenderItemBase>();
 		this.itemRendererMapByClass = new HashMap<Class<? extends Item>, RenderItemBase>();
@@ -161,26 +159,26 @@ public class RenderEngine {
 	public void buildRenderer() {
 		this.entityRendererMap.put(EntityType.CREEPER, new CreeperRenderer());
 		this.entityRendererMap.put(EntityType.ENDERMAN, new EndermanRenderer());
-		this.entityRendererMap.put(EntityType.ZOMBIE, new SimpleTextureBipedRenderer<ZombieEntity, ZombieData<ZombieEntity>>("textures/entity/zombie/zombie.png"));
+		this.entityRendererMap.put(EntityType.ZOMBIE, new SimpleTextureBipedRenderer<ZombieEntity, ZombieData<ZombieEntity>, ZombieModel<ZombieEntity>>("textures/entity/zombie/zombie.png"));
 		this.entityRendererMap.put(EntityType.ZOMBIE_VILLAGER, new ZombieVillagerRenderer());
-		this.entityRendererMap.put(EntityType.ZOMBIFIED_PIGLIN, new SimpleTextureBipedRenderer<ZombifiedPiglinEntity, ZombieData<ZombifiedPiglinEntity>>(EpicFightMod.MODID + ":textures/entity/zombified_piglin.png"));
-		this.entityRendererMap.put(EntityType.HUSK, new SimpleTextureBipedRenderer<HuskEntity, ZombieData<HuskEntity>>("textures/entity/zombie/husk.png"));
-		this.entityRendererMap.put(EntityType.SKELETON, new SimpleTextureBipedRenderer<SkeletonEntity, SkeletonData<SkeletonEntity>>("textures/entity/skeleton/skeleton.png"));
-		this.entityRendererMap.put(EntityType.WITHER_SKELETON, new SimpleTextureBipedRenderer<WitherSkeletonEntity, WitherSkeletonData>("textures/entity/skeleton/wither_skeleton.png"));
-		this.entityRendererMap.put(EntityType.STRAY, new SimpleTextureBipedRenderer<StrayEntity, SkeletonData<StrayEntity>>("textures/entity/skeleton/stray.png"));
+		this.entityRendererMap.put(EntityType.ZOMBIFIED_PIGLIN, new SimpleTextureBipedRenderer<ZombifiedPiglinEntity, ZombieData<ZombifiedPiglinEntity>, PiglinModel<ZombifiedPiglinEntity>>(EpicFightMod.MODID + ":textures/entity/zombified_piglin.png"));
+		this.entityRendererMap.put(EntityType.HUSK, new SimpleTextureBipedRenderer<HuskEntity, ZombieData<HuskEntity>, ZombieModel<HuskEntity>>("textures/entity/zombie/husk.png"));
+		this.entityRendererMap.put(EntityType.SKELETON, new SimpleTextureBipedRenderer<SkeletonEntity, SkeletonData<SkeletonEntity>, SkeletonModel<SkeletonEntity>>("textures/entity/skeleton/skeleton.png"));
+		this.entityRendererMap.put(EntityType.WITHER_SKELETON, new SimpleTextureBipedRenderer<WitherSkeletonEntity, WitherSkeletonData, SkeletonModel<WitherSkeletonEntity>>("textures/entity/skeleton/wither_skeleton.png"));
+		this.entityRendererMap.put(EntityType.STRAY, new SimpleTextureBipedRenderer<StrayEntity, SkeletonData<StrayEntity>, SkeletonModel<StrayEntity>>("textures/entity/skeleton/stray.png"));
 		this.entityRendererMap.put(EntityType.PLAYER, new ClientPlayerRenderer());
 		this.entityRendererMap.put(EntityType.SPIDER, new SpiderRenderer());
 		this.entityRendererMap.put(EntityType.CAVE_SPIDER, new CaveSpiderRenderer());
 		this.entityRendererMap.put(EntityType.IRON_GOLEM, new IronGolemRenderer());
-		this.entityRendererMap.put(EntityType.VINDICATOR, new SimpleTextureBipedRenderer<MobEntity, VindicatorData>("textures/entity/illager/vindicator.png", new EquipmentSlotType[0]));
-		this.entityRendererMap.put(EntityType.EVOKER, new SimpleTextureBipedRenderer<EvokerEntity, EvokerData>("textures/entity/illager/evoker.png"));
-		this.entityRendererMap.put(EntityType.WITCH, new SimpleTextureBipedRenderer<WitchEntity, WitchData>(EpicFightMod.MODID + ":textures/entity/witch.png"));
+		this.entityRendererMap.put(EntityType.VINDICATOR, new VindicatorRenderer("textures/entity/illager/vindicator.png"));
+		this.entityRendererMap.put(EntityType.EVOKER, new IllagerRenderer<EvokerEntity, EvokerData>("textures/entity/illager/evoker.png"));
+		this.entityRendererMap.put(EntityType.WITCH, new WitchRenderer(EpicFightMod.MODID + ":textures/entity/witch.png"));
 		this.entityRendererMap.put(EntityType.DROWNED, new DrownedRenderer());
-		this.entityRendererMap.put(EntityType.PILLAGER, new SimpleTextureBipedRenderer<PillagerEntity, PillagerData>("textures/entity/illager/pillager.png"));
+		this.entityRendererMap.put(EntityType.PILLAGER, new IllagerRenderer<PillagerEntity, PillagerData>("textures/entity/illager/pillager.png"));
 		this.entityRendererMap.put(EntityType.RAVAGER, new RavagerRenderer());
 		this.entityRendererMap.put(EntityType.VEX, new VexRenderer());
-		this.entityRendererMap.put(EntityType.PIGLIN, new SimpleTextureBipedRenderer<PiglinEntity, PiglinData>("textures/entity/piglin/piglin.png"));
-		this.entityRendererMap.put(EntityType.field_242287_aj, new SimpleTextureBipedRenderer<PiglinBruteEntity, PiglinBruteData>(EpicFightMod.MODID + ":textures/entity/piglin_brute.png"));
+		this.entityRendererMap.put(EntityType.PIGLIN, new SimpleTextureBipedRenderer<PiglinEntity, PiglinData, PiglinModel<PiglinEntity>>("textures/entity/piglin/piglin.png"));
+		this.entityRendererMap.put(EntityType.field_242287_aj, new SimpleTextureBipedRenderer<PiglinBruteEntity, PiglinBruteData, PiglinModel<PiglinBruteEntity>>(EpicFightMod.MODID + ":textures/entity/piglin_brute.png"));
 		this.entityRendererMap.put(EntityType.HOGLIN, new HoglinRenderer<HoglinEntity, HoglinData>("textures/entity/hoglin/hoglin.png"));
 		this.entityRendererMap.put(EntityType.ZOGLIN, new HoglinRenderer<ZoglinEntity, ZoglinData>("textures/entity/hoglin/zoglin.png"));
 		
@@ -189,10 +187,10 @@ public class RenderEngine {
 			if (entityType != null) {
 				switch (config.getValue().getEntityAIType()) {
 				case ZOMBIE:
-					this.entityRendererMap.put(entityType, new SimpleTextureBipedRenderer<MobEntity, ZombieData<MobEntity>>(config.getValue().getEntityTextureLocation()));
+					this.entityRendererMap.put(entityType, new SimpleTextureBipedRenderer<MobEntity, ZombieData<MobEntity>, BipedModel<MobEntity>>(config.getValue().getEntityTextureLocation()));
 					break;
 				case SKELETON:
-					this.entityRendererMap.put(entityType, new SimpleTextureBipedRenderer<MobEntity, SkeletonData<MobEntity>>(config.getValue().getEntityTextureLocation()));
+					this.entityRendererMap.put(entityType, new SimpleTextureBipedRenderer<MobEntity, SkeletonData<MobEntity>, BipedModel<MobEntity>>(config.getValue().getEntityTextureLocation()));
 					break;
 				case CREEPER:
 					this.entityRendererMap.put(entityType, new CreeperRenderer(new ResourceLocation(config.getValue().getEntityTextureLocation())));
@@ -201,7 +199,7 @@ public class RenderEngine {
 					this.entityRendererMap.put(entityType, new SpiderRenderer(new ResourceLocation(config.getValue().getEntityTextureLocation())));
 					break;
 				case VINDICATOR:
-					this.entityRendererMap.put(entityType, new SimpleTextureBipedRenderer<MobEntity, VindicatorData>(config.getValue().getEntityTextureLocation(), new EquipmentSlotType[0]));
+					this.entityRendererMap.put(entityType, new IllagerRenderer(config.getValue().getEntityTextureLocation()));
 					break;
 				default:
 					
@@ -211,8 +209,6 @@ public class RenderEngine {
 		
 		RenderBow bowRenderer = new RenderBow();
 		RenderCrossbow crossbowRenderer = new RenderCrossbow();
-		RenderElytra elytraRenderer = new RenderElytra();
-		RenderHat hatRenderer = new RenderHat();
 		RenderKatana katanaRenderer = new RenderKatana();
 		RenderShield shieldRenderer = new RenderShield();
 		RenderTrident tridentRenderer = new RenderTrident();
@@ -220,32 +216,22 @@ public class RenderEngine {
 		this.itemRendererMapByInstance.put(Items.AIR, new RenderItemBase());
 		this.itemRendererMapByInstance.put(Items.BOW, bowRenderer);
 		this.itemRendererMapByInstance.put(Items.SHIELD, shieldRenderer);
-		this.itemRendererMapByInstance.put(Items.ELYTRA, elytraRenderer);
-		this.itemRendererMapByInstance.put(Items.CREEPER_HEAD, hatRenderer);
-		this.itemRendererMapByInstance.put(Items.DRAGON_HEAD, hatRenderer);
-		this.itemRendererMapByInstance.put(Items.PLAYER_HEAD, hatRenderer);
-		this.itemRendererMapByInstance.put(Items.ZOMBIE_HEAD, hatRenderer);
-		this.itemRendererMapByInstance.put(Items.SKELETON_SKULL, hatRenderer);
-		this.itemRendererMapByInstance.put(Items.WITHER_SKELETON_SKULL, hatRenderer);
-		this.itemRendererMapByInstance.put(Items.CARVED_PUMPKIN, hatRenderer);
 		this.itemRendererMapByInstance.put(Items.CROSSBOW, crossbowRenderer);
 		this.itemRendererMapByInstance.put(Items.TRIDENT, tridentRenderer);
 		this.itemRendererMapByInstance.put(ModItems.KATANA.get(), katanaRenderer);
-		this.itemRendererMapByClass.put(BlockItem.class, hatRenderer);
 		this.itemRendererMapByClass.put(BowItem.class, bowRenderer);
 		this.itemRendererMapByClass.put(CrossbowItem.class, crossbowRenderer);
-		this.itemRendererMapByClass.put(ElytraItem.class, elytraRenderer);
 		this.itemRendererMapByClass.put(ShieldItem.class, shieldRenderer);
 		this.itemRendererMapByClass.put(TridentItem.class, tridentRenderer);
 		this.aimHelper = new AimHelperRenderer();
 	}
 	
 	public RenderItemBase getItemRenderer(Item item) {
-		RenderItemBase renderItem = itemRendererMapByInstance.get(item);
+		RenderItemBase renderItem = this.itemRendererMapByInstance.get(item);
 		if (renderItem == null) {
 			renderItem = this.findMatchingRendererByClass(item.getClass());
 			if (renderItem == null) {
-				renderItem = itemRendererMapByInstance.get(Items.AIR);
+				renderItem = this.itemRendererMapByInstance.get(Items.AIR);
 			}
 			this.itemRendererMapByInstance.put(item, renderItem);
 		}
@@ -262,7 +248,7 @@ public class RenderEngine {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void renderEntityArmatureModel(LivingEntity livingEntity, LivingData<?> entitydata, EntityRenderer<? extends Entity> renderer, IRenderTypeBuffer buffer, MatrixStack matStack, int packedLightIn, float partialTicks) {
+	public void renderEntityArmatureModel(LivingEntity livingEntity, LivingData<?> entitydata, LivingRenderer<? extends Entity, ?> renderer, IRenderTypeBuffer buffer, MatrixStack matStack, int packedLightIn, float partialTicks) {
 		this.entityRendererMap.get(livingEntity.getType()).render(livingEntity, entitydata, renderer, buffer, matStack, packedLightIn, partialTicks);
 	}
 	
@@ -271,14 +257,14 @@ public class RenderEngine {
 	}
 	
 	public void zoomIn() {
-		aiming = true;
-		zoomCount = zoomCount == 0 ? 1 : zoomCount;
-		zoomOutTimer = 0;
+		this.aiming = true;
+		this.zoomCount = this.zoomCount == 0 ? 1 : this.zoomCount;
+		this.zoomOutTimer = 0;
 	}
 
 	public void zoomOut(int timer) {
-		aiming = false;
-		zoomOutTimer = timer;
+		this.aiming = false;
+		this.zoomOutTimer = timer;
 	}
 	
 	private void updateCameraInfo(CameraSetup event, PointOfView pov, double partialTicks) {
@@ -287,7 +273,7 @@ public class RenderEngine {
 		}
 		
 		ActiveRenderInfo info = event.getInfo();
-		Entity entity = minecraft.getRenderViewEntity();
+		Entity entity = this.minecraft.getRenderViewEntity();
 		Vector3d vector = info.getProjectedView();
 		double totalX = vector.getX();
 		double totalY = vector.getY();
@@ -405,7 +391,7 @@ public class RenderEngine {
 											
 											tooltip.remove(i);
 											tooltip.add(i, new StringTextComponent(String.format(" %.2f ", playerdata.getAttackSpeed(cap, weaponSpeed)))
-													.append(new TranslationTextComponent(Attributes.ATTACK_SPEED.getAttributeName())));
+													.appendSibling(new TranslationTextComponent(Attributes.ATTACK_SPEED.getAttributeName())));
 										} else if (((TranslationTextComponent)translationComponent.getFormatArgs()[1]).getKey().equals(Attributes.ATTACK_DAMAGE.getAttributeName())) {
 											float weaponDamage = (float)playerdata.getOriginalEntity().getAttribute(Attributes.ATTACK_DAMAGE).getBaseValue();
 											weaponDamage += EnchantmentHelper.getModifierForCreature(event.getItemStack(), CreatureAttribute.UNDEFINED);
@@ -416,7 +402,7 @@ public class RenderEngine {
 											
 											tooltip.remove(i);
 											tooltip.add(i, new StringTextComponent(String.format(" %.0f ", playerdata.getDamageToEntity(null, null, weaponDamage)))
-													.append(new TranslationTextComponent(Attributes.ATTACK_DAMAGE.getAttributeName())).mergeStyle(TextFormatting.DARK_GREEN));
+													.appendSibling(new TranslationTextComponent(Attributes.ATTACK_DAMAGE.getAttributeName())).mergeStyle(TextFormatting.DARK_GREEN));
 										}
 									}
 								}
@@ -468,14 +454,16 @@ public class RenderEngine {
 			}
 		}
 		
+		@SuppressWarnings("unchecked")
 		@SubscribeEvent
 		public static void renderHand(RenderHandEvent event) {
 			boolean isBattleMode = ClientEngine.INSTANCE.isBattleMode();
 			if (isBattleMode) {
 				if (event.getHand() == Hand.MAIN_HAND) {
 					if (ClientEngine.INSTANCE.getPlayerData() != null) {
-						renderEngine.firstPersonRenderer.render(Minecraft.getInstance().player, ClientEngine.INSTANCE.getPlayerData(), null, event.getBuffers(),
-								event.getMatrixStack(), event.getLight(), event.getPartialTicks());
+						renderEngine.firstPersonRenderer.render(Minecraft.getInstance().player, ClientEngine.INSTANCE.getPlayerData(),
+								(LivingRenderer)renderEngine.minecraft.getRenderManager().getRenderer(ClientEngine.INSTANCE.getPlayerData().getOriginalEntity()),
+								event.getBuffers(), event.getMatrixStack(), event.getLight(), event.getPartialTicks());
 					}
 				}
 				event.setCanceled(true);

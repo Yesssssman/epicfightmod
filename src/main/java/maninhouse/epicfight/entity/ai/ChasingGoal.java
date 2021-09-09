@@ -63,7 +63,7 @@ public class ChasingGoal extends Goal {
 		} else {
 			if (this.canPenalize) {
 				if (--this.delayCounter <= 0) {
-					this.path = this.attacker.getNavigator().getPathToEntity(livingentity, 0);
+					this.path = this.attacker.getNavigator().pathfind(livingentity, 0);
 					this.delayCounter = 4 + this.attacker.getRNG().nextInt(7);
 					return this.path != null;
 				} else {
@@ -71,7 +71,7 @@ public class ChasingGoal extends Goal {
 				}
 			}
 
-			this.path = this.attacker.getNavigator().getPathToEntity(livingentity, 0);
+			this.path = this.attacker.getNavigator().pathfind(livingentity, 0);
 			if (this.path != null) {
 				return true;
 			} else {

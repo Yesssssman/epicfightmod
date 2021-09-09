@@ -52,38 +52,38 @@ import net.minecraftforge.common.util.NonNullSupplier;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class ProviderEntity implements ICapabilityProvider, NonNullSupplier<CapabilityEntity<?>> {
-	private static final Map<EntityType<?>, Function<Entity, Supplier<CapabilityEntity<?>>>> capabilityMap = new HashMap<EntityType<?>, Function<Entity, Supplier<CapabilityEntity<?>>>> ();
+	private static final Map<EntityType<?>, Function<Entity, Supplier<CapabilityEntity<?>>>> CAPABILITY_MAP = new HashMap<EntityType<?>, Function<Entity, Supplier<CapabilityEntity<?>>>> ();
 	
 	public static void makeMap() {
-		capabilityMap.put(EntityType.PLAYER, (entityIn) -> ServerPlayerData::new);
-		capabilityMap.put(EntityType.ZOMBIE, (entityIn) -> ZombieData<ZombieEntity>::new);
-		capabilityMap.put(EntityType.CREEPER, (entityIn) -> CreeperData::new);
-		capabilityMap.put(EntityType.ENDERMAN, (entityIn) -> EndermanData::new);
-		capabilityMap.put(EntityType.SKELETON, (entityIn) -> SkeletonData<SkeletonEntity>::new);
-		capabilityMap.put(EntityType.WITHER_SKELETON, (entityIn) -> WitherSkeletonData::new);
-		capabilityMap.put(EntityType.STRAY, (entityIn) -> StrayData::new);
-		capabilityMap.put(EntityType.ZOMBIFIED_PIGLIN, (entityIn) -> ZombifiedPiglinData::new);
-		capabilityMap.put(EntityType.ZOMBIE_VILLAGER, (entityIn) -> ZombieVillagerData::new);
-		capabilityMap.put(EntityType.HUSK, (entityIn) -> ZombieData<HuskEntity>::new);
-		capabilityMap.put(EntityType.SPIDER, (entityIn) -> SpiderData::new);
-		capabilityMap.put(EntityType.CAVE_SPIDER, (entityIn) -> CaveSpiderData::new);
-		capabilityMap.put(EntityType.IRON_GOLEM, (entityIn) -> IronGolemData::new);
-		capabilityMap.put(EntityType.VINDICATOR, (entityIn) -> VindicatorData::new);
-		capabilityMap.put(EntityType.EVOKER, (entityIn) -> EvokerData::new);
-		capabilityMap.put(EntityType.WITCH, (entityIn) -> WitchData::new);
-		capabilityMap.put(EntityType.DROWNED, (entityIn) -> DrownedData::new);
-		capabilityMap.put(EntityType.PILLAGER, (entityIn) -> PillagerData::new);
-		capabilityMap.put(EntityType.RAVAGER, (entityIn) -> RavagerData::new);
-		capabilityMap.put(EntityType.VEX, (entityIn) -> VexData::new);
-		capabilityMap.put(EntityType.PIGLIN, (entityIn) -> PiglinData::new);
-		capabilityMap.put(EntityType.field_242287_aj, (entityIn) -> PiglinBruteData::new);
-		capabilityMap.put(EntityType.HOGLIN, (entityIn) -> HoglinData::new);
-		capabilityMap.put(EntityType.ZOGLIN, (entityIn) -> ZoglinData::new);
+		CAPABILITY_MAP.put(EntityType.PLAYER, (entityIn) -> ServerPlayerData::new);
+		CAPABILITY_MAP.put(EntityType.ZOMBIE, (entityIn) -> ZombieData<ZombieEntity>::new);
+		CAPABILITY_MAP.put(EntityType.CREEPER, (entityIn) -> CreeperData::new);
+		CAPABILITY_MAP.put(EntityType.ENDERMAN, (entityIn) -> EndermanData::new);
+		CAPABILITY_MAP.put(EntityType.SKELETON, (entityIn) -> SkeletonData<SkeletonEntity>::new);
+		CAPABILITY_MAP.put(EntityType.WITHER_SKELETON, (entityIn) -> WitherSkeletonData::new);
+		CAPABILITY_MAP.put(EntityType.STRAY, (entityIn) -> StrayData::new);
+		CAPABILITY_MAP.put(EntityType.ZOMBIFIED_PIGLIN, (entityIn) -> ZombifiedPiglinData::new);
+		CAPABILITY_MAP.put(EntityType.ZOMBIE_VILLAGER, (entityIn) -> ZombieVillagerData::new);
+		CAPABILITY_MAP.put(EntityType.HUSK, (entityIn) -> ZombieData<HuskEntity>::new);
+		CAPABILITY_MAP.put(EntityType.SPIDER, (entityIn) -> SpiderData::new);
+		CAPABILITY_MAP.put(EntityType.CAVE_SPIDER, (entityIn) -> CaveSpiderData::new);
+		CAPABILITY_MAP.put(EntityType.IRON_GOLEM, (entityIn) -> IronGolemData::new);
+		CAPABILITY_MAP.put(EntityType.VINDICATOR, (entityIn) -> VindicatorData::new);
+		CAPABILITY_MAP.put(EntityType.EVOKER, (entityIn) -> EvokerData::new);
+		CAPABILITY_MAP.put(EntityType.WITCH, (entityIn) -> WitchData::new);
+		CAPABILITY_MAP.put(EntityType.DROWNED, (entityIn) -> DrownedData::new);
+		CAPABILITY_MAP.put(EntityType.PILLAGER, (entityIn) -> PillagerData::new);
+		CAPABILITY_MAP.put(EntityType.RAVAGER, (entityIn) -> RavagerData::new);
+		CAPABILITY_MAP.put(EntityType.VEX, (entityIn) -> VexData::new);
+		CAPABILITY_MAP.put(EntityType.PIGLIN, (entityIn) -> PiglinData::new);
+		CAPABILITY_MAP.put(EntityType.field_242287_aj, (entityIn) -> PiglinBruteData::new);
+		CAPABILITY_MAP.put(EntityType.HOGLIN, (entityIn) -> HoglinData::new);
+		CAPABILITY_MAP.put(EntityType.ZOGLIN, (entityIn) -> ZoglinData::new);
 		makeConfigEntities();
 	}
 	
 	public static void makeMapClient() {
-		capabilityMap.put(EntityType.PLAYER, (entityIn)->{
+		CAPABILITY_MAP.put(EntityType.PLAYER, (entityIn)->{
 			if (entityIn instanceof ClientPlayerEntity) {
 				return ClientPlayerData::new;
 			} else if (entityIn instanceof RemoteClientPlayerEntity) {
@@ -99,7 +99,7 @@ public class ProviderEntity implements ICapabilityProvider, NonNullSupplier<Capa
 	public static void makeConfigEntities() {
 		for (Map.Entry<ResourceLocation, CustomEntityConfig> config : CapabilityConfig.CUSTOM_ENTITY_MAP.entrySet()) {
 			if (ForgeRegistries.ENTITIES.containsKey(config.getKey())) {
-				capabilityMap.put(ForgeRegistries.ENTITIES.getValue(config.getKey()), (entityIn) -> config.getValue().getEntityAIType().getCapability());
+				CAPABILITY_MAP.put(ForgeRegistries.ENTITIES.getValue(config.getKey()), (entityIn) -> config.getValue().getEntityAIType().getCapability());
 			} else {
 				EpicFightMod.LOGGER.warn("Invalid entity type " + config.getKey());
 			}
@@ -110,8 +110,8 @@ public class ProviderEntity implements ICapabilityProvider, NonNullSupplier<Capa
 	private LazyOptional<CapabilityEntity<?>> optional = LazyOptional.of(this);
 	
 	public ProviderEntity(Entity entity) {
-		if(capabilityMap.containsKey(entity.getType())) {
-			this.capability = capabilityMap.get(entity.getType()).apply(entity).get();
+		if (CAPABILITY_MAP.containsKey(entity.getType())) {
+			this.capability = CAPABILITY_MAP.get(entity.getType()).apply(entity).get();
 		}
 	}
 	
@@ -126,6 +126,6 @@ public class ProviderEntity implements ICapabilityProvider, NonNullSupplier<Capa
 	
 	@Override
 	public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
-		return cap == ModCapabilities.CAPABILITY_ENTITY ? optional.cast() :  LazyOptional.empty();
+		return cap == ModCapabilities.CAPABILITY_ENTITY ? this.optional.cast() :  LazyOptional.empty();
 	}
 }

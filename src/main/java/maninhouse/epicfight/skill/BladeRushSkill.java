@@ -59,7 +59,7 @@ public class BladeRushSkill extends SpecialAttackSkill {
 		});
 		
 		container.executer.getEventListener().addEventListener(EventType.BASIC_ATTACK_EVENT, EVENT_UUID, (event) -> {
-			if (event.getPlayerData().getSkill(this.slot.index).isActivated()) {
+			if (event.getPlayerData().getSkill(this.slot).isActivated()) {
 				PacketBuffer buf = new PacketBuffer(Unpooled.buffer());
 				buf.writeBoolean(false);
 				this.executeOnServer(event.getPlayerData(), buf);

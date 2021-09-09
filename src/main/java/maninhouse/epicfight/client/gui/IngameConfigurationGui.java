@@ -33,8 +33,9 @@ public class IngameConfigurationGui extends Screen {
 		Option<Boolean> enableAimHelper = EpicFightMod.CLIENT_INGAME_CONFIG.enableAimHelperPointer;
 		Option<Double> aimHelperColor = EpicFightMod.CLIENT_INGAME_CONFIG.aimHelperColor;
 		Option<Boolean> cameraAutoSwitch = EpicFightMod.CLIENT_INGAME_CONFIG.cameraAutoSwitch;
+		Option<Boolean> autoPreparation = EpicFightMod.CLIENT_INGAME_CONFIG.autoPreparation;
 		
-		Button longPressCounterButton = this.addButton(new RewindableButton(this.width / 2 - 100, this.height / 4 - 36, 200, 20,
+		Button longPressCounterButton = this.addButton(new RewindableButton(this.width / 2 - 165, this.height / 4 - 12, 160, 20,
 			new TranslationTextComponent("gui."+EpicFightMod.MODID+".long_press_counter", (ItemStack.DECIMALFORMAT.format(longPressCounter.getValue()))),
 			(button) -> {
 				longPressCounter.setValue(longPressCounter.getValue() + 1);
@@ -48,7 +49,7 @@ public class IngameConfigurationGui extends Screen {
 			}
 		));
 		
-		Button filterAnimationButton = this.addButton(new Button(this.width / 2 - 100, this.height / 4 - 12, 200, 20,
+		Button filterAnimationButton = this.addButton(new Button(this.width / 2 + 5, this.height / 4 - 12, 160, 20,
 			new TranslationTextComponent("gui."+EpicFightMod.MODID+".filter_animation." + (filterAnimation.getValue() ? "on" : "off")), (button) -> {
 				filterAnimation.setValue(!filterAnimation.getValue());
 				button.setMessage(new TranslationTextComponent("gui."+EpicFightMod.MODID+".filter_animation." + (filterAnimation.getValue() ? "on" : "off")));
@@ -57,7 +58,7 @@ public class IngameConfigurationGui extends Screen {
 			}
 		));
 		
-		Button showHealthIndicatorButton = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 12, 200, 20,
+		Button showHealthIndicatorButton = this.addButton(new Button(this.width / 2 - 165, this.height / 4 + 12, 160, 20,
 			new TranslationTextComponent("gui."+EpicFightMod.MODID+".health_indicator." + (showHealthIndicator.getValue() ? "on" : "off")), (button) -> {
 				showHealthIndicator.setValue(!showHealthIndicator.getValue());
 				button.setMessage(new TranslationTextComponent("gui."+EpicFightMod.MODID+".health_indicator." + (showHealthIndicator.getValue() ? "on" : "off")));
@@ -66,7 +67,7 @@ public class IngameConfigurationGui extends Screen {
 			}
 		));
 		
-		Button showTargetIndicatorButton = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 36, 200, 20,
+		Button showTargetIndicatorButton = this.addButton(new Button(this.width / 2 + 5, this.height / 4 + 12, 160, 20,
 				new TranslationTextComponent("gui."+EpicFightMod.MODID+".target_indicator." + (showTargetIndicator.getValue() ? "on" : "off")), (button) -> {
 					showTargetIndicator.setValue(!showTargetIndicator.getValue());
 					button.setMessage(new TranslationTextComponent("gui."+EpicFightMod.MODID+".target_indicator." + (showTargetIndicator.getValue() ? "on" : "off")));
@@ -75,7 +76,7 @@ public class IngameConfigurationGui extends Screen {
 				}
 			));
 		
-		Button cameraAutoSwitchButton = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 60, 200, 20,
+		Button cameraAutoSwitchButton = this.addButton(new Button(this.width / 2 - 165, this.height / 4 + 36, 160, 20,
 				new TranslationTextComponent("gui."+EpicFightMod.MODID+".camera_auto_switch." + (cameraAutoSwitch.getValue() ? "on" : "off")), (button) -> {
 					cameraAutoSwitch.setValue(!cameraAutoSwitch.getValue());
 					button.setMessage(new TranslationTextComponent("gui."+EpicFightMod.MODID+".camera_auto_switch." + (cameraAutoSwitch.getValue() ? "on" : "off")));
@@ -84,7 +85,7 @@ public class IngameConfigurationGui extends Screen {
 				}
 			));
 		
-		Button enableAimHelperButton = this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 84, 200, 20,
+		Button enableAimHelperButton = this.addButton(new Button(this.width / 2 + 5, this.height / 4 + 36, 160, 20,
 				new TranslationTextComponent("gui."+EpicFightMod.MODID+".aim_helper." + (enableAimHelper.getValue() ? "on" : "off")), (button) -> {
 					enableAimHelper.setValue(!enableAimHelper.getValue());
 					button.setMessage(new TranslationTextComponent("gui."+EpicFightMod.MODID+".aim_helper." + (enableAimHelper.getValue() ? "on" : "off")));
@@ -93,13 +94,22 @@ public class IngameConfigurationGui extends Screen {
 				}
 			));
 		
-		this.addButton(new ColorSlider(this.width / 2 - 100, this.height / 4 + 108, 200, 20, new TranslationTextComponent("gui.epicfight.aim_helper_color"), aimHelperColor.getValue(), EpicFightMod.CLIENT_INGAME_CONFIG.aimHelperColor));
+		Button autoPreparationButton = this.addButton(new Button(this.width / 2 - 165, this.height / 4 + 60, 160, 20,
+				new TranslationTextComponent("gui."+EpicFightMod.MODID+".auto_preparation." + (autoPreparation.getValue() ? "on" : "off")), (button) -> {
+					autoPreparation.setValue(!autoPreparation.getValue());
+					button.setMessage(new TranslationTextComponent("gui."+EpicFightMod.MODID+".auto_preparation." + (autoPreparation.getValue() ? "on" : "off")));
+				}, (button, matrixStack, mouseX, mouseY) -> {
+			        this.renderTooltip(matrixStack, this.minecraft.fontRenderer.trimStringToWidth(new TranslationTextComponent("gui.epicfight.auto_preparation.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+				}
+			));
 		
-		this.addButton(new Button(this.width / 2 - 100, this.height / 4 + 150, 96, 20, new TranslationTextComponent("gui.done"), (button) -> {
+		this.addButton(new ColorSlider(this.width / 2 - 150, this.height / 4 + 108, 300, 20, new TranslationTextComponent("gui.epicfight.aim_helper_color"), aimHelperColor.getValue(), EpicFightMod.CLIENT_INGAME_CONFIG.aimHelperColor));
+		
+		this.addButton(new Button(this.width / 2 + 90, this.height / 4 + 150, 48, 20, new TranslationTextComponent("gui.done"), (button) -> {
 			this.closeScreen();
 		}));
 		
-		this.addButton(new Button(this.width / 2 + 4, this.height / 4 + 150, 96, 20, new TranslationTextComponent("controls.reset"), (button) -> {
+		this.addButton(new Button(this.width / 2 + 140, this.height / 4 + 150, 48, 20, new TranslationTextComponent("controls.reset"), (button) -> {
 			EpicFightMod.CLIENT_INGAME_CONFIG.resetSettings();
 			filterAnimationButton.setMessage(new TranslationTextComponent("gui."+EpicFightMod.MODID+".filter_animation." + (filterAnimation.getValue() ? "on" : "off")));
 			longPressCounterButton.setMessage(new TranslationTextComponent("gui."+EpicFightMod.MODID+".long_press_counter", (ItemStack.DECIMALFORMAT.format(longPressCounter.getValue()))));
@@ -107,6 +117,7 @@ public class IngameConfigurationGui extends Screen {
 			showTargetIndicatorButton.setMessage(new TranslationTextComponent("gui."+EpicFightMod.MODID+".target_indicator." + (showTargetIndicator.getValue() ? "on" : "off")));
 			enableAimHelperButton.setMessage(new TranslationTextComponent("gui."+EpicFightMod.MODID+".aim_helper." + (enableAimHelper.getValue() ? "on" : "off")));
 			cameraAutoSwitchButton.setMessage(new TranslationTextComponent("gui."+EpicFightMod.MODID+".camera_auto_switch." + (cameraAutoSwitch.getValue() ? "on" : "off")));
+			autoPreparationButton.setMessage(new TranslationTextComponent("gui."+EpicFightMod.MODID+".auto_preparation." + (autoPreparation.getValue() ? "on" : "off")));
 		}));
 	}
 	

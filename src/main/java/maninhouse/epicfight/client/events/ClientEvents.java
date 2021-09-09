@@ -12,6 +12,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.inventory.ContainerScreen;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.Slot;
+import net.minecraft.item.UseAction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -63,7 +64,7 @@ public class ClientEvents {
 	public static void rightClickItemClient(RightClickItem event) {
 		if (event.getSide() == LogicalSide.CLIENT) {
 			ClientPlayerData playerdata = (ClientPlayerData) event.getPlayer().getCapability(ModCapabilities.CAPABILITY_ENTITY).orElse(null);
-			if (playerdata != null) {
+			if (playerdata != null && playerdata.getOriginalEntity().getHeldItemOffhand().getUseAction() == UseAction.NONE) {
 				playerdata.getEventListener().activateEvents(EventType.CLIENT_ITEM_USE_EVENT, new RightClickItemEvent<>(playerdata));
 			}
 		}

@@ -1,6 +1,8 @@
 package maninhouse.epicfight.skill;
 
 import io.netty.buffer.Unpooled;
+import maninhouse.epicfight.animation.LivingMotion;
+import maninhouse.epicfight.animation.types.EntityState;
 import maninhouse.epicfight.animation.types.StaticAnimation;
 import maninhouse.epicfight.capabilities.entity.player.PlayerData;
 import maninhouse.epicfight.capabilities.entity.player.ServerPlayerData;
@@ -69,6 +71,9 @@ public class DodgeSkill extends Skill {
 	
 	@Override
 	public boolean isExecutableState(PlayerData<?> executer) {
-		return super.isExecutableState(executer) && !executer.getOriginalEntity().isInWater() && !executer.getOriginalEntity().isOnLadder();
+		executer.updateEntityState();
+		EntityState playerState = executer.getEntityState();
+		return !(executer.getOriginalEntity().isElytraFlying() || executer.currentMotion == LivingMotion.FALL || playerState == EntityState.HIT) &&
+			!executer.getOriginalEntity().isInWater() && !executer.getOriginalEntity().isOnLadder();
 	}
 }

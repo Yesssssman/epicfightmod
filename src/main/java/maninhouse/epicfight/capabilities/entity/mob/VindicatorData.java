@@ -7,9 +7,9 @@ import maninhouse.epicfight.entity.ai.ChasingGoal;
 import maninhouse.epicfight.entity.ai.attribute.ModAttributes;
 import maninhouse.epicfight.gamedata.Animations;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.monster.AbstractIllagerEntity;
 
-public class VindicatorData extends AbstractIllagerData<MobEntity> {
+public class VindicatorData<T extends AbstractIllagerEntity> extends AbstractIllagerData<T> {
 	public VindicatorData() {
 		super(Faction.ILLAGER);
 	}

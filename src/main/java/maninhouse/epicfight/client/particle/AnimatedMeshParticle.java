@@ -17,8 +17,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.EmptyModelData;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class AnimatedMeshParticle extends Particle
-{
+public abstract class AnimatedMeshParticle extends Particle {
 	protected IBakedModel mesh;
 	protected float rotationX;
 	protected float rotationY;
@@ -27,8 +26,7 @@ public abstract class AnimatedMeshParticle extends Particle
 	protected float prevScale;
 	protected float scale;
 	
-	protected AnimatedMeshParticle(ClientWorld worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, IBakedModel mesh)
-	{
+	protected AnimatedMeshParticle(ClientWorld worldIn, double xCoordIn, double yCoordIn, double zCoordIn, double xSpeedIn, double ySpeedIn, double zSpeedIn, IBakedModel mesh) {
 		super(worldIn, xCoordIn, yCoordIn, zCoordIn, xSpeedIn, ySpeedIn, zSpeedIn);
 		this.maxAge = 60;
 		this.mesh = mesh;
@@ -37,8 +35,7 @@ public abstract class AnimatedMeshParticle extends Particle
 	}
 	
 	@Override
-	public void renderParticle(IVertexBuilder buffer, ActiveRenderInfo renderInfo, float partialTicks)
-	{
+	public void renderParticle(IVertexBuilder buffer, ActiveRenderInfo renderInfo, float partialTicks) {
 		List<BakedQuad> quads = mesh.getQuads(null, null, new Random(), EmptyModelData.INSTANCE);
 		Vector3d vector3d = renderInfo.getProjectedView();
 	    float f5 = (float)(MathHelper.lerp((double)partialTicks, this.prevPosX, this.posX) - vector3d.getX());
@@ -52,13 +49,11 @@ public abstract class AnimatedMeshParticle extends Particle
 	    int j = i >> 16 & '\uffff';
 	    int k = i & '\uffff';
 	    
-	    for(int jj = quads.size(); ii < jj; ++ii)
-        {
+	    for(int jj = quads.size(); ii < jj; ++ii) {
         	BakedQuad bakedquad = quads.get(ii);
        	 	int[] vertexData = bakedquad.getVertexData();
        	 	
-	        for(int a = 0; a < 4; a++)
-	        {
+	        for(int a = 0; a < 4; a++) {
 		        float x = Float.intBitsToFloat(vertexData[0+7*a]);
 		        float y = Float.intBitsToFloat(vertexData[1+7*a]);
 		        float z = Float.intBitsToFloat(vertexData[2+7*a]);

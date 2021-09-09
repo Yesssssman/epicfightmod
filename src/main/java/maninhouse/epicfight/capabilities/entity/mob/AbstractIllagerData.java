@@ -7,9 +7,9 @@ import maninhouse.epicfight.gamedata.Animations;
 import maninhouse.epicfight.gamedata.Models;
 import maninhouse.epicfight.model.Model;
 import maninhouse.epicfight.utils.game.IExtendedDamageSource.StunType;
-import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.monster.AbstractIllagerEntity;
 
-public abstract class AbstractIllagerData<T extends MobEntity> extends BipedMobData<T> {
+public abstract class AbstractIllagerData<T extends AbstractIllagerEntity> extends BipedMobData<T> {
 	public AbstractIllagerData(Faction faction) {
 		super(faction);
 	}

@@ -296,9 +296,9 @@ public abstract class Skill {
 			skill.setDurationSynchronize(playerdata, skill.maxDuration);
 		}),
 		STAMINA((skill, playerdata) -> {
-			return playerdata.getStamina() >= Formulars.getStaminarConsumePenalty(playerdata.getWeight(), skill.consumption);
+			return playerdata.getStamina() >= Formulars.getStaminarConsumePenalty(playerdata.getWeight(), skill.consumption, playerdata);
 		}, (skill, playerdata) -> {
-			playerdata.setStamina(playerdata.getStamina() - Formulars.getStaminarConsumePenalty(playerdata.getWeight(), skill.consumption));
+			playerdata.setStamina(playerdata.getStamina() - Formulars.getStaminarConsumePenalty(playerdata.getWeight(), skill.consumption, playerdata));
 			skill.setDurationSynchronize(playerdata, skill.maxDuration);
 		});
 		

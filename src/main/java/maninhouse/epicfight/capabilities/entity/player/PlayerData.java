@@ -33,7 +33,6 @@ import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
 
 public abstract class PlayerData<T extends PlayerEntity> extends LivingData<T> {
 	private static final UUID ACTION_EVENT_UUID = UUID.fromString("e6beeac4-77d2-11eb-9439-0242ac130002");
@@ -151,7 +150,7 @@ public abstract class PlayerData<T extends PlayerEntity> extends LivingData<T> {
 	}
 	
 	public SkillContainer getSkill(SkillCategory category) {
-		return this.getSkillCapability().skills[category.getIndex()];
+		return this.getSkill(category.getIndex());
 	}
 	
 	public SkillContainer getSkill(int categoryIndex) {
@@ -159,7 +158,7 @@ public abstract class PlayerData<T extends PlayerEntity> extends LivingData<T> {
 	}
 	
 	public CapabilitySkill getSkillCapability() {
-		return this.orgEntity.getCapability(ModCapabilities.CAPABILITY_SKILL).orElse(null);
+		return this.orgEntity.getCapability(ModCapabilities.CAPABILITY_SKILL).orElse(CapabilitySkill.EMPTY);
 	}
 	
 	@Override
@@ -185,11 +184,6 @@ public abstract class PlayerData<T extends PlayerEntity> extends LivingData<T> {
 	
 	public PlayerEventListener getEventListener() {
 		return this.eventListeners;
-	}
-	
-	@Override
-	public boolean attackEntityFrom(LivingAttackEvent event) {
-		return super.attackEntityFrom(event);
 	}
 	
 	@Override

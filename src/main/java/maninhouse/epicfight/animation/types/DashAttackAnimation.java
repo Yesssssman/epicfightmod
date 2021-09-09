@@ -30,4 +30,9 @@ public class DashAttackAnimation extends AttackAnimation {
 		extSource.setImpact(extSource.getImpact() * 1.333F);
 		return extSource;
 	}
+	
+	@Override
+	public boolean isBasicAttackAnimation() {
+		return true;
+	}
 }

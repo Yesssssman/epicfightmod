@@ -2,9 +2,12 @@ package maninhouse.epicfight.client.renderer.entity;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
@@ -17,7 +20,7 @@ import maninhouse.epicfight.client.animation.Layer.Priority;
 import maninhouse.epicfight.client.model.ClientModel;
 import maninhouse.epicfight.client.model.ClientModels;
 import maninhouse.epicfight.client.renderer.ModRenderTypes;
-import maninhouse.epicfight.client.renderer.layer.Layer;
+import maninhouse.epicfight.client.renderer.layer.AnimatedLayer;
 import maninhouse.epicfight.model.Armature;
 import maninhouse.epicfight.utils.math.MathUtils;
 import maninhouse.epicfight.utils.math.OpenMatrix4f;
@@ -25,6 +28,9 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.LivingRenderer;
+import net.minecraft.client.renderer.entity.layers.LayerRenderer;
+import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
@@ -38,8 +44,8 @@ import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class ArmatureRenderer<E extends LivingEntity, T extends LivingData<E>> {
-	protected List<Layer<E, T>> layers;
+public abstract class ArmatureRenderer<E extends LivingEntity, T extends LivingData<E>, M extends EntityModel<E>> {
+	protected Map<Class<?>, AnimatedLayer<E, T, M, ? extends LayerRenderer<E, M>>> layerRendererReplace;
 	protected static Method canRenderName;
 	protected static Method renderName;
 	
@@ -50,16 +56,14 @@ public abstract class ArmatureRenderer<E extends LivingEntity, T extends LivingD
 	}
 	
 	public ArmatureRenderer() {
-		this.layers = Lists.newArrayList();
+		this.layerRendererReplace = Maps.newHashMap();
 	}
 	
-	public void render(E entityIn, T entitydata, EntityRenderer<E> renderer, IRenderTypeBuffer buffer, MatrixStack matStack, int packedLightIn, float partialTicks) {
+	public void render(E entityIn, T entitydata, LivingRenderer<E, M> renderer, IRenderTypeBuffer buffer, MatrixStack matStack, int packedLightIn, float partialTicks) {
 		try {
 			RenderNameplateEvent renderNameplateEvent = new RenderNameplateEvent(entityIn, entityIn.getDisplayName(), renderer, matStack, buffer, packedLightIn, partialTicks);
 			MinecraftForge.EVENT_BUS.post(renderNameplateEvent);
-			
-			if (((boolean)canRenderName.invoke(renderer, entityIn) || renderNameplateEvent.getResult() == Result.ALLOW)
-					&& renderNameplateEvent.getResult() != Result.DENY) {
+			if (((boolean)canRenderName.invoke(renderer, entityIn) || renderNameplateEvent.getResult() == Result.ALLOW) && renderNameplateEvent.getResult() != Result.DENY) {
 				renderName.invoke(renderer, entityIn, renderNameplateEvent.getContent(), matStack, buffer, packedLightIn);
 			}
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
@@ -71,7 +75,6 @@ public abstract class ArmatureRenderer<E extends LivingEntity, T extends LivingD
 		boolean flag1 = !flag && !entityIn.isInvisibleToPlayer(mc.player);
 		boolean flag2 = mc.isEntityGlowing(entityIn);
 		RenderType renderType = this.getRenderType(entityIn, entitydata, flag, flag1, flag2);
-		
 		ClientModel model = entitydata.getEntityModel(ClientModels.LOGICAL_CLIENT);
 		Armature armature = model.getArmature();
 		armature.initializeTransform();
@@ -86,7 +89,7 @@ public abstract class ArmatureRenderer<E extends LivingEntity, T extends LivingD
 		}
 		
 		if (!entityIn.isSpectator()) {
-			this.renderLayer(entitydata, entityIn, poses, buffer, matStack, packedLightIn, partialTicks);
+			this.renderLayer(renderer, entitydata, entityIn, poses, buffer, matStack, packedLightIn, partialTicks);
 		}
 		
 		if (renderType != null) {
@@ -118,10 +121,37 @@ public abstract class ArmatureRenderer<E extends LivingEntity, T extends LivingD
 	
 	protected abstract ResourceLocation getEntityTexture(E entityIn);
 	
-	protected void renderLayer(T entitydata, E entityIn, OpenMatrix4f[] poses, IRenderTypeBuffer buffer, MatrixStack matrixStackIn, int packedLightIn, float partialTicks) {
-		for (Layer<E, T> layer : this.layers) {
-			layer.renderLayer(entitydata, entityIn, matrixStackIn, buffer, packedLightIn, poses, partialTicks);
+	protected void renderLayer(LivingRenderer<E, M> renderer, T entitydata, E entityIn, OpenMatrix4f[] poses, IRenderTypeBuffer buffer, MatrixStack matrixStackIn, int packedLightIn, float partialTicks) {
+		List<LayerRenderer<E, M>> layers = Lists.newArrayList();
+		renderer.layerRenderers.forEach(layers::add);
+		Iterator<LayerRenderer<E, M>> iter = layers.iterator();
+		float f = MathUtils.interpolateRotation(entityIn.prevRenderYawOffset, entityIn.renderYawOffset, partialTicks);
+        float f1 = MathUtils.interpolateRotation(entityIn.prevRotationYawHead, entityIn.rotationYawHead, partialTicks);
+        float f2 = f1 - f;
+		float f7 = entityIn.getPitch(partialTicks);
+		
+		while (iter.hasNext()) {
+			LayerRenderer<E, M> layer = iter.next();
+			this.layerRendererReplace.computeIfPresent(layer.getClass(), (key, val) -> {
+				val.renderLayer(0, entitydata, entityIn, layer, matrixStackIn, buffer, packedLightIn, poses, f2, f7, partialTicks);
+				iter.remove();
+				return val;
+			});
 		}
+		
+		OpenMatrix4f modelMatrix = new OpenMatrix4f();
+		OpenMatrix4f.mul(entitydata.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().findJointById(this.getRootJointIndex()).getAnimatedTransform(), modelMatrix, modelMatrix);
+		OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);
+		
+		matrixStackIn.push();
+		MathUtils.translateStack(matrixStackIn, modelMatrix);
+		MathUtils.rotateStack(matrixStackIn, transpose);
+		matrixStackIn.translate(0.0D, this.getLayerCorrection(), 0.0D);
+		matrixStackIn.scale(-1.0F, -1.0F, 1.0F);
+		layers.forEach((layer) -> {
+			layer.render(matrixStackIn, buffer, packedLightIn, entityIn, entityIn.limbSwing, entityIn.limbSwingAmount, partialTicks, entityIn.ticksExisted, f2, f7);
+		});
+		matrixStackIn.pop();
 	}
 	
 	protected boolean isVisible(E entityIn) {
@@ -144,5 +174,13 @@ public abstract class ArmatureRenderer<E extends LivingEntity, T extends LivingD
         MathUtils.translateStack(matStack, origin);
         MathUtils.rotateStack(matStack, transpose);
         MathUtils.scaleStack(matStack, transpose);
+	}
+	
+	protected int getRootJointIndex() {
+		return 0;
+	}
+	
+	protected double getLayerCorrection() {
+		return 1.15D;
 	}
 }

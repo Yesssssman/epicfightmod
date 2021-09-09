@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import io.netty.buffer.Unpooled;
 import maninhouse.epicfight.capabilities.ModCapabilities;
 import maninhouse.epicfight.capabilities.entity.player.ServerPlayerData;
+import maninhouse.epicfight.skill.Skill;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -68,7 +69,10 @@ public class CTSExecuteSkill {
 			if (msg.active) {
 				playerdata.getSkill(msg.skillSlot).requestExecute(playerdata, msg.getBuffer());
 			} else {
-				playerdata.getSkill(msg.skillSlot).getContaining().cancelOnServer(playerdata, msg.getBuffer());
+				Skill contain = playerdata.getSkill(msg.skillSlot).getContaining();
+				if (contain != null) {
+					contain.cancelOnServer(playerdata, msg.getBuffer());
+				}
 			}
 		});
 		ctx.get().setPacketHandled(true);

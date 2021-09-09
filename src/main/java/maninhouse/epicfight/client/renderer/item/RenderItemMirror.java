@@ -21,7 +21,7 @@ public abstract class RenderItemMirror extends RenderItemBase {
 	
 	@Override
 	public void renderItemInHand(ItemStack stack, LivingData<?> itemHolder, Hand hand, IRenderTypeBuffer buffer, MatrixStack matrixStackIn, int packedLight) {
-		OpenMatrix4f modelMatrix = new OpenMatrix4f(hand == Hand.OFF_HAND ? leftHandCorrectionMatrix : correctionMatrix);
+		OpenMatrix4f modelMatrix = new OpenMatrix4f(hand == Hand.OFF_HAND ? this.leftHandCorrectionMatrix : this.correctionMatrix);
 		String heldingHand = hand == Hand.MAIN_HAND ? "Tool_R" : "Tool_L";
 		OpenMatrix4f.mul(itemHolder.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().findJointByName(heldingHand).getAnimatedTransform(), modelMatrix, modelMatrix);
 		OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);

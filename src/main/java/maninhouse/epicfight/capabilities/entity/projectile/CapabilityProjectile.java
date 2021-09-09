@@ -20,7 +20,7 @@ public abstract class CapabilityProjectile<T extends ProjectileEntity> {
 	private float armorNegation;
 	
 	public void onJoinWorld(T projectileEntity) {
-		Entity shooter = projectileEntity.func_234616_v_();
+		Entity shooter = projectileEntity.getShooter();
 		boolean flag = true;
 		if (shooter != null && shooter instanceof LivingEntity) {
 			LivingEntity livingshooter = (LivingEntity)shooter;

@@ -22,6 +22,7 @@ public class ProviderProjectile<P extends ProjectileEntity> implements ICapabili
 	
 	public static void makeMap() {
 		CAPABILITY_BY_TYPE.computeIfAbsent(EntityType.ARROW, (type) -> ArrowData::new);
+		
 		CAPABILITY_BY_CLASS.put(AbstractArrowEntity.class, ArrowData::new);
 	}
 	

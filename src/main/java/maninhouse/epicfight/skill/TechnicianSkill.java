@@ -35,7 +35,7 @@ public class TechnicianSkill extends PassiveSkill {
 				if (damageSource instanceof EntityDamageSource && !damageSource.isExplosion() && !damageSource.isMagicDamage()
 						&& !damageSource.isUnblockable() && !container.getDataManager().getDataValue(GAINED)) {
 					float consumption = Formulars.getStaminarConsumePenalty(executer.getWeight(),
-							executer.getSkill(SkillCategory.DODGE).containingSkill.getConsumption());
+							executer.getSkill(SkillCategory.DODGE).containingSkill.getConsumption(), executer);
 					executer.setStamina(executer.getStamina() + consumption);
 					container.getDataManager().setData(GAINED, true);
 					return true;

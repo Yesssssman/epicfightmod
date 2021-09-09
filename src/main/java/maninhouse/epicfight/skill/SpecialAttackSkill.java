@@ -69,7 +69,7 @@ public abstract class SpecialAttackSkill extends Skill {
 	public List<ITextComponent> getTooltipOnItem(ItemStack itemStack, CapabilityItem cap, PlayerData<?> playerCap) {
 		List<ITextComponent> list = Lists.<ITextComponent>newArrayList();
 		list.add(new TranslationTextComponent("skill." + EpicFightMod.MODID + "." + this.getSkillName()).mergeStyle(TextFormatting.WHITE)
-				.append(new StringTextComponent(String.format("[%.0f]", this.consumption)).mergeStyle(TextFormatting.AQUA)));
+				.appendSibling(new StringTextComponent(String.format("[%.0f]", this.consumption)).mergeStyle(TextFormatting.AQUA)));
 		list.add(new TranslationTextComponent("skill." + EpicFightMod.MODID + "." + this.getSkillName() + ".tooltip").mergeStyle(TextFormatting.DARK_GRAY));
 		return list;
 	}
@@ -116,7 +116,7 @@ public abstract class SpecialAttackSkill extends Skill {
 		).mergeStyle(TextFormatting.DARK_GRAY);
 		
 		this.getProperty(AttackPhaseProperty.EXTRA_DAMAGE, propertyMap).ifPresent((extraDamage) -> {
-			damageComponent.append(new TranslationTextComponent(extraDamage.toString(),
+			damageComponent.appendSibling(new TranslationTextComponent(extraDamage.toString(),
 					new StringTextComponent(ItemStack.DECIMALFORMAT.format(extraDamage.getArgument() * 100F) + "%").mergeStyle(TextFormatting.RED)))
 				.mergeStyle(TextFormatting.DARK_GRAY);
 		});

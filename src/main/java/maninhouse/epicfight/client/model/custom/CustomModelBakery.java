@@ -39,9 +39,8 @@ public class CustomModelBakery {
 	static final ModelPart RIGHT_LEG = new Limb(1, 2, 3, 6.0F, true);
 	static final ModelPart CHEST = new Chest();
 	
-	public static ClientModel bakeBipedCustomArmorModel(BipedModel<?> model, ArmorItem armorItem, EquipmentSlotType equipmentSlot) {
+	public static ClientModel bakeCustomArmorModel(BipedModel<?> model, ArmorItem armorItem, EquipmentSlotType equipmentSlot) {
 		List<ModelPartBind> allBoxes = Lists.<ModelPartBind>newArrayList();
-		
 		model.bipedHead.setRotationPoint(0.0F, 0.0F, 0.0F);
 		resetRotation(model.bipedHead);
 		model.bipedHeadwear.setRotationPoint(0.0F, 0.0F, 0.0F);
@@ -58,7 +57,7 @@ public class CustomModelBakery {
 	    model.bipedLeftLeg.mirror = true;
 	    model.bipedLeftLeg.setRotationPoint(1.9F, 12.0F, 0.0F);
 	    resetRotation(model.bipedLeftLeg);
-		
+	    
 		switch (equipmentSlot) {
 		case HEAD:
 			allBoxes.add(new ModelPartBind(HEAD, model.bipedHead));
@@ -472,7 +471,6 @@ public class CustomModelBakery {
 	static PositionTextureVertex getTranslatedVertex(PositionTextureVertex original, Matrix4f matrix) {
 		Vector4f translatedPosition = new Vector4f(original.position);
 		translatedPosition.transform(matrix);
-		
 		return new PositionTextureVertex(translatedPosition.getX(), translatedPosition.getY(), translatedPosition.getZ(), original.textureU, original.textureV);
 	}
 	
@@ -485,8 +483,7 @@ public class CustomModelBakery {
 			this(posTexVertx, jointId, 0, 0, 1.0F, 0.0F, 0.0F);
 		}
 		
-		public PositionTextureJointVertex(PositionTextureVertex posTexVertx, int jointId1, int jointId2, int jointId3,
-				float weight1, float weight2, float weight3) {
+		public PositionTextureJointVertex(PositionTextureVertex posTexVertx, int jointId1, int jointId2, int jointId3, float weight1, float weight2, float weight3) {
 			this(posTexVertx, new Vector3i(jointId1, jointId2, jointId3), new Vector3f(weight1, weight2, weight3));
 		}
 		

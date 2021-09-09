@@ -41,7 +41,7 @@ public class PlayerEvents {
 	public static void rightClickItemServer(RightClickItem event) {
 		if (event.getSide() == LogicalSide.SERVER) {
 			ServerPlayerData playerdata = (ServerPlayerData) event.getPlayer().getCapability(ModCapabilities.CAPABILITY_ENTITY).orElse(null);
-			if (playerdata != null) {
+			if (playerdata != null && (playerdata.getOriginalEntity().getHeldItemOffhand().getUseAction() == UseAction.NONE || playerdata.getHeldItemCapability(Hand.MAIN_HAND).isTwoHanded())) {
 				playerdata.getEventListener().activateEvents(EventType.SERVER_ITEM_USE_EVENT, new RightClickItemEvent<>(playerdata));
 			}
 		}
@@ -52,11 +52,12 @@ public class PlayerEvents {
 		if (event.getEntity() instanceof PlayerEntity) {
 			PlayerEntity player = (PlayerEntity) event.getEntity();
 			PlayerData<?> playerdata = (PlayerData<?>) event.getEntity().getCapability(ModCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-			CapabilityItem itemCap = playerdata.getHeldItemCapability(Hand.MAIN_HAND);
+			Hand hand = player.getHeldItem(Hand.MAIN_HAND).equals(event.getItem()) ? Hand.MAIN_HAND : Hand.OFF_HAND;
+			CapabilityItem itemCap = playerdata.getHeldItemCapability(hand);
 			
 			if (playerdata.getEntityState().isInaction()) {
 				event.setCanceled(true);
-			} else if (event.getItem() == player.getHeldItemOffhand() && itemCap.isTwoHanded()) {
+			} else if (event.getItem() == player.getHeldItemOffhand() && playerdata.getHeldItemCapability(Hand.MAIN_HAND).isTwoHanded()) {
 				event.setCanceled(true);
 			}
 			
@@ -124,6 +125,6 @@ public class PlayerEvents {
 		ModNetworkManager.sendToPlayer(new STCGameruleChange(Gamerules.HAS_FALL_ANIMATION,
 					event.getEntity().world.getGameRules().getBoolean(ModGamerules.HAS_FALL_ANIMATION)), (ServerPlayerEntity)event.getPlayer());
 		ModNetworkManager.sendToPlayer(new STCGameruleChange(Gamerules.SPEED_PENALTY_PERCENT,
-				event.getEntity().world.getGameRules().getInt(ModGamerules.ATTACK_SPEED_PENALTY)), (ServerPlayerEntity)event.getPlayer());
+				event.getEntity().world.getGameRules().getInt(ModGamerules.WEIGHT_PENALTY)), (ServerPlayerEntity)event.getPlayer());
 	}
 }

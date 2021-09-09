@@ -121,7 +121,7 @@ public class ActiveGuardSkill extends GuardSkill {
 	}
 	
 	@Override
-	protected boolean isHighTierSkill() {
+	protected boolean isHighTierGuard() {
 		return true;
 	}
 	

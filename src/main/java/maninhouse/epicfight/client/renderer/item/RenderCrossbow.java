@@ -5,10 +5,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class RenderCrossbow extends RenderShootableWeapon
-{
-	public RenderCrossbow()
-	{
-		correctionMatrix = new OpenMatrix4f();
+public class RenderCrossbow extends RenderShootableWeapon {
+	public RenderCrossbow() {
+		this.correctionMatrix = new OpenMatrix4f();
 	}
 }

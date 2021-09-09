@@ -5,17 +5,19 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import maninhouse.epicfight.capabilities.entity.mob.IronGolemData;
 import maninhouse.epicfight.client.renderer.layer.GolemCrackLayer;
 import maninhouse.epicfight.model.Armature;
+import net.minecraft.client.renderer.entity.layers.IronGolemCracksLayer;
+import net.minecraft.client.renderer.entity.model.IronGolemModel;
 import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class IronGolemRenderer extends ArmatureRenderer<IronGolemEntity, IronGolemData> {
+public class IronGolemRenderer extends ArmatureRenderer<IronGolemEntity, IronGolemData, IronGolemModel<IronGolemEntity>> {
 	private static final ResourceLocation IRON_GOLEM_TEXTURE = new ResourceLocation("textures/entity/iron_golem/iron_golem.png");
 	
 	public IronGolemRenderer() {
-		this.layers.add(new GolemCrackLayer());
+		this.layerRendererReplace.put(IronGolemCracksLayer.class, new GolemCrackLayer());
 	}
 	
 	@Override

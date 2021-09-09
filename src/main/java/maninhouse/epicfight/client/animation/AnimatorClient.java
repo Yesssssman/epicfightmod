@@ -203,9 +203,11 @@ public class AnimatorClient extends Animator {
 	}
 	
 	public void playReboundAnimation() {
-		this.playAnimation(this.overridenLivingAnimations.get(LivingMotion.SHOT), 0.0F);
-		this.entitydata.currentOverridenMotion = LivingMotion.NONE;
-		this.resetOverridenMotion();
+		if (this.overridenLivingAnimations.containsKey(LivingMotion.SHOT)) {
+			this.playAnimation(this.overridenLivingAnimations.get(LivingMotion.SHOT), 0.0F);
+			this.entitydata.currentOverridenMotion = LivingMotion.NONE;
+			this.resetOverridenMotion();
+		}
 	}
 	
 	@Override

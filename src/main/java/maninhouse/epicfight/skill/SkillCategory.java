@@ -1,20 +1,20 @@
 package maninhouse.epicfight.skill;
 
 public enum SkillCategory {
-	BASIC_ATTACK(0, false, false),
-	AIR_ATTACK(1, false, false),
-	DODGE(2, true, true),
-	PASSIVE(3, true, true),
-	WEAPON_PASSIVE(4, false, false),
-	WEAPON_SPECIAL_ATTACK(5, false, false),
-	GUARD(6, true, true);
+	BASIC_ATTACK(false, false),
+	AIR_ATTACK(false, false),
+	DODGE(true, true),
+	PASSIVE(true, true),
+	WEAPON_PASSIVE(false, false),
+	WEAPON_SPECIAL_ATTACK(false, false),
+	GUARD(true, true);
 	
 	int index;
 	boolean shouldSave;
 	boolean shouldSyncronized;
 	
-	SkillCategory(int index, boolean shouldSave, boolean shouldSyncronized) {
-		this.index = index;
+	SkillCategory(boolean shouldSave, boolean shouldSyncronized) {
+		this.index = Count.LAST_ID++;
 		this.shouldSave = shouldSave;
 		this.shouldSyncronized = shouldSyncronized;
 	}
@@ -29,5 +29,9 @@ public enum SkillCategory {
 	
 	public boolean shouldSyncronized() {
 		return this.shouldSyncronized;
+	}
+	
+	static class Count {
+		static int LAST_ID = 0;
 	}
 }

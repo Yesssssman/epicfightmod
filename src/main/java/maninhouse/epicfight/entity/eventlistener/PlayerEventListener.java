@@ -14,7 +14,7 @@ import net.minecraftforge.fml.LogicalSide;
 public class PlayerEventListener {
 	private Multimap<EventType<? extends PlayerEvent<?>>, EventTrigger<? extends PlayerEvent<?>>> events;
 	private PlayerData<?> player;
-	
+
 	public PlayerEventListener(PlayerData<?> player) {
 		this.player = player;
 		this.events = HashMultimap.create();
@@ -30,13 +30,13 @@ public class PlayerEventListener {
 	public <T extends PlayerEvent<?>> void removeListener(EventType<T> eventType, UUID uuid) {
 		this.events.get(eventType).removeIf((trigger) -> trigger.compareTo(uuid) == 0);
 	}
-	
+
 	@SuppressWarnings("unchecked")
 	public <T extends PlayerEvent<?>> boolean activateEvents(EventType<T> eventType, T event) {
 		boolean cancel = false;
 		for (EventTrigger<?> eventTrigger : this.events.get(eventType)) {
 			if (eventType.shouldActive(this.player.isRemote())) {
-				cancel |= ((EventTrigger<T>)eventTrigger).trigger(event);
+				cancel |= ((EventTrigger<T>) eventTrigger).trigger(event);
 			}
 		}
 		return cancel;

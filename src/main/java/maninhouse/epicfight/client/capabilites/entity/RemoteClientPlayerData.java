@@ -8,6 +8,7 @@ import maninhouse.epicfight.animation.LivingMotion;
 import maninhouse.epicfight.animation.types.StaticAnimation;
 import maninhouse.epicfight.capabilities.entity.player.PlayerData;
 import maninhouse.epicfight.capabilities.item.CapabilityItem;
+import maninhouse.epicfight.capabilities.item.CapabilityItem.WeaponCategory;
 import maninhouse.epicfight.client.animation.AnimatorClient;
 import maninhouse.epicfight.client.animation.Layer;
 import maninhouse.epicfight.gamedata.Animations;
@@ -117,12 +118,17 @@ public class RemoteClientPlayerData<T extends AbstractClientPlayerEntity> extend
 		}
 		
 		if (this.orgEntity.isHandActive() && this.orgEntity.getItemInUseCount() > 0) {
+			CapabilityItem activeItem = this.getHeldItemCapability(this.orgEntity.getActiveHand());
 			UseAction useAction = this.orgEntity.getHeldItem(this.orgEntity.getActiveHand()).getUseAction();
-			UseAction secondUseAction = this.getHeldItemCapability(this.orgEntity.getActiveHand()).getUseAction(this);
+			UseAction secondUseAction = activeItem.getUseAction(this);
 			
-			if (useAction == UseAction.BLOCK || secondUseAction == UseAction.BLOCK)
-				currentOverridenMotion = LivingMotion.BLOCK;
-			else if (useAction == UseAction.BOW || useAction == UseAction.SPEAR)
+			if (useAction == UseAction.BLOCK || secondUseAction == UseAction.BLOCK) {
+				if (activeItem.getWeaponCategory() == WeaponCategory.SHIELD) {
+					currentOverridenMotion = LivingMotion.BLOCK_SHIELD;
+				} else {
+					currentOverridenMotion = LivingMotion.BLOCK;
+				}
+			} else if (useAction == UseAction.BOW || useAction == UseAction.SPEAR)
 				currentOverridenMotion = LivingMotion.AIM;
 			else if (useAction == UseAction.CROSSBOW)
 				currentOverridenMotion = LivingMotion.RELOAD;
@@ -245,7 +251,6 @@ public class RemoteClientPlayerData<T extends AbstractClientPlayerEntity> extend
 	
 	@Override
 	public OpenMatrix4f getModelMatrix(float partialTick) {
-		LivingEntity entity = getOriginalEntity();
 		Direction direction;
 		if (this.orgEntity.isSpinAttacking()) {
 			OpenMatrix4f mat = MathUtils.getModelMatrixIntegrated(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0, partialTick, 1, 1, 1);
@@ -258,9 +263,7 @@ public class RemoteClientPlayerData<T extends AbstractClientPlayerEntity> extend
             return mat;
 		} else if (this.orgEntity.isElytraFlying()) {
 			OpenMatrix4f mat = MathUtils.getModelMatrixIntegrated(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0, partialTick, 1, 1, 1);
-			
-			OpenMatrix4f.rotate((float)-Math.toRadians(entity.renderYawOffset), new Vec3f(0F, 1F, 0F), mat, mat);
-			
+			OpenMatrix4f.rotate((float)-Math.toRadians(this.orgEntity.renderYawOffset), new Vec3f(0F, 1F, 0F), mat, mat);
             float f = (float)orgEntity.getTicksElytraFlying() + Minecraft.getInstance().getRenderPartialTicks();
             float f1 = MathHelper.clamp(f * f / 100.0F, 0.0F, 1.0F);
             OpenMatrix4f.rotate((float)Math.toRadians(f1 * (- this.orgEntity.rotationPitch)), new Vec3f(1F, 0F, 0F), mat, mat);
@@ -302,8 +305,7 @@ public class RemoteClientPlayerData<T extends AbstractClientPlayerEntity> extend
 			}
 			
 			return MathUtils.getModelMatrixIntegrated(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yaw, yaw, 0, 1.0F, 1.0F, 1.0F);
-		} else if ((direction = this.getLadderDirection(this.orgEntity.getBlockState(), this.orgEntity.world, this.orgEntity.getPosition(), this.orgEntity))
-				!= Direction.UP) {
+		} else if ((direction = this.getLadderDirection(this.orgEntity.getBlockState(), this.orgEntity.world, this.orgEntity.getPosition(), this.orgEntity)) != Direction.UP) {
 			float yaw = 0.0F;
 			
 			switch(direction) {
@@ -352,7 +354,7 @@ public class RemoteClientPlayerData<T extends AbstractClientPlayerEntity> extend
 	
 	public Direction getLadderDirection(@Nonnull BlockState state, @Nonnull World world, @Nonnull BlockPos pos, @Nonnull LivingEntity entity) {
 		boolean isSpectator = (entity instanceof PlayerEntity && ((PlayerEntity)entity).isSpectator());
-        if (isSpectator || orgEntity.isOnGround()) {
+        if (isSpectator || this.orgEntity.isOnGround() || this.orgEntity.isAlive()) {
         	return Direction.UP;
         }
         
@@ -379,6 +381,7 @@ public class RemoteClientPlayerData<T extends AbstractClientPlayerEntity> extend
             int mX = MathHelper.floor(bb.minX);
             int mY = MathHelper.floor(bb.minY);
             int mZ = MathHelper.floor(bb.minZ);
+            
 			for (int y2 = mY; y2 < bb.maxY; y2++) {
 				for (int x2 = mX; x2 < bb.maxX; x2++) {
 					for (int z2 = mZ; z2 < bb.maxZ; z2++) {

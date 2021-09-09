@@ -7,11 +7,9 @@ import maninhouse.epicfight.config.Option.DoubleOption;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.widget.AbstractSlider;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Quaternion;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
 
 public class ColorSlider extends AbstractSlider {
@@ -24,7 +22,7 @@ public class ColorSlider extends AbstractSlider {
 	}
 	
 	@Override
-	public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+	public void renderWidget(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
 		Minecraft minecraft = Minecraft.getInstance();
 		FontRenderer fontrenderer = minecraft.fontRenderer;
 		RenderSystem.enableBlend();
@@ -39,6 +37,7 @@ public class ColorSlider extends AbstractSlider {
 		drawCenteredString(matrixStack, fontrenderer, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | MathHelper.ceil(this.alpha * 255.0F) << 24);
 	}
 
+	@SuppressWarnings("deprecation")
 	@Override
 	protected void renderBg(MatrixStack matrixStack, Minecraft minecraft, int mouseX, int mouseY) {
 		minecraft.getTextureManager().bindTexture(WIDGETS_LOCATION);
@@ -91,31 +90,14 @@ public class ColorSlider extends AbstractSlider {
 	
 	@Override
 	protected void fillGradient(MatrixStack matrixStack, int x1, int y1, int x2, int y2, int colorA, int colorB) {
-		RenderSystem.disableTexture();
-		RenderSystem.enableBlend();
-		RenderSystem.disableAlphaTest();
-		RenderSystem.defaultBlendFunc();
-		RenderSystem.shadeModel(7425);
-		Tessellator tessellator = Tessellator.getInstance();
-		BufferBuilder bufferbuilder = tessellator.getBuffer();
-		bufferbuilder.begin(7, DefaultVertexFormats.POSITION_COLOR);
-		Matrix4f matrix = matrixStack.getLast().getMatrix();
-		float f = (float) (colorA >> 24 & 255) / 255.0F;
-		float f1 = (float) (colorA >> 16 & 255) / 255.0F;
-		float f2 = (float) (colorA >> 8 & 255) / 255.0F;
-		float f3 = (float) (colorA & 255) / 255.0F;
-		float f4 = (float) (colorB >> 24 & 255) / 255.0F;
-		float f5 = (float) (colorB >> 16 & 255) / 255.0F;
-		float f6 = (float) (colorB >> 8 & 255) / 255.0F;
-		float f7 = (float) (colorB & 255) / 255.0F;
-		bufferbuilder.pos(matrix, (float) x1, (float) y1, (float) this.getBlitOffset()).color(f1, f2, f3, f).endVertex();
-		bufferbuilder.pos(matrix, (float) x1, (float) y2, (float) this.getBlitOffset()).color(f1, f2, f3, f).endVertex();
-		bufferbuilder.pos(matrix, (float) x2, (float) y2, (float) this.getBlitOffset()).color(f5, f6, f7, f4).endVertex();
-		bufferbuilder.pos(matrix, (float) x2, (float) y1, (float) this.getBlitOffset()).color(f5, f6, f7, f4).endVertex();
-		tessellator.draw();
-		RenderSystem.shadeModel(7424);
-		RenderSystem.disableBlend();
-		RenderSystem.enableAlphaTest();
-		RenderSystem.enableTexture();
+		matrixStack.push();
+		int width = x2 - x1;
+		int height = y2 - y1;
+		int newX = x1 + width / 2;
+		int newY = y1 + height / 2;
+		matrixStack.translate(newX, newY, 0.0F);
+		matrixStack.rotate(new Quaternion(new Vector3f(0.0F, 0.0F, 1.0F), -90.0F, true));
+		super.fillGradient(matrixStack, -height/2, -width/2, height/2, width/2, colorA, colorB);
+		matrixStack.pop();
 	}
 }

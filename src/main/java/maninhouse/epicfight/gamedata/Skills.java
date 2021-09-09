@@ -49,7 +49,6 @@ public class Skills {
 	public static Skill ENERGIZING_GUARD;
 	
 	public static Skill BERSERKER;
-	
 	public static Skill STAMINA_PILLAGER;
 	public static Skill SWORD_MASTER;
 	public static Skill TECHINICIAN;

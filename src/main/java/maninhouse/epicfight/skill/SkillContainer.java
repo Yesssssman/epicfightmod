@@ -79,10 +79,14 @@ public class SkillContainer {
 	}
 	
 	public void setStack(int stack) {
-		this.stack = Math.min(this.containingSkill.maxStackSize, Math.max(stack, 0));
-		if (this.stack <= 0 && this.containingSkill.shouldDeactivateAutomatically(this.executer)) {
-			this.deactivate();
-			this.containingSkill.onReset(this);
+		if (this.containingSkill != null) {
+			this.stack = Math.min(this.containingSkill.maxStackSize, Math.max(stack, 0));
+			if (this.stack <= 0 && this.containingSkill.shouldDeactivateAutomatically(this.executer)) {
+				this.deactivate();
+				this.containingSkill.onReset(this);
+			}
+		} else {
+			this.stack = 0;
 		}
 	}
 	

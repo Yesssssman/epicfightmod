@@ -40,7 +40,7 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 @OnlyIn(Dist.CLIENT)
 public class ControllEngine {
 	private Map<KeyBinding, BiConsumer<Integer, Integer>> keyFunctionMap;
-	private GLFWCursorPosCallbackI callback = (handle, x, y) -> {Minecraft.getInstance().execute(()->{tracingMouseX = x; tracingMouseY = y;});};
+	private GLFWCursorPosCallbackI blockRotationCallback = (handle, x, y) -> {Minecraft.getInstance().execute(()->{tracingMouseX = x; tracingMouseY = y;});};
 	private ClientPlayerEntity player;
 	private ClientPlayerData playerdata;
 	private KeyBindingMap keyHash;
@@ -307,15 +307,15 @@ public class ControllEngine {
 		
 		@SubscribeEvent
 		public static void moveInputEvent(InputUpdateEvent event) {
-			if(controllEngine.playerdata == null) {
+			if (controllEngine.playerdata == null) {
 				return;
 			}
 			
 			Minecraft minecraft = Minecraft.getInstance();
 			EntityState playerState = controllEngine.playerdata.getEntityState();
 			
-			if(!controllEngine.canPlayerRotate(playerState) && controllEngine.player.isAlive()) {
-				GLFW.glfwSetCursorPosCallback(minecraft.getMainWindow().getHandle(), controllEngine.callback);
+			if (!controllEngine.canPlayerRotate(playerState) && controllEngine.player.isAlive()) {
+				GLFW.glfwSetCursorPosCallback(minecraft.getMainWindow().getHandle(), controllEngine.blockRotationCallback);
 				minecraft.mouseHelper.mouseX = controllEngine.tracingMouseX;
 				minecraft.mouseHelper.mouseY = controllEngine.tracingMouseY;
 			} else {
@@ -323,7 +323,7 @@ public class ControllEngine {
 				controllEngine.tracingMouseY = minecraft.mouseHelper.getMouseY();
 				
 				GLFW.glfwSetCursorPosCallback(minecraft.getMainWindow().getHandle(), (handle, x, y) -> {
-					minecraft.execute(()->{
+					minecraft.execute(() -> {
 						minecraft.mouseHelper.cursorPosCallback(handle, x, y);
 					});
 				});
@@ -344,8 +344,10 @@ public class ControllEngine {
 				controllEngine.setKeyBind(controllEngine.gameSettings.keyBindSprint, false);
 			}
 			
-			controllEngine.playerdata.getEventListener().activateEvents(EventType.MOVEMENT_INPUT_EVENT,
-					new MovementInputEvent(controllEngine.playerdata, event.getMovementInput()));
+			if (event.getPlayer().isAlive()) {
+				controllEngine.playerdata.getEventListener().activateEvents(EventType.MOVEMENT_INPUT_EVENT, new MovementInputEvent(controllEngine.playerdata,
+						event.getMovementInput()));
+			}
 		}
 		
 		@SubscribeEvent

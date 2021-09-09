@@ -5,6 +5,7 @@ import maninhouse.epicfight.animation.JointTransform;
 import maninhouse.epicfight.animation.Pose;
 import maninhouse.epicfight.animation.Quaternion;
 import maninhouse.epicfight.capabilities.entity.LivingData;
+import maninhouse.epicfight.capabilities.entity.player.PlayerData;
 import maninhouse.epicfight.client.animation.AnimatorClient;
 import maninhouse.epicfight.client.animation.Layer;
 import maninhouse.epicfight.collada.AnimationDataExtractor;
@@ -56,20 +57,24 @@ public class AimAnimation extends StaticAnimation {
 			chest.setCustomRotation(Quaternion.rotate((float)-Math.toRadians((entitydata.getOriginalEntity().rotationYaw - yawOffset) * ratio), new Vec3f(0,1,0), null));
 			return pose;
 		} else {
-			float pitch = entitydata.getOriginalEntity().getPitch(Minecraft.getInstance().getRenderPartialTicks());
-			StaticAnimation interpolateAnimation;
-			interpolateAnimation = (pitch > 0) ? this.lookDown : this.lookUp;
-			Pose pose1 = super.getPoseByTime(this, entitydata, time);
-			Pose pose2 = interpolateAnimation.getPoseByTime(interpolateAnimation, entitydata, time);
-			Pose interpolatedPose = Pose.interpolatePose(pose1, pose2, (Math.abs(pitch) / 90.0F));
-			JointTransform chest = interpolatedPose.getTransformByName("Chest");
-			JointTransform head = interpolatedPose.getTransformByName("Head");
-			float f = 90.0F;
-			float ratio = (f - Math.abs(entitydata.getOriginalEntity().rotationPitch)) / f;
-			float yawOffset = entitydata.getOriginalEntity().getRidingEntity() != null ? entitydata.getOriginalEntity().rotationYaw : entitydata.getOriginalEntity().renderYawOffset;
-			head.setRotation(Quaternion.rotate((float)-Math.toRadians((yawOffset - entitydata.getOriginalEntity().rotationYaw) * ratio), new Vec3f(0,1,0), head.getRotation()));
-			chest.setCustomRotation(Quaternion.rotate((float)-Math.toRadians((entitydata.getOriginalEntity().rotationYaw - yawOffset) * ratio), new Vec3f(0,1,0), null));
-			return interpolatedPose;
+			if (entitydata instanceof PlayerData) {
+				float pitch = entitydata.getOriginalEntity().getPitch(Minecraft.getInstance().getRenderPartialTicks());
+				StaticAnimation interpolateAnimation;
+				interpolateAnimation = (pitch > 0) ? this.lookDown : this.lookUp;
+				Pose pose1 = super.getPoseByTime(this, entitydata, time);
+				Pose pose2 = interpolateAnimation.getPoseByTime(interpolateAnimation, entitydata, time);
+				Pose interpolatedPose = Pose.interpolatePose(pose1, pose2, (Math.abs(pitch) / 90.0F));
+				JointTransform chest = interpolatedPose.getTransformByName("Chest");
+				JointTransform head = interpolatedPose.getTransformByName("Head");
+				float f = 90.0F;
+				float ratio = (f - Math.abs(entitydata.getOriginalEntity().rotationPitch)) / f;
+				float yawOffset = entitydata.getOriginalEntity().getRidingEntity() != null ? entitydata.getOriginalEntity().rotationYaw : entitydata.getOriginalEntity().renderYawOffset;
+				head.setRotation(Quaternion.rotate((float)-Math.toRadians((yawOffset - entitydata.getOriginalEntity().rotationYaw) * ratio), new Vec3f(0,1,0), head.getRotation()));
+				chest.setCustomRotation(Quaternion.rotate((float)-Math.toRadians((entitydata.getOriginalEntity().rotationYaw - yawOffset) * ratio), new Vec3f(0,1,0), null));
+				return interpolatedPose;
+			} else {
+				return super.getPoseByTime(animation, entitydata, time);
+			}
 		}
 	}
 	

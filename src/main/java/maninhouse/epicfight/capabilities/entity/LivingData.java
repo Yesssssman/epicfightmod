@@ -141,7 +141,7 @@ public abstract class LivingData<T extends LivingEntity> extends CapabilityEntit
 		}
 		
 		if (this.orgEntity.deathTime == 19) {
-			aboutToDeath();
+			this.aboutToDeath();
 		}
 	}
 	
@@ -182,22 +182,19 @@ public abstract class LivingData<T extends LivingEntity> extends CapabilityEntit
 		this.commonCreatureUpdateMotion();
 		UseAction useAction = this.orgEntity.getHeldItem(this.orgEntity.getActiveHand()).getUseAction();
 		if (this.orgEntity.isHandActive()) {
-			if (useAction == UseAction.CROSSBOW) {
+			if (useAction == UseAction.CROSSBOW)
 				currentOverridenMotion = LivingMotion.RELOAD;
-			} else {
-				this.currentOverridenMotion = LivingMotion.AIM;
-			}
+			else
+				currentOverridenMotion = LivingMotion.AIM;
 		} else {
-			if (this.getClientAnimator().getLayer(Layer.Priority.MIDDLE).animationPlayer.getPlay().isReboundAnimation()) {
+			if (this.getClientAnimator().getLayer(Layer.Priority.MIDDLE).animationPlayer.getPlay().isReboundAnimation())
 				currentOverridenMotion = LivingMotion.NONE;
-			}
 		}
 		
 		if (CrossbowItem.isCharged(this.orgEntity.getHeldItemMainhand()))
 			currentOverridenMotion = LivingMotion.AIM;
-		else if (this.getClientAnimator().prevAiming() && currentOverridenMotion != LivingMotion.AIM) {
+		else if (this.getClientAnimator().prevAiming() && currentOverridenMotion != LivingMotion.AIM)
 			this.playReboundAnimation();
-		}
 	}
 	
 	public void cancelUsingItem() {
@@ -217,7 +214,7 @@ public abstract class LivingData<T extends LivingEntity> extends CapabilityEntit
 		}
 	}
 	
-	public boolean attackEntityFrom(LivingAttackEvent event) {
+	public boolean hurtBy(LivingAttackEvent event) {
 		if (this.getEntityState().isInvincible()) {
 			DamageSource damageSource = event.getSource();
 			if (damageSource instanceof EntityDamageSource && !damageSource.isExplosion() && !damageSource.isMagicDamage()) {
@@ -565,12 +562,14 @@ public abstract class LivingData<T extends LivingEntity> extends CapabilityEntit
 	private boolean isRideOrBeingRidden(Entity entityIn) {
 		LivingEntity orgEntity = this.getOriginalEntity();
 		for (Entity passanger : orgEntity.getPassengers()) {
-			if (passanger.equals(entityIn))
+			if (passanger.equals(entityIn)) {
 				return true;
+			}
 		}
 		for (Entity passanger : entityIn.getPassengers()) {
-			if (passanger.equals(orgEntity))
+			if (passanger.equals(orgEntity)) {
 				return true;
+			}
 		}
 		return false;
 	}

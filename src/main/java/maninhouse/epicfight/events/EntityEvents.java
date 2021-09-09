@@ -48,7 +48,7 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.living.EnderTeleportEvent;
+import net.minecraftforge.event.entity.living.EntityTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -69,12 +69,13 @@ public class EntityEvents {
 	private static List<CapabilityEntity<?>> unInitializedEntitiesClient = Lists.<CapabilityEntity<?>>newArrayList();
 	private static List<CapabilityEntity<?>> unInitializedEntitiesServer = Lists.<CapabilityEntity<?>>newArrayList();
 	
+	@SuppressWarnings("unchecked")
 	@SubscribeEvent
 	public static void spawnEvent(EntityJoinWorldEvent event) {
-		CapabilityEntity entitydata = event.getEntity().getCapability(ModCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-		if(entitydata != null && event.getEntity().ticksExisted == 0) {
+		CapabilityEntity<Entity> entitydata = event.getEntity().getCapability(ModCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+		if (entitydata != null && event.getEntity().ticksExisted == 0) {
 			entitydata.onEntityJoinWorld(event.getEntity());
-			if(entitydata.isRemote()) {
+			if (entitydata.isRemote()) {
 				unInitializedEntitiesClient.add(entitydata);
 			} else {
 				unInitializedEntitiesServer.add(entitydata);
@@ -83,8 +84,8 @@ public class EntityEvents {
 		
 		if (event.getEntity() instanceof ProjectileEntity) {
 			ProjectileEntity projectileentity = (ProjectileEntity)event.getEntity();
-			CapabilityProjectile projectileData = event.getEntity().getCapability(ModCapabilities.CAPABILITY_PROJECTILE, null).orElse(null);
-			if(projectileData != null && event.getEntity().ticksExisted == 0) {
+			CapabilityProjectile<ProjectileEntity> projectileData = event.getEntity().getCapability(ModCapabilities.CAPABILITY_PROJECTILE, null).orElse(null);
+			if (projectileData != null && event.getEntity().ticksExisted == 0) {
 				projectileData.onJoinWorld(projectileentity);
 			}
 		}
@@ -93,7 +94,7 @@ public class EntityEvents {
 	@SubscribeEvent
 	public static void updateEvent(LivingUpdateEvent event) {
 		LivingData<?> entitydata = (LivingData<?>) event.getEntityLiving().getCapability(ModCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-		if(entitydata != null && entitydata.getOriginalEntity() != null) {
+		if (entitydata != null && entitydata.getOriginalEntity() != null) {
 			entitydata.update();
 		}
 	}
@@ -111,8 +112,8 @@ public class EntityEvents {
 		IExtendedDamageSource extSource = null;
 		Entity trueSource = event.getSource().getTrueSource();
 		
-		if(trueSource != null) {
-			if(event.getSource() instanceof IExtendedDamageSource) {
+		if (trueSource != null) {
+			if (event.getSource() instanceof IExtendedDamageSource) {
 				extSource = (IExtendedDamageSource) event.getSource();
 			} else if (event.getSource() instanceof IndirectEntityDamageSource && event.getSource().getImmediateSource() != null) {
 				CapabilityProjectile<?> projectileCap = event.getSource().getImmediateSource().getCapability(ModCapabilities.CAPABILITY_PROJECTILE, null).orElse(null);
@@ -137,8 +138,7 @@ public class EntityEvents {
 			        float f1 = calculatedDamage;
 			        calculatedDamage = Math.max(f / 25.0F, 0.0F);
 			        float f2 = f1 - calculatedDamage;
-			        if (f2 > 0.0F && f2 < 3.4028235E37F)
-			        {
+					if (f2 > 0.0F && f2 < 3.4028235E37F) {
 			        	if (hitEntity instanceof ServerPlayerEntity) {
 			        		((ServerPlayerEntity)hitEntity).addStat(Stats.DAMAGE_RESISTED, Math.round(f2 * 10.0F));
 			        	} else if(event.getSource().getTrueSource() instanceof ServerPlayerEntity) {
@@ -160,7 +160,7 @@ public class EntityEvents {
 		        if (realHealthDamage > 0.0F && realHealthDamage < 3.4028235E37F && event.getSource().getTrueSource() instanceof ServerPlayerEntity) {
 		        	((ServerPlayerEntity)event.getSource().getTrueSource()).addStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(realHealthDamage * 10.0F));
 		        }
-
+		        
 				if (absorpAmount < 0.0F) {
 					hitEntity.setHealth(hitEntity.getHealth() + absorpAmount);
 		        	LivingData<?> attacker = (LivingData<?>)trueSource.getCapability(ModCapabilities.CAPABILITY_ENTITY, null).orElse(null);
@@ -170,7 +170,6 @@ public class EntityEvents {
 		        }
 		        
 				event.setAmount(totalDamage - ignoreDamage);
-				
 				if (event.getAmount() + ignoreDamage > 0.0F) {
 					LivingData<?> hitEntityData = (LivingData<?>)hitEntity.getCapability(ModCapabilities.CAPABILITY_ENTITY, null).orElse(null);
 					
@@ -212,7 +211,7 @@ public class EntityEvents {
 							extendStunTime = extSource.getImpact() * 0.1F;
 							break;
 						}
-
+						
 						if (hitAnimation != null) {
 							if (!(hitEntity instanceof PlayerEntity)) {
 								hitEntity.lookAt(Type.FEET, trueSource.getPositionVec());
@@ -254,11 +253,10 @@ public class EntityEvents {
 	}
 	
 	@SubscribeEvent
-	public static void attackEvent(LivingAttackEvent event) {
+	public static void livingAttackEvent(LivingAttackEvent event) {
 		LivingData<?> entitydata = (LivingData<?>) event.getEntity().getCapability(ModCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-		
-		if (entitydata != null && !event.getEntity().world.isRemote && event.getEntityLiving().getHealth() > 0.0F) {
-			if (!entitydata.attackEntityFrom(event)) {
+		if (entitydata != null && event.getEntityLiving().getHealth() > 0.0F) {
+			if (!entitydata.hurtBy(event)) {
 				event.setCanceled(true);
 			}
 		}
@@ -268,8 +266,8 @@ public class EntityEvents {
 	public static void arrowHitEvent(ProjectileImpactEvent.Arrow event) {
 		if (event.getRayTraceResult() instanceof EntityRayTraceResult) {
 			EntityRayTraceResult rayresult = ((EntityRayTraceResult) event.getRayTraceResult());
-			if (rayresult.getEntity() != null && event.getArrow().func_234616_v_() != null) {
-				if (rayresult.getEntity().equals(event.getArrow().func_234616_v_().getRidingEntity())) {
+			if (rayresult.getEntity() != null && event.getArrow().getShooter() != null) {
+				if (rayresult.getEntity().equals(event.getArrow().getShooter().getRidingEntity())) {
 					event.setCanceled(true);
 				}
 			}
@@ -360,7 +358,7 @@ public class EntityEvents {
 	}
 	
 	@SubscribeEvent
-	public static void tpEvent(EnderTeleportEvent event) {
+	public static void tpEvent(EntityTeleportEvent.EnderEntity event) {
 		LivingEntity entity = event.getEntityLiving();
 		if (event.getEntityLiving() instanceof EndermanEntity) {
 			EndermanEntity enderman = (EndermanEntity)entity;
@@ -398,7 +396,6 @@ public class EntityEvents {
 	@SubscribeEvent
 	public static void deathEvent(LivingDeathEvent event) {
 		LivingData<?> entitydata = (LivingData<?>)event.getEntityLiving().getCapability(ModCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-		
 		if (entitydata != null) {
 			entitydata.getAnimator().playDeathAnimation();
 		}

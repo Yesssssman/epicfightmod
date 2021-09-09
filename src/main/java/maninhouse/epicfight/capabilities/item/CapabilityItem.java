@@ -83,10 +83,10 @@ public class CapabilityItem {
 	
 	public void modifyItemTooltip(List<ITextComponent> itemTooltip, LivingData<?> entitydata) {
 		if(this.isTwoHanded()) {
-			itemTooltip.add(1, new StringTextComponent(" ").append(
+			itemTooltip.add(1, new StringTextComponent(" ").appendSibling(
 					new TranslationTextComponent("attribute.name."+EpicFightMod.MODID+".twohanded").mergeStyle(TextFormatting.DARK_GRAY)));
 		} else if(this.isMainhandOnly()) {
-			itemTooltip.add(1, new StringTextComponent(" ").append(
+			itemTooltip.add(1, new StringTextComponent(" ").appendSibling(
 					new TranslationTextComponent("attribute.name."+EpicFightMod.MODID+".mainhand_only").mergeStyle(TextFormatting.DARK_GRAY)));
 		}
 		
@@ -97,14 +97,14 @@ public class CapabilityItem {
 				if (entitydata.getOriginalEntity().getAttributeManager().hasAttributeInstance(attr.getKey().get())) {
 					double value = attr.getValue().getAmount() + entitydata.getOriginalEntity().getAttribute(attr.getKey().get()).getBaseValue();
 					if (value != 0.0D) {
-						itemTooltip.add(new StringTextComponent(" ").append(
+						itemTooltip.add(new StringTextComponent(" ").appendSibling(
 							new TranslationTextComponent(attr.getKey().get().getAttributeName(), ItemStack.DECIMALFORMAT.format(value))));
 					}
 				}
 			}
 			
 			if(!attribute.keySet().contains(ModAttributes.MAX_STRIKES)) {
-				itemTooltip.add(new StringTextComponent(" ").append(new TranslationTextComponent(ModAttributes.MAX_STRIKES.get().getAttributeName(), 
+				itemTooltip.add(new StringTextComponent(" ").appendSibling(new TranslationTextComponent(ModAttributes.MAX_STRIKES.get().getAttributeName(), 
 						ItemStack.DECIMALFORMAT.format(ModAttributes.MAX_STRIKES.get().getDefaultValue()))));
 			}
 		}
@@ -254,7 +254,7 @@ public class CapabilityItem {
 	}
 	
 	public enum WeaponCategory {
-		NOT_WEAON, AXE, FIST, GREATSWORD, HOE, PICKAXE, SHOVEL, SWORD, KATANA, SPEAR, TACHI, LONGSWORD, DAGGER, RANGED
+		NOT_WEAON, AXE, FIST, GREATSWORD, HOE, PICKAXE, SHOVEL, SWORD, KATANA, SPEAR, TACHI, LONGSWORD, DAGGER, SHIELD, RANGED
 	}
 	
 	public enum HoldOption {

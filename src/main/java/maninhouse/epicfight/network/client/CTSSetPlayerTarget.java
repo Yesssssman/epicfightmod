@@ -42,8 +42,6 @@ public class CTSSetPlayerTarget {
 					if (entitydata != null && entity instanceof LivingEntity) {
 						entitydata.setAttackTarget((LivingEntity)entity);
 					}
-				} else {
-					entitydata.setAttackTarget(null);
 				}
 			}
 		});
