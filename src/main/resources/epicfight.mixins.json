@@ -1,0 +1,12 @@
+{
+	"required": true,
+	"compatibilityLevel": "JAVA_8",
+	"package": "yesman.epicfight.mixin",
+	"mixins": [
+		"MixinItemStack"
+	],
+	"injector": {
+		"defaultRequire": 1
+	},
+	"refmap": "epicfight.mixins.refmap.json"
+}
