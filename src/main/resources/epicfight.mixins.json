@@ -3,7 +3,8 @@
 	"compatibilityLevel": "JAVA_8",
 	"package": "yesman.epicfight.mixin",
 	"mixins": [
-		"MixinItemStack"
+		"MixinItemStack",
+		"MixinPacketBuffer"
 	],
 	"injector": {
 		"defaultRequire": 1

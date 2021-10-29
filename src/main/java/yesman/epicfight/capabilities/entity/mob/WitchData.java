@@ -20,7 +20,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.animation.LivingMotion;
 import yesman.epicfight.client.animation.AnimatorClient;
-import yesman.epicfight.entity.ai.RangeAttackMobGoal;
+import yesman.epicfight.entity.ai.goal.RangeAttackMobGoal;
 import yesman.epicfight.gamedata.Animations;
 import yesman.epicfight.gamedata.Models;
 import yesman.epicfight.model.Model;

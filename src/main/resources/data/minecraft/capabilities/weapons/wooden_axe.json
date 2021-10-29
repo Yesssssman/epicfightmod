@@ -1,9 +1,8 @@
 {
-	"stats":
+	"attributes":
 	{
 		"common":
 		{
-			"armor_negation":10.0,
 			"impact":0.7
 		}
 	},

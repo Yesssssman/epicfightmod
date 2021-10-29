@@ -22,4 +22,9 @@ public class KnuckleCapability extends ModWeaponCapability {
 		boolean isFist = itemCap != null && itemCap.getWeaponCategory() == WeaponCategory.FIST;
 		return isFist || !(item.getItem() instanceof SwordItem || item.getItem() instanceof ToolItem);
 	}
+	
+	@Override
+	public boolean canUsedInOffhandAlone() {
+		return true;
+	}
 }

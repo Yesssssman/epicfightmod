@@ -15,8 +15,8 @@ import yesman.epicfight.entity.eventlistener.PlayerEventListener.EventType;
 public class BerserkerSkill extends PassiveSkill {
 	private static final UUID EVENT_UUID = UUID.fromString("fdc09ee8-fcfc-11eb-9a03-0242ac130003");
 	
-	public BerserkerSkill() {
-		super("berserker");
+	public BerserkerSkill(Builder<? extends Skill> builder) {
+		super(builder);
 	}
 	
 	@Override

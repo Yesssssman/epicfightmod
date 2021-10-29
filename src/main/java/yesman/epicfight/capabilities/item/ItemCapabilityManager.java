@@ -38,6 +38,7 @@ public class ItemCapabilityManager extends JsonReloadListener {
 	@Override
 	protected void apply(Map<ResourceLocation, JsonElement> objectIn, IResourceManager resourceManagerIn, IProfiler profilerIn) {
 		ProviderItem.clear();
+		ProviderItem.addConfigItems();
 		
 		for (Map.Entry<ResourceLocation, JsonElement> entry : objectIn.entrySet()) {
 			ResourceLocation rl = entry.getKey();
@@ -55,17 +56,17 @@ public class ItemCapabilityManager extends JsonReloadListener {
 				
 				if (str[0].equals("armors")) {
 					CapabilityItem capability = deserializeArmor(item, entry.getValue().getAsJsonObject());
-					ProviderItem.addInstance(item, capability);
-					
+					ProviderItem.put(item, capability);
 					EpicFightMod.LOGGER.info("register weapon capability for " + registryName);
 				} else if (str[0].equals("weapons")) {
 					CapabilityItem capability = deserializeWeapon(item, entry.getValue().getAsJsonObject(), null);
-					ProviderItem.addInstance(item, capability);
-					
+					ProviderItem.put(item, capability);
 					EpicFightMod.LOGGER.info("register weapon capability for " + registryName);
 				}
 			}
 		}
+		
+		ProviderItem.addDefaultItems();
 	}
 	
 	private static CapabilityItem deserializeArmor(Item item, JsonObject jsonObj) {
@@ -114,7 +115,7 @@ public class ItemCapabilityManager extends JsonReloadListener {
 				}
 			}
 			
-			capability = new NBTPredicateCapability(list, innerDefaultCapability);
+			capability = new NBTSeparativeCapability(list, innerDefaultCapability);
 		} else {
 			capability = jsonObj.has("type") ? DefinedWeaponTypes.get(jsonObj.get("type").getAsString()).apply(item) : defaultCapability;
 			

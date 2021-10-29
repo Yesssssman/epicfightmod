@@ -17,6 +17,7 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -36,18 +37,14 @@ import yesman.epicfight.utils.game.IExtendedDamageSource.StunType;
 import yesman.epicfight.utils.math.ValueCorrector;
 
 public abstract class SpecialAttackSkill extends Skill {
+	public static Skill.Builder<? extends SpecialAttackSkill> createBuilder(ResourceLocation resourceLocation) {
+		return (new Skill.Builder<SpecialAttackSkill>(resourceLocation)).setCategory(SkillCategory.WEAPON_SPECIAL_ATTACK).setResource(Resource.SPECIAL_GAUAGE);
+	}
+	
 	protected List<Map<AttackPhaseProperty<?>, Object>> properties;
-
-	public SpecialAttackSkill(float consumption, String skillName) {
-		this(consumption, 0, 1, ActivateType.ONE_SHOT, skillName);
-	}
 	
-	public SpecialAttackSkill(float consumption, int duration, ActivateType activateType, String skillName) {
-		this(consumption, duration, 1, activateType, skillName);
-	}
-	
-	public SpecialAttackSkill(float consumption, int duration, int maxStack, ActivateType activateType, String skillName) {
-		super(SkillCategory.WEAPON_SPECIAL_ATTACK, consumption, duration, maxStack, true, activateType, Resource.SPECIAL_GAUAGE, skillName);
+	public SpecialAttackSkill(Builder<? extends Skill> builder) {
+		super(builder);
 		this.properties = Lists.<Map<AttackPhaseProperty<?>, Object>>newArrayList();
 	}
 	
@@ -55,16 +52,16 @@ public abstract class SpecialAttackSkill extends Skill {
 	@Override
 	public void executeOnClient(ClientPlayerData executer, PacketBuffer args) {
 		if (this.canExecute(executer)) {
-			ModNetworkManager.sendToServer(new CTSExecuteSkill(this.slot.getIndex(), true, args));
+			ModNetworkManager.sendToServer(new CTSExecuteSkill(this.category.getIndex(), true, args));
 		}
 	}
 	
 	@Override
 	public boolean canExecute(PlayerData<?> executer) {
 		if (executer.isRemote()) {
-			return true;
+			return executer.getSkill(this.getCategory()).isReady() || executer.getOriginalEntity().isCreative();
 		} else {
-			return executer.getHeldItemCapability(Hand.MAIN_HAND).getSpecialAttack(executer) == this && executer.getOriginalEntity().getRidingEntity() == null && (!executer.getSkill(this.slot).isActivated() || this.activateType == ActivateType.TOGGLE);
+			return executer.getHeldItemCapability(Hand.MAIN_HAND).getSpecialAttack(executer) == this && executer.getOriginalEntity().getRidingEntity() == null && (!executer.getSkill(this.category).isActivated() || this.activateType == ActivateType.TOGGLE);
 		}
 	}
 	
@@ -72,9 +69,9 @@ public abstract class SpecialAttackSkill extends Skill {
 	@Override
 	public List<ITextComponent> getTooltipOnItem(ItemStack itemStack, CapabilityItem cap, PlayerData<?> playerCap) {
 		List<ITextComponent> list = Lists.<ITextComponent>newArrayList();
-		list.add(new TranslationTextComponent("skill." + EpicFightMod.MODID + "." + this.getSkillName()).mergeStyle(TextFormatting.WHITE)
+		list.add(new TranslationTextComponent("skill." + EpicFightMod.MODID + "." + this.getName()).mergeStyle(TextFormatting.WHITE)
 				.appendSibling(new StringTextComponent(String.format("[%.0f]", this.consumption)).mergeStyle(TextFormatting.AQUA)));
-		list.add(new TranslationTextComponent("skill." + EpicFightMod.MODID + "." + this.getSkillName() + ".tooltip").mergeStyle(TextFormatting.DARK_GRAY));
+		list.add(new TranslationTextComponent("skill." + EpicFightMod.MODID + "." + this.getName() + ".tooltip").mergeStyle(TextFormatting.DARK_GRAY));
 		return list;
 	}
 	

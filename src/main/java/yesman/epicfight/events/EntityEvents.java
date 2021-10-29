@@ -73,7 +73,7 @@ public class EntityEvents {
 	@SubscribeEvent
 	public static void spawnEvent(EntityJoinWorldEvent event) {
 		CapabilityEntity<Entity> entitydata = event.getEntity().getCapability(ModCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-		if (entitydata != null && event.getEntity().ticksExisted == 0) {
+		if (entitydata != null && !entitydata.isInitialized()) {
 			entitydata.onEntityJoinWorld(event.getEntity());
 			if (entitydata.isRemote()) {
 				unInitializedEntitiesClient.add(entitydata);
@@ -85,7 +85,7 @@ public class EntityEvents {
 		if (event.getEntity() instanceof ProjectileEntity) {
 			ProjectileEntity projectileentity = (ProjectileEntity)event.getEntity();
 			CapabilityProjectile<ProjectileEntity> projectileData = event.getEntity().getCapability(ModCapabilities.CAPABILITY_PROJECTILE, null).orElse(null);
-			if (projectileData != null && event.getEntity().ticksExisted == 0) {
+			if (projectileData != null) {
 				projectileData.onJoinWorld(projectileentity);
 			}
 		}
@@ -280,46 +280,26 @@ public class EntityEvents {
 			return;
 		}
 		
-		LivingData<?> entitycap = (LivingData<?>) event.getEntity().getCapability(ModCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+		LivingData<?> entitydata = (LivingData<?>) event.getEntity().getCapability(ModCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+		CapabilityItem fromCap = ModCapabilities.getItemStackCapability(event.getFrom());
+		CapabilityItem toCap = ModCapabilities.getItemStackCapability(event.getTo());
 		
-		if (entitycap != null && entitycap.getOriginalEntity() != null) {
-			if (event.getSlot() == EquipmentSlotType.MAINHAND) {
-				CapabilityItem fromCap = ModCapabilities.getItemStackCapability(event.getFrom());
-				CapabilityItem toCap = ModCapabilities.getItemStackCapability(event.getTo());
-				entitycap.cancelUsingItem();
-				
-				if (fromCap != null) {
-					event.getEntityLiving().getAttributeManager().removeModifiers(fromCap.getAttributeModifiers(event.getSlot(), entitycap));
-				}
-				
-				if (toCap != null) {
-					event.getEntityLiving().getAttributeManager().reapplyModifiers(toCap.getAttributeModifiers(event.getSlot(), entitycap));
-				}
-				
-				if (entitycap instanceof ServerPlayerData) {
-					ServerPlayerData playercap = (ServerPlayerData)entitycap;
-					playercap.updateHeldItem(toCap, event.getTo(), Hand.MAIN_HAND);
-				}
-			} else if (event.getSlot() == EquipmentSlotType.OFFHAND) {
-				entitycap.cancelUsingItem();
-				
-				if (entitycap instanceof ServerPlayerData) {
-					ServerPlayerData playercap = (ServerPlayerData)entitycap;
-					playercap.updateHeldItem(entitycap.getHeldItemCapability(Hand.MAIN_HAND), event.getTo(), Hand.OFF_HAND);
+		if (fromCap != null) {
+			event.getEntityLiving().getAttributeManager().removeModifiers(fromCap.getAttributeModifiers(event.getSlot(), entitydata));
+		}
+		if (toCap != null) {
+			event.getEntityLiving().getAttributeManager().reapplyModifiers(toCap.getAttributeModifiers(event.getSlot(), entitydata));
+		}
+		
+		if (entitydata != null && entitydata.getOriginalEntity() != null) {
+			if (event.getSlot().getSlotType() == EquipmentSlotType.Group.HAND) {
+				entitydata.cancelUsingItem();
+				if (entitydata instanceof ServerPlayerData) {
+					ServerPlayerData playercap = (ServerPlayerData)entitydata;
+					Hand hand = event.getSlot() == EquipmentSlotType.MAINHAND ? Hand.MAIN_HAND : Hand.OFF_HAND;
+					playercap.updateHeldItem(fromCap, toCap, event.getFrom(), event.getTo(), hand);
 				}
 			} else if (event.getSlot().getSlotType() == EquipmentSlotType.Group.ARMOR) {
-				CapabilityItem fromCap = ModCapabilities.getItemStackCapability(event.getFrom());
-				CapabilityItem toCap = ModCapabilities.getItemStackCapability(event.getTo());
-				
-				if (fromCap != null) {
-					event.getEntityLiving().getAttributeManager().removeModifiers(fromCap.getAttributeModifiers(event.getSlot(), entitycap));
-				}
-				
-				if (toCap != null) {
-					event.getEntityLiving().getAttributeManager().reapplyModifiers(toCap.getAttributeModifiers(event.getSlot(), entitycap));
-				}
-				
-				LivingData<?> entitydata = (LivingData<?>) event.getEntity().getCapability(ModCapabilities.CAPABILITY_ENTITY, null).orElse(null);
 				entitydata.updateArmor(fromCap, toCap, event.getSlot());
 			}
 		}

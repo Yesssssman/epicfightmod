@@ -46,7 +46,7 @@ public class CTSReqPlayerInfo {
 					List<LivingMotion> motions = Lists.<LivingMotion>newArrayList();
 					List<StaticAnimation> animations = Lists.<StaticAnimation>newArrayList();
 					int i = 0;
-					for (Map.Entry<LivingMotion, StaticAnimation> entry : playerdata.getLivingMotionEntrySet()) {
+					for (Map.Entry<LivingMotion, StaticAnimation> entry : playerdata.getOverwritingLivingMotionEntrySet()) {
 						if (entry.getValue() != null) {
 							motions.add(entry.getKey());
 							animations.add(entry.getValue());

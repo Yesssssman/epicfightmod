@@ -4,9 +4,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.monster.AbstractIllagerEntity;
 import yesman.epicfight.animation.LivingMotion;
 import yesman.epicfight.client.animation.AnimatorClient;
-import yesman.epicfight.entity.ai.AttackPatternGoal;
-import yesman.epicfight.entity.ai.ChasingGoal;
 import yesman.epicfight.entity.ai.attribute.EpicFightAttributes;
+import yesman.epicfight.entity.ai.goal.AttackPatternGoal;
+import yesman.epicfight.entity.ai.goal.ChasingGoal;
 import yesman.epicfight.gamedata.Animations;
 import yesman.epicfight.gamedata.AttackCombos;
 

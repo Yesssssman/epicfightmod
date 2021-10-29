@@ -16,8 +16,8 @@ public class KatanaPassive extends Skill {
 	public static final SkillDataKey<Boolean> SHEATH = SkillDataKey.createDataKey(SkillDataManager.ValueType.BOOLEAN);
 	private static final UUID EVENT_UUID = UUID.fromString("a416c93a-42cb-11eb-b378-0242ac130002");
 	
-	public KatanaPassive() {
-		super(SkillCategory.WEAPON_PASSIVE, 5.0F, ActivateType.ONE_SHOT, Resource.COOLDOWN, "katana_passive");
+	public KatanaPassive(Builder<? extends Skill> builder) {
+		super(builder);
 	}
 	
 	@Override
@@ -25,8 +25,8 @@ public class KatanaPassive extends Skill {
 		super.onInitiate(container);
 		container.getDataManager().registerData(SHEATH);
 		container.executer.getEventListener().addEventListener(EventType.ACTION_EVENT, EVENT_UUID, (event) -> {
-			container.getContaining().setConsumptionSynchronize(event.getPlayerData(), 0.0F);
-			container.getContaining().setStackSynchronize(event.getPlayerData(), 0);
+			container.getSkill().setConsumptionSynchronize(event.getPlayerData(), 0.0F);
+			container.getSkill().setStackSynchronize(event.getPlayerData(), 0);
 			return false;
 		});
 		container.executer.getEventListener().addEventListener(EventType.SERVER_ITEM_USE_EVENT, EVENT_UUID, (event) -> {
@@ -47,8 +47,8 @@ public class KatanaPassive extends Skill {
 		if (!executer.isRemote()) {
 			ServerPlayerData playerdata = (ServerPlayerData)executer;
 			container.getDataManager().setDataSync(SHEATH, false, playerdata.getOriginalEntity());
-			(playerdata).setLivingMotionCurrentItem(executer.getHeldItemCapability(Hand.MAIN_HAND));
-			container.getContaining().setConsumptionSynchronize(playerdata, 0);
+			(playerdata).setLivingMotionCurrentItem(executer.getHeldItemCapability(Hand.MAIN_HAND), Hand.MAIN_HAND);
+			container.getSkill().setConsumptionSynchronize(playerdata, 0);
 		}
 	}
 	
@@ -59,7 +59,7 @@ public class KatanaPassive extends Skill {
 			if (this.consumption < value) {
 				ServerPlayerEntity serverPlayer = (ServerPlayerEntity) executer.getOriginalEntity();
 				container.getDataManager().setDataSync(SHEATH, true, serverPlayer);
-				((ServerPlayerData)container.executer).setLivingMotionCurrentItem(executer.getHeldItemCapability(Hand.MAIN_HAND));
+				((ServerPlayerData)container.executer).setLivingMotionCurrentItem(executer.getHeldItemCapability(Hand.MAIN_HAND), Hand.MAIN_HAND);
 				STCPlayAnimation msg3 = new STCPlayAnimation(Animations.BIPED_KATANA_SCRAP.getNamespaceId(), Animations.BIPED_KATANA_SCRAP.getId(), serverPlayer.getEntityId(), 0.0F);
 				ModNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(msg3, serverPlayer);
 			}

@@ -1,4 +1,4 @@
-package yesman.epicfight.client.model.custom;
+package yesman.epicfight.client.model;
 
 import java.util.List;
 
@@ -21,8 +21,6 @@ import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.math.vector.Vector4f;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.client.model.ClientModel;
-import yesman.epicfight.client.model.Mesh;
 import yesman.epicfight.collada.VertexData;
 import yesman.epicfight.utils.math.Vec2f;
 import yesman.epicfight.utils.math.Vec3f;

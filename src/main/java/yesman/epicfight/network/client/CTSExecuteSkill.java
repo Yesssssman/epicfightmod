@@ -55,7 +55,6 @@ public class CTSExecuteSkill {
 	public static void toBytes(CTSExecuteSkill msg, PacketBuffer buf) {
 		buf.writeInt(msg.skillSlot);
 		buf.writeBoolean(msg.active);
-
 		while (msg.buffer.isReadable()) {
 			buf.writeByte(msg.buffer.readByte());
 		}
@@ -69,7 +68,7 @@ public class CTSExecuteSkill {
 			if (msg.active) {
 				playerdata.getSkill(msg.skillSlot).requestExecute(playerdata, msg.getBuffer());
 			} else {
-				Skill contain = playerdata.getSkill(msg.skillSlot).getContaining();
+				Skill contain = playerdata.getSkill(msg.skillSlot).getSkill();
 				if (contain != null) {
 					contain.cancelOnServer(playerdata, msg.getBuffer());
 				}

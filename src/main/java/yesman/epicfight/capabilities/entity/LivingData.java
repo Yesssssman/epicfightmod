@@ -80,6 +80,7 @@ public abstract class LivingData<T extends LivingEntity> extends CapabilityEntit
 	
 	@Override
 	public void onEntityJoinWorld(T entityIn) {
+		super.onEntityJoinWorld(entityIn);
 		this.initAttributes();
 		if (CapabilityConfig.CUSTOM_ENTITY_MAP.containsKey(EntityType.getKey(this.orgEntity.getType()))) {
 			CustomEntityConfig config = CapabilityConfig.CUSTOM_ENTITY_MAP.get(EntityType.getKey(this.orgEntity.getType()));

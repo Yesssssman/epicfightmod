@@ -80,7 +80,8 @@ public class PlayerEvents {
 	public static void changeDimensionEvent(PlayerEvent.PlayerChangedDimensionEvent event) {
 		PlayerEntity player = event.getPlayer();
 		ServerPlayerData playerdata = (ServerPlayerData)player.getCapability(ModCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-		playerdata.setLivingMotionCurrentItem(playerdata.getHeldItemCapability(Hand.MAIN_HAND));
+		playerdata.setLivingMotionCurrentItem(playerdata.getHeldItemCapability(Hand.MAIN_HAND), Hand.MAIN_HAND);
+		playerdata.setLivingMotionCurrentItem(playerdata.getHeldItemCapability(Hand.OFF_HAND), Hand.OFF_HAND);
 	}
 	
 	@SubscribeEvent

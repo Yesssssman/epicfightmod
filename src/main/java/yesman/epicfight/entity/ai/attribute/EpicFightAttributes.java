@@ -110,7 +110,7 @@ public class EpicFightAttributes {
 		event.add(entityType, EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get());
 		event.add(entityType, EpicFightAttributes.OFFHAND_IMPACT.get());
 	}
-	
+    
 	public static AttributeModifier getArmorNegationModifier(double value) {
 		return new AttributeModifier(EpicFightAttributes.ARMOR_NEGATION_MODIFIER, EpicFightMod.MODID + ":weapon_modifier", value, AttributeModifier.Operation.ADDITION);
 	}

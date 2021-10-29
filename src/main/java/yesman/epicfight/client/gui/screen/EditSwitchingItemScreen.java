@@ -19,6 +19,8 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.registries.ForgeRegistries;
+import yesman.epicfight.capabilities.provider.ProviderItem;
 import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
@@ -26,6 +28,7 @@ public class EditSwitchingItemScreen extends Screen {
 	private EditSwitchingItemScreen.RegisteredItemList battleAutoSwitchItems;
 	private EditSwitchingItemScreen.RegisteredItemList miningAutoSwitchItems;
 	protected final Screen parentScreen;
+	private Runnable deferredTooltip;
 	
 	public EditSwitchingItemScreen(Screen parentScreen) {
 		super(new TranslationTextComponent(EpicFightMod.MODID + ".gui.configuration.autoswitching"));
@@ -74,6 +77,10 @@ public class EditSwitchingItemScreen extends Screen {
 		this.miningAutoSwitchItems.render(matrixStack, mouseX, mouseY, partialTicks);
 		drawCenteredString(matrixStack, this.font, this.title, this.width / 2, 16, 16777215);
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
+		if (this.deferredTooltip != null) {
+			this.deferredTooltip.run();
+			this.deferredTooltip = null;
+		}
 	}
 	
 	@Override
@@ -94,11 +101,11 @@ public class EditSwitchingItemScreen extends Screen {
 				this.centerScrollOn(this.getSelected());
 			}
 			
+			this.addEntry(new ButtonInEntry());
+			
 			for (Item item : saved) {
 				this.addEntry(new ItemEntry(item));
 			}
-			
-			this.addEntry(new ButtonInEntry());
 		}
 		
 		public void resize(int width, int height) {
@@ -127,8 +134,7 @@ public class EditSwitchingItemScreen extends Screen {
 		}
 		
 		protected void addEntry(Item item) {
-			int size = this.getEventListeners().size();
-			this.getEventListeners().add(size-1, new ItemEntry(item));
+			this.getEventListeners().add(new ItemEntry(item));
 		}
 		
 		protected void removeIfPresent(Item item) {
@@ -186,33 +192,91 @@ public class EditSwitchingItemScreen extends Screen {
 		
 		@OnlyIn(Dist.CLIENT)
 		class ButtonInEntry extends ItemEntry {
-			private Button button;
+			private Button addItemButton;
+			private Button removeAllButton;
+			private Button automaticRegisterButton;
 			
 			public ButtonInEntry() {
 				super(null);
-				this.button = new Button(0, 0, 20, 20, new StringTextComponent("+"), (button) -> {
-					EditSwitchingItemScreen.RegisteredItemList thisList = EditSwitchingItemScreen.RegisteredItemList.this == EditSwitchingItemScreen.this.battleAutoSwitchItems ?
-							EditSwitchingItemScreen.this.battleAutoSwitchItems : EditSwitchingItemScreen.this.miningAutoSwitchItems;
-					EditSwitchingItemScreen.RegisteredItemList opponentList = EditSwitchingItemScreen.RegisteredItemList.this == EditSwitchingItemScreen.this.battleAutoSwitchItems ?
-							EditSwitchingItemScreen.this.miningAutoSwitchItems : EditSwitchingItemScreen.this.battleAutoSwitchItems;
-					RegisteredItemList.this.minecraft.displayGuiScreen(
-							new EditItemListScreen(EditSwitchingItemScreen.this, thisList, opponentList));
+				this.addItemButton = new Button(0, 0, 20, 20, new StringTextComponent("+"), (button) -> {
+					EditSwitchingItemScreen.RegisteredItemList thisList = EditSwitchingItemScreen.RegisteredItemList.this == EditSwitchingItemScreen.this.battleAutoSwitchItems ? EditSwitchingItemScreen.this.battleAutoSwitchItems : EditSwitchingItemScreen.this.miningAutoSwitchItems;
+					EditSwitchingItemScreen.RegisteredItemList opponentList = EditSwitchingItemScreen.RegisteredItemList.this == EditSwitchingItemScreen.this.battleAutoSwitchItems ? EditSwitchingItemScreen.this.miningAutoSwitchItems : EditSwitchingItemScreen.this.battleAutoSwitchItems;
+					RegisteredItemList.this.minecraft.displayGuiScreen(new EditItemListScreen(EditSwitchingItemScreen.this, thisList, opponentList));
 				}, Button.EMPTY_TOOLTIP);
+				
+				this.removeAllButton = new Button(0, 0, 60, 20, new TranslationTextComponent("epicfight.gui.delete_all"), (button) -> {
+					RegisteredItemList.this.clearEntries();
+					RegisteredItemList.this.addEntry(this);
+				}, Button.EMPTY_TOOLTIP);
+				
+				this.automaticRegisterButton = new Button(0, 0, 60, 20, new TranslationTextComponent("epicfight.gui.auto_add"), (button) -> {
+					boolean isBattleTab = EditSwitchingItemScreen.RegisteredItemList.this == EditSwitchingItemScreen.this.battleAutoSwitchItems;
+					if (isBattleTab) {
+						for (Item item : ForgeRegistries.ITEMS.getValues()) {
+							if (ProviderItem.has(item)) {
+								ItemEntry itemEntry = new ItemEntry(item);
+								if (!EditSwitchingItemScreen.this.battleAutoSwitchItems.getEventListeners().contains(itemEntry)) {
+									EditSwitchingItemScreen.this.battleAutoSwitchItems.addEntry(itemEntry);
+								}
+							}
+						}
+					} else {
+						for (Item item : ForgeRegistries.ITEMS.getValues()) {
+							ItemEntry itemEntry = new ItemEntry(item);
+							if (!EditSwitchingItemScreen.this.battleAutoSwitchItems.getEventListeners().contains(itemEntry)) {
+								if (!EditSwitchingItemScreen.this.miningAutoSwitchItems.getEventListeners().contains(itemEntry)) {
+									EditSwitchingItemScreen.this.miningAutoSwitchItems.addEntry(itemEntry);
+								}
+							}
+						}
+					}
+					
+				}, (button, matrixStack, mouseX, mouseY) -> {
+					boolean isBattleTab = EditSwitchingItemScreen.RegisteredItemList.this == EditSwitchingItemScreen.this.battleAutoSwitchItems;
+					String tooltip = isBattleTab ? "epicfight.gui.tooltip_battle" : "epicfight.gui.tooltip_mining";
+					if (isBattleTab) {
+						EditSwitchingItemScreen.this.deferredTooltip = () -> {
+							EditSwitchingItemScreen.this.renderTooltip(matrixStack, EditSwitchingItemScreen.this.minecraft.fontRenderer.trimStringToWidth(
+									new TranslationTextComponent(tooltip), Math.max(EditSwitchingItemScreen.this.width / 2 - 43, 170)), mouseX, mouseY);
+						};
+					} else {
+						EditSwitchingItemScreen.this.renderTooltip(matrixStack, EditSwitchingItemScreen.this.minecraft.fontRenderer.trimStringToWidth(
+								new TranslationTextComponent(tooltip), Math.max(EditSwitchingItemScreen.this.width / 2 - 43, 170)), mouseX, mouseY);
+					}
+				});
 			}
 			
 			@Override
 			public void render(MatrixStack matrixStack, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
-				this.button.x = left+87;
-				this.button.y = top-2;
-				this.button.render(matrixStack, mouseX, mouseY, partialTicks);
+				this.addItemButton.x = left+25;
+				this.addItemButton.y = top-2;
+				this.addItemButton.render(matrixStack, mouseX, mouseY, partialTicks);
+				
+				this.removeAllButton.x = left+47;
+				this.removeAllButton.y = top-2;
+				this.removeAllButton.render(matrixStack, mouseX, mouseY, partialTicks);
+				
+				this.automaticRegisterButton.x = left+109;
+				this.automaticRegisterButton.y = top-2;
+				this.automaticRegisterButton.render(matrixStack, mouseX, mouseY, partialTicks);
 			}
 			
 			@Override
 			public boolean mouseClicked(double mouseX, double mouseY, int button) {
 				if (button == 0) {
-					if (this.button.isMouseOver(mouseX, mouseY)) {
-						this.button.playDownSound(Minecraft.getInstance().getSoundHandler());
-						this.button.onPress();
+					if (this.addItemButton.isMouseOver(mouseX, mouseY)) {
+						this.addItemButton.playDownSound(Minecraft.getInstance().getSoundHandler());
+						this.addItemButton.onPress();
+					}
+					
+					if (this.removeAllButton.isMouseOver(mouseX, mouseY)) {
+						this.removeAllButton.playDownSound(Minecraft.getInstance().getSoundHandler());
+						this.removeAllButton.onPress();
+					}
+					
+					if (this.automaticRegisterButton.isMouseOver(mouseX, mouseY)) {
+						this.automaticRegisterButton.playDownSound(Minecraft.getInstance().getSoundHandler());
+						this.automaticRegisterButton.onPress();
 					}
 				}
 				return false;

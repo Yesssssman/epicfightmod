@@ -1,16 +1,16 @@
-package yesman.epicfight.entity.ai;
+package yesman.epicfight.entity.ai.goal;
 
 import net.minecraft.entity.ai.goal.CreeperSwellGoal;
 import net.minecraft.entity.monster.CreeperEntity;
 import yesman.epicfight.capabilities.entity.mob.CreeperData;
 
 public class CreeperSwellStoppableGoal extends CreeperSwellGoal {
-	protected CreeperEntity CreeperEntity;
+	protected CreeperEntity creeperEntity;
 	protected CreeperData creeperdata;
 	
 	public CreeperSwellStoppableGoal(CreeperData creeperdata, CreeperEntity CreeperEntityIn) {
 		super(CreeperEntityIn);
-		this.CreeperEntity = CreeperEntityIn;
+		this.creeperEntity = CreeperEntityIn;
 		this.creeperdata = creeperdata;
 	}
 	
@@ -27,6 +27,6 @@ public class CreeperSwellStoppableGoal extends CreeperSwellGoal {
 	@Override
 	public void resetTask() {
 		super.resetTask();
-		this.CreeperEntity.setCreeperState(-1);
+		this.creeperEntity.setCreeperState(-1);
     }
 }

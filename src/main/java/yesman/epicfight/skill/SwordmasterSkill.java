@@ -14,8 +14,8 @@ public class SwordmasterSkill extends PassiveSkill {
 	private static final UUID EVENT_UUID = UUID.fromString("a395b692-fd97-11eb-9a03-0242ac130003");
 	private static final WeaponCategory[] AVAILABLE_WEAPON_TYPES = {WeaponCategory.KATANA, WeaponCategory.LONGSWORD, WeaponCategory.SWORD, WeaponCategory.TACHI};
 	
-	public SwordmasterSkill() {
-		super("swordmaster");
+	public SwordmasterSkill(Builder<? extends Skill> builder) {
+		super(builder);
 	}
 	
 	@Override

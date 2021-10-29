@@ -1,14 +1,18 @@
 package yesman.epicfight.skill;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
+
+import com.google.common.collect.Lists;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.ITextComponent;
+import yesman.epicfight.animation.property.Property.AttackPhaseProperty;
 import yesman.epicfight.animation.types.AttackAnimation;
-import yesman.epicfight.animation.types.StaticAnimation;
 import yesman.epicfight.animation.types.AttackAnimation.Phase;
+import yesman.epicfight.animation.types.StaticAnimation;
 import yesman.epicfight.capabilities.entity.player.PlayerData;
 import yesman.epicfight.capabilities.entity.player.ServerPlayerData;
 import yesman.epicfight.capabilities.item.CapabilityItem;
@@ -19,14 +23,9 @@ public class SelectiveAttackSkill extends SpecialAttackSkill {
 	protected final StaticAnimation[] attackAnimations;
 	protected final Function<ServerPlayerData, Integer> selector;
 	
-	public SelectiveAttackSkill(float consumption, String skillName, Function<ServerPlayerData, Integer> func, StaticAnimation... animations) {
-		super(consumption, skillName);
-		this.attackAnimations = animations;
-		this.selector = func;
-	}
-	
-	public SelectiveAttackSkill(float consumption, int duration, String skillName, Function<ServerPlayerData, Integer> func, StaticAnimation... animations) {
-		super(consumption, duration, ActivateType.ONE_SHOT, skillName);
+	public SelectiveAttackSkill(Builder<? extends Skill> builder, Function<ServerPlayerData, Integer> func, StaticAnimation... animations) {
+		super(builder);
+		this.properties = Lists.<Map<AttackPhaseProperty<?>, Object>>newArrayList();
 		this.attackAnimations = animations;
 		this.selector = func;
 	}
@@ -41,9 +40,9 @@ public class SelectiveAttackSkill extends SpecialAttackSkill {
 	
 	@Override
 	public SpecialAttackSkill registerPropertiesToAnimation() {
-		for(StaticAnimation animation : this.attackAnimations) {
+		for (StaticAnimation animation : this.attackAnimations) {
 			AttackAnimation anim = ((AttackAnimation)animation);
-			for(Phase phase : anim.phases) {
+			for (Phase phase : anim.phases) {
 				phase.addProperties(this.properties.get(0).entrySet());
 			}
 		}

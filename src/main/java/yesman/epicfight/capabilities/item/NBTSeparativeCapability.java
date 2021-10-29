@@ -7,21 +7,21 @@ import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.item.ItemStack;
 
-public class NBTPredicateCapability extends CapabilityItem {
+public class NBTSeparativeCapability extends CapabilityItem {
 	private List<Pair<Predicate<ItemStack>, CapabilityItem>> variables;
 	private CapabilityItem defaultCapability;
 	
-	public NBTPredicateCapability(List<Pair<Predicate<ItemStack>, CapabilityItem>> variables, CapabilityItem defaultCapability) {
+	public NBTSeparativeCapability(List<Pair<Predicate<ItemStack>, CapabilityItem>> variables, CapabilityItem defaultCapability) {
 		super(WeaponCategory.NOT_WEAON);
 		this.variables = variables;
 		this.defaultCapability = defaultCapability;
 	}
 	
 	@Override
-	public CapabilityItem get(ItemStack item) {
+	public CapabilityItem getFinal(ItemStack item) {
 		for (Pair<Predicate<ItemStack>, CapabilityItem> pair : this.variables) {
 			if (pair.getFirst().test(item)) {
-				return pair.getSecond().get(item);
+				return pair.getSecond().getFinal(item);
 			}
 		}
 		return this.defaultCapability;

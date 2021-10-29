@@ -1,4 +1,4 @@
-package yesman.epicfight.entity.ai;
+package yesman.epicfight.entity.ai.goal;
 
 import java.util.EnumSet;
 

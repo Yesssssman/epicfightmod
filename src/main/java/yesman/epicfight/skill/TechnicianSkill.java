@@ -14,8 +14,8 @@ public class TechnicianSkill extends PassiveSkill {
 	private static final UUID EVENT_UUID = UUID.fromString("99e5c782-fdaf-11eb-9a03-0242ac130003");
 	private static final SkillDataKey<Boolean> GAINED = SkillDataKey.createDataKey(SkillDataManager.ValueType.BOOLEAN);
 	
-	public TechnicianSkill() {
-		super("technician");
+	public TechnicianSkill(Builder<? extends Skill> builder) {
+		super(builder);
 	}
 	
 	@Override

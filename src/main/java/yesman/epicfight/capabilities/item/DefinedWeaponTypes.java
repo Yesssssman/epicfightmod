@@ -4,8 +4,10 @@ import java.util.Map;
 import java.util.function.Function;
 
 import com.google.common.collect.Maps;
+import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.item.Item;
+import net.minecraft.item.TieredItem;
 import net.minecraft.util.Hand;
 import yesman.epicfight.animation.LivingMotion;
 import yesman.epicfight.capabilities.ModCapabilities;
@@ -13,6 +15,7 @@ import yesman.epicfight.capabilities.entity.player.PlayerData;
 import yesman.epicfight.capabilities.item.CapabilityItem.HoldOption;
 import yesman.epicfight.capabilities.item.CapabilityItem.Style;
 import yesman.epicfight.capabilities.item.CapabilityItem.WeaponCategory;
+import yesman.epicfight.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.gamedata.Animations;
 import yesman.epicfight.gamedata.Colliders;
 import yesman.epicfight.gamedata.Skills;
@@ -21,7 +24,7 @@ import yesman.epicfight.skill.KatanaPassive;
 import yesman.epicfight.skill.SkillCategory;
 
 public class DefinedWeaponTypes {
-	public static final Function<Item, CapabilityItem> AXE = item -> {
+	public static final Function<Item, CapabilityItem> AXE = (item) -> {
 		ModWeaponCapability cap = new ModWeaponCapability(ModWeaponCapability.builder()
 			.setCategory(WeaponCategory.AXE)
 			.setHitSound(Sounds.BLADE_HIT)
@@ -31,19 +34,34 @@ public class DefinedWeaponTypes {
 			.addStyleSpecialAttack(Style.ONE_HAND, Skills.GUILLOTINE_AXE)
 			.addLivingMotionModifier(Style.ONE_HAND, LivingMotion.BLOCK, Animations.SWORD_GUARD)
 		);
+		
+		if (item instanceof TieredItem) {
+			int harvestLevel = ((TieredItem)item).getTier().getHarvestLevel();
+			if (harvestLevel != 0) {
+				cap.addStyleAttibute(CapabilityItem.Style.COMMON, Pair.of(EpicFightAttributes.ARMOR_NEGATION.get(), EpicFightAttributes.getArmorNegationModifier(10.0D * harvestLevel)));
+			}
+			cap.addStyleAttibute(CapabilityItem.Style.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.7D + 0.3D * harvestLevel)));
+		}
+		
 		return cap;
 	};
-	public static final Function<Item, CapabilityItem> FIST = item -> new KnuckleCapability();
-	public static final Function<Item, CapabilityItem> HOE = item -> {
+	public static final Function<Item, CapabilityItem> FIST = (item) -> new KnuckleCapability();
+	public static final Function<Item, CapabilityItem> HOE = (item) -> {
 		ModWeaponCapability cap = new ModWeaponCapability(ModWeaponCapability.builder()
 			.setCategory(WeaponCategory.HOE)
 			.setHitSound(Sounds.BLADE_HIT)
 			.setWeaponCollider(Colliders.tools).addStyleCombo(Style.ONE_HAND, Animations.TOOL_AUTO_1, Animations.TOOL_AUTO_2, Animations.TOOL_DASH, Animations.SWORD_AIR_SLASH)
 			.addStyleCombo(Style.MOUNT, Animations.SWORD_MOUNT_ATTACK)
 		);
+		
+		if (item instanceof TieredItem) {
+			int harvestLevel = ((TieredItem)item).getTier().getHarvestLevel();
+			cap.addStyleAttibute(CapabilityItem.Style.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(-0.4D + 0.1D * harvestLevel)));
+		}
+		
 		return cap;
 	};
-	public static final Function<Item, CapabilityItem> PICKAXE = item -> {
+	public static final Function<Item, CapabilityItem> PICKAXE = (item) -> {
 		ModWeaponCapability cap = new ModWeaponCapability(ModWeaponCapability.builder()
 			.setCategory(WeaponCategory.PICKAXE)
 			.setHitSound(Sounds.BLADE_HIT)
@@ -51,18 +69,33 @@ public class DefinedWeaponTypes {
 			.addStyleCombo(Style.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
 			.addStyleCombo(Style.MOUNT, Animations.SWORD_MOUNT_ATTACK)
 		);
+		
+		if (item instanceof TieredItem) {
+			int harvestLevel = ((TieredItem)item).getTier().getHarvestLevel();
+			if (harvestLevel != 0) {
+				cap.addStyleAttibute(CapabilityItem.Style.COMMON, Pair.of(EpicFightAttributes.ARMOR_NEGATION.get(), EpicFightAttributes.getArmorNegationModifier(6.0D * harvestLevel)));
+			}
+			cap.addStyleAttibute(CapabilityItem.Style.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.4D + 0.1D * harvestLevel)));
+		}
+		
 		return cap;
 	};
-	public static final Function<Item, CapabilityItem> SHOVEL = item -> {
+	public static final Function<Item, CapabilityItem> SHOVEL = (item) -> {
 		ModWeaponCapability cap = new ModWeaponCapability(ModWeaponCapability.builder()
 			.setCategory(WeaponCategory.SHOVEL)
 			.setWeaponCollider(Colliders.tools)
 			.addStyleCombo(Style.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
 			.addStyleCombo(Style.MOUNT, Animations.SWORD_MOUNT_ATTACK)
 		);
+		
+		if (item instanceof TieredItem) {
+			int harvestLevel = ((TieredItem)item).getTier().getHarvestLevel();
+			cap.addStyleAttibute(CapabilityItem.Style.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.8D + 0.4D * harvestLevel)));
+		}
+		
 		return cap;
 	};
-	public static final Function<Item, CapabilityItem> SWORD = item -> {
+	public static final Function<Item, CapabilityItem> SWORD = (item) -> {
 		ModWeaponCapability cap = new ModWeaponCapability(ModWeaponCapability.builder()
 			.setCategory(WeaponCategory.SWORD)
 			.setStyleGetter((playerdata) -> playerdata.getHeldItemCapability(Hand.OFF_HAND).getWeaponCategory() == WeaponCategory.SWORD ? Style.TWO_HAND : Style.ONE_HAND)
@@ -77,9 +110,16 @@ public class DefinedWeaponTypes {
 			.addLivingMotionModifier(Style.TWO_HAND, LivingMotion.BLOCK, Animations.SWORD_DUAL_GUARD)
 			.addOffhandPredicator((itemstack) -> ModCapabilities.getItemStackCapability(itemstack).weaponCategory == WeaponCategory.SWORD)
 		);
+		
+		if (item instanceof TieredItem) {
+			int harvestLevel = ((TieredItem)item).getTier().getHarvestLevel();
+			cap.addStyleAttibute(CapabilityItem.Style.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.5D + 0.2D * harvestLevel)));
+			cap.addStyleAttibute(CapabilityItem.Style.COMMON, Pair.of(EpicFightAttributes.MAX_STRIKES.get(), EpicFightAttributes.getMaxStrikesModifier(1)));
+		}
+		
 		return cap;
 	};
-	public static final Function<Item, CapabilityItem> SPEAR = item -> {
+	public static final Function<Item, CapabilityItem> SPEAR = (item) -> {
 		ModWeaponCapability cap = new ModWeaponCapability(ModWeaponCapability.builder()
 			.setCategory(WeaponCategory.SPEAR)
 			.setStyleGetter((playerdata) -> playerdata.getOriginalEntity().getHeldItemOffhand().isEmpty() ? Style.TWO_HAND : Style.ONE_HAND)
@@ -97,7 +137,7 @@ public class DefinedWeaponTypes {
 		);
 		return cap;
 	};
-	public static final Function<Item, CapabilityItem> GREATSWORD = item -> {
+	public static final Function<Item, CapabilityItem> GREATSWORD = (item) -> {
 		ModWeaponCapability cap = new ModWeaponCapability(ModWeaponCapability.builder()
 			.setCategory(WeaponCategory.GREATSWORD)
 			.setStyleGetter((playerdata) -> Style.TWO_HAND)
@@ -119,7 +159,7 @@ public class DefinedWeaponTypes {
 		);
 		return cap;
 	};
-	public static final Function<Item, CapabilityItem> KATANA = item -> {
+	public static final Function<Item, CapabilityItem> KATANA = (item) -> {
 		ModWeaponCapability cap = new ModWeaponCapability(ModWeaponCapability.builder()
 			.setCategory(WeaponCategory.KATANA)
 			.setStyleGetter((entitydata) -> {
@@ -161,7 +201,7 @@ public class DefinedWeaponTypes {
 		);
 		return cap;
 	};
-	public static final Function<Item, CapabilityItem> TACHI = item -> {
+	public static final Function<Item, CapabilityItem> TACHI = (item) -> {
 		ModWeaponCapability cap = new ModWeaponCapability(ModWeaponCapability.builder()
 			.setCategory(WeaponCategory.TACHI)
 			.setStyleGetter((playerdata) -> Style.TWO_HAND)
@@ -184,7 +224,7 @@ public class DefinedWeaponTypes {
 		);
 		return cap;
 	};
-	public static final Function<Item, CapabilityItem> LONGSWORD = item -> {
+	public static final Function<Item, CapabilityItem> LONGSWORD = (item) -> {
 		ModWeaponCapability weaponCapability = new ModWeaponCapability(ModWeaponCapability.builder()
 			.setCategory(WeaponCategory.LONGSWORD)
 			.setStyleGetter((playerdata) -> {
@@ -224,12 +264,13 @@ public class DefinedWeaponTypes {
 		);
 		return weaponCapability;
 	};
-	public static final Function<Item, CapabilityItem> DAGGER = item -> {
+	public static final Function<Item, CapabilityItem> DAGGER = (item) -> {
 		ModWeaponCapability weaponCapability = new ModWeaponCapability(ModWeaponCapability.builder()
 			.setCategory(WeaponCategory.DAGGER)
 			.setStyleGetter((playerdata) -> playerdata.getHeldItemCapability(Hand.OFF_HAND).getWeaponCategory() == WeaponCategory.DAGGER ? Style.TWO_HAND : Style.ONE_HAND)
 			.setHitSound(Sounds.BLADE_HIT)
 			.setWeaponCollider(Colliders.dagger)
+			.addOffhandPredicator((itemstack) -> ModCapabilities.getItemStackCapability(itemstack).weaponCategory == WeaponCategory.DAGGER)
 			.addStyleCombo(Style.ONE_HAND, Animations.DAGGER_AUTO_1, Animations.DAGGER_AUTO_2, Animations.DAGGER_AUTO_3, Animations.SWORD_DASH, Animations.DAGGER_AIR_SLASH)
 			.addStyleCombo(Style.TWO_HAND, Animations.DAGGER_DUAL_AUTO_1, Animations.DAGGER_DUAL_AUTO_2, Animations.DAGGER_DUAL_AUTO_3, Animations.DAGGER_DUAL_AUTO_4, Animations.DAGGER_DUAL_DASH, Animations.DAGGER_DUAL_AIR_SLASH)
 			.addStyleCombo(Style.MOUNT, Animations.SWORD_MOUNT_ATTACK)
@@ -241,6 +282,7 @@ public class DefinedWeaponTypes {
 	public static final Function<Item, CapabilityItem> BOW = BowCapability::new;
 	public static final Function<Item, CapabilityItem> CROSSBOW = CrossbowCapability::new;
 	public static final Function<Item, CapabilityItem> TRIDENT = TridentCapability::new;
+	public static final Function<Item, CapabilityItem> SHIELD = ShieldCapability::new;
 	
 	private static final Map<String, Function<Item, CapabilityItem>> TYPES = Maps.newHashMap();
 	
@@ -260,6 +302,7 @@ public class DefinedWeaponTypes {
 		TYPES.put("bow", BOW);
 		TYPES.put("crossbow", CROSSBOW);
 		TYPES.put("trident", TRIDENT);
+		TYPES.put("shield", SHIELD);
 	}
 	
 	public static Function<Item, CapabilityItem> get(String typeName) {

@@ -22,44 +22,87 @@ import yesman.epicfight.client.capabilites.player.ClientPlayerData;
 import yesman.epicfight.client.events.engine.ControllEngine;
 import yesman.epicfight.client.gui.BattleModeGui;
 import yesman.epicfight.config.ConfigurationIngame;
-import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.ModNetworkManager;
 import yesman.epicfight.network.server.STCSetSkillValue;
-import yesman.epicfight.network.server.STCSkillExecutionFeedback;
 import yesman.epicfight.network.server.STCSetSkillValue.Target;
+import yesman.epicfight.network.server.STCSkillExecutionFeedback;
 import yesman.epicfight.utils.math.Formulars;
 
 public abstract class Skill {
-	protected ResourceLocation registryName;
-	protected final SkillCategory slot;
-	protected final boolean isActiveSkill;
+	public static class Builder<T extends Skill> {
+		protected final ResourceLocation registryName;
+		protected SkillCategory category;
+		protected float consumption;
+		protected int maxDuration;
+		protected int maxStack;
+		protected int requiredXp;
+		protected ActivateType activateType;
+		protected Resource resource;
+		
+		public Builder(ResourceLocation resourceLocation) {
+			this.registryName = resourceLocation;
+			this.maxDuration = 0;
+			this.maxStack = 1;
+		}
+		
+		public Builder<T> setCategory(SkillCategory category) {
+			this.category = category;
+			return this;
+		}
+		
+		public Builder<T> setConsumption(float consumption) {
+			this.consumption = consumption;
+			return this;
+		}
+		
+		public Builder<T> setMaxDuration(int maxDuration) {
+			this.maxDuration = maxDuration;
+			return this;
+		}
+		
+		public Builder<T> setMaxStack(int maxStack) {
+			this.maxStack = maxStack;
+			return this;
+		}
+		
+		public Builder<T> setRequiredXp(int requiredXp) {
+			this.requiredXp = requiredXp;
+			return this;
+		}
+		
+		public Builder<T> setActivateType(ActivateType activateType) {
+			this.activateType = activateType;
+			return this;
+		}
+		
+		public Builder<T> setResource(Resource resource) {
+			this.resource = resource;
+			return this;
+		}
+	}
+	
+	public static Builder<? extends Skill> createBuilder(ResourceLocation registryName) {
+		return new Builder<Skill>(registryName);
+	}
+	
+	protected final ResourceLocation registryName;
+	protected final SkillCategory category;
 	protected final float consumption;
 	protected final int maxDuration;
 	protected final int maxStackSize;
-	protected ActivateType activateType;
-	protected Resource resource;
+	protected final int requiredXp;
+	protected final ActivateType activateType;
+	protected final Resource resource;
 	
-	public Skill(SkillCategory index, float consumption, ActivateType activateType, Resource cooldownType, String skillName) {
-		this(index, consumption, 0, 1, true, activateType, cooldownType, skillName);
-	}
-	
-	public Skill(SkillCategory index, float consumption, int maxStack, ActivateType activateType, Resource resource, String skillName) {
-		this(index, consumption, 0, maxStack, true, activateType, resource, skillName);
-	}
-	
-	public Skill(SkillCategory index, float consumption, int duration, boolean isActiveSkill, ActivateType activateType, Resource resource, String skillName) {
-		this(index, consumption, duration, 1, true, activateType, resource, skillName);
-	}
-	
-	public Skill(SkillCategory index, float consumption, int duration, int maxStack, boolean isActiveSkill, ActivateType activateType, Resource resource, String skillName) {
-		this.slot = index;
-		this.consumption = consumption;
-		this.maxDuration = duration;
-		this.isActiveSkill = isActiveSkill;
-		this.maxStackSize = maxStack;
-		this.registryName = new ResourceLocation(EpicFightMod.MODID, skillName);
-		this.activateType = activateType;
-		this.resource = resource;
+	public Skill(Builder<? extends Skill> builder) {
+		this.registryName = builder.registryName;
+		this.category = builder.category;
+		this.consumption = builder.consumption;
+		this.maxDuration = builder.maxDuration;
+		this.maxStackSize = builder.maxStack;
+		this.requiredXp = builder.requiredXp;
+		this.activateType = builder.activateType;
+		this.resource = builder.resource;
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -87,12 +130,12 @@ public abstract class Skill {
 	}
 	
 	public void cancelOnServer(ServerPlayerData executer, PacketBuffer args) {
-		ModNetworkManager.sendToPlayer(new STCSkillExecutionFeedback(this.slot.getIndex(), false), executer.getOriginalEntity());
+		ModNetworkManager.sendToPlayer(new STCSkillExecutionFeedback(this.category.getIndex(), false), executer.getOriginalEntity());
 	}
 	
 	public void executeOnServer(ServerPlayerData executer, PacketBuffer args) {
 		this.resource.consume.accept(this, executer);
-		executer.getSkill(this.slot).activate();
+		executer.getSkill(this.category).activate();
 	}
 	
 	public void cancelOnClient(ClientPlayerData executer, PacketBuffer args) {
@@ -173,30 +216,30 @@ public abstract class Skill {
 	}
 
 	public void setConsumptionSynchronize(ServerPlayerData executer, float amount) {
-		setConsumptionSynchronize(executer, this.slot, amount);
+		setConsumptionSynchronize(executer, this.category, amount);
 	}
 
 	public void setDurationSynchronize(ServerPlayerData executer, int amount) {
-		setDurationSynchronize(executer, this.slot, amount);
+		setDurationSynchronize(executer, this.category, amount);
 	}
 	
 	public void setStackSynchronize(ServerPlayerData executer, int amount) {
-		setStackSynchronize(executer, this.slot, amount);
+		setStackSynchronize(executer, this.category, amount);
 	}
 	
 	public static void setConsumptionSynchronize(ServerPlayerData executer, SkillCategory slot, float amount) {
 		executer.getSkill(slot).setResource(amount);
-		ModNetworkManager.sendToPlayer(new STCSetSkillValue(Target.COOLDOWN, slot.index, amount, false), executer.getOriginalEntity());
+		ModNetworkManager.sendToPlayer(new STCSetSkillValue(Target.COOLDOWN, slot.getIndex(), amount, false), executer.getOriginalEntity());
 	}
 	
 	public static void setDurationSynchronize(ServerPlayerData executer, SkillCategory slot, int amount) {
 		executer.getSkill(slot).setDuration(amount);
-		ModNetworkManager.sendToPlayer(new STCSetSkillValue(Target.DURATION, slot.index, amount, false), executer.getOriginalEntity());
+		ModNetworkManager.sendToPlayer(new STCSetSkillValue(Target.DURATION, slot.getIndex(), amount, false), executer.getOriginalEntity());
 	}
 	
 	public static void setStackSynchronize(ServerPlayerData executer, SkillCategory slot, int amount) {
 		executer.getSkill(slot).setStack(amount);
-		ModNetworkManager.sendToPlayer(new STCSetSkillValue(Target.STACK, slot.index, amount, false), executer.getOriginalEntity());
+		ModNetworkManager.sendToPlayer(new STCSetSkillValue(Target.STACK, slot.getIndex(), amount, false), executer.getOriginalEntity());
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -213,7 +256,7 @@ public abstract class Skill {
 		return this.registryName;
 	}
 	
-	public String getSkillName() {
+	public String getName() {
 		return this.registryName.getPath();
 	}
 	
@@ -222,7 +265,7 @@ public abstract class Skill {
 	}
 	
 	public SkillCategory getCategory() {
-		return this.slot;
+		return this.category;
 	}
 	
 	public int getMaxStack() {
@@ -233,8 +276,8 @@ public abstract class Skill {
 		return this.consumption;
 	}
 	
-	public boolean isActiveSkill() {
-		return this.isActiveSkill;
+	public int getRequiredXp() {
+		return this.requiredXp;
 	}
 	
 	public boolean resourcePredicate(PlayerData<?> playerdata) {
@@ -276,6 +319,11 @@ public abstract class Skill {
 		return false;
 	}
 	
+	@Override
+	public String toString() {
+		return this.getName();
+	}
+	
 	public static enum ActivateType {
 		PASSIVE, ONE_SHOT, DURATION, DURATION_INFINITE, TOGGLE;
 	}
@@ -283,16 +331,16 @@ public abstract class Skill {
 	public static enum Resource {
 		NONE((skill, playerdata) -> true, (skill, playerdata) -> {}),
 		SPECIAL_GAUAGE((skill, playerdata) -> {
-			return playerdata.getSkill(skill.slot).stack > 0;
+			return playerdata.getSkill(skill.category).stack > 0;
 		}, (skill, playerdata) -> {
-			skill.setStackSynchronize(playerdata, playerdata.getSkill(skill.slot).getStack() - 1);
+			skill.setStackSynchronize(playerdata, playerdata.getSkill(skill.category).getStack() - 1);
 			skill.setDurationSynchronize(playerdata, skill.maxDuration);
 		}),
 		COOLDOWN((skill, playerdata) -> {
-			return playerdata.getSkill(skill.slot).stack > 0;
+			return playerdata.getSkill(skill.category).stack > 0;
 		}, (skill, playerdata) -> {
 			skill.setConsumptionSynchronize(playerdata, 0);
-			skill.setStackSynchronize(playerdata, playerdata.getSkill(skill.slot).getStack() - 1);
+			skill.setStackSynchronize(playerdata, playerdata.getSkill(skill.category).getStack() - 1);
 			skill.setDurationSynchronize(playerdata, skill.maxDuration);
 		}),
 		STAMINA((skill, playerdata) -> {

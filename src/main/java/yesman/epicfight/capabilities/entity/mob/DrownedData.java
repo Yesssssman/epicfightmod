@@ -5,9 +5,9 @@ import net.minecraft.entity.monster.DrownedEntity;
 import net.minecraft.item.Items;
 import yesman.epicfight.animation.LivingMotion;
 import yesman.epicfight.client.animation.AnimatorClient;
-import yesman.epicfight.entity.ai.AttackPatternGoal;
-import yesman.epicfight.entity.ai.ChasingGoal;
-import yesman.epicfight.entity.ai.RangeAttackMobGoal;
+import yesman.epicfight.entity.ai.goal.AttackPatternGoal;
+import yesman.epicfight.entity.ai.goal.ChasingGoal;
+import yesman.epicfight.entity.ai.goal.RangeAttackMobGoal;
 import yesman.epicfight.gamedata.Animations;
 import yesman.epicfight.gamedata.AttackCombos;
 

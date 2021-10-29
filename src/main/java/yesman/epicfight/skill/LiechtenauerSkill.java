@@ -13,14 +13,12 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.server.ServerWorld;
-import yesman.epicfight.animation.LivingMotion;
 import yesman.epicfight.capabilities.entity.player.PlayerData;
 import yesman.epicfight.capabilities.entity.player.ServerPlayerData;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.gamedata.Animations;
 import yesman.epicfight.gamedata.Sounds;
-import yesman.epicfight.network.server.STCLivingMotionChange;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.particle.Particles;
 import yesman.epicfight.utils.game.IExtendedDamageSource;
@@ -28,8 +26,8 @@ import yesman.epicfight.utils.game.IExtendedDamageSource;
 public class LiechtenauerSkill extends SpecialAttackSkill {
 	private static final UUID EVENT_UUID = UUID.fromString("244c57c0-a837-11eb-bcbc-0242ac130002");
 	
-	public LiechtenauerSkill(String skillName) {
-		super(40.0F, 4, ActivateType.DURATION_INFINITE, skillName);
+	public LiechtenauerSkill(Builder<? extends Skill> builder) {
+		super(builder);
 	}
 	
 	@Override
@@ -86,7 +84,7 @@ public class LiechtenauerSkill extends SpecialAttackSkill {
 		});
 		
 		container.executer.getEventListener().addEventListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID, (event) -> {
-			if (event.getPlayerData().getSkill(this.slot).isActivated()) {
+			if (event.getPlayerData().getSkill(this.category).isActivated()) {
 				ClientPlayerEntity clientPlayer = event.getPlayerData().getOriginalEntity();
 				clientPlayer.setSprinting(false);
 				clientPlayer.sprintToggleTimer = -1;
@@ -107,21 +105,17 @@ public class LiechtenauerSkill extends SpecialAttackSkill {
 	
 	@Override
 	public void executeOnServer(ServerPlayerData executer, PacketBuffer args) {
-		if (executer.getSkill(this.slot).isActivated()) { 
+		if (executer.getSkill(this.category).isActivated()) { 
 			super.cancelOnServer(executer, args);
-			this.setConsumptionSynchronize(executer, this.consumption * ((float)executer.getSkill(this.slot).duration /
+			this.setConsumptionSynchronize(executer, this.consumption * ((float)executer.getSkill(this.category).duration /
 					(this.maxDuration + EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.SWEEPING, executer.getOriginalEntity()) + 1)));
 			this.setDurationSynchronize(executer, 0);
-			this.setStackSynchronize(executer, executer.getSkill(this.slot).getStack() - 1);
-			executer.setLivingMotionCurrentItem(executer.getHeldItemCapability(Hand.MAIN_HAND));
+			this.setStackSynchronize(executer, executer.getSkill(this.category).getStack() - 1);
+			executer.setLivingMotionCurrentItem(executer.getHeldItemCapability(Hand.MAIN_HAND), Hand.MAIN_HAND);
 		} else {
 			this.setDurationSynchronize(executer, this.maxDuration + EnchantmentHelper.getMaxEnchantmentLevel(Enchantments.SWEEPING, executer.getOriginalEntity()));
-			executer.getSkill(this.slot).activate();
-			STCLivingMotionChange msg = new STCLivingMotionChange(executer.getOriginalEntity().getEntityId(), 6);
-			msg.setMotions(LivingMotion.IDLE, LivingMotion.WALK, LivingMotion.RUN, LivingMotion.JUMP, LivingMotion.KNEEL, LivingMotion.SNEAK);
-			msg.setAnimations(Animations.BIPED_HOLD_LONGSWORD, Animations.BIPED_HOLD_LONGSWORD, Animations.BIPED_HOLD_LONGSWORD, Animations.BIPED_HOLD_LONGSWORD,
-					Animations.BIPED_HOLD_LONGSWORD, Animations.BIPED_HOLD_LONGSWORD);
-			((ServerPlayerData)executer).modifyLivingMotion(msg);
+			executer.getSkill(this.category).activate();
+			executer.setLivingMotionCurrentItem(executer.getHeldItemCapability(Hand.MAIN_HAND), Hand.MAIN_HAND);
 		}
 	}
 	
@@ -129,13 +123,17 @@ public class LiechtenauerSkill extends SpecialAttackSkill {
 	public void cancelOnServer(ServerPlayerData executer, PacketBuffer args) {
 		super.cancelOnServer(executer, args);
 		this.setConsumptionSynchronize(executer, 0);
-		this.setStackSynchronize(executer, executer.getSkill(this.slot).getStack() - 1);
-		executer.setLivingMotionCurrentItem(executer.getHeldItemCapability(Hand.MAIN_HAND));
+		this.setStackSynchronize(executer, executer.getSkill(this.category).getStack() - 1);
+		executer.setLivingMotionCurrentItem(executer.getHeldItemCapability(Hand.MAIN_HAND), Hand.MAIN_HAND);
 	}
 	
 	@Override
 	public boolean canExecute(PlayerData<?> executer) {
-		return executer.getHeldItemCapability(Hand.MAIN_HAND).getSpecialAttack(executer) == this && executer.getOriginalEntity().getRidingEntity() == null;
+		if (executer.isRemote()) {
+			return super.canExecute(executer);
+		} else {
+			return executer.getHeldItemCapability(Hand.MAIN_HAND).getSpecialAttack(executer) == this && executer.getOriginalEntity().getRidingEntity() == null;
+		}
 	}
 	
 	@Override

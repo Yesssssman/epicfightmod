@@ -147,7 +147,7 @@ public class SkillContainer {
 		return this.stack;
 	}
 
-	public Skill getContaining() {
+	public Skill getSkill() {
 		return this.containingSkill;
 	}
 	
@@ -177,6 +177,10 @@ public class SkillContainer {
 	
 	public boolean isFull() {
 		return this.containingSkill != null ? this.stack >= this.containingSkill.maxStackSize : true;
+	}
+	
+	public boolean isReady() {
+		return this.containingSkill != null ? this.stack > 0 : true;
 	}
 	
 	public float getResource(float partialTicks) {

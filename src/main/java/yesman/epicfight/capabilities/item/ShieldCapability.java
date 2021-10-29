@@ -5,6 +5,7 @@ import java.util.Map;
 import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.item.Item;
+import net.minecraft.util.Hand;
 import yesman.epicfight.animation.LivingMotion;
 import yesman.epicfight.animation.types.StaticAnimation;
 import yesman.epicfight.capabilities.entity.player.PlayerData;
@@ -19,7 +20,7 @@ public class ShieldCapability extends CapabilityItem {
 	}
 	
 	@Override
-	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(PlayerData<?> playerdata) {
+	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(PlayerData<?> playerdata, Hand hand) {
 		return ImmutableMap.of(LivingMotion.BLOCK_SHIELD, this.blockingMotion);
 	}
 }

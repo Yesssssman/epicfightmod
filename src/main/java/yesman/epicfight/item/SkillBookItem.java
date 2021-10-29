@@ -32,7 +32,7 @@ public class SkillBookItem extends Item {
 	}
 	
 	public static void setContainingSkill(Skill skill, ItemStack stack) {
-		setContainingSkill(skill.getSkillName(), stack);
+		setContainingSkill(skill.getName(), stack);
 	}
 	
 	public static Skill getContainSkill(ItemStack stack) {

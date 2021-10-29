@@ -50,7 +50,7 @@ public class StaticAnimation extends DynamicAnimation {
 		this.namespaceId = animationManager.getNamespaceHash();
 		this.animationId = animationManager.getIdCounter();
 		animationManager.getIdMap().put(this.animationId, this);
-		this.animationLocation = new ResourceLocation(animationManager.getModid(), "animations/" + path);
+		this.animationLocation = new ResourceLocation(animationManager.getModid(), "models/animations/" + path);
 		animationManager.getNameMap().put(this.animationLocation, this);
 		this.model = model;
 	}
@@ -59,13 +59,13 @@ public class StaticAnimation extends DynamicAnimation {
 		super(convertTime, repeatPlay);
 		this.namespaceId = -1;
 		this.animationId = -1;
-		this.animationLocation = new ResourceLocation(EpicFightMod.getInstance().animationManager.getModid(), "animations/" + path);
+		this.animationLocation = new ResourceLocation(EpicFightMod.getInstance().animationManager.getModid(), "models/animations/" + path);
 		this.model = model;
 	}
 	
 	public void loadAnimation(IResourceManager resourceManager) {
 		try {
-			int id = Integer.parseInt(this.animationLocation.getPath().substring(11));
+			int id = Integer.parseInt(this.animationLocation.getPath().substring(18));
 			StaticAnimation animation = EpicFightMod.getInstance().animationManager.findAnimation(this.namespaceId, id);
 			this.jointTransforms = animation.jointTransforms;
 			this.setTotalTime(animation.totalTime);

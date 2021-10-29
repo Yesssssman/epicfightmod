@@ -22,10 +22,10 @@ import net.minecraft.util.math.vector.Vector3d;
 import yesman.epicfight.capabilities.ModCapabilities;
 import yesman.epicfight.capabilities.entity.mob.Faction;
 import yesman.epicfight.capabilities.item.CapabilityItem;
-import yesman.epicfight.entity.ai.AttackPatternGoal;
-import yesman.epicfight.entity.ai.ChasingGoal;
-import yesman.epicfight.entity.ai.RangeAttackMobGoal;
 import yesman.epicfight.entity.ai.attribute.EpicFightAttributes;
+import yesman.epicfight.entity.ai.goal.AttackPatternGoal;
+import yesman.epicfight.entity.ai.goal.ChasingGoal;
+import yesman.epicfight.entity.ai.goal.RangeAttackMobGoal;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.server.STCMobInitialSetting;
 

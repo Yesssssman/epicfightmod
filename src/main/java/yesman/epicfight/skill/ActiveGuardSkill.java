@@ -41,8 +41,8 @@ public class ActiveGuardSkill extends GuardSkill {
 		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.TACHI, (item, player) -> Animations.LONGSWORD_GUARD_HIT);
 	}
 	
-	public ActiveGuardSkill() {
-		super("active_guard");
+	public ActiveGuardSkill(Builder<? extends Skill> builder) {
+		super(builder);
 	}
 	
 	@Override

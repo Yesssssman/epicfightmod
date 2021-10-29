@@ -6,7 +6,8 @@ import yesman.epicfight.utils.math.OpenMatrix4f;
 
 public abstract class CapabilityEntity<T extends Entity> {
 	protected T orgEntity;
-
+	protected boolean initialized = false;
+	
 	public abstract void update();
 
 	protected abstract void updateOnClient();
@@ -21,13 +22,17 @@ public abstract class CapabilityEntity<T extends Entity> {
 	}
 
 	public void onEntityJoinWorld(T entityIn) {
-		
+		this.initialized = true;
 	}
 
 	public T getOriginalEntity() {
 		return this.orgEntity;
 	}
-
+	
+	public boolean isInitialized() {
+		return this.initialized;
+	}
+	
 	public boolean isRemote() {
 		return this.orgEntity.world.isRemote;
 	}

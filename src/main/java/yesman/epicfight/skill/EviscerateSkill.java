@@ -22,8 +22,8 @@ public class EviscerateSkill extends SpecialAttackSkill {
 	private StaticAnimation first;
 	private StaticAnimation second;
 	
-	public EviscerateSkill(float consumption, String skillName) {
-		super(consumption, skillName);
+	public EviscerateSkill(Builder<? extends Skill> builder) {
+		super(builder);
 		this.first = Animations.EVISCERATE_FIRST;
 		this.second = Animations.EVISCERATE_SECOND;
 	}

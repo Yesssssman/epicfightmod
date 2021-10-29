@@ -26,7 +26,7 @@ import yesman.epicfight.capabilities.ModCapabilities;
 import yesman.epicfight.capabilities.item.ArmorCapability;
 import yesman.epicfight.capabilities.item.CapabilityItem;
 import yesman.epicfight.capabilities.item.DefinedWeaponTypes;
-import yesman.epicfight.capabilities.item.ShieldCapability;
+import yesman.epicfight.capabilities.item.NBTSeparativeCapability;
 import yesman.epicfight.config.CapabilityConfig;
 import yesman.epicfight.config.CapabilityConfig.CustomArmorConfig;
 import yesman.epicfight.config.CapabilityConfig.CustomWeaponConfig;
@@ -36,10 +36,9 @@ public class ProviderItem implements ICapabilityProvider, NonNullSupplier<Capabi
 	private static final Map<Class<? extends Item>, Function<Item, CapabilityItem>> CAPABILITY_BY_CLASS = new HashMap<Class<? extends Item>, Function<Item, CapabilityItem>> ();
 	private static final Map<Item, CapabilityItem> CAPABILITIES = new HashMap<Item, CapabilityItem> ();
 	
-	public static void makeMap() {
-		addConfigItems();
+	public static void registerWeaponClass() {
 		CAPABILITY_BY_CLASS.put(ArmorItem.class, ArmorCapability::new);
-		CAPABILITY_BY_CLASS.put(ShieldItem.class, ShieldCapability::new);
+		CAPABILITY_BY_CLASS.put(ShieldItem.class, DefinedWeaponTypes.SHIELD);
 		CAPABILITY_BY_CLASS.put(SwordItem.class, DefinedWeaponTypes.SWORD);
 		CAPABILITY_BY_CLASS.put(PickaxeItem.class, DefinedWeaponTypes.PICKAXE);
 		CAPABILITY_BY_CLASS.put(AxeItem.class, DefinedWeaponTypes.AXE);
@@ -49,7 +48,7 @@ public class ProviderItem implements ICapabilityProvider, NonNullSupplier<Capabi
 		CAPABILITY_BY_CLASS.put(CrossbowItem.class, DefinedWeaponTypes.CROSSBOW);
 	}
 	
-	public static void addInstance(Item item, CapabilityItem cap) {
+	public static void put(Item item, CapabilityItem cap) {
 		CAPABILITIES.put(item, cap);
 	}
 	
@@ -57,8 +56,22 @@ public class ProviderItem implements ICapabilityProvider, NonNullSupplier<Capabi
 		return CAPABILITIES.containsKey(item);
 	}
 	
-	public static void clear() {
-		CAPABILITY_BY_CLASS.clear();
+	public static void addDefaultItems() {
+		for (Item item : ForgeRegistries.ITEMS.getValues()) {
+			if (!CAPABILITIES.containsKey(item)) {
+				Class<?> clazz = item.getClass();
+				CapabilityItem capability = null;
+				
+				for (; clazz != null && capability == null; clazz = clazz.getSuperclass()) {
+					capability = CAPABILITY_BY_CLASS.getOrDefault(clazz, (argIn) -> null).apply(item);
+				}
+				
+				if (capability != null) {
+					EpicFightMod.LOGGER.info("register weapon capability for " + item);
+					CAPABILITIES.put(item, capability);
+				}
+			}
+		}
 	}
 	
 	public static void addConfigItems() {
@@ -83,7 +96,7 @@ public class ProviderItem implements ICapabilityProvider, NonNullSupplier<Capabi
 				if (item instanceof ArmorItem) {
 					ArmorCapability cap = new ArmorCapability(item, config.getWeight(), config.getStunArmor());
 					CAPABILITIES.put(item, cap);
-					EpicFightMod.LOGGER.info("Register Custom Capaiblity for " + config.getRegistryName());
+					EpicFightMod.LOGGER.info("Register Custom Capability for " + config.getRegistryName());
 				} else {
 					if (item == null) {
 						EpicFightMod.LOGGER.warn("Failed to load custom item " + config.getRegistryName() + ". Item not exist!");
@@ -95,34 +108,23 @@ public class ProviderItem implements ICapabilityProvider, NonNullSupplier<Capabi
 		}
 	}
 	
+	public static void clear() {
+		CAPABILITIES.clear();
+	}
+	
 	private CapabilityItem capability;
 	private LazyOptional<CapabilityItem> optional = LazyOptional.of(this);
 	
 	public ProviderItem(ItemStack itemstack) {
 		this.capability = CAPABILITIES.get(itemstack.getItem());
-		if (this.capability == null) {
-			this.capability = this.findByClass(itemstack.getItem());
-			if (this.capability != null) {
-				CAPABILITIES.put(itemstack.getItem(), this.capability);
-			}
-		}
 		
-		if (this.capability != null) {
-			this.capability = this.capability.get(itemstack);
+		if (this.capability instanceof NBTSeparativeCapability) {
+			this.capability = this.capability.getFinal(itemstack);
 		}
 	}
 	
 	public boolean hasCapability() {
 		return this.capability != null;
-	}
-	
-	private CapabilityItem findByClass(Item item) {
-		Class<?> clazz = item.getClass();
-		CapabilityItem cap = null;
-		for (; clazz != null && cap == null; clazz = clazz.getSuperclass()) {
-			cap = CAPABILITY_BY_CLASS.getOrDefault(clazz, (argIn) -> null).apply(item);
-		}
-		return cap;
 	}
 
 	@Override

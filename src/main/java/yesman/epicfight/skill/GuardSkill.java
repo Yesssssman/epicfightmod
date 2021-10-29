@@ -18,6 +18,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.api.distmarker.Dist;
@@ -58,8 +59,12 @@ public class GuardSkill extends Skill {
 		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.TACHI, (item, player) -> Animations.LONGSWORD_GUARD_HIT);
 	}
 	
-	public GuardSkill(String skillName) {
-		super(SkillCategory.GUARD, 0, 0, ActivateType.ONE_SHOT, Resource.STAMINA, skillName);
+	public static Skill.Builder<GuardSkill> createBuilder(ResourceLocation resourceLocation) {
+		return (new Skill.Builder<GuardSkill>(resourceLocation)).setCategory(SkillCategory.GUARD).setMaxStack(0).setActivateType(ActivateType.ONE_SHOT).setResource(Resource.STAMINA);
+	}
+	
+	public GuardSkill(Builder<? extends Skill> builder) {
+		super(builder);
 	}
 	
 	@Override
@@ -199,7 +204,7 @@ public class GuardSkill extends Skill {
 	@Override
 	public boolean isExecutableState(PlayerData<?> executer) {
 		EntityState playerState = executer.getEntityState();
-		return !(executer.getOriginalEntity().isElytraFlying() || executer.currentMotion == LivingMotion.FALL || !playerState.canExecuteSkill());
+		return !(executer.getOriginalEntity().isElytraFlying() || executer.currentMotion == LivingMotion.FALL || !playerState.canExecuteSkill()) && executer.isBattleMode();
 	}
 	
 	protected boolean isBlockableSource(DamageSource damageSource, boolean specialSourceBlockCondition) {

@@ -24,8 +24,9 @@ import net.minecraftforge.client.ForgeHooksClient;
 import yesman.epicfight.capabilities.ModCapabilities;
 import yesman.epicfight.capabilities.entity.LivingData;
 import yesman.epicfight.capabilities.item.ArmorCapability;
+import yesman.epicfight.capabilities.item.CapabilityItem;
 import yesman.epicfight.client.model.ClientModel;
-import yesman.epicfight.client.model.custom.CustomModelBakery;
+import yesman.epicfight.client.model.CustomModelBakery;
 import yesman.epicfight.client.renderer.ModRenderTypes;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.utils.math.OpenMatrix4f;
@@ -49,8 +50,9 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingData<E>, 
 		for (EquipmentSlotType slot : this.slots) {
 			ItemStack stack = entityliving.getItemStackFromSlot(slot);
 			Item item = stack.getItem();
+			CapabilityItem itemCapability = ModCapabilities.getItemStackCapability(stack);
 			
-			if (item instanceof ArmorItem) {
+			if (item instanceof ArmorItem && itemCapability instanceof ArmorCapability) {
 				ArmorItem armorItem = (ArmorItem) stack.getItem();
 				matrixStackIn.push();
 				if (slot != armorItem.getEquipmentSlot()) {
@@ -61,8 +63,15 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingData<E>, 
 				if (slot == EquipmentSlotType.HEAD && entityliving instanceof ZombieVillagerEntity) {
 					matrixStackIn.translate(0.0D, 0.1D, 0.0D);
 				}
+				/**
+				matrixStackIn.push();
+				matrixStackIn.translate(1.0D, 0.0D, 0.0D);
+				BipedModel<E> customModel = armorItem.getArmorModel(entityliving, stack, slot, originalRenderer.func_241736_a_(slot));
+				customModel.render(matrixStackIn, buffer.getBuffer(RenderType.getArmorCutoutNoCull(this.getArmorTexture(stack, entityliving, slot, null))), 
+						packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
+				matrixStackIn.pop();**/
 				
-				ClientModel model = this.getArmorModel(originalRenderer, entityliving, armorItem, stack, slot);
+				ClientModel model = this.getArmorModel(originalRenderer, entityliving, armorItem, stack, (ArmorCapability)itemCapability, slot);
 				boolean hasEffect = stack.hasEffect();
 				if (armorItem instanceof IDyeableArmorItem) {
 					int i = ((IDyeableArmorItem) armorItem).getColor(stack);
@@ -82,20 +91,18 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingData<E>, 
 		}
 	}
 	
-	private ClientModel getArmorModel(BipedArmorLayer<E, M, M> originalRenderer, E entityliving, ArmorItem armorItem, ItemStack stack, EquipmentSlotType slot) {
+	private ClientModel getArmorModel(BipedArmorLayer<E, M, M> originalRenderer, E entityliving, ArmorItem armorItem, ItemStack stack, ArmorCapability armorCapability, EquipmentSlotType slot) {
 		ResourceLocation registryName = armorItem.getRegistryName();
 		if (ARMOR_MODEL_MAP.containsKey(registryName)) {
 			return ARMOR_MODEL_MAP.get(registryName);
 		} else {
 			BipedModel<E> customModel = armorItem.getArmorModel(entityliving, stack, slot, originalRenderer.func_241736_a_(slot));
-			ClientModel model;
-			
+			ClientModel model = null;
 			if (customModel == null) {
-				ArmorCapability cap = (ArmorCapability)ModCapabilities.getItemStackCapability(stack);
-				if (cap == null) {
+				if (armorCapability == null) {
 					model = ArmorCapability.getBipedArmorModel(slot);
 				} else {
-					model = cap.getArmorModel(slot);
+					model = armorCapability.getArmorModel(slot);
 				}
 			} else {
 				EpicFightMod.LOGGER.info("baked new model for " + registryName);

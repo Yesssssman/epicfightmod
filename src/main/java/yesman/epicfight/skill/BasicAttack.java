@@ -9,6 +9,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.animation.LivingMotion;
@@ -20,6 +21,7 @@ import yesman.epicfight.capabilities.item.CapabilityItem;
 import yesman.epicfight.client.capabilites.player.ClientPlayerData;
 import yesman.epicfight.entity.eventlistener.BasicAttackEvent;
 import yesman.epicfight.entity.eventlistener.PlayerEventListener.EventType;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.ModNetworkManager;
 import yesman.epicfight.network.client.CTSExecuteSkill;
 import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
@@ -28,8 +30,12 @@ public class BasicAttack extends Skill {
 	private static final SkillDataKey<Integer> COMBO_COUNTER = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
 	private static final UUID EVENT_UUID = UUID.fromString("a42e0198-fdbc-11eb-9a03-0242ac130003");
 	
-	public BasicAttack() {
-		super(SkillCategory.BASIC_ATTACK, 0, ActivateType.ONE_SHOT, Resource.NONE, "basic_attack");
+	public static Skill.Builder<BasicAttack> createBuilder() {
+		return (new Builder<BasicAttack>(new ResourceLocation(EpicFightMod.MODID, "basic_attack"))).setCategory(SkillCategory.BASIC_ATTACK).setConsumption(0.0F).setActivateType(ActivateType.ONE_SHOT).setResource(Resource.NONE);
+	}
+	
+	public BasicAttack(Builder<? extends Skill> builder) {
+		super(builder);
 	}
 	
 	@Override
@@ -52,7 +58,7 @@ public class BasicAttack extends Skill {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void executeOnClient(ClientPlayerData executer, PacketBuffer args) {
-		ModNetworkManager.sendToServer(new CTSExecuteSkill(this.slot.getIndex(), true, args));
+		ModNetworkManager.sendToServer(new CTSExecuteSkill(this.category.getIndex(), true, args));
 	}
 	
 	@Override
@@ -71,7 +77,7 @@ public class BasicAttack extends Skill {
 		CapabilityItem cap = executer.getHeldItemCapability(Hand.MAIN_HAND);
 		StaticAnimation attackMotion = null;
 		ServerPlayerEntity player = executer.getOriginalEntity();
-		SkillDataManager dataManager = executer.getSkill(this.slot).getDataManager();
+		SkillDataManager dataManager = executer.getSkill(this.category).getDataManager();
 		int comboCounter = dataManager.getDataValue(COMBO_COUNTER);
 		
 		if (player.isPassenger()) {

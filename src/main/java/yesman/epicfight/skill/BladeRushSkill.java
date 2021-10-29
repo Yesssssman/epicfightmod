@@ -34,8 +34,8 @@ public class BladeRushSkill extends SpecialAttackSkill {
 	private static final SkillDataKey<Integer> COMBO_COUNT = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
 	private static final UUID EVENT_UUID = UUID.fromString("444a1a6a-c2f1-11eb-8529-0242ac130003");
 	
-	public BladeRushSkill(float consumption, String skillName) {
-		super(consumption, 1, 4, ActivateType.TOGGLE, skillName);
+	public BladeRushSkill(Builder<? extends Skill> builder) {
+		super(builder);
 	}
 	
 	@Override
@@ -51,15 +51,14 @@ public class BladeRushSkill extends SpecialAttackSkill {
 		container.getDataManager().registerData(COMBO_COUNT);
 		container.executer.getEventListener().addEventListener(EventType.DEALT_DAMAGE_POST_EVENT, EVENT_UUID, (event) -> {
 			int animationId = event.getDamageSource().getSkillId();
-			if (animationId >= Animations.BLADE_RUSH_FIRST.getId() && animationId <= Animations.BLADE_RUSH_FINISHER.getId() 
-					&& !event.getTarget().isAlive()) {
+			if (animationId >= Animations.BLADE_RUSH_FIRST.getId() && animationId <= Animations.BLADE_RUSH_FINISHER.getId() && !event.getTarget().isAlive()) {
 				this.setStackSynchronize(event.getPlayerData(), container.stack + 1);
 			}
 			return false;
 		});
 		
 		container.executer.getEventListener().addEventListener(EventType.BASIC_ATTACK_EVENT, EVENT_UUID, (event) -> {
-			if (event.getPlayerData().getSkill(this.slot).isActivated()) {
+			if (container.isActivated() && !container.isDisabled()) {
 				PacketBuffer buf = new PacketBuffer(Unpooled.buffer());
 				buf.writeBoolean(false);
 				this.executeOnServer(event.getPlayerData(), buf);
@@ -77,30 +76,30 @@ public class BladeRushSkill extends SpecialAttackSkill {
 	
 	@Override
 	public void executeOnServer(ServerPlayerData executer, PacketBuffer args) {
-		if (executer.getSkill(this.slot).isActivated() && args.readBoolean()) {
+		if (executer.getSkill(this.category).isActivated() && args.readBoolean()) {
 			this.cancelOnServer(executer, null);
 		} else {
 			int firstComboId = Animations.BLADE_RUSH_FIRST.getId();
-			int animationId = firstComboId + executer.getSkill(this.slot).getDataManager().getDataValue(COMBO_COUNT);
+			int animationId = firstComboId + executer.getSkill(this.category).getDataManager().getDataValue(COMBO_COUNT);
 			executer.playAnimationSynchronize(EpicFightMod.getInstance().animationManager.findAnimation(EpicFightMod.MODID.hashCode(), animationId), 0);
 			ModNetworkManager.sendToPlayer(new STCResetBasicAttackCool(), executer.getOriginalEntity());
-			executer.getSkill(this.slot).getDataManager().setData(COMBO_COUNT, (animationId - firstComboId + 1) % 4);
+			executer.getSkill(this.category).getDataManager().setData(COMBO_COUNT, (animationId - firstComboId + 1) % 4);
 			this.setDurationSynchronize(executer, this.maxDuration);
-			this.setStackSynchronize(executer, executer.getSkill(this.slot).getStack() - 1);
-			executer.getSkill(this.slot).activate();
+			this.setStackSynchronize(executer, executer.getSkill(this.category).getStack() - 1);
+			executer.getSkill(this.category).activate();
 		}
 	}
 	
 	@Override
 	public void cancelOnClient(ClientPlayerData executer, PacketBuffer args) {
-		executer.getSkill(this.slot).deactivate();
+		executer.getSkill(this.category).deactivate();
 	}
 	
 	@Override
 	public void cancelOnServer(ServerPlayerData executer, PacketBuffer args) {
-		executer.getSkill(this.slot).deactivate();
-		executer.getSkill(this.slot).getDataManager().setData(COMBO_COUNT, 0);
-		ModNetworkManager.sendToPlayer(new STCSkillExecutionFeedback(this.slot.getIndex(), false), executer.getOriginalEntity());
+		executer.getSkill(this.category).deactivate();
+		executer.getSkill(this.category).getDataManager().setData(COMBO_COUNT, 0);
+		ModNetworkManager.sendToPlayer(new STCSkillExecutionFeedback(this.category.getIndex(), false), executer.getOriginalEntity());
 	}
 	
 	@Override
@@ -114,8 +113,8 @@ public class BladeRushSkill extends SpecialAttackSkill {
 	@SuppressWarnings("deprecation")
 	@Override
 	public void onScreen(ClientPlayerData playerdata, float resolutionX, float resolutionY) {
-		if (playerdata.getSkill(this.slot).isActivated()) {
-			Minecraft.getInstance().getTextureManager().bindTexture(new ResourceLocation(EpicFightMod.MODID, "textures/gui/screen/blade_rush.png"));
+		if (playerdata.getSkill(this.category).isActivated()) {
+			Minecraft.getInstance().getTextureManager().bindTexture(new ResourceLocation(EpicFightMod.MODID, "textures/gui/overlay/blade_rush.png"));
 			GlStateManager.enableBlend();
 			GlStateManager.disableDepthTest();
 			GlStateManager.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);

@@ -7,8 +7,29 @@ import net.minecraftforge.fml.network.NetworkRegistry;
 import net.minecraftforge.fml.network.PacketDistributor;
 import net.minecraftforge.fml.network.simple.SimpleChannel;
 import yesman.epicfight.main.EpicFightMod;
-import yesman.epicfight.network.client.*;
-import yesman.epicfight.network.server.*;
+import yesman.epicfight.network.client.CTSChangeSkill;
+import yesman.epicfight.network.client.CTSExecuteSkill;
+import yesman.epicfight.network.client.CTSPlayAnimation;
+import yesman.epicfight.network.client.CTSReqPlayerInfo;
+import yesman.epicfight.network.client.CTSReqSpawnInfo;
+import yesman.epicfight.network.client.CTSRotatePlayerYaw;
+import yesman.epicfight.network.client.CTSSetPlayerTarget;
+import yesman.epicfight.network.client.CTSToggleMode;
+import yesman.epicfight.network.server.STCAddLearnedSkill;
+import yesman.epicfight.network.server.STCChangeSkill;
+import yesman.epicfight.network.server.STCGameruleChange;
+import yesman.epicfight.network.server.STCLivingMotionChange;
+import yesman.epicfight.network.server.STCMobInitialSetting;
+import yesman.epicfight.network.server.STCModifySkillData;
+import yesman.epicfight.network.server.STCNotifyPlayerYawChanged;
+import yesman.epicfight.network.server.STCPlayAnimation;
+import yesman.epicfight.network.server.STCPlayAnimationTP;
+import yesman.epicfight.network.server.STCPlayAnimationTarget;
+import yesman.epicfight.network.server.STCPotion;
+import yesman.epicfight.network.server.STCResetBasicAttackCool;
+import yesman.epicfight.network.server.STCSetSkillValue;
+import yesman.epicfight.network.server.STCSkillExecutionFeedback;
+import yesman.epicfight.network.server.STCToggleMode;
 
 public class ModNetworkManager {
 	private static final String PROTOCOL_VERSION = "1";
@@ -61,5 +82,6 @@ public class ModNetworkManager {
 		INSTANCE.registerMessage(id++, STCModifySkillData.class, STCModifySkillData::toBytes, STCModifySkillData::fromBytes, STCModifySkillData::handle);
 		INSTANCE.registerMessage(id++, STCGameruleChange.class, STCGameruleChange::toBytes, STCGameruleChange::fromBytes, STCGameruleChange::handle);
 		INSTANCE.registerMessage(id++, STCToggleMode.class, STCToggleMode::toBytes, STCToggleMode::fromBytes, STCToggleMode::handle);
+		INSTANCE.registerMessage(id++, STCAddLearnedSkill.class, STCAddLearnedSkill::toBytes, STCAddLearnedSkill::fromBytes, STCAddLearnedSkill::handle);
 	}
 }

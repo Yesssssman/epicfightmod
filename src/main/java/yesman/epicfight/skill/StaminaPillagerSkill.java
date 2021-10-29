@@ -7,8 +7,8 @@ import yesman.epicfight.entity.eventlistener.PlayerEventListener.EventType;
 public class StaminaPillagerSkill extends PassiveSkill {
 	private static final UUID EVENT_UUID = UUID.fromString("20807880-fd30-11eb-9a03-0242ac130003");
 	
-	public StaminaPillagerSkill() {
-		super("stamina_pillager");
+	public StaminaPillagerSkill(Builder<? extends Skill> builder) {
+		super(builder);
 	}
 	
 	@Override

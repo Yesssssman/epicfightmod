@@ -8,7 +8,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.ITextComponent;
 import yesman.epicfight.animation.types.AttackAnimation;
-import yesman.epicfight.animation.types.StaticAnimation;
 import yesman.epicfight.capabilities.entity.player.PlayerData;
 import yesman.epicfight.capabilities.entity.player.ServerPlayerData;
 import yesman.epicfight.capabilities.item.CapabilityItem;
@@ -19,21 +18,21 @@ import yesman.epicfight.network.server.STCResetBasicAttackCool;
 
 public class LethalSlicingSkill extends SpecialAttackSkill {
 	private static final UUID EVENT_UUID = UUID.fromString("bfa79c04-97a5-11eb-a8b3-0242ac130003");
-	private StaticAnimation elbow;
-	private StaticAnimation swing;
-	private StaticAnimation doubleSwing;
+	private AttackAnimation elbow;
+	private AttackAnimation swing;
+	private AttackAnimation doubleSwing;
 	
-	public LethalSlicingSkill(float consumption, String skillName) {
-		super(consumption, skillName);
-		this.elbow = Animations.LETHAL_SLICING;
-		this.swing = Animations.LETHAL_SLICING_ONCE;
-		this.doubleSwing = Animations.LETHAL_SLICING_TWICE;
+	public LethalSlicingSkill(Builder<? extends Skill> builder) {
+		super(builder);
+		this.elbow = (AttackAnimation)Animations.LETHAL_SLICING;
+		this.swing = (AttackAnimation)Animations.LETHAL_SLICING_ONCE;
+		this.doubleSwing = (AttackAnimation)Animations.LETHAL_SLICING_TWICE;
 	}
 	
 	@Override
 	public void onInitiate(SkillContainer container) {
 		super.onInitiate(container);
-		container.executer.getEventListener().addEventListener(EventType.ATTACK_ANIMATION_END_EVENT, EVENT_UUID, (event)->{
+		container.executer.getEventListener().addEventListener(EventType.ATTACK_ANIMATION_END_EVENT, EVENT_UUID, (event) -> {
 			if (event.getAnimationId() == Animations.LETHAL_SLICING.getId()) {
 				List<LivingEntity> hitEnemies = event.getAttackedEntity();
 				if (hitEnemies.size() <= 1) {
@@ -53,7 +52,7 @@ public class LethalSlicingSkill extends SpecialAttackSkill {
 	
 	@Override
 	public void executeOnServer(ServerPlayerData executer, PacketBuffer args) {
-		executer.playAnimationSynchronize(this.elbow, 0);
+		executer.playAnimationSynchronize(this.elbow, 0.0F);
 		ModNetworkManager.sendToPlayer(new STCResetBasicAttackCool(), executer.getOriginalEntity());
 		super.executeOnServer(executer, args);
 	}
@@ -68,14 +67,10 @@ public class LethalSlicingSkill extends SpecialAttackSkill {
 	
 	@Override
 	public SpecialAttackSkill registerPropertiesToAnimation() {
-		AttackAnimation _elbow = ((AttackAnimation)this.elbow);
-		AttackAnimation _swing = ((AttackAnimation)this.swing);
-		AttackAnimation _doubleSwing = ((AttackAnimation)this.doubleSwing);
-		_elbow.phases[0].addProperties(this.properties.get(0).entrySet());
-		_swing.phases[0].addProperties(this.properties.get(1).entrySet());
-		_doubleSwing.phases[0].addProperties(this.properties.get(1).entrySet());
-		_doubleSwing.phases[1].addProperties(this.properties.get(1).entrySet());
-		
+		this.elbow.phases[0].addProperties(this.properties.get(0).entrySet());
+		this.swing.phases[0].addProperties(this.properties.get(1).entrySet());
+		this.doubleSwing.phases[0].addProperties(this.properties.get(1).entrySet());
+		this.doubleSwing.phases[1].addProperties(this.properties.get(1).entrySet());
 		return this;
 	}
 }

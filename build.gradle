@@ -152,6 +152,7 @@ dependencies {
     // http://www.gradle.org/docs/current/userguide/dependency_management.html
     implementation fg.deobf("curse.maven:tetra-289712:3468014")
     implementation fg.deobf("curse.maven:mgui-351914:3456505")
+    implementation fg.deobf("curse.maven:twilight-forest-227639:3413560")
     annotationProcessor 'org.spongepowered:mixin:0.8.2:processor'
 }
 

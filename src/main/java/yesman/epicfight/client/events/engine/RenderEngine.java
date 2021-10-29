@@ -87,7 +87,7 @@ import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.capabilites.player.ClientPlayerData;
 import yesman.epicfight.client.gui.BattleModeGui;
 import yesman.epicfight.client.gui.EntityIndicator;
-import yesman.epicfight.client.input.ModKeys;
+import yesman.epicfight.client.input.EpicFightKeyBindings;
 import yesman.epicfight.client.renderer.AimHelperRenderer;
 import yesman.epicfight.client.renderer.FirstPersonRenderer;
 import yesman.epicfight.client.renderer.ModRenderTypes;
@@ -361,7 +361,7 @@ public class RenderEngine {
 				CapabilityItem cap = ModCapabilities.getItemStackCapability(event.getItemStack());
 				ClientPlayerData playerdata = (ClientPlayerData) event.getPlayer().getCapability(ModCapabilities.CAPABILITY_ENTITY, null).orElse(null);
 				if (cap != null && playerdata != null) {
-					if (ClientEngine.instance.inputController.isKeyDown(ModKeys.SPECIAL_SKILL_TOOLTIP)) {
+					if (ClientEngine.instance.inputController.isKeyDown(EpicFightKeyBindings.SPECIAL_SKILL_TOOLTIP)) {
 						if (cap.getSpecialAttack(playerdata) != null) {
 							event.getToolTip().clear();
 							List<ITextComponent> skilltooltip = cap.getSpecialAttack(playerdata).getTooltipOnItem(event.getItemStack(), cap, playerdata);
@@ -445,9 +445,9 @@ public class RenderEngine {
 				ClientPlayerData playerdata = ClientEngine.instance.getPlayerData();
 				
 				if (playerdata != null) {
-					for (SkillContainer skillContainer : playerdata.getSkillCapability().skills) {
-						if (skillContainer.getContaining() != null) {
-							skillContainer.getContaining().onScreen(playerdata, sr.getScaledWidth(), sr.getScaledHeight());
+					for (SkillContainer skillContainer : playerdata.getSkillCapability().skillContainers) {
+						if (skillContainer.getSkill() != null) {
+							skillContainer.getSkill().onScreen(playerdata, sr.getScaledWidth(), sr.getScaledHeight());
 						}
 					}
 					

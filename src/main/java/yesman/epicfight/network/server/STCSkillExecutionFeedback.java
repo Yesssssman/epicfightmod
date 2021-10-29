@@ -56,7 +56,7 @@ public class STCSkillExecutionFeedback {
 			
 			if (playerdata != null) {
 				if (!msg.active) {
-					playerdata.getSkill(msg.skillSlot).getContaining().cancelOnClient(playerdata, msg.getBuffer());
+					playerdata.getSkill(msg.skillSlot).getSkill().cancelOnClient(playerdata, msg.getBuffer());
 				}
 			}
 		});

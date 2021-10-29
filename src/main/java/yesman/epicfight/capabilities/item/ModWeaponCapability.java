@@ -9,6 +9,7 @@ import com.google.common.collect.Maps;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.UseAction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import yesman.epicfight.animation.LivingMotion;
 import yesman.epicfight.animation.types.StaticAnimation;
@@ -23,7 +24,7 @@ import yesman.epicfight.skill.Skill;
 
 public class ModWeaponCapability extends CapabilityItem {
 	protected final Function<LivingData<?>, Style> stylegetter;
-	protected final Function<ItemStack, Boolean> offhandCompatiblePredicator;
+	protected final Function<ItemStack, Boolean> offhandPredicator;
 	protected final Skill passiveSkill;
 	protected final SoundEvent smashingSound;
 	protected final SoundEvent hitSound;
@@ -39,7 +40,7 @@ public class ModWeaponCapability extends CapabilityItem {
 		this.specialAttacks = builder.specialAttackMap;
 		this.livingMotionModifiers = builder.livingMotionModifiers;
 		this.stylegetter = builder.styleGetter;
-		this.offhandCompatiblePredicator = builder.offhandCompatiblePredicator;
+		this.offhandPredicator = builder.offhandPredicator;
 		this.passiveSkill = builder.passiveSkill;
 		this.smashingSound = builder.smashingSound;
 		this.hitSound = builder.hitSound;
@@ -98,8 +99,8 @@ public class ModWeaponCapability extends CapabilityItem {
 	}
 	
 	@Override
-	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(PlayerData<?> player) {
-		return this.livingMotionModifiers == null ? super.getLivingMotionModifier(player) : this.livingMotionModifiers.get(this.getStyle(player));
+	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(PlayerData<?> player, Hand hand) {
+		return (this.livingMotionModifiers == null || hand == Hand.OFF_HAND) ? super.getLivingMotionModifier(player, hand) : this.livingMotionModifiers.get(this.getStyle(player));
 	}
 	
 	@Override
@@ -116,13 +117,13 @@ public class ModWeaponCapability extends CapabilityItem {
 	}
 	
 	@Override
-	public boolean canUsedOffhandAlone() {
+	public boolean canUsedInOffhandAlone() {
 		return false;
 	}
 	
 	@Override
 	public boolean isValidOffhandItem(ItemStack itemstack) {
-		return super.isValidOffhandItem(itemstack) || this.offhandCompatiblePredicator.apply(itemstack);
+		return super.isValidOffhandItem(itemstack) || this.offhandPredicator.apply(itemstack);
 	}
 	
 	public static ModWeaponCapability.Builder builder() {
@@ -132,7 +133,7 @@ public class ModWeaponCapability extends CapabilityItem {
 	public static class Builder {
 		WeaponCategory category;
 		Function<LivingData<?>, Style> styleGetter;
-		Function<ItemStack, Boolean> offhandCompatiblePredicator;
+		Function<ItemStack, Boolean> offhandPredicator;
 		Skill passiveSkill;
 		SoundEvent smashingSound;
 		SoundEvent hitSound;
@@ -145,7 +146,7 @@ public class ModWeaponCapability extends CapabilityItem {
 		public Builder() {
 			this.category = WeaponCategory.NOT_WEAON;
 			this.styleGetter = (entitydata) -> Style.ONE_HAND;
-			this.offhandCompatiblePredicator = (entitydata) -> false;
+			this.offhandPredicator = (entitydata) -> false;
 			this.passiveSkill = null;
 			this.smashingSound = Sounds.WHOOSH;
 			this.hitSound = Sounds.BLUNT_HIT;
@@ -208,7 +209,7 @@ public class ModWeaponCapability extends CapabilityItem {
 		}
 		
 		public Builder addOffhandPredicator(Function<ItemStack, Boolean> predicator) {
-			this.offhandCompatiblePredicator = predicator;
+			this.offhandPredicator = predicator;
 			return this;
 		}
 		

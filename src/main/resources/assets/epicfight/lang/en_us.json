@@ -18,7 +18,12 @@
 	"epicfight.gui.to_battle_mode": "To Battle Mode",
 	"epicfight.gui.to_mining_mode": "To Mining Mode",
 	"epicfight.gui.warn_already_registered": "%s Warning: This item is already registered in opponent!",
+	"epicfight.gui.tooltip_battle": "Automatically registers all items with epicfight attributes.",
+	"epicfight.gui.tooltip_mining": "Automatically registers all items not included in the battle mode.",
+	"epicfight.gui.delete_all": "Delete All",
+	"epicfight.gui.auto_add": "Auto Add",
 	
+	"gui.epicfight.skill_edit": "Skills",
 	"gui.epicfight.filter_animation.on" : "Filter Animation: ON",
 	"gui.epicfight.filter_animation.off" : "Filter Animation: OFF",
 	"gui.epicfight.health_indicator.on" : "Show Health Indicator: ON",
@@ -50,6 +55,18 @@
 	"gui.epicfight.learn" : "Learn",
 	"gui.epicfight.applied" : "Applied",
 	"gui.epicfight.unusable" : "Unusable",
+	"gui.epicfight.changing_cost": "Cost: %d",
+	
+	"entity.hit.blunt": "Hit",
+	"entity.hit.blunt_hard": "Hit Hard",
+	"entity.hit.blade": "Hit by Blade",
+	"entity.hit.clash": "Metal Clash",
+	"entity.hit.eviscerate": "Eviscerate",
+	"entity.hit.blade_rush_last": "Hit Hard",
+	"entity.common.whoosh": "Swing",
+	"entity.common.whoosh_hard": "Swing Hard",
+	"entity.common.whoosh_sharp": "Swing Sharp Sword",
+	"entity.common.sword_in": "Sword In",
 	
 	"item.epicfight.katana" : "Katana",
 	"item.epicfight.stray_hat" : "Stray Hat",
@@ -85,11 +102,12 @@
 	
 	"itemGroup.epicfight.items" : "EpicFight Items",
 	
-	"key.epicfight.gui" : "EpicFightMod GUI",
-	"key.epicfight.combat" : "EpicFightMod Combat",
+	"key.epicfight.gui" : "Epic Fight GUI",
+	"key.epicfight.combat" : "Epic Fight Combat",
 	"key.epicfight.show_tooltip" : "Show Special Skill Tooltip",
 	"key.epicfight.switch_mode" : "Toggle Battle/Mining Mode",
 	"key.epicfight.weapon_special_skill" : "Weapon Special Skill",
+	"key.epicfight.skill_gui" : "Open Skill Editor",
 	"key.epicfight.dodge" : "Dodge",
 	
 	"skill.epicfight.dancing_edge" : "Dancing Edge",

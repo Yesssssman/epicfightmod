@@ -11,6 +11,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.client.event.GuiScreenEvent.KeyboardKeyPressedEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.MouseClickedEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.MouseReleasedEvent;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickItem;
@@ -20,8 +21,8 @@ import net.minecraftforge.fml.common.Mod;
 import yesman.epicfight.capabilities.ModCapabilities;
 import yesman.epicfight.capabilities.item.CapabilityItem;
 import yesman.epicfight.client.capabilites.player.ClientPlayerData;
-import yesman.epicfight.entity.eventlistener.RightClickItemEvent;
 import yesman.epicfight.entity.eventlistener.PlayerEventListener.EventType;
+import yesman.epicfight.entity.eventlistener.RightClickItemEvent;
 import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
@@ -53,6 +54,22 @@ public class ClientEvents {
 				CapabilityItem cap = ModCapabilities.getItemStackCapability(Minecraft.getInstance().player.inventory.getItemStack());
 				if (!cap.canUsedInOffhand()) {
 					if (slotUnderMouse.getBackground() != null && slotUnderMouse.getBackground().equals(OFFHAND_TEXTURE)) {
+						event.setCanceled(true);
+					}
+				}
+			}
+		}
+	}
+	
+	@SubscribeEvent
+	public static void presssKeyInGui(KeyboardKeyPressedEvent.Pre event) {
+		CapabilityItem itemCapability = CapabilityItem.EMPTY;
+		if (event.getKeyCode() == Minecraft.getInstance().gameSettings.keyBindSwapHands.getKey().getKeyCode()) {
+			if (event.getGui() instanceof ContainerScreen) {
+				Slot slot = ((ContainerScreen<?>)event.getGui()).getSlotUnderMouse();
+				if (slot != null && slot.getHasStack()) {
+					itemCapability = ModCapabilities.getItemStackCapability(slot.getStack());
+					if (!itemCapability.canUsedInOffhand()) {
 						event.setCanceled(true);
 					}
 				}

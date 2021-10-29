@@ -28,6 +28,7 @@ import yesman.epicfight.gamedata.Animations;
 import yesman.epicfight.gamedata.Models;
 import yesman.epicfight.gamedata.Skills;
 import yesman.epicfight.model.Model;
+import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.utils.game.IExtendedDamageSource;
@@ -55,8 +56,8 @@ public abstract class PlayerData<T extends PlayerEntity> extends LivingData<T> {
 	public void onEntityJoinWorld(T entityIn) {
 		super.onEntityJoinWorld(entityIn);
 		CapabilitySkill skillCapability = this.getSkillCapability();
-		skillCapability.skills[SkillCategory.BASIC_ATTACK.getIndex()].setSkill(Skills.BASIC_ATTACK);
-		skillCapability.skills[SkillCategory.AIR_ATTACK.getIndex()].setSkill(Skills.AIR_ATTACK);
+		skillCapability.skillContainers[SkillCategory.BASIC_ATTACK.getIndex()].setSkill(Skills.BASIC_ATTACK);
+		skillCapability.skillContainers[SkillCategory.AIR_ATTACK.getIndex()].setSkill(Skills.AIR_ATTACK);
 		this.tickSinceLastAction = 40;
 		this.eventListeners.addEventListener(EventType.ACTION_EVENT, ACTION_EVENT_UUID, (event) -> {
 			this.resetActionTick();
@@ -98,14 +99,21 @@ public abstract class PlayerData<T extends PlayerEntity> extends LivingData<T> {
 		CapabilitySkill newSkill = this.getSkillCapability();
 		int i = 0;
 		
-		for (SkillContainer container : newSkill.skills) {
+		for (SkillContainer container : newSkill.skillContainers) {
 			container.setExecuter(this);
-			if (oldSkill.skills[i].getContaining() != null) {
-				container.setSkill(oldSkill.skills[i].getContaining());
+			if (oldSkill.skillContainers[i].getSkill() != null) {
+				container.setSkill(oldSkill.skillContainers[i].getSkill());
 			}
 			i++;
 		}
-		this.setStamina(old.getStamina());
+		
+		for (SkillCategory skillCategory : SkillCategory.values()) {
+			if (oldSkill.hasCategory(skillCategory)) {
+				for (Skill learnedSkill : oldSkill.getLearnedSkills(skillCategory)) {
+					newSkill.addLearnedSkills(learnedSkill);
+				}
+			}
+		}
 	}
 	
 	public void changeYaw(float amount) {
@@ -123,11 +131,9 @@ public abstract class PlayerData<T extends PlayerEntity> extends LivingData<T> {
 	@Override
 	public void updateOnServer() {
 		super.updateOnServer();
-		
 		if (!this.state.isInaction()) {
 			this.tickSinceLastAction++;
 		}
-		
 		float stamina = this.getStamina();
 		float maxStamina = this.getMaxStamina();
 		
@@ -144,7 +150,7 @@ public abstract class PlayerData<T extends PlayerEntity> extends LivingData<T> {
 	@Override
 	public void update() {
 		if (this.orgEntity.getRidingEntity() == null) {
-			for (SkillContainer container : this.getSkillCapability().skills) {
+			for (SkillContainer container : this.getSkillCapability().skillContainers) {
 				if (container != null) {
 					container.update();
 				}
@@ -158,7 +164,7 @@ public abstract class PlayerData<T extends PlayerEntity> extends LivingData<T> {
 	}
 	
 	public SkillContainer getSkill(int categoryIndex) {
-		return this.getSkillCapability().skills[categoryIndex];
+		return this.getSkillCapability().skillContainers[categoryIndex];
 	}
 	
 	public CapabilitySkill getSkillCapability() {

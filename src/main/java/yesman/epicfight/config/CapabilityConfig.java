@@ -249,7 +249,8 @@ public class CapabilityConfig {
 		DAGGER(DefinedWeaponTypes.DAGGER),
 		BOW(DefinedWeaponTypes.BOW),
 		CROSSBOW(DefinedWeaponTypes.CROSSBOW),
-		TRIDENT(DefinedWeaponTypes.TRIDENT);
+		TRIDENT(DefinedWeaponTypes.TRIDENT),
+		SHIELD(DefinedWeaponTypes.SHIELD);
 		
 		Function<Item, CapabilityItem> capabilitySupplier;
 		

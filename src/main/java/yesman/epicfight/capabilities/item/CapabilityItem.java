@@ -17,6 +17,7 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.UseAction;
+import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -130,39 +131,41 @@ public class CapabilityItem {
 		return this.weaponCategory;
 	}
 	
-	public void onHeld(PlayerData<?> playerdata) {
-		if (!playerdata.isRemote()) {
-			Skill specialSkill = this.getSpecialAttack(playerdata);
-			String skillName = "empty";
-			STCChangeSkill.State state = STCChangeSkill.State.ENABLE;
-			
-			if (specialSkill != null) {
-				SkillContainer skillContainer = playerdata.getSkill(SkillCategory.WEAPON_SPECIAL_ATTACK);
-				if (skillContainer.getContaining() != specialSkill) {
-					skillContainer.setSkill(specialSkill);
-					skillName = specialSkill.getSkillName();
-				}
+	public void changeWeaponSpecialSkill(PlayerData<?> playerdata) {
+		Skill specialSkill = this.getSpecialAttack(playerdata);
+		String skillName = "empty";
+		STCChangeSkill.State state = STCChangeSkill.State.ENABLE;
+		SkillContainer specialSkillContainer = playerdata.getSkill(SkillCategory.WEAPON_SPECIAL_ATTACK);
+		
+		if (specialSkill != null) {
+			if (specialSkillContainer.getSkill() != specialSkill) {
+				specialSkillContainer.setSkill(specialSkill);
+				skillName = specialSkill.getName();
 			} else {
-				state = STCChangeSkill.State.DISABLE;
+				specialSkillContainer.getSkill().onInitiate(specialSkillContainer);
 			}
-			
-			ModNetworkManager.sendToPlayer(new STCChangeSkill(SkillCategory.WEAPON_SPECIAL_ATTACK.getIndex(), skillName, state),
-					(ServerPlayerEntity)playerdata.getOriginalEntity());
-			
-			Skill skill = this.getPassiveSkill();
-			SkillContainer skillContainer = playerdata.getSkill(SkillCategory.WEAPON_PASSIVE);
-			
-			if (skill != null) {
-				if (skillContainer.getContaining() != skill) {
-					skillContainer.setSkill(skill);
-					ModNetworkManager.sendToPlayer(new STCChangeSkill(skill.getCategory().getIndex(), skill.getSkillName(), STCChangeSkill.State.ENABLE),
-							(ServerPlayerEntity)playerdata.getOriginalEntity());
-				}
-			} else {
-				skillContainer.setSkill(null);
-				ModNetworkManager.sendToPlayer(new STCChangeSkill(SkillCategory.WEAPON_PASSIVE.getIndex(), "empty", STCChangeSkill.State.ENABLE),
+			specialSkillContainer.setDisabled(false);
+		} else {
+			state = STCChangeSkill.State.DISABLE;
+			specialSkillContainer.setDisabled(true);
+		}
+		
+		ModNetworkManager.sendToPlayer(new STCChangeSkill(SkillCategory.WEAPON_SPECIAL_ATTACK.getIndex(), skillName, state),
+				(ServerPlayerEntity)playerdata.getOriginalEntity());
+		
+		Skill skill = this.getPassiveSkill();
+		SkillContainer passiveSkillContainer = playerdata.getSkill(SkillCategory.WEAPON_PASSIVE);
+		
+		if (skill != null) {
+			if (passiveSkillContainer.getSkill() != skill) {
+				passiveSkillContainer.setSkill(skill);
+				ModNetworkManager.sendToPlayer(new STCChangeSkill(skill.getCategory().getIndex(), skill.getName(), STCChangeSkill.State.ENABLE),
 						(ServerPlayerEntity)playerdata.getOriginalEntity());
 			}
+		} else {
+			passiveSkillContainer.setSkill(null);
+			ModNetworkManager.sendToPlayer(new STCChangeSkill(SkillCategory.WEAPON_PASSIVE.getIndex(), "empty", STCChangeSkill.State.ENABLE),
+					(ServerPlayerEntity)playerdata.getOriginalEntity());
 		}
 	}
 	
@@ -205,7 +208,7 @@ public class CapabilityItem {
 	
 	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlotType equipmentSlot, LivingData<?> entitydata) {
 		Multimap<Attribute, AttributeModifier> map = HashMultimap.<Attribute, AttributeModifier>create();
-		if(entitydata != null) {
+		if (entitydata != null) {
 			Map<Attribute, AttributeModifier> modifierMap = this.getDamageAttributesInCondition(this.getStyle(entitydata));
 			if (modifierMap != null) {
 				for (Entry<Attribute, AttributeModifier> entry : modifierMap.entrySet()) {
@@ -217,7 +220,7 @@ public class CapabilityItem {
 		return map;
     }
 	
-	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(PlayerData<?> player) {
+	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(PlayerData<?> player, Hand hand) {
 		return Maps.<LivingMotion, StaticAnimation>newHashMap();
 	}
 	
@@ -245,6 +248,14 @@ public class CapabilityItem {
 		return this.getHoldOption() == HoldOption.MAINHAND_ONLY;
 	}
 	
+	public boolean isEmpty() {
+		return this == CapabilityItem.EMPTY;
+	}
+	
+	public CapabilityItem getFinal(ItemStack item) {
+		return this;
+	}
+	
 	public boolean canUseOnMount() {
 		return !this.isTwoHanded();
 	}
@@ -253,24 +264,16 @@ public class CapabilityItem {
 		return HoldOption.GENERAL;
 	}
 	
-	public CapabilityItem get(ItemStack item) {
-		return this;
-	}
-	
 	public void setConfigFileAttribute(double armorNegation1, double impact1, int maxStrikes1, double armorNegation2, double impact2, int maxStrikes2) {
 		this.addStyleAttributeSimple(Style.ONE_HAND, armorNegation1, impact1, maxStrikes1);
 		this.addStyleAttributeSimple(Style.TWO_HAND, armorNegation2, impact2, maxStrikes2);
 	}
 	
 	public boolean isValidOffhandItem(ItemStack item) {
-		return !this.isTwoHanded() && (!this.isEmtpy() || ModCapabilities.getItemStackCapability(item).canUsedOffhandAlone());
+		return !this.isTwoHanded() && ModCapabilities.getItemStackCapability(item).canUsedInOffhandAlone();
 	}
 	
-	public boolean isEmtpy() {
-		return this == CapabilityItem.EMPTY;
-	}
-	
-	public boolean canUsedOffhandAlone() {
+	public boolean canUsedInOffhandAlone() {
 		return true;
 	}
 	

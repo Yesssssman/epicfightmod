@@ -614,7 +614,7 @@ public class Animations {
 		
 		LETHAL_SLICING = new SpecialAttackAnimation(0.15F, 0.0F, 0.0F, 0.11F, 0.38F, false, Colliders.narrowFront, "", "biped/skill/lethal_slicing_start", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
-				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
+				.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.0F);
 		
 		LETHAL_SLICING_ONCE = new SpecialAttackAnimation(0.016F, 0.0F, 0.0F, 0.1F, 0.6F, false, Colliders.fatal_draw, "", "biped/skill/lethal_slicing_once", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)

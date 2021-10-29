@@ -32,7 +32,7 @@ import yesman.epicfight.client.events.RegistryClientEvent;
 import yesman.epicfight.client.events.engine.ControllEngine;
 import yesman.epicfight.client.events.engine.RenderEngine;
 import yesman.epicfight.client.gui.screen.IngameConfigurationScreen;
-import yesman.epicfight.client.input.ModKeys;
+import yesman.epicfight.client.input.EpicFightKeyBindings;
 import yesman.epicfight.client.model.ClientModels;
 import yesman.epicfight.config.CapabilityConfig;
 import yesman.epicfight.config.ConfigManager;
@@ -113,7 +113,7 @@ public class EpicFightMod {
 		Animations.buildClient();
 		
 		ClientEngine.instance.renderEngine.buildRenderer();
-		ModKeys.registerKeys();
+		EpicFightKeyBindings.registerKeys();
 		MinecraftForge.EVENT_BUS.register(ControllEngine.Events.class);
         MinecraftForge.EVENT_BUS.register(RenderEngine.Events.class);
         MinecraftForge.EVENT_BUS.register(RegistryClientEvent.class);
@@ -131,7 +131,7 @@ public class EpicFightMod {
 	private void doCommonStuff(final FMLCommonSetupEvent event) {
     	ModCapabilities.registerCapabilities();
     	ModNetworkManager.registerPackets();
-    	ProviderItem.makeMap();
+    	ProviderItem.registerWeaponClass();
     	ProviderEntity.makeMap();
     	ProviderProjectile.makeMap();
     	ModGamerules.registerRules();

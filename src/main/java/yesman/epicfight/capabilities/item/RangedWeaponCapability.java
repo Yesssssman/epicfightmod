@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import net.minecraft.item.Item;
+import net.minecraft.util.Hand;
 import yesman.epicfight.animation.LivingMotion;
 import yesman.epicfight.animation.types.StaticAnimation;
 import yesman.epicfight.capabilities.entity.player.PlayerData;
@@ -32,8 +33,11 @@ public class RangedWeaponCapability extends CapabilityItem {
 	}
 	
 	@Override
-	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(PlayerData<?> playerdata) {
-		return this.rangeAnimationSet;
+	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(PlayerData<?> playerdata, Hand hand) {
+		if (hand == Hand.MAIN_HAND) {
+			return this.rangeAnimationSet;
+		}
+		return super.getLivingMotionModifier(playerdata, hand);
 	}
 
 	@Override

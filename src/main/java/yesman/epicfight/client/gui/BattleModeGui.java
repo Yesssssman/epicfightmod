@@ -109,15 +109,15 @@ public class BattleModeGui extends ModIngameGui {
 		for (int i = 0; i < SkillCategory.values().length; i++) {
 			SkillContainer container = playerdata.getSkill(i);
 			if (container != null && !container.isEmpty()) {
-				SkillCategory slot = container.getContaining().getCategory();
+				SkillCategory slot = container.getSkill().getCategory();
 				if (slot == SkillCategory.WEAPON_SPECIAL_ATTACK) {
 					this.drawSpecialAttack(playerdata, container, matStack, partialTicks);
 				} else {
 					GlStateManager.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-					Skill skill = container.getContaining();
+					Skill skill = container.getSkill();
 					if (skill != null && skill.shouldDraw(container)) {
 						if (!this.skillIcons.contains(container)) {
-							this.skillIcons.removeIf((showingContainer) -> showingContainer.getContaining().getCategory() == skill.getCategory());
+							this.skillIcons.removeIf((showingContainer) -> showingContainer.getSkill().getCategory() == skill.getCategory());
 							this.skillIcons.add(container);
 						}
 						
@@ -209,7 +209,7 @@ public class BattleModeGui extends ModIngameGui {
 		
 		GlStateManager.enableBlend();
 		GL11.glDisable(GL11.GL_ALPHA_TEST);
-		Minecraft.getInstance().getTextureManager().bindTexture(container.getContaining().getSkillTexture());
+		Minecraft.getInstance().getTextureManager().bindTexture(container.getSkill().getSkillTexture());
 		
 		if (isCompatibleWeapon) {
 			if (container.getStack() > 0) {
@@ -267,14 +267,14 @@ public class BattleModeGui extends ModIngameGui {
 			int stringWidth = (this.font.getStringWidth(s) - 6) / 3;
 			this.font.drawStringWithShadow(matStack, s, ((float)width - x+13-stringWidth), ((float)height - y+13), 16777215);
 			GL11.glEnable(GL11.GL_ALPHA_TEST);
-		} else if (container.getRemainDuration() > 0 && container.getContaining().getActivateType() != ActivateType.TOGGLE) {
+		} else if (container.getRemainDuration() > 0 && container.getSkill().getActivateType() != ActivateType.TOGGLE) {
 			String s = String.valueOf(container.getRemainDuration());
 			int stringWidth = (this.font.getStringWidth(s) - 6) / 3;
 			this.font.drawStringWithShadow(matStack, s, ((float)width - x+13-stringWidth), ((float)height - y+13), 16777215);
 			GL11.glEnable(GL11.GL_ALPHA_TEST);
 		}
 		
-		if (container.getContaining().getMaxStack() > 1) {
+		if (container.getSkill().getMaxStack() > 1) {
 			String s = String.valueOf(container.getStack());
 			int stringWidth = (this.font.getStringWidth(s) - 6) / 3;
 			this.font.drawStringWithShadow(matStack, s, ((float)width - x+25-stringWidth), ((float)height - y+22), 16777215);

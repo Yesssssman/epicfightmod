@@ -14,7 +14,7 @@ import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import yesman.epicfight.animation.LivingMotion;
 import yesman.epicfight.capabilities.item.CapabilityItem;
 import yesman.epicfight.client.ClientEngine;
-import yesman.epicfight.client.gui.SkillDescriptionGui;
+import yesman.epicfight.client.gui.screen.SkillBookScreen;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.ModNetworkManager;
 import yesman.epicfight.network.client.CTSPlayAnimation;
@@ -86,10 +86,6 @@ public class ClientPlayerData extends RemoteClientPlayerData<ClientPlayerEntity>
 	public void updateHeldItem(CapabilityItem mainHandCap, CapabilityItem offHandCap) {
 		super.updateHeldItem(mainHandCap, offHandCap);
 		
-		if (mainHandCap != null) {
-			mainHandCap.onHeld(this);
-		}
-		
 		if (EpicFightMod.CLIENT_INGAME_CONFIG.battleAutoSwitchItems.contains(this.orgEntity.getHeldItemMainhand().getItem())) {
 			ClientEngine.instance.switchToBattleMode();
 		} else if (EpicFightMod.CLIENT_INGAME_CONFIG.miningAutoSwitchItems.contains(this.orgEntity.getHeldItemMainhand().getItem())) {
@@ -133,7 +129,7 @@ public class ClientPlayerData extends RemoteClientPlayerData<ClientPlayerEntity>
 	@Override
 	public void openSkillBook(ItemStack itemstack) {
 		if (itemstack.hasTag() && itemstack.getTag().contains("skill")) {
-			Minecraft.getInstance().displayGuiScreen(new SkillDescriptionGui(this.orgEntity, itemstack));
+			Minecraft.getInstance().displayGuiScreen(new SkillBookScreen(this.orgEntity, itemstack));
 		}
 	}
 }

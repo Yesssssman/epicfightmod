@@ -1,4 +1,4 @@
-package yesman.epicfight.client.gui;
+package yesman.epicfight.client.gui.screen;
 
 import java.util.List;
 
@@ -27,12 +27,12 @@ import yesman.epicfight.network.client.CTSChangeSkill;
 import yesman.epicfight.skill.Skill;
 
 @OnlyIn(Dist.CLIENT)
-public class SkillDescriptionGui extends Screen {
-	public static final ResourceLocation BACKGROUND = new ResourceLocation(EpicFightMod.MODID, "textures/gui/skill_description.png");
+public class SkillBookScreen extends Screen {
+	public static final ResourceLocation BACKGROUND = new ResourceLocation(EpicFightMod.MODID, "textures/gui/screen/skillbook.png");
 	private final PlayerEntity opener;
 	private final Skill skill;
 	
-	public SkillDescriptionGui(PlayerEntity opener, ItemStack stack) {
+	public SkillBookScreen(PlayerEntity opener, ItemStack stack) {
 		super(StringTextComponent.EMPTY);
 		this.opener = opener;
 		this.skill = SkillBookItem.getContainSkill(stack);
@@ -41,26 +41,25 @@ public class SkillDescriptionGui extends Screen {
 	@Override
 	protected void init() {
 		ClientPlayerData playerdata = (ClientPlayerData) this.opener.getCapability(ModCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-		boolean isUsing = this.skill.equals(playerdata.getSkill(this.skill.getCategory()).getContaining());
+		boolean isUsing = this.skill.equals(playerdata.getSkill(this.skill.getCategory()).getSkill());
 		Skill priorSkill = this.skill.getPriorSkill();
-		boolean condition = priorSkill == null ? true : playerdata.getSkill(priorSkill.getCategory()).getContaining() == priorSkill;
-		
+		boolean condition = priorSkill == null ? true : playerdata.getSkill(priorSkill.getCategory()).getSkill() == priorSkill;
 		Button.ITooltip tooltip = Button.EMPTY_TOOLTIP;
 		
 		if (!isUsing) {
 			if (condition) {
-				if (playerdata.getSkill(this.skill.getCategory()).getContaining() != null) {
+				if (playerdata.getSkill(this.skill.getCategory()).getSkill() != null) {
 					tooltip = (button, matrixStack, mouseX, mouseY) -> {
 						this.renderTooltip(matrixStack, this.minecraft.fontRenderer.trimStringToWidth(new TranslationTextComponent(
 								"gui." + EpicFightMod.MODID + ".replace", new TranslationTextComponent("skill." + EpicFightMod.MODID + "." +
-									playerdata.getSkill(this.skill.getCategory()).getContaining().getSkillName()).getString()), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+									playerdata.getSkill(this.skill.getCategory()).getSkill().getName()).getString()), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 					};
 				}
 			} else {
 				tooltip = (button, matrixStack, mouseX, mouseY) -> {
 					this.renderTooltip(matrixStack, this.minecraft.fontRenderer.trimStringToWidth(new TranslationTextComponent(
 							"gui." + EpicFightMod.MODID + ".require_learning", new TranslationTextComponent("skill." + EpicFightMod.MODID + "." +
-									priorSkill.getSkillName()).getString()), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+									priorSkill.getName()).getString()), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 				};
 			}
 		}
@@ -70,7 +69,8 @@ public class SkillDescriptionGui extends Screen {
 				if (playerdata != null) {
 					playerdata.getSkill(this.skill.getCategory()).setSkill(this.skill);
 					this.minecraft.displayGuiScreen((Screen) null);
-					ModNetworkManager.sendToServer(new CTSChangeSkill(this.skill.getCategory().getIndex(), this.skill.getSkillName()));
+					playerdata.getSkillCapability().addLearnedSkills(this.skill);
+					ModNetworkManager.sendToServer(new CTSChangeSkill(this.skill.getCategory().getIndex(), this.skill.getName(), false));
 				}
 			}, tooltip);
 		
@@ -97,7 +97,7 @@ public class SkillDescriptionGui extends Screen {
 		GlStateManager.disableBlend();
 		GL11.glEnable(GL11.GL_ALPHA_TEST);
 		
-		String skillName = new TranslationTextComponent("skill." + EpicFightMod.MODID + "." + this.skill.getSkillName()).getString();
+		String skillName = new TranslationTextComponent("skill." + EpicFightMod.MODID + "." + this.skill.getName()).getString();
 		int width = this.font.getStringWidth(skillName);
 		this.font.drawString(matrixStack, skillName, posX + 50 - width / 2, posY + 115, 0);
 		
@@ -107,7 +107,7 @@ public class SkillDescriptionGui extends Screen {
 		this.font.drawString(matrixStack, skillCategory, posX + 50 - width / 2, posY + 130, 0);
 		
 		List<IReorderingProcessor> list = this.font.trimStringToWidth(new TranslationTextComponent(
-				"skill." + EpicFightMod.MODID + "." + this.skill.getSkillName() + ".tooltip", this.skill.getTooltipArgs().toArray(new Object[0])), 140);
+				"skill." + EpicFightMod.MODID + "." + this.skill.getName() + ".tooltip", this.skill.getTooltipArgs().toArray(new Object[0])), 140);
 		int height = posY + 20;
 		
 		for(int l1 = 0; l1 < list.size(); ++l1) {

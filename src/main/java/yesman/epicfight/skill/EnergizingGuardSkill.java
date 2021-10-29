@@ -23,8 +23,8 @@ public class EnergizingGuardSkill extends GuardSkill {
 		AVAILABLE_WEAPON_TYPES.add(WeaponCategory.TACHI);
 	}
 	
-	public EnergizingGuardSkill() {
-		super("energizing_guard");
+	public EnergizingGuardSkill(Builder<? extends Skill> builder) {
+		super(builder);
 	}
 	
 	@Override

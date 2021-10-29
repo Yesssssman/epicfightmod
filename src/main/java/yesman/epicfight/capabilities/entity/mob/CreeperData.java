@@ -12,7 +12,7 @@ import yesman.epicfight.animation.LivingMotion;
 import yesman.epicfight.animation.types.StaticAnimation;
 import yesman.epicfight.capabilities.entity.MobData;
 import yesman.epicfight.client.animation.AnimatorClient;
-import yesman.epicfight.entity.ai.CreeperSwellStoppableGoal;
+import yesman.epicfight.entity.ai.goal.CreeperSwellStoppableGoal;
 import yesman.epicfight.gamedata.Animations;
 import yesman.epicfight.gamedata.Models;
 import yesman.epicfight.model.Model;
@@ -41,10 +41,11 @@ public class CreeperData extends MobData<CreeperEntity> {
 			}
 		}
         
-        if(toRemove != null)
-        	orgEntity.goalSelector.removeGoal(toRemove);
+        if (toRemove != null) {
+        	this.orgEntity.goalSelector.removeGoal(toRemove);
+        }
         
-        orgEntity.goalSelector.addGoal(2, new CreeperSwellStoppableGoal(this, this.orgEntity));
+        this.orgEntity.goalSelector.addGoal(2, new CreeperSwellStoppableGoal(this, this.orgEntity));
 	}
 
 	@Override

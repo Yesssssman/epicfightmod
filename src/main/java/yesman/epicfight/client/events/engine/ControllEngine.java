@@ -28,7 +28,8 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 import yesman.epicfight.animation.types.EntityState;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.capabilites.player.ClientPlayerData;
-import yesman.epicfight.client.input.ModKeys;
+import yesman.epicfight.client.gui.screen.SkillEditScreen;
+import yesman.epicfight.client.input.EpicFightKeyBindings;
 import yesman.epicfight.entity.eventlistener.MovementInputEvent;
 import yesman.epicfight.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.main.EpicFightMod;
@@ -59,9 +60,9 @@ public class ControllEngine {
 		this.keyFunctionMap = new HashMap<KeyBinding, BiConsumer<Integer, Integer>>();
 		this.keyFunctionMap.put(this.gameSettings.keyBindAttack, this::attackKeyPressed);
 		this.keyFunctionMap.put(this.gameSettings.keyBindSwapHands, this::swapHandKeyPressed);
-		this.keyFunctionMap.put(ModKeys.SWITCH_MODE, this::switchModeKeyPressed);
-		this.keyFunctionMap.put(ModKeys.DODGE, this::sneakKeyPressed);
-		this.keyFunctionMap.put(ModKeys.SPECIAL_SKILL, this::specialSkillKeyPressed);
+		this.keyFunctionMap.put(EpicFightKeyBindings.SWITCH_MODE, this::switchModeKeyPressed);
+		this.keyFunctionMap.put(EpicFightKeyBindings.DODGE, this::sneakKeyPressed);
+		this.keyFunctionMap.put(EpicFightKeyBindings.SPECIAL_SKILL, this::specialSkillKeyPressed);
 		
 		try {
 			this.keyHash = (KeyBindingMap) ObfuscationReflectionHelper.findField(KeyBinding.class, "field_74514_b").get(null);
@@ -114,7 +115,7 @@ public class ControllEngine {
 				}
 			} else {
 				SkillContainer skill = this.playerdata.getSkill(SkillCategory.DODGE);
-				if (skill.canExecute(this.playerdata) && skill.getContaining().isExecutableState(this.playerdata)) {
+				if (skill.canExecute(this.playerdata) && skill.getSkill().isExecutableState(this.playerdata)) {
 					skill.sendExecuteRequest(this.playerdata);
 				}
 			}
@@ -144,7 +145,7 @@ public class ControllEngine {
 					}
 				}
 			} else {
-				if (this.gameSettings.keyBindAttack.equals(ModKeys.SPECIAL_SKILL)) {
+				if (this.gameSettings.keyBindAttack.equals(EpicFightKeyBindings.SPECIAL_SKILL)) {
 					KeyBinding.onTick(this.gameSettings.keyBindAttack.getKey());
 				}
 			}
@@ -163,7 +164,7 @@ public class ControllEngine {
 				this.mouseLeftPressToggle = false;
 				this.mouseLeftPressCounter = 0;
 			} else {
-				if (ModKeys.SPECIAL_SKILL.getKey().equals(this.gameSettings.keyBindAttack.getKey())) {
+				if (EpicFightKeyBindings.SPECIAL_SKILL.getKey().equals(this.gameSettings.keyBindAttack.getKey())) {
 					if (this.mouseLeftPressCounter > EpicFightMod.CLIENT_INGAME_CONFIG.longPressCount.getValue()) {
 						if (!this.playerdata.getSkill(SkillCategory.WEAPON_SPECIAL_ATTACK).sendExecuteRequest(this.playerdata)) {
 							if (!this.player.isSpectator()) {
@@ -219,7 +220,7 @@ public class ControllEngine {
 			if (this.reserveCounter > 0) {
 				SkillContainer skill = this.playerdata.getSkill(this.reservedKey);
 				this.reserveCounter--;
-				if (skill.getContaining() != null && skill.sendExecuteRequest(this.playerdata)) {
+				if (skill.getSkill() != null && skill.sendExecuteRequest(this.playerdata)) {
 					this.resetReservedKey();
 				}
 			} else {
@@ -232,6 +233,12 @@ public class ControllEngine {
 				if (this.playerdata.getEntityState().isInaction()) {
 					this.gameSettings.keyBindsHotbar[i].isPressed();
 				}
+			}
+		}
+		
+		if (EpicFightKeyBindings.SKILL_EDIT.isPressed()) {
+			if (this.playerdata.getSkillCapability() != null) {
+				Minecraft.getInstance().displayGuiScreen(new SkillEditScreen(this.playerdata.getSkillCapability()));
 			}
 		}
 		

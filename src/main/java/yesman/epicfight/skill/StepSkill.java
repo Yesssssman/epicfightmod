@@ -3,16 +3,15 @@ package yesman.epicfight.skill;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.animation.types.StaticAnimation;
 import yesman.epicfight.client.capabilites.player.ClientPlayerData;
 import yesman.epicfight.network.ModNetworkManager;
 import yesman.epicfight.network.client.CTSExecuteSkill;
 
 public class StepSkill extends DodgeSkill {
-	public StepSkill(float consumption, String skillName, StaticAnimation... animation) {
-		super(consumption, skillName, animation);
+	public StepSkill(DodgeSkill.Builder builder) {
+		super(builder);
 	}
-
+	
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void executeOnClient(ClientPlayerData executer, PacketBuffer args) {
@@ -35,7 +34,7 @@ public class StepSkill extends DodgeSkill {
 			animation = vertic >= 0 ? 0 : 1;
 		}
 		
-		CTSExecuteSkill packet = new CTSExecuteSkill(this.slot.getIndex());
+		CTSExecuteSkill packet = new CTSExecuteSkill(this.category.getIndex());
 		packet.getBuffer().writeInt(animation);
 		packet.getBuffer().writeFloat(degree);
 		
