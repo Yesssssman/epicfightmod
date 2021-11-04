@@ -18,11 +18,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.capabilities.entity.LivingData;
-import yesman.epicfight.client.model.ClientModel;
-import yesman.epicfight.client.model.ClientModels;
 import yesman.epicfight.entity.ai.attribute.EpicFightAttributes;
 
 public class ArmorCapability extends CapabilityItem {
@@ -69,27 +65,4 @@ public class ArmorCapability extends CapabilityItem {
 		
         return map;
     }
-	
-	@OnlyIn(Dist.CLIENT)
-	public ClientModel getArmorModel(EquipmentSlotType slot) {
-		return getBipedArmorModel(slot);
-	}
-	
-	@OnlyIn(Dist.CLIENT)
-	public static ClientModel getBipedArmorModel(EquipmentSlotType slot) {
-		ClientModels modelDB = ClientModels.LOGICAL_CLIENT;
-		
-		switch (slot) {
-		case HEAD:
-			return modelDB.helmet;
-		case CHEST:
-			return modelDB.chestplate;
-		case LEGS:
-			return modelDB.leggins;
-		case FEET:
-			return modelDB.boots;
-		default:
-			return null;
-		}
-	}
 }

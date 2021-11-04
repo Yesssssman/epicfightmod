@@ -1,8 +1,11 @@
 package yesman.epicfight.capabilities.provider;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+
+import com.google.common.collect.Lists;
 
 import net.minecraft.item.ArmorItem;
 import net.minecraft.item.AxeItem;
@@ -25,6 +28,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.capabilities.ModCapabilities;
 import yesman.epicfight.capabilities.item.ArmorCapability;
 import yesman.epicfight.capabilities.item.CapabilityItem;
+import yesman.epicfight.capabilities.item.DeferredItemCapability;
 import yesman.epicfight.capabilities.item.DefinedWeaponTypes;
 import yesman.epicfight.capabilities.item.NBTSeparativeCapability;
 import yesman.epicfight.config.CapabilityConfig;
@@ -35,6 +39,8 @@ import yesman.epicfight.main.EpicFightMod;
 public class ProviderItem implements ICapabilityProvider, NonNullSupplier<CapabilityItem> {
 	private static final Map<Class<? extends Item>, Function<Item, CapabilityItem>> CAPABILITY_BY_CLASS = new HashMap<Class<? extends Item>, Function<Item, CapabilityItem>> ();
 	private static final Map<Item, CapabilityItem> CAPABILITIES = new HashMap<Item, CapabilityItem> ();
+	private static boolean isInitialized;
+	private static List<ProviderItem> deferredProviders = Lists.newArrayList();
 	
 	public static void registerWeaponClass() {
 		CAPABILITY_BY_CLASS.put(ArmorItem.class, ArmorCapability::new);
@@ -56,9 +62,33 @@ public class ProviderItem implements ICapabilityProvider, NonNullSupplier<Capabi
 		return CAPABILITIES.containsKey(item);
 	}
 	
+	public static boolean initialized() {
+		return isInitialized;
+	}
+	
+	public static void clear() {
+		isInitialized = false;
+		CAPABILITIES.clear();
+	}
+	
+	public static void processDeferredProviders() {
+		deferredProviders.forEach((provider) -> {
+			ItemStack itemstack = ((DeferredItemCapability)provider.capability).getStack();
+			CapabilityItem capability = CAPABILITIES.get(itemstack.getItem());
+			if (capability instanceof NBTSeparativeCapability) {
+				capability = capability.getFinal(itemstack);
+			}
+			
+			provider.capability = capability;
+		});
+		
+		deferredProviders.clear();
+		isInitialized = true;
+	}
+	
 	public static void addDefaultItems() {
 		for (Item item : ForgeRegistries.ITEMS.getValues()) {
-			if (!CAPABILITIES.containsKey(item)) {
+			if (!has(item)) {
 				Class<?> clazz = item.getClass();
 				CapabilityItem capability = null;
 				
@@ -67,7 +97,7 @@ public class ProviderItem implements ICapabilityProvider, NonNullSupplier<Capabi
 				}
 				
 				if (capability != null) {
-					EpicFightMod.LOGGER.info("register weapon capability for " + item);
+					EpicFightMod.LOGGER.info("register capability for " + item);
 					CAPABILITIES.put(item, capability);
 				}
 			}
@@ -81,8 +111,7 @@ public class ProviderItem implements ICapabilityProvider, NonNullSupplier<Capabi
 				Item item = ForgeRegistries.ITEMS.getValue(key);
 				EpicFightMod.LOGGER.info("Register Custom Capaiblity for " + config.getRegistryName());
 				CapabilityItem cap = config.getWeaponType().get(item);
-				cap.setConfigFileAttribute(config.getArmorIgnoranceOnehand(), config.getImpactOnehand(), config.getMaxStrikesOnehand(),
-						config.getArmorIgnoranceTwohand(), config.getImpactTwohand(), config.getMaxStrikesTwohand());
+				cap.setConfigFileAttribute(config.getArmorIgnoranceOnehand(), config.getImpactOnehand(), config.getMaxStrikesOnehand(), config.getArmorIgnoranceTwohand(), config.getImpactTwohand(), config.getMaxStrikesTwohand());
 				CAPABILITIES.put(item, cap);
 			} else {
 				EpicFightMod.LOGGER.warn("Failed to load custom item " + config.getRegistryName() + ". Item not exist!");
@@ -108,16 +137,16 @@ public class ProviderItem implements ICapabilityProvider, NonNullSupplier<Capabi
 		}
 	}
 	
-	public static void clear() {
-		CAPABILITIES.clear();
-	}
-	
 	private CapabilityItem capability;
 	private LazyOptional<CapabilityItem> optional = LazyOptional.of(this);
 	
+	public ProviderItem(ItemStack itemstack, boolean deferred) {
+		this.capability = new DeferredItemCapability(itemstack);
+		deferredProviders.add(this);
+	}
+	
 	public ProviderItem(ItemStack itemstack) {
 		this.capability = CAPABILITIES.get(itemstack.getItem());
-		
 		if (this.capability instanceof NBTSeparativeCapability) {
 			this.capability = this.capability.getFinal(itemstack);
 		}

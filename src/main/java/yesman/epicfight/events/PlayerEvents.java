@@ -20,12 +20,14 @@ import yesman.epicfight.capabilities.ModCapabilities;
 import yesman.epicfight.capabilities.entity.player.PlayerData;
 import yesman.epicfight.capabilities.entity.player.ServerPlayerData;
 import yesman.epicfight.capabilities.item.CapabilityItem;
+import yesman.epicfight.capabilities.item.ItemCapabilityListener;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.entity.eventlistener.ItemUseEndEvent;
-import yesman.epicfight.entity.eventlistener.RightClickItemEvent;
 import yesman.epicfight.entity.eventlistener.PlayerEventListener.EventType;
+import yesman.epicfight.entity.eventlistener.RightClickItemEvent;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.ModNetworkManager;
+import yesman.epicfight.network.server.STCDatapackSync;
 import yesman.epicfight.network.server.STCGameruleChange;
 import yesman.epicfight.network.server.STCGameruleChange.Gamerules;
 import yesman.epicfight.world.ModGamerules;
@@ -123,9 +125,17 @@ public class PlayerEvents {
 	
 	@SubscribeEvent
 	public static void playerLogInEvent(PlayerLoggedInEvent event) {
-		ModNetworkManager.sendToPlayer(new STCGameruleChange(Gamerules.HAS_FALL_ANIMATION,
-					event.getEntity().world.getGameRules().getBoolean(ModGamerules.HAS_FALL_ANIMATION)), (ServerPlayerEntity)event.getPlayer());
-		ModNetworkManager.sendToPlayer(new STCGameruleChange(Gamerules.SPEED_PENALTY_PERCENT,
-				event.getEntity().world.getGameRules().getInt(ModGamerules.WEIGHT_PENALTY)), (ServerPlayerEntity)event.getPlayer());
+		ServerPlayerEntity serverplayer = (ServerPlayerEntity)event.getPlayer();
+		ModNetworkManager.sendToPlayer(new STCGameruleChange(Gamerules.HAS_FALL_ANIMATION, event.getEntity().world.getGameRules().getBoolean(ModGamerules.HAS_FALL_ANIMATION)),serverplayer);
+		ModNetworkManager.sendToPlayer(new STCGameruleChange(Gamerules.SPEED_PENALTY_PERCENT, event.getEntity().world.getGameRules().getInt(ModGamerules.WEIGHT_PENALTY)), serverplayer);
+		
+		if (!serverplayer.getServer().isServerOwner(serverplayer.getGameProfile())) {
+			STCDatapackSync armorPacket = new STCDatapackSync(ItemCapabilityListener.armorCount(), STCDatapackSync.Type.ARMOR);
+			STCDatapackSync weaponPacket = new STCDatapackSync(ItemCapabilityListener.weaponCount(), STCDatapackSync.Type.WEAPON);
+			ItemCapabilityListener.getArmorDataStream().forEach(armorPacket::write);
+			ItemCapabilityListener.getWeaponDataStream().forEach(weaponPacket::write);
+			ModNetworkManager.sendToPlayer(armorPacket, serverplayer);
+			ModNetworkManager.sendToPlayer(weaponPacket, serverplayer);
+		}
 	}
 }

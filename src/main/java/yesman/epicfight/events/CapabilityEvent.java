@@ -22,6 +22,9 @@ public class CapabilityEvent {
 	public static void attachItemCapability(AttachCapabilitiesEvent<ItemStack> event) {
 		if (event.getObject().getCapability(ModCapabilities.CAPABILITY_ITEM).orElse(null) == null) {
 			ProviderItem prov = new ProviderItem(event.getObject());
+			if (!ProviderItem.initialized()) {
+				prov = new ProviderItem(event.getObject(), true);
+			}
 			if (prov.hasCapability()) {
 				event.addCapability(new ResourceLocation(EpicFightMod.MODID, "item_cap"), prov);
 			}

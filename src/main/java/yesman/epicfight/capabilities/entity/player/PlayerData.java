@@ -98,7 +98,6 @@ public abstract class PlayerData<T extends PlayerEntity> extends LivingData<T> {
 		CapabilitySkill oldSkill = old.getSkillCapability();
 		CapabilitySkill newSkill = this.getSkillCapability();
 		int i = 0;
-		
 		for (SkillContainer container : newSkill.skillContainers) {
 			container.setExecuter(this);
 			if (oldSkill.skillContainers[i].getSkill() != null) {

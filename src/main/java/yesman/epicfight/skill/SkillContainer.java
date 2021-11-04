@@ -33,6 +33,7 @@ public class SkillContainer {
 	public SkillContainer setSkill(Skill skill) {
 		if (this.containingSkill != null) {
 			this.containingSkill.onRemoved(this);
+			System.out.println("remove " + this.containingSkill + " and " + skill);
 		}
 		this.containingSkill = skill;
 		this.resetValues();

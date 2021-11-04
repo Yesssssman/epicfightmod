@@ -17,6 +17,7 @@ import yesman.epicfight.network.client.CTSSetPlayerTarget;
 import yesman.epicfight.network.client.CTSToggleMode;
 import yesman.epicfight.network.server.STCAddLearnedSkill;
 import yesman.epicfight.network.server.STCChangeSkill;
+import yesman.epicfight.network.server.STCDatapackSync;
 import yesman.epicfight.network.server.STCGameruleChange;
 import yesman.epicfight.network.server.STCLivingMotionChange;
 import yesman.epicfight.network.server.STCMobInitialSetting;
@@ -83,5 +84,6 @@ public class ModNetworkManager {
 		INSTANCE.registerMessage(id++, STCGameruleChange.class, STCGameruleChange::toBytes, STCGameruleChange::fromBytes, STCGameruleChange::handle);
 		INSTANCE.registerMessage(id++, STCToggleMode.class, STCToggleMode::toBytes, STCToggleMode::fromBytes, STCToggleMode::handle);
 		INSTANCE.registerMessage(id++, STCAddLearnedSkill.class, STCAddLearnedSkill::toBytes, STCAddLearnedSkill::fromBytes, STCAddLearnedSkill::handle);
+		INSTANCE.registerMessage(id++, STCDatapackSync.class, STCDatapackSync::toBytes, STCDatapackSync::fromBytes, STCDatapackSync::handle);
 	}
 }

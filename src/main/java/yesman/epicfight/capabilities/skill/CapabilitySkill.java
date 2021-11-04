@@ -44,7 +44,7 @@ public class CapabilitySkill {
 		CompoundNBT nbt = new CompoundNBT();
 		
 		for (SkillContainer container : this.skillContainers) {
-			if (container.getSkill() != null && container.getSkill().getCategory().shouldSave()) {
+			if (container.getSkill() != null && container.getSkill().getCategory().shouldSaved()) {
 				nbt.putString(String.valueOf(container.getSkill().getCategory().getIndex()), container.getSkill().getName());
 			}
 		}

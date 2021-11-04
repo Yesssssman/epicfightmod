@@ -63,8 +63,7 @@ public class ClientPlayerData extends RemoteClientPlayerData<ClientPlayerEntity>
 			}
 		}
 		if (this.rayTarget != null) {
-			if (!this.rayTarget.isAlive() || this.getOriginalEntity().getDistanceSq(this.rayTarget) > 64.0D
-					|| MathUtils.getAngleBetween(this.getOriginalEntity(), this.rayTarget) > 1.5707963267948966D) {
+			if (!this.rayTarget.isAlive() || this.getOriginalEntity().getDistanceSq(this.rayTarget) > 64.0D || MathUtils.getAngleBetween(this.getOriginalEntity(), this.rayTarget) > 1.5707963267948966D) {
 				this.rayTarget = null;
 				ModNetworkManager.sendToServer(new CTSSetPlayerTarget(-1));
 			}

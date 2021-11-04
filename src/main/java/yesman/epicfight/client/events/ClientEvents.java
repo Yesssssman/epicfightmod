@@ -20,6 +20,8 @@ import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
 import yesman.epicfight.capabilities.ModCapabilities;
 import yesman.epicfight.capabilities.item.CapabilityItem;
+import yesman.epicfight.capabilities.item.ItemCapabilityListener;
+import yesman.epicfight.capabilities.provider.ProviderItem;
 import yesman.epicfight.client.capabilites.player.ClientPlayerData;
 import yesman.epicfight.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.entity.eventlistener.RightClickItemEvent;
@@ -37,8 +39,7 @@ public class ClientEvents {
 			if (slotUnderMouse != null) {
 				CapabilityItem cap = ModCapabilities.getItemStackCapability(Minecraft.getInstance().player.inventory.getItemStack());
 				if (!cap.canUsedInOffhand()) {
-					if (slotUnderMouse.getBackground() != null
-							&& slotUnderMouse.getBackground().equals(OFFHAND_TEXTURE)) {
+					if (slotUnderMouse.getBackground() != null && slotUnderMouse.getBackground().equals(OFFHAND_TEXTURE)) {
 						event.setCanceled(true);
 					}
 				}
@@ -66,9 +67,19 @@ public class ClientEvents {
 		CapabilityItem itemCapability = CapabilityItem.EMPTY;
 		if (event.getKeyCode() == Minecraft.getInstance().gameSettings.keyBindSwapHands.getKey().getKeyCode()) {
 			if (event.getGui() instanceof ContainerScreen) {
-				Slot slot = ((ContainerScreen<?>)event.getGui()).getSlotUnderMouse();
-				if (slot != null && slot.getHasStack()) {
-					itemCapability = ModCapabilities.getItemStackCapability(slot.getStack());
+				Slot slotUnderMouse = ((ContainerScreen<?>)event.getGui()).getSlotUnderMouse();
+				if (slotUnderMouse != null && slotUnderMouse.getHasStack()) {
+					itemCapability = ModCapabilities.getItemStackCapability(slotUnderMouse.getStack());
+					if (!itemCapability.canUsedInOffhand()) {
+						event.setCanceled(true);
+					}
+				}
+			}
+		} else if (event.getKeyCode() >= 49 && event.getKeyCode() <= 57) {
+			if (event.getGui() instanceof ContainerScreen) {
+				Slot slotUnderMouse = ((ContainerScreen<?>)event.getGui()).getSlotUnderMouse();
+				if (slotUnderMouse.getBackground() != null && slotUnderMouse.getBackground().equals(OFFHAND_TEXTURE)) {
+					itemCapability = ModCapabilities.getItemStackCapability(Minecraft.getInstance().player.inventory.getStackInSlot(event.getKeyCode() - 49));
 					if (!itemCapability.canUsedInOffhand()) {
 						event.setCanceled(true);
 					}
@@ -90,10 +101,18 @@ public class ClientEvents {
 	@SubscribeEvent
 	public static void clientRespawnEvent(ClientPlayerNetworkEvent.RespawnEvent event) {
 		ClientPlayerData oldOne = (ClientPlayerData)event.getOldPlayer().getCapability(ModCapabilities.CAPABILITY_ENTITY).orElse(null);
-		if (oldOne != null) {
+		if (oldOne != null) { // This value is null when player dies.
 			ClientPlayerData newOne = (ClientPlayerData)event.getNewPlayer().getCapability(ModCapabilities.CAPABILITY_ENTITY).orElse(null);
 			newOne.onEntityJoinWorld(event.getNewPlayer());
 			newOne.initFromOldOne(oldOne);
+		}
+	}
+	
+	@SubscribeEvent
+	public static void clientLogoutEvent(ClientPlayerNetworkEvent.LoggedOutEvent event) {
+		if (event.getPlayer() != null) {
+			ItemCapabilityListener.reset();
+			ProviderItem.clear();
 		}
 	}
 }

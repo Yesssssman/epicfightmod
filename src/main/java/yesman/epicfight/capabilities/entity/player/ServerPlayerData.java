@@ -39,11 +39,11 @@ public class ServerPlayerData extends PlayerData<ServerPlayerEntity> {
 	@Override
 	public void onEntityJoinWorld(ServerPlayerEntity entityIn) {
 		super.onEntityJoinWorld(entityIn);
+		
 		CapabilitySkill skillCapability = this.getSkillCapability();
 		for (SkillContainer skill : skillCapability.skillContainers) {
 			if (skill.getSkill() != null && skill.getSkill().getCategory().shouldSyncronized()) {
-				ModNetworkManager.sendToPlayer(new STCChangeSkill(skill.getSkill().getCategory().getIndex(), skill.getSkill().getName(),
-						STCChangeSkill.State.ENABLE), this.orgEntity);
+				ModNetworkManager.sendToPlayer(new STCChangeSkill(skill.getSkill().getCategory().getIndex(), skill.getSkill().getName(), STCChangeSkill.State.ENABLE), this.orgEntity);
 			}
 		}
 		

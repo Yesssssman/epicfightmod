@@ -51,7 +51,7 @@ public class STCGameruleChange {
 	
 	public static void handle(STCGameruleChange msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
-			switch(msg.gamerule.valueType) {
+			switch (msg.gamerule.valueType) {
 			case INTEGER:
 				((GameRules.IntegerValue)Minecraft.getInstance().world.getGameRules().get(msg.gamerule.key)).parseIntValue(msg.object.toString());
 				break;

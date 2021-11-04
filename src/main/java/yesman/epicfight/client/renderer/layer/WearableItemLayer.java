@@ -21,11 +21,9 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.ForgeHooksClient;
-import yesman.epicfight.capabilities.ModCapabilities;
 import yesman.epicfight.capabilities.entity.LivingData;
-import yesman.epicfight.capabilities.item.ArmorCapability;
-import yesman.epicfight.capabilities.item.CapabilityItem;
 import yesman.epicfight.client.model.ClientModel;
+import yesman.epicfight.client.model.ClientModels;
 import yesman.epicfight.client.model.CustomModelBakery;
 import yesman.epicfight.client.renderer.ModRenderTypes;
 import yesman.epicfight.main.EpicFightMod;
@@ -33,7 +31,7 @@ import yesman.epicfight.utils.math.OpenMatrix4f;
 
 @OnlyIn(Dist.CLIENT)
 public class WearableItemLayer<E extends LivingEntity, T extends LivingData<E>, M extends BipedModel<E>> extends AnimatedLayer<E, T, M, BipedArmorLayer<E, M, M>> {
-	private static final Map<ResourceLocation, ClientModel> ARMOR_MODEL_MAP = new HashMap<ResourceLocation, ClientModel>();
+	private static final Map<ResourceLocation, ClientModel> ARMOR_MODEL_MAP = new HashMap<ResourceLocation, ClientModel> ();
 	private final EquipmentSlotType[] slots;
 	
 	public WearableItemLayer(EquipmentSlotType... slotType) {
@@ -50,9 +48,8 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingData<E>, 
 		for (EquipmentSlotType slot : this.slots) {
 			ItemStack stack = entityliving.getItemStackFromSlot(slot);
 			Item item = stack.getItem();
-			CapabilityItem itemCapability = ModCapabilities.getItemStackCapability(stack);
 			
-			if (item instanceof ArmorItem && itemCapability instanceof ArmorCapability) {
+			if (item instanceof ArmorItem) {
 				ArmorItem armorItem = (ArmorItem) stack.getItem();
 				matrixStackIn.push();
 				if (slot != armorItem.getEquipmentSlot()) {
@@ -71,7 +68,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingData<E>, 
 						packedLightIn, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
 				matrixStackIn.pop();**/
 				
-				ClientModel model = this.getArmorModel(originalRenderer, entityliving, armorItem, stack, (ArmorCapability)itemCapability, slot);
+				ClientModel model = this.getArmorModel(originalRenderer, entityliving, armorItem, stack, slot);
 				boolean hasEffect = stack.hasEffect();
 				if (armorItem instanceof IDyeableArmorItem) {
 					int i = ((IDyeableArmorItem) armorItem).getColor(stack);
@@ -91,7 +88,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingData<E>, 
 		}
 	}
 	
-	private ClientModel getArmorModel(BipedArmorLayer<E, M, M> originalRenderer, E entityliving, ArmorItem armorItem, ItemStack stack, ArmorCapability armorCapability, EquipmentSlotType slot) {
+	private ClientModel getArmorModel(BipedArmorLayer<E, M, M> originalRenderer, E entityliving, ArmorItem armorItem, ItemStack stack, EquipmentSlotType slot) {
 		ResourceLocation registryName = armorItem.getRegistryName();
 		if (ARMOR_MODEL_MAP.containsKey(registryName)) {
 			return ARMOR_MODEL_MAP.get(registryName);
@@ -99,11 +96,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingData<E>, 
 			BipedModel<E> customModel = armorItem.getArmorModel(entityliving, stack, slot, originalRenderer.func_241736_a_(slot));
 			ClientModel model = null;
 			if (customModel == null) {
-				if (armorCapability == null) {
-					model = ArmorCapability.getBipedArmorModel(slot);
-				} else {
-					model = armorCapability.getArmorModel(slot);
-				}
+				model = getDefaultArmorModel(slot);
 			} else {
 				EpicFightMod.LOGGER.info("baked new model for " + registryName);
 				model = CustomModelBakery.bakeCustomArmorModel(customModel, armorItem, slot);
@@ -135,5 +128,22 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingData<E>, 
 		}
 
 		return resourcelocation;
+	}
+	
+	public static ClientModel getDefaultArmorModel(EquipmentSlotType slot) {
+		ClientModels modelDB = ClientModels.LOGICAL_CLIENT;
+		
+		switch (slot) {
+		case HEAD:
+			return modelDB.helmet;
+		case CHEST:
+			return modelDB.chestplate;
+		case LEGS:
+			return modelDB.leggins;
+		case FEET:
+			return modelDB.boots;
+		default:
+			return null;
+		}
 	}
 }

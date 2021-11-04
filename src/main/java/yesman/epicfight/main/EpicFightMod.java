@@ -22,7 +22,7 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 import yesman.epicfight.animation.AnimationManager;
 import yesman.epicfight.capabilities.ModCapabilities;
-import yesman.epicfight.capabilities.item.ItemCapabilityManager;
+import yesman.epicfight.capabilities.item.ItemCapabilityListener;
 import yesman.epicfight.capabilities.provider.ProviderEntity;
 import yesman.epicfight.capabilities.provider.ProviderItem;
 import yesman.epicfight.capabilities.provider.ProviderProjectile;
@@ -138,7 +138,7 @@ public class EpicFightMod {
     }
 	
 	private void reloadListnerEvent(final AddReloadListenerEvent event) {
-		event.addListener(new ItemCapabilityManager());
+		event.addListener(new ItemCapabilityListener());
 	}
 	
 	public static boolean isPhysicalClient() {

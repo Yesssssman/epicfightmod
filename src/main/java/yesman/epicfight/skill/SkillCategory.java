@@ -6,15 +6,15 @@ public enum SkillCategory {
 	DODGE(true, true, true),
 	PASSIVE(true, true, true),
 	WEAPON_PASSIVE(false, false, false),
-	WEAPON_SPECIAL_ATTACK(false, false, false),
+	WEAPON_SPECIAL_ATTACK(false, true, false),
 	GUARD(true, true, true);
 	
-	boolean shouldSave;
+	boolean shouldSaved;
 	boolean shouldSyncronized;
 	boolean modifiable;
 	
 	SkillCategory(boolean shouldSave, boolean shouldSyncronized, boolean shownInEditor) {
-		this.shouldSave = shouldSave;
+		this.shouldSaved = shouldSave;
 		this.shouldSyncronized = shouldSyncronized;
 		this.modifiable = shownInEditor;
 	}
@@ -23,8 +23,8 @@ public enum SkillCategory {
 		return this.ordinal();
 	}
 	
-	public boolean shouldSave() {
-		return this.shouldSave;
+	public boolean shouldSaved() {
+		return this.shouldSaved;
 	}
 	
 	public boolean shouldSyncronized() {
