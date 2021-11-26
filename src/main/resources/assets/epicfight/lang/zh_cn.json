@@ -40,7 +40,7 @@
 	"gui.epicfight.auto_preparation.off" : "自动战斗切换: 关闭",
 	"gui.epicfight.off_gore_effect.on" : "血腥效果: 关闭",
 	"gui.epicfight.off_gore_effect.off" : "血腥效果: 开启",
-	"gui.epicfight.auto_switching_items" : "自动切换五物品",
+	"gui.epicfight.auto_switching_items" : "自动切换物品",
 	"gui.epicfight.filter_animation.tooltip" : "开启此选项将禁用玩家在挖掘模式下的动画模型  ",
 	"gui.epicfight.health_indicator.tooltip" : "关闭此选将关闭目标血条显示",
 	"gui.epicfight.target_indicator.tooltip" : "关闭此选项将关闭目标指示器",
