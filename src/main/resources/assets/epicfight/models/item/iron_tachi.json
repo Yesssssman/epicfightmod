@@ -1,0 +1,22 @@
+{
+    "parent": "item/generated",
+    "textures":
+    {
+        "layer0" : "epicfight:item/iron_tachi"
+    },
+    "display":
+  	{
+    	"thirdperson_righthand":
+    	{
+    		"scale": [1.4, 1.4, 1.0],
+    		"translation": [0.0, 10, 1.5],
+    		"rotation": [40, 90, 0]
+    	},
+    	"firstperson_righthand":
+    	{
+      		"translation": [2,7.5,0],
+      		"rotation": [30,90,0],
+      		"scale": [1.0, 1.0, 0.7]
+    	}
+  	}
+}

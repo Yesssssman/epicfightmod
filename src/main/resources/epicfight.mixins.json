@@ -1,0 +1,20 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"compatibilityLevel": "JAVA_16",
+	"package": "yesman.epicfight.mixin",
+	"client": [
+		"MixinEnderDragonRenderer",
+		"MixinBufferBuilder"
+	],
+	"mixins": [
+		"MixinItemStack",
+		"MixinFriendlyByteBuf",
+		"MixinEndCrystal",
+		"MixinWitherBoss"
+	],
+	"injector": {
+		"defaultRequire": 1
+	},
+	"refmap": "epicfight.mixins.refmap.json"
+}

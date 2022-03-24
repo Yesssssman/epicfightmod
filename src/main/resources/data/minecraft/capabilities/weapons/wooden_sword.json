@@ -1,0 +1,13 @@
+{
+	"attributes":
+	{
+		"common":
+		{
+			"impact":0.5,
+			"max_strikes":1
+		}
+	},
+	"hit_particle":"blunt",
+	"hit_sound":"entity.hit.blunt",
+	"type":"sword"
+}
