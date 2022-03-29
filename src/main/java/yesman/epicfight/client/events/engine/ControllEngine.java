@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.BiConsumer;
 
+import net.minecraft.util.MovementInput;
 import org.lwjgl.glfw.GLFW;
 import org.lwjgl.glfw.GLFWCursorPosCallbackI;
 
@@ -270,6 +271,10 @@ public class ControllEngine {
 	public void setKeyBind(KeyBinding key, boolean setter) {
 		KeyBinding.setKeyBindState(key.getKey(), setter);
 	}
+
+    public MovementInput getMovementInput() {
+        return player != null ? player.movementInput : new MovementInput();
+    }
 	
 	@OnlyIn(Dist.CLIENT)
 	@Mod.EventBusSubscriber(modid = EpicFightMod.MODID, value = Dist.CLIENT)

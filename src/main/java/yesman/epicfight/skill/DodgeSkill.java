@@ -1,8 +1,8 @@
 package yesman.epicfight.skill;
 
 import io.netty.buffer.Unpooled;
-import net.minecraft.client.GameSettings;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.MovementInput;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -79,11 +79,11 @@ public class DodgeSkill extends Skill {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public PacketBuffer gatherArguments(ClientPlayerData executer, ControllEngine controllEngine) {
-		GameSettings gamesetting = controllEngine.gameSettings;
-		int forward = gamesetting.keyBindForward.isKeyDown() ? 1 : 0;
-		int backward = gamesetting.keyBindBack.isKeyDown() ? -1 : 0;
-		int left = gamesetting.keyBindLeft.isKeyDown() ? 1 : 0;
-		int right = gamesetting.keyBindRight.isKeyDown() ? -1 : 0;
+        MovementInput input = controllEngine.getMovementInput();
+        int forward = input.forwardKeyDown ? 1 : 0;
+        int backward = input.backKeyDown ? -1 : 0;
+        int left = input.leftKeyDown ? 1 : 0;
+        int right = input.rightKeyDown ? -1 : 0;
 		
 		PacketBuffer buf = new PacketBuffer(Unpooled.buffer());
 		
