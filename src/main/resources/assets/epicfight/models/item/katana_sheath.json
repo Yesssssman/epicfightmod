@@ -1,0 +1,21 @@
+{
+	"loader": "forge:obj",
+  	"model": "epicfight:models/item/obj/katana_sheath.obj",
+  	"flip-v": true,
+  	"materialLibraryOverride": "katana.mtl",
+	"display":
+  	{
+    	"thirdperson_righthand":
+    	{
+     		"translation": [6.2, -5.0, 7.46],
+     		"rotation": [88, -2, 0],
+     		"scale": [0.8, 0.8, 0.8]
+    	},
+    	"firstperson_righthand":
+    	{
+     		"translation": [10,-1,-5],
+     		"rotation": [75,0,0],
+    		"scale": [0.45, 0.45, 0.45]
+    	}
+  	}
+}

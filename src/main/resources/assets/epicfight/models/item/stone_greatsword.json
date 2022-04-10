@@ -1,0 +1,22 @@
+{
+    "parent": "item/generated",
+    "textures":
+    {
+        "layer0" : "epicfight:item/stone_greatsword"
+    },
+    "display":
+  	{
+    	"thirdperson_righthand":
+    	{
+    		"scale": [1.8, 1.8, 1.0],
+    		"translation": [-1.0, 12, -1.0],
+    		"rotation": [40, 90, 0]
+    	},
+    	"firstperson_righthand":
+    	{
+      		"translation": [2,7.5,0],
+      		"rotation": [30,90,0],
+      		"scale": [1.2, 1.2, 0.7]
+    	}
+  	}
+}

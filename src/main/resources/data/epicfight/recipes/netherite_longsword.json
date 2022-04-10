@@ -1,0 +1,12 @@
+{
+    "type": "minecraft:smithing",
+    "base": {
+        "item": "epicfight:diamond_longsword"
+    },
+    "addition": {
+        "item" : "minecraft:netherite_ingot"
+    },
+    "result": {
+        "item": "epicfight:netherite_longsword"
+    }
+}

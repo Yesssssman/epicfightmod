@@ -1,0 +1,14 @@
+{
+	"priority":"MIDDLE",
+	"masks":
+	[
+		{
+			"livingmotion":"ALL",
+			"type":"arms"
+		},
+		{
+			"livingmotion":"IDLE",
+			"type":"none"
+		}
+	]
+}

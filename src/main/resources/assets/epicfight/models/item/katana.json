@@ -1,0 +1,52 @@
+{
+	"loader": "forge:separate-perspective",
+	"base":
+	{
+		"loader": "forge:obj",
+  		"model": "epicfight:models/item/obj/katana.obj",
+  		"flip-v": true,
+		"display":
+  		{
+    		"thirdperson_righthand":
+    		{
+      			"translation": [6.5, -7.5, 8.5],
+      			"rotation": [80, 0, 0],
+      			"scale": [0.8, 0.8, 0.8]
+    		},
+    		"firstperson_righthand":
+    		{
+      			"translation": [13,-6,-0],
+      			"rotation": [75,0,0],
+      			"scale": [0.7, 0.7, 0.7]
+    		}
+  		}
+	},
+	"perspectives":
+	{
+		"ground":
+		{
+			"parent": "item/generated",
+			"textures":
+			{
+				"layer0": "epicfight:item/katana"
+			}
+		},
+		"gui":
+		{
+			"parent": "item/generated",
+			"textures":
+			{
+				"layer0": "epicfight:item/katana"
+			},
+			"gui_light": "front"
+		},
+		"fixed":
+		{
+			"parent": "item/generated",
+			"textures":
+			{
+				"layer0": "epicfight:item/katana"
+			}
+		}
+	}
+}
