@@ -2,10 +2,8 @@ package yesman.epicfight.world.capabilities.entitypatch.player;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -15,6 +13,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.game.AttackResult;
@@ -25,6 +24,7 @@ import yesman.epicfight.network.server.SPChangeLivingMotion;
 import yesman.epicfight.network.server.SPChangePlayerYaw;
 import yesman.epicfight.network.server.SPChangeSkill;
 import yesman.epicfight.network.server.SPPlayAnimation;
+import yesman.epicfight.network.server.SPTogglePlayerMode;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
@@ -35,8 +35,7 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 
 public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	private LivingEntity attackTarget;
-	private Map<LivingMotion, StaticAnimation> mainhandCompositeLivingMotions = Maps.<LivingMotion, StaticAnimation>newHashMap();
-	private Map<LivingMotion, StaticAnimation> offhandCompositeLivingMotions = Maps.<LivingMotion, StaticAnimation>newHashMap();
+	private boolean updatedMotionCurrentTick;
 	
 	@Override
 	public void onJoinWorld(ServerPlayer entityIn, EntityJoinWorldEvent event) {
@@ -62,11 +61,19 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	}
 	
 	@Override
+	public void onStartTracking(ServerPlayer trackingPlayer) {
+		SPChangeLivingMotion msg = new SPChangeLivingMotion(this.getOriginal().getId());
+		msg.putEntries(this.getAnimator().getLivingAnimationEntrySet());
+		EpicFightNetworkManager.sendToPlayer(msg, trackingPlayer);
+		EpicFightNetworkManager.sendToPlayer(new SPTogglePlayerMode(this.getOriginal().getId(), this.isBattleMode()), trackingPlayer);
+	}
+	
+	@Override
 	public void gatherDamageDealt(ExtendedDamageSource source, float amount) {
 		if (source.isBasicAttack()) {
 			SkillContainer container = this.getSkill(SkillCategory.WEAPON_SPECIAL_ATTACK);
 			
-			if (!container.isFull() && container.hasSkill(this.getHeldItemCapability(InteractionHand.MAIN_HAND).getSpecialAttack(this))) {
+			if (!container.isFull() && container.hasSkill(this.getHoldingItemCapability(InteractionHand.MAIN_HAND).getSpecialAttack(this))) {
 				float value = container.getResource() + amount;
 				
 				if (value > 0.0F) {
@@ -77,12 +84,19 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	}
 	
 	@Override
+	public void tick(LivingUpdateEvent event) {
+		super.tick(event);
+		this.updatedMotionCurrentTick = false;
+	}
+	
+	@Override
 	public void updateMotion(boolean considerInaction) {
 		;
 	}
 	
+	@Override
 	public void updateHeldItem(CapabilityItem fromCap, CapabilityItem toCap, ItemStack from, ItemStack to, InteractionHand hand) {
-		CapabilityItem mainHandCap = (hand == InteractionHand.MAIN_HAND) ? toCap : this.getHeldItemCapability(InteractionHand.MAIN_HAND);
+		CapabilityItem mainHandCap = (hand == InteractionHand.MAIN_HAND) ? toCap : this.getHoldingItemCapability(InteractionHand.MAIN_HAND);
 		mainHandCap.changeWeaponSpecialSkill(this);
 		
 		if (hand == InteractionHand.OFF_HAND) {
@@ -107,60 +121,35 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 			}
 		}
 		
-		this.setLivingMotionCurrentItem(toCap, hand);
+		this.modifyLivingMotionByCurrentItem();
 	}
 	
-	public void setLivingMotionCurrentItem(CapabilityItem capabilityItem, InteractionHand hand) {
-		this.resetCompositeLivingMotions(hand);
-		Map<LivingMotion, StaticAnimation> motionChanger = capabilityItem.getLivingMotionModifier(this, hand);
-		List<LivingMotion> motions = Lists.<LivingMotion>newArrayList();
-		List<StaticAnimation> animations = Lists.<StaticAnimation>newArrayList();
-		
-		for (Map.Entry<LivingMotion, StaticAnimation> entry : motionChanger.entrySet()) {
-			this.addCompositeLivingMotion(entry.getKey(), entry.getValue(), hand);
+	public void modifyLivingMotionByCurrentItem() {
+		if (this.updatedMotionCurrentTick) {
+			return;
 		}
 		
-		for (Map.Entry<LivingMotion, StaticAnimation> finalEntry : this.getCompositeLivingMotions()) {
-			motions.add(finalEntry.getKey());
-			animations.add(finalEntry.getValue());
+		CapabilityItem mainhandCap = this.getHoldingItemCapability(InteractionHand.MAIN_HAND);
+		CapabilityItem offhandCap = this.getAdvancedHoldingItemCapability(InteractionHand.OFF_HAND);
+		CapabilityItem motionModifyingCap = mainhandCap.isEmpty() ? offhandCap : mainhandCap;
+		
+		this.getAnimator().resetMotions();
+		Map<LivingMotion, StaticAnimation> mainhandMotionModifier = motionModifyingCap.getLivingMotionModifier(this, InteractionHand.MAIN_HAND);
+		
+		for (Map.Entry<LivingMotion, StaticAnimation> entry : mainhandMotionModifier.entrySet()) {
+			this.getAnimator().addLivingAnimation(entry.getKey(), entry.getValue());
 		}
 		
-		LivingMotion[] motionarr = motions.toArray(new LivingMotion[0]);
-		StaticAnimation[] animationarr = animations.toArray(new StaticAnimation[0]);
-		SPChangeLivingMotion msg = new SPChangeLivingMotion(this.original.getId(), motions.size(), SPPlayAnimation.Layer.COMPOSITE_LAYER);
-		msg.setMotions(motionarr);
-		msg.setAnimations(animationarr);
+		SPChangeLivingMotion msg = new SPChangeLivingMotion(this.original.getId());
+		msg.putEntries(this.getAnimator().getLivingAnimationEntrySet());
 		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(msg, this.original);
-	}
-	
-	private void addCompositeLivingMotion(LivingMotion motion, StaticAnimation animation, InteractionHand hand) {
-		Map<LivingMotion, StaticAnimation> CompositeMotion = hand == InteractionHand.MAIN_HAND ? this.mainhandCompositeLivingMotions : this.offhandCompositeLivingMotions;
-		
-		if (animation != null) {
-			CompositeMotion.put(motion, animation);
-		}
-	}
-	
-	private void resetCompositeLivingMotions(InteractionHand hand) {
-		Map<LivingMotion, StaticAnimation> compositeMotion = hand == InteractionHand.MAIN_HAND ? this.mainhandCompositeLivingMotions : this.offhandCompositeLivingMotions;
-		compositeMotion.clear();
-	}
-	
-	public Set<Map.Entry<LivingMotion, StaticAnimation>> getCompositeLivingMotions() {
-		Map<LivingMotion, StaticAnimation> map = Maps.newHashMap();
-		map.putAll(this.mainhandCompositeLivingMotions);
-		
-		for (Map.Entry<LivingMotion, StaticAnimation> entry : this.offhandCompositeLivingMotions.entrySet()) {
-			map.computeIfAbsent(entry.getKey(), (key) -> entry.getValue());
-		}
-		
-		return map.entrySet();
+		this.updatedMotionCurrentTick = true;
 	}
 	
 	@Override
-	public void playAnimationSynchronized(StaticAnimation animation, float convertTimeModifier, AnimationPacketProvider packetProvider, SPPlayAnimation.Layer playOn) {
-		super.playAnimationSynchronized(animation, convertTimeModifier, packetProvider, playOn);
-		EpicFightNetworkManager.sendToPlayer(packetProvider.get(animation, convertTimeModifier, this, playOn), this.original);
+	public void playAnimationSynchronized(StaticAnimation animation, float convertTimeModifier, AnimationPacketProvider packetProvider) {
+		super.playAnimationSynchronized(animation, convertTimeModifier, packetProvider);
+		EpicFightNetworkManager.sendToPlayer(packetProvider.get(animation, convertTimeModifier, this), this.original);
 	}
 	
 	@Override

@@ -56,7 +56,7 @@ public class EpicFightRenderTypes extends RenderType {
 				.setTextureState(new RenderStateShard.TextureStateShard(p_173206_, false, false))
 				.setTransparencyState(NO_TRANSPARENCY).setCullState(NO_CULL).setLightmapState(LIGHTMAP)
 				.setOverlayState(OVERLAY).setLayeringState(VIEW_OFFSET_Z_LAYERING).createCompositeState(true);
-		return create("armor_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.TRIANGLES, 256, true, false,
+		return create(EpicFightMod.MODID + ":armor_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.TRIANGLES, 256, true, false,
 				rendertype$compositestate);
 	});
 

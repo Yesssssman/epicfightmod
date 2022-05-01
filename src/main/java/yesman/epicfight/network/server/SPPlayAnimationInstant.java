@@ -8,21 +8,22 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class SPPlayAnimationInstant extends SPPlayAnimation {
-	public SPPlayAnimationInstant(int namespaceId, int animation, int entityId, float convertTimeModifier, Layer playOn) {
-		super(namespaceId, animation, entityId, convertTimeModifier, playOn);
+	public SPPlayAnimationInstant(int namespaceId, int animation, int entityId, float convertTimeModifier) {
+		super(namespaceId, animation, entityId, convertTimeModifier);
 	}
 	
-	public SPPlayAnimationInstant(StaticAnimation animation, float convertTimeModifier, LivingEntityPatch<?> entitypatch, SPPlayAnimation.Layer layer) {
-		this(animation.getNamespaceId(), animation.getId(), entitypatch.getOriginal().getId(), convertTimeModifier, layer);
+	public SPPlayAnimationInstant(StaticAnimation animation, float convertTimeModifier, LivingEntityPatch<?> entitypatch) {
+		this(animation.getNamespaceId(), animation.getId(), entitypatch.getOriginal().getId(), convertTimeModifier);
 	}
 	
 	public static SPPlayAnimationInstant fromBytes(FriendlyByteBuf buf) {
-		return new SPPlayAnimationInstant(buf.readInt(), buf.readInt(), buf.readInt(), buf.readFloat(), Layer.values()[buf.readInt()]);
+		return new SPPlayAnimationInstant(buf.readInt(), buf.readInt(), buf.readInt(), buf.readFloat());
 	}
 	
 	@Override
 	public void onArrive() {
-		Entity entity = Minecraft.getInstance().player.level.getEntity(this.entityId);
+		Minecraft mc = Minecraft.getInstance();
+		Entity entity = mc.player.level.getEntity(this.entityId);
 		
 		if (entity == null) {
 			return;

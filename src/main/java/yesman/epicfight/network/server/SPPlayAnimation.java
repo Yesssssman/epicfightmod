@@ -16,7 +16,6 @@ public class SPPlayAnimation {
 	protected int animationId;
 	protected int entityId;
 	protected float convertTimeModifier;
-	protected Layer playOn;
 
 	public SPPlayAnimation() {
 		this.animationId = 0;
@@ -25,35 +24,23 @@ public class SPPlayAnimation {
 	}
 	
 	public SPPlayAnimation(StaticAnimation animation, float convertTimeModifier, LivingEntityPatch<?> entitypatch) {
-		this(animation, convertTimeModifier, entitypatch, SPPlayAnimation.Layer.BASE_LAYER);
-	}
-	
-	public SPPlayAnimation(StaticAnimation animation, float convertTimeModifier, LivingEntityPatch<?> entitypatch, SPPlayAnimation.Layer layer) {
-		this(animation.getNamespaceId(), animation.getId(), entitypatch.getOriginal().getId(), convertTimeModifier, layer);
-	}
-	
-	public SPPlayAnimation(int namespaceId, int animation, int entityId, float convertTimeModifier) {
-		this(namespaceId, animation, entityId, convertTimeModifier, Layer.BASE_LAYER);
+		this(animation.getNamespaceId(), animation.getId(), entitypatch.getOriginal().getId(), convertTimeModifier);
 	}
 	
 	public SPPlayAnimation(StaticAnimation animation, int entityId, float convertTimeModifier) {
-		this(animation, entityId, convertTimeModifier, Layer.BASE_LAYER);
+		this(animation.getNamespaceId(), animation.getId(), entityId, convertTimeModifier);
 	}
 	
-	public SPPlayAnimation(StaticAnimation animation, int entityId, float convertTimeModifier, Layer playOn) {
-		this(animation.getNamespaceId(), animation.getId(), entityId, convertTimeModifier, playOn);
-	}
-	
-	public SPPlayAnimation(int namespaceId, int animation, int entityId, float convertTimeModifier, Layer playOn) {
+	public SPPlayAnimation(int namespaceId, int animation, int entityId, float convertTimeModifier) {
 		this.namespaceId = namespaceId;
 		this.animationId = animation;
 		this.entityId = entityId;
 		this.convertTimeModifier = convertTimeModifier;
-		this.playOn = playOn;
 	}
 	
 	public <T extends SPPlayAnimation> void onArrive() {
-		Entity entity = Minecraft.getInstance().player.level.getEntity(this.entityId);
+		Minecraft mc = Minecraft.getInstance();
+		Entity entity = mc.player.level.getEntity(this.entityId);
 		
 		if (entity == null) {
 			return;
@@ -61,15 +48,13 @@ public class SPPlayAnimation {
 		
 		LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>)entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
 		
-		if (this.playOn == Layer.BASE_LAYER) {
+		if (entitypatch != null) {
 			entitypatch.getAnimator().playAnimation(this.namespaceId, this.animationId, this.convertTimeModifier);
-		} else if (this.playOn == Layer.COMPOSITE_LAYER) {
-			entitypatch.getClientAnimator().playCompositeAnimation(this.namespaceId, this.animationId, this.convertTimeModifier);
 		}
 	}
 	
 	public static SPPlayAnimation fromBytes(FriendlyByteBuf buf) {
-		return new SPPlayAnimation(buf.readInt(), buf.readInt(), buf.readInt(), buf.readFloat(), Layer.values()[buf.readInt()]);
+		return new SPPlayAnimation(buf.readInt(), buf.readInt(), buf.readInt(), buf.readFloat());
 	}
 	
 	public static void toBytes(SPPlayAnimation msg, ByteBuf buf) {
@@ -77,7 +62,6 @@ public class SPPlayAnimation {
 		buf.writeInt(msg.animationId);
 		buf.writeInt(msg.entityId);
 		buf.writeFloat(msg.convertTimeModifier);
-		buf.writeInt(msg.playOn.ordinal());
 	}
 	
 	public static void handle(SPPlayAnimation msg, Supplier<NetworkEvent.Context> ctx) {
@@ -86,9 +70,5 @@ public class SPPlayAnimation {
 		});
 		
 		ctx.get().setPacketHandled(true);
-	}
-	
-	public static enum Layer {
-		BASE_LAYER, COMPOSITE_LAYER;
 	}
 }

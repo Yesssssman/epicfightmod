@@ -25,7 +25,7 @@ import yesman.epicfight.world.entity.ai.goal.CreeperSwellStoppableGoal;
 
 public class CreeperPatch extends MobPatch<Creeper> {
 	public CreeperPatch() {
-		super(Faction.NATURAL);
+		super(Faction.NEUTURAL);
 	}
 	
 	@Override
@@ -59,15 +59,16 @@ public class CreeperPatch extends MobPatch<Creeper> {
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void initAnimator(ClientAnimator animator) {
-		animator.addLivingMotion(LivingMotion.IDLE, Animations.CREEPER_IDLE);
-		animator.addLivingMotion(LivingMotion.WALK, Animations.CREEPER_WALK);
-		animator.addLivingMotion(LivingMotion.DEATH, Animations.CREEPER_DEATH);
+	public void initAnimator(ClientAnimator clientAnimator) {
+		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.CREEPER_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.CREEPER_WALK);
+		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.CREEPER_DEATH);
+		clientAnimator.setCurrentMotionsAsDefault();
 	}
 
 	@Override
 	public void updateMotion(boolean considerInaction) {
-		super.humanoidEntityUpdateMotion(considerInaction);
+		super.commonMobUpdateMotion(considerInaction);
 	}
 	
 	@Override

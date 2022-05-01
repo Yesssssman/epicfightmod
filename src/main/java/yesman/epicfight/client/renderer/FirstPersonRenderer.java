@@ -17,7 +17,6 @@ import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.PlayerItemInHandLayer;
 import net.minecraft.client.renderer.entity.layers.SpinAttackEffectLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.phys.Vec3;
@@ -32,9 +31,9 @@ import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec4f;
 import yesman.epicfight.client.renderer.patched.entity.PatchedLivingEntityRenderer;
-import yesman.epicfight.client.renderer.patched.layer.PatchedElytraLayer;
-import yesman.epicfight.client.renderer.patched.layer.PatchedHeldItemLayer;
 import yesman.epicfight.client.renderer.patched.layer.NoRenderingLayer;
+import yesman.epicfight.client.renderer.patched.layer.PatchedElytraLayer;
+import yesman.epicfight.client.renderer.patched.layer.PatchedItemInHandLayer;
 import yesman.epicfight.client.renderer.patched.layer.WearableItemLayer;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 
@@ -43,7 +42,7 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 	public FirstPersonRenderer() {
 		super();
 		this.layerRendererReplace.put(ElytraLayer.class, new PatchedElytraLayer<>());
-		this.layerRendererReplace.put(PlayerItemInHandLayer.class, new PatchedHeldItemLayer<>());
+		this.layerRendererReplace.put(PlayerItemInHandLayer.class, new PatchedItemInHandLayer<>());
 		this.layerRendererReplace.put(HumanoidArmorLayer.class, new WearableItemLayer<>(EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET));
 		this.layerRendererReplace.put(CustomHeadLayer.class, new NoRenderingLayer<>());
 		this.layerRendererReplace.put(ArrowLayer.class, new NoRenderingLayer<>());
@@ -95,10 +94,5 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 		}
 		
 		matStackIn.popPose();
-	}
-	
-	@Override
-	protected ResourceLocation getEntityTexture(LocalPlayerPatch entitypatch) {
-		return entitypatch.getOriginal().getSkinTextureLocation();
 	}
 }

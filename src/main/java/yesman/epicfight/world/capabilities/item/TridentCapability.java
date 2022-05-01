@@ -23,7 +23,7 @@ public class TridentCapability extends RangedWeaponCapability {
 	private static List<StaticAnimation> mountAttackMotion;
 	
 	public TridentCapability(Item item) {
-		super(item, null, Animations.BIPED_JAVELIN_AIM, Animations.BIPED_JAVELIN_THROW);
+		super(item, null, Animations.BIPED_JAVELIN_AIM, Animations.BIPED_JAVELIN_THROW, WeaponCategory.TRIDENT);
 		
 		if (attackMotion == null) {
 			attackMotion = new ArrayList<StaticAnimation> ();
@@ -45,7 +45,7 @@ public class TridentCapability extends RangedWeaponCapability {
 	
 	@Override
 	protected void registerAttribute() {
-		this.addStyleAttibute(Style.ONE_HAND, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(2.25D)));
+		this.addStyleAttibute(Style.ONE_HAND, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(2.3D)));
 	}
 	
 	@Override
@@ -57,7 +57,7 @@ public class TridentCapability extends RangedWeaponCapability {
 	public HitParticleType getHitParticle() {
 		return EpicFightParticles.HIT_BLADE.get();
 	}
-
+	
 	@Override
 	public Collider getWeaponCollider() {
 		return ColliderPreset.SPEAR;

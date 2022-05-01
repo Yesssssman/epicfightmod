@@ -1,7 +1,12 @@
 package yesman.epicfight.network.server;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
+import com.google.common.collect.Lists;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
@@ -16,68 +21,77 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 public class SPChangeLivingMotion {
 	private int entityId;
 	private int count;
-	private LivingMotion[] motion;
-	private StaticAnimation[] animation;
-	private SPPlayAnimation.Layer layer;
+	private boolean setChangesAsDefault;
+	private List<LivingMotion> motionList = Lists.newArrayList();
+	private List<StaticAnimation> animationList = Lists.newArrayList();
 	
 	public SPChangeLivingMotion() {
-		this.entityId = 0;
-		this.count = 0;
+		this(-1);
 	}
 	
-	public SPChangeLivingMotion(int entityId, int count, SPPlayAnimation.Layer layer) {
+	public SPChangeLivingMotion(int entityId) {
+		this(entityId, 0, false);
+	}
+	
+	public SPChangeLivingMotion(int entityId, boolean setChangesAsDefault) {
+		this(entityId, 0, setChangesAsDefault);
+	}
+	
+	private SPChangeLivingMotion(int entityId, int count, boolean setChangesAsDefault) {
 		this.entityId = entityId;
 		this.count = count;
-		this.motion = new LivingMotion[0];
-		this.animation = new StaticAnimation[0];
-		this.layer = layer;
+		this.setChangesAsDefault = setChangesAsDefault;
 	}
 	
-	public void setAnimations(StaticAnimation... animation) {
-		this.animation = animation;
+	public SPChangeLivingMotion putPair(LivingMotion motion, StaticAnimation animation) {
+		return this.putPair(Pair.of(motion, animation));
 	}
-
-	public void setMotions(LivingMotion... motion) {
-		this.motion = motion;
+	
+	public SPChangeLivingMotion putPair(Pair<LivingMotion, StaticAnimation> pair) {
+		this.motionList.add(pair.getFirst());
+		this.animationList.add(pair.getSecond());
+		this.count++;
+		return this;
 	}
-
-	public LivingMotion[] getMotions() {
-		return this.motion;
+	
+	public void putEntries(Set<Map.Entry<LivingMotion, StaticAnimation>> motionSet) {
+		this.count += motionSet.size();
+		
+		motionSet.forEach((entry) -> {
+			this.motionList.add(entry.getKey());
+			this.animationList.add(entry.getValue());
+		});
 	}
-
-	public StaticAnimation[] getAnimations() {
-		return this.animation;
-	}
-
+	
 	public static SPChangeLivingMotion fromBytes(FriendlyByteBuf buf) {
-		SPChangeLivingMotion msg = new SPChangeLivingMotion(buf.readInt(), buf.readInt(), SPPlayAnimation.Layer.values()[buf.readInt()]);
-		LivingMotion[] motionarr = new LivingMotion[msg.count];
-		StaticAnimation[] idarr = new StaticAnimation[msg.count];
+		SPChangeLivingMotion msg = new SPChangeLivingMotion(buf.readInt(), buf.readInt(), buf.readBoolean());
+		List<LivingMotion> motionList = Lists.newArrayList();
+		List<StaticAnimation> animationList = Lists.newArrayList();
 		
-		for(int i = 0; i < msg.count; i++) {
-			motionarr[i] = LivingMotion.values()[buf.readInt()];
+		for (int i = 0; i < msg.count; i++) {
+			motionList.add(LivingMotion.values()[buf.readInt()]);
 		}
 		
-		for(int i = 0; i < msg.count; i++) {
-			idarr[i] = EpicFightMod.getInstance().animationManager.findAnimation(buf.readInt(), buf.readInt());
+		for (int i = 0; i < msg.count; i++) {
+			animationList.add(EpicFightMod.getInstance().animationManager.findAnimationById(buf.readInt(), buf.readInt()));
 		}
 		
-		msg.motion = motionarr;
-		msg.animation = idarr;
+		msg.motionList = motionList;
+		msg.animationList = animationList;
 		
 		return msg;
 	}
-
+	
 	public static void toBytes(SPChangeLivingMotion msg, FriendlyByteBuf buf) {
 		buf.writeInt(msg.entityId);
 		buf.writeInt(msg.count);
-		buf.writeInt(msg.layer.ordinal());
+		buf.writeBoolean(msg.setChangesAsDefault);
 		
-		for(LivingMotion motion : msg.motion) {
+		for (LivingMotion motion : msg.motionList) {
 			buf.writeInt(motion.getId());
 		}
 		
-		for(StaticAnimation anim : msg.animation) {
+		for (StaticAnimation anim : msg.animationList) {
 			buf.writeInt(anim.getNamespaceId());
 			buf.writeInt(anim.getId());
 		}
@@ -87,22 +101,19 @@ public class SPChangeLivingMotion {
 		ctx.get().enqueueWork(() -> {
 			Minecraft mc = Minecraft.getInstance();
 			Entity entity = mc.player.level.getEntity(msg.entityId);
-			
+			 
 			if (entity != null) {
-				LivingEntityPatch<?> playerpatch = (LivingEntityPatch<?>) entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-				ClientAnimator animator = playerpatch.getClientAnimator();
-				animator.resetCompositeMotionCache();
+				LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>) entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+				ClientAnimator animator = entitypatch.getClientAnimator();
+				animator.resetMotions();
 				animator.resetCompositeMotion();
 				
 				for (int i = 0; i < msg.count; i++) {
-					switch (msg.layer) {
-					case BASE_LAYER:
-						playerpatch.getClientAnimator().addLivingMotion(msg.motion[i], msg.animation[i]);
-						break;
-					case COMPOSITE_LAYER:
-						playerpatch.getClientAnimator().addCompositeAnimation(msg.motion[i], msg.animation[i]);
-						break;
-					}
+					entitypatch.getClientAnimator().addLivingAnimation(msg.motionList.get(i), msg.animationList.get(i));
+				}
+				
+				if (msg.setChangesAsDefault) {
+					animator.setCurrentMotionsAsDefault();
 				}
 			}
 		});

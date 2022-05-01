@@ -12,7 +12,6 @@ import yesman.epicfight.api.utils.game.ExtendedDamageSource;
 
 public class EntityState {
 	public static final EntityState FREE = new EntityState(false, false, false, true, true, false, false, 0, (damagesource) -> false);
-	public static final EntityState FREE_CAMERA = new EntityState(false, true, false, false, false, true, false, 1, (damagesource) -> false);
 	public static final EntityState ROTATABLE_PRE_DELAY = new EntityState(false, true, false, false, false, true, false, 1, (damagesource) -> false);
 	public static final EntityState PRE_DELAY = new EntityState(true, true, false, false, false, true, false, 1, (damagesource) -> false);
 	public static final EntityState ROTATABLE_CONTACT = new EntityState(false, true, true, false, false, true, false, 2, (damagesource) -> false);
@@ -59,8 +58,8 @@ public class EntityState {
 		TO_LOCKED, TO_ROTATABLE
 	}
 	
-	final boolean cameraLock;
-	final boolean movementLock;
+	final boolean turningLocked;
+	final boolean movementLocked;
 	final boolean attacking;
 	final boolean canBasicAttack;
 	final boolean canSkillExecution;
@@ -70,9 +69,9 @@ public class EntityState {
 	final int phaseLevel;
 	final Function<DamageSource, Boolean> invulnerabilityChecker;
 	
-	private EntityState(boolean cameraLock, boolean movementLock, boolean attacking, boolean basicAttackPossible, boolean skillExecutionPossible, boolean inaction, boolean hurt, int phaseLevel, Function<DamageSource, Boolean> invulnerabilityChecker) {
-		this.cameraLock = cameraLock;
-		this.movementLock = movementLock;
+	private EntityState(boolean turningLocked, boolean movementLocked, boolean attacking, boolean basicAttackPossible, boolean skillExecutionPossible, boolean inaction, boolean hurt, int phaseLevel, Function<DamageSource, Boolean> invulnerabilityChecker) {
+		this.turningLocked = turningLocked;
+		this.movementLocked = movementLocked;
 		this.attacking = attacking;
 		this.canBasicAttack = basicAttackPossible;
 		this.canSkillExecution = skillExecutionPossible;
@@ -82,12 +81,12 @@ public class EntityState {
 		this.invulnerabilityChecker = invulnerabilityChecker;
 	}
 	
-	public boolean cameraRotationLocked() {
-		return this.cameraLock;
+	public boolean turningLocked() {
+		return this.turningLocked;
 	}
 	
 	public boolean movementLocked() {
-		return this.movementLock;
+		return this.movementLocked;
 	}
 	
 	public boolean attacking() {

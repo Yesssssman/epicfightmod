@@ -1,5 +1,10 @@
 package yesman.epicfight.api.animation;
 
+import java.util.Map;
+import java.util.Set;
+
+import com.google.common.collect.Maps;
+
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -12,11 +17,14 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 public abstract class Animator {
 	protected Pose prevPose = new Pose();
 	protected Pose currentPose = new Pose();
+	protected final Map<LivingMotion, StaticAnimation> livingAnimations = Maps.newHashMap();
+	
 	protected LivingEntityPatch<?> entitypatch;
+	
 	public abstract void playAnimation(StaticAnimation nextAnimation, float convertTimeModifier);
 	public abstract void playAnimationInstantly(StaticAnimation nextAnimation);
 	public abstract void update();
-	/** Standby until the current animation is completely end. Mostly used for attaching two animations having the same last & first pose **/
+	/** Standby until the current animation is completely end. Mostly used for link two animations having the same last & first keyframe pose **/
 	public abstract void reserveAnimation(StaticAnimation nextAnimation);
 	public abstract EntityState getEntityState();
 	/** Give a null value as a parameter to get an animation that is highest priority on client **/
@@ -25,11 +33,11 @@ public abstract class Animator {
 	public abstract void updatePose();
 	
 	public final void playAnimation(int namespaceId, int id, float convertTimeModifier) {
-		this.playAnimation(EpicFightMod.getInstance().animationManager.findAnimation(namespaceId, id), convertTimeModifier);
+		this.playAnimation(EpicFightMod.getInstance().animationManager.findAnimationById(namespaceId, id), convertTimeModifier);
 	}
 	
 	public final void playAnimationInstantly(int namespaceId, int id) {
-		this.playAnimationInstantly(EpicFightMod.getInstance().animationManager.findAnimation(namespaceId, id));
+		this.playAnimationInstantly(EpicFightMod.getInstance().animationManager.findAnimationById(namespaceId, id));
 	}
 	
 	public Pose getPose(float partialTicks) {
@@ -42,6 +50,18 @@ public abstract class Animator {
 	
 	public void playDeathAnimation() {
 		this.playAnimation(Animations.BIPED_DEATH, 0);
+	}
+	
+	public void addLivingAnimation(LivingMotion livingMotion, StaticAnimation animation) {
+		this.livingAnimations.put(livingMotion, animation);
+	}
+	
+	public Set<Map.Entry<LivingMotion, StaticAnimation>> getLivingAnimationEntrySet() {
+		return this.livingAnimations.entrySet();
+	}
+	
+	public void resetMotions() {
+		this.livingAnimations.clear();
 	}
 	
 	/** Get binded position of joint **/

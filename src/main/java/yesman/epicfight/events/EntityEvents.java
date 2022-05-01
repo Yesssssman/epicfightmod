@@ -1,9 +1,5 @@
 package yesman.epicfight.events;
 
-import java.util.List;
-
-import com.google.common.collect.Lists;
-
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
@@ -27,7 +23,6 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.entity.PartEntity;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
@@ -46,6 +41,7 @@ import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionExpiryEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
+import net.minecraftforge.event.entity.living.ShieldBlockEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -57,24 +53,21 @@ import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.client.CPPlayAnimation;
 import yesman.epicfight.network.server.SPPotion;
 import yesman.epicfight.network.server.SPPotion.Action;
-import yesman.epicfight.world.EpicFightGamerules;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
+import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.mob.EndermanPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.projectile.ProjectilePatch;
 import yesman.epicfight.world.effect.EpicFightMobEffects;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.ProjectileHitEvent;
+import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 @Mod.EventBusSubscriber(modid=EpicFightMod.MODID)
 public class EntityEvents {
-	private static List<EntityPatch<?>> unInitializedEntitiesClient = Lists.<EntityPatch<?>>newArrayList();
-	private static List<EntityPatch<?>> unInitializedEntitiesServer = Lists.<EntityPatch<?>>newArrayList();
-	
 	@SuppressWarnings("unchecked")
 	@SubscribeEvent
 	public static void spawnEvent(EntityJoinWorldEvent event) {
@@ -82,12 +75,6 @@ public class EntityEvents {
 		
 		if (entitypatch != null && !entitypatch.isInitialized()) {
 			entitypatch.onJoinWorld(event.getEntity(), event);
-			
-			if (entitypatch.isLogicalClient()) {
-				unInitializedEntitiesClient.add(entitypatch);
-			} else {
-				unInitializedEntitiesServer.add(entitypatch);
-			}
 		}
 		
 		if (event.getEntity() instanceof Projectile) {
@@ -230,21 +217,21 @@ public class EntityEvents {
 							break;
 						}
 						
-						if (hitAnimation != null) {
-							if (!(hitEntity instanceof Player)) {
-								Vec3 sourcePosition = ((DamageSource)extendedDamageSource).getSourcePosition();
-								
-								if (sourcePosition != null) {
+						Vec3 sourcePosition = ((DamageSource)extendedDamageSource).getSourcePosition();
+						
+						if (sourcePosition != null) {
+							if (hitAnimation != null) {
+								if (!(hitEntity instanceof Player)) {
 									hitEntity.lookAt(EntityAnchorArgument.Anchor.FEET, sourcePosition);
 								}
+								
+								hitentitypatch.setStunReductionOnHit();
+								hitentitypatch.playAnimationSynchronized(hitAnimation, extendStunTime);
 							}
 							
-							hitentitypatch.setStunReductionOnHit();
-							hitentitypatch.playAnimationSynchronized(hitAnimation, extendStunTime);
-						}
-						
-						if (knockBackAmount != 0.0F) {
-							hitentitypatch.knockBackEntity(((DamageSource)extendedDamageSource).getSourcePosition(), knockBackAmount);
+							if (knockBackAmount != 0.0F) {
+								hitentitypatch.knockBackEntity(((DamageSource)extendedDamageSource).getSourcePosition(), knockBackAmount);
+							}
 						}
 					}
 				}
@@ -305,6 +292,15 @@ public class EntityEvents {
 				damagesource.bypassInvul();
 				event.getEntity().hurt(damagesource, result.damage);
 			}
+		}
+	}
+	
+	@SubscribeEvent
+	public static void shieldBlockEvent(ShieldBlockEvent event) {
+		LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>)event.getDamageSource().getDirectEntity().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+		
+		if (entitypatch != null) {
+			entitypatch.onBlockedByShield();
 		}
 	}
 	
@@ -382,13 +378,8 @@ public class EntityEvents {
 		
 		if (entitypatch != null && entitypatch.getOriginal() != null) {
 			if (event.getSlot().getType() == EquipmentSlot.Type.HAND) {
-				entitypatch.cancelUsingItem();
-				
-				if (entitypatch instanceof ServerPlayerPatch) {
-					ServerPlayerPatch playerpatch = (ServerPlayerPatch)entitypatch;
-					InteractionHand hand = event.getSlot() == EquipmentSlot.MAINHAND ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
-					playerpatch.updateHeldItem(fromCap, toCap, event.getFrom(), event.getTo(), hand);
-				}
+				InteractionHand hand = event.getSlot() == EquipmentSlot.MAINHAND ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
+				entitypatch.updateHeldItem(fromCap, toCap, event.getFrom(), event.getTo(), hand);
 			} else if (event.getSlot().getType() == EquipmentSlot.Type.ARMOR) {
 				entitypatch.updateArmor(fromCap, toCap, event.getSlot());
 			}
@@ -427,10 +418,10 @@ public class EntityEvents {
 	@SubscribeEvent
 	public static void mountEvent(EntityMountEvent event) {
 		EntityPatch<?> mountEntity = event.getEntityMounting().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-
+		
 		if (!event.getWorldObj().isClientSide() && mountEntity instanceof HumanoidMobPatch && mountEntity.getOriginal() != null) {
 			if (event.getEntityBeingMounted() instanceof Mob) {
-				((HumanoidMobPatch<?>) mountEntity).onMount(event.isMounting(), event.getEntityBeingMounted());
+				((HumanoidMobPatch<?>)mountEntity).onMount(event.isMounting(), event.getEntityBeingMounted());
 			}
 		}
 	}
@@ -497,28 +488,6 @@ public class EntityEvents {
 					}
 				}
 			}
-		}
-	}
-	
-	@SubscribeEvent
-	public static void tickClientEvent(TickEvent.ClientTickEvent event) {
-		if (event.phase == TickEvent.Phase.END) {
-			for (EntityPatch<?> cap : unInitializedEntitiesClient) {
-				cap.postInit();
-			}
-			
-			unInitializedEntitiesClient.clear();
-		}
-	}
-	
-	@SubscribeEvent
-	public static void tickServerEvent(TickEvent.ServerTickEvent event) {
-		if (event.phase == TickEvent.Phase.END) {
-			for (EntityPatch<?> cap : unInitializedEntitiesServer) {
-				cap.postInit();
-			}
-			
-			unInitializedEntitiesServer.clear();
 		}
 	}
 }

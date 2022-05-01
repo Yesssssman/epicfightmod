@@ -9,7 +9,7 @@ import net.minecraft.world.item.Item;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.gameasset.Animations;
-import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class ShieldCapability extends CapabilityItem {
 	protected StaticAnimation blockingMotion;
@@ -20,7 +20,7 @@ public class ShieldCapability extends CapabilityItem {
 	}
 	
 	@Override
-	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(PlayerPatch<?> playerdata, InteractionHand hand) {
+	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(LivingEntityPatch<?> playerdata, InteractionHand hand) {
 		return ImmutableMap.of(LivingMotion.BLOCK_SHIELD, this.blockingMotion);
 	}
 }

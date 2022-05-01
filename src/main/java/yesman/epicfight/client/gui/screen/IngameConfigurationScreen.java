@@ -35,7 +35,7 @@ public class IngameConfigurationScreen extends Screen {
 		Option<Double> aimHelperColor = EpicFightMod.CLIENT_INGAME_CONFIG.aimHelperColor;
 		Option<Boolean> cameraAutoSwitch = EpicFightMod.CLIENT_INGAME_CONFIG.cameraAutoSwitch;
 		Option<Boolean> autoPreparation = EpicFightMod.CLIENT_INGAME_CONFIG.autoPreparation;
-		Option<Boolean> offGore = EpicFightMod.CLIENT_INGAME_CONFIG.offGoreEffect;
+		Option<Boolean> offBlood = EpicFightMod.CLIENT_INGAME_CONFIG.offBloodEffects;
 		
 		Button longPressCounterButton = this.addRenderableWidget(new RewindableButton(this.width / 2 - 165, this.height / 4 - 32, 160, 20,
 			new TranslatableComponent("gui."+EpicFightMod.MODID+".long_press_counter", (ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(longPressCounter.getValue()))),
@@ -106,11 +106,11 @@ public class IngameConfigurationScreen extends Screen {
 			));
 		
 		Button offGoreButton = this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 4 + 40, 160, 20,
-				new TranslatableComponent("gui."+EpicFightMod.MODID+".off_gore_effect." + (offGore.getValue() ? "on" : "off")), (button) -> {
-					offGore.setValue(!offGore.getValue());
-					button.setMessage(new TranslatableComponent("gui."+EpicFightMod.MODID+".off_gore_effect." + (offGore.getValue() ? "on" : "off")));
+				new TranslatableComponent("gui."+EpicFightMod.MODID+".off_blood_effects." + (offBlood.getValue() ? "on" : "off")), (button) -> {
+					offBlood.setValue(!offBlood.getValue());
+					button.setMessage(new TranslatableComponent("gui."+EpicFightMod.MODID+".off_blood_effects." + (offBlood.getValue() ? "on" : "off")));
 				}, (button, matrixStack, mouseX, mouseY) -> {
-			        this.renderTooltip(matrixStack, this.minecraft.font.split(new TranslatableComponent("gui.epicfight.off_gore_effect.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+			        this.renderTooltip(matrixStack, this.minecraft.font.split(new TranslatableComponent("gui.epicfight.off_blood_effects.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 				}
 			));
 		
@@ -136,7 +136,7 @@ public class IngameConfigurationScreen extends Screen {
 			enableAimHelperButton.setMessage(new TranslatableComponent("gui."+EpicFightMod.MODID+".aim_helper." + (enableAimHelper.getValue() ? "on" : "off")));
 			cameraAutoSwitchButton.setMessage(new TranslatableComponent("gui."+EpicFightMod.MODID+".camera_auto_switch." + (cameraAutoSwitch.getValue() ? "on" : "off")));
 			autoPreparationButton.setMessage(new TranslatableComponent("gui."+EpicFightMod.MODID+".auto_preparation." + (autoPreparation.getValue() ? "on" : "off")));
-			offGoreButton.setMessage(new TranslatableComponent("gui."+EpicFightMod.MODID+".off_gore_effect." + (offGore.getValue() ? "on" : "off")));
+			offGoreButton.setMessage(new TranslatableComponent("gui."+EpicFightMod.MODID+".off_gore_effect." + (offBlood.getValue() ? "on" : "off")));
 		}));
 	}
 	

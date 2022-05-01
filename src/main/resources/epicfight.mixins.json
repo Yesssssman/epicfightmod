@@ -8,7 +8,6 @@
 		"MixinBufferBuilder"
 	],
 	"mixins": [
-		"MixinItemStack",
 		"MixinEndCrystal",
 		"MixinWitherBoss"
 	],

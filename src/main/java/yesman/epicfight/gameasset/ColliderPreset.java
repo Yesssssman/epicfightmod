@@ -16,7 +16,7 @@ public class ColliderPreset {
 	public static final Collider FATAL_DRAW_DASH = new OBBCollider(0.7D, 0.7D, 5.0D, 0D, 1.0D, -4.0D);
 	public static final Collider FIST = new MultiOBBCollider(2, 0.4D, 0.4D, 0.4D, 0D, 0D, 0D);
 	public static final Collider GREATSWORD = new MultiOBBCollider(3, 0.5D, 0.8D, 1.0D, 0D, 0D, -1.0D);
-	public static final Collider HEADBUTT_GOLEM = new OBBCollider(0.4D, 0.4D, 0.4D, 0D, 0D, -0.3D);
+	public static final Collider HEAD = new OBBCollider(0.4D, 0.4D, 0.4D, 0D, 0D, -0.3D);
 	public static final Collider HEADBUTT_RAVAGER = new OBBCollider(0.8D, 0.8D, 0.8D, 0D, 0D, -0.3D);
 	public static final Collider KATANA = new MultiOBBCollider(3, 0.4D, 0.4D, 1.0D, 0D, 0D, -0.5D);
 	public static final Collider SWORD = new MultiOBBCollider(3, 0.4D, 0.4D, 0.7D, 0D, 0D, -0.35D);

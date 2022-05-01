@@ -8,6 +8,7 @@ import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.Models;
+import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 
 public abstract class AbstractIllagerPatch<T extends AbstractIllager> extends HumanoidMobPatch<T> {
 	public AbstractIllagerPatch(Faction faction) {
@@ -16,10 +17,11 @@ public abstract class AbstractIllagerPatch<T extends AbstractIllager> extends Hu
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void initAnimator(ClientAnimator animatorClient) {
-		animatorClient.addLivingMotion(LivingMotion.IDLE, Animations.ILLAGER_IDLE);
-		animatorClient.addLivingMotion(LivingMotion.WALK, Animations.ILLAGER_WALK);
-		animatorClient.addLivingMotion(LivingMotion.DEATH, Animations.BIPED_DEATH);
+	public void initAnimator(ClientAnimator clientAnimator) {
+		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.ILLAGER_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.ILLAGER_WALK);
+		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.BIPED_DEATH);
+		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
 	@Override

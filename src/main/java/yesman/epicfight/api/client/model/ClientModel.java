@@ -25,7 +25,6 @@ public class ClientModel extends Model {
 	}
 	
 	public ClientModel(Mesh mesh) {
-		super(null);
 		this.mesh = mesh;
 	}
 	

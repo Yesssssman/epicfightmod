@@ -18,11 +18,13 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickItem
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
+import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
+import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.ItemCapabilityListener;
+import yesman.epicfight.world.capabilities.provider.ProviderEntity;
 import yesman.epicfight.world.capabilities.provider.ProviderItem;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.RightClickItemEvent;
@@ -124,8 +126,10 @@ public class ClientEvents {
 	@SubscribeEvent
 	public static void clientLogoutEvent(ClientPlayerNetworkEvent.LoggedOutEvent event) {
 		if (event.getPlayer() != null) {
-			ItemCapabilityListener.reset();
+			ItemCapabilityReloadListener.reset();
 			ProviderItem.clear();
+			ProviderEntity.clear();
+			ClientEngine.instance.renderEngine.clearCustomEntityRenerer();
 		}
 	}
 }

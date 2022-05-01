@@ -47,7 +47,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		boolean isVisible = this.isVisible(entityIn, entitypatch);
 		boolean isVisibleToPlayer = !isVisible && !entityIn.isInvisibleTo(mc.player);
 		boolean isGlowing = mc.shouldEntityAppearGlowing(entityIn);
-		RenderType renderType = this.getRenderType(entityIn, entitypatch, isVisible, isVisibleToPlayer, isGlowing);
+		RenderType renderType = this.getRenderType(entityIn, entitypatch, renderer, isVisible, isVisibleToPlayer, isGlowing);
 		ClientModel model = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT);
 		Armature armature = model.getArmature();
 		poseStack.pushPose();
@@ -87,7 +87,13 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		
 		while (iter.hasNext()) {
 			RenderLayer<E, M> layer = iter.next();
-			this.layerRendererReplace.computeIfPresent(layer.getClass(), (key, val) -> {
+			Class<?> rendererClass = layer.getClass();
+			
+			if (rendererClass.isAnonymousClass()) {
+				rendererClass = rendererClass.getSuperclass();
+			}
+			
+			this.layerRendererReplace.computeIfPresent(rendererClass, (key, val) -> {
 				val.renderLayer(0, entitypatch, entityIn, layer, matrixStackIn, buffer, packedLightIn, poses, f2, f7, partialTicks);
 				iter.remove();
 				return val;
@@ -110,8 +116,8 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		matrixStackIn.popPose();
 	}
 	
-	public RenderType getRenderType(E entityIn, T entitypatch, boolean isVisible, boolean isVisibleToPlayer, boolean isGlowing) {
-		ResourceLocation resourcelocation = this.getEntityTexture(entitypatch);
+	public RenderType getRenderType(E entityIn, T entitypatch, LivingEntityRenderer<E, M> renderer, boolean isVisible, boolean isVisibleToPlayer, boolean isGlowing) {
+		ResourceLocation resourcelocation = this.getEntityTexture(entitypatch, renderer);
 		
 		if (isVisibleToPlayer) {
 			return EpicFightRenderTypes.itemEntityTranslucentCull(resourcelocation);

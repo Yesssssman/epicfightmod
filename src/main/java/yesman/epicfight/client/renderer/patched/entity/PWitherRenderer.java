@@ -38,7 +38,7 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 		boolean isVisible = this.isVisible(entityIn, entitypatch);
 		boolean isVisibleToPlayer = !isVisible && !entityIn.isInvisibleTo(mc.player);
 		boolean isGlowing = mc.shouldEntityAppearGlowing(entityIn);
-		RenderType renderType = this.getRenderType(entityIn, entitypatch, isVisible, isVisibleToPlayer, isGlowing);
+		RenderType renderType = this.getRenderType(entityIn, entitypatch, renderer, isVisible, isVisibleToPlayer, isGlowing);
 		ClientModel model = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT);
 		Armature armature = model.getArmature();
 		poseStack.pushPose();
@@ -88,12 +88,6 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 	@Override
 	protected boolean isVisible(WitherBoss witherboss, WitherPatch witherpatch) {
 		return !witherpatch.isGhost() || witherpatch.getTransparency() != 0;
-	}
-	
-	@Override
-	protected ResourceLocation getEntityTexture(WitherPatch entitypatch) {
-		int i = entitypatch.getOriginal().getInvulnerableTicks();
-		return i > 0 && (i > 80 || i / 5 % 2 != 1) ? WITHER_INVULNERABLE_LOCATION : WITHER_LOCATION;
 	}
 	
 	@Override

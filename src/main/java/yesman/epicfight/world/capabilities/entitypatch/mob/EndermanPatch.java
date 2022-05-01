@@ -4,12 +4,13 @@ import java.util.EnumSet;
 import java.util.Random;
 import java.util.UUID;
 
+import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -37,15 +38,16 @@ import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPChangeLivingMotion;
-import yesman.epicfight.network.server.SPPlayAnimation;
+import yesman.epicfight.network.server.SPSpawnData;
 import yesman.epicfight.particle.EpicFightParticles;
+import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 import yesman.epicfight.world.effect.EpicFightMobEffects;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-import yesman.epicfight.world.entity.ai.goal.AttackBehaviorGoal;
+import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
 import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 
-public class EndermanPatch extends HumanoidMobPatch<EnderMan> {
+public class EndermanPatch extends MobPatch<EnderMan> {
 	private static final UUID SPEED_MODIFIER_RAGE_UUID = UUID.fromString("dc362d1a-8424-11ec-a8a3-0242ac120002");
 	private static final AttributeModifier SPEED_MODIFIER_RAGE = new AttributeModifier(SPEED_MODIFIER_RAGE_UUID, "Rage speed bonus", 0.1D, AttributeModifier.Operation.ADDITION);
 	
@@ -72,6 +74,22 @@ public class EndermanPatch extends HumanoidMobPatch<EnderMan> {
 	}
 	
 	@Override
+	public void onStartTracking(ServerPlayer trackingPlayer) {
+		if (this.isRaging()) {
+			SPSpawnData packet = new SPSpawnData(this.original.getId());
+			EpicFightNetworkManager.sendToPlayer(packet, trackingPlayer);
+		}
+	}
+	
+	@Override
+	public void processSpawnData(ByteBuf buf) {
+		ClientAnimator animator = this.getClientAnimator();
+		animator.addLivingAnimation(LivingMotion.IDLE, Animations.ENDERMAN_RAGE_IDLE);
+		animator.addLivingAnimation(LivingMotion.WALK, Animations.ENDERMAN_RAGE_WALK);
+		animator.setCurrentMotionsAsDefault();
+	}
+	
+	@Override
 	protected void initAttributes() {
 		super.initAttributes();
 		this.original.getAttribute(EpicFightAttributes.STUN_ARMOR.get()).setBaseValue(8.0F);
@@ -79,42 +97,36 @@ public class EndermanPatch extends HumanoidMobPatch<EnderMan> {
 	}
 	
 	@Override
-	public void postInit() {
-		super.postInit();
-		
-		if (this.isLogicalClient()) {
-			if (this.isRaging()) {
-				this.getClientAnimator().addLivingMotion(LivingMotion.IDLE, Animations.ENDERMAN_RAGE_IDLE);
-				this.getClientAnimator().addLivingMotion(LivingMotion.WALK, Animations.ENDERMAN_RAGE_WALK);
-				this.onRage = true;
-			} else {
-				this.getClientAnimator().addLivingMotion(LivingMotion.IDLE, Animations.ENDERMAN_IDLE);
-				this.getClientAnimator().addLivingMotion(LivingMotion.WALK, Animations.ENDERMAN_WALK);
-				this.onRage = false;
-			}
-		}
-	}
-	
-	@Override
 	protected void initAI() {
 		super.initAI();
-		this.normalAttacks = new AttackBehaviorGoal<>(this, MobCombatBehaviors.ENDERMAN_NORMAL_BEHAVIORS.build(this));
-		this.teleportAttacks = new EndermanTeleportMove(this, MobCombatBehaviors.ENDERMAN_TELEPORT_BEHAVIORS.build(this));
+		this.normalAttacks = new CombatBehaviorGoal<>(this, MobCombatBehaviors.ENDERMAN.build(this));
+		this.teleportAttacks = new EndermanTeleportMove(this, MobCombatBehaviors.ENDERMAN_TELEPORT.build(this));
 		this.rageTarget = new NearestAttackableTargetGoal<>(this.original, Player.class, true);
-		this.rageMove = new AttackBehaviorGoal<>(this, MobCombatBehaviors.ENDERMAN_RAGE_BEHAVIORS.build(this));
+		this.rageMove = new CombatBehaviorGoal<>(this, MobCombatBehaviors.ENDERMAN_RAGE.build(this));
+		
+		if (this.isRaging()) {
+			this.original.targetSelector.addGoal(3, this.rageTarget);
+			this.original.goalSelector.addGoal(1, this.rageMove);
+		} else {
+			this.original.goalSelector.addGoal(1, this.normalAttacks);
+			this.original.goalSelector.addGoal(0, this.teleportAttacks);
+		}
+		
+		this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, 0.75D, false));
 	}
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingMotion(LivingMotion.DEATH, Animations.ENDERMAN_DEATH);
-		clientAnimator.addLivingMotion(LivingMotion.WALK, Animations.ENDERMAN_WALK);
-		clientAnimator.addLivingMotion(LivingMotion.IDLE, Animations.ENDERMAN_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.ENDERMAN_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.ENDERMAN_WALK);
+		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.ENDERMAN_IDLE);
+		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
-		super.humanoidEntityUpdateMotion(considerInaction);
+		super.commonMobUpdateMotion(considerInaction);
 	}
 	
 	@Override
@@ -193,9 +205,9 @@ public class EndermanPatch extends HumanoidMobPatch<EnderMan> {
 			this.original.addEffect(new MobEffectInstance(EpicFightMobEffects.STUN_IMMUNITY.get(), 120000));
 			this.original.getAttribute(Attributes.MOVEMENT_SPEED).addTransientModifier(SPEED_MODIFIER_RAGE);
 			
-			SPChangeLivingMotion msg = new SPChangeLivingMotion(this.original.getId(), 2, SPPlayAnimation.Layer.BASE_LAYER);
-			msg.setMotions(LivingMotion.IDLE, LivingMotion.WALK);
-			msg.setAnimations(Animations.ENDERMAN_RAGE_IDLE, Animations.ENDERMAN_RAGE_WALK);
+			SPChangeLivingMotion msg = new SPChangeLivingMotion(this.original.getId(), true)
+					.putPair(LivingMotion.IDLE, Animations.ENDERMAN_RAGE_IDLE)
+					.putPair(LivingMotion.WALK, Animations.ENDERMAN_RAGE_WALK);
 			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(msg, this.original);
 		}
 	}
@@ -216,34 +228,11 @@ public class EndermanPatch extends HumanoidMobPatch<EnderMan> {
 			this.original.removeEffect(EpicFightMobEffects.STUN_IMMUNITY.get());
 			this.original.getAttribute(Attributes.MOVEMENT_SPEED).removeModifier(SPEED_MODIFIER_RAGE);
 			
-			SPChangeLivingMotion msg = new SPChangeLivingMotion(this.original.getId(), 2, SPPlayAnimation.Layer.BASE_LAYER);
-			msg.setMotions(LivingMotion.IDLE, LivingMotion.WALK);
-			msg.setAnimations(Animations.ENDERMAN_IDLE, Animations.ENDERMAN_WALK);
+			SPChangeLivingMotion msg = new SPChangeLivingMotion(this.original.getId(), true)
+					.putPair(LivingMotion.IDLE, Animations.ENDERMAN_IDLE)
+					.putPair(LivingMotion.WALK, Animations.ENDERMAN_WALK);
 			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(msg, this.original);
 		}
-	}
-	
-	@Override
-	public void setAIAsUnarmed() {
-		if (this.isRaging()) {
-			this.original.targetSelector.addGoal(3, this.rageTarget);
-			this.original.goalSelector.addGoal(1, this.rageMove);
-		} else {
-			this.original.goalSelector.addGoal(1, this.normalAttacks);
-			this.original.goalSelector.addGoal(0, this.teleportAttacks);
-		}
-		
-		this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, 0.75D, false));
-	}
-	
-	@Override
-	public void setAIAsArmed() {
-		this.setAIAsUnarmed();
-	}
-	
-	@Override
-	public void setAIAsMounted(Entity ridingEntity) {
-		
 	}
 	
 	@Override
@@ -277,7 +266,7 @@ public class EndermanPatch extends HumanoidMobPatch<EnderMan> {
 		return modelDB.enderman;
 	}
 	
-	static class EndermanTeleportMove extends AttackBehaviorGoal<EndermanPatch> {
+	static class EndermanTeleportMove extends CombatBehaviorGoal<EndermanPatch> {
 		private int waitingCounter;
 		private int delayCounter;
 		private CombatBehaviors.Behavior<EndermanPatch> move;

@@ -28,11 +28,11 @@ public abstract class EntityIndicator extends ModIngameGui {
 		new TargetIndicator();
 		new HealthBarIndicator();
 	}
-
+	
 	public void drawTexturedModalRect2DPlane(Matrix4f matrix, VertexConsumer vertexBuilder, float minX, float minY, float maxX, float maxY, float minTexU, float minTexV, float maxTexU, float maxTexV) {
 		this.drawTexturedModalRect3DPlane(matrix, vertexBuilder, minX, minY, this.getBlitOffset(), maxX, maxY, this.getBlitOffset(), minTexU, minTexV, maxTexU, maxTexV);
 	}
-
+	
 	public void drawTexturedModalRect3DPlane(Matrix4f matrix, VertexConsumer vertexBuilder, float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float minTexU, float minTexV, float maxTexU, float maxTexV) {
 		float cor = 0.00390625F;
 		vertexBuilder.vertex(matrix, minX, minY, maxZ).uv((minTexU * cor), (maxTexV) * cor).endVertex();
@@ -40,12 +40,12 @@ public abstract class EntityIndicator extends ModIngameGui {
         vertexBuilder.vertex(matrix, maxX, maxY, minZ).uv((maxTexU * cor), (minTexV) * cor).endVertex();
         vertexBuilder.vertex(matrix, minX, maxY, minZ).uv((minTexU * cor), (minTexV) * cor).endVertex();
 	}
-
+	
 	public EntityIndicator() {
 		EntityIndicator.ENTITY_INDICATOR_RENDERERS.add(this);
 	}
-
-	public Matrix4f getMVMatrix(PoseStack matStackIn, LivingEntity entityIn, float correctionX, float correctionY, float correctionZ, boolean lockRotation, float partialTicks) {
+	
+	public final Matrix4f getMVMatrix(PoseStack matStackIn, LivingEntity entityIn, float correctionX, float correctionY, float correctionZ, boolean lockRotation, float partialTicks) {
 		float posX = (float)Mth.lerp((double)partialTicks, entityIn.xOld, entityIn.getX());
 		float posY = (float)Mth.lerp((double)partialTicks, entityIn.yOld, entityIn.getY());
 		float posZ = (float)Mth.lerp((double)partialTicks, entityIn.zOld, entityIn.getZ());
@@ -55,7 +55,7 @@ public abstract class EntityIndicator extends ModIngameGui {
 		return this.getMVMatrix(matStackIn, posX + correctionX, posY + correctionY, posZ + correctionZ, lockRotation);
 	}
 	
-	public Matrix4f getMVMatrix(PoseStack matStackIn, float posX, float posY, float posZ, boolean lockRotation) {
+	public final Matrix4f getMVMatrix(PoseStack matStackIn, float posX, float posY, float posZ, boolean lockRotation) {
 		OpenMatrix4f viewMatrix = OpenMatrix4f.importFromMojangMatrix(matStackIn.last().pose());
 		OpenMatrix4f finalMatrix = new OpenMatrix4f();
 		finalMatrix.translate(new Vec3f(-posX, posY, -posZ));

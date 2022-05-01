@@ -10,7 +10,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.attributes.RangedAttribute;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
-import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.registries.DeferredRegister;
@@ -45,51 +44,46 @@ public class EpicFightAttributes {
 	}
 	
 	public static void modifyExistingMobs(EntityAttributeModificationEvent event) {
-		general(EntityType.CAVE_SPIDER, event);
-		general(EntityType.EVOKER, event);
-		general(EntityType.IRON_GOLEM, event);
-		general(EntityType.PILLAGER, event);
-		general(EntityType.RAVAGER, event);
-		general(EntityType.SPIDER, event);
-		general(EntityType.VEX, event);
-		general(EntityType.VINDICATOR, event);
-		general(EntityType.WITCH, event);
-		general(EntityType.HOGLIN, event);
-		general(EntityType.ZOGLIN, event);
-		general(EntityType.ENDER_DRAGON, event);
-		withStunArmor(EntityType.CREEPER, event);
-		withStunArmor(EntityType.DROWNED, event);
-		withStunArmor(EntityType.ENDERMAN, event);
-		withStunArmor(EntityType.HUSK, event);
-		withStunArmor(EntityType.PIGLIN, event);
-		withStunArmor(EntityType.PIGLIN_BRUTE, event);
-		withStunArmor(EntityType.SKELETON, event);
-		withStunArmor(EntityType.STRAY, event);
-		withStunArmor(EntityType.WITHER_SKELETON, event);
-		withStunArmor(EntityType.ZOMBIE, event);
-		withStunArmor(EntityType.ZOMBIE_VILLAGER, event);
-		withStunArmor(EntityType.ZOMBIFIED_PIGLIN, event);
-		withStunArmor(EpicFightEntities.WITHER_SKELETON_MINION.get(), event);
+		commonCreature(EntityType.CAVE_SPIDER, event);
+		commonCreature(EntityType.EVOKER, event);
+		commonCreature(EntityType.IRON_GOLEM, event);
+		habilis(EntityType.PILLAGER, event);
+		commonCreature(EntityType.RAVAGER, event);
+		commonCreature(EntityType.SPIDER, event);
+		commonCreature(EntityType.VEX, event);
+		habilis(EntityType.VINDICATOR, event);
+		commonCreature(EntityType.WITCH, event);
+		commonCreature(EntityType.HOGLIN, event);
+		commonCreature(EntityType.ZOGLIN, event);
+		commonCreature(EntityType.ENDER_DRAGON, event);
+		commonCreature(EntityType.CREEPER, event);
+		habilis(EntityType.DROWNED, event);
+		commonCreature(EntityType.ENDERMAN, event);
+		habilis(EntityType.HUSK, event);
+		habilis(EntityType.PIGLIN, event);
+		habilis(EntityType.PIGLIN_BRUTE, event);
+		habilis(EntityType.SKELETON, event);
+		habilis(EntityType.STRAY, event);
+		habilis(EntityType.WITHER_SKELETON, event);
+		habilis(EntityType.ZOMBIE, event);
+		habilis(EntityType.ZOMBIE_VILLAGER, event);
+		habilis(EntityType.ZOMBIFIED_PIGLIN, event);
+		commonCreature(EpicFightEntities.WITHER_SKELETON_MINION.get(), event);
 		player(EntityType.PLAYER, event);
 		dragon(EntityType.ENDER_DRAGON, event);
-		withStunArmor(EntityType.WITHER, event);
+		commonCreature(EntityType.WITHER, event);
 	}
     
-    private static void general(EntityType<? extends LivingEntity> entityType, EntityAttributeModificationEvent event) {
+    private static void commonCreature(EntityType<? extends LivingEntity> entityType, EntityAttributeModificationEvent event) {
 		event.add(entityType, EpicFightAttributes.WEIGHT.get());
 		event.add(entityType, EpicFightAttributes.ARMOR_NEGATION.get());
 		event.add(entityType, EpicFightAttributes.IMPACT.get());
 		event.add(entityType, EpicFightAttributes.MAX_STRIKES.get());
-	}
-    
-    private static void withStunArmor(EntityType<? extends LivingEntity> entityType, EntityAttributeModificationEvent event) {
-		general(entityType, event);
 		event.add(entityType, EpicFightAttributes.STUN_ARMOR.get());
 	}
     
-    private static void player(EntityType<? extends Player> entityType, EntityAttributeModificationEvent event) {
-		withStunArmor(entityType, event);
-		event.add(entityType, EpicFightAttributes.MAX_STAMINA.get());
+    private static void habilis(EntityType<? extends LivingEntity> entityType, EntityAttributeModificationEvent event) {
+    	commonCreature(entityType, event);
 		event.add(entityType, EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get());
 		event.add(entityType, EpicFightAttributes.OFFHAND_ATTACK_SPEED.get());
 		event.add(entityType, EpicFightAttributes.OFFHAND_MAX_STRIKES.get());
@@ -97,8 +91,13 @@ public class EpicFightAttributes {
 		event.add(entityType, EpicFightAttributes.OFFHAND_IMPACT.get());
 	}
     
+    private static void player(EntityType<? extends LivingEntity> entityType, EntityAttributeModificationEvent event) {
+    	habilis(entityType, event);
+		event.add(entityType, EpicFightAttributes.MAX_STAMINA.get());
+	}
+    
     private static void dragon(EntityType<? extends EnderDragon> entityType, EntityAttributeModificationEvent event) {
-    	general(entityType, event);
+    	commonCreature(entityType, event);
 		event.add(entityType, Attributes.ATTACK_DAMAGE);
 	}
     

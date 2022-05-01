@@ -10,18 +10,16 @@ import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
-import yesman.epicfight.api.utils.game.AttackResult;
 import yesman.epicfight.api.utils.game.ExtendedDamageSource;
 import yesman.epicfight.api.utils.game.ExtendedDamageSource.StunType;
 import yesman.epicfight.gameasset.Animations;
+import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.gameasset.Models;
-import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-import yesman.epicfight.world.entity.ai.goal.AttackPatternGoal;
-import yesman.epicfight.world.entity.ai.goal.AttackPatternPercentGoal;
 import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
+import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
 
 public class RavagerPatch extends MobPatch<Ravager> {
 	public RavagerPatch() {
@@ -38,35 +36,31 @@ public class RavagerPatch extends MobPatch<Ravager> {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingMotion(LivingMotion.IDLE, Animations.RAVAGER_IDLE);
-		clientAnimator.addLivingMotion(LivingMotion.WALK, Animations.RAVAGER_WALK);
-		clientAnimator.addLivingMotion(LivingMotion.DEATH, Animations.RAVAGER_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.RAVAGER_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.RAVAGER_WALK);
+		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.RAVAGER_DEATH);
+		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
-		super.humanoidEntityUpdateMotion(considerInaction);
+		super.commonMobUpdateMotion(considerInaction);
 	}
 	
 	@Override
 	protected void initAI() {
 		super.initAI();
 		this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, 1.0D, false));
-		this.original.goalSelector.addGoal(0, new AttackPatternPercentGoal(this, this.original, 0.0D, 2.25D, 0.1F, true, MobCombatBehaviors.RAVAGER_SMASHING_GROUND));
-		this.original.goalSelector.addGoal(1, new AttackPatternGoal(this, this.original, 1.0D, 2.4D, true, MobCombatBehaviors.RAVAGER_HEADBUTT));
+		this.original.goalSelector.addGoal(0, new CombatBehaviorGoal<>(this, MobCombatBehaviors.RAVAGER.build(this)));
 	}
 	
 	@Override
-	public AttackResult harmEntity(Entity target, ExtendedDamageSource damagesource, float amount) {
-		AttackResult result = super.harmEntity(target, damagesource, amount);
+	public void onHurtSomeone(Entity target, InteractionHand handIn, ExtendedDamageSource damagesource, float amount, boolean succeed) {
+		super.onHurtSomeone(target, handIn, damagesource, amount, succeed);
 		
-		if (result.resultType == AttackResult.ResultType.BLOCKED) {
-			if (this.original.getStunnedTick() > 0) {
-				this.playAnimationSynchronized(Animations.RAVAGER_STUN, 0.0F);
-			}
+		if (!succeed && this.original.getStunnedTick() > 0) {
+			this.playAnimationSynchronized(Animations.RAVAGER_STUN, 0.0F);
 		}
-		
-		return result;
 	}
 	
 	@Override

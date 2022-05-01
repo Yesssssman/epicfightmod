@@ -23,13 +23,13 @@ public class ConfigurationIngame {
 	public final Option<Boolean> enableAimHelperPointer;
 	public final Option<Boolean> cameraAutoSwitch;
 	public final Option<Boolean> autoPreparation;
-	public final Option<Boolean> offGoreEffect;
+	public final Option<Boolean> offBloodEffects;
 	public final List<Item> battleAutoSwitchItems;
 	public final List<Item> miningAutoSwitchItems;
 	public int aimHelperRealColor;
 	
 	public ConfigurationIngame() {
-		IngameConfig config = ConfigManager.INGAME_CONFIG;
+		ClientConfig config = ConfigManager.INGAME_CONFIG;
 		this.longPressCount = new IntegerOption(config.longPressCountConfig.get(), 1, 10);
 		this.filterAnimation = new Option<Boolean>(config.filterAnimation.get());
 		this.showHealthIndicator = new Option<Boolean>(config.showHealthIndicator.get());
@@ -39,7 +39,7 @@ public class ConfigurationIngame {
 		this.aimHelperRealColor = ColorSlider.toColorInteger(config.aimHelperColor.get());
 		this.cameraAutoSwitch = new Option<Boolean>(config.cameraAutoSwitch.get());
 		this.autoPreparation = new Option<Boolean>(config.autoPreparation.get());
-		this.offGoreEffect = new Option<Boolean>(config.offGoreEffect.get());
+		this.offBloodEffects = new Option<Boolean>(config.offBloodEffects.get());
 		this.battleAutoSwitchItems = Lists.newArrayList(config.battleAutoSwitchItems.get().stream().map((itemName) ->
 			ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName))).iterator()
 		);
@@ -57,12 +57,12 @@ public class ConfigurationIngame {
 		this.enableAimHelperPointer.setDefaultValue();
 		this.cameraAutoSwitch.setDefaultValue();
 		this.autoPreparation.setDefaultValue();
-		this.offGoreEffect.setDefaultValue();
+		this.offBloodEffects.setDefaultValue();
 		this.aimHelperRealColor = ColorSlider.toColorInteger(this.aimHelperColor.getValue());
 	}
 	
 	public void save() {
-		IngameConfig config = ConfigManager.INGAME_CONFIG;
+		ClientConfig config = ConfigManager.INGAME_CONFIG;
 		config.longPressCountConfig.set(this.longPressCount.getValue());
 		config.filterAnimation.set(this.filterAnimation.getValue());
 		config.showHealthIndicator.set(this.showHealthIndicator.getValue());
@@ -71,7 +71,7 @@ public class ConfigurationIngame {
 		config.enableAimHelper.set(this.enableAimHelperPointer.getValue());
 		config.cameraAutoSwitch.set(this.cameraAutoSwitch.getValue());
 		config.autoPreparation.set(this.autoPreparation.getValue());
-		config.offGoreEffect.set(this.offGoreEffect.getValue());
+		config.offBloodEffects.set(this.offBloodEffects.getValue());
 		this.aimHelperRealColor = ColorSlider.toColorInteger(this.aimHelperColor.getValue());
 		config.battleAutoSwitchItems.set(Lists.newArrayList(this.battleAutoSwitchItems.stream().map((item) -> item.getRegistryName().toString()).iterator()));
 		config.miningAutoSwitchItems.set(Lists.newArrayList(this.miningAutoSwitchItems.stream().map((item) -> item.getRegistryName().toString()).iterator()));

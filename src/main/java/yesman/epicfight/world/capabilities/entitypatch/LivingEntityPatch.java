@@ -20,9 +20,7 @@ import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.phys.AABB;
@@ -38,7 +36,6 @@ import yesman.epicfight.api.animation.ServerAnimator;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
-import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.game.AttackResult;
@@ -46,7 +43,6 @@ import yesman.epicfight.api.utils.game.ExtendedDamageSource;
 import yesman.epicfight.api.utils.game.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
-import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
@@ -64,7 +60,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	private float stunTimeReduction;
 	protected EntityState state = EntityState.FREE;
 	protected Animator animator;
-	public LivingMotion currentMotion = LivingMotion.IDLE;
+	public LivingMotion currentLivingMotion = LivingMotion.IDLE;
 	public LivingMotion currentCompositeMotion = LivingMotion.IDLE;
 	public List<LivingEntity> currentlyAttackedEntity;
 	protected Vec3 lastAttackPosition;
@@ -86,7 +82,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public abstract void initAnimator(ClientAnimator animatorClient);
+	public abstract void initAnimator(ClientAnimator clientAnimator);
 	public abstract void updateMotion(boolean considerInaction);
 	public abstract <M extends Model> M getEntityModel(Models<M> modelDB);
 	
@@ -137,69 +133,20 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		this.state = this.animator.getEntityState();
 	}
 	
-	protected final void commonBipedCreatureAnimatorInit(ClientAnimator animatorClient) {
-		animatorClient.addLivingMotion(LivingMotion.IDLE, Animations.BIPED_IDLE);
-		animatorClient.addLivingMotion(LivingMotion.WALK, Animations.BIPED_WALK);
-		animatorClient.addLivingMotion(LivingMotion.FALL, Animations.BIPED_FALL);
-		animatorClient.addLivingMotion(LivingMotion.MOUNT, Animations.BIPED_MOUNT);
-		animatorClient.addLivingMotion(LivingMotion.DEATH, Animations.BIPED_DEATH);
-	}
-	
-	protected final void humanoidEntityUpdateMotion(boolean considerInaction) {
-		if (this.state.inaction() && considerInaction) {
-			currentMotion = LivingMotion.INACTION;
-		} else {
-			if (this.original.getHealth() <= 0.0F) {
-				currentMotion = LivingMotion.DEATH;
-			} else if (original.getVehicle() != null) {
-				currentMotion = LivingMotion.MOUNT;
-			} else {
-				if (this.original.getDeltaMovement().y < -0.55F)
-					currentMotion = LivingMotion.FALL;
-				else if (original.animationSpeed > 0.01F)
-					currentMotion = LivingMotion.WALK;
-				else
-					currentMotion = LivingMotion.IDLE;
-			}
-		}
-		
-		this.currentCompositeMotion = this.currentMotion;
-	}
-	
-	protected final void humanoidRangedEntityUpdateMotion(boolean considerInaction) {
-		this.humanoidEntityUpdateMotion(considerInaction);
-		UseAnim useAction = this.original.getItemInHand(this.original.getUsedItemHand()).getUseAnimation();
-		
-		if (this.original.isUsingItem()) {
-			if (useAction == UseAnim.CROSSBOW)
-				currentCompositeMotion = LivingMotion.RELOAD;
-			else
-				currentCompositeMotion = LivingMotion.AIM;
-		} else {
-			if (this.getClientAnimator().getCompositeLayer(Layer.Priority.MIDDLE).animationPlayer.getPlay().isReboundAnimation())
-				currentCompositeMotion = LivingMotion.NONE;
-		}
-		
-		if (CrossbowItem.isCharged(this.original.getMainHandItem()))
-			currentCompositeMotion = LivingMotion.AIM;
-		else if (this.getClientAnimator().isAiming() && currentCompositeMotion != LivingMotion.AIM)
-			this.playReboundAnimation();
-	}
-	
 	public void cancelUsingItem() {
 		this.original.stopUsingItem();
 		net.minecraftforge.event.ForgeEventFactory.onUseItemStop(this.original, this.original.getUseItem(), this.original.getUseItemRemainingTicks());
 	}
 	
-	public CapabilityItem getHeldItemCapability(InteractionHand hand) {
+	public CapabilityItem getHoldingItemCapability(InteractionHand hand) {
 		return EpicFightCapabilities.getItemStackCapability(this.original.getItemInHand(hand));
 	}
 	
-	public CapabilityItem getAdvancedHeldItemCapability(InteractionHand hand) {
+	public CapabilityItem getAdvancedHoldingItemCapability(InteractionHand hand) {
 		if (hand == InteractionHand.MAIN_HAND) {
-			return getHeldItemCapability(hand);
+			return getHoldingItemCapability(hand);
 		} else {
-			return this.isValidOffhandItem() ? this.getHeldItemCapability(hand) : CapabilityItem.EMPTY;
+			return this.isOffhandItemValid() ? this.getHoldingItemCapability(hand) : CapabilityItem.EMPTY;
 		}
 	}
 	
@@ -213,7 +160,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		if (hand == InteractionHand.MAIN_HAND) {
 			damage = (float) this.original.getAttributeValue(Attributes.ATTACK_DAMAGE);
 		} else {
-			damage = this.isValidOffhandItem() ? (float) this.original.getAttributeValue(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get()) : (float) this.original.getAttribute(Attributes.ATTACK_DAMAGE).getBaseValue();
+			damage = this.isOffhandItemValid() ? (float) this.original.getAttributeValue(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get()) : (float) this.original.getAttribute(Attributes.ATTACK_DAMAGE).getBaseValue();
 		}
 		
 		damage += EnchantmentHelper.getDamageBonus(this.getValidItemInHand(hand), (targetEntity instanceof LivingEntity) ? ((LivingEntity)targetEntity).getMobType() : MobType.UNDEFINED);
@@ -229,13 +176,16 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		return new AttackResult(AttackResult.ResultType.SUCCESS, amount);
 	}
 	
-	public AttackResult harmEntity(Entity target, ExtendedDamageSource damagesource, float amount) {
+	public AttackResult tryHarm(Entity target, ExtendedDamageSource damagesource, float amount) {
 		LivingEntityPatch<?> livingpatch = (LivingEntityPatch<?>)target.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
 		AttackResult result = (livingpatch != null) ? livingpatch.tryHurt((DamageSource)damagesource, amount) : new AttackResult(AttackResult.ResultType.SUCCESS, amount);
 		return result;
 	}
 	
-	public void onHit(Entity target, InteractionHand handIn, ExtendedDamageSource damagesource, float amount) {
+	public void onBlockedByShield() {
+	}
+	
+	public void onHurtSomeone(Entity target, InteractionHand handIn, ExtendedDamageSource damagesource, float amount, boolean succeed) {
 		int j = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.FIRE_ASPECT, this.getValidItemInHand(handIn));
 		
 		if (target instanceof LivingEntity) {
@@ -429,25 +379,17 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	}
 	
 	public void playAnimationSynchronized(StaticAnimation animation, float convertTimeModifier) {
-		this.playAnimationSynchronized(animation, convertTimeModifier, SPPlayAnimation.Layer.BASE_LAYER);
-	}
-	
-	public void playAnimationSynchronized(StaticAnimation animation, float convertTimeModifier, SPPlayAnimation.Layer playOn) {
-		this.playAnimationSynchronized(animation, convertTimeModifier, SPPlayAnimation::new, playOn);
+		this.playAnimationSynchronized(animation, convertTimeModifier, SPPlayAnimation::new);
 	}
 	
 	public void playAnimationSynchronized(StaticAnimation animation, float convertTimeModifier, AnimationPacketProvider packetProvider) {
-		this.playAnimationSynchronized(animation, convertTimeModifier, packetProvider, SPPlayAnimation.Layer.BASE_LAYER);
-	}
-	
-	public void playAnimationSynchronized(StaticAnimation animation, float convertTimeModifier, AnimationPacketProvider packetProvider, SPPlayAnimation.Layer playOn) {
 		this.animator.playAnimation(animation, convertTimeModifier);
-		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(packetProvider.get(animation, convertTimeModifier, this, playOn), this.original);
+		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(packetProvider.get(animation, convertTimeModifier, this), this.original);
 	}
 	
 	@FunctionalInterface
 	public static interface AnimationPacketProvider {
-		public SPPlayAnimation get(StaticAnimation animation, float convertTimeModifier, LivingEntityPatch<?> entitypatch, SPPlayAnimation.Layer layer);
+		public SPPlayAnimation get(StaticAnimation animation, float convertTimeModifier, LivingEntityPatch<?> entitypatch);
 	}
 	
 	protected void playReboundAnimation() {
@@ -474,12 +416,16 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	    }
     }
 	
+	public void updateHeldItem(CapabilityItem fromCap, CapabilityItem toCap, ItemStack from, ItemStack to, InteractionHand hand) {
+	}
+	
 	public void updateArmor(CapabilityItem fromCap, CapabilityItem toCap, EquipmentSlot slotType) {
-		
 	}
 	
 	public void onAttackBlocked(HurtEventPre hurtEvent, LivingEntityPatch<?> opponent) {
-		
+	}
+	
+	public void onMount(boolean isMountOrDismount, Entity ridingEntity) {
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -504,29 +450,29 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	}
 
 	public SoundEvent getWeaponHitSound(InteractionHand hand) {
-		return this.getAdvancedHeldItemCapability(hand).getHitSound();
+		return this.getAdvancedHoldingItemCapability(hand).getHitSound();
 	}
 
 	public SoundEvent getSwingSound(InteractionHand hand) {
-		return this.getAdvancedHeldItemCapability(hand).getSmashingSound();
+		return this.getAdvancedHoldingItemCapability(hand).getSmashingSound();
 	}
 	
 	public HitParticleType getWeaponHitParticle(InteractionHand hand) {
-		return this.getAdvancedHeldItemCapability(hand).getHitParticle();
+		return this.getAdvancedHoldingItemCapability(hand).getHitParticle();
 	}
 
 	public Collider getColliderMatching(InteractionHand hand) {
-		return this.getAdvancedHeldItemCapability(hand).getWeaponCollider();
+		return this.getAdvancedHoldingItemCapability(hand).getWeaponCollider();
 	}
 
 	public int getMaxStrikes(InteractionHand hand) {
 		return (int) (hand == InteractionHand.MAIN_HAND ? this.original.getAttributeValue(EpicFightAttributes.MAX_STRIKES.get()) : 
-			this.isValidOffhandItem() ? this.original.getAttributeValue(EpicFightAttributes.OFFHAND_MAX_STRIKES.get()) : this.original.getAttribute(EpicFightAttributes.MAX_STRIKES.get()).getBaseValue());
+			this.isOffhandItemValid() ? this.original.getAttributeValue(EpicFightAttributes.OFFHAND_MAX_STRIKES.get()) : this.original.getAttribute(EpicFightAttributes.MAX_STRIKES.get()).getBaseValue());
 	}
 	
 	public float getArmorNegation(InteractionHand hand) {
 		return (float) (hand == InteractionHand.MAIN_HAND ? this.original.getAttributeValue(EpicFightAttributes.ARMOR_NEGATION.get()) : 
-			this.isValidOffhandItem() ? this.original.getAttributeValue(EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get()) : this.original.getAttribute(EpicFightAttributes.ARMOR_NEGATION.get()).getBaseValue());
+			this.isOffhandItemValid() ? this.original.getAttributeValue(EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get()) : this.original.getAttribute(EpicFightAttributes.ARMOR_NEGATION.get()).getBaseValue());
 	}
 	
 	public float getImpact(InteractionHand hand) {
@@ -537,7 +483,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 			impact = (float)this.original.getAttributeValue(EpicFightAttributes.IMPACT.get());
 			i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, this.getOriginal().getMainHandItem());
 		} else {
-			if (this.isValidOffhandItem()) {
+			if (this.isOffhandItemValid()) {
 				impact = (float)this.original.getAttributeValue(EpicFightAttributes.OFFHAND_IMPACT.get());
 				i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, this.getOriginal().getOffhandItem());
 			} else {
@@ -552,12 +498,12 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		if (hand == InteractionHand.MAIN_HAND) {
 			return this.original.getItemInHand(hand);
 		} else {
-			return this.isValidOffhandItem() ? this.original.getItemInHand(hand) : ItemStack.EMPTY;
+			return this.isOffhandItemValid() ? this.original.getItemInHand(hand) : ItemStack.EMPTY;
 		}
 	}
 	
-	public boolean isValidOffhandItem() {
-		return this.getHeldItemCapability(InteractionHand.MAIN_HAND).isValidOffhandItem(this.original.getOffhandItem());
+	public boolean isOffhandItemValid() {
+		return this.getHoldingItemCapability(InteractionHand.MAIN_HAND).checkOffhandUsable(this.original.getOffhandItem());
 	}
 	
 	public boolean isTeammate(Entity entityIn) {
@@ -613,7 +559,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		return this.state;
 	}
 	
-	public LivingMotion getCurrentMotion() {
-		return this.currentMotion;
+	public LivingMotion getCurrentLivingMotion() {
+		return this.currentLivingMotion;
 	}
 }

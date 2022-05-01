@@ -6,25 +6,16 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.monster.WitherSkeleton;
-import yesman.epicfight.api.animation.LivingMotion;
-import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.game.ExtendedDamageSource;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
-import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
 public class WitherSkeletonPatch extends SkeletonPatch<WitherSkeleton> {
 	public WitherSkeletonPatch() {
-		super(Faction.WITHER_ARMY);
-	}
-	
-	@Override
-	public void postInit() {
-		super.resetCombatAI();
-		super.postInit();
+		super(Faction.WITHER);
 	}
 	
 	@Override
@@ -34,22 +25,13 @@ public class WitherSkeletonPatch extends SkeletonPatch<WitherSkeleton> {
 	}
 	
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingMotion(LivingMotion.FALL, Animations.BIPED_FALL);
-		clientAnimator.addLivingMotion(LivingMotion.MOUNT, Animations.BIPED_MOUNT);
-		clientAnimator.addLivingMotion(LivingMotion.DEATH, Animations.BIPED_DEATH);
-		clientAnimator.addLivingMotion(LivingMotion.IDLE, Animations.WITHER_SKELETON_IDLE);
-		clientAnimator.addLivingMotion(LivingMotion.WALK, Animations.WITHER_SKELETON_WALK);
-	}
-	
-	@Override
 	public void updateMotion(boolean considerInaction) {
-		super.humanoidEntityUpdateMotion(considerInaction);
+		super.commonAggressiveMobUpdateMotion(considerInaction);
 	}
 	
 	@Override
-	public void onHit(Entity target, InteractionHand handIn, ExtendedDamageSource source, float amount) {
-		if (target instanceof LivingEntity && this.original.getRandom().nextInt(10) == 0) {
+	public void onHurtSomeone(Entity target, InteractionHand handIn, ExtendedDamageSource source, float amount, boolean succeed) {
+		if (succeed && target instanceof LivingEntity && this.original.getRandom().nextInt(10) == 0) {
 			((LivingEntity)target).addEffect(new MobEffectInstance(MobEffects.WITHER, 200));
 		}
 	}

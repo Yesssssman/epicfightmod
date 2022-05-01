@@ -24,14 +24,24 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 	private int namespaceHash;
 	private int counter = 0;
 	
-	public StaticAnimation findAnimation(int namespaceId, int animationId) {
+	public StaticAnimation findAnimationById(int namespaceId, int animationId) {
 		if (this.animationById.containsKey(namespaceId)) {
 			Map<Integer, StaticAnimation> map = this.animationById.get(namespaceId);
 			if (map.containsKey(animationId)) {
 				return map.get(animationId);
 			}
 		}
-		throw new IllegalArgumentException("Unable to find " + animationId + " from " + namespaceId);
+		throw new IllegalArgumentException("Unable to find animation. id: " + animationId + ", namespcae hash: " + namespaceId);
+	}
+	
+	public StaticAnimation findAnimationByResourceLocation(String resourceLocation) {
+		ResourceLocation rl = new ResourceLocation(resourceLocation);
+		
+		if (this.animationByName.containsKey(rl)) {
+			return this.animationByName.get(rl);
+		}
+		
+		throw new IllegalArgumentException("Unable to find animation. resource location: " + rl);
 	}
 	
 	public void registerAnimations() {

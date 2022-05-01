@@ -78,23 +78,24 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingMotion(LivingMotion.IDLE, Animations.BIPED_IDLE);
-		clientAnimator.addLivingMotion(LivingMotion.WALK, Animations.BIPED_WALK);
-		clientAnimator.addLivingMotion(LivingMotion.RUN, Animations.BIPED_RUN);
-		clientAnimator.addLivingMotion(LivingMotion.SNEAK, Animations.BIPED_SNEAK);
-		clientAnimator.addLivingMotion(LivingMotion.SWIM, Animations.BIPED_SWIM);
-		clientAnimator.addLivingMotion(LivingMotion.FLOAT, Animations.BIPED_FLOAT);
-		clientAnimator.addLivingMotion(LivingMotion.KNEEL, Animations.BIPED_KNEEL);
-		clientAnimator.addLivingMotion(LivingMotion.FALL, Animations.BIPED_FALL);
-		clientAnimator.addLivingMotion(LivingMotion.MOUNT, Animations.BIPED_MOUNT);
-		clientAnimator.addLivingMotion(LivingMotion.FLY, Animations.BIPED_FLYING);
-		clientAnimator.addLivingMotion(LivingMotion.DEATH, Animations.BIPED_DEATH);
-		clientAnimator.addLivingMotion(LivingMotion.JUMP, Animations.BIPED_JUMP);
-		clientAnimator.addLivingMotion(LivingMotion.CLIMB, Animations.BIPED_CLIMBING);
-		clientAnimator.addLivingMotion(LivingMotion.SLEEP, Animations.BIPED_SLEEPING);
-		clientAnimator.addDefaultCompositeMotion(LivingMotion.DIGGING, Animations.BIPED_DIG);
-		clientAnimator.addDefaultCompositeMotion(LivingMotion.AIM, Animations.BIPED_BOW_AIM);
-		clientAnimator.addDefaultCompositeMotion(LivingMotion.SHOT, Animations.BIPED_BOW_SHOT);
+		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.BIPED_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.BIPED_WALK);
+		clientAnimator.addLivingAnimation(LivingMotion.RUN, Animations.BIPED_RUN);
+		clientAnimator.addLivingAnimation(LivingMotion.SNEAK, Animations.BIPED_SNEAK);
+		clientAnimator.addLivingAnimation(LivingMotion.SWIM, Animations.BIPED_SWIM);
+		clientAnimator.addLivingAnimation(LivingMotion.FLOAT, Animations.BIPED_FLOAT);
+		clientAnimator.addLivingAnimation(LivingMotion.KNEEL, Animations.BIPED_KNEEL);
+		clientAnimator.addLivingAnimation(LivingMotion.FALL, Animations.BIPED_FALL);
+		clientAnimator.addLivingAnimation(LivingMotion.MOUNT, Animations.BIPED_MOUNT);
+		clientAnimator.addLivingAnimation(LivingMotion.FLY, Animations.BIPED_FLYING);
+		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.BIPED_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotion.JUMP, Animations.BIPED_JUMP);
+		clientAnimator.addLivingAnimation(LivingMotion.CLIMB, Animations.BIPED_CLIMBING);
+		clientAnimator.addLivingAnimation(LivingMotion.SLEEP, Animations.BIPED_SLEEPING);
+		clientAnimator.addLivingAnimation(LivingMotion.DIGGING, Animations.BIPED_DIG);
+		clientAnimator.addLivingAnimation(LivingMotion.AIM, Animations.BIPED_BOW_AIM);
+		clientAnimator.addLivingAnimation(LivingMotion.SHOT, Animations.BIPED_BOW_SHOT);
+		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
 	public void initFromOldOne(PlayerPatch<?> old) {
@@ -191,7 +192,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	public float getAttackSpeed() {
-		return this.getAttackSpeed(this.getHeldItemCapability(InteractionHand.MAIN_HAND), (float)this.original.getAttributeValue(Attributes.ATTACK_SPEED));
+		return this.getAttackSpeed(this.getHoldingItemCapability(InteractionHand.MAIN_HAND), (float)this.original.getAttributeValue(Attributes.ATTACK_SPEED));
 	}
 	
 	public float getAttackSpeed(CapabilityItem itemCapability, float baseSpeed) {

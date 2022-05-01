@@ -66,10 +66,11 @@ public class VexPatch extends MobPatch<Vex> {
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void initAnimator(ClientAnimator animatorClient) {
-		animatorClient.addLivingMotion(LivingMotion.IDLE, Animations.VEX_IDLE);
-		animatorClient.addLivingMotion(LivingMotion.DEATH, Animations.VEX_DEATH);
-		animatorClient.addCompositeAnimation(LivingMotion.IDLE, Animations.VEX_FLIPPING);
+	public void initAnimator(ClientAnimator clientAnimator) {
+		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.VEX_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.VEX_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.VEX_FLIPPING);
+		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
 	@Override
@@ -81,12 +82,12 @@ public class VexPatch extends MobPatch<Vex> {
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		if (this.state.inaction() && considerInaction) {
-			currentMotion = LivingMotion.INACTION;
+			currentLivingMotion = LivingMotion.INACTION;
 		} else {
 			if (this.original.getHealth() <= 0.0F) {
-				currentMotion = LivingMotion.DEATH;
+				currentLivingMotion = LivingMotion.DEATH;
 			} else {
-				currentMotion = LivingMotion.IDLE;
+				currentLivingMotion = LivingMotion.IDLE;
 				currentCompositeMotion = LivingMotion.IDLE;
 			}
 		}

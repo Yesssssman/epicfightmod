@@ -64,22 +64,22 @@ public class CustomArmorVertex {
 	}
 	
 	public State compareTextureCoordinateAndNormal(Vec3f normal, Vec2f textureCoord) {
-		if (textureCoordinate == null) {
+		if (this.textureCoordinate == null) {
 			return State.EMPTY;
-		} else if (textureCoordinate.equals(textureCoord) && this.normal.equals(normal)) {
+		} else if (this.textureCoordinate.equals(textureCoord) && this.normal.equals(normal)) {
 			return State.EQUAL;
 		} else {
 			return State.DIFFERENT;
 		}
 	}
 	
-	public static Mesh loadVertexInformation(List<CustomArmorVertex> vertices, int[] indices, boolean animated) {
+	public static Mesh loadVertexInformation(List<CustomArmorVertex> vertices, int[] indices) {
 		List<Float> positions = Lists.<Float>newArrayList();
 		List<Float> normals = Lists.<Float>newArrayList();
 		List<Float> texCoords = Lists.<Float>newArrayList();
-		List<Integer> jointIndices = Lists.<Integer>newArrayList();
+		List<Integer> animationIndices = Lists.<Integer>newArrayList();
 		List<Float> jointWeights = Lists.<Float>newArrayList();
-		List<Integer> effectJointCount = Lists.<Integer>newArrayList();
+		List<Integer> affectCountList = Lists.<Integer>newArrayList();
 		
 		for (int i = 0; i < vertices.size(); i++) {
 			CustomArmorVertex vertex = vertices.get(i);
@@ -95,27 +95,29 @@ public class CustomArmorVertex {
 			texCoords.add(texCoord.x);
 			texCoords.add(texCoord.y);
 			
-			if (animated) {
-				Vec3f effectIDs = vertex.effectiveJointIDs;
-				Vec3f weights = vertex.effectiveJointWeights;
-				int count = Math.min(vertex.effectiveJointNumber, 3);
-				effectJointCount.add(count);
-				for(int j = 0; j < count; j++) {
-					switch(j) {
-					case 0:
-						jointIndices.add((int) effectIDs.x);
-						jointWeights.add(weights.x);
-						break;
-					case 1:
-						jointIndices.add((int) effectIDs.y);
-						jointWeights.add(weights.y);
-						break;
-					case 2:
-						jointIndices.add((int) effectIDs.z);
-						jointWeights.add(weights.z);
-						break;
-					default:
-					}
+			Vec3f effectIDs = vertex.effectiveJointIDs;
+			Vec3f weights = vertex.effectiveJointWeights;
+			int count = Math.min(vertex.effectiveJointNumber, 3);
+			affectCountList.add(count);
+			
+			for (int j = 0; j < count; j++) {
+				switch (j) {
+				case 0:
+					animationIndices.add((int) effectIDs.x);
+					jointWeights.add(weights.x);
+					animationIndices.add(jointWeights.size() - 1);
+					break;
+				case 1:
+					animationIndices.add((int) effectIDs.y);
+					jointWeights.add(weights.y);
+					animationIndices.add(jointWeights.size() - 1);
+					break;
+				case 2:
+					animationIndices.add((int) effectIDs.z);
+					jointWeights.add(weights.z);
+					animationIndices.add(jointWeights.size() - 1);
+					break;
+				default:
 				}
 			}
 		}
@@ -123,13 +125,13 @@ public class CustomArmorVertex {
 		float[] positionList = ArrayUtils.toPrimitive(positions.toArray(new Float[0]));
 		float[] normalList = ArrayUtils.toPrimitive(normals.toArray(new Float[0]));
 		float[] texCoordList = ArrayUtils.toPrimitive(texCoords.toArray(new Float[0]));
-		int[] jointIndexList = ArrayUtils.toPrimitive(jointIndices.toArray(new Integer[0]));
+		int[] animationIndexList = ArrayUtils.toPrimitive(animationIndices.toArray(new Integer[0]));
 		float[] jointWeightList = ArrayUtils.toPrimitive(jointWeights.toArray(new Float[0]));
-		int[] jointCountList = ArrayUtils.toPrimitive(effectJointCount.toArray(new Integer[0]));
+		int[] affectJointCounts = ArrayUtils.toPrimitive(affectCountList.toArray(new Integer[0]));
 		
-		return new Mesh(positionList, normalList, texCoordList, jointIndexList, jointWeightList, indices, jointCountList);
+		return new Mesh(positionList, normalList, texCoordList, animationIndexList, jointWeightList, indices, affectJointCounts);
 	}
-
+	
 	public enum State {
 		EMPTY, EQUAL, DIFFERENT;
 	}

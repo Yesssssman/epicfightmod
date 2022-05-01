@@ -13,11 +13,11 @@ public class Mesh {
 	final float[] weights;
 	final List<VertexIndicator> vertexIndicators;
 	
-	public Mesh(float[] positions, float[] noramls, float[] uvs, int[] weightIndices, float[] weights, int[] indices, int[] vCounts) {
+	public Mesh(float[] positions, float[] noramls, float[] uvs, int[] animationIndices, float[] weights, int[] indices, int[] vCounts) {
 		this.positions = positions;
 		this.noramls = noramls;
 		this.uvs = uvs;
 		this.weights = weights;
-		this.vertexIndicators = VertexIndicator.create(indices, vCounts, weightIndices);
+		this.vertexIndicators = VertexIndicator.create(indices, vCounts, animationIndices);
 	}
 }

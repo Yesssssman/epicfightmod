@@ -18,7 +18,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin'
 
 
-version = '1.0'
+version = '18.1.5'
 group = 'com.yesman.epicfight'
 archivesBaseName = 'epicfight'
 
@@ -26,7 +26,6 @@ java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
     mappings channel: 'official', version: '1.18.2'
-
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     runs {
@@ -61,7 +60,7 @@ minecraft {
                 }
             }
         }
-
+		
         gameTestServer {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
@@ -103,6 +102,12 @@ repositories {
     // flatDir {
     //     dir 'libs'
     // }
+    maven {
+        url "https://cursemaven.com"
+        content {
+            includeGroup "curse.maven"
+        }
+    }
 }
 
 mixin {
@@ -110,7 +115,8 @@ mixin {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.18.2-40.0.44'
+    minecraft 'net.minecraftforge:forge:1.18.2-40.1.0'
+    //implementation fg.deobf("curse.maven:guardvillager-360203:3694899")
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 

@@ -1,5 +1,7 @@
 package yesman.epicfight.world.capabilities.entitypatch;
 
+import io.netty.buffer.ByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -15,9 +17,12 @@ public abstract class EntityPatch<T extends Entity> {
 	protected abstract void clientTick(LivingUpdateEvent event);
 	protected abstract void serverTick(LivingUpdateEvent event);
 	
-	public void postInit() {
+	public void onStartTracking(ServerPlayer trackingPlayer) {
 	}
-
+	
+	public void processSpawnData(ByteBuf buf) {
+	}
+	
 	public void onConstructed(T entityIn) {
 		this.original = entityIn;
 	}

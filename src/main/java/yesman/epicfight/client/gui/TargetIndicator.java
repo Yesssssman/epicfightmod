@@ -23,6 +23,7 @@ public class TargetIndicator extends EntityIndicator {
 			return false;
 		} else {
 			LocalPlayerPatch playerpatch = ClientEngine.instance.getPlayerPatch();
+			
 			if (playerpatch != null && entityIn != playerpatch.getAttackTarget()) {
 				return false;
 			} else if (entityIn.isInvisible() || !entityIn.isAlive() || entityIn == player.getVehicle()) {
@@ -30,7 +31,8 @@ public class TargetIndicator extends EntityIndicator {
 			} else if (entityIn.distanceToSqr(Minecraft.getInstance().getCameraEntity()) >= 400) {
 				return false;
 			} else if (entityIn instanceof Player) {
-				Player playerIn = (Player) entityIn;
+				Player playerIn = (Player)entityIn;
+				
 				if (playerIn.isSpectator()) {
 					return false;
 				}

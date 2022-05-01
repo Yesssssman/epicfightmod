@@ -3,7 +3,6 @@ package yesman.epicfight.skill;
 import java.util.UUID;
 
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPPlayAnimation;
@@ -43,23 +42,27 @@ public class KatanaPassive extends Skill {
 	@Override
 	public void onReset(SkillContainer container) {
 		PlayerPatch<?> executer = container.executer;
+		
 		if (!executer.isLogicalClient()) {
-			ServerPlayerPatch playerpatch = (ServerPlayerPatch) executer;
-			container.getDataManager().setDataSync(SHEATH, false, playerpatch.getOriginal());
-			(playerpatch).setLivingMotionCurrentItem(executer.getHeldItemCapability(InteractionHand.MAIN_HAND), InteractionHand.MAIN_HAND);
-			container.getSkill().setConsumptionSynchronize(playerpatch, 0);
+			if (container.getDataManager().getDataValue(SHEATH)) {
+				ServerPlayerPatch playerpatch = (ServerPlayerPatch)executer;
+				container.getDataManager().setDataSync(SHEATH, false, playerpatch.getOriginal());
+				playerpatch.modifyLivingMotionByCurrentItem();
+				container.getSkill().setConsumptionSynchronize(playerpatch, 0);
+			}
 		}
 	}
 	
 	@Override
 	public void setConsumption(SkillContainer container, float value) {
 		PlayerPatch<?> executer = container.executer;
+		
 		if (!executer.isLogicalClient()) {
 			if (this.consumption < value) {
 				ServerPlayer serverPlayer = (ServerPlayer) executer.getOriginal();
 				container.getDataManager().setDataSync(SHEATH, true, serverPlayer);
-				((ServerPlayerPatch)container.executer).setLivingMotionCurrentItem(executer.getHeldItemCapability(InteractionHand.MAIN_HAND), InteractionHand.MAIN_HAND);
-				SPPlayAnimation msg3 = new SPPlayAnimation(Animations.BIPED_KATANA_SCRAP, serverPlayer.getId(), 0.0F, SPPlayAnimation.Layer.COMPOSITE_LAYER);
+				((ServerPlayerPatch)container.executer).modifyLivingMotionByCurrentItem();
+				SPPlayAnimation msg3 = new SPPlayAnimation(Animations.BIPED_KATANA_SCRAP, serverPlayer.getId(), 0.0F);
 				EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(msg3, serverPlayer);
 			}
 		}

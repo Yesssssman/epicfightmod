@@ -91,34 +91,35 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void initAnimator(ClientAnimator animatorClient) {
+	public void initAnimator(ClientAnimator clientAnimator) {
 		for (Map.Entry<LivingMotion, StaticAnimation> livingmotionEntry : this.livingMotions.entrySet()) {
-			animatorClient.addLivingMotion(livingmotionEntry.getKey(), livingmotionEntry.getValue());
+			clientAnimator.addLivingAnimation(livingmotionEntry.getKey(), livingmotionEntry.getValue());
 		}
+		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		if (this.state.inaction() && considerInaction) {
-			this.currentMotion = LivingMotion.INACTION;
+			this.currentLivingMotion = LivingMotion.INACTION;
 		} else {
 			DragonPhaseInstance phase = this.original.getPhaseManager().getCurrentPhase();
 			
 			if (!this.groundPhase) {
 				if (phase.getPhase() == PatchedPhases.AIRSTRIKE && ((DragonAirstrikePhase)phase).isActuallyAttacking()) {
-					this.currentMotion = LivingMotion.CHASE;
+					this.currentLivingMotion = LivingMotion.CHASE;
 				} else {
-					this.currentMotion = LivingMotion.FLY;
+					this.currentLivingMotion = LivingMotion.FLY;
 				}
 			} else {
 				if (phase.getPhase() == PatchedPhases.GROUND_BATTLE) {
 					if (this.original.getTarget() != null) {
-						this.currentMotion = LivingMotion.WALK;
+						this.currentLivingMotion = LivingMotion.WALK;
 					} else {
-						this.currentMotion = LivingMotion.IDLE;
+						this.currentLivingMotion = LivingMotion.IDLE;
 					}
 				} else {
-					this.currentMotion = LivingMotion.IDLE;
+					this.currentLivingMotion = LivingMotion.IDLE;
 				}
 			}
 		}
@@ -140,12 +141,12 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 		this.original.getSensing().tick();
 		this.updateMotion(true);
 		
-		if (this.prevMotion != this.currentMotion && !this.animator.getEntityState().inaction()) {
-			if (this.livingMotions.containsKey(this.currentMotion)) {
-				this.animator.playAnimation(this.livingMotions.get(this.currentMotion), 0.0F);
+		if (this.prevMotion != this.currentLivingMotion && !this.animator.getEntityState().inaction()) {
+			if (this.livingMotions.containsKey(this.currentLivingMotion)) {
+				this.animator.playAnimation(this.livingMotions.get(this.currentLivingMotion), 0.0F);
 			}
 			
-			this.prevMotion = this.currentMotion;
+			this.prevMotion = this.currentLivingMotion;
 		}
 		
 		this.updateTipPoints();

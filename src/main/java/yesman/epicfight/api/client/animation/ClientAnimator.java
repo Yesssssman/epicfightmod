@@ -25,7 +25,6 @@ import yesman.epicfight.api.client.animation.Layer.Priority;
 import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Animations;
-import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
@@ -34,9 +33,9 @@ public class ClientAnimator extends Animator {
 		return entitypatch.isLogicalClient() ? new ClientAnimator(entitypatch) : ServerAnimator.getAnimator(entitypatch);
 	}
 	
-	private final Map<LivingMotion, StaticAnimation> livingAnimations;
 	private final Map<LivingMotion, StaticAnimation> compositeLivingAnimations;
-	private final Map<LivingMotion, StaticAnimation> defaultCompositeMotion;
+	private final Map<LivingMotion, StaticAnimation> defaultLivingAnimations;
+	private final Map<LivingMotion, StaticAnimation> defaultCompositeLivingAnimations;
 	public final Layer.BaseLayer baseLayer;
 	private LivingMotion currentMotion;
 	private LivingMotion currentCompositeMotion;
@@ -45,17 +44,18 @@ public class ClientAnimator extends Animator {
 		this.entitypatch = entitypatch;
 		this.currentMotion = LivingMotion.IDLE;
 		this.currentCompositeMotion = LivingMotion.IDLE;
-		this.livingAnimations = Maps.<LivingMotion, StaticAnimation>newHashMap();
-		this.compositeLivingAnimations = Maps.<LivingMotion, StaticAnimation>newHashMap();
-		this.defaultCompositeMotion = Maps.<LivingMotion, StaticAnimation>newHashMap();
+		this.compositeLivingAnimations = Maps.newHashMap();
+		this.defaultLivingAnimations = Maps.<LivingMotion, StaticAnimation>newHashMap();
+		this.defaultCompositeLivingAnimations = Maps.<LivingMotion, StaticAnimation>newHashMap();
 		this.baseLayer = new Layer.BaseLayer(null);
 	}
 	
 	/** Play an animation by animation instance **/
 	@Override
 	public void playAnimation(StaticAnimation nextAnimation, float convertTimeModifier) {
-		this.baseLayer.paused  = false;
-		this.baseLayer.playAnimation(nextAnimation, this.entitypatch, convertTimeModifier);
+		Layer layer = nextAnimation.getLayerType() == Layer.LayerType.BASE_LAYER ? this.baseLayer : this.baseLayer.compositeLayers.get(nextAnimation.getPriority());
+		layer.paused = false;
+		layer.playAnimation(nextAnimation, this.entitypatch, convertTimeModifier);
 	}
 	
 	@Override
@@ -64,27 +64,30 @@ public class ClientAnimator extends Animator {
 		this.baseLayer.playAnimation(nextAnimation, this.entitypatch);
 	}
 	
-	public void playCompositeAnimation(int namespaceId, int id, float convertTimeModifier) {
-		this.playCompositeAnimation(EpicFightMod.getInstance().animationManager.findAnimation(namespaceId, id), convertTimeModifier);
-	}
-	
-	public void playCompositeAnimation(StaticAnimation nextAnimation, float convertTimeModifier) {
-		Priority priority = nextAnimation.getPriority();
-		Layer compositeLayer = this.baseLayer.compositeLayers.get(priority);
-		compositeLayer.playAnimation(nextAnimation, this.entitypatch, convertTimeModifier);
-	}
-	
 	@Override
 	public void reserveAnimation(StaticAnimation nextAnimation) {
 		this.baseLayer.paused = false;
 		this.baseLayer.nextAnimation = nextAnimation;
 	}
 	
-	/** Add new Living animation of entity **/
-	public void addLivingMotion(LivingMotion motion, StaticAnimation animation) {
-		this.livingAnimations.put(motion, animation);
+	@Override
+	public void addLivingAnimation(LivingMotion livingMotion, StaticAnimation animation) {
+		Layer.LayerType layerType = animation.getLayerType();
 		
-		if (motion == this.currentMotion) {
+		switch (layerType) {
+		case BASE_LAYER:
+			this.addBaseLivingAnimation(livingMotion, animation);
+			break;
+		case COMPOSITE_LAYER:
+			this.addCompositeLivingAnimation(livingMotion, animation);
+			break;
+		}
+	}
+	
+	protected void addBaseLivingAnimation(LivingMotion livingMotion, StaticAnimation animation) {
+		this.livingAnimations.put(livingMotion, animation);
+		
+		if (livingMotion == this.currentMotion) {
 			EntityState state = this.getEntityState();
 			
 			if (!state.inaction()) {
@@ -93,27 +96,31 @@ public class ClientAnimator extends Animator {
 		}
 	}
 	
-	public void addCompositeAnimation(LivingMotion motion, StaticAnimation animation) {
+	protected void addCompositeLivingAnimation(LivingMotion livingMotion, StaticAnimation animation) {
 		if (animation != null) {
-			this.compositeLivingAnimations.put(motion, animation);
+			this.compositeLivingAnimations.put(livingMotion, animation);
 			
-			if (motion == this.currentCompositeMotion) {
+			if (livingMotion == this.currentCompositeMotion) {
 				EntityState state = this.getEntityState();
 				
 				if (!state.inaction()) {
-					this.playCompositeAnimation(animation, 0.0F);
+					this.playAnimation(animation, 0.0F);
 				}
 			}
 		}
 	}
 	
-	public void addDefaultCompositeMotion(LivingMotion motion, StaticAnimation animation) {
-		this.defaultCompositeMotion.put(motion, animation);
+	public void setCurrentMotionsAsDefault() {
+		this.livingAnimations.forEach(this.defaultLivingAnimations::put);
+		this.compositeLivingAnimations.forEach(this.defaultCompositeLivingAnimations::put);
 	}
 	
-	public void resetCompositeMotionCache() {
+	@Override
+	public void resetMotions() {
+		super.resetMotions();
 		this.compositeLivingAnimations.clear();
-		this.defaultCompositeMotion.forEach(this.compositeLivingAnimations::put);
+		this.defaultLivingAnimations.forEach(this.livingAnimations::put);
+		this.defaultCompositeLivingAnimations.forEach(this.compositeLivingAnimations::put);
 	}
 	
 	public StaticAnimation getLivingMotion(LivingMotion motion) {
@@ -158,24 +165,24 @@ public class ClientAnimator extends Animator {
 		
 		if (this.baseLayer.animationPlayer.isEnd() && this.baseLayer.nextAnimation == null && this.currentMotion != LivingMotion.DEATH) {
 			this.entitypatch.updateMotion(false);
-			this.baseLayer.playAnimation(this.getLivingMotion(this.entitypatch.currentMotion), this.entitypatch, 0.0F);
+			this.baseLayer.playAnimation(this.getLivingMotion(this.entitypatch.currentLivingMotion), this.entitypatch, 0.0F);
 		}
 		
 		if (!this.compareCompositeMotion(this.entitypatch.currentCompositeMotion)) {
 			if (this.compositeLivingAnimations.containsKey(this.entitypatch.currentCompositeMotion)) {
-				this.playCompositeAnimation(this.getCompositeLivingMotion(this.entitypatch.currentCompositeMotion), 0.0F);
+				this.playAnimation(this.getCompositeLivingMotion(this.entitypatch.currentCompositeMotion), 0.0F);
 			} else {
 				this.getCompositeLayer(Layer.Priority.MIDDLE).off(this.entitypatch);
 			}
 		}
 		
-		if (!this.compareMotion(this.entitypatch.currentMotion)) {
-			if (this.livingAnimations.containsKey(this.entitypatch.currentMotion)) {
-				this.baseLayer.playAnimation(this.getLivingMotion(this.entitypatch.currentMotion), this.entitypatch, 0.0F);
+		if (!this.compareMotion(this.entitypatch.currentLivingMotion)) {
+			if (this.livingAnimations.containsKey(this.entitypatch.currentLivingMotion)) {
+				this.baseLayer.playAnimation(this.getLivingMotion(this.entitypatch.currentLivingMotion), this.entitypatch, 0.0F);
 			}
 		}
 		
-		this.currentMotion = this.entitypatch.currentMotion;
+		this.currentMotion = this.entitypatch.currentLivingMotion;
 		this.currentCompositeMotion = this.entitypatch.currentCompositeMotion;
 	}
 	
@@ -203,7 +210,7 @@ public class ClientAnimator extends Animator {
 			composedPose.putJointData(transformEntry.getKey(), transformEntry.getValue());
 		}
 		
-		for (Layer.Priority priority : this.baseLayer.priority.uppers()) {
+		for (Layer.Priority priority : this.baseLayer.baserLayerPriority.uppers()) {
 			Layer compositeLayer = this.baseLayer.compositeLayers.get(priority);
 			
 			if (!compositeLayer.isDisabled()) {
@@ -284,7 +291,7 @@ public class ClientAnimator extends Animator {
 	
 	public void startInaction() {
 		this.currentMotion = LivingMotion.INACTION;
-		this.entitypatch.currentMotion = LivingMotion.INACTION;
+		this.entitypatch.currentLivingMotion = LivingMotion.INACTION;
 	}
 	
 	public void resetCompositeMotion() {
@@ -298,7 +305,7 @@ public class ClientAnimator extends Animator {
 	
 	public void playReboundAnimation() {
 		if (this.compositeLivingAnimations.containsKey(LivingMotion.SHOT)) {
-			this.playCompositeAnimation(this.compositeLivingAnimations.get(LivingMotion.SHOT), 0.0F);
+			this.playAnimation(this.compositeLivingAnimations.get(LivingMotion.SHOT), 0.0F);
 			this.entitypatch.currentCompositeMotion = LivingMotion.NONE;
 			this.resetCompositeMotion();
 		}

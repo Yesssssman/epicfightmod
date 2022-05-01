@@ -40,14 +40,17 @@ public class AnimationDataReader {
         }
         
         animation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.priority);
+        animation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.layerType);
 	}
 	
 	private JointMaskEntry jointMaskEntry;
+	private Layer.LayerType layerType;
 	private Layer.Priority priority;
 	
-	private AnimationDataReader(JointMaskEntry jointMaskEntry, Layer.Priority priority) {
+	private AnimationDataReader(JointMaskEntry jointMaskEntry, Layer.Priority priority, Layer.LayerType layerType) {
 		this.jointMaskEntry = jointMaskEntry;
 		this.priority = priority;
+		this.layerType = layerType;
 	}
 	
 	static class Deserializer implements JsonDeserializer<AnimationDataReader> {
@@ -56,6 +59,8 @@ public class AnimationDataReader {
 			JsonObject jsonObject = json.getAsJsonObject();
 			JointMaskEntry.Builder builder = JointMaskEntry.builder();
 			Layer.Priority priority = jsonObject.has("priority") ? Layer.Priority.valueOf(GsonHelper.getAsString(jsonObject, "priority")) : Layer.Priority.LOWEST;
+			Layer.LayerType layerType = jsonObject.has("layer") ? Layer.LayerType.valueOf(GsonHelper.getAsString(jsonObject, "layer")) : Layer.LayerType.BASE_LAYER;
+			
 			if (jsonObject.has("masks")) {
 				builder.defaultMask(JointMaskEntry.NONE);
 				JsonArray maskArray = jsonObject.get("masks").getAsJsonArray();
@@ -71,7 +76,8 @@ public class AnimationDataReader {
 					}
 				});
 			}
-			return new AnimationDataReader(builder.create(), priority);
+			
+			return new AnimationDataReader(builder.create(), priority, layerType);
 		}
 	}
 	

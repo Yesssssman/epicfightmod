@@ -66,7 +66,7 @@ public class BasicAttack extends Skill {
 		EntityState playerState = executer.getEntityState();
 		Player player = executer.getOriginal();
 		
-		return !(player.isSpectator() || player.isFallFlying() || executer.currentMotion == LivingMotion.FALL || !playerState.canBasicAttack());
+		return !(player.isSpectator() || player.isFallFlying() || executer.currentLivingMotion == LivingMotion.FALL || !playerState.canBasicAttack());
 	}
 	
 	@Override
@@ -75,7 +75,7 @@ public class BasicAttack extends Skill {
 			return;
 		}
 		
-		CapabilityItem cap = executer.getHeldItemCapability(InteractionHand.MAIN_HAND);
+		CapabilityItem cap = executer.getHoldingItemCapability(InteractionHand.MAIN_HAND);
 		StaticAnimation attackMotion = null;
 		ServerPlayer player = executer.getOriginal();
 		SkillDataManager dataManager = executer.getSkill(this.category).getDataManager();

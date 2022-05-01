@@ -83,7 +83,7 @@ public class BladeRushSkill extends SpecialAttackSkill {
 		} else {
 			int firstComboId = Animations.BLADE_RUSH_FIRST.getId();
 			int animationId = firstComboId + executer.getSkill(this.category).getDataManager().getDataValue(COMBO_COUNT);
-			executer.playAnimationSynchronized(EpicFightMod.getInstance().animationManager.findAnimation(EpicFightMod.MODID.hashCode(), animationId), 0);
+			executer.playAnimationSynchronized(EpicFightMod.getInstance().animationManager.findAnimationById(EpicFightMod.MODID.hashCode(), animationId), 0);
 			executer.getSkill(this.category).getDataManager().setData(COMBO_COUNT, (animationId - firstComboId + 1) % 4);
 			this.setDurationSynchronize(executer, this.maxDuration);
 			this.setStackSynchronize(executer, executer.getSkill(this.category).getStack() - 1);

@@ -76,7 +76,11 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 				if (hit instanceof LivingEntity) {
 					this.rayTarget = (LivingEntity)hit;
 				} else if (hit instanceof PartEntity<?>) {
-					this.rayTarget = (LivingEntity)((PartEntity<?>)hit).getParent();
+					Entity parent = ((PartEntity<?>)hit).getParent();
+					
+					if (parent instanceof LivingEntity) {
+						this.rayTarget = (LivingEntity)parent;
+					}
 				} else {
 					this.rayTarget = null;
 				}

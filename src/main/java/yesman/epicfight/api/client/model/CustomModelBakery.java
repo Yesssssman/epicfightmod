@@ -44,12 +44,10 @@ public class CustomModelBakery {
 		resetRotation(model.body);
 	    model.rightArm.setPos(-5.0F, 2.0F, 0.0F);
 	    resetRotation(model.rightArm);
-	    //model.leftArm.mirror = true;
 	    model.leftArm.setPos(5.0F, 2.0F, 0.0F);
 	    resetRotation(model.leftArm);
 	    model.rightLeg.setPos(-1.9F, 12.0F, 0.0F);
 	    resetRotation(model.rightLeg);
-	    //model.leftLeg.mirror = true;
 	    model.leftLeg.setPos(1.9F, 12.0F, 0.0F);
 	    resetRotation(model.leftLeg);
 		
@@ -75,28 +73,31 @@ public class CustomModelBakery {
 		default:
 			return null;
 		}
+		
 		ClientModel customModel = new ClientModel(bakeMeshFromCubes(allBoxes));
 		return customModel;
 	}
 	
 	private static Mesh bakeMeshFromCubes(List<ModelPartBind> cubes) {
-		List<CustomArmorVertex> vertices = Lists.<CustomArmorVertex>newArrayList();
-		List<Integer> indices = Lists.<Integer>newArrayList();
+		List<CustomArmorVertex> vertices = Lists.newArrayList();
+		List<Integer> indices = Lists.newArrayList();
 		PoseStack matrixStack = new PoseStack();
 		indexCount = 0;
 		matrixStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
 		matrixStack.mulPose(Vector3f.XP.rotationDegrees(180.0F));
 		matrixStack.translate(0, -24, 0);
+		
 		for (ModelPartBind modelPart : cubes) {
 			bake(matrixStack, modelPart.partedBaker, modelPart.modelRenderer, vertices, indices);
 		}
 		
-		return CustomArmorVertex.loadVertexInformation(vertices, ArrayUtils.toPrimitive(indices.toArray(new Integer[0])), true);
+		return CustomArmorVertex.loadVertexInformation(vertices, ArrayUtils.toPrimitive(indices.toArray(new Integer[0])));
 	}
 	
 	private static void bake(PoseStack matrixStack, ModelPartition part, ModelPart renderer, List<CustomArmorVertex> vertices, List<Integer> indices) {
 		matrixStack.pushPose();
 		matrixStack.translate(renderer.x, renderer.y, renderer.z);
+		
 		if (renderer.zRot != 0.0F) {
 			matrixStack.mulPose(Vector3f.ZP.rotation(renderer.zRot));
 		}
@@ -140,9 +141,16 @@ public class CustomModelBakery {
 		public abstract void bakeCube(PoseStack matrixStack, ModelPart.Cube cube, List<CustomArmorVertex> vertices, List<Integer> indices);
 	}
 	
+	static void putIndexCount(List<Integer> indices, int value) {
+		for (int i = 0; i < 3; i++) {
+			indices.add(value);
+		}
+	}
+	
 	@OnlyIn(Dist.CLIENT)
 	static class SimplePart extends ModelPartition {
 		final int jointId;
+		
 		public SimplePart (int jointId) {
 			this.jointId = jointId;
 		}
@@ -151,6 +159,7 @@ public class CustomModelBakery {
 			for (ModelPart.Polygon quad : cube.polygons) {
 				Vector3f norm = quad.normal.copy();
 				norm.transform(matrixStack.last().normal());
+				
 				for (ModelPart.Vertex vertex : quad.vertices) {
 					Vector4f pos = new Vector4f(vertex.pos);
 					pos.transform(matrixStack.last().pose());
@@ -158,18 +167,18 @@ public class CustomModelBakery {
 						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
 						.setTextureCoordinate(new Vec2f(vertex.u, vertex.v))
-						.setEffectiveJointIDs(new Vec3f(jointId, 0, 0))
+						.setEffectiveJointIDs(new Vec3f(this.jointId, 0, 0))
 						.setEffectiveJointWeights(new Vec3f(1.0F, 0.0F, 0.0F))
 						.setEffectiveJointNumber(1)
 					);
 				}
 				
-				indices.add(indexCount);
-				indices.add(indexCount+1);
-				indices.add(indexCount+3);
-				indices.add(indexCount+3);
-				indices.add(indexCount+1);
-				indices.add(indexCount+2);
+				putIndexCount(indices, indexCount);
+				putIndexCount(indices, indexCount + 1);
+				putIndexCount(indices, indexCount + 3);
+				putIndexCount(indices, indexCount + 3);
+				putIndexCount(indices, indexCount + 1);
+				putIndexCount(indices, indexCount + 2);
 				indexCount+=4;
 			}
 		}
@@ -178,13 +187,13 @@ public class CustomModelBakery {
 	@OnlyIn(Dist.CLIENT)
 	static class Chest extends ModelPartition {
 		final float cutX = 0.0F;
-		final WeightPair[] cutYList = { new WeightPair(13.6666F, 0.254F, 0.746F), new WeightPair(15.8333F, 0.254F, 0.746F),
-				new WeightPair(18.0F, 0.5F, 0.5F), new WeightPair(20.1666F, 0.744F, 0.256F), new WeightPair(22.3333F, 0.770F, 0.230F)};
+		final WeightPair[] cutYList = { new WeightPair(13.6666F, 0.254F, 0.746F), new WeightPair(15.8333F, 0.254F, 0.746F), new WeightPair(18.0F, 0.5F, 0.5F), new WeightPair(20.1666F, 0.744F, 0.256F), new WeightPair(22.3333F, 0.770F, 0.230F)};
 		
 		@Override
 		public void bakeCube(PoseStack matrixStack, ModelPart.Cube cube, List<CustomArmorVertex> vertices, List<Integer> indices) {
 			List<AnimatableCube> seperatedX = Lists.<AnimatableCube>newArrayList();
 			List<AnimatableCube> seperatedXY = Lists.<AnimatableCube>newArrayList();
+			
 			for (ModelPart.Polygon quad : cube.polygons) {
 				Matrix4f matrix = matrixStack.last().pose();
 				ModelPart.Vertex pos0 = getTranslatedVertex(quad.vertices[0], matrix);
@@ -275,7 +284,7 @@ public class CustomModelBakery {
 					int joint2 = vertex.jointId.getY();
 					int count = weight1 > 0.0F && weight2 > 0.0F ? 2 : 1;
 					
-					if(weight1 <= 0.0F) {
+					if (weight1 <= 0.0F) {
 						joint1 = joint2;
 						weight1 = weight2;
 					}
@@ -290,12 +299,12 @@ public class CustomModelBakery {
 					);
 				}
 				
-				indices.add(indexCount);
-				indices.add(indexCount+1);
-				indices.add(indexCount+3);
-				indices.add(indexCount+3);
-				indices.add(indexCount+1);
-				indices.add(indexCount+2);
+				putIndexCount(indices, indexCount);
+				putIndexCount(indices, indexCount + 1);
+				putIndexCount(indices, indexCount + 3);
+				putIndexCount(indices, indexCount + 3);
+				putIndexCount(indices, indexCount + 1);
+				putIndexCount(indices, indexCount + 2);
 				indexCount+=4;
 			}
 		}
@@ -360,6 +369,7 @@ public class CustomModelBakery {
 		@Override
 		public void bakeCube(PoseStack matrixStack, ModelPart.Cube cube, List<CustomArmorVertex> vertices, List<Integer> indices) {
 			List<AnimatableCube> polygons = Lists.<AnimatableCube>newArrayList();
+			
 			for (ModelPart.Polygon quad : cube.polygons) {
 				Matrix4f matrix = matrixStack.last().pose();
 				ModelPart.Vertex pos0 = getTranslatedVertex(quad.vertices[0], matrix);
@@ -367,6 +377,7 @@ public class CustomModelBakery {
 				ModelPart.Vertex pos2 = getTranslatedVertex(quad.vertices[2], matrix);
 				ModelPart.Vertex pos3 = getTranslatedVertex(quad.vertices[3], matrix);
 				Direction direction = getDirectionFromVector(quad.normal);
+				
 				if (pos1.pos.y() > this.cutY != pos2.pos.y() > this.cutY) {
 					float distance = pos2.pos.y() - pos1.pos.y();
 					float textureV = pos1.v + (pos2.v - pos1.v) * ((this.cutY - pos1.pos.y()) / distance);
@@ -439,12 +450,12 @@ public class CustomModelBakery {
 					);
 				}
 				
-				indices.add(indexCount);
-				indices.add(indexCount+1);
-				indices.add(indexCount+3);
-				indices.add(indexCount+3);
-				indices.add(indexCount+1);
-				indices.add(indexCount+2);
+				putIndexCount(indices, indexCount);
+				putIndexCount(indices, indexCount + 1);
+				putIndexCount(indices, indexCount + 3);
+				putIndexCount(indices, indexCount + 3);
+				putIndexCount(indices, indexCount + 1);
+				putIndexCount(indices, indexCount + 2);
 				indexCount+=4;
 			}
 		}

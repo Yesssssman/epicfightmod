@@ -1,42 +1,36 @@
 package yesman.epicfight.world.capabilities.entitypatch;
 
-import java.util.Iterator;
-import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
-import com.google.common.collect.Lists;
-
-import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
-import net.minecraft.world.entity.ai.goal.WrappedGoal;
+import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
-import yesman.epicfight.network.server.SPMobInitialize;
 import yesman.epicfight.network.server.SPSetAttackTarget;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.mob.Faction;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-import yesman.epicfight.world.entity.ai.goal.AttackPatternGoal;
 import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
-import yesman.epicfight.world.entity.ai.goal.RangeAttackMobGoal;
+import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
 
 public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	protected final Faction mobFaction;
 	
 	public MobPatch() {
-		this.mobFaction = Faction.NATURAL;
+		this.mobFaction = Faction.NEUTURAL;
 	}
 	
 	public MobPatch(Faction faction) {
@@ -47,7 +41,7 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	public void onJoinWorld(T entityIn, EntityJoinWorldEvent event) {
 		super.onJoinWorld(entityIn, event);
 		
-		if (!entityIn.level.isClientSide()) {
+		if (!entityIn.level.isClientSide() && !this.original.isNoAi()) {
 			this.initAI();
 		}
 	}
@@ -55,41 +49,84 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	protected void initAI() {
 		this.resetCombatAI();
 	}
-
+	
 	protected void resetCombatAI() {
-		Set<WrappedGoal> goals = this.original.goalSelector.getAvailableGoals();
-		Iterator<WrappedGoal> iterator = goals.iterator();
-		List<Goal> toRemove = Lists.<Goal>newArrayList();
-		
-		while (iterator.hasNext()) {
-        	WrappedGoal goal = iterator.next();
-            Goal inner = goal.getGoal();
-			if (inner instanceof MeleeAttackGoal || inner instanceof ChasingGoal || inner instanceof RangedAttackGoal
-					|| inner instanceof RangeAttackMobGoal || inner instanceof AttackPatternGoal) {
-            	toRemove.add(inner);
-            }
-        }
-        
-		for (Goal AI : toRemove) {
-        	this.original.goalSelector.removeGoal(AI);
-        }
+		this.original.goalSelector.getAvailableGoals().removeIf((goal) -> (goal.getGoal() instanceof MeleeAttackGoal || goal.getGoal() instanceof CombatBehaviorGoal || goal.getGoal() instanceof ChasingGoal || goal.getGoal() instanceof RangedAttackGoal));
 	}
 	
-	public SPMobInitialize sendInitialInformationToClient() {
-		return null;
+	protected final void commonMobUpdateMotion(boolean considerInaction) {
+		if (this.state.inaction() && considerInaction) {
+			currentLivingMotion = LivingMotion.INACTION;
+		} else {
+			if (this.original.getHealth() <= 0.0F) {
+				currentLivingMotion = LivingMotion.DEATH;
+			} else if (original.getVehicle() != null) {
+				currentLivingMotion = LivingMotion.MOUNT;
+			} else {
+				if (this.original.getDeltaMovement().y < -0.55F)
+					currentLivingMotion = LivingMotion.FALL;
+				else if (original.animationSpeed > 0.01F)
+					currentLivingMotion = LivingMotion.WALK;
+				else
+					currentLivingMotion = LivingMotion.IDLE;
+			}
+		}
+		
+		this.currentCompositeMotion = this.currentLivingMotion;
 	}
-
-	public void clientInitialSettings(ByteBuf buf) {
-
+	
+	protected final void commonAggressiveMobUpdateMotion(boolean considerInaction) {
+		if (this.state.inaction() && considerInaction) {
+			currentLivingMotion = LivingMotion.INACTION;
+		} else {
+			if (this.original.getHealth() <= 0.0F) {
+				currentLivingMotion = LivingMotion.DEATH;
+			} else if (original.getVehicle() != null) {
+				currentLivingMotion = LivingMotion.MOUNT;
+			} else {
+				if (this.original.getDeltaMovement().y < -0.55F)
+					currentLivingMotion = LivingMotion.FALL;
+				else if (original.animationSpeed > 0.01F)
+					if (original.isAggressive())
+						currentLivingMotion = LivingMotion.CHASE;
+					else
+						currentLivingMotion = LivingMotion.WALK;
+				else
+					currentLivingMotion = LivingMotion.IDLE;
+			}
+		}
+		
+		this.currentCompositeMotion = this.currentLivingMotion;
+	}
+	
+	protected final void commonAggressiveRangedMobUpdateMotion(boolean considerInaction) {
+		this.commonAggressiveMobUpdateMotion(considerInaction);
+		UseAnim useAction = this.original.getItemInHand(this.original.getUsedItemHand()).getUseAnimation();
+		
+		if (this.original.isUsingItem()) {
+			if (useAction == UseAnim.CROSSBOW)
+				currentCompositeMotion = LivingMotion.RELOAD;
+			else
+				currentCompositeMotion = LivingMotion.AIM;
+		} else {
+			if (this.getClientAnimator().getCompositeLayer(Layer.Priority.MIDDLE).animationPlayer.getPlay().isReboundAnimation())
+				currentCompositeMotion = LivingMotion.NONE;
+		}
+		
+		if (CrossbowItem.isCharged(this.original.getMainHandItem()))
+			currentCompositeMotion = LivingMotion.AIM;
+		else if (this.getClientAnimator().isAiming() && currentCompositeMotion != LivingMotion.AIM)
+			this.playReboundAnimation();
 	}
 	
 	@Override
 	public void updateArmor(CapabilityItem fromCap, CapabilityItem toCap, EquipmentSlot slotType) {
-		if(this.original.getAttributes().hasAttribute(EpicFightAttributes.STUN_ARMOR.get())) {
-			if(fromCap != null) {
+		if (this.original.getAttributes().hasAttribute(EpicFightAttributes.STUN_ARMOR.get())) {
+			if (fromCap != null) {
 				this.original.getAttributes().removeAttributeModifiers(fromCap.getAttributeModifiers(slotType, this));
 			}
-			if(toCap != null) {
+			
+			if (toCap != null) {
 				this.original.getAttributes().addTransientAttributeModifiers(toCap.getAttributeModifiers(slotType, this));
 			}
 		}

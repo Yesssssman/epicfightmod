@@ -24,7 +24,7 @@ public class MirrorAnimation extends StaticAnimation {
 	public void begin(LivingEntityPatch<?> entitypatch) {
 		super.begin(entitypatch);
 		StaticAnimation animation = this.checkHandAndReturnAnimation(entitypatch.getOriginal().getUsedItemHand());
-		entitypatch.getClientAnimator().playCompositeAnimation(animation, 0.0F);
+		entitypatch.getClientAnimator().playAnimation(animation, 0.0F);
 	}
 	
 	@Override
@@ -49,6 +49,12 @@ public class MirrorAnimation extends StaticAnimation {
 	@OnlyIn(Dist.CLIENT)
 	public Layer.Priority getPriority() {
 		return this.original.getProperty(ClientAnimationProperties.PRIORITY).orElse(Layer.Priority.LOWEST);
+	}
+	
+	@Override
+	@OnlyIn(Dist.CLIENT)
+	public Layer.LayerType getLayerType() {
+		return this.original.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER);
 	}
 	
 	private StaticAnimation checkHandAndReturnAnimation(InteractionHand hand) {

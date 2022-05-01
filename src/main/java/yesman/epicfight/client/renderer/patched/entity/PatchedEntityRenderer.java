@@ -24,10 +24,16 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, R extends EntityRenderer<E>> {
 	protected static Method shouldShowName;
 	protected static Method renderNameTag;
+	private ResourceLocation overridingTexture;
 	
 	static {
 		shouldShowName = ObfuscationReflectionHelper.findMethod(EntityRenderer.class, "m_6512_", Entity.class);
 		renderNameTag = ObfuscationReflectionHelper.findMethod(EntityRenderer.class, "m_7649_", Entity.class, Component.class, PoseStack.class, MultiBufferSource.class, int.class);
+	}
+	
+	public PatchedEntityRenderer<E, T, R> setOverridingTexture(String texture) {
+		this.overridingTexture = new ResourceLocation(texture);
+		return this;
 	}
 	
 	public void render(E entityIn, T entitypatch, R renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
@@ -66,5 +72,12 @@ public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends Li
 	}
 	
 	protected void setJointTransforms(T entitypatch, Armature armature, float partialTicks) {}
-	protected abstract ResourceLocation getEntityTexture(T entitypatch);
+	
+	protected ResourceLocation getEntityTexture(T entitypatch, R renderer) {
+		if (this.overridingTexture != null) {
+			return this.overridingTexture;
+		}
+		
+		return renderer.getTextureLocation(entitypatch.getOriginal());
+	}
 }

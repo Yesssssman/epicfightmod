@@ -58,7 +58,7 @@ public class IndirectEpicFightDamageSource extends IndirectEntityDamageSource im
 	
 	@Override
 	public Vec3 getSourcePosition() {
-		return this.projectileInitialPosition;
+		return this.projectileInitialPosition != null ? this.projectileInitialPosition : super.getSourcePosition();
 	}
 	
 	@Override

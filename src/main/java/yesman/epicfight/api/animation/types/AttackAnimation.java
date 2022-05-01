@@ -46,9 +46,9 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.particle.HitParticleType;
+import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.entity.eventlistener.AttackEndEvent;
@@ -80,7 +80,7 @@ public class AttackAnimation extends ActionAnimation {
 				Vec3f keyLast = keyframes[endFrame].transform().translation();
 				Vec3 pos = entitypatch.getOriginal().getEyePosition();
 				Vec3 targetpos = attackTarget.position();
-				float horizontalDistance = Math.max((float)targetpos.subtract(pos).horizontalDistance() - (attackTarget.getBbWidth() + entitypatch.getOriginal().getBbWidth()) * 0.5F, 0.0F);
+				float horizontalDistance = Math.max((float)targetpos.subtract(pos).horizontalDistance() - (attackTarget.getBbWidth() + entitypatch.getOriginal().getBbWidth()) * 0.75F, 0.0F);
 				Vec3f worldPosition = new Vec3f(keyLast.x, 0.0F, -horizontalDistance);
 				float scale = Math.min(worldPosition.length() / keyLast.length(), 2.0F);
 				
@@ -111,7 +111,7 @@ public class AttackAnimation extends ActionAnimation {
 			EntityState prevState = this.getState(prevElapsedTime);
 			Phase phase = this.getPhaseByTime(elapsedTime);
 			
-			if (state == EntityState.FREE_CAMERA) {
+			if (state == EntityState.ROTATABLE_PRE_DELAY) {
 				if (entitypatch instanceof MobPatch) {
 					((Mob)entitypatch.getOriginal()).getNavigation().stop();
 					entitypatch.getOriginal().attackAnim = 2;
@@ -127,62 +127,7 @@ public class AttackAnimation extends ActionAnimation {
 					entitypatch.currentlyAttackedEntity.clear();
 				}
 				
-				Collider collider = this.getCollider(entitypatch, elapsedTime);
-				LivingEntity entity = entitypatch.getOriginal();
-				entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature().initializeTransform();				
-				float prevPoseTime = prevState.attacking() ? prevElapsedTime : phase.preDelay;
-				float poseTime = state.attacking() ? elapsedTime : phase.contact;
-				List<Entity> list = collider.updateAndFilterCollideEntity(entitypatch, this, prevPoseTime, poseTime, phase.getColliderJointName(), this.getPlaySpeed(entitypatch));
-				
-				if (list.size() > 0) {
-					HitEntitySet hitEntities = new HitEntitySet(entitypatch, list, phase.getProperty(AttackPhaseProperty.HIT_PRIORITY).orElse(HitEntitySet.Priority.DISTANCE));
-					boolean flag1 = true;
-					int maxStrikes = this.getMaxStrikes(entitypatch, phase);
-					
-					while (entitypatch.currentlyAttackedEntity.size() < maxStrikes && hitEntities.next()) {
-						Entity e = hitEntities.getEntity();
-						LivingEntity trueEntity = this.getTrueEntity(e);
-						
-						if (!entitypatch.currentlyAttackedEntity.contains(trueEntity) && !entitypatch.isTeammate(e)) {
-							if (e instanceof LivingEntity || e instanceof PartEntity) {
-								if (entity.hasLineOfSight(e)) {
-									ExtendedDamageSource source = this.getExtendedDamageSource(entitypatch, e, phase);
-									AttackResult attackResult = entitypatch.harmEntity(e, source, this.getDamageTo(entitypatch, trueEntity, phase, source));
-									boolean count = attackResult.resultType.count();
-									
-									if (attackResult.resultType.dealtDamage()) {
-										int temp = e.invulnerableTime;
-										trueEntity.invulnerableTime = 0;
-										boolean attackSuccess = e.hurt((DamageSource)source, attackResult.damage);
-										trueEntity.invulnerableTime = temp;
-										count = attackSuccess;
-										
-										if (attackSuccess) {
-											if (entitypatch instanceof ServerPlayerPatch) {
-												ServerPlayerPatch playerpatch = ((ServerPlayerPatch)entitypatch);
-												playerpatch.getEventListener().triggerEvents(EventType.DEALT_DAMAGE_EVENT_POST, new DealtDamageEvent<>(playerpatch, trueEntity, source, attackResult.damage));
-											}
-											
-											entitypatch.onHit(e, phase.hand, source, attackResult.damage);
-											
-											if (flag1 && entitypatch instanceof PlayerPatch) {
-												entity.getItemInHand(phase.hand).hurtEnemy(trueEntity, (Player)entity);
-												flag1 = false;
-											}
-											
-											e.level.playSound(null, e.getX(), e.getY(), e.getZ(), this.getHitSound(entitypatch, phase), e.getSoundSource(), 1.0F, 1.0F);
-											this.spawnHitParticle(((ServerLevel)e.level), entitypatch, e, phase);
-										}
-									}
-									
-									if (count) {
-										entitypatch.currentlyAttackedEntity.add(trueEntity);
-									}
-								}
-							}
-						}
-					}
-				}
+				this.doAttack(entitypatch, prevElapsedTime, elapsedTime, prevState, state, phase);
 			}
 		}
 	}
@@ -207,13 +152,71 @@ public class AttackAnimation extends ActionAnimation {
 		}
 	}
 	
+	public void doAttack(LivingEntityPatch<?> entitypatch, float prevElapsedTime, float elapsedTime, EntityState prevState, EntityState state, Phase phase) {
+		Collider collider = this.getCollider(entitypatch, elapsedTime);
+		LivingEntity entity = entitypatch.getOriginal();
+		entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature().initializeTransform();				
+		float prevPoseTime = prevState.attacking() ? prevElapsedTime : phase.preDelay;
+		float poseTime = state.attacking() ? elapsedTime : phase.contact;
+		List<Entity> list = collider.updateAndFilterCollideEntity(entitypatch, this, prevPoseTime, poseTime, phase.getColliderJointName(), this.getPlaySpeed(entitypatch));
+		
+		if (list.size() > 0) {
+			HitEntitySet hitEntities = new HitEntitySet(entitypatch, list, phase.getProperty(AttackPhaseProperty.HIT_PRIORITY).orElse(HitEntitySet.Priority.DISTANCE));
+			boolean flag1 = true;
+			int maxStrikes = this.getMaxStrikes(entitypatch, phase);
+			
+			while (entitypatch.currentlyAttackedEntity.size() < maxStrikes && hitEntities.next()) {
+				Entity e = hitEntities.getEntity();
+				LivingEntity trueEntity = this.getTrueEntity(e);
+				
+				if (!entitypatch.currentlyAttackedEntity.contains(trueEntity) && !entitypatch.isTeammate(e)) {
+					if (e instanceof LivingEntity || e instanceof PartEntity) {
+						if (entity.hasLineOfSight(e)) {
+							ExtendedDamageSource source = this.getExtendedDamageSource(entitypatch, e, phase);
+							AttackResult attackResult = entitypatch.tryHarm(e, source, this.getDamageTo(entitypatch, trueEntity, phase, source));
+							boolean count = attackResult.resultType.count();
+							
+							if (attackResult.resultType.dealtDamage()) {
+								int temp = e.invulnerableTime;
+								trueEntity.invulnerableTime = 0;
+								boolean attackSuccess = e.hurt((DamageSource)source, attackResult.damage);
+								trueEntity.invulnerableTime = temp;
+								count = attackSuccess || trueEntity.isDamageSourceBlocked((DamageSource)source);
+								entitypatch.onHurtSomeone(e, phase.hand, source, attackResult.damage, attackSuccess);
+								
+								if (attackSuccess) {
+									if (entitypatch instanceof ServerPlayerPatch) {
+										ServerPlayerPatch playerpatch = ((ServerPlayerPatch)entitypatch);
+										playerpatch.getEventListener().triggerEvents(EventType.DEALT_DAMAGE_EVENT_POST, new DealtDamageEvent<>(playerpatch, trueEntity, source, attackResult.damage));
+									}
+									
+									if (flag1 && entitypatch instanceof PlayerPatch) {
+										entity.getItemInHand(phase.hand).hurtEnemy(trueEntity, (Player)entity);
+										flag1 = false;
+									}
+									
+									e.level.playSound(null, e.getX(), e.getY(), e.getZ(), this.getHitSound(entitypatch, phase), e.getSoundSource(), 1.0F, 1.0F);
+									this.spawnHitParticle(((ServerLevel)e.level), entitypatch, e, phase);
+								}
+							}
+							
+							if (count) {
+								entitypatch.currentlyAttackedEntity.add(trueEntity);
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	@Override
 	public EntityState getState(float time) {
 		Phase phase = this.getPhaseByTime(time);
 		EntityState state;
 		
 		if (phase.antic >= time)
-			state = EntityState.FREE_CAMERA;
+			state = EntityState.ROTATABLE_PRE_DELAY;
 		else if (phase.antic < time && phase.preDelay > time)
 			state = EntityState.PRE_DELAY;
 		else if (phase.preDelay <= time && phase.contact >= time)
@@ -228,32 +231,6 @@ public class AttackAnimation extends ActionAnimation {
 		}
 		
 		return state;
-	}
-	
-	@Override
-	protected Vec3f getCoordVector(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
-		Vec3f vec3 = super.getCoordVector(entitypatch, animation);
-		/**
-		if (!this.getProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE).orElse(false)) {
-			EntityState state = this.getState(entitypatch.getAnimator().getPlayerFor(this).getElapsedTime());
-			
-			if (state.getLevel() < 3) {
-				LivingEntity orgEntity = entitypatch.getOriginal();
-				LivingEntity target = entitypatch.getAttackTarget();
-				float multiplier = (orgEntity instanceof Player) ? 2.0F : 1.0F;
-				
-				if (target != null) {
-					Vec3f movement = new Vec3f(vec3.x, 0.0F, vec3.z);
-					float distance = (float) Math.max(Math.min(orgEntity.distanceToSqr(target) - (orgEntity.getBbWidth() + target.getBbWidth()), multiplier), 0.0F);
-					
-					movement.scale(Math.min(1.4F, distance));
-					vec3.x = movement.x;
-					vec3.z = movement.z;
-				}
-			}
-		}**/
-		
-		return vec3;
 	}
 	
 	public Collider getCollider(LivingEntityPatch<?> entitypatch, float elapsedTime) {

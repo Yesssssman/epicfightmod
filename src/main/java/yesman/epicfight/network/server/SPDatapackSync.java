@@ -5,7 +5,8 @@ import java.util.function.Supplier;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
-import yesman.epicfight.world.capabilities.item.ItemCapabilityListener;
+import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
+import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 
 public class SPDatapackSync {
 	private int count;
@@ -55,11 +56,18 @@ public class SPDatapackSync {
 	}
 	
 	public static void handle(SPDatapackSync msg, Supplier<NetworkEvent.Context> ctx) {
-		ItemCapabilityListener.processServerData(msg);
+		ctx.get().enqueueWork(() -> {
+			if (msg.getType() == Type.MOB) {
+				MobPatchReloadListener.processServerPacket(msg);
+			} else {
+				ItemCapabilityReloadListener.processServerPacket(msg);
+			}
+		});
+		
 		ctx.get().setPacketHandled(true);
 	}
 	
 	public static enum Type {
-		ARMOR, WEAPON
+		ARMOR, WEAPON, MOB
 	}
 }

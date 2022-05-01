@@ -18,12 +18,13 @@ public class NBTSeparativeCapability extends CapabilityItem {
 	}
 	
 	@Override
-	public CapabilityItem getFinal(ItemStack item) {
+	public CapabilityItem getResult(ItemStack item) {
 		for (Pair<Predicate<ItemStack>, CapabilityItem> pair : this.variables) {
 			if (pair.getFirst().test(item)) {
-				return pair.getSecond().getFinal(item);
+				return pair.getSecond().getResult(item);
 			}
 		}
+		
 		return this.defaultCapability;
 	}
 }

@@ -21,13 +21,12 @@ import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
-import yesman.epicfight.world.entity.ai.goal.AttackPatternGoal;
-import yesman.epicfight.world.entity.ai.goal.AttackPatternPercentGoal;
+import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
 import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
 
 public class SpiderPatch<T extends Mob> extends MobPatch<T> {
 	public SpiderPatch() {
-		super(Faction.NATURAL);
+		super(Faction.NEUTURAL);
 	}
 	
 	@Override
@@ -48,31 +47,26 @@ public class SpiderPatch<T extends Mob> extends MobPatch<T> {
 			}
 		}
         
-        if(toRemove != null) {
+        if (toRemove != null) {
         	this.original.goalSelector.removeGoal(toRemove);
         }
         
         this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, 1.0D, false));
-        this.original.goalSelector.addGoal(1, new AttackPatternPercentGoal(this, this.original, 0.0D, 2.0D, 0.5F, true, MobCombatBehaviors.SPIDER));
-        this.original.goalSelector.addGoal(0, new AttackPatternGoal(this, this.original, 0.0D, 2.5D, true, MobCombatBehaviors.SPIDER_JUMP));
-	}
-	
-	@Override
-	public void postInit() {
-		super.postInit();
+        this.original.goalSelector.addGoal(0, new CombatBehaviorGoal<>(this, MobCombatBehaviors.SPIDER.build(this)));
 	}
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingMotion(LivingMotion.DEATH, Animations.SPIDER_DEATH);
-		clientAnimator.addLivingMotion(LivingMotion.IDLE, Animations.SPIDER_IDLE);
-		clientAnimator.addLivingMotion(LivingMotion.WALK, Animations.SPIDER_CRAWL);
+		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.SPIDER_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.SPIDER_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.SPIDER_CRAWL);
+		clientAnimator.setCurrentMotionsAsDefault();
 	}
 
 	@Override
 	public void updateMotion(boolean considerInaction) {
-		super.humanoidEntityUpdateMotion(considerInaction);
+		super.commonMobUpdateMotion(considerInaction);
 	}
 
 	@Override

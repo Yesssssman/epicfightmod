@@ -52,7 +52,7 @@ import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 import yesman.epicfight.world.entity.DroppedNetherStar;
 import yesman.epicfight.world.entity.WitherGhostClone;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-import yesman.epicfight.world.entity.ai.goal.AttackBehaviorGoal;
+import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
 import yesman.epicfight.world.entity.eventlistener.HurtEventPre;
 
 public class WitherPatch extends MobPatch<WitherBoss> {
@@ -95,7 +95,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 		super.initAI();
 		this.original.goalSelector.addGoal(1, new WitherChasingGoal());
 		this.original.goalSelector.addGoal(0, new WitherGhostAttackGoal());
-		this.original.goalSelector.addGoal(0, new AttackBehaviorGoal<>(this, MobCombatBehaviors.WITHER_BEHAVIORS.build(this)));
+		this.original.goalSelector.addGoal(0, new CombatBehaviorGoal<>(this, MobCombatBehaviors.WITHER.build(this)));
 	}
 	
 	@Override
@@ -105,17 +105,18 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	}
 	
 	@Override
-	public void initAnimator(ClientAnimator animatorClient) {
-		animatorClient.addLivingMotion(LivingMotion.IDLE, Animations.WITHER_IDLE);
-		animatorClient.addLivingMotion(LivingMotion.DEATH, Animations.WITHER_DEATH);
+	public void initAnimator(ClientAnimator clientAnimator) {
+		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.WITHER_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.WITHER_DEATH);
+		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		if (this.getEntityState().inaction() && considerInaction) {
-			currentMotion = LivingMotion.INACTION;
+			currentLivingMotion = LivingMotion.INACTION;
 		} else {
-			currentMotion = LivingMotion.IDLE;
+			currentLivingMotion = LivingMotion.IDLE;
 		}
 	}
 	
@@ -206,7 +207,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 						ExtendedDamageSource extendedSource = this.getDamageSource(StunType.KNOCKDOWN, Animations.WITHER_CHARGE, InteractionHand.MAIN_HAND);
 						extendedSource.setImpact(4.0F);
 						extendedSource.setInitialPosition(this.lastAttackPosition);
-						AttackResult attackResult = this.harmEntity(this.blockingEntity.getOriginal(), extendedSource, blockingCount);
+						AttackResult attackResult = this.tryHarm(this.blockingEntity.getOriginal(), extendedSource, blockingCount);
 						
 						if (attackResult.resultType == AttackResult.ResultType.SUCCESS) {
 							this.blockingEntity.getOriginal().hurt((DamageSource)extendedSource, 4.0F);

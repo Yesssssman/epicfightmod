@@ -34,20 +34,11 @@ public class SPPlayAnimationAndSyncTransform extends SPPlayAnimationAndSetTarget
 		this.yRot = entitypatch.getOriginal().yRotO;
 	}
 	
-	public SPPlayAnimationAndSyncTransform(StaticAnimation animation, float modifyTime, LivingEntityPatch<?> entitypatch, SPPlayAnimation.Layer playOn) {
-		super(animation, modifyTime, entitypatch, playOn);
-		
-		Vec3 position = entitypatch.getOriginal().position();
-		this.posX = position.x;
-		this.posY = position.y;
-		this.posZ = position.z;
-		this.yRot = entitypatch.getOriginal().yRotO;
-	}
-	
 	@Override
 	public void onArrive() {
 		super.onArrive();
-		Entity entity = Minecraft.getInstance().player.level.getEntity(this.entityId);
+		Minecraft mc = Minecraft.getInstance();
+		Entity entity = mc.player.level.getEntity(this.entityId);
 		entity.setPos(this.posX, this.posY, this.posZ);
 		entity.xo = entity.getX();
 		entity.yo = entity.getY();

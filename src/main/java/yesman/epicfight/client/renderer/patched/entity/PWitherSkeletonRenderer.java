@@ -8,11 +8,7 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.world.capabilities.entitypatch.mob.WitherSkeletonPatch;
 
-public class PWitherSkeletonRenderer extends SimpleTextureHumanoidRenderer<WitherSkeleton, WitherSkeletonPatch, SkeletonModel<WitherSkeleton>> {
-	public PWitherSkeletonRenderer(String texturePath) {
-		super(texturePath);
-	}
-	
+public class PWitherSkeletonRenderer extends PHumanoidRenderer<WitherSkeleton, WitherSkeletonPatch, SkeletonModel<WitherSkeleton>> {
 	@Override
 	protected void setJointTransforms(WitherSkeletonPatch entitypatch, Armature armature, float partialTicks) {
 		Pose pose = entitypatch.getClientAnimator().getPose(partialTicks);

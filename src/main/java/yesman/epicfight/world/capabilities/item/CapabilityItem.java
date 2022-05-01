@@ -45,7 +45,7 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
 public class CapabilityItem {
-	public static CapabilityItem EMPTY = new CapabilityItem(WeaponCategory.NOT_WEAON);
+	public static CapabilityItem EMPTY = new CapabilityItem(WeaponCategory.FIST);
 	protected static List<StaticAnimation> commonAutoAttackMotion;
 	protected final WeaponCategory weaponCategory;
 	
@@ -235,7 +235,7 @@ public class CapabilityItem {
 		return map;
     }
 	
-	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(PlayerPatch<?> playerpatch, InteractionHand hand) {
+	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(LivingEntityPatch<?> playerpatch, InteractionHand hand) {
 		return Maps.<LivingMotion, StaticAnimation>newHashMap();
 	}
 	
@@ -252,22 +252,22 @@ public class CapabilityItem {
 	}
 	
 	public final boolean canUsedInOffhand() {
-		return this.getHoldOption() == HoldOption.GENERAL ? true : false;
+		return this.getHoldOption() == HoldingOption.GENERAL ? true : false;
 	}
 
 	public final boolean isTwoHanded() {
-		return this.getHoldOption() == HoldOption.TWO_HANDED;
+		return this.getHoldOption() == HoldingOption.TWO_HANDED;
 	}
 	
 	public final boolean isMainhandOnly() {
-		return this.getHoldOption() == HoldOption.MAINHAND_ONLY;
+		return this.getHoldOption() == HoldingOption.MAINHAND_ONLY;
 	}
 	
 	public boolean isEmpty() {
 		return this == CapabilityItem.EMPTY;
 	}
 	
-	public CapabilityItem getFinal(ItemStack item) {
+	public CapabilityItem getResult(ItemStack item) {
 		return this;
 	}
 	
@@ -275,8 +275,8 @@ public class CapabilityItem {
 		return !this.isTwoHanded();
 	}
 	
-	public HoldOption getHoldOption() {
-		return HoldOption.GENERAL;
+	public HoldingOption getHoldOption() {
+		return HoldingOption.GENERAL;
 	}
 	
 	public void setConfigFileAttribute(double armorNegation1, double impact1, int maxStrikes1, double armorNegation2, double impact2, int maxStrikes2) {
@@ -284,23 +284,23 @@ public class CapabilityItem {
 		this.addStyleAttributeSimple(Style.TWO_HAND, armorNegation2, impact2, maxStrikes2);
 	}
 	
-	public boolean isValidOffhandItem(ItemStack item) {
-		return !this.isTwoHanded() && EpicFightCapabilities.getItemStackCapability(item).canUsedInOffhandAlone();
+	public boolean checkOffhandUsable(ItemStack offhandItem) {
+		return !this.isTwoHanded() && EpicFightCapabilities.getItemStackCapability(offhandItem).canUsedInOffhandAlone();
 	}
 	
 	public boolean canUsedInOffhandAlone() {
 		return true;
 	}
 	
-	public UseAnim getUseAnimation(PlayerPatch<?> playerpatch) {
+	public UseAnim getUseAnimation(LivingEntityPatch<?> playerpatch) {
 		return UseAnim.NONE;
 	}
 	
 	public enum WeaponCategory {
-		NOT_WEAON, AXE, FIST, GREATSWORD, HOE, PICKAXE, SHOVEL, SWORD, KATANA, SPEAR, TACHI, LONGSWORD, DAGGER, SHIELD, RANGED
+		NOT_WEAON, AXE, FIST, GREATSWORD, HOE, PICKAXE, SHOVEL, SWORD, KATANA, SPEAR, TACHI, TRIDENT, LONGSWORD, DAGGER, SHIELD, RANGED
 	}
 	
-	public enum HoldOption {
+	public enum HoldingOption {
 		TWO_HANDED, MAINHAND_ONLY, GENERAL
 	}
 	

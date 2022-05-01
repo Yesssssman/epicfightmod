@@ -46,7 +46,7 @@ public class WitherGhostCloneRenderer extends PatchedEntityRenderer<WitherGhostC
 	}
 	
 	@Override
-	protected ResourceLocation getEntityTexture(WitherGhostPatch entitypatch) {
+	protected ResourceLocation getEntityTexture(WitherGhostPatch entitypatch, NoopLivingEntityRenderer<WitherGhostClone> renderer) {
 		return PWitherRenderer.WITHER_INVULNERABLE_LOCATION;
 	}
 }

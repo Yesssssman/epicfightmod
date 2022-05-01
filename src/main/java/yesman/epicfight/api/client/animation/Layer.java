@@ -119,20 +119,20 @@ public class Layer {
 	
 	public static class BaseLayer extends Layer {
 		protected Map<Layer.Priority, Layer> compositeLayers = Maps.newHashMap();
-		protected Layer.Priority priority;
+		protected Layer.Priority baserLayerPriority;
 		
 		public BaseLayer(Priority priority) {
 			super(priority);
 			this.compositeLayers.computeIfAbsent(Priority.HIGHEST, Layer::new);
 			this.compositeLayers.computeIfAbsent(Priority.MIDDLE, Layer::new);
 			this.compositeLayers.put(Priority.LOWEST, this);
-			this.priority = Priority.LOWEST;
+			this.baserLayerPriority = Priority.LOWEST;
 		}
 		
 		@Override
 		public void playAnimation(StaticAnimation nextAnimation, LivingEntityPatch<?> entitypatch, float convertTimeModifier) {
 			Priority priority = nextAnimation.getPriority();
-			this.priority = priority;
+			this.baserLayerPriority = priority;
 			this.offCompositeLayerLowerThan(entitypatch, priority);
 			super.playAnimation(nextAnimation, entitypatch, convertTimeModifier);
 		}
@@ -169,6 +169,10 @@ public class Layer {
 		protected boolean isDisabled() {
 			return false;
 		}
+	}
+	
+	public static enum LayerType {
+		BASE_LAYER, COMPOSITE_LAYER;
 	}
 	
 	public static enum Priority {

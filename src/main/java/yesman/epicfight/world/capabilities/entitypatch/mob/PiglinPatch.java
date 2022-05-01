@@ -1,38 +1,37 @@
 package yesman.epicfight.world.capabilities.entitypatch.mob;
 
+import io.netty.buffer.ByteBuf;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.behavior.MeleeAttack;
+import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
+import net.minecraft.world.entity.ai.behavior.RunIf;
 import net.minecraft.world.entity.ai.behavior.RunOne;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.schedule.Activity;
+import net.minecraft.world.item.CrossbowItem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.gameasset.Animations;
-import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
-import yesman.epicfight.network.client.CPReqSpawnInfo;
+import yesman.epicfight.network.server.SPSpawnData;
+import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.brain.BrainRemodeler;
-import yesman.epicfight.world.entity.ai.brain.task.AnimatedFightBehavior;
+import yesman.epicfight.world.entity.ai.brain.task.AnimatedCombatBehavior;
+import yesman.epicfight.world.entity.ai.brain.task.BackUpIfTooCloseStopInaction;
+import yesman.epicfight.world.entity.ai.brain.task.MoveToTargetSinkStopInaction;
+import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 
 public class PiglinPatch extends HumanoidMobPatch<Piglin> {
 	public PiglinPatch() {
-		super(Faction.PIGLIN_ARMY);
-	}
-	
-	@Override
-	public void onJoinWorld(Piglin entityIn, EntityJoinWorldEvent event) {
-		super.onJoinWorld(entityIn, event);
-		
-		BrainRemodeler.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 13, MeleeAttack.class, new AnimatedFightBehavior<>(this, MobCombatBehaviors.BIPED_ARMED_BEHAVIORS.build(this)));
-		BrainRemodeler.removeBehavior(this.original.getBrain(), Activity.CELEBRATE, 15, RunOne.class);
+		super(Faction.PIGLINS);
 	}
 	
 	@Override
@@ -44,59 +43,66 @@ public class PiglinPatch extends HumanoidMobPatch<Piglin> {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingMotion(LivingMotion.IDLE, Animations.PIGLIN_IDLE);
-		clientAnimator.addLivingMotion(LivingMotion.FALL, Animations.BIPED_FALL);
-		clientAnimator.addLivingMotion(LivingMotion.MOUNT, Animations.BIPED_MOUNT);
-		clientAnimator.addLivingMotion(LivingMotion.CELEBRATE, EpicFightMod.getInstance().animationManager.findAnimation(EpicFightMod.MODID.hashCode(), Animations.PIGLIN_CELEBRATE1.getId() + this.original.getRandom().nextInt(3)));
-		clientAnimator.addLivingMotion(LivingMotion.ADMIRE, Animations.PIGLIN_ADMIRE);
-		clientAnimator.addLivingMotion(LivingMotion.WALK, Animations.PIGLIN_WALK);
-		clientAnimator.addLivingMotion(LivingMotion.DEATH, Animations.PIGLIN_DEATH);
-		clientAnimator.addCompositeAnimation(LivingMotion.RELOAD, Animations.BIPED_CROSSBOW_RELOAD);
-		clientAnimator.addCompositeAnimation(LivingMotion.AIM, Animations.BIPED_CROSSBOW_AIM);
-		clientAnimator.addCompositeAnimation(LivingMotion.SHOT, Animations.BIPED_CROSSBOW_SHOT);
+		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.PIGLIN_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotion.FALL, Animations.BIPED_FALL);
+		clientAnimator.addLivingAnimation(LivingMotion.MOUNT, Animations.BIPED_MOUNT);
+		clientAnimator.addLivingAnimation(LivingMotion.CELEBRATE, EpicFightMod.getInstance().animationManager.findAnimationById(EpicFightMod.MODID.hashCode(), Animations.PIGLIN_CELEBRATE1.getId() + this.original.getRandom().nextInt(3)));
+		clientAnimator.addLivingAnimation(LivingMotion.ADMIRE, Animations.PIGLIN_ADMIRE);
+		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.PIGLIN_WALK);
+		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.PIGLIN_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotion.RELOAD, Animations.BIPED_CROSSBOW_RELOAD);
+		clientAnimator.addLivingAnimation(LivingMotion.AIM, Animations.BIPED_CROSSBOW_AIM);
+		clientAnimator.addLivingAnimation(LivingMotion.SHOT, Animations.BIPED_CROSSBOW_SHOT);
+		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
 	@Override
-	public void postInit() {
-		super.postInit();
-
-		if (this.isLogicalClient()) {
-			ClientAnimator animator = this.getClientAnimator();
-			if (this.original.isBaby()) {
-				animator.addLivingMotion(LivingMotion.WALK, Animations.BIPED_RUN);
-			}
-			EpicFightNetworkManager.sendToServer(new CPReqSpawnInfo(this.original.getId()));
+	public void onStartTracking(ServerPlayer trackingPlayer) {
+		if (this.original.isBaby()) {
+			SPSpawnData packet = new SPSpawnData(this.original.getId());
+			EpicFightNetworkManager.sendToPlayer(packet, trackingPlayer);
 		}
+		
+		super.onStartTracking(trackingPlayer);
+	}
+	
+	@Override
+	public void processSpawnData(ByteBuf buf) {
+		ClientAnimator animator = this.getClientAnimator();
+		animator.addLivingAnimation(LivingMotion.WALK, Animations.BIPED_RUN);
+		animator.setCurrentMotionsAsDefault();
 	}
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		if (this.getOriginal().getOffhandItem().is(ItemTags.PIGLIN_LOVED))
-			this.currentMotion = LivingMotion.ADMIRE;
+			this.currentLivingMotion = LivingMotion.ADMIRE;
 		else if (this.original.isDancing())
-			this.currentMotion = LivingMotion.CELEBRATE;
+			this.currentLivingMotion = LivingMotion.CELEBRATE;
 		else
-			super.humanoidRangedEntityUpdateMotion(considerInaction);
+			super.commonAggressiveRangedMobUpdateMotion(considerInaction);
 	}
 
 	@Override
 	public <M extends Model> M getEntityModel(Models<M> modelDB) {
 		return modelDB.piglin;
 	}
-
-	public void setAIAsUnarmed() {
-
+	
+	@Override
+	public void setAIAsInfantry(boolean holdingRanedWeapon) {
+		CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
+		
+		if (builder != null) {
+			BrainRemodeler.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 13, MeleeAttack.class, new AnimatedCombatBehavior<>(this, builder.build(this)));
+		}
+		
+		BrainRemodeler.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 11, RunIf.class, new RunIf<>((entity) -> entity.isHolding(is -> is.getItem() instanceof CrossbowItem), new BackUpIfTooCloseStopInaction<>(5, 0.75F)));
+		BrainRemodeler.replaceBehavior(this.original.getBrain(), Activity.CORE, 1, MoveToTargetSink.class, new MoveToTargetSinkStopInaction());
+		BrainRemodeler.removeBehavior(this.original.getBrain(), Activity.CELEBRATE, 15, RunOne.class);
 	}
-
-	public void setAIAsArmed() {
-
-	}
-
+	
+	@Override
 	public void setAIAsMounted(Entity ridingEntity) {
-
-	}
-
-	public void setAIAsRanged() {
-
+		
 	}
 }

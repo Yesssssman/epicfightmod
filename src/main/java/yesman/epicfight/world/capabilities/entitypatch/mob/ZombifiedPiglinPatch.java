@@ -1,8 +1,6 @@
 package yesman.epicfight.world.capabilities.entitypatch.mob;
 
-import io.netty.buffer.ByteBuf;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -11,47 +9,36 @@ import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.game.AttackResult;
 import yesman.epicfight.gameasset.Animations;
-import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.gameasset.Models;
-import yesman.epicfight.network.EpicFightNetworkManager;
-import yesman.epicfight.network.server.SPChangeLivingMotion;
-import yesman.epicfight.network.server.SPMobInitialize;
-import yesman.epicfight.network.server.SPPlayAnimation;
-import yesman.epicfight.world.entity.ai.goal.AttackBehaviorGoal;
+import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
 
 public class ZombifiedPiglinPatch extends HumanoidMobPatch<ZombifiedPiglin> {
 	public ZombifiedPiglinPatch() {
-		super(Faction.NATURAL);
+		super(Faction.NEUTURAL);
 	}
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingMotion(LivingMotion.IDLE, Animations.PIGLIN_ZOMBIFIED_IDLE);
-		clientAnimator.addLivingMotion(LivingMotion.WALK, Animations.PIGLIN_ZOMBIFIED_WALK);
-		clientAnimator.addLivingMotion(LivingMotion.FALL, Animations.BIPED_FALL);
-		clientAnimator.addLivingMotion(LivingMotion.MOUNT, Animations.BIPED_MOUNT);
-		clientAnimator.addLivingMotion(LivingMotion.DEATH, Animations.PIGLIN_DEATH);
-	}
-	
-	@Override
-	public SPMobInitialize sendInitialInformationToClient() {
-		SPMobInitialize packet = new SPMobInitialize(this.original.getId());
-        ByteBuf buf = packet.getBuffer();
-        buf.writeBoolean(this.original.canPickUpLoot());
-		return packet;
+		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.PIGLIN_ZOMBIFIED_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.PIGLIN_ZOMBIFIED_WALK);
+		clientAnimator.addLivingAnimation(LivingMotion.CHASE, Animations.PIGLIN_ZOMBIFIED_CHASE);
+		clientAnimator.addLivingAnimation(LivingMotion.FALL, Animations.BIPED_FALL);
+		clientAnimator.addLivingAnimation(LivingMotion.MOUNT, Animations.BIPED_MOUNT);
+		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.PIGLIN_DEATH);
+		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
-		super.humanoidEntityUpdateMotion(considerInaction);
+		super.commonAggressiveMobUpdateMotion(considerInaction);
 	}
 	
 	@Override
-	public void setAIAsArmed() {
-		this.original.goalSelector.addGoal(1, new EntityAIPigmanChase(this, this.original));
-		this.original.goalSelector.addGoal(0, new AttackBehaviorGoal<>(this, MobCombatBehaviors.BIPED_ARMED_BEHAVIORS.build(this)));
+	public void setAIAsInfantry(boolean holdingRanedWeapon) {
+		super.setAIAsInfantry(holdingRanedWeapon);
+		this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, 1.2D, true));
 	}
 	
 	@Override
@@ -66,48 +53,5 @@ public class ZombifiedPiglinPatch extends HumanoidMobPatch<ZombifiedPiglin> {
 	@Override
 	public <M extends Model> M getEntityModel(Models<M> modelDB) {
 		return modelDB.piglin;
-	}
-	
-	static class EntityAIPigmanChase extends ChasingGoal {
-		boolean angry;
-		
-		public EntityAIPigmanChase(HumanoidMobPatch<?> entitypatch, Mob creature) {
-			super(entitypatch, creature, 1.35D, false, Animations.PIGLIN_ZOMBIFIED_CHASE, Animations.PIGLIN_ZOMBIFIED_WALK);
-		}
-		
-		@Override
-		public void tick() {
-			super.tick();
-
-			if (!((ZombifiedPiglin)this.attacker).isAggressive()) {
-				if (this.angry) {
-					SPChangeLivingMotion msg = new SPChangeLivingMotion(this.attacker.getId(), 1, SPPlayAnimation.Layer.BASE_LAYER);
-					msg.setMotions(LivingMotion.WALK);
-					msg.setAnimations(walkingAnimation);
-					EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(msg, this.attacker);
-					this.angry = false;
-				}
-			} else {
-				if (!this.angry) {
-					SPChangeLivingMotion msg = new SPChangeLivingMotion(this.attacker.getId(), 1, SPPlayAnimation.Layer.BASE_LAYER);
-					msg.setMotions(LivingMotion.WALK);
-					msg.setAnimations(this.chasingAnimation);
-					EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(msg, this.attacker);
-					this.angry = true;
-				}
-			}
-		}
-		
-		@Override
-		public void start() {
-	        super.start();
-	        this.angry = true;
-	    }
-		
-		@Override
-		public void stop() {
-	        super.stop();
-	        this.angry = false;
-	    }
 	}
 }

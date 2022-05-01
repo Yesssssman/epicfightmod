@@ -1,13 +1,17 @@
 package yesman.epicfight.main;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ConfigGuiHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -29,6 +33,8 @@ import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.ServerAnimator;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.model.ClientModels;
+import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
+import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.events.ClientEvents;
 import yesman.epicfight.client.events.ClientModBusEvent;
@@ -36,6 +42,7 @@ import yesman.epicfight.client.events.engine.ControllEngine;
 import yesman.epicfight.client.events.engine.RenderEngine;
 import yesman.epicfight.client.gui.screen.IngameConfigurationScreen;
 import yesman.epicfight.client.input.EpicFightKeyMappings;
+import yesman.epicfight.client.renderer.patched.layer.WearableItemLayer;
 import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.config.ConfigurationIngame;
 import yesman.epicfight.data.loot.EpicFightLootModifiers;
@@ -49,10 +56,9 @@ import yesman.epicfight.gameasset.Skills;
 import yesman.epicfight.network.EpicFightDataSerializers;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.particle.EpicFightParticles;
-import yesman.epicfight.world.EpicFightGamerules;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
-import yesman.epicfight.world.capabilities.item.ItemCapabilityListener;
+import yesman.epicfight.world.capabilities.item.WeaponCapabilityPresets;
 import yesman.epicfight.world.capabilities.provider.ProviderEntity;
 import yesman.epicfight.world.capabilities.provider.ProviderItem;
 import yesman.epicfight.world.capabilities.provider.ProviderProjectile;
@@ -60,6 +66,7 @@ import yesman.epicfight.world.effect.EpicFightMobEffects;
 import yesman.epicfight.world.effect.EpicFightPotions;
 import yesman.epicfight.world.entity.EpicFightEntities;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+import yesman.epicfight.world.gamerule.EpicFightGamerules;
 import yesman.epicfight.world.item.EpicFightItems;
 
 @Mod("epicfight")
@@ -81,7 +88,6 @@ public class EpicFightMod {
     public EpicFightMod() {
     	this.animationManager = new AnimationManager();
     	instance = this;
-    	
     	ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ConfigManager.CLIENT_CONFIG);
     	
     	IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -118,7 +124,7 @@ public class EpicFightMod {
     
 	private void doClientStuff(final FMLClientSetupEvent event) {
     	new ClientEngine();
-		ProviderEntity.makeMapClient();
+		ProviderEntity.registerEntityPatchesClient();
 		
 		ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
 		ClientModels.LOGICAL_CLIENT.loadMeshData(resourceManager);
@@ -127,7 +133,7 @@ public class EpicFightMod {
 		this.animationManager.loadAnimationsInit(resourceManager);
 		Animations.buildClient();
 		
-		ClientEngine.instance.renderEngine.buildRenderer();
+		ClientEngine.instance.renderEngine.registerRenderer();
 		EpicFightKeyMappings.registerKeys();
 		MinecraftForge.EVENT_BUS.register(ControllEngine.Events.class);
         MinecraftForge.EVENT_BUS.register(RenderEngine.Events.class);
@@ -135,6 +141,16 @@ public class EpicFightMod {
         MinecraftForge.EVENT_BUS.register(ClientEvents.class);
         ((ReloadableResourceManager)resourceManager).registerReloadListener(ClientModels.LOGICAL_CLIENT);
         ((ReloadableResourceManager)resourceManager).registerReloadListener(this.animationManager);
+        ((ReloadableResourceManager)resourceManager).registerReloadListener(new PreparableReloadListener() {
+			@Override
+			public CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
+				return CompletableFuture.runAsync(() -> {
+					ClientEngine.instance.renderEngine.registerRenderer();
+					WearableItemLayer.clear();
+				}, gameExecutor).thenCompose(stage::wait);
+			}
+        });
+        
         CLIENT_INGAME_CONFIG = new ConfigurationIngame();
         this.animatorProvider = ClientAnimator::getAnimator;
         this.model = ClientModels.LOGICAL_CLIENT;
@@ -151,14 +167,16 @@ public class EpicFightMod {
 		event.enqueueWork(EpicFightPotions::addRecipes);
 		event.enqueueWork(EpicFightNetworkManager::registerPackets);
 		event.enqueueWork(ProviderItem::registerWeaponTypesByClass);
-		event.enqueueWork(ProviderEntity::registerPatches);
+		event.enqueueWork(ProviderEntity::registerEntityPatches);
 		event.enqueueWork(ProviderProjectile::registerPatches);
 		event.enqueueWork(EpicFightGamerules::registerRules);
 		event.enqueueWork(EpicFightEntities::registerSpawnPlacements);
+		event.enqueueWork(WeaponCapabilityPresets::register);
     }
 	
 	private void reloadListnerEvent(final AddReloadListenerEvent event) {
-		event.addListener(new ItemCapabilityListener());
+		event.addListener(new ItemCapabilityReloadListener());
+		event.addListener(new MobPatchReloadListener());
 	}
 	
 	public static Animator getAnimator(LivingEntityPatch<?> entitypatch) {
@@ -166,7 +184,7 @@ public class EpicFightMod {
 	}
 	
 	public static Models<?> getModelContainer(boolean isLogicalClient) {
-		return EpicFightMod.getInstance().model.getModelContainer(isLogicalClient);
+		return EpicFightMod.getInstance().model.getModels(isLogicalClient);
 	}
 	
 	public static boolean isPhysicalClient() {

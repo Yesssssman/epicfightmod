@@ -2,7 +2,6 @@ package yesman.epicfight.client.renderer.patched.entity;
 
 import net.minecraft.client.model.CreeperModel;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraftforge.api.distmarker.Dist;
@@ -12,27 +11,6 @@ import yesman.epicfight.world.capabilities.entitypatch.mob.CreeperPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class PCreeperRenderer extends PatchedLivingEntityRenderer<Creeper, CreeperPatch, CreeperModel<Creeper>> {
-	public static final ResourceLocation CREEPER_TEXTURE = new ResourceLocation("textures/entity/creeper/creeper.png");
-	private final ResourceLocation customTexture;
-	
-	public PCreeperRenderer() {
-		this(null);
-	}
-	
-	public PCreeperRenderer(ResourceLocation customTextureLocation) {
-		super();
-		this.customTexture = customTextureLocation;
-	}
-	
-	@Override
-	protected ResourceLocation getEntityTexture(CreeperPatch entitypatch) {
-		if (this.customTexture != null) {
-			return customTexture;
-		} else {
-			return CREEPER_TEXTURE;
-		}
-	}
-	
 	@Override
 	protected int getOverlayCoord(Creeper entity, CreeperPatch entitypatch, float partialTicks) {
 		float f = entity.getSwelling(partialTicks);

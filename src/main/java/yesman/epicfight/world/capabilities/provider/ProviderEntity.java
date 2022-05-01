@@ -1,9 +1,10 @@
 package yesman.epicfight.world.capabilities.provider;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import com.google.common.collect.Maps;
 
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
@@ -19,6 +20,8 @@ import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.common.util.NonNullSupplier;
+import net.minecraftforge.fml.ModLoader;
+import yesman.epicfight.api.forgeevent.EntityPatchRegistryEvent;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.AbstractClientPlayerPatch;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
@@ -52,47 +55,53 @@ import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.entity.EpicFightEntities;
 
 public class ProviderEntity implements ICapabilityProvider, NonNullSupplier<EntityPatch<?>> {
-	private static final Map<EntityType<?>, Function<Entity, Supplier<EntityPatch<?>>>> CAPABILITY_MAP = new HashMap<EntityType<?>, Function<Entity, Supplier<EntityPatch<?>>>> ();
+	private static final Map<EntityType<?>, Function<Entity, Supplier<EntityPatch<?>>>> CAPABILITIES = Maps.newHashMap();
+	private static final Map<EntityType<?>, Function<Entity, Supplier<EntityPatch<?>>>> CUSTOM_CAPABILITIES = Maps.newHashMap();
 	
-	public static void registerPatches() {
-		CAPABILITY_MAP.put(EntityType.PLAYER, (entityIn) -> ServerPlayerPatch::new);
-		CAPABILITY_MAP.put(EntityType.ZOMBIE, (entityIn) -> ZombiePatch<Zombie>::new);
-		CAPABILITY_MAP.put(EntityType.CREEPER, (entityIn) -> CreeperPatch::new);
-		CAPABILITY_MAP.put(EntityType.ENDERMAN, (entityIn) -> EndermanPatch::new);
-		CAPABILITY_MAP.put(EntityType.SKELETON, (entityIn) -> SkeletonPatch<Skeleton>::new);
-		CAPABILITY_MAP.put(EntityType.WITHER_SKELETON, (entityIn) -> WitherSkeletonPatch::new);
-		CAPABILITY_MAP.put(EntityType.STRAY, (entityIn) -> StrayPatch::new);
-		CAPABILITY_MAP.put(EntityType.ZOMBIFIED_PIGLIN, (entityIn) -> ZombifiedPiglinPatch::new);
-		CAPABILITY_MAP.put(EntityType.ZOMBIE_VILLAGER, (entityIn) -> ZombieVillagerPatch::new);
-		CAPABILITY_MAP.put(EntityType.HUSK, (entityIn) -> ZombiePatch<Husk>::new);
-		CAPABILITY_MAP.put(EntityType.SPIDER, (entityIn) -> SpiderPatch::new);
-		CAPABILITY_MAP.put(EntityType.CAVE_SPIDER, (entityIn) -> CaveSpiderPatch::new);
-		CAPABILITY_MAP.put(EntityType.IRON_GOLEM, (entityIn) -> IronGolemPatch::new);
-		CAPABILITY_MAP.put(EntityType.VINDICATOR, (entityIn) -> VindicatorPatch::new);
-		CAPABILITY_MAP.put(EntityType.EVOKER, (entityIn) -> EvokerPatch::new);
-		CAPABILITY_MAP.put(EntityType.WITCH, (entityIn) -> WitchPatch::new);
-		CAPABILITY_MAP.put(EntityType.DROWNED, (entityIn) -> DrownedPatch::new);
-		CAPABILITY_MAP.put(EntityType.PILLAGER, (entityIn) -> PillagerPatch::new);
-		CAPABILITY_MAP.put(EntityType.RAVAGER, (entityIn) -> RavagerPatch::new);
-		CAPABILITY_MAP.put(EntityType.VEX, (entityIn) -> VexPatch::new);
-		CAPABILITY_MAP.put(EntityType.PIGLIN, (entityIn) -> PiglinPatch::new);
-		CAPABILITY_MAP.put(EntityType.PIGLIN_BRUTE, (entityIn) -> PiglinBrutePatch::new);
-		CAPABILITY_MAP.put(EntityType.HOGLIN, (entityIn) -> HoglinPatch::new);
-		CAPABILITY_MAP.put(EntityType.ZOGLIN, (entityIn) -> ZoglinPatch::new);
-		CAPABILITY_MAP.put(EntityType.ENDER_DRAGON, (entityIn) -> {
+	public static void registerEntityPatches() {
+		Map<EntityType<?>, Function<Entity, Supplier<EntityPatch<?>>>> registry = Maps.newHashMap();
+		registry.put(EntityType.PLAYER, (entityIn) -> ServerPlayerPatch::new);
+		registry.put(EntityType.ZOMBIE, (entityIn) -> ZombiePatch<Zombie>::new);
+		registry.put(EntityType.CREEPER, (entityIn) -> CreeperPatch::new);
+		registry.put(EntityType.ENDERMAN, (entityIn) -> EndermanPatch::new);
+		registry.put(EntityType.SKELETON, (entityIn) -> SkeletonPatch<Skeleton>::new);
+		registry.put(EntityType.WITHER_SKELETON, (entityIn) -> WitherSkeletonPatch::new);
+		registry.put(EntityType.STRAY, (entityIn) -> StrayPatch::new);
+		registry.put(EntityType.ZOMBIFIED_PIGLIN, (entityIn) -> ZombifiedPiglinPatch::new);
+		registry.put(EntityType.ZOMBIE_VILLAGER, (entityIn) -> ZombieVillagerPatch::new);
+		registry.put(EntityType.HUSK, (entityIn) -> ZombiePatch<Husk>::new);
+		registry.put(EntityType.SPIDER, (entityIn) -> SpiderPatch::new);
+		registry.put(EntityType.CAVE_SPIDER, (entityIn) -> CaveSpiderPatch::new);
+		registry.put(EntityType.IRON_GOLEM, (entityIn) -> IronGolemPatch::new);
+		registry.put(EntityType.VINDICATOR, (entityIn) -> VindicatorPatch::new);
+		registry.put(EntityType.EVOKER, (entityIn) -> EvokerPatch::new);
+		registry.put(EntityType.WITCH, (entityIn) -> WitchPatch::new);
+		registry.put(EntityType.DROWNED, (entityIn) -> DrownedPatch::new);
+		registry.put(EntityType.PILLAGER, (entityIn) -> PillagerPatch::new);
+		registry.put(EntityType.RAVAGER, (entityIn) -> RavagerPatch::new);
+		registry.put(EntityType.VEX, (entityIn) -> VexPatch::new);
+		registry.put(EntityType.PIGLIN, (entityIn) -> PiglinPatch::new);
+		registry.put(EntityType.PIGLIN_BRUTE, (entityIn) -> PiglinBrutePatch::new);
+		registry.put(EntityType.HOGLIN, (entityIn) -> HoglinPatch::new);
+		registry.put(EntityType.ZOGLIN, (entityIn) -> ZoglinPatch::new);
+		registry.put(EntityType.ENDER_DRAGON, (entityIn) -> {
 			if (entityIn instanceof EnderDragon) {
 				return EnderDragonPatch::new;
 			}
 			return () -> null;
 		});
-		CAPABILITY_MAP.put(EntityType.WITHER, (entityIn) -> WitherPatch::new);
+		registry.put(EntityType.WITHER, (entityIn) -> WitherPatch::new);
+		registry.put(EpicFightEntities.WITHER_SKELETON_MINION.get(), (entityIn) -> WitherSkeletonPatch::new);
+		registry.put(EpicFightEntities.WITHER_GHOST_CLONE.get(), (entityIn) -> WitherGhostPatch::new);
 		
-		CAPABILITY_MAP.put(EpicFightEntities.WITHER_SKELETON_MINION.get(), (entityIn) -> WitherSkeletonPatch::new);
-		CAPABILITY_MAP.put(EpicFightEntities.WITHER_GHOST_CLONE.get(), (entityIn) -> WitherGhostPatch::new);
+		EntityPatchRegistryEvent entitypatchRegistryEvent = new EntityPatchRegistryEvent(registry);
+		ModLoader.get().postEvent(entitypatchRegistryEvent);
+		
+		registry.forEach(CAPABILITIES::put);
 	}
 	
-	public static void makeMapClient() {
-		CAPABILITY_MAP.put(EntityType.PLAYER, (entityIn) -> {
+	public static void registerEntityPatchesClient() {
+		CAPABILITIES.put(EntityType.PLAYER, (entityIn) -> {
 			if (entityIn instanceof LocalPlayer) {
 				return LocalPlayerPatch::new;
 			} else if (entityIn instanceof RemotePlayer) {
@@ -105,12 +114,22 @@ public class ProviderEntity implements ICapabilityProvider, NonNullSupplier<Enti
 		});
 	}
 	
+	public static void clear() {
+		CUSTOM_CAPABILITIES.clear();
+	}
+	
+	public static void putCustomEntityPatch(EntityType<?> entityType, Function<Entity, Supplier<EntityPatch<?>>> entitypatchProvider) {
+		CUSTOM_CAPABILITIES.put(entityType, entitypatchProvider);
+	}
+	
 	private EntityPatch<?> capability;
 	private LazyOptional<EntityPatch<?>> optional = LazyOptional.of(this);
 	
 	public ProviderEntity(Entity entity) {
-		if (CAPABILITY_MAP.containsKey(entity.getType())) {
-			this.capability = CAPABILITY_MAP.get(entity.getType()).apply(entity).get();
+		Function<Entity, Supplier<EntityPatch<?>>> provider = CUSTOM_CAPABILITIES.getOrDefault(entity.getType(), CAPABILITIES.get(entity.getType()));
+		
+		if (provider != null) {
+			this.capability = provider.apply(entity).get();
 		}
 	}
 	

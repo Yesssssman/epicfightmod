@@ -62,7 +62,6 @@ public class JsonModelLoader {
 	}
 	
 	private JsonObject rootJson;
-	private int jointIdCount;
 	
 	public JsonModelLoader(ResourceManager resourceManager, ResourceLocation resourceLocation) {
 		if (resourceManager == null) {
@@ -101,6 +100,7 @@ public class JsonModelLoader {
 		JsonObject vcounts = obj.getAsJsonObject("vcounts");
 		
 		float[] positionArray = toFloatArray(positions.get("array").getAsJsonArray());
+		
 		for (int i = 0; i < positionArray.length / 3; i++) {
 			int k = i * 3;
 			Vec4f posVector = new Vec4f(positionArray[k], positionArray[k+1], positionArray[k+2], 1.0F);
@@ -111,6 +111,7 @@ public class JsonModelLoader {
 		}
 		
 		float[] normalArray = toFloatArray(normals.get("array").getAsJsonArray());
+		
 		for (int i = 0; i < normalArray.length / 3; i++) {
 			int k = i * 3;
 			Vec4f normVector = new Vec4f(normalArray[k], normalArray[k+1], normalArray[k+2], 1.0F);
@@ -121,24 +122,25 @@ public class JsonModelLoader {
 		}
 		
 		float[] uvArray = toFloatArray(uvs.get("array").getAsJsonArray());
-		int[] vindexArray = toIntArray(vdincies.get("array").getAsJsonArray());
+		int[] animationIndexArray = toIntArray(vdincies.get("array").getAsJsonArray());
 		float[] weightArray = toFloatArray(weights.get("array").getAsJsonArray());
 		int[] drawingIndexArray = toIntArray(drawingIndices.get("array").getAsJsonArray());
 		int[] vcountArray = toIntArray(vcounts.get("array").getAsJsonArray());
 		
-		return new Mesh(positionArray, normalArray, uvArray, vindexArray, weightArray, drawingIndexArray, vcountArray);
+		return new Mesh(positionArray, normalArray, uvArray, animationIndexArray, weightArray, drawingIndexArray, vcountArray);
 	}
 	
 	public Armature getArmature() {
 		JsonObject obj = this.rootJson.getAsJsonObject("armature");
 		JsonObject hierarchy = obj.get("hierarchy").getAsJsonArray().get(0).getAsJsonObject();
+		JsonArray nameAsVertexGroups = obj.getAsJsonArray("joints");
 		Map<String, Joint> jointMap = Maps.newHashMap();
-		Joint joint = this.getJoint(hierarchy, jointMap, true);
+		Joint joint = this.getJoint(hierarchy, nameAsVertexGroups, jointMap, true);
 		joint.setInversedModelTransform(new OpenMatrix4f());
 		return new Armature(jointMap.size(), joint, jointMap);
 	}
 	
-	public Joint getJoint(JsonObject object, Map<String, Joint> jointMap, boolean start) {
+	public Joint getJoint(JsonObject object, JsonArray nameAsVertexGroups, Map<String, Joint> jointMap, boolean start) {
 		float[] floatArray = toFloatArray(object.get("transform").getAsJsonArray());
 		OpenMatrix4f localMatrix = new OpenMatrix4f().load(FloatBuffer.wrap(floatArray));
 		localMatrix.transpose();
@@ -147,12 +149,24 @@ public class JsonModelLoader {
 		}
 		
 		String name = object.get("name").getAsString();
-		Joint joint = new Joint(name, this.jointIdCount, localMatrix);
+		int index = -1;
+		
+		for (int i = 0; i < nameAsVertexGroups.size(); i++) {
+			if (name.equals(nameAsVertexGroups.get(i).getAsString())) {
+				index = i;
+				break;
+			}
+		}
+		
+		if (index == -1) {
+			throw new IllegalStateException("[ModelParsingError]: Joint name " + name + " not exist!");
+		}
+		
+		Joint joint = new Joint(name, index, localMatrix);
 		jointMap.put(name, joint);
-		this.jointIdCount++;
 		
 		for (JsonElement children : object.get("children").getAsJsonArray()) {
-			joint.addSubJoint(this.getJoint(children.getAsJsonObject(), jointMap, false));
+			joint.addSubJoint(this.getJoint(children.getAsJsonObject(), nameAsVertexGroups, jointMap, false));
 		}
 		
 		return joint;

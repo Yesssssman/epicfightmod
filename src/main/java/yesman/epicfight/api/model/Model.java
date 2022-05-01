@@ -6,7 +6,11 @@ import net.minecraft.server.packs.resources.ResourceManager;
 public class Model {
 	protected Armature armature;
 	protected ResourceLocation location;
-
+	
+	public Model() {
+		this.location = null;
+	}
+	
 	public Model(ResourceLocation location) {
 		this.location = new ResourceLocation(location.getNamespace(), "animmodels/" + location.getPath() + ".json");
 	}
@@ -19,7 +23,11 @@ public class Model {
 	public void loadArmatureData(Armature armature) {
 		this.armature = armature;
 	}
-
+	
+	public ResourceLocation getLocation() {
+		return this.location;
+	}
+	
 	public Armature getArmature() {
 		return armature;
 	}

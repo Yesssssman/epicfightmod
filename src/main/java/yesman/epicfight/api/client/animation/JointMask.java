@@ -24,8 +24,8 @@ public class JointMask {
 	public static final BindModifier ROOT_COMBINE = (clientAnimator, result, priority, joint, poses) -> {
 		Pose lowestPose = poses.get(Layer.Priority.LOWEST).getSecond();
 		Pose currentPose = poses.get(priority).getSecond();
-		JointTransform lowestTransform = lowestPose.getJointTransformData().get(joint.getName());
-		JointTransform currentTransform = currentPose.getJointTransformData().get(joint.getName());
+		JointTransform lowestTransform = lowestPose.getJointTransformData().getOrDefault(joint.getName(), JointTransform.empty());
+		JointTransform currentTransform = currentPose.getJointTransformData().getOrDefault(joint.getName(), JointTransform.empty());
 		result.getJointTransformData().get(joint.getName()).translation().y = lowestTransform.translation().y;
 		OpenMatrix4f lowestMatrix = lowestTransform.toMatrix();
 		OpenMatrix4f currentMatrix = currentTransform.toMatrix();
@@ -39,7 +39,7 @@ public class JointMask {
 				OpenMatrix4f lowestFinal = OpenMatrix4f.mul(lowestLocalTransform, childTransform, null);
 				OpenMatrix4f currentFinal = OpenMatrix4f.mul(currentLocalTransform, childTransform, null);
 				Vec3f vec = new Vec3f(0, currentFinal.m31 - lowestFinal.m31, currentFinal.m32 - lowestFinal.m32);
-				JointTransform jt = result.getJointTransformData().get(subJoint.getName());
+				JointTransform jt = result.getJointTransformData().getOrDefault(subJoint.getName(), JointTransform.empty());
 				jt.parent(JointTransform.getTranslation(vec), OpenMatrix4f::mul);
 				jt.jointLocal(JointTransform.fromMatrixNoScale(currentToLowest), OpenMatrix4f::mul);
 			}

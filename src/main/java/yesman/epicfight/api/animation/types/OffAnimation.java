@@ -6,8 +6,8 @@ import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class OffAnimation extends StaticAnimation {
-	public OffAnimation() {
-		super(0.0F, false, null, null);
+	public OffAnimation(String path) {
+		super(0.0F, false, path, null);
 	}
 	
 	@Override

@@ -2,31 +2,27 @@ package yesman.epicfight.world.capabilities.entitypatch.mob;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.behavior.MeleeAttack;
+import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Animations;
-import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.gameasset.Models;
+import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.brain.BrainRemodeler;
-import yesman.epicfight.world.entity.ai.brain.task.AnimatedFightBehavior;
+import yesman.epicfight.world.entity.ai.brain.task.AnimatedCombatBehavior;
+import yesman.epicfight.world.entity.ai.brain.task.MoveToTargetSinkStopInaction;
+import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 
 public class PiglinBrutePatch extends HumanoidMobPatch<PiglinBrute> {
 	public PiglinBrutePatch() {
-		super(Faction.PIGLIN_ARMY);
-	}
-	
-	@Override
-	public void onJoinWorld(PiglinBrute entityIn, EntityJoinWorldEvent event) {
-		super.onJoinWorld(entityIn, event);
-		BrainRemodeler.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 12, MeleeAttack.class, new AnimatedFightBehavior<>(this, MobCombatBehaviors.BIPED_ARMED_BEHAVIORS.build(this)));
+		super(Faction.PIGLINS);
 	}
 	
 	@Override
@@ -39,16 +35,17 @@ public class PiglinBrutePatch extends HumanoidMobPatch<PiglinBrute> {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingMotion(LivingMotion.IDLE, Animations.PIGLIN_IDLE);
-		clientAnimator.addLivingMotion(LivingMotion.WALK, Animations.PIGLIN_WALK);
-		clientAnimator.addLivingMotion(LivingMotion.FALL, Animations.BIPED_FALL);
-		clientAnimator.addLivingMotion(LivingMotion.MOUNT, Animations.BIPED_MOUNT);
-		clientAnimator.addLivingMotion(LivingMotion.DEATH, Animations.PIGLIN_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.PIGLIN_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.PIGLIN_WALK);
+		clientAnimator.addLivingAnimation(LivingMotion.FALL, Animations.BIPED_FALL);
+		clientAnimator.addLivingAnimation(LivingMotion.MOUNT, Animations.BIPED_MOUNT);
+		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.PIGLIN_DEATH);
+		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
-		super.humanoidEntityUpdateMotion(considerInaction);
+		super.commonMobUpdateMotion(considerInaction);
 	}
 	
 	@Override
@@ -56,19 +53,19 @@ public class PiglinBrutePatch extends HumanoidMobPatch<PiglinBrute> {
 		return modelDB.piglin;
 	}
 	
-	public void setAIAsUnarmed() {
+	@Override
+	public void setAIAsInfantry(boolean holdingRanedWeapon) {
+		CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
 		
+		if (builder != null) {
+			BrainRemodeler.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 12, MeleeAttack.class, new AnimatedCombatBehavior<>(this, builder.build(this)));
+		}
+		
+		BrainRemodeler.replaceBehavior(this.original.getBrain(), Activity.CORE, 1, MoveToTargetSink.class, new MoveToTargetSinkStopInaction());
 	}
 	
-	public void setAIAsArmed() {
-		
-	}
-	
+	@Override
 	public void setAIAsMounted(Entity ridingEntity) {
-		
-	}
-	
-	public void setAIAsRanged() {
 		
 	}
 	

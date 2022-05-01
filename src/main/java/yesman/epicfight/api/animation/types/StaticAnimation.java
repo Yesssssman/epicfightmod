@@ -21,6 +21,7 @@ import yesman.epicfight.api.client.animation.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.JointMask;
 import yesman.epicfight.api.client.animation.JointMask.BindModifier;
 import yesman.epicfight.api.client.animation.Layer;
+import yesman.epicfight.api.client.animation.Layer.LayerType;
 import yesman.epicfight.api.model.JsonModelLoader;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.config.ConfigurationIngame;
@@ -53,7 +54,7 @@ public class StaticAnimation extends DynamicAnimation {
 		this.animationId = animationManager.getIdCounter();
 		animationManager.getIdMap().put(this.animationId, this);
 		this.resourceLocation = new ResourceLocation(animationManager.getModid(), "animmodels/animations/" + path);
-		animationManager.getNameMap().put(this.resourceLocation, this);
+		animationManager.getNameMap().put(new ResourceLocation(animationManager.getModid(), path), this);
 		this.model = model;
 	}
 	
@@ -78,7 +79,7 @@ public class StaticAnimation extends DynamicAnimation {
 	public void loadAnimation(ResourceManager resourceManager) {
 		try {
 			int id = Integer.parseInt(this.resourceLocation.getPath().substring(22));
-			StaticAnimation animation = EpicFightMod.getInstance().animationManager.findAnimation(this.namespaceId, id);
+			StaticAnimation animation = EpicFightMod.getInstance().animationManager.findAnimationById(this.namespaceId, id);
 			this.jointTransforms = animation.jointTransforms;
 			this.setTotalTime(animation.totalTime);
 		} catch (NumberFormatException e) {
@@ -136,7 +137,7 @@ public class StaticAnimation extends DynamicAnimation {
 			return false;
 		} else {
 			boolean bool = this.getProperty(ClientAnimationProperties.POSE_MODIFIER).map((bindModifier) -> {
-				return !bindModifier.isMasked(entitypatch.getCurrentMotion(), joint);
+				return !bindModifier.isMasked(entitypatch.getCurrentLivingMotion(), joint);
 			}).orElse(true);
 			
 			return bool;
@@ -146,7 +147,7 @@ public class StaticAnimation extends DynamicAnimation {
 	@Override
 	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, String joint) {
 		return this.getProperty(ClientAnimationProperties.POSE_MODIFIER).map((jointMaskEntry) -> {
-			List<JointMask> list = jointMaskEntry.getMask(entitypatch.getCurrentMotion());
+			List<JointMask> list = jointMaskEntry.getMask(entitypatch.getCurrentLivingMotion());
 			int position = list.indexOf(JointMask.of(joint));
 			
 			if (position >= 0) {
@@ -199,6 +200,11 @@ public class StaticAnimation extends DynamicAnimation {
 	@OnlyIn(Dist.CLIENT)
 	public Layer.Priority getPriority() {
 		return this.getProperty(ClientAnimationProperties.PRIORITY).orElse(Layer.Priority.LOWEST);
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public Layer.LayerType getLayerType() {
+		return this.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(LayerType.BASE_LAYER);
 	}
 	
 	public static class Event implements Comparable<Event> {

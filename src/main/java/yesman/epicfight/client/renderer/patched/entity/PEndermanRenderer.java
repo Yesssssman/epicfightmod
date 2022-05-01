@@ -14,7 +14,6 @@ import yesman.epicfight.world.capabilities.entitypatch.mob.EndermanPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class PEndermanRenderer extends PatchedLivingEntityRenderer<EnderMan, EndermanPatch, EndermanModel<EnderMan>> {
-	private static final ResourceLocation ENDERMAN_TEXTURE = new ResourceLocation("textures/entity/enderman/enderman.png");
 	private static final ResourceLocation ENDERMAN_EYE_TEXTURE = new ResourceLocation("textures/entity/enderman/enderman_eyes.png");
 	
 	public PEndermanRenderer() {
@@ -29,10 +28,5 @@ public class PEndermanRenderer extends PatchedLivingEntityRenderer<EnderMan, End
 			OpenMatrix4f head = new OpenMatrix4f().translate(0.0F, 0.25F, 0.0F);
 			this.setJointTransform(16, armature, head);
 		}
-	}
-	
-	@Override
-	protected ResourceLocation getEntityTexture(EndermanPatch entitypatch) {
-		return ENDERMAN_TEXTURE;
 	}
 }

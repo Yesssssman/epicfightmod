@@ -37,13 +37,13 @@ public class AirAttack extends Skill {
 	public boolean isExecutableState(PlayerPatch<?> executer) {
 		EntityState playerState = executer.getEntityState();
 		Player player = executer.getOriginal();
-		return !(player.isPassenger() || player.isSpectator() || player.isFallFlying() || executer.currentMotion == LivingMotion.FALL
+		return !(player.isPassenger() || player.isSpectator() || player.isFallFlying() || executer.currentLivingMotion == LivingMotion.FALL
 				|| !playerState.canBasicAttack());
 	}
 	
 	@Override
 	public void executeOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
-		List<StaticAnimation> motions = executer.getHeldItemCapability(InteractionHand.MAIN_HAND).getAutoAttckMotion(executer);
+		List<StaticAnimation> motions = executer.getHoldingItemCapability(InteractionHand.MAIN_HAND).getAutoAttckMotion(executer);
 		StaticAnimation attackMotion = motions.get(motions.size() - 1);
 		
 		if (attackMotion != null) {

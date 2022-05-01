@@ -7,22 +7,28 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Item;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class RangedWeaponCapability extends CapabilityItem {
 	protected Map<LivingMotion, StaticAnimation> rangeAnimationSet;
-
+	
 	public RangedWeaponCapability(Item item, StaticAnimation reload, StaticAnimation aiming, StaticAnimation shot) {
-		super(item, WeaponCategory.RANGED);
+		this(item, reload, aiming, shot, WeaponCategory.RANGED);
+	}
+	
+	public RangedWeaponCapability(Item item, StaticAnimation reload, StaticAnimation aiming, StaticAnimation shot, WeaponCategory weaponCategory) {
+		super(item, weaponCategory);
 		this.rangeAnimationSet = new HashMap<LivingMotion, StaticAnimation> ();
 		
-		if(reload != null) {
+		if (reload != null) {
 			this.rangeAnimationSet.put(LivingMotion.RELOAD, reload);
 		}
-		if(aiming != null) {
+		
+		if (aiming != null) {
 			this.rangeAnimationSet.put(LivingMotion.AIM, aiming);
 		}
-		if(shot != null) {
+		
+		if (shot != null) {
 			this.rangeAnimationSet.put(LivingMotion.SHOT, shot);
 		}
 	}
@@ -33,7 +39,7 @@ public class RangedWeaponCapability extends CapabilityItem {
 	}
 	
 	@Override
-	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(PlayerPatch<?> playerdata, InteractionHand hand) {
+	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(LivingEntityPatch<?> playerdata, InteractionHand hand) {
 		if (hand == InteractionHand.MAIN_HAND) {
 			return this.rangeAnimationSet;
 		}
@@ -46,7 +52,7 @@ public class RangedWeaponCapability extends CapabilityItem {
 	}
 	
 	@Override
-	public final HoldOption getHoldOption() {
-		return HoldOption.TWO_HANDED;
+	public final HoldingOption getHoldOption() {
+		return HoldingOption.TWO_HANDED;
 	}
 }

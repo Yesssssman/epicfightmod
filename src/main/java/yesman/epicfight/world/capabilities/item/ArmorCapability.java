@@ -28,7 +28,7 @@ public class ArmorCapability extends CapabilityItem {
 	private final EquipmentSlot equipmentSlot;
 	
 	public ArmorCapability(Item item) {
-		super(item, WeaponCategory.NOT_WEAON);
+		super(item, WeaponCategory.FIST);
 		ArmorItem armorItem = (ArmorItem) item;
 		ArmorMaterial armorMaterial = armorItem.getMaterial();
 		this.equipmentSlot = armorItem.getSlot();
@@ -37,7 +37,7 @@ public class ArmorCapability extends CapabilityItem {
 	}
 	
 	public ArmorCapability(Item item, double customWeight, double customStunArmor) {
-		super(item, WeaponCategory.NOT_WEAON);
+		super(item, WeaponCategory.FIST);
 		ArmorItem armorItem = (ArmorItem) item;
 		this.equipmentSlot = armorItem.getSlot();
 		this.weight = customWeight;
@@ -46,11 +46,10 @@ public class ArmorCapability extends CapabilityItem {
 	
 	@Override
 	public void modifyItemTooltip(ItemStack stack, List<Component> itemTooltip, LivingEntityPatch<?> entitypatch) {
-		itemTooltip.add(1, new TextComponent(ChatFormatting.BLUE + " +" + (int)this.weight + " ")
-				.append(new TranslatableComponent(EpicFightAttributes.WEIGHT.get().getDescriptionId()).withStyle(ChatFormatting.BLUE)));
+		itemTooltip.add(1, new TextComponent(ChatFormatting.BLUE + " +" + (int)this.weight + " ").append(new TranslatableComponent(EpicFightAttributes.WEIGHT.get().getDescriptionId()).withStyle(ChatFormatting.BLUE)));
+		
 		if (this.stunArmor > 0.0F) {
-			itemTooltip.add(1, new TextComponent(ChatFormatting.BLUE + " +" + ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(this.stunArmor) + " ")
-				.append(new TranslatableComponent(EpicFightAttributes.STUN_ARMOR.get().getDescriptionId()).withStyle(ChatFormatting.BLUE)));
+			itemTooltip.add(1, new TextComponent(ChatFormatting.BLUE + " +" + ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(this.stunArmor) + " ").append(new TranslatableComponent(EpicFightAttributes.STUN_ARMOR.get().getDescriptionId()).withStyle(ChatFormatting.BLUE)));
 		}
 	}
 	

@@ -15,44 +15,35 @@ public class EvokerPatch extends AbstractIllagerPatch<Evoker> {
 	
 	@Override
 	protected void initAI() {
-
+		
 	}
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
 		super.initAnimator(clientAnimator);
-		clientAnimator.addLivingMotion(LivingMotion.SPELLCAST, Animations.EVOKER_CAST_SPELL);
+		clientAnimator.addLivingAnimation(LivingMotion.SPELLCAST, Animations.EVOKER_CAST_SPELL);
+		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		if (this.state.inaction() && considerInaction) {
-			currentMotion = LivingMotion.INACTION;
+			currentLivingMotion = LivingMotion.INACTION;
 		} else {
 			if (this.getOriginal().isCastingSpell()) {
-				currentMotion = LivingMotion.SPELLCAST;
+				currentLivingMotion = LivingMotion.SPELLCAST;
 			} else {
-				super.humanoidEntityUpdateMotion(considerInaction);
+				super.commonMobUpdateMotion(considerInaction);
 			}
 		}
 	}
 	
 	@Override
-	public void postInit() {
+	public void setAIAsInfantry(boolean holdingRanedWeapon) {
 
 	}
-
-	@Override
-	public void setAIAsUnarmed() {
-
-	}
-
-	@Override
-	public void setAIAsArmed() {
-
-	}
-
+	
 	@Override
 	public void setAIAsMounted(Entity ridingEntity) {
 

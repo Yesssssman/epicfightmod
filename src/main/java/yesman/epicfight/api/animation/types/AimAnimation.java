@@ -15,7 +15,6 @@ import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.config.ConfigurationIngame;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
-import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class AimAnimation extends StaticAnimation {
 	public StaticAnimation lookUp;
@@ -53,18 +52,17 @@ public class AimAnimation extends StaticAnimation {
 				this.modifyPose(pose, entitypatch, time);
 				return pose;
 			} else {
-				if (entitypatch instanceof PlayerPatch) {
-					float pitch = entitypatch.getOriginal().getViewXRot(Minecraft.getInstance().getFrameTime());
-					StaticAnimation interpolateAnimation;
-					interpolateAnimation = (pitch > 0) ? this.lookDown : this.lookUp;
-					Pose pose1 = super.getPoseByTime(entitypatch, time, partialTicks);
-					Pose pose2 = interpolateAnimation.getPoseByTime(entitypatch, time, partialTicks);
-					this.modifyPose(pose2, entitypatch, time);
-					Pose interpolatedPose = Pose.interpolatePose(pose1, pose2, (Math.abs(pitch) / 90.0F));
-					return interpolatedPose;
-				}
+				float pitch = entitypatch.getOriginal().getViewXRot(Minecraft.getInstance().getFrameTime());
+				StaticAnimation interpolateAnimation;
+				interpolateAnimation = (pitch > 0) ? this.lookDown : this.lookUp;
+				Pose pose1 = super.getPoseByTime(entitypatch, time, partialTicks);	
+				Pose pose2 = interpolateAnimation.getPoseByTime(entitypatch, time, partialTicks);
+				this.modifyPose(pose2, entitypatch, time);
+				Pose interpolatedPose = Pose.interpolatePose(pose1, pose2, (Math.abs(pitch) / 90.0F));
+				return interpolatedPose;
 			}
 		}
+		
 		return super.getPoseByTime(entitypatch, time, partialTicks);
 	}
 	

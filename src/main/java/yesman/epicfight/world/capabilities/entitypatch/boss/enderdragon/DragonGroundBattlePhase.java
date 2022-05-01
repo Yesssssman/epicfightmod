@@ -40,7 +40,7 @@ public class DragonGroundBattlePhase extends PatchedDragonPhase {
 		super(dragon);
 		
 		if (!dragon.level.isClientSide()) {
-			this.combatBehaviors = MobCombatBehaviors.ENDER_DRAGON_BEHAVIORS.build(this.dragonpatch);
+			this.combatBehaviors = MobCombatBehaviors.ENDER_DRAGON.build(this.dragonpatch);
 			NodeEvaluator nodeEvaluator = new WalkNodeEvaluator();
 			nodeEvaluator.setCanPassDoors(true);
 		    this.pathFinder = new PathFinder(nodeEvaluator, 100);

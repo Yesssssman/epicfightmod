@@ -74,7 +74,7 @@ public class GuardSkill extends Skill {
 		container.getDataManager().registerData(PENALTY);
 		
 		container.executer.getEventListener().addEventListener(EventType.CLIENT_ITEM_USE_EVENT, EVENT_UUID, (event) -> {
-			CapabilityItem itemCapability = event.getPlayerPatch().getHeldItemCapability(InteractionHand.MAIN_HAND);
+			CapabilityItem itemCapability = event.getPlayerPatch().getHoldingItemCapability(InteractionHand.MAIN_HAND);
 			
 			if (AVAILABLE_WEAPON_TYPES.getOrDefault(itemCapability.getWeaponCategory(), (a, b) -> null).apply(itemCapability, event.getPlayerPatch()) != null && this.isExecutableState(event.getPlayerPatch())) {
 				event.getPlayerPatch().getOriginal().startUsingItem(InteractionHand.MAIN_HAND);
@@ -82,7 +82,7 @@ public class GuardSkill extends Skill {
 		});
 		
 		container.executer.getEventListener().addEventListener(EventType.SERVER_ITEM_USE_EVENT, EVENT_UUID, (event) -> {
-			CapabilityItem itemCapability = event.getPlayerPatch().getHeldItemCapability(InteractionHand.MAIN_HAND);
+			CapabilityItem itemCapability = event.getPlayerPatch().getHoldingItemCapability(InteractionHand.MAIN_HAND);
 			
 			if (AVAILABLE_WEAPON_TYPES.getOrDefault(itemCapability.getWeaponCategory(), (a, b) -> null).apply(itemCapability, event.getPlayerPatch()) != null && this.isExecutableState(event.getPlayerPatch())) {
 				event.getPlayerPatch().getOriginal().startUsingItem(InteractionHand.MAIN_HAND);
@@ -99,7 +99,7 @@ public class GuardSkill extends Skill {
 		});
 		
 		container.executer.getEventListener().addEventListener(EventType.HURT_EVENT_PRE, EVENT_UUID, (event) -> {
-			CapabilityItem itemCapability = event.getPlayerPatch().getHeldItemCapability(event.getPlayerPatch().getOriginal().getUsedItemHand());
+			CapabilityItem itemCapability = event.getPlayerPatch().getHoldingItemCapability(event.getPlayerPatch().getOriginal().getUsedItemHand());
 			
 			if (this.getHitMotion(event.getPlayerPatch(), itemCapability, 0) != null && event.getPlayerPatch().getOriginal().isUsingItem() && this.isExecutableState(event.getPlayerPatch())) {
 				DamageSource damageSource = event.getDamageSource();
@@ -216,7 +216,7 @@ public class GuardSkill extends Skill {
 	@Override
 	public boolean isExecutableState(PlayerPatch<?> executer) {
 		EntityState playerState = executer.getEntityState();
-		return !(executer.getOriginal().isFallFlying() || executer.currentMotion == LivingMotion.FALL || playerState.hurt()) && executer.isBattleMode();
+		return !(executer.getOriginal().isFallFlying() || executer.currentLivingMotion == LivingMotion.FALL || playerState.hurt()) && executer.isBattleMode();
 	}
 	
 	protected boolean isBlockableSource(DamageSource damageSource, boolean specialSourceBlockCondition) {

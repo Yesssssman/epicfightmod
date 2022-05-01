@@ -90,7 +90,7 @@ public class ControllEngine {
 	}
 	
 	public boolean canPlayerRotate(EntityState playerState) {
-		return !playerState.cameraRotationLocked() || this.player.isRidingJumpable();
+		return !playerState.turningLocked() || this.player.isRidingJumpable();
 	}
 	
 	private void attackKeyPressed(int key, int action) {
@@ -129,7 +129,7 @@ public class ControllEngine {
 	}
 	
 	private void swapHandKeyPressed(int key, int action) {
-		if (this.playerpatch.getEntityState().inaction() || (!this.playerpatch.getHeldItemCapability(InteractionHand.MAIN_HAND).canUsedInOffhand())) {
+		if (this.playerpatch.getEntityState().inaction() || (!this.playerpatch.getHoldingItemCapability(InteractionHand.MAIN_HAND).canUsedInOffhand())) {
 			while (this.options.keySwapOffhand.consumeClick()) {}
 			this.setKeyBind(this.options.keySwapOffhand, false);
 		}
@@ -161,6 +161,7 @@ public class ControllEngine {
 		if (this.playerpatch == null) {
 			return;
 		}
+		
 		this.playerpatch.updateEntityState();
 		
 		if (this.mouseLeftPressToggle) {

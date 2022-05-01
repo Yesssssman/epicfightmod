@@ -12,11 +12,10 @@ import net.minecraft.client.renderer.entity.EnderDragonRenderer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraftforge.common.MinecraftForge;
-import yesman.epicfight.api.forge.event.RenderEnderDragonEvent;
+import yesman.epicfight.api.client.model.forgeevent.RenderEnderDragonEvent;
 
 @Mixin(value = EnderDragonRenderer.class)
 public abstract class MixinEnderDragonRenderer {
-	//render (Lnet/minecraft/world/entity/Entity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V m_7392_
 	@Inject(at = @At(value = "HEAD"), method = "render(Lnet/minecraft/world/entity/Entity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", cancellable = true)
 	private void epicfight_render(Entity enderdragon, float yRot, float partialTicks, PoseStack poseStack, MultiBufferSource multiSourceBuffer, int packedLight, CallbackInfo info) {
 		RenderEnderDragonEvent renderDragonEvent = new RenderEnderDragonEvent.Pre((EnderDragon)enderdragon, (EnderDragonRenderer)((Object)this), partialTicks, poseStack, multiSourceBuffer, packedLight);

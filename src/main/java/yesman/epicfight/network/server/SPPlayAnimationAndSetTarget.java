@@ -25,19 +25,16 @@ public class SPPlayAnimationAndSetTarget extends SPPlayAnimation {
 	}
 	
 	public SPPlayAnimationAndSetTarget(StaticAnimation animation, float modifyTime, LivingEntityPatch<?> entitypatch) {
-		this(animation, modifyTime, entitypatch, SPPlayAnimation.Layer.BASE_LAYER);
-	}
-	
-	public SPPlayAnimationAndSetTarget(StaticAnimation animation, float modifyTime, LivingEntityPatch<?> entitypatch, SPPlayAnimation.Layer playOn) {
-		super(animation, modifyTime, entitypatch, playOn);
+		super(animation, modifyTime, entitypatch);
 		this.targetId = entitypatch.getAttackTarget().getId();
 	}
 	
 	@Override
 	public void onArrive() {
 		super.onArrive();
-		Entity entity = Minecraft.getInstance().player.level.getEntity(this.entityId);
-		Entity target = Minecraft.getInstance().player.level.getEntity(this.targetId);
+		Minecraft mc = Minecraft.getInstance();
+		Entity entity = mc.player.level.getEntity(this.entityId);
+		Entity target = mc.player.level.getEntity(this.targetId);
 
 		if (entity instanceof Mob && target instanceof LivingEntity) {
 			Mob entityliving = (Mob)entity;

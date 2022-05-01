@@ -24,8 +24,9 @@ import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.gameasset.Models;
+import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-import yesman.epicfight.world.entity.ai.goal.AttackBehaviorGoal;
+import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
 import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
 
 public class IronGolemPatch extends HumanoidMobPatch<IronGolem> {
@@ -66,15 +67,16 @@ public class IronGolemPatch extends HumanoidMobPatch<IronGolem> {
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void initAnimator(ClientAnimator animatorClient) {
-		animatorClient.addLivingMotion(LivingMotion.IDLE, Animations.GOLEM_IDLE);
-		animatorClient.addLivingMotion(LivingMotion.WALK, Animations.GOLEM_WALK);
-		animatorClient.addLivingMotion(LivingMotion.DEATH, Animations.GOLEM_DEATH);
+	public void initAnimator(ClientAnimator clientAnimator) {
+		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.GOLEM_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.GOLEM_WALK);
+		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.GOLEM_DEATH);
+		clientAnimator.setCurrentMotionsAsDefault();
 	}
 
 	@Override
 	public void updateMotion(boolean considerInaction) {
-		super.humanoidEntityUpdateMotion(considerInaction);
+		super.commonMobUpdateMotion(considerInaction);
 	}
 
 	@Override
@@ -91,14 +93,9 @@ public class IronGolemPatch extends HumanoidMobPatch<IronGolem> {
 	}
 
 	@Override
-	public void setAIAsUnarmed() {
-		this.original.goalSelector.addGoal(0, new AttackBehaviorGoal<>(this, MobCombatBehaviors.IRON_GOLEM_BEHAVIORS.build(this)));
+	public void setAIAsInfantry(boolean holdingRanedWeapon) {
+		this.original.goalSelector.addGoal(0, new CombatBehaviorGoal<>(this, MobCombatBehaviors.IRON_GOLEM.build(this)));
 		this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, 1.0D, false));
-	}
-	
-	@Override
-	public void setAIAsArmed() {
-		this.setAIAsUnarmed();
 	}
 
 	@Override

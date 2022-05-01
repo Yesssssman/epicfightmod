@@ -36,10 +36,6 @@ public class SkillDataManager {
 		EpicFightNetworkManager.sendToPlayer(msg2, player);
 	}
 	
-	public Data getData(SkillDataKey<?> key) {
-		return this.data.get(key.getId());
-	}
-	
 	public <T> T getDataValue(SkillDataKey<T> key) {
 		if (this.hasData(key)) {
 			return key.valueType.get(this.data.get(key.getId()));

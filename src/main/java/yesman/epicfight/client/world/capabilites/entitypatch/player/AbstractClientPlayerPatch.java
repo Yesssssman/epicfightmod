@@ -34,8 +34,6 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.main.EpicFightMod;
-import yesman.epicfight.network.EpicFightNetworkManager;
-import yesman.epicfight.network.client.CPReqPlayerInfo;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
@@ -56,30 +54,23 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	}
 	
 	@Override
-	public void postInit() {
-		if (!(this instanceof LocalPlayerPatch)) {
-			EpicFightNetworkManager.sendToServer(new CPReqPlayerInfo(this.original.getId()));
-		}
-	}
-	
-	@Override
 	public void updateMotion(boolean considerInaction) {
 		if (this.state.inaction() && considerInaction) {
-			currentMotion = LivingMotion.INACTION;
+			currentLivingMotion = LivingMotion.INACTION;
 		} else {
 			ClientAnimator animator = this.getClientAnimator();
 			if (this.original.getHealth() <= 0.0F) {
-				currentMotion = LivingMotion.DEATH;
+				currentLivingMotion = LivingMotion.DEATH;
 			} else if (original.isFallFlying() || original.isAutoSpinAttack()) {
-				currentMotion = LivingMotion.FLY;
+				currentLivingMotion = LivingMotion.FLY;
 			} else if (original.getVehicle() != null) {
-				currentMotion = LivingMotion.MOUNT;
+				currentLivingMotion = LivingMotion.MOUNT;
 			} else if (original.isVisuallySwimming()) {
-				currentMotion = LivingMotion.SWIM;
+				currentLivingMotion = LivingMotion.SWIM;
 			} else if (original.isSleeping()) {
-				currentMotion = LivingMotion.SLEEP;
+				currentLivingMotion = LivingMotion.SLEEP;
 			} else if (!original.isOnGround() && original.onClimbable()) {
-				currentMotion = LivingMotion.CLIMB;
+				currentLivingMotion = LivingMotion.CLIMB;
 				double y = original.yCloak - original.yCloakO;
 				if (Math.abs(y) < 0.04D) {
 					animator.baseLayer.pause();
@@ -88,16 +79,16 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 				}
 			} else {
 				if (original.isUnderWater() && (original.yCloak - original.yCloakO) < -0.005)
-					currentMotion = LivingMotion.FLOAT;
+					currentLivingMotion = LivingMotion.FLOAT;
 				else if (original.yCloak - original.yCloakO < -0.25F)
-					currentMotion = LivingMotion.FALL;
+					currentLivingMotion = LivingMotion.FALL;
 				else if (original.animationSpeed > 0.01F) {
 					if (original.isShiftKeyDown())
-						currentMotion = LivingMotion.SNEAK;
+						currentLivingMotion = LivingMotion.SNEAK;
 					else if (original.isSprinting())
-						currentMotion = LivingMotion.RUN;
+						currentLivingMotion = LivingMotion.RUN;
 					else
-						currentMotion = LivingMotion.WALK;
+						currentLivingMotion = LivingMotion.WALK;
 					
 					if (original.zza > 0)
 						animator.baseLayer.animationPlayer.setReversed(false);
@@ -107,30 +98,29 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 				} else {
 					animator.baseLayer.animationPlayer.setReversed(false);
 					if (original.isShiftKeyDown())
-						currentMotion = LivingMotion.KNEEL;
+						currentLivingMotion = LivingMotion.KNEEL;
 					else
-						currentMotion = LivingMotion.IDLE;
+						currentLivingMotion = LivingMotion.IDLE;
 				}
 			}
 		}
 		
 		if (this.original.isUsingItem()) {
-			CapabilityItem activeItem = this.getHeldItemCapability(this.original.getUsedItemHand());
+			CapabilityItem activeItem = this.getHoldingItemCapability(this.original.getUsedItemHand());
 			UseAnim useAnim = this.original.getItemInHand(this.original.getUsedItemHand()).getUseAnimation();
 			UseAnim secondUseAnim = activeItem.getUseAnimation(this);
 			
-			if (useAnim == UseAnim.BLOCK || secondUseAnim == UseAnim.BLOCK) {
-				if (activeItem.getWeaponCategory() == WeaponCategory.SHIELD) {
+			if (useAnim == UseAnim.BLOCK || secondUseAnim == UseAnim.BLOCK)
+				if (activeItem.getWeaponCategory() == WeaponCategory.SHIELD)
 					currentCompositeMotion = LivingMotion.BLOCK_SHIELD;
-				} else {
+				else
 					currentCompositeMotion = LivingMotion.BLOCK;
-				}
-			} else if (useAnim == UseAnim.BOW || useAnim == UseAnim.SPEAR)
+			else if (useAnim == UseAnim.BOW || useAnim == UseAnim.SPEAR)
 				currentCompositeMotion = LivingMotion.AIM;
 			else if (useAnim == UseAnim.CROSSBOW)
 				currentCompositeMotion = LivingMotion.RELOAD;
 			else
-				currentCompositeMotion = currentMotion;
+				currentCompositeMotion = currentLivingMotion;
 		} else {
 			if (CrossbowItem.isCharged(this.original.getMainHandItem()))
 				currentCompositeMotion = LivingMotion.AIM;
@@ -139,7 +129,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			else if (this.original.swinging && this.original.getSleepingPos().isEmpty())
 				currentCompositeMotion = LivingMotion.DIGGING;
 			else
-				currentCompositeMotion = currentMotion;
+				currentCompositeMotion = currentLivingMotion;
 			
 			if (this.getClientAnimator().isAiming() && currentCompositeMotion != LivingMotion.AIM) {
 				this.playReboundAnimation();
@@ -161,7 +151,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 		boolean isOffHandChanged = this.prevHeldItemOffHand != this.original.getInventory().offhand.get(0).getItem();
 
 		if (isMainHandChanged || isOffHandChanged) {
-			this.updateHeldItem(this.getHeldItemCapability(InteractionHand.MAIN_HAND), this.getHeldItemCapability(InteractionHand.OFF_HAND));
+			this.updateHeldItem(this.getHoldingItemCapability(InteractionHand.MAIN_HAND), this.getHoldingItemCapability(InteractionHand.OFF_HAND));
 			
 			if (isMainHandChanged) {
 				this.prevHeldItem = this.original.getInventory().getSelected().getItem();

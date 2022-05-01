@@ -6,14 +6,13 @@ import net.minecraft.world.entity.monster.Witch;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.model.Armature;
-import yesman.epicfight.client.renderer.patched.layer.PatchedHeldItemLayer;
+import yesman.epicfight.client.renderer.patched.layer.PatchedItemInHandLayer;
 import yesman.epicfight.world.capabilities.entitypatch.mob.WitchPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PWitchRenderer extends SimpleTextureRenderer<Witch, WitchPatch, WitchModel<Witch>> {
-	public PWitchRenderer(String textureLocation) {
-		super(textureLocation);
-		this.layerRendererReplace.put(WitchItemLayer.class, new PatchedHeldItemLayer<>());
+public class PWitchRenderer extends PatchedLivingEntityRenderer<Witch, WitchPatch, WitchModel<Witch>> {
+	public PWitchRenderer() {
+		this.layerRendererReplace.put(WitchItemLayer.class, new PatchedItemInHandLayer<>());
 	}
 	
 	@Override

@@ -1,8 +1,8 @@
 package yesman.epicfight.api.utils.math;
 
 import net.minecraft.util.Mth;
-import yesman.epicfight.world.EpicFightGamerules;
 import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
+import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 public class Formulars {
 	public static float getAttackSpeedPenalty(float weight, float weaponAttackSpeed, EntityPatch<?> entitypatch) {

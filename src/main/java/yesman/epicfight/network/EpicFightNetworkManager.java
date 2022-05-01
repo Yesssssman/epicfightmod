@@ -10,8 +10,6 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.client.CPChangeSkill;
 import yesman.epicfight.network.client.CPExecuteSkill;
 import yesman.epicfight.network.client.CPPlayAnimation;
-import yesman.epicfight.network.client.CPReqPlayerInfo;
-import yesman.epicfight.network.client.CPReqSpawnInfo;
 import yesman.epicfight.network.client.CPRotatePlayerYaw;
 import yesman.epicfight.network.client.CPSetPlayerTarget;
 import yesman.epicfight.network.client.CPToggleMode;
@@ -21,7 +19,6 @@ import yesman.epicfight.network.server.SPChangeLivingMotion;
 import yesman.epicfight.network.server.SPChangePlayerYaw;
 import yesman.epicfight.network.server.SPChangeSkill;
 import yesman.epicfight.network.server.SPDatapackSync;
-import yesman.epicfight.network.server.SPMobInitialize;
 import yesman.epicfight.network.server.SPModifySkillData;
 import yesman.epicfight.network.server.SPPlayAnimation;
 import yesman.epicfight.network.server.SPPlayAnimationAndSetTarget;
@@ -31,6 +28,7 @@ import yesman.epicfight.network.server.SPPotion;
 import yesman.epicfight.network.server.SPSetAttackTarget;
 import yesman.epicfight.network.server.SPSetSkillValue;
 import yesman.epicfight.network.server.SPSkillExecutionFeedback;
+import yesman.epicfight.network.server.SPSpawnData;
 import yesman.epicfight.network.server.SPTogglePlayerMode;
 
 public class EpicFightNetworkManager {
@@ -63,16 +61,14 @@ public class EpicFightNetworkManager {
 		int id = 0;
 		INSTANCE.registerMessage(id++, CPExecuteSkill.class, CPExecuteSkill::toBytes, CPExecuteSkill::fromBytes, CPExecuteSkill::handle);
 		INSTANCE.registerMessage(id++, CPPlayAnimation.class, CPPlayAnimation::toBytes, CPPlayAnimation::fromBytes, CPPlayAnimation::handle);
-		INSTANCE.registerMessage(id++, CPReqSpawnInfo.class, CPReqSpawnInfo::toBytes, CPReqSpawnInfo::fromBytes, CPReqSpawnInfo::handle);
 		INSTANCE.registerMessage(id++, CPRotatePlayerYaw.class, CPRotatePlayerYaw::toBytes, CPRotatePlayerYaw::fromBytes, CPRotatePlayerYaw::handle);
-		INSTANCE.registerMessage(id++, CPReqPlayerInfo.class, CPReqPlayerInfo::toBytes, CPReqPlayerInfo::fromBytes, CPReqPlayerInfo::handle);
 		INSTANCE.registerMessage(id++, CPToggleMode.class, CPToggleMode::toBytes, CPToggleMode::fromBytes, CPToggleMode::handle);
 		INSTANCE.registerMessage(id++, CPSetPlayerTarget.class, CPSetPlayerTarget::toBytes, CPSetPlayerTarget::fromBytes, CPSetPlayerTarget::handle);
 		INSTANCE.registerMessage(id++, CPChangeSkill.class, CPChangeSkill::toBytes, CPChangeSkill::fromBytes, CPChangeSkill::handle);
 		
 		INSTANCE.registerMessage(id++, SPChangeSkill.class, SPChangeSkill::toBytes, SPChangeSkill::fromBytes, SPChangeSkill::handle);
 		INSTANCE.registerMessage(id++, SPSkillExecutionFeedback.class, SPSkillExecutionFeedback::toBytes, SPSkillExecutionFeedback::fromBytes, SPSkillExecutionFeedback::handle);
-		INSTANCE.registerMessage(id++, SPMobInitialize.class, SPMobInitialize::toBytes, SPMobInitialize::fromBytes, SPMobInitialize::handle);
+		INSTANCE.registerMessage(id++, SPSpawnData.class, SPSpawnData::toBytes, SPSpawnData::fromBytes, SPSpawnData::handle);
 		INSTANCE.registerMessage(id++, SPChangeLivingMotion.class, SPChangeLivingMotion::toBytes, SPChangeLivingMotion::fromBytes, SPChangeLivingMotion::handle);
 		INSTANCE.registerMessage(id++, SPSetSkillValue.class, SPSetSkillValue::toBytes, SPSetSkillValue::fromBytes, SPSetSkillValue::handle);
 		INSTANCE.registerMessage(id++, SPChangePlayerYaw.class, SPChangePlayerYaw::toBytes, SPChangePlayerYaw::fromBytes, SPChangePlayerYaw::handle);

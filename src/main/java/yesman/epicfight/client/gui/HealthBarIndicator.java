@@ -35,7 +35,8 @@ public class HealthBarIndicator extends EntityIndicator {
 		} else if (entityIn.distanceToSqr(Minecraft.getInstance().getCameraEntity()) >= 400) {
 			return false;
 		} else if (entityIn instanceof Player) {
-			Player playerIn = (Player) entityIn;
+			Player playerIn = (Player)entityIn;
+			
 			if (playerIn == player) {
 				return false;
 			} else if (playerIn.isCreative() || playerIn.isSpectator()) {

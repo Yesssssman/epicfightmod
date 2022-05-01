@@ -25,7 +25,7 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.ArmorCapability;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.DefinedWeaponTypes;
+import yesman.epicfight.world.capabilities.item.WeaponCapabilityPresets;
 import yesman.epicfight.world.capabilities.item.NBTSeparativeCapability;
 
 public class ProviderItem implements ICapabilityProvider, NonNullSupplier<CapabilityItem> {
@@ -34,14 +34,14 @@ public class ProviderItem implements ICapabilityProvider, NonNullSupplier<Capabi
 	
 	public static void registerWeaponTypesByClass() {
 		CAPABILITY_BY_CLASS.put(ArmorItem.class, ArmorCapability::new);
-		CAPABILITY_BY_CLASS.put(ShieldItem.class, DefinedWeaponTypes.SHIELD);
-		CAPABILITY_BY_CLASS.put(SwordItem.class, DefinedWeaponTypes.SWORD);
-		CAPABILITY_BY_CLASS.put(PickaxeItem.class, DefinedWeaponTypes.PICKAXE);
-		CAPABILITY_BY_CLASS.put(AxeItem.class, DefinedWeaponTypes.AXE);
-		CAPABILITY_BY_CLASS.put(ShovelItem.class, DefinedWeaponTypes.SHOVEL);
-		CAPABILITY_BY_CLASS.put(HoeItem.class, DefinedWeaponTypes.HOE);
-		CAPABILITY_BY_CLASS.put(BowItem.class, DefinedWeaponTypes.BOW);
-		CAPABILITY_BY_CLASS.put(CrossbowItem.class, DefinedWeaponTypes.CROSSBOW);
+		CAPABILITY_BY_CLASS.put(ShieldItem.class, WeaponCapabilityPresets.SHIELD);
+		CAPABILITY_BY_CLASS.put(SwordItem.class, WeaponCapabilityPresets.SWORD);
+		CAPABILITY_BY_CLASS.put(PickaxeItem.class, WeaponCapabilityPresets.PICKAXE);
+		CAPABILITY_BY_CLASS.put(AxeItem.class, WeaponCapabilityPresets.AXE);
+		CAPABILITY_BY_CLASS.put(ShovelItem.class, WeaponCapabilityPresets.SHOVEL);
+		CAPABILITY_BY_CLASS.put(HoeItem.class, WeaponCapabilityPresets.HOE);
+		CAPABILITY_BY_CLASS.put(BowItem.class, WeaponCapabilityPresets.BOW);
+		CAPABILITY_BY_CLASS.put(CrossbowItem.class, WeaponCapabilityPresets.CROSSBOW);
 	}
 	
 	public static void put(Item item, CapabilityItem cap) {
@@ -80,7 +80,7 @@ public class ProviderItem implements ICapabilityProvider, NonNullSupplier<Capabi
 	public ProviderItem(ItemStack itemstack) {
 		this.capability = CAPABILITIES.get(itemstack.getItem());
 		if (this.capability instanceof NBTSeparativeCapability) {
-			this.capability = this.capability.getFinal(itemstack);
+			this.capability = this.capability.getResult(itemstack);
 		}
 	}
 	

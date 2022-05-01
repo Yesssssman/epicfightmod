@@ -11,20 +11,20 @@ import yesman.epicfight.api.utils.game.ExtendedDamageSource;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
-import yesman.epicfight.world.entity.ai.goal.AttackPatternGoal;
+import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
 import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
 
 public class CaveSpiderPatch extends SpiderPatch<CaveSpider> {
 	@Override
 	protected void initAI() {
 		super.initAI();
-		this.original.goalSelector.addGoal(0, new AttackPatternGoal(this, this.original, 0.0D, 2.0D, true, MobCombatBehaviors.SPIDER));
+		this.original.goalSelector.addGoal(0, new CombatBehaviorGoal<>(this, MobCombatBehaviors.SPIDER.build(this)));
         this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, 1.0D, false));
 	}
 	
 	@Override
-	public void onHit(Entity target, InteractionHand handIn, ExtendedDamageSource source, float amount) {
-		if (target instanceof LivingEntity) {
+	public void onHurtSomeone(Entity target, InteractionHand handIn, ExtendedDamageSource source, float amount, boolean succeed) {
+		if (succeed && target instanceof LivingEntity) {
 			int i = 0;
 			
             if (this.original.level.getDifficulty() == Difficulty.NORMAL) {

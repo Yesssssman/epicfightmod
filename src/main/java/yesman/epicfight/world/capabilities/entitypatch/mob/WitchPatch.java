@@ -8,50 +8,40 @@ import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Animations;
+import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.gameasset.Models;
-import yesman.epicfight.world.entity.ai.goal.RangeAttackMobGoal;
+import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
+import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
+import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
 
 public class WitchPatch extends HumanoidMobPatch<Witch> {
 	public WitchPatch() {
-		super(Faction.NATURAL);
-	}
-
-	@Override
-	public void postInit() {
-		super.resetCombatAI();
-		this.original.goalSelector.addGoal(0, new RangeAttackMobGoal(this.original, this, Animations.BIPED_MOB_THROW, 1.0D, 60, 10.0F, 5));
+		super(Faction.NEUTURAL);
 	}
 	
 	@Override
-	public void setAIAsUnarmed() {
-
+	public void setAIAsInfantry(boolean holdingRanedWeapon) {
+		this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, 1.0D, 10.0F, false));
+		this.original.goalSelector.addGoal(0, new CombatBehaviorGoal<>(this, MobCombatBehaviors.WITCH.build(this)));
 	}
 	
-	@Override
-	public void setAIAsArmed() {
-
-	}
-
 	public void setAIAsMounted() {
-
-	}
-
-	public void setAIAsRanged() {
-
+		
 	}
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingMotion(LivingMotion.DEATH, Animations.BIPED_DEATH);
-		clientAnimator.addLivingMotion(LivingMotion.IDLE, Animations.ILLAGER_IDLE);
-		clientAnimator.addLivingMotion(LivingMotion.WALK, Animations.ILLAGER_WALK);
-		clientAnimator.addCompositeAnimation(LivingMotion.DRINK, Animations.WITCH_DRINKING);
+		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.BIPED_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.ILLAGER_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.ILLAGER_WALK);
+		clientAnimator.addLivingAnimation(LivingMotion.DRINK, Animations.WITCH_DRINKING);
+		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
-		super.humanoidEntityUpdateMotion(considerInaction);
+		super.commonMobUpdateMotion(considerInaction);
 		
 		if (this.original.isDrinkingPotion()) {
 			this.currentCompositeMotion = LivingMotion.DRINK;

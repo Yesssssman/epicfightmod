@@ -109,11 +109,11 @@ public class LiechtenauerSkill extends SpecialAttackSkill {
 			this.setConsumptionSynchronize(executer, this.consumption * ((float)executer.getSkill(this.category).duration / (this.maxDuration + EnchantmentHelper.getEnchantmentLevel(Enchantments.SWEEPING_EDGE, executer.getOriginal()) + 1)));
 			this.setDurationSynchronize(executer, 0);
 			this.setStackSynchronize(executer, executer.getSkill(this.category).getStack() - 1);
-			executer.setLivingMotionCurrentItem(executer.getHeldItemCapability(InteractionHand.MAIN_HAND), InteractionHand.MAIN_HAND);
+			executer.modifyLivingMotionByCurrentItem();
 		} else {
 			this.setDurationSynchronize(executer, this.maxDuration + EnchantmentHelper.getEnchantmentLevel(Enchantments.SWEEPING_EDGE, executer.getOriginal()));
 			executer.getSkill(this.category).activate();
-			executer.setLivingMotionCurrentItem(executer.getHeldItemCapability(InteractionHand.MAIN_HAND), InteractionHand.MAIN_HAND);
+			executer.modifyLivingMotionByCurrentItem();
 		}
 	}
 	
@@ -122,7 +122,7 @@ public class LiechtenauerSkill extends SpecialAttackSkill {
 		super.cancelOnServer(executer, args);
 		this.setConsumptionSynchronize(executer, 0);
 		this.setStackSynchronize(executer, executer.getSkill(this.category).getStack() - 1);
-		executer.setLivingMotionCurrentItem(executer.getHeldItemCapability(InteractionHand.MAIN_HAND), InteractionHand.MAIN_HAND);
+		executer.modifyLivingMotionByCurrentItem();
 	}
 	
 	@Override
@@ -130,7 +130,7 @@ public class LiechtenauerSkill extends SpecialAttackSkill {
 		if (executer.isLogicalClient()) {
 			return super.canExecute(executer);
 		} else {
-			return executer.getHeldItemCapability(InteractionHand.MAIN_HAND).getSpecialAttack(executer) == this && executer.getOriginal().getVehicle() == null;
+			return executer.getHoldingItemCapability(InteractionHand.MAIN_HAND).getSpecialAttack(executer) == this && executer.getOriginal().getVehicle() == null;
 		}
 	}
 	

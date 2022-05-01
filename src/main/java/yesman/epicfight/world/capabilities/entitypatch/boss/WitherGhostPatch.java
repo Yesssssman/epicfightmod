@@ -25,9 +25,10 @@ public class WitherGhostPatch extends MobPatch<WitherGhostClone> {
 	}
 	
 	@Override
-	public void initAnimator(ClientAnimator animatorClient) {
-		animatorClient.addLivingMotion(LivingMotion.IDLE, Animations.WITHER_IDLE);
-		animatorClient.addLivingMotion(LivingMotion.DEATH, Animations.WITHER_IDLE);
+	public void initAnimator(ClientAnimator clientAnimator) {
+		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.WITHER_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.WITHER_IDLE);
+		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
 	@Override
@@ -38,7 +39,7 @@ public class WitherGhostPatch extends MobPatch<WitherGhostClone> {
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
-		this.currentMotion = LivingMotion.IDLE;
+		this.currentLivingMotion = LivingMotion.IDLE;
 	}
 	
 	@Override

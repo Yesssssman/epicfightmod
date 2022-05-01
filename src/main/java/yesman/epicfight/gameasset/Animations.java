@@ -54,6 +54,7 @@ import yesman.epicfight.api.animation.types.MirrorAnimation;
 import yesman.epicfight.api.animation.types.MountAttackAnimation;
 import yesman.epicfight.api.animation.types.MovementAnimation;
 import yesman.epicfight.api.animation.types.OffAnimation;
+import yesman.epicfight.api.animation.types.RangedAttackAnimation;
 import yesman.epicfight.api.animation.types.ReboundAnimation;
 import yesman.epicfight.api.animation.types.SpecialAttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -104,11 +105,14 @@ public class Animations {
 	public static StaticAnimation BIPED_HOLD_GREATSWORD;
 	public static StaticAnimation BIPED_HOLD_KATANA_SHEATHING;
 	public static StaticAnimation BIPED_HOLD_KATANA;
-	public static StaticAnimation BIPED_WALK_UNSHEATHING;
-	public static StaticAnimation BIPED_RUN_UNSHEATHING;
+	public static StaticAnimation BIPED_HOLD_TACHI;
 	public static StaticAnimation BIPED_HOLD_LONGSWORD;
+	public static StaticAnimation BIPED_HOLD_SPEAR;
+	public static StaticAnimation BIPED_HOLD_CROSSBOW;
+	public static StaticAnimation BIPED_WALK_UNSHEATHING;
+	public static StaticAnimation BIPED_WALK_TWOHAND;
+	public static StaticAnimation BIPED_RUN_UNSHEATHING;
 	public static StaticAnimation BIPED_KATANA_SCRAP;
-	public static StaticAnimation BIPED_IDLE_CROSSBOW;
 	public static StaticAnimation BIPED_CLIMBING;
 	public static StaticAnimation BIPED_SLEEPING;
 	public static StaticAnimation BIPED_BOW_AIM;
@@ -132,10 +136,28 @@ public class Animations {
 	public static StaticAnimation BIPED_STEP_RIGHT;
 	public static StaticAnimation BIPED_KNOCKDOWN_WAKEUP_LEFT;
 	public static StaticAnimation BIPED_KNOCKDOWN_WAKEUP_RIGHT;
-	public static StaticAnimation BIPED_ARMED_MOB_ATTACK1;
-	public static StaticAnimation BIPED_ARMED_MOB_ATTACK2;
+	public static StaticAnimation BIPED_MOB_ONEHAND1;
+	public static StaticAnimation BIPED_MOB_ONEHAND2;
+	public static StaticAnimation BIPED_MOB_GREATSWORD;
+	public static StaticAnimation BIPED_MOB_TACHI;
+	public static StaticAnimation BIPED_MOB_SPEAR_ONEHAND;
+	public static StaticAnimation BIPED_MOB_SPEAR_TWOHAND1;
+	public static StaticAnimation BIPED_MOB_SPEAR_TWOHAND2;
+	public static StaticAnimation BIPED_MOB_SPEAR_TWOHAND3;
+	public static StaticAnimation BIPED_MOB_SWORD_DUAL1;
+	public static StaticAnimation BIPED_MOB_SWORD_DUAL2;
+	public static StaticAnimation BIPED_MOB_SWORD_DUAL3;
+	public static StaticAnimation BIPED_MOB_LONGSWORD1;
+	public static StaticAnimation BIPED_MOB_LONGSWORD2;
+	public static StaticAnimation BIPED_MOB_KATANA1;
+	public static StaticAnimation BIPED_MOB_KATANA2;
+	public static StaticAnimation BIPED_MOB_KATANA3;
+	public static StaticAnimation BIPED_MOB_DAGGER_ONEHAND1;
+	public static StaticAnimation BIPED_MOB_DAGGER_ONEHAND2;
+	public static StaticAnimation BIPED_MOB_DAGGER_ONEHAND3;
+	public static StaticAnimation BIPED_MOB_DAGGER_TWOHAND1;
+	public static StaticAnimation BIPED_MOB_DAGGER_TWOHAND2;
 	public static StaticAnimation BIPED_MOB_THROW;
-	public static StaticAnimation BIPED_IDLE_TACHI;
 	public static StaticAnimation CREEPER_IDLE;
 	public static StaticAnimation CREEPER_WALK;
 	public static StaticAnimation CREEPER_HIT_LONG;
@@ -169,7 +191,6 @@ public class Animations {
 	public static StaticAnimation ENDERMAN_CONVERT_RAGE;
 	public static StaticAnimation ENDERMAN_ATTACK1;
 	public static StaticAnimation ENDERMAN_ATTACK2;
-	public static StaticAnimation ENDERMAN_RUSH;
 	public static StaticAnimation ENDERMAN_RAGE_IDLE;
 	public static StaticAnimation ENDERMAN_RAGE_WALK;
 	public static StaticAnimation ENDERMAN_GRASP;
@@ -277,16 +298,16 @@ public class Animations {
 	public static StaticAnimation SWORD_AIR_SLASH;
 	public static StaticAnimation SWORD_GUARD;
 	public static StaticAnimation SWORD_GUARD_HIT;
-	public static StaticAnimation SWORD_DUAL_AUTO_1;
-	public static StaticAnimation SWORD_DUAL_AUTO_2;
-	public static StaticAnimation SWORD_DUAL_AUTO_3;
+	public static StaticAnimation SWORD_DUAL_AUTO1;
+	public static StaticAnimation SWORD_DUAL_AUTO2;
+	public static StaticAnimation SWORD_DUAL_AUTO3;
 	public static StaticAnimation SWORD_DUAL_DASH;
 	public static StaticAnimation SWORD_DUAL_AIR_SLASH;
 	public static StaticAnimation SWORD_DUAL_GUARD;
 	public static StaticAnimation SWORD_DUAL_GUARD_HIT;
-	public static StaticAnimation LONGSWORD_AUTO_1;
-	public static StaticAnimation LONGSWORD_AUTO_2;
-	public static StaticAnimation LONGSWORD_AUTO_3;
+	public static StaticAnimation LONGSWORD_AUTO1;
+	public static StaticAnimation LONGSWORD_AUTO2;
+	public static StaticAnimation LONGSWORD_AUTO3;
 	public static StaticAnimation LONGSWORD_DASH;
 	public static StaticAnimation LONGSWORD_AIR_SLASH;
 	public static StaticAnimation LONGSWORD_GUARD;
@@ -305,8 +326,8 @@ public class Animations {
 	public static StaticAnimation KATANA_GUARD;
 	public static StaticAnimation KATANA_GUARD_HIT;
 	public static StaticAnimation SWORD_MOUNT_ATTACK;
-	public static StaticAnimation GREATSWORD_AUTO_1;
-	public static StaticAnimation GREATSWORD_AUTO_2;
+	public static StaticAnimation GREATSWORD_AUTO1;
+	public static StaticAnimation GREATSWORD_AUTO2;
 	public static StaticAnimation GREATSWORD_DASH;
 	public static StaticAnimation GREATSWORD_AIR_SLASH;
 	public static StaticAnimation GREATSWORD_GUARD;
@@ -347,23 +368,23 @@ public class Animations {
 	}
 	
 	private static void build() {
-		Models<?> modeldata = FMLEnvironment.dist == Dist.CLIENT ? ClientModels.LOGICAL_CLIENT : Models.LOGICAL_SERVER;
-		Model biped = modeldata.biped;
-		Model crepper = modeldata.creeper;
-		Model enderman = modeldata.enderman;
-		Model spider = modeldata.spider;
-		Model hoglin = modeldata.hoglin;
-		Model iron_golem = modeldata.ironGolem;
-		Model piglin = modeldata.piglin;
-		Model ravager = modeldata.ravager;
-		Model vex = modeldata.vex;
-		Model dragon = modeldata.dragon;
-		Model wither = modeldata.wither;
+		Models<?> models = FMLEnvironment.dist == Dist.CLIENT ? ClientModels.LOGICAL_CLIENT : Models.LOGICAL_SERVER;
+		Model biped = models.biped;
+		Model crepper = models.creeper;
+		Model enderman = models.enderman;
+		Model spider = models.spider;
+		Model hoglin = models.hoglin;
+		Model iron_golem = models.ironGolem;
+		Model piglin = models.piglin;
+		Model ravager = models.ravager;
+		Model vex = models.vex;
+		Model dragon = models.dragon;
+		Model wither = models.wither;
 		
 		BIPED_IDLE = new StaticAnimation(true, "biped/living/idle", biped);
 		BIPED_WALK = new MovementAnimation(true, "biped/living/walk", biped);
 		BIPED_FLYING = new StaticAnimation(true, "biped/living/fly", biped);
-		BIPED_IDLE_CROSSBOW = new StaticAnimation(true, "biped/living/hold_crossbow", biped);
+		BIPED_HOLD_CROSSBOW = new StaticAnimation(true, "biped/living/hold_crossbow", biped);
 		BIPED_RUN = new MovementAnimation(true, "biped/living/run", biped);
 		BIPED_SNEAK = new MovementAnimation(true, "biped/living/sneak", biped);
 		BIPED_SWIM = new MovementAnimation(true, "biped/living/swim", biped);
@@ -384,22 +405,24 @@ public class Animations {
 		BIPED_HOLD_KATANA_SHEATHING = new StaticAnimation(true, "biped/living/hold_katana_sheath", biped);
 		BIPED_HOLD_KATANA = new StaticAnimation(true, "biped/living/hold_katana", biped);
 		BIPED_WALK_UNSHEATHING = new MovementAnimation(true, "biped/living/walk_unsheath", biped);
+		BIPED_WALK_TWOHAND = new MovementAnimation(true, "biped/living/walk_twohand", biped);
 		BIPED_RUN_UNSHEATHING = new MovementAnimation(true, "biped/living/run_katana", biped);
 		
 		BIPED_KATANA_SCRAP = new StaticAnimation(false, "biped/living/katana_scrap", biped)
-				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.15F, RecycleableEvents.KATANA_IN, Event.Side.CLIENT)});
+				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.15F, ReuseableEvents.KATANA_IN, Event.Side.CLIENT)});
 		
-		BIPED_IDLE_TACHI = new StaticAnimation(true, "biped/living/hold_tachi", biped);
+		BIPED_HOLD_TACHI = new StaticAnimation(true, "biped/living/hold_tachi", biped);
 		
 		BIPED_HOLD_LONGSWORD = new StaticAnimation(true, "biped/living/hold_longsword", biped);
+		BIPED_HOLD_SPEAR = new StaticAnimation(true, "biped/living/hold_spear", biped);
 		BIPED_CLIMBING = new StaticAnimation(0.16F, true, "biped/living/climb", biped);
 		BIPED_SLEEPING = new StaticAnimation(0.16F, true, "biped/living/sleep", biped);
 		
 		BIPED_JAVELIN_AIM = new AimAnimation(false, "biped/combat/javelin_aim_mid", "biped/combat/javelin_aim_up", "biped/combat/javelin_aim_down", "biped/combat/javelin_aim_lying", biped);
 		BIPED_JAVELIN_THROW = new ReboundAnimation(0.08F, false, "biped/combat/javelin_throw_mid", "biped/combat/javelin_throw_up", "biped/combat/javelin_throw_down", "biped/combat/javelin_throw_lying", biped);
 		
-		OFF_ANIMATION_HIGHEST = new OffAnimation();
-		OFF_ANIMATION_MIDDLE = new OffAnimation();
+		OFF_ANIMATION_HIGHEST = new OffAnimation("off_highest");
+		OFF_ANIMATION_MIDDLE = new OffAnimation("off_middle");
 		
 		ZOMBIE_IDLE = new StaticAnimation(true, "zombie/idle", biped);
 		ZOMBIE_WALK = new MovementAnimation(true, "zombie/walk", biped);
@@ -410,7 +433,6 @@ public class Animations {
 		
 		ENDERMAN_IDLE = new StaticAnimation(true, "enderman/idle", enderman);
 		ENDERMAN_WALK = new MovementAnimation(true, "enderman/walk", enderman);
-		ENDERMAN_RUSH = new StaticAnimation(false, "enderman/rush", enderman);
 		ENDERMAN_RAGE_IDLE = new StaticAnimation(true, "enderman/rage_idle", enderman);
 		ENDERMAN_RAGE_WALK = new MovementAnimation(true, "enderman/rage_walk", enderman);
 		
@@ -435,7 +457,7 @@ public class Animations {
 		EVOKER_CAST_SPELL = new StaticAnimation(true, "illager/spellcast", biped);
 		
 		RAVAGER_IDLE = new StaticAnimation(true, "ravager/idle", ravager);
-		RAVAGER_WALK = new StaticAnimation(true, "ravager/walk", ravager);
+		RAVAGER_WALK = new MovementAnimation(true, "ravager/walk", ravager);
 		
 		VEX_IDLE = new StaticAnimation(true, "vex/idle", vex);
 		VEX_FLIPPING = new StaticAnimation(0.05F, true, "vex/flip", vex);
@@ -485,8 +507,8 @@ public class Animations {
 		SWORD_DASH = new DashAttackAnimation(0.12F, 0.1F, 0.25F, 0.4F, 0.65F, null, "Tool_R", "biped/combat/sword_dash", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
-		GREATSWORD_AUTO_1 = new BasicAttackAnimation(0.2F, 0.4F, 0.6F, 0.8F, null, "Tool_R", "biped/combat/greatsword_auto1", biped);
-		GREATSWORD_AUTO_2 = new BasicAttackAnimation(0.2F, 0.4F, 0.6F, 0.8F, null, "Tool_R", "biped/combat/greatsword_auto2", biped);
+		GREATSWORD_AUTO1 = new BasicAttackAnimation(0.2F, 0.4F, 0.6F, 0.8F, null, "Tool_R", "biped/combat/greatsword_auto1", biped);
+		GREATSWORD_AUTO2 = new BasicAttackAnimation(0.2F, 0.4F, 0.6F, 0.8F, null, "Tool_R", "biped/combat/greatsword_auto2", biped);
 		GREATSWORD_DASH = new DashAttackAnimation(0.11F, 0.4F, 0.65F, 0.8F, 1.2F, null, "Tool_R", "biped/combat/greatsword_dash", false, biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
 				.addProperty(AttackPhaseProperty.FINISHER, true);
@@ -502,9 +524,9 @@ public class Animations {
 				.addProperty(AttackPhaseProperty.MAX_STRIKES, ValueCorrector.adder(1));
 		AXE_DASH = new DashAttackAnimation(0.25F, 0.08F, 0.4F, 0.46F, 0.9F, null, "Tool_R", "biped/combat/axe_dash", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true);
-		SWORD_DUAL_AUTO_1 = new BasicAttackAnimation(0.16F, 0.0F, 0.11F, 0.2F, null, "Tool_R", "biped/combat/sword_dual_auto1", biped);
-		SWORD_DUAL_AUTO_2 = new BasicAttackAnimation(0.13F, 0.0F, 0.1F, 0.1F, InteractionHand.OFF_HAND, null, "Tool_L", "biped/combat/sword_dual_auto2", biped);
-		SWORD_DUAL_AUTO_3 = new BasicAttackAnimation(0.18F, 0.0F, 0.25F, 0.35F, 0.64F, ColliderPreset.DUAL_SWORD, "Torso", "biped/combat/sword_dual_auto3", biped);
+		SWORD_DUAL_AUTO1 = new BasicAttackAnimation(0.16F, 0.0F, 0.11F, 0.2F, null, "Tool_R", "biped/combat/sword_dual_auto1", biped);
+		SWORD_DUAL_AUTO2 = new BasicAttackAnimation(0.13F, 0.0F, 0.1F, 0.1F, InteractionHand.OFF_HAND, null, "Tool_L", "biped/combat/sword_dual_auto2", biped);
+		SWORD_DUAL_AUTO3 = new BasicAttackAnimation(0.18F, 0.0F, 0.25F, 0.35F, 0.64F, ColliderPreset.DUAL_SWORD, "Torso", "biped/combat/sword_dual_auto3", biped);
 		SWORD_DUAL_DASH = new DashAttackAnimation(0.16F, 0.05F, 0.05F, 0.3F, 0.75F, ColliderPreset.DUAL_SWORD_DASH, "Root", "biped/combat/sword_dual_dash", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true);
@@ -524,9 +546,9 @@ public class Animations {
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP);
 		AXE_AUTO1 = new BasicAttackAnimation(0.16F, 0.05F, 0.16F, 0.7F, null, "Tool_R", "biped/combat/axe_auto1", biped);
 		AXE_AUTO2 = new BasicAttackAnimation(0.16F, 0.05F, 0.16F, 0.85F, null, "Tool_R", "biped/combat/axe_auto2", biped);
-		LONGSWORD_AUTO_1 = new BasicAttackAnimation(0.1F, 0.2F, 0.3F, 0.45F, null, "Tool_R", "biped/combat/longsword_auto1", biped);
-		LONGSWORD_AUTO_2 = new BasicAttackAnimation(0.15F, 0.1F, 0.21F, 0.45F, null, "Tool_R", "biped/combat/longsword_auto2", biped);
-		LONGSWORD_AUTO_3 = new BasicAttackAnimation(0.15F, 0.05F, 0.16F, 0.8F, null, "Tool_R", "biped/combat/longsword_auto3", biped);
+		LONGSWORD_AUTO1 = new BasicAttackAnimation(0.1F, 0.2F, 0.3F, 0.45F, null, "Tool_R", "biped/combat/longsword_auto1", biped);
+		LONGSWORD_AUTO2 = new BasicAttackAnimation(0.15F, 0.1F, 0.21F, 0.45F, null, "Tool_R", "biped/combat/longsword_auto2", biped);
+		LONGSWORD_AUTO3 = new BasicAttackAnimation(0.15F, 0.05F, 0.16F, 0.8F, null, "Tool_R", "biped/combat/longsword_auto3", biped);
 		LONGSWORD_DASH = new DashAttackAnimation(0.15F, 0.1F, 0.3F, 0.5F, 0.7F, null, "Tool_R", "biped/combat/longsword_dash", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true);
 		TACHI_DASH = new DashAttackAnimation(0.15F, 0.1F, 0.2F, 0.45F, 0.7F, null, "Tool_R", "biped/combat/tachi_dash", false, biped)
@@ -568,11 +590,55 @@ public class Animations {
 		SPEAR_MOUNT_ATTACK = new MountAttackAnimation(0.16F, 0.38F, 0.38F, 0.45F, 0.8F, null, "Tool_R", "biped/combat/spear_mount_attack", biped)
 				.addProperty(AttackAnimationProperty.ROTATE_X, true);
 		
-		BIPED_ARMED_MOB_ATTACK1 = new AttackAnimation(0.08F, 0.45F, 0.55F, 0.66F, 0.95F, null, "Tool_R", "biped/combat/armed_mob_attack1", biped)
+		BIPED_MOB_ONEHAND1 = new AttackAnimation(0.08F, 0.45F, 0.55F, 0.66F, 0.95F, null, "Tool_R", "biped/combat/mob_onehand1", biped)
 				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_ARMED_MOB_ATTACK2 = new AttackAnimation(0.08F, 0.45F, 0.5F, 0.61F, 0.95F, null, "Tool_R", "biped/combat/armed_mob_attack2", biped)
+		BIPED_MOB_ONEHAND2 = new AttackAnimation(0.08F, 0.45F, 0.5F, 0.61F, 0.95F, null, "Tool_R", "biped/combat/mob_onehand2", biped)
 				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_THROW = new AttackAnimation(0.11F, 1.0F, 0, 0, 0, null, "Root", "biped/combat/javelin_throw_mid", biped);
+		BIPED_MOB_GREATSWORD = new AttackAnimation(0.15F, 0.45F, 0.85F, 0.95F, 2.2F, null, "Tool_R", "biped/combat/mob_greatsword1", biped)
+				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN)
+				.addProperty(AttackAnimationProperty.ROTATE_X, true);
+		BIPED_MOB_TACHI = new AttackAnimation(0.15F, 0.15F, 0.25F, 0.35F, 1.0F, null, "Tool_R", "biped/combat/mob_tachi_special", biped)
+				.addProperty(AttackAnimationProperty.ROTATE_X, true);
+		BIPED_MOB_SPEAR_ONEHAND = new AttackAnimation(0.15F, 0.15F, 0.4F, 0.5F, 1.1F, null, "Tool_R", "biped/combat/mob_spear_onehand", biped)
+				.addProperty(AttackAnimationProperty.ROTATE_X, true);
+		BIPED_MOB_SPEAR_TWOHAND1 = new AttackAnimation(0.15F, 0.15F, 0.4F, 0.5F, 1.0F, null, "Tool_R", "biped/combat/mob_spear_twohand1", biped)
+				.addProperty(AttackAnimationProperty.ROTATE_X, true);
+		BIPED_MOB_SPEAR_TWOHAND2 = new AttackAnimation(0.15F, 0.15F, 0.4F, 0.5F, 1.0F, null, "Tool_R", "biped/combat/mob_spear_twohand2", biped)
+				.addProperty(AttackAnimationProperty.ROTATE_X, true);
+		BIPED_MOB_SPEAR_TWOHAND3 = new AttackAnimation(0.15F, 0.15F, 0.4F, 0.5F, 1.0F, null, "Tool_R", "biped/combat/mob_spear_twohand3", biped)
+				.addProperty(AttackAnimationProperty.ROTATE_X, true);
+		BIPED_MOB_SWORD_DUAL1 = new AttackAnimation(0.1F, "biped/combat/mob_sword_dual1", biped,
+				new Phase(0.35F, 0.4F, 0.5F, 0.55F, InteractionHand.OFF_HAND, "Tool_L", null), new Phase(0.55F, 0.65F, 0.75F, 1.15F, "Tool_R", null))
+				.addProperty(AttackAnimationProperty.ROTATE_X, true);
+		BIPED_MOB_SWORD_DUAL2 = new AttackAnimation(0.1F, "biped/combat/mob_sword_dual2", biped,
+				new Phase(0.3F, 0.3F, 0.45F, 0.55F, InteractionHand.OFF_HAND, "Tool_L", null), new Phase(0.55F, 0.65F, 0.75F, 1.15F, "Tool_R", null))
+				.addProperty(AttackAnimationProperty.ROTATE_X, true);
+		BIPED_MOB_SWORD_DUAL3 = new AttackAnimation(0.1F, 0.25F, 0.85F, 0.95F, 1.4F, null, "Tool_R", "biped/combat/mob_sword_dual3", biped)
+				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true);
+		BIPED_MOB_LONGSWORD1 = new AttackAnimation(0.15F, "biped/combat/mob_longsword1", biped,
+				new Phase(0.15F, 0.25F, 0.35F, 0.45F, "Tool_R", null), new Phase(0.85F, 1.0F, 1.1F, 1.55F, "Tool_R", null))
+				.addProperty(AttackAnimationProperty.ROTATE_X, true);
+		BIPED_MOB_LONGSWORD2 = new AttackAnimation(0.25F, 0.3F, 0.45F, 0.55F, 1.0F, null, "Tool_R", "biped/combat/mob_longsword2", biped)
+				.addProperty(AttackAnimationProperty.ROTATE_X, true);
+		BIPED_MOB_KATANA1 = new AttackAnimation(0.05F, 0.3F, 0.2F, 0.3F, 0.7F, null, "Tool_R", "biped/combat/mob_katana1", biped)
+				.addProperty(AttackAnimationProperty.ROTATE_X, true);
+		BIPED_MOB_KATANA2 = new AttackAnimation(0.15F, 0.01F, 0.01F, 0.1F, 0.55F, null, "Tool_R", "biped/combat/mob_katana2", biped)
+				.addProperty(AttackAnimationProperty.ROTATE_X, true);
+		BIPED_MOB_KATANA3 = new AttackAnimation(0.15F, 0.01F, 0.1F, 0.2F, 0.7F, null, "Tool_R", "biped/combat/mob_katana3", biped)
+				.addProperty(AttackAnimationProperty.ROTATE_X, true);
+		BIPED_MOB_DAGGER_ONEHAND1 = new AttackAnimation(0.1F, 0.05F, 0.15F, 0.25F, 0.4F, null, "Tool_R", "biped/combat/mob_dagger_onehand1", biped)
+				.addProperty(AttackAnimationProperty.ROTATE_X, true);
+		BIPED_MOB_DAGGER_ONEHAND2 = new AttackAnimation(0.1F, 0.05F, 0.01F, 0.1F, 0.45F, null, "Tool_R", "biped/combat/mob_dagger_onehand2", biped)
+				.addProperty(AttackAnimationProperty.ROTATE_X, true);
+		BIPED_MOB_DAGGER_ONEHAND3 = new AttackAnimation(0.1F, 0.3F, 0.5F, 0.6F, 0.9F, null, "Tool_R", "biped/combat/mob_dagger_onehand3", biped)
+				.addProperty(AttackAnimationProperty.ROTATE_X, true);
+		BIPED_MOB_DAGGER_TWOHAND1 = new AttackAnimation(0.15F, "biped/combat/mob_dagger_twohand1", biped,
+				new Phase(0.01F, 0.05F, 0.15F, 0.3F, "Tool_R", null), new Phase(0.3F, 0.3F, 0.4F, 0.5F, InteractionHand.OFF_HAND, "Tool_L", null)
+				,new Phase(0.5F, 0.55F, 0.65F, 1.0F, "Tool_R", null))
+				.addProperty(AttackAnimationProperty.ROTATE_X, true);
+		BIPED_MOB_DAGGER_TWOHAND2 = new AttackAnimation(0.1F, 0.25F, 0.75F, 0.85F, 1.0F, null, "Tool_R", "biped/combat/mob_dagger_twohand2", biped)
+				.addProperty(AttackAnimationProperty.ROTATE_X, true);
+		BIPED_MOB_THROW = new RangedAttackAnimation(0.11F, 0.1F, 0.1F, 0.49F, 0.95F, null, "Root", "biped/combat/mob_throw", biped);
 		
 		SWORD_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_sword_hit", biped);
 		SWORD_DUAL_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_dualsword_hit", biped);
@@ -622,7 +688,7 @@ public class Animations {
 				});
 		
 		DRAGON_FLY = new StaticAnimation(0.35F, true, "dragon/fly", dragon)
-				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.4F, RecycleableEvents.WING_FLAP, Event.Side.CLIENT)});
+				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.4F, ReuseableEvents.WING_FLAP, Event.Side.CLIENT)});
 		
 		DRAGON_DEATH = new EnderDragonDeathAnimation(1.0F, "dragon/death", dragon);
 		
@@ -634,7 +700,7 @@ public class Animations {
 				})
 				.addProperty(ActionAnimationProperty.INTERRUPT_PREVIOUS_DELTA_MOVEMENT, true)
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true)
-				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.25F, RecycleableEvents.WING_FLAP, Event.Side.CLIENT), Event.create(1.05F, RecycleableEvents.WING_FLAP, Event.Side.CLIENT), Event.create(1.45F, (entitypatch) -> {
+				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.25F, ReuseableEvents.WING_FLAP, Event.Side.CLIENT), Event.create(1.05F, ReuseableEvents.WING_FLAP, Event.Side.CLIENT), Event.create(1.45F, (entitypatch) -> {
 					if (entitypatch instanceof EnderDragonPatch) {
 						((EnderDragonPatch)entitypatch).setFlyingPhase();
 					}
@@ -667,7 +733,7 @@ public class Animations {
 						transformSheet.readFrom(transform);
 					}
 				})
-				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.3F, RecycleableEvents.WING_FLAP, Event.Side.CLIENT), Event.create(1.1F, (entitypatch) -> {
+				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.3F, ReuseableEvents.WING_FLAP, Event.Side.CLIENT), Event.create(1.1F, (entitypatch) -> {
 					entitypatch.playSound(EpicFightSounds.GROUND_SLAM, 0, 0);
 					LivingEntity original = entitypatch.getOriginal();
 					BlockPos blockpos = original.level.getHeightmapPos(Heightmap.Types.WORLD_SURFACE, original.blockPosition());
@@ -767,7 +833,7 @@ public class Animations {
 		}, Side.SERVER)});
 		
 		DRAGON_AIRSTRIKE = new StaticAnimation(0.35F, true, "dragon/airstrike", dragon)
-			.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.3F, RecycleableEvents.WING_FLAP, Event.Side.CLIENT)});
+			.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.3F, ReuseableEvents.WING_FLAP, Event.Side.CLIENT)});
 		
 		DRAGON_BACKJUMP_PREPARE = new EnderDragonActionAnimation(0.35F, "dragon/backjump_prepare", dragon, new IKSetter[] {
 				IKSetter.make("Leg_Front_L1", "Leg_Front_L3", null, Pair.of(0, 4), 0.12F, 0, new boolean[] {true, true, true, true}),
@@ -849,7 +915,7 @@ public class Animations {
 		SPIDER_HIT = new HitAnimation(0.08F, "spider/hit", spider);
 		SPIDER_DEATH = new LongHitAnimation(0.16F, "spider/death", spider);
 		
-		GOLEM_ATTACK1 = new AttackAnimation(0.2F, 0.1F, 0.15F, 0.25F, 0.9F, ColliderPreset.HEADBUTT_GOLEM, "Head", "iron_golem/attack1", iron_golem)
+		GOLEM_ATTACK1 = new AttackAnimation(0.2F, 0.1F, 0.15F, 0.25F, 0.9F, ColliderPreset.HEAD, "Head", "iron_golem/attack1", iron_golem)
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN);
 		GOLEM_ATTACK2 = new AttackAnimation(0.34F, 0.1F, 0.4F, 0.6F, 1.3F, ColliderPreset.GOLEM_SMASHDOWN, "LA4", "iron_golem/attack2", iron_golem)
 				.addProperty(AttackPhaseProperty.FINISHER, true);
@@ -1125,7 +1191,7 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.ROTATE_X, true);
 		ZOMBIE_ATTACK2 = new AttackAnimation(0.1F, 0.3F, 0.33F, 0.55F, 0.85F, ColliderPreset.FIST, "Tool_L", "zombie/attack2", biped)
 				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		ZOMBIE_ATTACK3 = new AttackAnimation(0.1F, 0.5F, 0.5F, 0.6F, 1.15F, ColliderPreset.HEADBUTT_GOLEM, "Head", "zombie/attack3", biped);
+		ZOMBIE_ATTACK3 = new AttackAnimation(0.1F, 0.5F, 0.5F, 0.6F, 1.15F, ColliderPreset.HEAD, "Head", "zombie/attack3", biped);
 		
 		SWEEPING_EDGE = new SpecialAttackAnimation(0.16F, 0.1F, 0.35F, 0.46F, 0.79F, null, "Tool_R", "biped/skill/sweeping_edge", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
@@ -1168,14 +1234,14 @@ public class Animations {
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
 				.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.0F)
-				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.05F, RecycleableEvents.KATANA_IN, Event.Side.SERVER)});
+				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.05F, ReuseableEvents.KATANA_IN, Event.Side.SERVER)});
 		
 		FATAL_DRAW_DASH = new SpecialAttackAnimation(0.15F, 0.43F, 0.85F, 0.91F, 1.4F, ColliderPreset.FATAL_DRAW_DASH, "Root", "biped/skill/fatal_draw_dash", biped)
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
 				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
 				.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.0F)
-				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.05F, RecycleableEvents.KATANA_IN, Event.Side.SERVER)})
+				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.05F, ReuseableEvents.KATANA_IN, Event.Side.SERVER)})
 				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.85F, (entitypatch) -> {
 					Entity entity = entitypatch.getOriginal();
 					entitypatch.getOriginal().level.addParticle(EpicFightParticles.ENTITY_AFTER_IMAGE.get(), entity.getX(), entity.getY(), entity.getZ(), Double.longBitsToDouble(entity.getId()), 0, 0);
@@ -1227,10 +1293,9 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
 				.addProperty(AttackPhaseProperty.HIT_PRIORITY, Priority.TARGET)
 				.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.0F);
-		MobCombatBehaviors.setAttackCombos();
 	}
 	
-	private static class RecycleableEvents {
+	private static class ReuseableEvents {
 		private static final Consumer<LivingEntityPatch<?>> WING_FLAP = (entitypatch) -> {
 			if (entitypatch instanceof EnderDragonPatch) {
 				((EnderDragonPatch)entitypatch).getOriginal().onFlap();
@@ -1259,8 +1324,5 @@ public class Animations {
 		
 		BIPED_LANDING
 				.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.LOWEST);
-		
-		BIPED_MOB_THROW
-				.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.HIGHEST);
 	}
 }
