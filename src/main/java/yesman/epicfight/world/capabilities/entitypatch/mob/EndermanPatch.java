@@ -40,11 +40,12 @@ import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPChangeLivingMotion;
 import yesman.epicfight.network.server.SPSpawnData;
 import yesman.epicfight.particle.EpicFightParticles;
+import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 import yesman.epicfight.world.effect.EpicFightMobEffects;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
-import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 
 public class EndermanPatch extends MobPatch<EnderMan> {
@@ -55,8 +56,8 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 	private boolean onRage;
 	private Goal normalAttacks;
 	private Goal teleportAttacks;
-	private Goal rageMove;
-	private Goal rageTarget;
+	private Goal rageAttacks;
+	private Goal rageTargeting;
 	
 	public EndermanPatch() {
 		super(Faction.ENDERMAN);
@@ -99,20 +100,18 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 	@Override
 	protected void initAI() {
 		super.initAI();
-		this.normalAttacks = new CombatBehaviorGoal<>(this, MobCombatBehaviors.ENDERMAN.build(this));
+		this.normalAttacks = new AnimatedAttackGoal<>(this, MobCombatBehaviors.ENDERMAN.build(this), this.original, 0.75D, false);
 		this.teleportAttacks = new EndermanTeleportMove(this, MobCombatBehaviors.ENDERMAN_TELEPORT.build(this));
-		this.rageTarget = new NearestAttackableTargetGoal<>(this.original, Player.class, true);
-		this.rageMove = new CombatBehaviorGoal<>(this, MobCombatBehaviors.ENDERMAN_RAGE.build(this));
+		this.rageTargeting = new NearestAttackableTargetGoal<>(this.original, Player.class, true);
+		this.rageAttacks = new AnimatedAttackGoal<>(this, MobCombatBehaviors.ENDERMAN_RAGE.build(this), this.original, 0.75D, false);
 		
 		if (this.isRaging()) {
-			this.original.targetSelector.addGoal(3, this.rageTarget);
-			this.original.goalSelector.addGoal(1, this.rageMove);
+			this.original.targetSelector.addGoal(3, this.rageTargeting);
+			this.original.goalSelector.addGoal(1, this.rageAttacks);
 		} else {
 			this.original.goalSelector.addGoal(1, this.normalAttacks);
 			this.original.goalSelector.addGoal(0, this.teleportAttacks);
 		}
-		
-		this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, 0.75D, false));
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -199,8 +198,8 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 		if (!this.original.isNoAi()) {
 			this.original.goalSelector.removeGoal(this.normalAttacks);
 			this.original.goalSelector.removeGoal(this.teleportAttacks);
-			this.original.goalSelector.addGoal(1, this.rageMove);
-			this.original.targetSelector.addGoal(3, this.rageTarget);
+			this.original.goalSelector.addGoal(1, this.rageAttacks);
+			this.original.targetSelector.addGoal(3, this.rageTargeting);
 			this.original.getEntityData().set(EnderMan.DATA_CREEPY, Boolean.valueOf(true));
 			this.original.addEffect(new MobEffectInstance(EpicFightMobEffects.STUN_IMMUNITY.get(), 120000));
 			this.original.getAttribute(Attributes.MOVEMENT_SPEED).addTransientModifier(SPEED_MODIFIER_RAGE);
@@ -218,8 +217,8 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 		if (!this.original.isNoAi()) {
 			this.original.goalSelector.addGoal(1, this.normalAttacks);
 			this.original.goalSelector.addGoal(0, this.teleportAttacks);
-			this.original.goalSelector.removeGoal(this.rageMove);
-			this.original.targetSelector.removeGoal(this.rageTarget);
+			this.original.goalSelector.removeGoal(this.rageAttacks);
+			this.original.targetSelector.removeGoal(this.rageTargeting);
 			
 			if (this.original.getTarget() == null) {
 				this.original.getEntityData().set(EnderMan.DATA_CREEPY, Boolean.valueOf(false));

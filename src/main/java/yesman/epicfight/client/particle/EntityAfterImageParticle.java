@@ -67,8 +67,8 @@ public class EntityAfterImageParticle extends CustomModelParticle {
 		public Particle createParticle(SimpleParticleType typeIn, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
 			LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>)level.getEntity((int)Double.doubleToLongBits(xSpeed)).getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
 			
-			if (entitypatch != null) {
-				PatchedEntityRenderer renderer = ClientEngine.instance.renderEngine.getEntityRenderer(entitypatch.getOriginal().getType());
+			if (entitypatch != null && ClientEngine.instance.renderEngine.hasRendererFor(entitypatch.getOriginal())) {
+				PatchedEntityRenderer renderer = ClientEngine.instance.renderEngine.getEntityRenderer(entitypatch.getOriginal());
 				Armature armature = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature();
 				PoseStack poseStack = new PoseStack();
 				OpenMatrix4f[] matrices = renderer.getPoseMatrices(entitypatch, armature, 1.0F);

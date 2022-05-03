@@ -6,7 +6,7 @@ import java.util.Set;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.LeapAtTargetGoal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
@@ -20,13 +20,13 @@ import yesman.epicfight.api.utils.game.ExtendedDamageSource.StunType;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.gameasset.Models;
+import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
-import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
-import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
+import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 
-public class SpiderPatch<T extends Mob> extends MobPatch<T> {
+public class SpiderPatch<T extends PathfinderMob> extends MobPatch<T> {
 	public SpiderPatch() {
-		super(Faction.NEUTURAL);
+		super(Faction.NEUTRAL);
 	}
 	
 	@Override
@@ -51,8 +51,7 @@ public class SpiderPatch<T extends Mob> extends MobPatch<T> {
         	this.original.goalSelector.removeGoal(toRemove);
         }
         
-        this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, 1.0D, false));
-        this.original.goalSelector.addGoal(0, new CombatBehaviorGoal<>(this, MobCombatBehaviors.SPIDER.build(this)));
+        this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, MobCombatBehaviors.SPIDER.build(this), this.getOriginal(), 1.0D, false));
 	}
 	
 	@OnlyIn(Dist.CLIENT)

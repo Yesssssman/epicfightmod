@@ -47,27 +47,27 @@ public class EpicFightAttributes {
 		commonCreature(EntityType.CAVE_SPIDER, event);
 		commonCreature(EntityType.EVOKER, event);
 		commonCreature(EntityType.IRON_GOLEM, event);
-		habilis(EntityType.PILLAGER, event);
+		humanoid(EntityType.PILLAGER, event);
 		commonCreature(EntityType.RAVAGER, event);
 		commonCreature(EntityType.SPIDER, event);
 		commonCreature(EntityType.VEX, event);
-		habilis(EntityType.VINDICATOR, event);
-		commonCreature(EntityType.WITCH, event);
+		humanoid(EntityType.VINDICATOR, event);
+		humanoid(EntityType.WITCH, event);
 		commonCreature(EntityType.HOGLIN, event);
 		commonCreature(EntityType.ZOGLIN, event);
 		commonCreature(EntityType.ENDER_DRAGON, event);
 		commonCreature(EntityType.CREEPER, event);
-		habilis(EntityType.DROWNED, event);
+		humanoid(EntityType.DROWNED, event);
 		commonCreature(EntityType.ENDERMAN, event);
-		habilis(EntityType.HUSK, event);
-		habilis(EntityType.PIGLIN, event);
-		habilis(EntityType.PIGLIN_BRUTE, event);
-		habilis(EntityType.SKELETON, event);
-		habilis(EntityType.STRAY, event);
-		habilis(EntityType.WITHER_SKELETON, event);
-		habilis(EntityType.ZOMBIE, event);
-		habilis(EntityType.ZOMBIE_VILLAGER, event);
-		habilis(EntityType.ZOMBIFIED_PIGLIN, event);
+		humanoid(EntityType.HUSK, event);
+		humanoid(EntityType.PIGLIN, event);
+		humanoid(EntityType.PIGLIN_BRUTE, event);
+		humanoid(EntityType.SKELETON, event);
+		humanoid(EntityType.STRAY, event);
+		humanoid(EntityType.WITHER_SKELETON, event);
+		humanoid(EntityType.ZOMBIE, event);
+		humanoid(EntityType.ZOMBIE_VILLAGER, event);
+		humanoid(EntityType.ZOMBIFIED_PIGLIN, event);
 		commonCreature(EpicFightEntities.WITHER_SKELETON_MINION.get(), event);
 		player(EntityType.PLAYER, event);
 		dragon(EntityType.ENDER_DRAGON, event);
@@ -82,7 +82,7 @@ public class EpicFightAttributes {
 		event.add(entityType, EpicFightAttributes.STUN_ARMOR.get());
 	}
     
-    private static void habilis(EntityType<? extends LivingEntity> entityType, EntityAttributeModificationEvent event) {
+    private static void humanoid(EntityType<? extends LivingEntity> entityType, EntityAttributeModificationEvent event) {
     	commonCreature(entityType, event);
 		event.add(entityType, EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get());
 		event.add(entityType, EpicFightAttributes.OFFHAND_ATTACK_SPEED.get());
@@ -92,7 +92,7 @@ public class EpicFightAttributes {
 	}
     
     private static void player(EntityType<? extends LivingEntity> entityType, EntityAttributeModificationEvent event) {
-    	habilis(entityType, event);
+    	humanoid(entityType, event);
 		event.add(entityType, EpicFightAttributes.MAX_STAMINA.get());
 	}
     

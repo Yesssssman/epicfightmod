@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
@@ -129,19 +130,21 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 			return;
 		}
 		
+		this.getAnimator().resetMotions();
 		CapabilityItem mainhandCap = this.getHoldingItemCapability(InteractionHand.MAIN_HAND);
 		CapabilityItem offhandCap = this.getAdvancedHoldingItemCapability(InteractionHand.OFF_HAND);
-		CapabilityItem motionModifyingCap = mainhandCap.isEmpty() ? offhandCap : mainhandCap;
+		Map<LivingMotion, StaticAnimation> motionModifier = Maps.newHashMap();
 		
-		this.getAnimator().resetMotions();
-		Map<LivingMotion, StaticAnimation> mainhandMotionModifier = motionModifyingCap.getLivingMotionModifier(this, InteractionHand.MAIN_HAND);
+		offhandCap.getLivingMotionModifier(this, InteractionHand.OFF_HAND).forEach(motionModifier::put);
+		mainhandCap.getLivingMotionModifier(this, InteractionHand.MAIN_HAND).forEach(motionModifier::put);
 		
-		for (Map.Entry<LivingMotion, StaticAnimation> entry : mainhandMotionModifier.entrySet()) {
+		for (Map.Entry<LivingMotion, StaticAnimation> entry : motionModifier.entrySet()) {
 			this.getAnimator().addLivingAnimation(entry.getKey(), entry.getValue());
 		}
 		
 		SPChangeLivingMotion msg = new SPChangeLivingMotion(this.original.getId());
 		msg.putEntries(this.getAnimator().getLivingAnimationEntrySet());
+		
 		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(msg, this.original);
 		this.updatedMotionCurrentTick = true;
 	}

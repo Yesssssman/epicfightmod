@@ -20,17 +20,15 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPSetAttackTarget;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
-import yesman.epicfight.world.capabilities.entitypatch.mob.Faction;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
-import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
+import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 
 public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	protected final Faction mobFaction;
 	
 	public MobPatch() {
-		this.mobFaction = Faction.NEUTURAL;
+		this.mobFaction = Faction.NEUTRAL;
 	}
 	
 	public MobPatch(Faction faction) {
@@ -51,7 +49,7 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	}
 	
 	protected void resetCombatAI() {
-		this.original.goalSelector.getAvailableGoals().removeIf((goal) -> (goal.getGoal() instanceof MeleeAttackGoal || goal.getGoal() instanceof CombatBehaviorGoal || goal.getGoal() instanceof ChasingGoal || goal.getGoal() instanceof RangedAttackGoal));
+		this.original.goalSelector.getAvailableGoals().removeIf((goal) -> (goal.getGoal() instanceof MeleeAttackGoal || goal.getGoal() instanceof AnimatedAttackGoal || goal.getGoal() instanceof RangedAttackGoal));
 	}
 	
 	protected final void commonMobUpdateMotion(boolean considerInaction) {

@@ -17,15 +17,13 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.BossHealthOverlay;
 import net.minecraft.client.model.EntityModel;
-import net.minecraft.client.model.PiglinModel;
-import net.minecraft.client.model.SkeletonModel;
-import net.minecraft.client.model.ZombieModel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -35,17 +33,6 @@ import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
-import net.minecraft.world.entity.monster.Evoker;
-import net.minecraft.world.entity.monster.Husk;
-import net.minecraft.world.entity.monster.Pillager;
-import net.minecraft.world.entity.monster.Skeleton;
-import net.minecraft.world.entity.monster.WitherSkeleton;
-import net.minecraft.world.entity.monster.Zoglin;
-import net.minecraft.world.entity.monster.Zombie;
-import net.minecraft.world.entity.monster.ZombifiedPiglin;
-import net.minecraft.world.entity.monster.hoglin.Hoglin;
-import net.minecraft.world.entity.monster.piglin.Piglin;
-import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.Item;
@@ -67,6 +54,7 @@ import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.client.model.forgeevent.RenderEnderDragonEvent;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -95,7 +83,7 @@ import yesman.epicfight.client.renderer.patched.entity.PVexRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PVindicatorRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PWitchRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PWitherRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PWitherSkeletonRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PWitherSkeletonMinionRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PZombieVillagerRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PatchedEntityRenderer;
 import yesman.epicfight.client.renderer.patched.entity.WitherGhostCloneRenderer;
@@ -111,15 +99,6 @@ import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.EnderDragonPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.EvokerPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.HoglinPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.PiglinBrutePatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.PiglinPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.PillagerPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.SkeletonPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.WitherSkeletonPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.ZoglinPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.ZombiePatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.EpicFightEntities;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
@@ -133,11 +112,11 @@ public class RenderEngine {
 	public AimHelperRenderer aimHelper;
 	public BattleModeGui guiSkillBar = new BattleModeGui(Minecraft.getInstance());
 	private Minecraft minecraft;
-	private Map<EntityType<?>, PatchedEntityRenderer> entityRenderers;
-	private Map<EntityType<?>, PatchedEntityRenderer> customEntityRenderers;
+	private Map<EntityType<?>, Supplier<PatchedEntityRenderer>> entityRendererProvider;
+	private Map<EntityType<?>, PatchedEntityRenderer> entityRendererCache;
 	private Map<Item, RenderItemBase> itemRendererMapByInstance;
 	private Map<Class<? extends Item>, RenderItemBase> itemRendererMapByClass;
-	private final Map<String, Supplier<PatchedEntityRenderer>> rendererTypes = Maps.newHashMap();
+	//private final Map<String, Supplier<PatchedEntityRenderer>> rendererTypes = Maps.newHashMap();
 	private FirstPersonRenderer firstPersonRenderer;
 	private OverlayManager overlayManager;
 	private boolean aiming;
@@ -150,55 +129,44 @@ public class RenderEngine {
 		RenderItemBase.renderEngine = this;
 		EntityIndicator.init();
 		this.minecraft = Minecraft.getInstance();
-		this.entityRenderers = Maps.newHashMap();
-		this.customEntityRenderers = Maps.newHashMap();
+		this.entityRendererProvider = Maps.newHashMap();
+		this.entityRendererCache = Maps.newHashMap();
 		this.itemRendererMapByInstance = Maps.newHashMap();
 		this.itemRendererMapByClass = Maps.newHashMap();
 		this.firstPersonRenderer = new FirstPersonRenderer();
 		this.overlayManager = new OverlayManager();
 		this.minecraft.renderBuffers().fixedBuffers.put(EpicFightRenderTypes.enchantedAnimatedArmor(), new BufferBuilder(EpicFightRenderTypes.enchantedAnimatedArmor().bufferSize()));
-		
-		this.rendererTypes.put("creeper", PCreeperRenderer::new);
-		this.rendererTypes.put("humanoid", PHumanoidRenderer::new);
-		this.rendererTypes.put("vindicator", PVindicatorRenderer::new);
-		this.rendererTypes.put("spider", PSpiderRenderer::new);
-		this.rendererTypes.put("iron_golem", PIronGolemRenderer::new);
-		this.rendererTypes.put("abstract_illager", PAbstractIllagerRenderer::new);
-		this.rendererTypes.put("ravager", PRavagerRenderer::new);
-		this.rendererTypes.put("vex", PVexRenderer::new);
-		this.rendererTypes.put("hoglin", PHoglinRenderer::new);
-		this.rendererTypes.put("witch", PWitchRenderer::new);
 	}
 	
 	public void registerRenderer() {
-		this.entityRenderers.put(EntityType.CREEPER, new PCreeperRenderer());
-		this.entityRenderers.put(EntityType.ENDERMAN, new PEndermanRenderer());
-		this.entityRenderers.put(EntityType.ZOMBIE, new PHumanoidRenderer<Zombie, ZombiePatch<Zombie>, ZombieModel<Zombie>>());
-		this.entityRenderers.put(EntityType.ZOMBIE_VILLAGER, new PZombieVillagerRenderer());
-		this.entityRenderers.put(EntityType.ZOMBIFIED_PIGLIN, new PHumanoidRenderer<ZombifiedPiglin, ZombiePatch<ZombifiedPiglin>, PiglinModel<ZombifiedPiglin>>());
-		this.entityRenderers.put(EntityType.HUSK, new PHumanoidRenderer<Husk, ZombiePatch<Husk>, ZombieModel<Husk>>());
-		this.entityRenderers.put(EntityType.SKELETON, new PHumanoidRenderer<Skeleton, SkeletonPatch<Skeleton>, SkeletonModel<Skeleton>>());
-		this.entityRenderers.put(EntityType.WITHER_SKELETON, new PHumanoidRenderer<WitherSkeleton, WitherSkeletonPatch, SkeletonModel<WitherSkeleton>>());
-		this.entityRenderers.put(EntityType.STRAY, new PStrayRenderer());
-		this.entityRenderers.put(EntityType.PLAYER, new PPlayerRenderer());
-		this.entityRenderers.put(EntityType.SPIDER, new PSpiderRenderer());
-		this.entityRenderers.put(EntityType.CAVE_SPIDER, new PCaveSpiderRenderer());
-		this.entityRenderers.put(EntityType.IRON_GOLEM, new PIronGolemRenderer());
-		this.entityRenderers.put(EntityType.VINDICATOR, new PVindicatorRenderer());
-		this.entityRenderers.put(EntityType.EVOKER, new PAbstractIllagerRenderer<Evoker, EvokerPatch>());
-		this.entityRenderers.put(EntityType.WITCH, new PWitchRenderer());
-		this.entityRenderers.put(EntityType.DROWNED, new PDrownedRenderer());
-		this.entityRenderers.put(EntityType.PILLAGER, new PAbstractIllagerRenderer<Pillager, PillagerPatch>());
-		this.entityRenderers.put(EntityType.RAVAGER, new PRavagerRenderer());
-		this.entityRenderers.put(EntityType.VEX, new PVexRenderer());
-		this.entityRenderers.put(EntityType.PIGLIN, new PHumanoidRenderer<Piglin, PiglinPatch, PiglinModel<Piglin>>());
-		this.entityRenderers.put(EntityType.PIGLIN_BRUTE, new PHumanoidRenderer<PiglinBrute, PiglinBrutePatch, PiglinModel<PiglinBrute>>());
-		this.entityRenderers.put(EntityType.HOGLIN, new PHoglinRenderer<Hoglin, HoglinPatch>());
-		this.entityRenderers.put(EntityType.ZOGLIN, new PHoglinRenderer<Zoglin, ZoglinPatch>());
-		this.entityRenderers.put(EntityType.ENDER_DRAGON, new PEnderDragonRenderer());
-		this.entityRenderers.put(EntityType.WITHER, new PWitherRenderer());
-		this.entityRenderers.put(EpicFightEntities.WITHER_SKELETON_MINION.get(), new PWitherSkeletonRenderer().setOverridingTexture("epicfight:textures/entity/wither_skeleton_minion.png"));
-		this.entityRenderers.put(EpicFightEntities.WITHER_GHOST_CLONE.get(), new WitherGhostCloneRenderer());
+		this.entityRendererProvider.put(EntityType.CREEPER, PCreeperRenderer::new);
+		this.entityRendererProvider.put(EntityType.ENDERMAN, PEndermanRenderer::new);
+		this.entityRendererProvider.put(EntityType.ZOMBIE, PHumanoidRenderer::new);
+		this.entityRendererProvider.put(EntityType.ZOMBIE_VILLAGER, PZombieVillagerRenderer::new);
+		this.entityRendererProvider.put(EntityType.ZOMBIFIED_PIGLIN, PHumanoidRenderer::new);
+		this.entityRendererProvider.put(EntityType.HUSK, PHumanoidRenderer::new);
+		this.entityRendererProvider.put(EntityType.SKELETON, PHumanoidRenderer::new);
+		this.entityRendererProvider.put(EntityType.WITHER_SKELETON, PHumanoidRenderer::new);
+		this.entityRendererProvider.put(EntityType.STRAY, PStrayRenderer::new);
+		this.entityRendererProvider.put(EntityType.PLAYER, PPlayerRenderer::new);
+		this.entityRendererProvider.put(EntityType.SPIDER, PSpiderRenderer::new);
+		this.entityRendererProvider.put(EntityType.CAVE_SPIDER, PCaveSpiderRenderer::new);
+		this.entityRendererProvider.put(EntityType.IRON_GOLEM, PIronGolemRenderer::new);
+		this.entityRendererProvider.put(EntityType.VINDICATOR, PVindicatorRenderer::new);
+		this.entityRendererProvider.put(EntityType.EVOKER, PAbstractIllagerRenderer::new);
+		this.entityRendererProvider.put(EntityType.WITCH, PWitchRenderer::new);
+		this.entityRendererProvider.put(EntityType.DROWNED, PDrownedRenderer::new);
+		this.entityRendererProvider.put(EntityType.PILLAGER, PAbstractIllagerRenderer::new);
+		this.entityRendererProvider.put(EntityType.RAVAGER, PRavagerRenderer::new);
+		this.entityRendererProvider.put(EntityType.VEX, PVexRenderer::new);
+		this.entityRendererProvider.put(EntityType.PIGLIN, PHumanoidRenderer::new);
+		this.entityRendererProvider.put(EntityType.PIGLIN_BRUTE, PHumanoidRenderer::new);
+		this.entityRendererProvider.put(EntityType.HOGLIN, PHoglinRenderer::new);
+		this.entityRendererProvider.put(EntityType.ZOGLIN, PHoglinRenderer::new);
+		this.entityRendererProvider.put(EntityType.ENDER_DRAGON, PEnderDragonRenderer::new);
+		this.entityRendererProvider.put(EntityType.WITHER, PWitherRenderer::new);
+		this.entityRendererProvider.put(EpicFightEntities.WITHER_SKELETON_MINION.get(), () -> new PWitherSkeletonMinionRenderer().setOverridingTexture("epicfight:textures/entity/wither_skeleton_minion.png"));
+		this.entityRendererProvider.put(EpicFightEntities.WITHER_GHOST_CLONE.get(), WitherGhostCloneRenderer::new);
 		
 		RenderBow bowRenderer = new RenderBow();
 		RenderCrossbow crossbowRenderer = new RenderCrossbow();
@@ -218,16 +186,19 @@ public class RenderEngine {
 		this.aimHelper = new AimHelperRenderer();
 	}
 	
-	public void registerCustomEntityRenderer(EntityType<?> entityType, String rendererType) {
-		if (rendererType == "") {
+	public void registerCustomEntityRenderer(EntityType<?> entityType, String renderer) {
+		if (renderer == "") {
 			return;
 		}
 		
-		if (!this.rendererTypes.containsKey(rendererType)) {
-			throw new IllegalArgumentException("Datapack Mob Patch Crash: No render type " + rendererType);
+		EntityType<?> presetEntityType = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(renderer));
+		
+		if (this.entityRendererProvider.containsKey(presetEntityType)) {
+			this.entityRendererCache.put(entityType, this.entityRendererProvider.get(presetEntityType).get());
+			return;
 		}
 		
-		this.customEntityRenderers.put(entityType, this.rendererTypes.get(rendererType).get());
+		throw new IllegalArgumentException("Datapack Mob Patch Crash: Invalid Renderer type " + renderer);
 	}
 	
 	public RenderItemBase getItemRenderer(Item item) {
@@ -257,19 +228,19 @@ public class RenderEngine {
 	
 	@SuppressWarnings("unchecked")
 	public void renderEntityArmatureModel(LivingEntity livingEntity, LivingEntityPatch<?> entitypatch, LivingEntityRenderer<? extends Entity, ?> renderer, MultiBufferSource buffer, PoseStack matStack, int packedLightIn, float partialTicks) {
-		this.getEntityRenderer(livingEntity.getType()).render(livingEntity, entitypatch, renderer, buffer, matStack, packedLightIn, partialTicks);
+		this.getEntityRenderer(livingEntity).render(livingEntity, entitypatch, renderer, buffer, matStack, packedLightIn, partialTicks);
 	}
 	
-	public PatchedEntityRenderer getEntityRenderer(EntityType<?> entityType) {
-		return this.customEntityRenderers.getOrDefault(entityType, this.entityRenderers.get(entityType));
+	public PatchedEntityRenderer getEntityRenderer(Entity entity) {
+		return this.entityRendererCache.get(entity.getType());
 	}
 	
-	public boolean isEntityContained(Entity entity) {
-		return this.customEntityRenderers.containsKey(entity.getType()) || this.entityRenderers.containsKey(entity.getType());
+	public boolean hasRendererFor(Entity entity) {
+		return this.entityRendererCache.computeIfAbsent(entity.getType(), (key) -> this.entityRendererProvider.containsKey(key) ? this.entityRendererProvider.get(entity.getType()).get() : null) != null;
 	}
 	
 	public void clearCustomEntityRenerer() {
-		this.customEntityRenderers.clear();
+		this.entityRendererCache.clear();
 	}
 	
 	public void zoomIn() {
@@ -350,7 +321,7 @@ public class RenderEngine {
 		public static void renderLivingEvent(RenderLivingEvent.Pre<? extends LivingEntity, ? extends EntityModel<? extends LivingEntity>> event) {
 			LivingEntity livingentity = event.getEntity();
 			
-			if (renderEngine.isEntityContained(livingentity)) {
+			if (renderEngine.hasRendererFor(livingentity)) {
 				if (livingentity instanceof LocalPlayer && event.getPartialTick() == 1.0F) {
 					return;
 				}
@@ -538,12 +509,12 @@ public class RenderEngine {
 		public static void renderEnderDragonEvent(RenderEnderDragonEvent.Pre event) {
 			EnderDragon livingentity = event.getEntity();
 			
-			if (renderEngine.isEntityContained(livingentity)) {
+			if (renderEngine.hasRendererFor(livingentity)) {
 				EnderDragonPatch entitypatch = (EnderDragonPatch) livingentity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
 				
 				if (entitypatch != null) {
 					event.setCanceled(true);
-					renderEngine.getEntityRenderer(livingentity.getType()).render(livingentity, entitypatch, event.getRenderer(), event.getBuffers(), event.getPoseStack(), event.getLight(), event.getPartialRenderTick());
+					renderEngine.getEntityRenderer(livingentity).render(livingentity, entitypatch, event.getRenderer(), event.getBuffers(), event.getPoseStack(), event.getLight(), event.getPartialRenderTick());
 				}
 			}
 		}

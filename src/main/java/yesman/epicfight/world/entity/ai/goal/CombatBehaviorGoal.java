@@ -33,23 +33,25 @@ public class CombatBehaviorGoal<T extends MobPatch<?>> extends Goal {
 	
 	@Override
 	public void tick() {
-		EntityState state = this.mobpatch.getEntityState();
-		this.combatBehaviors.tick();
-		
-		if (this.combatBehaviors.hasActivatedMove()) {
-			if (state.canBasicAttack()) {
-				CombatBehaviors.Behavior<T> result = this.combatBehaviors.tryProceed();
-				
-				if (result != null) {
-					result.execute(this.mobpatch);
+		if (this.isValidTarget(this.mob.getTarget())) {
+			EntityState state = this.mobpatch.getEntityState();
+			this.combatBehaviors.tick();
+			
+			if (this.combatBehaviors.hasActivatedMove()) {
+				if (state.canBasicAttack()) {
+					CombatBehaviors.Behavior<T> result = this.combatBehaviors.tryProceed();
+					
+					if (result != null) {
+						result.execute(this.mobpatch);
+					}
 				}
-			}
-		} else {
-			if (!state.inaction()) {
-				CombatBehaviors.Behavior<T> result = this.combatBehaviors.selectRandomBehaviorSeries();
-				
-				if (result != null) {
-					result.execute(this.mobpatch);
+			} else {
+				if (!state.inaction()) {
+					CombatBehaviors.Behavior<T> result = this.combatBehaviors.selectRandomBehaviorSeries();
+					
+					if (result != null) {
+						result.execute(this.mobpatch);
+					}
 				}
 			}
 		}

@@ -3,7 +3,7 @@ package yesman.epicfight.world.capabilities.entitypatch.mob;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.monster.Zombie;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.LivingMotion;
@@ -13,11 +13,11 @@ import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPSpawnData;
+import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
 
-public class ZombiePatch<T extends Zombie> extends HumanoidMobPatch<T> {
+public class ZombiePatch<T extends PathfinderMob> extends HumanoidMobPatch<T> {
 	public ZombiePatch() {
 		super(Faction.UNDEAD);
 	}
@@ -62,12 +62,6 @@ public class ZombiePatch<T extends Zombie> extends HumanoidMobPatch<T> {
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		super.commonAggressiveMobUpdateMotion(considerInaction);
-	}
-	
-	@Override
-	public void setAIAsInfantry(boolean holdingRanedWeapon) {
-		super.setAIAsInfantry(holdingRanedWeapon);
-		this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, 1.0D, true));
 	}
 	
 	@Override

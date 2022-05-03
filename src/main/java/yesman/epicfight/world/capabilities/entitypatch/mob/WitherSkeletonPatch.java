@@ -5,15 +5,16 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.monster.WitherSkeleton;
+import net.minecraft.world.entity.PathfinderMob;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.game.ExtendedDamageSource;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.gameasset.Models;
+import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
-public class WitherSkeletonPatch extends SkeletonPatch<WitherSkeleton> {
+public class WitherSkeletonPatch<T extends PathfinderMob> extends SkeletonPatch<T> {
 	public WitherSkeletonPatch() {
 		super(Faction.WITHER);
 	}

@@ -1,18 +1,12 @@
 package yesman.epicfight.world.capabilities.entitypatch.mob;
 
-import java.util.Iterator;
-import java.util.Set;
-
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MoveTowardsTargetGoal;
-import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -24,12 +18,12 @@ import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.gameasset.Models;
-import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
+import yesman.epicfight.world.capabilities.entitypatch.Faction;
+import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
-import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
+import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 
-public class IronGolemPatch extends HumanoidMobPatch<IronGolem> {
+public class IronGolemPatch extends MobPatch<IronGolem> {
 	private int deathTimerExt;
 	
 	public IronGolemPatch() {
@@ -37,25 +31,10 @@ public class IronGolemPatch extends HumanoidMobPatch<IronGolem> {
 	}
 	
 	@Override
-	public void onJoinWorld(IronGolem entityIn, EntityJoinWorldEvent event) {
-		super.onJoinWorld(entityIn, event);
-		Set<WrappedGoal> goals = this.original.goalSelector.getAvailableGoals();
-		Iterator<WrappedGoal> iterator = goals.iterator();
-		Goal toRemove = null;
-		
-		while (iterator.hasNext()) {
-			WrappedGoal goal = iterator.next();
-			Goal inner = goal.getGoal();
-
-			if (inner instanceof MoveTowardsTargetGoal) {
-				toRemove = inner;
-				break;
-			}
-		}
-
-		if (toRemove != null) {
-			this.original.goalSelector.removeGoal(toRemove);
-		}
+	protected void initAI() {
+		super.initAI();
+		this.original.goalSelector.getAvailableGoals().removeIf((goal) -> (goal.getGoal() instanceof MoveTowardsTargetGoal));
+		this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, MobCombatBehaviors.IRON_GOLEM.build(this), this.original, 1.0D, false));
 	}
 	
 	@Override
@@ -91,13 +70,7 @@ public class IronGolemPatch extends HumanoidMobPatch<IronGolem> {
 		
 		super.tick(event);
 	}
-
-	@Override
-	public void setAIAsInfantry(boolean holdingRanedWeapon) {
-		this.original.goalSelector.addGoal(0, new CombatBehaviorGoal<>(this, MobCombatBehaviors.IRON_GOLEM.build(this)));
-		this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, 1.0D, false));
-	}
-
+	
 	@Override
 	public SoundEvent getWeaponHitSound(InteractionHand hand) {
 		return EpicFightSounds.BLUNT_HIT_HARD;

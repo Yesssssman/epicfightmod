@@ -2,9 +2,10 @@ package yesman.epicfight.world.capabilities.entitypatch;
 
 import com.mojang.datafixers.util.Pair;
 
-import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraft.world.entity.ai.goal.SwellGoal;
+import net.minecraft.world.entity.monster.Creeper;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
@@ -12,17 +13,15 @@ import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.game.ExtendedDamageSource.StunType;
 import yesman.epicfight.gameasset.Models;
-import yesman.epicfight.world.capabilities.entitypatch.mob.Faction;
-import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributeSupplier;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
-import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
+import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
+import yesman.epicfight.world.entity.ai.goal.CreeperSwellStoppableGoal;
 
-public class CustomMobPatch<T extends Mob> extends MobPatch<T> {
-	private final MobPatchReloadListener.MobPatchProvider provider;
+public class CustomMobPatch<T extends PathfinderMob> extends MobPatch<T> {
+	private final MobPatchReloadListener.CustomMobPatchProvider provider;
 	
-	public CustomMobPatch(Faction faction, MobPatchReloadListener.MobPatchProvider provider) {
+	public CustomMobPatch(Faction faction, MobPatchReloadListener.CustomMobPatchProvider provider) {
 		super(faction);
 		this.provider = provider;
 	}
@@ -31,22 +30,22 @@ public class CustomMobPatch<T extends Mob> extends MobPatch<T> {
 	@Override
 	protected void initAI() {
 		this.resetCombatAI();
-		this.original.goalSelector.addGoal(0, new CombatBehaviorGoal<>(this, ((CombatBehaviors.Builder<CustomMobPatch<T>>)this.provider.getCombatBehaviorsBuilder()).build(this)));
-		this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, this.provider.getChasingSpeed(), false));
+		this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, ((CombatBehaviors.Builder<CustomMobPatch<T>>)this.provider.getCombatBehaviorsBuilder()).build(this), this.original, this.provider.getChasingSpeed(), false));
+		
+		if (this.original.goalSelector.getAvailableGoals().removeIf((goal) -> goal.getGoal() instanceof SwellGoal)) {
+			this.original.goalSelector.addGoal(2, new CreeperSwellStoppableGoal(this, (Creeper)this.original));
+		}
 	}
 	
 	@Override
 	protected void initAttributes() {
-		this.original.getAttributes().supplier = new EpicFightAttributeSupplier(this.original.getAttributes().supplier);
 		this.original.getAttribute(EpicFightAttributes.WEIGHT.get()).setBaseValue(this.original.getAttribute(Attributes.MAX_HEALTH).getBaseValue() * 2.0D);
 		this.original.getAttribute(EpicFightAttributes.MAX_STRIKES.get()).setBaseValue(this.provider.getAttributeValues().get(EpicFightAttributes.MAX_STRIKES.get()));
 		this.original.getAttribute(EpicFightAttributes.ARMOR_NEGATION.get()).setBaseValue(this.provider.getAttributeValues().get(EpicFightAttributes.ARMOR_NEGATION.get()));
 		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(this.provider.getAttributeValues().get(EpicFightAttributes.IMPACT.get()));
-	}
-	
-	@Override
-	public void tick(LivingUpdateEvent event) {
-		super.tick(event);
+		if (this.provider.getAttributeValues().containsKey(Attributes.ATTACK_DAMAGE)) {
+			this.original.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(this.provider.getAttributeValues().get(Attributes.ATTACK_DAMAGE));
+		}
 	}
 	
 	@Override

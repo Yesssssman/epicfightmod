@@ -9,6 +9,7 @@ import com.google.common.collect.Maps;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.core.Direction;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -21,6 +22,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.common.util.NonNullSupplier;
 import net.minecraftforge.fml.ModLoader;
+import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.forgeevent.EntityPatchRegistryEvent;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.AbstractClientPlayerPatch;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
@@ -120,6 +122,12 @@ public class ProviderEntity implements ICapabilityProvider, NonNullSupplier<Enti
 	
 	public static void putCustomEntityPatch(EntityType<?> entityType, Function<Entity, Supplier<EntityPatch<?>>> entitypatchProvider) {
 		CUSTOM_CAPABILITIES.put(entityType, entitypatchProvider);
+	}
+	
+	public static Function<Entity, Supplier<EntityPatch<?>>> get(String registryName) {
+		ResourceLocation rl = new ResourceLocation(registryName);
+		EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(rl);
+		return CAPABILITIES.get(entityType);
 	}
 	
 	private EntityPatch<?> capability;

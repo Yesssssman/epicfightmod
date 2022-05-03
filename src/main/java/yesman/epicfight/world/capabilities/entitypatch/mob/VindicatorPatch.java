@@ -3,19 +3,19 @@ package yesman.epicfight.world.capabilities.entitypatch.mob;
 import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.monster.AbstractIllager;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
+import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
 
-public class VindicatorPatch<T extends AbstractIllager> extends AbstractIllagerPatch<T> {
+public class VindicatorPatch<T extends PathfinderMob> extends AbstractIllagerPatch<T> {
 	public VindicatorPatch() {
 		super(Faction.ILLAGER);
 	}
@@ -57,12 +57,6 @@ public class VindicatorPatch<T extends AbstractIllager> extends AbstractIllagerP
 				currentLivingMotion = isAngry ? LivingMotion.ANGRY : LivingMotion.IDLE;
 			}
 		}
-	}
-	
-	@Override
-	public void setAIAsInfantry(boolean holdingRanedWeapon) {
-		super.setAIAsInfantry(holdingRanedWeapon);
-		this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, 1.0D, true));
 	}
 	
 	@Override

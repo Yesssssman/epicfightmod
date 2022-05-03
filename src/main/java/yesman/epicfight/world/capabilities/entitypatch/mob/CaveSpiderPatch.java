@@ -11,15 +11,13 @@ import yesman.epicfight.api.utils.game.ExtendedDamageSource;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
-import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
-import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
+import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 
 public class CaveSpiderPatch extends SpiderPatch<CaveSpider> {
 	@Override
 	protected void initAI() {
 		super.initAI();
-		this.original.goalSelector.addGoal(0, new CombatBehaviorGoal<>(this, MobCombatBehaviors.SPIDER.build(this)));
-        this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, 1.0D, false));
+		this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, MobCombatBehaviors.SPIDER.build(this), this.original, 1.0D, false));
 	}
 	
 	@Override

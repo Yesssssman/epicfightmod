@@ -16,10 +16,10 @@ import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.gameasset.Models;
+import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
-import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
+import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 
 public class RavagerPatch extends MobPatch<Ravager> {
 	public RavagerPatch() {
@@ -50,8 +50,7 @@ public class RavagerPatch extends MobPatch<Ravager> {
 	@Override
 	protected void initAI() {
 		super.initAI();
-		this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, 1.0D, false));
-		this.original.goalSelector.addGoal(0, new CombatBehaviorGoal<>(this, MobCombatBehaviors.RAVAGER.build(this)));
+		this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, MobCombatBehaviors.RAVAGER.build(this), this.original, 1.0D, false));
 	}
 	
 	@Override

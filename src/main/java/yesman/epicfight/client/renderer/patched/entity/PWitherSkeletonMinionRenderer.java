@@ -1,16 +1,16 @@
 package yesman.epicfight.client.renderer.patched.entity;
 
-import net.minecraft.client.model.SkeletonModel;
-import net.minecraft.world.entity.monster.WitherSkeleton;
+import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.world.entity.PathfinderMob;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
-import yesman.epicfight.world.capabilities.entitypatch.mob.WitherSkeletonPatch;
+import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 
-public class PWitherSkeletonRenderer extends PHumanoidRenderer<WitherSkeleton, WitherSkeletonPatch, SkeletonModel<WitherSkeleton>> {
+public class PWitherSkeletonMinionRenderer extends PHumanoidRenderer<PathfinderMob, HumanoidMobPatch<PathfinderMob>, HumanoidModel<PathfinderMob>> {
 	@Override
-	protected void setJointTransforms(WitherSkeletonPatch entitypatch, Armature armature, float partialTicks) {
+	protected void setJointTransforms(HumanoidMobPatch<PathfinderMob> entitypatch, Armature armature, float partialTicks) {
 		Pose pose = entitypatch.getClientAnimator().getPose(partialTicks);
 		Vec3f rootScale = pose.getTransformByName("Root").scale();
 		Vec3f headScale = pose.getTransformByName("Head").scale();

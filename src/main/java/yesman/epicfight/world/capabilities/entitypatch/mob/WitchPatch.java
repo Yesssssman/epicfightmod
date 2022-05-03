@@ -1,6 +1,8 @@
 package yesman.epicfight.world.capabilities.entitypatch.mob;
 
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.monster.Witch;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.LivingMotion;
@@ -10,19 +12,29 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.gameasset.Models;
+import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
-import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
-import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
+import yesman.epicfight.world.capabilities.item.CapabilityItem;
+import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 
 public class WitchPatch extends HumanoidMobPatch<Witch> {
 	public WitchPatch() {
-		super(Faction.NEUTURAL);
+		super(Faction.NEUTRAL);
+	}
+	
+	@Override
+	protected void initAI() {
+		super.initAI();
 	}
 	
 	@Override
 	public void setAIAsInfantry(boolean holdingRanedWeapon) {
-		this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, 1.0D, 10.0F, false));
-		this.original.goalSelector.addGoal(0, new CombatBehaviorGoal<>(this, MobCombatBehaviors.WITCH.build(this)));
+		this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, MobCombatBehaviors.WITCH.build(this), this.getOriginal(), 1.0F, true, 10.0D));
+	}
+	
+	@Override
+	public void updateHeldItem(CapabilityItem fromCap, CapabilityItem toCap, ItemStack from, ItemStack to, InteractionHand hand) {
+		
 	}
 	
 	public void setAIAsMounted() {

@@ -21,12 +21,11 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.common.util.NonNullSupplier;
 import net.minecraftforge.registries.ForgeRegistries;
-import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.ArmorCapability;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.WeaponCapabilityPresets;
 import yesman.epicfight.world.capabilities.item.NBTSeparativeCapability;
+import yesman.epicfight.world.capabilities.item.WeaponCapabilityPresets;
 
 public class ProviderItem implements ICapabilityProvider, NonNullSupplier<CapabilityItem> {
 	private static final Map<Class<? extends Item>, Function<Item, CapabilityItem>> CAPABILITY_BY_CLASS = new HashMap<Class<? extends Item>, Function<Item, CapabilityItem>> ();
@@ -67,7 +66,6 @@ public class ProviderItem implements ICapabilityProvider, NonNullSupplier<Capabi
 				}
 				
 				if (capability != null) {
-					EpicFightMod.LOGGER.info("register weapon capability for " + item);
 					CAPABILITIES.put(item, capability);
 				}
 			}

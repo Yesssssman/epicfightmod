@@ -7,7 +7,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.gameasset.Animations;
-import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
+import yesman.epicfight.world.capabilities.entitypatch.Faction;
 
 public class PillagerPatch extends AbstractIllagerPatch<Pillager> {
 	public PillagerPatch() {
@@ -35,7 +35,6 @@ public class PillagerPatch extends AbstractIllagerPatch<Pillager> {
 	public void setAIAsInfantry(boolean holdingRanedWeapon) {
 		if (!holdingRanedWeapon) {
 			super.setAIAsInfantry(holdingRanedWeapon);
-			this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, 1.0D, false));
 		}
 	}
 	

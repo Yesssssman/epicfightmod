@@ -12,7 +12,6 @@ import yesman.epicfight.client.renderer.patched.layer.PatchedItemInHandLayer;
 import yesman.epicfight.world.capabilities.entitypatch.mob.AbstractIllagerPatch;
 
 @OnlyIn(Dist.CLIENT)
-
 public class PAbstractIllagerRenderer<E extends AbstractIllager, T extends AbstractIllagerPatch<E>> extends PatchedLivingEntityRenderer<E, T, IllagerModel<E>> {
 	public PAbstractIllagerRenderer() {
 		this.layerRendererReplace.put(ItemInHandLayer.class, new PatchedItemInHandLayer<>());

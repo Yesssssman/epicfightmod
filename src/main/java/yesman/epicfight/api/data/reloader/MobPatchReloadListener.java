@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableSet;
@@ -24,8 +26,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -38,9 +42,9 @@ import yesman.epicfight.network.server.SPDatapackSync;
 import yesman.epicfight.world.capabilities.entitypatch.CustomHumanoidMobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.CustomMobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
+import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.Faction;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Style;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
@@ -55,7 +59,7 @@ import yesman.epicfight.world.entity.ai.goal.CombatBehaviors.BehaviorSeries;
 public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 	private static final Gson GSON = (new GsonBuilder()).create();
 	private static final Map<EntityType<?>, CompoundTag> TAGMAP = Maps.newHashMap();
-	private static final Map<EntityType<?>, MobPatchProvider> MOB_PATCH_PROVIDERS = Maps.newHashMap();
+	private static final Map<EntityType<?>, AbstractMobPatchProvider> MOB_PATCH_PROVIDERS = Maps.newHashMap();
 	
 	public MobPatchReloadListener() {
 		super(GSON, "epicfight_mobpatch");
@@ -70,7 +74,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(registryName);
 			
 			if (entityType == null) {
-				EpicFightMod.LOGGER.warn("Tried to add a mob patch for entity " + registryName + ", but it's not exist!");
+				EpicFightMod.LOGGER.warn("Tried to add a mob patch for entity " + registryName + ", but it's not exist");
 				return;
 			}
 			
@@ -83,37 +87,67 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			}
 			
 			MOB_PATCH_PROVIDERS.put(entityType, deserializeMobPatchProvider(tag, false));
-			ProviderEntity.putCustomEntityPatch(entityType, (entity) -> MOB_PATCH_PROVIDERS.get(entity.getType())::get);
+			ProviderEntity.putCustomEntityPatch(entityType, (entity) -> () -> MOB_PATCH_PROVIDERS.get(entity.getType()).get(entity));
 			TAGMAP.put(entityType, extractClientData(tag));
 			
 			if (EpicFightMod.isPhysicalClient()) {
-				ClientEngine.instance.renderEngine.registerCustomEntityRenderer(entityType, tag.getString("renderer"));
+				ClientEngine.instance.renderEngine.registerCustomEntityRenderer(entityType, tag.contains("preset") ? tag.getString("preset") : tag.getString("renderer"));
 			}
 		}
 	}
 	
-	public static class MobPatchProvider {
-		private ResourceLocation modelLocation;
-		private CombatBehaviors.Builder<?> combatBehaviorsBuilder;
-		private Map<WeaponCategory, Map<CapabilityItem.Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> humanoidCombatBehaviors;
-		private List<Pair<LivingMotion, StaticAnimation>> defaultAnimations;
-		private Map<StunType, StaticAnimation> stunAnimations;
-		private Map<Attribute, Double> attributeValues;
-		private Map<WeaponCategory, Map<WeaponCapability.Style, Set<Pair<LivingMotion, StaticAnimation>>>> humanoidWeaponMotions;
-		private Faction faction;
-		private double chasingSpeed;
-		private boolean isHumanoid;
-		private boolean disabled;
+	public static abstract class AbstractMobPatchProvider {
+		public abstract EntityPatch<?> get(Entity entity);
+	}
+	
+	public static class NullPatchProvider extends AbstractMobPatchProvider {
+		@Override
+		public EntityPatch<?> get(Entity entity) {
+			return null;
+		}
+	}
+	
+	public static class MobPatchPresetProvider extends AbstractMobPatchProvider {
+		protected Function<Entity, Supplier<EntityPatch<?>>> presetProvider;
+		
+		@Override
+		public EntityPatch<?> get(Entity entity) {
+			return this.presetProvider.apply(entity).get();
+		}
+	}
+	
+	public static class CustomHumanoidMobPatchProvider extends CustomMobPatchProvider {
+		protected Map<WeaponCategory, Map<CapabilityItem.Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> humanoidCombatBehaviors;
+		protected Map<WeaponCategory, Map<WeaponCapability.Style, Set<Pair<LivingMotion, StaticAnimation>>>> humanoidWeaponMotions;
 		
 		@SuppressWarnings("rawtypes")
-		public EntityPatch<?> get() {
-			if (this.disabled) {
-				return null;
-			} else if (this.isHumanoid) {
-				return new CustomHumanoidMobPatch(this.faction, this);
-			} else {
-				return new CustomMobPatch(this.faction, this);
-			}
+		@Override
+		public EntityPatch<?> get(Entity entity) {
+			return new CustomHumanoidMobPatch(this.faction, this);
+		}
+		
+		public Map<WeaponCategory, Map<WeaponCapability.Style, Set<Pair<LivingMotion, StaticAnimation>>>> getHumanoidWeaponMotions() {
+			return this.humanoidWeaponMotions;
+		}
+		
+		public Map<WeaponCategory, Map<CapabilityItem.Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> getHumanoidCombatBehaviors() {
+			return this.humanoidCombatBehaviors;
+		}
+	}
+	
+	public static class CustomMobPatchProvider extends AbstractMobPatchProvider {
+		protected ResourceLocation modelLocation;
+		protected CombatBehaviors.Builder<?> combatBehaviorsBuilder;
+		protected List<Pair<LivingMotion, StaticAnimation>> defaultAnimations;
+		protected Map<StunType, StaticAnimation> stunAnimations;
+		protected Map<Attribute, Double> attributeValues;
+		protected Faction faction;
+		protected double chasingSpeed;
+		
+		@Override
+		@SuppressWarnings("rawtypes")
+		public EntityPatch<?> get(Entity entity) {
+			return new CustomMobPatch(this.faction, this);
 		}
 		
 		public ResourceLocation getModelLocation() {
@@ -122,10 +156,6 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 
 		public CombatBehaviors.Builder<?> getCombatBehaviorsBuilder() {
 			return this.combatBehaviorsBuilder;
-		}
-		
-		public Map<WeaponCategory, Map<CapabilityItem.Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> getHumanoidCombatBehaviors() {
-			return this.humanoidCombatBehaviors;
 		}
 		
 		public List<Pair<LivingMotion, StaticAnimation>> getDefaultAnimations() {
@@ -140,40 +170,46 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			return this.attributeValues;
 		}
 		
-		public Map<WeaponCategory, Map<WeaponCapability.Style, Set<Pair<LivingMotion, StaticAnimation>>>> getHumanoidWeaponMotions() {
-			return this.humanoidWeaponMotions;
-		}
-		
 		public double getChasingSpeed() {
 			return this.chasingSpeed;
 		}
 	}
 	
-	public static MobPatchProvider deserializeMobPatchProvider(CompoundTag tag, boolean clientSide) {
-		MobPatchProvider provider = new MobPatchProvider();
-		provider.disabled = tag.contains("disabled") ? tag.getBoolean("disabled") : false;
+	public static AbstractMobPatchProvider deserializeMobPatchProvider(CompoundTag tag, boolean clientSide) {
+		boolean disabled = tag.contains("disabled") ? tag.getBoolean("disabled") : false;
 		
-		if (!provider.disabled) {
-			provider.attributeValues = deserializeAttributes(tag.getCompound("attributes"));
-			provider.modelLocation = new ResourceLocation(tag.getString("model"));
-			provider.defaultAnimations = deserializeDefaultAnimations(tag.getCompound("default_livingmotions"));
-			provider.isHumanoid = tag.getBoolean("isHumanoid");
-			provider.faction = Faction.valueOf(tag.getString("faction").toUpperCase(Locale.ROOT));
-			
-			if (!clientSide) {
-				provider.stunAnimations = deserializeStunAnimations(tag.getCompound("stun_animations"));
-				provider.chasingSpeed = tag.getCompound("attributes").getDouble("chasing_speed");
+		if (disabled) {
+			return new NullPatchProvider();
+		} else {
+			if (tag.contains("preset")) {
+				Function<Entity, Supplier<EntityPatch<?>>> preset = ProviderEntity.get(tag.getString("preset"));
+				MobPatchPresetProvider provider = new MobPatchPresetProvider();
+				provider.presetProvider = preset;
+				return provider;
+			} else {
+				boolean humanoid = tag.getBoolean("isHumanoid") ? tag.getBoolean("isHumanoid") : false;
+				CustomMobPatchProvider provider = humanoid ? new CustomHumanoidMobPatchProvider() : new CustomMobPatchProvider();
+				provider.attributeValues = deserializeAttributes(tag.getCompound("attributes"));
+				provider.modelLocation = new ResourceLocation(tag.getString("model"));
+				provider.defaultAnimations = deserializeDefaultAnimations(tag.getCompound("default_livingmotions"));
+				provider.faction = Faction.valueOf(tag.getString("faction").toUpperCase(Locale.ROOT));
 				
-				if (provider.isHumanoid) {
-					provider.humanoidCombatBehaviors = deserializeHumanoidCombatBehaviors(tag.getList("combat_behavior", 10));
-					provider.humanoidWeaponMotions = deserializeHumanoidWeaponMotions(tag.getList("humanoid_weapon_motions", 10));
-				} else {
-					provider.combatBehaviorsBuilder = deserializeCombatBehaviorsBuilder(tag.getList("combat_behavior", 10));
+				if (!clientSide) {
+					provider.stunAnimations = deserializeStunAnimations(tag.getCompound("stun_animations"));
+					provider.chasingSpeed = tag.getCompound("attributes").getDouble("chasing_speed");
+					
+					if (humanoid) {
+						CustomHumanoidMobPatchProvider humanoidProvider = (CustomHumanoidMobPatchProvider)provider;
+						humanoidProvider.humanoidCombatBehaviors = deserializeHumanoidCombatBehaviors(tag.getList("combat_behavior", 10));
+						humanoidProvider.humanoidWeaponMotions = deserializeHumanoidWeaponMotions(tag.getList("humanoid_weapon_motions", 10));
+					} else {
+						provider.combatBehaviorsBuilder = deserializeCombatBehaviorsBuilder(tag.getList("combat_behavior", 10));
+					}
 				}
+				
+				return provider;
 			}
 		}
-		
-		return provider;
 	}
 	
 	public static Map<WeaponCategory, Map<CapabilityItem.Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> deserializeHumanoidCombatBehaviors(ListTag tag) {
@@ -182,7 +218,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		for (int i = 0; i < tag.size(); i++) {
 			CompoundTag combatBehavior = tag.getCompound(i);
 			ListTag categories = combatBehavior.getList("weapon_categories", 8);
-			CapabilityItem.Style style = CapabilityItem.Style.valueOf(combatBehavior.getString("weapon_style").toUpperCase());
+			CapabilityItem.Style style = CapabilityItem.Style.valueOf(combatBehavior.getString("style").toUpperCase());
 			CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = deserializeCombatBehaviorsBuilder(combatBehavior.getList("behavior_series", 10));
 			
 			for (int j = 0; j < categories.size(); j++) {
@@ -220,8 +256,11 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 	public static Map<Attribute, Double> deserializeAttributes(CompoundTag tag) {
 		Map<Attribute, Double> attributes = Maps.newHashMap();
 		attributes.put(EpicFightAttributes.IMPACT.get(), tag.contains("impact", 6) ? tag.getDouble("impact") : 0.5D);
-		attributes.put(EpicFightAttributes.ARMOR_NEGATION.get(), tag.contains("armor_negation", 6) ? tag.getDouble("armor_negation") : 0.5D);
-		attributes.put(EpicFightAttributes.MAX_STRIKES.get(), (double) (tag.contains("max_strikes", 3) ? tag.getInt("max_strikes") : 1));
+		attributes.put(EpicFightAttributes.ARMOR_NEGATION.get(), tag.contains("armor_negation", 6) ? tag.getDouble("armor_negation") : 0.0D);
+		attributes.put(EpicFightAttributes.MAX_STRIKES.get(), (double)(tag.contains("max_strikes", 3) ? tag.getInt("max_strikes") : 1));
+		if (tag.contains("attack_damage", 6)) {
+			attributes.put(Attributes.ATTACK_DAMAGE, tag.getDouble("attack_damage"));
+		}
 		
 		return attributes;
 	}
@@ -239,7 +278,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 				motions.add(Pair.of(LivingMotion.valueOf(key.toUpperCase(Locale.ROOT)), EpicFightMod.getInstance().animationManager.findAnimationByResourceLocation(motionsTag.getString(key))));
 			}
 			
-			Tag weponTypeTag = weaponMotionTag.get("weapon_type");
+			Tag weponTypeTag = weaponMotionTag.get("weapon_categories");
 			
 			if (weponTypeTag instanceof StringTag) {
 				WeaponCategory weaponCategory = WeaponCategory.valueOf(weponTypeTag.getAsString().toUpperCase(Locale.ROOT));
@@ -373,24 +412,25 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 	
 	public static CompoundTag extractClientData(CompoundTag tag) {
 		CompoundTag clientTag = new CompoundTag();
-		boolean disabled = false;
 		
 		if (tag.contains("disabled")) {
-			disabled = tag.getBoolean("disabled");
-			
-			if (disabled) {
+			if (tag.getBoolean("disabled")) {
 				clientTag.put("disabled", tag.get("disabled"));
+				return clientTag;
 			}
 		}
 		
-		if (!disabled) {
-			clientTag.put("model", tag.get("model"));
-			clientTag.putBoolean("isHumanoid", tag.contains("isHumanoid") ? tag.getBoolean("isHumanoid") : false);
-			clientTag.put("renderer", tag.get("renderer"));
-			clientTag.put("faction", tag.get("faction"));
-			clientTag.put("default_livingmotions", tag.get("default_livingmotions"));
-			clientTag.put("attributes", tag.get("attributes"));
+		if (tag.contains("preset")) {
+			clientTag.put("preset", tag.get("preset"));
+			return clientTag;
 		}
+		
+		clientTag.put("model", tag.get("model"));
+		clientTag.putBoolean("isHumanoid", tag.contains("isHumanoid") ? tag.getBoolean("isHumanoid") : false);
+		clientTag.put("renderer", tag.get("renderer"));
+		clientTag.put("faction", tag.get("faction"));
+		clientTag.put("default_livingmotions", tag.get("default_livingmotions"));
+		clientTag.put("attributes", tag.get("attributes"));
 		
 		return clientTag;
 	}
@@ -419,10 +459,10 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			
 			EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(tag.getString("id")));
 			MOB_PATCH_PROVIDERS.put(entityType, deserializeMobPatchProvider(tag, true));
-			ProviderEntity.putCustomEntityPatch(entityType, (entity) -> MOB_PATCH_PROVIDERS.get(entity.getType())::get);
+			ProviderEntity.putCustomEntityPatch(entityType, (entity) -> () -> MOB_PATCH_PROVIDERS.get(entity.getType()).get(entity));
 			
 			if (!disabled) {
-				ClientEngine.instance.renderEngine.registerCustomEntityRenderer(entityType, tag.getString("renderer"));
+				ClientEngine.instance.renderEngine.registerCustomEntityRenderer(entityType, tag.contains("preset") ? tag.getString("preset") : tag.getString("renderer"));
 			}
 		}
 	}

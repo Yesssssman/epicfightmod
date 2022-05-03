@@ -638,7 +638,7 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.ROTATE_X, true);
 		BIPED_MOB_DAGGER_TWOHAND2 = new AttackAnimation(0.1F, 0.25F, 0.75F, 0.85F, 1.0F, null, "Tool_R", "biped/combat/mob_dagger_twohand2", biped)
 				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		BIPED_MOB_THROW = new RangedAttackAnimation(0.11F, 0.1F, 0.1F, 0.49F, 0.95F, null, "Root", "biped/combat/mob_throw", biped);
+		BIPED_MOB_THROW = new RangedAttackAnimation(0.11F, 0.1F, 0.45F, 0.49F, 0.95F, null, "Root", "biped/combat/mob_throw", biped);
 		
 		SWORD_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_sword_hit", biped);
 		SWORD_DUAL_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_dualsword_hit", biped);

@@ -11,6 +11,7 @@ import yesman.epicfight.world.capabilities.entitypatch.mob.EndermanPatch;
 import yesman.epicfight.world.capabilities.entitypatch.mob.IronGolemPatch;
 import yesman.epicfight.world.capabilities.entitypatch.mob.RavagerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.mob.SpiderPatch;
+import yesman.epicfight.world.capabilities.entitypatch.mob.WitchPatch;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors.Behavior;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors.BehaviorSeries;
@@ -139,10 +140,10 @@ public class MobCombatBehaviors {
 				.nextBehavior(Behavior.<HumanoidMobPatch<?>>builder().animationBehavior(Animations.BIPED_MOB_THROW).withinEyeHeight().withinDistance(5.0D, 10.0D))
 		);
 	
-	public static final CombatBehaviors.Builder<HumanoidMobPatch<?>> WITCH = CombatBehaviors.<HumanoidMobPatch<?>>builder()
+	public static final CombatBehaviors.Builder<WitchPatch> WITCH = CombatBehaviors.<WitchPatch>builder()
 		.newBehaviorSeries(
-			BehaviorSeries.<HumanoidMobPatch<?>>builder().weight(100.0F).canBeInterrupted(true).looping(false).cooldown(30)
-				.nextBehavior(Behavior.<HumanoidMobPatch<?>>builder().animationBehavior(Animations.BIPED_MOB_THROW).withinEyeHeight().withinDistance(0.0D, 10.0D))
+			BehaviorSeries.<WitchPatch>builder().weight(100.0F).canBeInterrupted(true).looping(false).cooldown(50)
+				.nextBehavior(Behavior.<WitchPatch>builder().animationBehavior(Animations.BIPED_MOB_THROW).custom((witchpatch) -> !witchpatch.getOriginal().isDrinkingPotion()).withinEyeHeight().withinDistance(0.0D, 10.0D))
 		);
 	
 	public static final CombatBehaviors.Builder<EnderDragonPatch> ENDER_DRAGON = CombatBehaviors.<EnderDragonPatch>builder()

@@ -5,7 +5,7 @@ import java.util.Set;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
 
-import net.minecraft.world.entity.monster.AbstractSkeleton;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.LivingMotion;
@@ -14,14 +14,14 @@ import yesman.epicfight.api.model.Model;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.gameasset.Models;
+import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
-import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
-import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
+import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 
-public class SkeletonPatch<T extends AbstractSkeleton> extends HumanoidMobPatch<T> {
+public class SkeletonPatch<T extends PathfinderMob> extends HumanoidMobPatch<T> {
 	public SkeletonPatch() {
 		super(Faction.UNDEAD);
 	}
@@ -60,10 +60,8 @@ public class SkeletonPatch<T extends AbstractSkeleton> extends HumanoidMobPatch<
 			CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
 			
 			if (builder != null) {
-				this.original.goalSelector.addGoal(0, new CombatBehaviorGoal<>(this, builder.build(this)));
+				this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, builder.build(this), this.original, 1.2D, true));
 			}
-			
-			this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, 1.2D, true));
 		}
 	}
 	

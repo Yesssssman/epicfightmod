@@ -2,13 +2,13 @@ package yesman.epicfight.world.entity.ai.goal;
 
 import net.minecraft.world.entity.ai.goal.SwellGoal;
 import net.minecraft.world.entity.monster.Creeper;
-import yesman.epicfight.world.capabilities.entitypatch.mob.CreeperPatch;
+import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 
 public class CreeperSwellStoppableGoal extends SwellGoal {
 	protected Creeper creeperEntity;
-	protected CreeperPatch creeperpatch;
+	protected MobPatch<?> creeperpatch;
 	
-	public CreeperSwellStoppableGoal(CreeperPatch creeperdata, Creeper creeperEntityIn) {
+	public CreeperSwellStoppableGoal(MobPatch<?> creeperdata, Creeper creeperEntityIn) {
 		super(creeperEntityIn);
 		this.creeperEntity = creeperEntityIn;
 		this.creeperpatch = creeperdata;

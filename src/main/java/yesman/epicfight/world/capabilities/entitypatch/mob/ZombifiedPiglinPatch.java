@@ -10,12 +10,14 @@ import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.game.AttackResult;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.Models;
+import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
-import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
+import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
+import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 
 public class ZombifiedPiglinPatch extends HumanoidMobPatch<ZombifiedPiglin> {
 	public ZombifiedPiglinPatch() {
-		super(Faction.NEUTURAL);
+		super(Faction.NEUTRAL);
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -37,8 +39,11 @@ public class ZombifiedPiglinPatch extends HumanoidMobPatch<ZombifiedPiglin> {
 	
 	@Override
 	public void setAIAsInfantry(boolean holdingRanedWeapon) {
-		super.setAIAsInfantry(holdingRanedWeapon);
-		this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, 1.2D, true));
+		CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
+		
+		if (builder != null) {
+			this.original.goalSelector.addGoal(1, new AnimatedAttackGoal<>(this, builder.build(this), this.getOriginal(), 1.2D, true));
+		}
 	}
 	
 	@Override

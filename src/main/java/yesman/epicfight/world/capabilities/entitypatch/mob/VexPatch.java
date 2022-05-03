@@ -25,6 +25,7 @@ import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.network.server.SPPlayAnimationAndSetTarget;
+import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 import yesman.epicfight.world.entity.eventlistener.HurtEventPre;
@@ -53,6 +54,7 @@ public class VexPatch extends MobPatch<Vex> {
 				toRemove = inner;
 				break;
 			}
+			
 			iterCount++;
         }
         

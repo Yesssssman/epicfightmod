@@ -12,6 +12,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.item.DiggerItem;
@@ -28,16 +29,14 @@ import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPChangeLivingMotion;
-import yesman.epicfight.world.capabilities.entitypatch.mob.Faction;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Style;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-import yesman.epicfight.world.entity.ai.goal.ChasingGoal;
-import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
+import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 
-public abstract class HumanoidMobPatch<T extends Mob> extends MobPatch<T> {
+public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch<T> {
 	protected Map<WeaponCategory, Map<CapabilityItem.Style, Set<Pair<LivingMotion, StaticAnimation>>>> weaponLivingMotions;
 	protected Map<WeaponCategory, Map<CapabilityItem.Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> weaponAttackMotions;
 	
@@ -105,16 +104,14 @@ public abstract class HumanoidMobPatch<T extends Mob> extends MobPatch<T> {
 		CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
 		
 		if (builder != null) {
-			this.original.goalSelector.addGoal(0, new CombatBehaviorGoal<>(this, builder.build(this)));
+			this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, builder.build(this), this.getOriginal(), 1.0D, true));
 		}
 	}
 	
 	public void setAIAsMounted(Entity ridingEntity) {
 		if (this.isArmed()) {
-			this.original.goalSelector.addGoal(0, new CombatBehaviorGoal<>(this, MobCombatBehaviors.MOUNT_HUMANOID_BEHAVIORS.build(this)));
-			
 			if (ridingEntity instanceof AbstractHorse) {
-				this.original.goalSelector.addGoal(1, new ChasingGoal(this, this.original, 1.0D, false));
+				this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, MobCombatBehaviors.MOUNT_HUMANOID_BEHAVIORS.build(this), this.original, 1.0D, false));
 			}
 		}
 	}

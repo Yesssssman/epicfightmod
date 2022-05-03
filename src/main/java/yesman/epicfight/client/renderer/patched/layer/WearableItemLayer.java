@@ -49,8 +49,8 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		this.slots = slotType;
 	}
 	
-	private void renderArmor(PoseStack matStack, MultiBufferSource buf, int packedLightIn, boolean hasEffect, ClientModel model, float r, float g, float b, ResourceLocation armorResource, OpenMatrix4f[] poses) {
-		VertexConsumer ivertexbuilder = EpicFightRenderTypes.getArmorVertexBuilder(buf, EpicFightRenderTypes.animatedArmor(armorResource), hasEffect);
+	private void renderArmor(PoseStack matStack, MultiBufferSource multiBufferSource, int packedLightIn, boolean hasEffect, ClientModel model, float r, float g, float b, ResourceLocation armorTexture, OpenMatrix4f[] poses) {
+		VertexConsumer ivertexbuilder = EpicFightRenderTypes.getArmorVertexBuilder(multiBufferSource, EpicFightRenderTypes.animatedArmor(armorTexture), hasEffect);
 		model.drawAnimatedModel(matStack, ivertexbuilder, packedLightIn, r, g, b, 1.0F, OverlayTexture.NO_OVERLAY, poses);
 	}
 	
@@ -68,8 +68,12 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				}
 				
 				poseStack.pushPose();
-				Cube headCube = originalRenderer.getParentModel().getHead().cubes.get(0);
-				float head = headCube.maxX - headCube.minY - 12.0F;
+				float head = 0.0F;
+				
+				if (originalRenderer.getParentModel().getHead() != null && originalRenderer.getParentModel().getHead().cubes.size() > 0) {
+					Cube headCube = originalRenderer.getParentModel().getHead().cubes.get(0);
+					head = headCube.maxX - headCube.minY - 12.0F;
+				}
 				
 				if (slot == EquipmentSlot.HEAD) {
 					poseStack.translate(0.0D, head * 0.055D, 0.0D);

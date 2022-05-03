@@ -126,7 +126,6 @@ public class AttackAnimation extends ActionAnimation {
 					entitypatch.playSound(this.getSwingSound(entitypatch, phase), 0.0F, 0.0F);
 					entitypatch.currentlyAttackedEntity.clear();
 				}
-				
 				this.doAttack(entitypatch, prevElapsedTime, elapsedTime, prevState, state, phase);
 			}
 		}

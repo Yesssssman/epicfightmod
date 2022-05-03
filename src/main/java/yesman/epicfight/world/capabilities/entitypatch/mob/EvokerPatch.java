@@ -1,14 +1,15 @@
 package yesman.epicfight.world.capabilities.entitypatch.mob;
 
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.monster.Evoker;
+import net.minecraft.world.entity.monster.SpellcasterIllager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.gameasset.Animations;
+import yesman.epicfight.world.capabilities.entitypatch.Faction;
 
-public class EvokerPatch extends AbstractIllagerPatch<Evoker> {
+public class EvokerPatch<T extends SpellcasterIllager> extends AbstractIllagerPatch<T> {
 	public EvokerPatch() {
 		super(Faction.ILLAGER);
 	}
