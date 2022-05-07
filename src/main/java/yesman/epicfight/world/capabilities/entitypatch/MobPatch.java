@@ -1,6 +1,9 @@
 package yesman.epicfight.world.capabilities.entitypatch;
 
 import java.util.Optional;
+import java.util.Set;
+
+import com.google.common.collect.Sets;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
@@ -8,8 +11,10 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
+import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.phys.Vec3;
@@ -23,6 +28,7 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
+import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 
 public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	protected final Faction mobFaction;
@@ -45,29 +51,36 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	}
 	
 	protected void initAI() {
-		this.resetCombatAI();
+		Set<Goal> toRemove = Sets.newHashSet();
+		this.onResetAI(toRemove);
+		toRemove.forEach(this.original.goalSelector::removeGoal);
 	}
 	
-	protected void resetCombatAI() {
-		this.original.goalSelector.getAvailableGoals().removeIf((goal) -> (goal.getGoal() instanceof MeleeAttackGoal || goal.getGoal() instanceof AnimatedAttackGoal || goal.getGoal() instanceof RangedAttackGoal));
+	protected void onResetAI(Set<Goal> toRemove) {
+		for (WrappedGoal wrappedGoal : this.original.goalSelector.getAvailableGoals()) {
+			Goal goal = wrappedGoal.getGoal();
+			
+			if (goal instanceof MeleeAttackGoal || goal instanceof AnimatedAttackGoal || goal instanceof RangedAttackGoal || goal instanceof TargetChasingGoal) {
+				toRemove.add(goal);
+			}
+		}
 	}
 	
 	protected final void commonMobUpdateMotion(boolean considerInaction) {
 		if (this.state.inaction() && considerInaction) {
 			currentLivingMotion = LivingMotion.INACTION;
 		} else {
-			if (this.original.getHealth() <= 0.0F) {
+			if (this.original.getHealth() <= 0.0F)
 				currentLivingMotion = LivingMotion.DEATH;
-			} else if (original.getVehicle() != null) {
+			else if (original.getVehicle() != null)
 				currentLivingMotion = LivingMotion.MOUNT;
-			} else {
+			else
 				if (this.original.getDeltaMovement().y < -0.55F)
 					currentLivingMotion = LivingMotion.FALL;
 				else if (original.animationSpeed > 0.01F)
 					currentLivingMotion = LivingMotion.WALK;
 				else
 					currentLivingMotion = LivingMotion.IDLE;
-			}
 		}
 		
 		this.currentCompositeMotion = this.currentLivingMotion;

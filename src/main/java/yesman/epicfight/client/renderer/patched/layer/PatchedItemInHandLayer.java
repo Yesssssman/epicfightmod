@@ -22,27 +22,23 @@ public class PatchedItemInHandLayer<E extends LivingEntity, T extends LivingEnti
 	public void renderLayer(T entitypatch, E entityliving, RenderLayer<E, M> originalRenderer, PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn, OpenMatrix4f[] poses, float netYawHead, float pitchHead, float partialTicks) {
 		ItemStack mainHandStack = entitypatch.getOriginal().getMainHandItem();
 		RenderEngine renderEngine = ClientEngine.instance.renderEngine;
-		matrixStackIn.pushPose();
 		
 		if (mainHandStack.getItem() != Items.AIR) {
 			if (entitypatch.getOriginal().getVehicle() != null) {
 				if (!entitypatch.getHoldingItemCapability(InteractionHand.MAIN_HAND).canUseOnMount()) {
 					renderEngine.getItemRenderer(mainHandStack.getItem()).renderUnusableItemMount(mainHandStack, entitypatch, buffer, matrixStackIn, packedLightIn);
-					matrixStackIn.popPose();
 					return;
 				}
 			}
+			
 			renderEngine.getItemRenderer(mainHandStack.getItem()).renderItemInHand(mainHandStack, entitypatch, InteractionHand.MAIN_HAND, buffer, matrixStackIn, packedLightIn);
 		}
 		
-		matrixStackIn.popPose();
-		matrixStackIn.pushPose();
+		
 		ItemStack offHandStack = entitypatch.getOriginal().getOffhandItem();
 		
 		if (entitypatch.isOffhandItemValid()) {
 			renderEngine.getItemRenderer(offHandStack.getItem()).renderItemInHand(offHandStack, entitypatch, InteractionHand.OFF_HAND, buffer, matrixStackIn, packedLightIn);
 		}
-		
-		matrixStackIn.popPose();
 	}
 }

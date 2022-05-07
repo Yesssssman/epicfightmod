@@ -21,20 +21,23 @@ public class RenderKatana extends RenderItemBase {
 	private final ItemStack sheathStack = new ItemStack(EpicFightItems.KATANA_SHEATH.get());
 	
 	@Override
-	public void renderItemInHand(ItemStack stack, LivingEntityPatch<?> entitypatch, InteractionHand hand, MultiBufferSource buffer, PoseStack matrixStackIn, int packedLight) {
-		matrixStackIn.pushPose();
-		OpenMatrix4f modelMatrix = new OpenMatrix4f(this.correctionMatrix);
+	public void renderItemInHand(ItemStack stack, LivingEntityPatch<?> entitypatch, InteractionHand hand, MultiBufferSource buffer, PoseStack poseStack, int packedLight) {
+		poseStack.pushPose();
+		OpenMatrix4f modelMatrix = new OpenMatrix4f(this.mainhandcorrectionMatrix);
 		modelMatrix.mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointByName("Tool_R").getAnimatedTransform());
 		OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);
-		MathUtils.translateStack(matrixStackIn, modelMatrix);
-		MathUtils.rotateStack(matrixStackIn, transpose);
-        Minecraft.getInstance().getItemRenderer().renderStatic(stack, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, packedLight, OverlayTexture.NO_OVERLAY, matrixStackIn, buffer, 0);
-        matrixStackIn.popPose();
-		modelMatrix = new OpenMatrix4f(this.correctionMatrix);
+		MathUtils.translateStack(poseStack, modelMatrix);
+		MathUtils.rotateStack(poseStack, transpose);
+        Minecraft.getInstance().getItemRenderer().renderStatic(stack, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, packedLight, OverlayTexture.NO_OVERLAY, poseStack, buffer, 0);
+        poseStack.popPose();
+		modelMatrix = new OpenMatrix4f(this.mainhandcorrectionMatrix);
 		modelMatrix.mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointByName("Tool_L").getAnimatedTransform());
 		transpose = OpenMatrix4f.transpose(modelMatrix, null);
-		MathUtils.translateStack(matrixStackIn, modelMatrix);
-		MathUtils.rotateStack(matrixStackIn, transpose);
-        Minecraft.getInstance().getItemRenderer().renderStatic(this.sheathStack, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, packedLight, OverlayTexture.NO_OVERLAY, matrixStackIn, buffer, 0);
+		
+		poseStack.pushPose();
+		MathUtils.translateStack(poseStack, modelMatrix);
+		MathUtils.rotateStack(poseStack, transpose);
+        Minecraft.getInstance().getItemRenderer().renderStatic(this.sheathStack, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, packedLight, OverlayTexture.NO_OVERLAY, poseStack, buffer, 0);
+        poseStack.popPose();
     }
 }

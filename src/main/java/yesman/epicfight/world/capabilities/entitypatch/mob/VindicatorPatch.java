@@ -1,6 +1,9 @@
 package yesman.epicfight.world.capabilities.entitypatch.mob;
 
+import java.util.Set;
+
 import com.google.common.collect.ImmutableMap;
+import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
@@ -38,6 +41,14 @@ public class VindicatorPatch<T extends PathfinderMob> extends AbstractIllagerPat
 	@Override
 	protected void setWeaponMotions() {
 		super.setWeaponMotions();
+		
+		this.weaponLivingMotions.put(WeaponCategory.GREATSWORD, ImmutableMap.of(
+			CapabilityItem.Style.TWO_HAND, Set.of(
+				Pair.of(LivingMotion.WALK, Animations.ILLAGER_WALK),
+				Pair.of(LivingMotion.CHASE, Animations.BIPED_WALK_TWOHAND)
+			)
+		));
+		
 		this.weaponAttackMotions.put(WeaponCategory.AXE, ImmutableMap.of(CapabilityItem.Style.COMMON, MobCombatBehaviors.VINDICATOR_ONEHAND));
 		this.weaponAttackMotions.put(WeaponCategory.SWORD, ImmutableMap.of(CapabilityItem.Style.COMMON, MobCombatBehaviors.VINDICATOR_ONEHAND));
 	}

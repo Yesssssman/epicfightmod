@@ -20,6 +20,7 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
+import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 
 public class CustomHumanoidMobPatch<T extends PathfinderMob> extends HumanoidMobPatch<T> {
 	private final MobPatchReloadListener.CustomHumanoidMobPatchProvider provider;
@@ -37,7 +38,8 @@ public class CustomHumanoidMobPatch<T extends PathfinderMob> extends HumanoidMob
 			CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
 			
 			if (builder != null) {
-				this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, builder.build(this), this.original, this.provider.getChasingSpeed(), false));
+				this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, builder.build(this)));
+				this.original.goalSelector.addGoal(1, new TargetChasingGoal(this, this.getOriginal(), this.provider.getChasingSpeed(), true));
 			}
 		}
 	}

@@ -86,9 +86,9 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 				e.printStackTrace();
 			}
 			
-			MOB_PATCH_PROVIDERS.put(entityType, deserializeMobPatchProvider(tag, false));
+			MOB_PATCH_PROVIDERS.put(entityType, deserialize(tag, false));
 			ProviderEntity.putCustomEntityPatch(entityType, (entity) -> () -> MOB_PATCH_PROVIDERS.get(entity.getType()).get(entity));
-			TAGMAP.put(entityType, extractClientData(tag));
+			TAGMAP.put(entityType, filterClientData(tag));
 			
 			if (EpicFightMod.isPhysicalClient()) {
 				ClientEngine.instance.renderEngine.registerCustomEntityRenderer(entityType, tag.contains("preset") ? tag.getString("preset") : tag.getString("renderer"));
@@ -104,6 +104,22 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		@Override
 		public EntityPatch<?> get(Entity entity) {
 			return null;
+		}
+	}
+	
+	public static class BranchProvider extends AbstractMobPatchProvider {
+		protected List<Pair<EpicFightPredicates<Entity>, AbstractMobPatchProvider>> providers = Lists.newArrayList();
+		protected AbstractMobPatchProvider defaultProvider;
+		
+		@Override
+		public EntityPatch<?> get(Entity entity) {
+			for (Pair<EpicFightPredicates<Entity>, AbstractMobPatchProvider> provider : this.providers) {
+				if (provider.getFirst().test(entity)) {
+					return provider.getSecond().get(entity);
+				}
+			}
+			
+			return this.defaultProvider.get(entity);
 		}
 	}
 	
@@ -173,6 +189,52 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		public double getChasingSpeed() {
 			return this.chasingSpeed;
 		}
+	}
+	
+	public static AbstractMobPatchProvider deserialize(CompoundTag tag, boolean clientSide) {
+		AbstractMobPatchProvider provider = null;
+		int i = 0;
+		boolean hasBranch = tag.contains(String.format("branch_%d", i));
+		
+		if (hasBranch) {
+			provider = new BranchProvider();
+			((BranchProvider)provider).defaultProvider = deserializeMobPatchProvider(tag, clientSide);
+		} else {
+			provider = deserializeMobPatchProvider(tag, clientSide);
+		}
+		
+		while (hasBranch) {
+			CompoundTag branchTag = tag.getCompound(String.format("branch_%d", i));
+			((BranchProvider)provider).providers.add(Pair.of(deserializePredicate(branchTag.getCompound("condition")), deserialize(branchTag, clientSide)));
+			hasBranch = tag.contains(String.format("branch_%d", ++i));
+		}
+		
+		return provider;
+	}
+	
+	public static EpicFightPredicates<Entity> deserializePredicate(CompoundTag tag) {
+		String predicateType = tag.getString("predicate");
+		EpicFightPredicates<Entity> predicate = null;
+		List<String[]> loggerNote = Lists.newArrayList();
+		
+		switch (predicateType) {
+		case "has_tags":
+			if (!tag.contains("tags", 9)) {
+				loggerNote.add(new String[] {"has_tags", "tags", "string list"});
+			}
+			predicate = new EpicFightPredicates.HasTag(tag.getList("tags", 8));
+			break;
+		}
+		
+		for (String[] formatArgs : loggerNote) {
+			EpicFightMod.LOGGER.info(String.format("[Custom Entity Error] can't find a proper argument for %s. [name: %s, type: %s]", (Object[])formatArgs));
+		}
+		
+		if (predicate == null) {
+			throw new IllegalArgumentException("[Custom Entity Error] No predicate type: " + predicateType);
+		}
+		
+		return predicate;
 	}
 	
 	public static AbstractMobPatchProvider deserializeMobPatchProvider(CompoundTag tag, boolean clientSide) {
@@ -410,29 +472,39 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		return predicate;
 	}
 	
-	public static CompoundTag extractClientData(CompoundTag tag) {
+	public static CompoundTag filterClientData(CompoundTag tag) {
 		CompoundTag clientTag = new CompoundTag();
+		int i = 0;
+		boolean hasBranch = tag.contains(String.format("branch_%d", i));
 		
-		if (tag.contains("disabled")) {
-			if (tag.getBoolean("disabled")) {
-				clientTag.put("disabled", tag.get("disabled"));
-				return clientTag;
-			}
+		while (hasBranch) {
+			CompoundTag branchTag = tag.getCompound(String.format("branch_%d", i));
+			CompoundTag copiedTag = new CompoundTag();
+			extractBranch(copiedTag, branchTag);
+			clientTag.put(String.format("branch_%d", i), copiedTag);
+			hasBranch = tag.contains(String.format("branch_%d", ++i));
 		}
 		
-		if (tag.contains("preset")) {
-			clientTag.put("preset", tag.get("preset"));
-			return clientTag;
-		}
-		
-		clientTag.put("model", tag.get("model"));
-		clientTag.putBoolean("isHumanoid", tag.contains("isHumanoid") ? tag.getBoolean("isHumanoid") : false);
-		clientTag.put("renderer", tag.get("renderer"));
-		clientTag.put("faction", tag.get("faction"));
-		clientTag.put("default_livingmotions", tag.get("default_livingmotions"));
-		clientTag.put("attributes", tag.get("attributes"));
+		extractBranch(clientTag, tag);
 		
 		return clientTag;
+	}
+	
+	public static CompoundTag extractBranch(CompoundTag extract, CompoundTag original) {
+		if (original.contains("disabled") && original.getBoolean("disabled")) {
+			extract.put("disabled", original.get("disabled"));
+		} else if (original.contains("preset")) {
+			extract.put("preset", original.get("preset"));
+		} else {
+			extract.put("model", original.get("model"));
+			extract.putBoolean("isHumanoid", original.contains("isHumanoid") ? original.getBoolean("isHumanoid") : false);
+			extract.put("renderer", original.get("renderer"));
+			extract.put("faction", original.get("faction"));
+			extract.put("default_livingmotions", original.get("default_livingmotions"));
+			extract.put("attributes", original.get("attributes"));
+		}
+		
+		return extract;
 	}
 	
 	public static Stream<CompoundTag> getDataStream() {
@@ -458,7 +530,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			}
 			
 			EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(tag.getString("id")));
-			MOB_PATCH_PROVIDERS.put(entityType, deserializeMobPatchProvider(tag, true));
+			MOB_PATCH_PROVIDERS.put(entityType, deserialize(tag, true));
 			ProviderEntity.putCustomEntityPatch(entityType, (entity) -> () -> MOB_PATCH_PROVIDERS.get(entity.getType()).get(entity));
 			
 			if (!disabled) {

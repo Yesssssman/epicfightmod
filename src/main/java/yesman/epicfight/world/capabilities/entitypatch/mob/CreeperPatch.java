@@ -1,6 +1,5 @@
 package yesman.epicfight.world.capabilities.entitypatch.mob;
 
-import java.util.Iterator;
 import java.util.Set;
 
 import net.minecraft.util.Mth;
@@ -36,25 +35,19 @@ public class CreeperPatch extends MobPatch<Creeper> {
 	}
 	
 	@Override
-	protected void initAI() {
-        Set<WrappedGoal> goals = this.original.goalSelector.getAvailableGoals();
-		Iterator<WrappedGoal> iterator = goals.iterator();
-		Goal toRemove = null;
-		
-		while (iterator.hasNext()) {
-			WrappedGoal goal = iterator.next();
-			Goal inner = goal.getGoal();
-
-			if (inner instanceof SwellGoal) {
-				toRemove = inner;
-				break;
+	protected void onResetAI(Set<Goal> toRemove) {
+		for (WrappedGoal wrappedGoal : this.original.goalSelector.getAvailableGoals()) {
+			Goal goal = wrappedGoal.getGoal();
+			
+			if (goal instanceof SwellGoal) {
+				toRemove.add(goal);
 			}
 		}
-        
-        if (toRemove != null) {
-        	this.original.goalSelector.removeGoal(toRemove);
-        }
-        
+	}
+	
+	@Override
+	protected void initAI() {
+		super.initAI();
         this.original.goalSelector.addGoal(2, new CreeperSwellStoppableGoal(this, this.original));
 	}
 	

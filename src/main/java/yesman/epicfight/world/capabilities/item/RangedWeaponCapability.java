@@ -52,7 +52,7 @@ public class RangedWeaponCapability extends CapabilityItem {
 	}
 	
 	@Override
-	public final HoldingOption getHoldOption() {
+	public HoldingOption getHoldOption() {
 		return HoldingOption.TWO_HANDED;
 	}
 }

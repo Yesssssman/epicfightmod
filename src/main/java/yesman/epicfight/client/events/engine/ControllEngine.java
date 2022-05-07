@@ -99,7 +99,7 @@ public class ControllEngine {
 				this.setKeyBind(this.options.keyAttack, false);
 				while (this.options.keyAttack.consumeClick()) {
 				}
-
+				
 				if (this.player.getUseItemRemainingTicks() == 0) {
 					if (!this.mouseLeftPressToggle) {
 						this.mouseLeftPressToggle = true;

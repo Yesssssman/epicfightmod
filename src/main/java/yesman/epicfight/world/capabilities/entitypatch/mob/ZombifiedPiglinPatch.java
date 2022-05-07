@@ -14,6 +14,7 @@ import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
+import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 
 public class ZombifiedPiglinPatch extends HumanoidMobPatch<ZombifiedPiglin> {
 	public ZombifiedPiglinPatch() {
@@ -42,7 +43,8 @@ public class ZombifiedPiglinPatch extends HumanoidMobPatch<ZombifiedPiglin> {
 		CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
 		
 		if (builder != null) {
-			this.original.goalSelector.addGoal(1, new AnimatedAttackGoal<>(this, builder.build(this), this.getOriginal(), 1.2D, true));
+			this.original.goalSelector.addGoal(1, new AnimatedAttackGoal<>(this, builder.build(this)));
+			this.original.goalSelector.addGoal(1, new TargetChasingGoal(this, this.getOriginal(), 1.2D, true));
 		}
 	}
 	

@@ -10,7 +10,9 @@ import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 import yesman.epicfight.data.loot.ModLootTables;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
+import yesman.epicfight.network.server.SPChangeGamerule;
 import yesman.epicfight.network.server.SPDatapackSync;
+import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 @Mod.EventBusSubscriber(modid=EpicFightMod.MODID)
 public class WorldEvents {
@@ -22,6 +24,8 @@ public class WorldEvents {
 	@SubscribeEvent
 	public static void onDatapackSync(final OnDatapackSyncEvent event) {
 		ServerPlayer serverplayer = (ServerPlayer)event.getPlayer();
+		EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.WEIGHT_PENALTY, serverplayer.level.getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY)), serverplayer);
+		EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.DIABLE_ENTITY_UI, serverplayer.level.getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI)), serverplayer);
 		
 		if (!serverplayer.getServer().isSingleplayerOwner(serverplayer.getGameProfile())) {
 			SPDatapackSync armorPacket = new SPDatapackSync(ItemCapabilityReloadListener.armorCount(), SPDatapackSync.Type.ARMOR);

@@ -1,6 +1,5 @@
 package yesman.epicfight.world.capabilities.entitypatch.mob;
 
-import java.util.Iterator;
 import java.util.Set;
 
 import net.minecraft.sounds.SoundEvent;
@@ -23,6 +22,7 @@ import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
+import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 
 public class SpiderPatch<T extends PathfinderMob> extends MobPatch<T> {
 	public SpiderPatch() {
@@ -32,26 +32,21 @@ public class SpiderPatch<T extends PathfinderMob> extends MobPatch<T> {
 	@Override
 	protected void initAI() {
 		super.initAI();
-        
-		Set<WrappedGoal> goals = this.original.goalSelector.getAvailableGoals();
-		Iterator<WrappedGoal> iterator = goals.iterator();
-		Goal toRemove = null;
+        this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, MobCombatBehaviors.SPIDER.build(this)));
+        this.original.goalSelector.addGoal(1, new TargetChasingGoal(this, this.original, 1.0D, false));
+	}
+	
+	@Override
+	protected void onResetAI(Set<Goal> toRemove) {
+		super.onResetAI(toRemove);
 		
-		while (iterator.hasNext()) {
-			WrappedGoal goal = iterator.next();
-			Goal inner = goal.getGoal();
-
-			if (inner instanceof LeapAtTargetGoal) {
-				toRemove = inner;
-				break;
+		for (WrappedGoal wrappedGoal : this.original.goalSelector.getAvailableGoals()) {
+			Goal goal = wrappedGoal.getGoal();
+			
+			if (goal instanceof LeapAtTargetGoal) {
+				toRemove.add(goal);
 			}
 		}
-        
-        if (toRemove != null) {
-        	this.original.goalSelector.removeGoal(toRemove);
-        }
-        
-        this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, MobCombatBehaviors.SPIDER.build(this), this.getOriginal(), 1.0D, false));
 	}
 	
 	@OnlyIn(Dist.CLIENT)

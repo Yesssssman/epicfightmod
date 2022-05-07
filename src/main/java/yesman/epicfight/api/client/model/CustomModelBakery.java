@@ -101,17 +101,19 @@ public class CustomModelBakery {
 		if (renderer.zRot != 0.0F) {
 			matrixStack.mulPose(Vector3f.ZP.rotation(renderer.zRot));
 		}
-
+		
 		if (renderer.yRot != 0.0F) {
 			matrixStack.mulPose(Vector3f.YP.rotation(renderer.yRot));
 		}
-
+		
 		if (renderer.xRot != 0.0F) {
 			matrixStack.mulPose(Vector3f.XP.rotation(renderer.xRot));
 		}
 		
 		for (ModelPart.Cube cube : renderer.cubes) {
-			part.bakeCube(matrixStack, cube, vertices, indices);
+			if (renderer.visible) {
+				part.bakeCube(matrixStack, cube, vertices, indices);
+			}
 		}
 		
 		for (ModelPart childRenderer : renderer.children.values()) {

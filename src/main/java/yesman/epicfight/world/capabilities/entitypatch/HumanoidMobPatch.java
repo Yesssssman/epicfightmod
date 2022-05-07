@@ -5,6 +5,7 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.server.level.ServerPlayer;
@@ -14,6 +15,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.item.DiggerItem;
 import net.minecraft.world.item.Item;
@@ -35,6 +37,7 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
+import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 
 public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch<T> {
 	protected Map<WeaponCategory, Map<CapabilityItem.Style, Set<Pair<LivingMotion, StaticAnimation>>>> weaponLivingMotions;
@@ -83,6 +86,8 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 		this.weaponAttackMotions.put(WeaponCategory.SPEAR, ImmutableMap.of(CapabilityItem.Style.ONE_HAND, MobCombatBehaviors.HUMANOID_SPEAR_ONEHAND, CapabilityItem.Style.TWO_HAND, MobCombatBehaviors.HUMANOID_SPEAR_TWOHAND));
 		this.weaponAttackMotions.put(WeaponCategory.FIST, ImmutableMap.of(CapabilityItem.Style.COMMON, MobCombatBehaviors.HUMANOID_FIST));
 		this.weaponAttackMotions.put(WeaponCategory.DAGGER, ImmutableMap.of(CapabilityItem.Style.ONE_HAND, MobCombatBehaviors.HUMANOID_ONEHAND_DAGGER, CapabilityItem.Style.TWO_HAND, MobCombatBehaviors.HUMANOID_TWOHAND_DAGGER));
+		this.weaponAttackMotions.put(WeaponCategory.RANGED, ImmutableMap.of(CapabilityItem.Style.COMMON, MobCombatBehaviors.HUMANOID_FIST));
+		this.weaponAttackMotions.put(WeaponCategory.TRIDENT, ImmutableMap.of(CapabilityItem.Style.COMMON, MobCombatBehaviors.HUMANOID_SPEAR_ONEHAND));
 	}
 	
 	protected CombatBehaviors.Builder<HumanoidMobPatch<?>> getHoldingItemWeaponMotionBuilder() {
@@ -104,14 +109,16 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 		CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
 		
 		if (builder != null) {
-			this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, builder.build(this), this.getOriginal(), 1.0D, true));
+			this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, builder.build(this)));
+			this.original.goalSelector.addGoal(1, new TargetChasingGoal(this, this.getOriginal(), 1.0D, true));
 		}
 	}
 	
 	public void setAIAsMounted(Entity ridingEntity) {
 		if (this.isArmed()) {
 			if (ridingEntity instanceof AbstractHorse) {
-				this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, MobCombatBehaviors.MOUNT_HUMANOID_BEHAVIORS.build(this), this.original, 1.0D, false));
+				this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, MobCombatBehaviors.MOUNT_HUMANOID_BEHAVIORS.build(this)));
+				this.original.goalSelector.addGoal(1, new TargetChasingGoal(this, this.getOriginal(), 1.0D, true));
 			}
 		}
 	}
@@ -207,12 +214,16 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 			return;
 		}
 		
-		this.resetCombatAI();
-		
-		if (isMountOrDismount) {
-			this.setAIAsMounted(ridingEntity);
-		} else {
-			this.setAIAsInfantry(this.original.getMainHandItem().getItem() instanceof ProjectileWeaponItem);
+		if (!this.original.level.isClientSide() && !this.original.isNoAi()) {
+			Set<Goal> toRemove = Sets.newHashSet();
+			this.onResetAI(toRemove);
+			toRemove.forEach(this.original.goalSelector::removeGoal);
+			
+			if (isMountOrDismount) {
+				this.setAIAsMounted(ridingEntity);
+			} else {
+				this.setAIAsInfantry(this.original.getMainHandItem().getItem() instanceof ProjectileWeaponItem);
+			}
 		}
 	}
 	

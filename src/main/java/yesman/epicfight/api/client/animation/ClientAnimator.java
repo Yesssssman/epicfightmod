@@ -61,7 +61,7 @@ public class ClientAnimator extends Animator {
 	@Override
 	public void playAnimationInstantly(StaticAnimation nextAnimation) {
 		this.baseLayer.paused  = false;
-		this.baseLayer.playAnimation(nextAnimation, this.entitypatch);
+		this.baseLayer.playAnimationInstant(nextAnimation, this.entitypatch);
 	}
 	
 	@Override
@@ -149,7 +149,7 @@ public class ClientAnimator extends Animator {
 	public void init() {
 		this.entitypatch.initAnimator(this);
 		StaticAnimation idleMotion = this.livingAnimations.get(this.currentMotion);
-		this.baseLayer.playAnimation(idleMotion, this.entitypatch);
+		this.baseLayer.playAnimationInstant(idleMotion, this.entitypatch);
 	}
 	
 	@Override

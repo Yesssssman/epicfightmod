@@ -24,6 +24,7 @@ import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -159,7 +160,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 		super.serverTick(event);
 		
 		if (this.original.getHealth() <= this.original.getMaxHealth() * 0.5F) {
-			if (!this.isArmorActivated() && !this.getEntityState().inaction() && this.original.getInvulnerableTicks() <= 0) {
+			if (!this.isArmorActivated() && !this.getEntityState().inaction() && this.original.getInvulnerableTicks() <= 0 && this.original.isAlive()) {
 				this.playAnimationSynchronized(Animations.WITHER_SPELL_ARMOR, 0.0F);
 			}
 		} else {
@@ -275,7 +276,8 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	
 	@Override
 	public boolean onDrop(LivingDropsEvent event) {
-		return true;
+		event.getDrops().removeIf((itemEntity) -> itemEntity.getItem().is(Items.NETHER_STAR));
+		return false;
 	}
 	
 	@Override

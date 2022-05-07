@@ -33,37 +33,36 @@ import yesman.epicfight.world.entity.eventlistener.HurtEventPre;
 public class VexPatch extends MobPatch<Vex> {
 	private float targetXRotO;
 	private float targetXRot;
-
+	
 	public VexPatch() {
 		super(Faction.ILLAGER);
 	}
-
+	
 	@Override
 	protected void initAI() {
 		super.initAI();
+        this.original.goalSelector.addGoal(0, new ChargeAttackGoal());
+        this.original.goalSelector.addGoal(1, new StopStandGoal());
+	}
+	
+	@Override
+	protected void onResetAI(Set<Goal> toRemove) {
+		super.onResetAI(toRemove);
 		
-		Set<WrappedGoal> goals = this.original.goalSelector.getAvailableGoals();
-		Iterator<WrappedGoal> iterator = goals.iterator();
-		Goal toRemove = null;
-		int iterCount = 0;
+		Iterator<WrappedGoal> iterator = this.original.goalSelector.getAvailableGoals().iterator();
+		
+		int index = 0;
 		while (iterator.hasNext()) {
 			WrappedGoal goal = iterator.next();
 			Goal inner = goal.getGoal();
-
-			if (iterCount == 1) {
-				toRemove = inner;
+			
+			if (index == 1) {
+				toRemove.add(inner);
 				break;
 			}
 			
-			iterCount++;
+			index++;
         }
-        
-        if (toRemove != null) {
-        	this.original.goalSelector.removeGoal(toRemove);
-        }
-        
-        this.original.goalSelector.addGoal(0, new ChargeAttackGoal());
-        this.original.goalSelector.addGoal(1, new StopStandGoal());
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -155,8 +154,7 @@ public class VexPatch extends MobPatch<Vex> {
 
 		@Override
 		public void start() {
-			//VexPatch.this.original.setDeltaMovement(0, 0, 0);
-			//VexPatch.this.original.getNavigation().stop();
+			
 		}
 		
 		@Override
@@ -167,15 +165,14 @@ public class VexPatch extends MobPatch<Vex> {
 	
 	class ChargeAttackGoal extends Goal {
 		private int chargingCounter;
-
+		
 		public ChargeAttackGoal() {
-			this.setFlags(EnumSet.noneOf(Flag.class));
+			this.setFlags(EnumSet.of(Flag.MOVE));
 		}
-
+		
 		@Override
 		public boolean canUse() {
-			if (VexPatch.this.original.getTarget() != null && !VexPatch.this.getEntityState().inaction()
-					&& VexPatch.this.original.getRandom().nextInt(10) == 0) {
+			if (VexPatch.this.original.getTarget() != null && !VexPatch.this.getEntityState().inaction() && VexPatch.this.original.getRandom().nextInt(10) == 0) {
 				double distance = VexPatch.this.original.distanceToSqr(VexPatch.this.original.getTarget());
 				return distance < 50.0D;
 			} else {

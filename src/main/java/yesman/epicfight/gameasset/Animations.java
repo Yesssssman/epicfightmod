@@ -716,7 +716,7 @@ public class Animations {
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true)
 				.addProperty(ActionAnimationProperty.MOVE_ON_LINK, false)
 				.addProperty(ActionAnimationProperty.ACTION_TIME, new ActionTime[] {ActionTime.crate(0.0F, 1.35F)})
-				.addProperty(ActionAnimationProperty.MOVEMENT_ANIMATION_SETTER, (self, entitypatch, transformSheet) -> {
+				.addProperty(ActionAnimationProperty.COORD_SET_BEGIN, (self, entitypatch, transformSheet) -> {
 					if (entitypatch instanceof EnderDragonPatch) {
 						TransformSheet transform = self.getTransfroms().get("Root").copyAll();
 						Vec3 dragonpos = entitypatch.getOriginal().position();
@@ -972,7 +972,7 @@ public class Animations {
 				.addProperty(AttackPhaseProperty.DAMAGE, ValueCorrector.setter(15.0F))
 				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true)
-				.addProperty(ActionAnimationProperty.MOVEMENT_ANIMATION_SETTER, (self, entitypatch, transformSheet) -> {
+				.addProperty(ActionAnimationProperty.COORD_SET_BEGIN, (self, entitypatch, transformSheet) -> {
 					if (entitypatch instanceof WitherPatch && !entitypatch.isLogicalClient() && ((WitherPatch)entitypatch).getOriginal().getAlternativeTarget(0) > 0) {
 						WitherPatch witherpatch = (WitherPatch)entitypatch;
 						TransformSheet transform = self.getTransfroms().get("Root").copyAll();

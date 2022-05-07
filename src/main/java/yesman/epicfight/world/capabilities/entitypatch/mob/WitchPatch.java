@@ -16,6 +16,7 @@ import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
+import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 
 public class WitchPatch extends HumanoidMobPatch<Witch> {
 	public WitchPatch() {
@@ -23,22 +24,13 @@ public class WitchPatch extends HumanoidMobPatch<Witch> {
 	}
 	
 	@Override
-	protected void initAI() {
-		super.initAI();
-	}
-	
-	@Override
 	public void setAIAsInfantry(boolean holdingRanedWeapon) {
-		this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, MobCombatBehaviors.WITCH.build(this), this.getOriginal(), 1.0F, true, 10.0D));
+		this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, MobCombatBehaviors.WITCH.build(this)));
+		this.original.goalSelector.addGoal(1, new TargetChasingGoal(this, this.getOriginal(), 1.0F, true, 10.0D));
 	}
 	
 	@Override
 	public void updateHeldItem(CapabilityItem fromCap, CapabilityItem toCap, ItemStack from, ItemStack to, InteractionHand hand) {
-		
-	}
-	
-	public void setAIAsMounted() {
-		
 	}
 	
 	@OnlyIn(Dist.CLIENT)

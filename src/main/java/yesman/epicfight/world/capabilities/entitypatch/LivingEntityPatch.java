@@ -446,11 +446,6 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	public abstract StaticAnimation getHitAnimation(StunType stunType);
 	public void aboutToDeath() {}
 	
-	@Override
-	public T getOriginal() {
-		return original;
-	}
-
 	public SoundEvent getWeaponHitSound(InteractionHand hand) {
 		return this.getAdvancedHoldingItemCapability(hand).getHitSound();
 	}

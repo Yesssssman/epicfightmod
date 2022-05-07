@@ -109,6 +109,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		MathUtils.rotateStack(matrixStackIn, transpose);
 		matrixStackIn.translate(0.0D, this.getLayerCorrection(), 0.0D);
 		matrixStackIn.scale(-1.0F, -1.0F, 1.0F);
+		
 		layers.forEach((layer) -> {
 			layer.render(matrixStackIn, buffer, packedLightIn, entityIn, entityIn.animationPosition, entityIn.animationSpeed, partialTicks, entityIn.tickCount, f2, f7);
 		});

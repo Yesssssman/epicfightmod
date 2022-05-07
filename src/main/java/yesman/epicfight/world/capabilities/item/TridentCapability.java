@@ -12,8 +12,8 @@ import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.ColliderPreset;
 import yesman.epicfight.gameasset.EpicFightSounds;
-import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.particle.EpicFightParticles;
+import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
@@ -36,6 +36,11 @@ public class TridentCapability extends RangedWeaponCapability {
 			mountAttackMotion = new ArrayList<StaticAnimation> ();
 			mountAttackMotion.add(Animations.SPEAR_MOUNT_ATTACK);
 		}
+	}
+	
+	@Override
+	public HoldingOption getHoldOption() {
+		return HoldingOption.MAINHAND_ONLY;
 	}
 	
 	@Override

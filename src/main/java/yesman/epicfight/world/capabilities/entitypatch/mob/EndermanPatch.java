@@ -47,6 +47,7 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
+import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 
 public class EndermanPatch extends MobPatch<EnderMan> {
 	private static final UUID SPEED_MODIFIER_RAGE_UUID = UUID.fromString("dc362d1a-8424-11ec-a8a3-0242ac120002");
@@ -100,17 +101,22 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 	@Override
 	protected void initAI() {
 		super.initAI();
-		this.normalAttacks = new AnimatedAttackGoal<>(this, MobCombatBehaviors.ENDERMAN.build(this), this.original, 0.75D, false);
+		this.normalAttacks = new AnimatedAttackGoal<>(this, MobCombatBehaviors.ENDERMAN.build(this));
 		this.teleportAttacks = new EndermanTeleportMove(this, MobCombatBehaviors.ENDERMAN_TELEPORT.build(this));
+		this.rageAttacks = new AnimatedAttackGoal<>(this, MobCombatBehaviors.ENDERMAN_RAGE.build(this));
 		this.rageTargeting = new NearestAttackableTargetGoal<>(this.original, Player.class, true);
-		this.rageAttacks = new AnimatedAttackGoal<>(this, MobCombatBehaviors.ENDERMAN_RAGE.build(this), this.original, 0.75D, false);
+		
+		this.original.goalSelector.addGoal(1, new TargetChasingGoal(this, this.getOriginal(), 0.75D, false));
+		this.original.goalSelector.addGoal(1, this.rageAttacks);
 		
 		if (this.isRaging()) {
 			this.original.targetSelector.addGoal(3, this.rageTargeting);
 			this.original.goalSelector.addGoal(1, this.rageAttacks);
+			this.original.goalSelector.addGoal(1, this.rageAttacks);
 		} else {
 			this.original.goalSelector.addGoal(1, this.normalAttacks);
 			this.original.goalSelector.addGoal(0, this.teleportAttacks);
+			this.original.goalSelector.addGoal(1, this.rageAttacks);
 		}
 	}
 	

@@ -178,11 +178,6 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 		}
 	}
 	
-	@Override
-	public ServerPlayer getOriginal() {
-		return this.original;
-	}
-	
 	public void setAttackTarget(LivingEntity entity) {
 		this.attackTarget = entity;
 	}

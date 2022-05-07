@@ -9,11 +9,11 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.client.renderer.patched.layer.PatchedHeadLayer;
 import yesman.epicfight.client.renderer.patched.layer.PatchedItemInHandLayer;
-import yesman.epicfight.world.capabilities.entitypatch.mob.AbstractIllagerPatch;
+import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PAbstractIllagerRenderer<E extends AbstractIllager, T extends AbstractIllagerPatch<E>> extends PatchedLivingEntityRenderer<E, T, IllagerModel<E>> {
-	public PAbstractIllagerRenderer() {
+public class PIllagerRenderer<E extends AbstractIllager, T extends MobPatch<E>> extends PatchedLivingEntityRenderer<E, T, IllagerModel<E>> {
+	public PIllagerRenderer() {
 		this.layerRendererReplace.put(ItemInHandLayer.class, new PatchedItemInHandLayer<>());
 		this.layerRendererReplace.put(CustomHeadLayer.class, new PatchedHeadLayer<>());
 	}

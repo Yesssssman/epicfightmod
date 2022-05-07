@@ -20,6 +20,7 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
+import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 
 public class SkeletonPatch<T extends PathfinderMob> extends HumanoidMobPatch<T> {
 	public SkeletonPatch() {
@@ -45,9 +46,8 @@ public class SkeletonPatch<T extends PathfinderMob> extends HumanoidMobPatch<T> 
 	protected void setWeaponMotions() {
 		super.setWeaponMotions();
 		this.weaponLivingMotions.put(WeaponCategory.SWORD, ImmutableMap.of(
-			CapabilityItem.Style.COMMON, Set.of(
-				Pair.of(LivingMotion.CHASE, Animations.WITHER_SKELETON_CHASE),
-				Pair.of(LivingMotion.IDLE, Animations.WITHER_SKELETON_IDLE)
+			CapabilityItem.Style.ONE_HAND, Set.of(
+				Pair.of(LivingMotion.CHASE, Animations.WITHER_SKELETON_CHASE)
 			)
 		));
 		
@@ -60,7 +60,8 @@ public class SkeletonPatch<T extends PathfinderMob> extends HumanoidMobPatch<T> 
 			CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
 			
 			if (builder != null) {
-				this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, builder.build(this), this.original, 1.2D, true));
+				this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, builder.build(this)));
+				this.original.goalSelector.addGoal(1, new TargetChasingGoal(this, this.original, 1.2D, true));
 			}
 		}
 	}

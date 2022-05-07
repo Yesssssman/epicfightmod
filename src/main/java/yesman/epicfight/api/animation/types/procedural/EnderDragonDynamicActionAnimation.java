@@ -75,7 +75,7 @@ public class EnderDragonDynamicActionAnimation extends ActionAnimation implement
 			EnderDragonPatch enderdragonpatch = (EnderDragonPatch)entitypatch;
 			Vec3 entitypos = enderdragonpatch.getOriginal().position();
 			OpenMatrix4f toWorld = OpenMatrix4f.mul(OpenMatrix4f.createTranslation((float)entitypos.x, (float)entitypos.y, (float)entitypos.z), enderdragonpatch.getModelMatrix(1.0F), null);
-			TransformSheet movementAnimation = enderdragonpatch.getAnimator().getPlayerFor(this).getMovementAnimation();
+			TransformSheet movementAnimation = enderdragonpatch.getAnimator().getPlayerFor(this).getActionAnimationCoord();
 			
 			for (IKSetter ikSetter : this.ikSetters) {
 				TransformSheet tipAnim = this.toPartAnimation(this.tipPointTransform.get(ikSetter.endJoint), ikSetter);

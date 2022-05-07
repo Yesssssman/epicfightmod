@@ -7,6 +7,6 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 @OnlyIn(Dist.CLIENT)
 public class RenderCrossbow extends RenderShootableWeapon {
 	public RenderCrossbow() {
-		this.correctionMatrix = new OpenMatrix4f();
+		super(new OpenMatrix4f());
 	}
 }

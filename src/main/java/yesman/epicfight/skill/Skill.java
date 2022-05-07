@@ -339,22 +339,16 @@ public abstract class Skill {
 	
 	public static enum Resource {
 		NONE((skill, playerpatch) -> true, (skill, playerpatch) -> {}),
-		SPECIAL_GAUAGE((skill, playerpatch) -> {
-			return playerpatch.getSkill(skill.category).stack > 0;
-		}, (skill, playerpatch) -> {
+		SPECIAL_GAUAGE((skill, playerpatch) -> playerpatch.getSkill(skill.category).stack > 0, (skill, playerpatch) -> {
 			skill.setStackSynchronize(playerpatch, playerpatch.getSkill(skill.category).getStack() - 1);
 			skill.setDurationSynchronize(playerpatch, skill.maxDuration);
 		}),
-		COOLDOWN((skill, playerpatch) -> {
-			return playerpatch.getSkill(skill.category).stack > 0;
-		}, (skill, playerpatch) -> {
+		COOLDOWN((skill, playerpatch) -> playerpatch.getSkill(skill.category).stack > 0, (skill, playerpatch) -> {
 			skill.setConsumptionSynchronize(playerpatch, 0);
 			skill.setStackSynchronize(playerpatch, playerpatch.getSkill(skill.category).getStack() - 1);
 			skill.setDurationSynchronize(playerpatch, skill.maxDuration);
 		}),
-		STAMINA((skill, playerpatch) -> {
-			return playerpatch.getStamina() >= Formulars.getStaminarConsumePenalty(playerpatch.getWeight(), skill.consumption, playerpatch);
-		}, (skill, playerpatch) -> {
+		STAMINA((skill, playerpatch) -> playerpatch.getStamina() >= Formulars.getStaminarConsumePenalty(playerpatch.getWeight(), skill.consumption, playerpatch), (skill, playerpatch) -> {
 			playerpatch.setStamina(playerpatch.getStamina() - Formulars.getStaminarConsumePenalty(playerpatch.getWeight(), skill.consumption, playerpatch));
 			skill.setDurationSynchronize(playerpatch, skill.maxDuration);
 		});

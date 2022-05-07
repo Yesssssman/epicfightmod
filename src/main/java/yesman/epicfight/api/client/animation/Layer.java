@@ -45,7 +45,7 @@ public class Layer {
 		}
 	}
 	
-	public void playAnimation(DynamicAnimation nextAnimation, LivingEntityPatch<?> entitypatch) {
+	public void playAnimationInstant(DynamicAnimation nextAnimation, LivingEntityPatch<?> entitypatch) {
 		this.animationPlayer.getPlay().end(entitypatch, this.animationPlayer.isEnd());
 		this.resume();
 		nextAnimation.begin(entitypatch);
@@ -107,7 +107,7 @@ public class Layer {
 		if (!this.isDisabled() && !(this.animationPlayer.getPlay() instanceof LayerOffAnimation)) {
 			float convertTime = entitypatch.getClientAnimator().baseLayer.animationPlayer.getPlay().getConvertTime();
 			setLayerOffAnimation(this.animationPlayer.getPlay(), this.animationPlayer.getCurrentPose(entitypatch, 1.0F), this.layerOffAnimation, convertTime);
-			this.playAnimation(this.layerOffAnimation, entitypatch);
+			this.playAnimationInstant(this.layerOffAnimation, entitypatch);
 		}
 	}
 	

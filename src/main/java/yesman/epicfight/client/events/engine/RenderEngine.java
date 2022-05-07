@@ -66,7 +66,7 @@ import yesman.epicfight.client.input.EpicFightKeyMappings;
 import yesman.epicfight.client.renderer.AimHelperRenderer;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.FirstPersonRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PAbstractIllagerRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PIllagerRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PCaveSpiderRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PCreeperRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PDrownedRenderer;
@@ -116,7 +116,6 @@ public class RenderEngine {
 	private Map<EntityType<?>, PatchedEntityRenderer> entityRendererCache;
 	private Map<Item, RenderItemBase> itemRendererMapByInstance;
 	private Map<Class<? extends Item>, RenderItemBase> itemRendererMapByClass;
-	//private final Map<String, Supplier<PatchedEntityRenderer>> rendererTypes = Maps.newHashMap();
 	private FirstPersonRenderer firstPersonRenderer;
 	private OverlayManager overlayManager;
 	private boolean aiming;
@@ -153,10 +152,10 @@ public class RenderEngine {
 		this.entityRendererProvider.put(EntityType.CAVE_SPIDER, PCaveSpiderRenderer::new);
 		this.entityRendererProvider.put(EntityType.IRON_GOLEM, PIronGolemRenderer::new);
 		this.entityRendererProvider.put(EntityType.VINDICATOR, PVindicatorRenderer::new);
-		this.entityRendererProvider.put(EntityType.EVOKER, PAbstractIllagerRenderer::new);
+		this.entityRendererProvider.put(EntityType.EVOKER, PIllagerRenderer::new);
 		this.entityRendererProvider.put(EntityType.WITCH, PWitchRenderer::new);
 		this.entityRendererProvider.put(EntityType.DROWNED, PDrownedRenderer::new);
-		this.entityRendererProvider.put(EntityType.PILLAGER, PAbstractIllagerRenderer::new);
+		this.entityRendererProvider.put(EntityType.PILLAGER, PIllagerRenderer::new);
 		this.entityRendererProvider.put(EntityType.RAVAGER, PRavagerRenderer::new);
 		this.entityRendererProvider.put(EntityType.VEX, PVexRenderer::new);
 		this.entityRendererProvider.put(EntityType.PIGLIN, PHumanoidRenderer::new);
@@ -173,6 +172,7 @@ public class RenderEngine {
 		RenderShield shieldRenderer = new RenderShield();
 		RenderTrident tridentRenderer = new RenderTrident();
 		
+		this.itemRendererMapByInstance.clear();
 		this.itemRendererMapByInstance.put(Items.AIR, new RenderItemBase());
 		this.itemRendererMapByInstance.put(Items.BOW, bowRenderer);
 		this.itemRendererMapByInstance.put(Items.SHIELD, shieldRenderer);
@@ -206,6 +206,7 @@ public class RenderEngine {
 		
 		if (renderItem == null) {
 			renderItem = this.findMatchingRendererByClass(item.getClass());
+			
 			if (renderItem == null) {
 				renderItem = this.itemRendererMapByInstance.get(Items.AIR);
 			}
@@ -220,7 +221,7 @@ public class RenderEngine {
 		RenderItemBase renderer = null;
 		
 		for (; clazz != null && renderer == null; clazz = clazz.getSuperclass()) {
-			renderer = itemRendererMapByClass.getOrDefault(clazz, null);
+			renderer = this.itemRendererMapByClass.getOrDefault(clazz, null);
 		}
 		
 		return renderer;

@@ -31,7 +31,7 @@ public abstract class EntityPatch<T extends Entity> {
 		this.initialized = true;
 	}
 
-	public T getOriginal() {
+	public final T getOriginal() {
 		return this.original;
 	}
 	

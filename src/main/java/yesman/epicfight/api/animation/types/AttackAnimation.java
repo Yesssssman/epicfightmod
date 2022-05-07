@@ -69,7 +69,7 @@ public class AttackAnimation extends ActionAnimation {
 	public AttackAnimation(float convertTime, String path, Model model, Phase... phases) {
 		super(convertTime, path, model);
 		
-		this.addProperty(ActionAnimationProperty.MOVEMENT_ANIMATION_SETTER, (self, entitypatch, transformSheet) -> {
+		this.addProperty(ActionAnimationProperty.COORD_SET_BEGIN, (self, entitypatch, transformSheet) -> {
 			LivingEntity attackTarget = entitypatch.getAttackTarget();
 			
 			if (!self.getProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE).orElse(false) && attackTarget != null) {
@@ -81,6 +81,33 @@ public class AttackAnimation extends ActionAnimation {
 				Vec3 pos = entitypatch.getOriginal().getEyePosition();
 				Vec3 targetpos = attackTarget.position();
 				float horizontalDistance = Math.max((float)targetpos.subtract(pos).horizontalDistance() - (attackTarget.getBbWidth() + entitypatch.getOriginal().getBbWidth()) * 0.75F, 0.0F);
+				Vec3f worldPosition = new Vec3f(keyLast.x, 0.0F, -horizontalDistance);
+				float scale = Math.min(worldPosition.length() / keyLast.length(), 2.0F);
+				
+				for (int i = startFrame; i <= endFrame; i++) {
+					Vec3f translation = keyframes[i].transform().translation();
+					translation.z *= scale;
+				}
+				
+				transformSheet.readFrom(transform);
+			} else {
+				transformSheet.readFrom(self.getTransfroms().get("Root"));
+			}
+		});
+		
+		this.addProperty(ActionAnimationProperty.COORD_SET_TICK, (self, entitypatch, transformSheet) -> {
+			LivingEntity attackTarget = entitypatch.getAttackTarget();
+			
+			if (!self.getProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE).orElse(false) && attackTarget != null) {
+				TransformSheet transform = self.getTransfroms().get("Root").copyAll();
+				Keyframe[] keyframes = transform.getKeyframes();
+				int startFrame = 0;
+				int endFrame = transform.getKeyframes().length - 1;
+				Vec3f keyLast = keyframes[endFrame].transform().translation();
+				Vec3 pos = entitypatch.getOriginal().getEyePosition();
+				Vec3 targetpos = attackTarget.position();
+				float horizontalDistance = Math.max((float)targetpos.subtract(pos).horizontalDistance() - (attackTarget.getBbWidth() + entitypatch.getOriginal().getBbWidth()) * 0.75F, 0.0F);
+				
 				Vec3f worldPosition = new Vec3f(keyLast.x, 0.0F, -horizontalDistance);
 				float scale = Math.min(worldPosition.length() / keyLast.length(), 2.0F);
 				
@@ -323,7 +350,6 @@ public class AttackAnimation extends ActionAnimation {
 			float speedFactor = this.getProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR).orElse(1.0F);
 			Optional<Float> property = this.getProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED);
 			float correctedSpeed = property.map((value) -> ((PlayerPatch<?>)entitypatch).getAttackSpeed() / value).orElse(this.totalTime * ((PlayerPatch<?>)entitypatch).getAttackSpeed());
-			
 			return 1.0F + (correctedSpeed - 1.0F) * speedFactor;
 		} else {
 			return 1.0F;

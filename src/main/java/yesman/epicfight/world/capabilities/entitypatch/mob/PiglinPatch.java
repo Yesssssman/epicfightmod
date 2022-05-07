@@ -50,6 +50,7 @@ public class PiglinPatch extends HumanoidMobPatch<Piglin> {
 		clientAnimator.addLivingAnimation(LivingMotion.CELEBRATE, EpicFightMod.getInstance().animationManager.findAnimationById(EpicFightMod.MODID.hashCode(), Animations.PIGLIN_CELEBRATE1.getId() + this.original.getRandom().nextInt(3)));
 		clientAnimator.addLivingAnimation(LivingMotion.ADMIRE, Animations.PIGLIN_ADMIRE);
 		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.PIGLIN_WALK);
+		clientAnimator.addLivingAnimation(LivingMotion.CHASE, Animations.PIGLIN_WALK);
 		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.PIGLIN_DEATH);
 		clientAnimator.addLivingAnimation(LivingMotion.RELOAD, Animations.BIPED_CROSSBOW_RELOAD);
 		clientAnimator.addLivingAnimation(LivingMotion.AIM, Animations.BIPED_CROSSBOW_AIM);

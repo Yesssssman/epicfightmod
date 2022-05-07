@@ -1,6 +1,6 @@
 package yesman.epicfight.api.animation;
 
-import yesman.epicfight.api.animation.property.Property.MovementAnimationSet;
+import yesman.epicfight.api.animation.property.Property.ActionAnimationCoordSetter;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.config.ConfigurationIngame;
 import yesman.epicfight.gameasset.Animations;
@@ -13,7 +13,7 @@ public class AnimationPlayer {
 	private boolean doNotResetNext;
 	private boolean reversed;
 	private DynamicAnimation play;
-	private TransformSheet movementAnimation = new TransformSheet();
+	private TransformSheet actionAnimationCoord = new TransformSheet();
 	
 	public AnimationPlayer() {
 		this.setPlayAnimation(Animations.DUMMY_ANIMATION);
@@ -65,12 +65,12 @@ public class AnimationPlayer {
 		this.play = animation;
 	}
 	
-	public void setMovementAnimation(DynamicAnimation animation, LivingEntityPatch<?> entitypatch, MovementAnimationSet movementAnimationSetter) {
-		movementAnimationSetter.set(animation, entitypatch, this.movementAnimation);
+	public void setActionAnimationCoord(DynamicAnimation animation, LivingEntityPatch<?> entitypatch, ActionAnimationCoordSetter actionAnimationCoordSetter) {
+		actionAnimationCoordSetter.set(animation, entitypatch, this.actionAnimationCoord);
 	}
 	
-	public TransformSheet getMovementAnimation() {
-		return this.movementAnimation;
+	public TransformSheet getActionAnimationCoord() {
+		return this.actionAnimationCoord;
 	}
 	
 	public void setEmpty() {

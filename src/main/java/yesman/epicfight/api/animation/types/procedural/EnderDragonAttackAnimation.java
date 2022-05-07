@@ -18,7 +18,7 @@ import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.property.Property.ActionAnimationProperty;
 import yesman.epicfight.api.animation.property.Property.AttackAnimationProperty;
-import yesman.epicfight.api.animation.property.Property.MovementAnimationSet;
+import yesman.epicfight.api.animation.property.Property.ActionAnimationCoordSetter;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Model;
@@ -37,6 +37,7 @@ public class EnderDragonAttackAnimation extends AttackAnimation implements Proce
 		super(convertTime, antic, preDelay, contact, recovery, collider, index, path, model);
 		this.ikSetters = ikSetters;
 		this.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true);
+		this.properties.remove(ActionAnimationProperty.COORD_SET_TICK);
 	}
 	
 	@Override
@@ -74,11 +75,11 @@ public class EnderDragonAttackAnimation extends AttackAnimation implements Proce
 	
 	@Override
 	public void begin(LivingEntityPatch<?> entitypatch) {
-		MovementAnimationSet movementAnimationSetter = this.getProperty(ActionAnimationProperty.MOVEMENT_ANIMATION_SETTER).orElse((self, entitypatch$2, transformSheet) -> {
+		ActionAnimationCoordSetter movementAnimationSetter = this.getProperty(ActionAnimationProperty.COORD_SET_BEGIN).orElse((self, entitypatch$2, transformSheet) -> {
 			transformSheet.readFrom(self.getTransfroms().get("Root"));
 		});
 		
-		entitypatch.getAnimator().getPlayerFor(this).setMovementAnimation(this, entitypatch, movementAnimationSetter);
+		entitypatch.getAnimator().getPlayerFor(this).setActionAnimationCoord(this, entitypatch, movementAnimationSetter);
 		
 		if (entitypatch instanceof EnderDragonPatch) {
 			EnderDragonPatch enderdragonpatch = (EnderDragonPatch)entitypatch;

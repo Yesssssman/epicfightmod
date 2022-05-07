@@ -1,9 +1,13 @@
 package yesman.epicfight.world.capabilities.entitypatch.mob;
 
+import java.util.Set;
+
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MoveTowardsTargetGoal;
+import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -22,6 +26,7 @@ import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
+import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 
 public class IronGolemPatch extends MobPatch<IronGolem> {
 	private int deathTimerExt;
@@ -33,8 +38,21 @@ public class IronGolemPatch extends MobPatch<IronGolem> {
 	@Override
 	protected void initAI() {
 		super.initAI();
-		this.original.goalSelector.getAvailableGoals().removeIf((goal) -> (goal.getGoal() instanceof MoveTowardsTargetGoal));
-		this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, MobCombatBehaviors.IRON_GOLEM.build(this), this.original, 1.0D, false));
+		this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, MobCombatBehaviors.IRON_GOLEM.build(this)));
+		this.original.goalSelector.addGoal(1, new TargetChasingGoal(this, this.original, 1.0D, false));
+	}
+	
+	@Override
+	protected void onResetAI(Set<Goal> toRemove) {
+		super.onResetAI(toRemove);
+		
+		for (WrappedGoal wrappedGoal : this.original.goalSelector.getAvailableGoals()) {
+			Goal goal = wrappedGoal.getGoal();
+			
+			if (goal instanceof MoveTowardsTargetGoal) {
+				toRemove.add(goal);
+			}
+		}
 	}
 	
 	@Override

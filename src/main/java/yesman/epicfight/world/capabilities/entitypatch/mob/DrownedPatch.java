@@ -10,6 +10,7 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
+import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 
 public class DrownedPatch extends ZombiePatch<Drowned> {
 	@Override
@@ -23,15 +24,16 @@ public class DrownedPatch extends ZombiePatch<Drowned> {
 		CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
 		
 		if (builder != null) {
-			this.original.goalSelector.addGoal(0, new DrownedAnimatedAttackGoal(this, builder.build(this), this.getOriginal(), 1.0D, true));
+			this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, builder.build(this)));
+			this.original.goalSelector.addGoal(1, new DrownedTargetChasingGoal(this, this.getOriginal(), 1.0D, true));
 		}
 	}
 	
-	static class DrownedAnimatedAttackGoal extends AnimatedAttackGoal<HumanoidMobPatch<?>> {
+	static class DrownedTargetChasingGoal extends TargetChasingGoal {
 		private final Drowned drowned;
 		
-		public DrownedAnimatedAttackGoal(DrownedPatch mobpatch, CombatBehaviors<HumanoidMobPatch<?>> combatBehaviors, PathfinderMob pathfinderMob, double speedModifier, boolean longMemory) {
-			super(mobpatch, combatBehaviors, pathfinderMob, speedModifier, longMemory);
+		public DrownedTargetChasingGoal(DrownedPatch mobpatch, PathfinderMob pathfinderMob, double speedModifier, boolean longMemory) {
+			super(mobpatch, pathfinderMob, speedModifier, longMemory);
 			this.drowned = mobpatch.getOriginal();
 		}
 		
