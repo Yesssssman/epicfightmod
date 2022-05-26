@@ -46,7 +46,7 @@ public class CPChangeSkill {
 			Skill skill = Skills.findSkill(msg.skillName);
 			playerpatch.getSkill(msg.skillSlotIndex).setSkill(skill);
 			
-			if (skill.getCategory().modifiable()) {
+			if (skill.getCategory().learnable()) {
 				playerpatch.getSkillCapability().addLearnedSkills(skill);
 			}
 			

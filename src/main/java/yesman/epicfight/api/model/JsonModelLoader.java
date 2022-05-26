@@ -2,7 +2,6 @@ package yesman.epicfight.api.model;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.FloatBuffer;
@@ -25,6 +24,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
@@ -33,15 +33,16 @@ import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
-import yesman.epicfight.api.client.model.Mesh;
 import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.api.client.model.ClientModel;
+import yesman.epicfight.api.client.model.Mesh;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.api.utils.math.Vec4f;
 import yesman.epicfight.main.EpicFightMod;
 
 public class JsonModelLoader {
-	private static final OpenMatrix4f CORRECTION = OpenMatrix4f.createRotatorDeg(-90.0F, Vec3f.X_AXIS);
+	public static final OpenMatrix4f CORRECTION = OpenMatrix4f.createRotatorDeg(-90.0F, Vec3f.X_AXIS);
 	
 	private static int[] toIntArray(JsonArray array) {
 		List<Integer> result = Lists.newArrayList();
@@ -71,24 +72,41 @@ public class JsonModelLoader {
 			in.setLenient(true);
 			this.rootJson = Streams.parse(in).getAsJsonObject();	
 		} else {
-			if (resourceManager.hasResource(resourceLocation)) {
-				try {
-					Resource resource = resourceManager.getResource(resourceLocation);
-					InputStream inputstream = resource.getInputStream();
-					Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
-					JsonReader in = new JsonReader(reader);
-					in.setLenient(true);
-					this.rootJson = Streams.parse(in).getAsJsonObject();	
-				} catch (IOException e) {
-					e.printStackTrace();
-					throw new IllegalArgumentException("[EpicFightMod] : get an exception reading " + resourceLocation.toString());
-				}
-			} else {
-				throw new IllegalArgumentException("[EpicFightMod] : no model file in " + resourceLocation.toString());
+			try {
+				Resource resource = resourceManager.getResource(resourceLocation);
+				JsonReader in = new JsonReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
+				in.setLenient(true);
+				this.rootJson = Streams.parse(in).getAsJsonObject();
+			} catch (IOException e) {
+				EpicFightMod.LOGGER.info("Can't read " + resourceLocation.toString());
+				e.printStackTrace();
 			}
 		}
 	}
 	
+	public boolean isValidSource() {
+		return this.rootJson != null;
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public ClientModel.RenderProperties getRenderProperties() {
+		JsonObject properties = this.rootJson.getAsJsonObject("render_properties");
+		
+		if (properties != null) {
+			return ClientModel.RenderProperties.builder()
+					.transparency(properties.has("transparent") ? properties.get("transparent").getAsBoolean() : false)
+				.build();
+		} else {
+			return ClientModel.RenderProperties.builder().build();
+		}
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public ResourceLocation getParent() {
+		return this.rootJson.has("parent") ? new ResourceLocation(this.rootJson.get("parent").getAsString()) : null;
+	}
+	
+	@OnlyIn(Dist.CLIENT)
 	public Mesh getMesh() {
 		JsonObject obj = this.rootJson.getAsJsonObject("vertices");
 		JsonObject positions = obj.getAsJsonObject("positions");
@@ -98,7 +116,6 @@ public class JsonModelLoader {
 		JsonObject weights = obj.getAsJsonObject("weights");
 		JsonObject drawingIndices = obj.getAsJsonObject("indices");
 		JsonObject vcounts = obj.getAsJsonObject("vcounts");
-		
 		float[] positionArray = toFloatArray(positions.get("array").getAsJsonArray());
 		
 		for (int i = 0; i < positionArray.length / 3; i++) {

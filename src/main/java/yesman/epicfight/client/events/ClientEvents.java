@@ -43,7 +43,7 @@ public class ClientEvents {
 			if (slot != null) {
 				CapabilityItem cap = EpicFightCapabilities.getItemStackCapability(minecraft.player.containerMenu.getCarried());
 				
-				if (!cap.canUsedInOffhand()) {
+				if (!cap.canBePlacedOffhand()) {
 					if (slot.getNoItemIcon() != null && slot.getNoItemIcon().equals(OFFHAND_TEXTURE)) {
 						event.setCanceled(true);
 					}
@@ -60,7 +60,7 @@ public class ClientEvents {
 			if (slot != null) {
 				CapabilityItem cap = EpicFightCapabilities.getItemStackCapability(minecraft.player.containerMenu.getCarried());
 				
-				if (!cap.canUsedInOffhand()) {
+				if (!cap.canBePlacedOffhand()) {
 					if (slot.getNoItemIcon() != null && slot.getNoItemIcon().equals(OFFHAND_TEXTURE)) {
 						event.setCanceled(true);
 					}
@@ -80,7 +80,7 @@ public class ClientEvents {
 				if (slot != null && slot.hasItem()) {
 					itemCapability = EpicFightCapabilities.getItemStackCapability(slot.getItem());
 					
-					if (!itemCapability.canUsedInOffhand()) {
+					if (!itemCapability.canBePlacedOffhand()) {
 						event.setCanceled(true);
 					}
 				}
@@ -92,7 +92,7 @@ public class ClientEvents {
 				if (slot != null && slot.getNoItemIcon() != null && slot.getNoItemIcon().equals(OFFHAND_TEXTURE)) {
 					itemCapability = EpicFightCapabilities.getItemStackCapability(minecraft.player.getInventory().getItem(event.getKeyCode() - 49));
 					
-					if (!itemCapability.canUsedInOffhand()) {
+					if (!itemCapability.canBePlacedOffhand()) {
 						event.setCanceled(true);
 					}
 				}

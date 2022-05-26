@@ -21,6 +21,7 @@ public class GreatswordItem extends WeaponItem {
 	private final float attackDamage;
 	private final float attackSpeed;
 	
+	@SuppressWarnings("deprecation")
 	public GreatswordItem(Item.Properties build, Tier tier) {
 		super(tier, 0, 0.0F, build);
 		this.attackDamage = 11.0F + tier.getAttackDamageBonus();

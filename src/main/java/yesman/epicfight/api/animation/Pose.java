@@ -1,8 +1,10 @@
 package yesman.epicfight.api.animation;
 
 import java.util.Map;
+import java.util.Set;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 public class Pose {
 	private final Map<String, JointTransform> jointTransformData = Maps.newHashMap();
@@ -15,22 +17,19 @@ public class Pose {
 		return this.jointTransformData;
 	}
 	
-	public JointTransform getTransformByName(String jointName) {
-		JointTransform jt = this.jointTransformData.get(jointName);
-		if (jt == null) {
-			return JointTransform.empty();
-		}
-		
-		return jt;
+	public JointTransform getOrDefaultTransform(String jointName) {
+		return this.jointTransformData.getOrDefault(jointName, JointTransform.empty());
 	}
 	
 	public static Pose interpolatePose(Pose pose1, Pose pose2, float pregression) {
 		Pose pose = new Pose();
 		
-		for (String jointName : pose1.jointTransformData.keySet()) {
-			if (pose2.jointTransformData.containsKey(jointName)) { 
-				pose.putJointData(jointName, JointTransform.interpolate(pose1.jointTransformData.get(jointName), pose2.jointTransformData.get(jointName), pregression));
-			}
+		Set<String> mergedSet = Sets.newHashSet();
+		mergedSet.addAll(pose1.jointTransformData.keySet());
+		mergedSet.addAll(pose2.jointTransformData.keySet());
+		
+		for (String jointName : mergedSet) {
+			pose.putJointData(jointName, JointTransform.interpolate(pose1.getOrDefaultTransform(jointName), pose2.getOrDefaultTransform(jointName), pregression));
 		}
 		
 		return pose;

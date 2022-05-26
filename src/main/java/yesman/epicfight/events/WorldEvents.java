@@ -3,22 +3,32 @@ package yesman.epicfight.events;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
+import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.data.loot.ModLootTables;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPChangeGamerule;
 import yesman.epicfight.network.server.SPDatapackSync;
+import yesman.epicfight.server.command.PlayerModeCommand;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
-@Mod.EventBusSubscriber(modid=EpicFightMod.MODID)
+@Mod.EventBusSubscriber(modid = EpicFightMod.MODID)
 public class WorldEvents {
 	@SubscribeEvent
 	public static void onLootTableRegistry(final LootTableLoadEvent event) {
-    	ModLootTables.modifyVanillaLootPools(event);
+		if (ConfigManager.SKILLBOOK_CHEST_LOOT.get()) {
+			ModLootTables.modifyVanillaLootPools(event);
+		}
+    }
+	
+	@SubscribeEvent
+	public static void onCommandRegistry(final RegisterCommandsEvent event) {
+		PlayerModeCommand.register(event.getDispatcher());
     }
 	
 	@SubscribeEvent

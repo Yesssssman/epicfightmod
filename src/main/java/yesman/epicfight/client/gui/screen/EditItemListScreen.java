@@ -357,7 +357,11 @@ public class EditItemListScreen extends Screen {
 				tessellator.end();
 				this.onTooltip.onTooltip(this, matrixStack, mouseX, mouseY);
 			}
-			EditItemListScreen.this.itemRenderer.renderGuiItem(new ItemStack(this.item), this.x, this.y);
+			
+			try {
+				EditItemListScreen.this.itemRenderer.renderGuiItem(new ItemStack(this.item), this.x, this.y);
+			} catch (Exception e) {
+			}
 		}
 	}
 	

@@ -29,9 +29,11 @@ public class BasicAttackAnimation extends AttackAnimation {
 	@Override
 	public void setLinkAnimation(Pose pose1, float timeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
 		float extTime = Math.max(this.convertTime + timeModifier, 0);
+		
 		if (entitypatch instanceof PlayerPatch<?>) {
-			PlayerPatch<?> playerdata = (PlayerPatch<?>) entitypatch;
-			extTime *= (float)(this.totalTime * playerdata.getAttackSpeed());
+			PlayerPatch<?> playerpatch = (PlayerPatch<?>)entitypatch;
+			Phase phase = this.getPhaseByTime(playerpatch.getAnimator().getPlayerFor(this).getElapsedTime());
+			extTime *= (float)(this.totalTime * playerpatch.getAttackSpeed(phase.hand));
 		}
 		
 		extTime = Math.max(extTime - this.convertTime, 0);

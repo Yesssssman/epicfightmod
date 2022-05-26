@@ -30,7 +30,7 @@ public class PlaneCollider extends Collider {
 	}
 
 	@Override
-	public boolean collide(Entity entity) {
+	public boolean isCollide(Entity entity) {
 		AABB opponent = entity.getBoundingBox();
 		Vec3 planeNorm = this.worldPos[0].cross(this.worldPos[1]);
 		Vec3 pos = new Vec3(planeNorm.x >= 0 ? opponent.maxX : opponent.minX, planeNorm.y >= 0 ? opponent.maxY : opponent.minY, planeNorm.z >= 0 ? opponent.maxZ : opponent.minZ);

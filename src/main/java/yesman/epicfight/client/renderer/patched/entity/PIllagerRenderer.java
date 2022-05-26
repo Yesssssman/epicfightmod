@@ -14,8 +14,8 @@ import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 @OnlyIn(Dist.CLIENT)
 public class PIllagerRenderer<E extends AbstractIllager, T extends MobPatch<E>> extends PatchedLivingEntityRenderer<E, T, IllagerModel<E>> {
 	public PIllagerRenderer() {
-		this.layerRendererReplace.put(ItemInHandLayer.class, new PatchedItemInHandLayer<>());
-		this.layerRendererReplace.put(CustomHeadLayer.class, new PatchedHeadLayer<>());
+		this.addPatchedLayer(ItemInHandLayer.class, new PatchedItemInHandLayer<>());
+		this.addPatchedLayer(CustomHeadLayer.class, new PatchedHeadLayer<>());
 	}
 	
 	@Override

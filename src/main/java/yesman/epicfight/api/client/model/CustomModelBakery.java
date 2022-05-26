@@ -1,146 +1,186 @@
 package yesman.epicfight.api.client.model;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.lang3.ArrayUtils;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 
+import net.minecraft.SharedConstants;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.ModelPart.Cube;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
 public class CustomModelBakery {
 	static int indexCount = 0;
-	static final ModelPartition HEAD = new SimplePart(9);
-	static final ModelPartition LEFT_FEET = new SimplePart(5);
-	static final ModelPartition RIGHT_FEET = new SimplePart(2);
-	static final ModelPartition LEFT_ARM = new Limb(16, 17, 19, 19.0F, false);
-	static final ModelPartition RIGHT_ARM = new Limb(11, 12, 14, 19.0F, false);
-	static final ModelPartition LEFT_LEG = new Limb(4, 5, 6, 6.0F, true);
-	static final ModelPartition RIGHT_LEG = new Limb(1, 2, 3, 6.0F, true);
-	static final ModelPartition CHEST = new Chest();
 	
-	public static ClientModel bakeBipedCustomArmorModel(HumanoidModel<?> model, ArmorItem armorItem, EquipmentSlot equipmentSlot) {
-		List<ModelPartBind> allBoxes = Lists.<ModelPartBind>newArrayList();
+	static final Map<ResourceLocation, ClientModel> BAKED_MODELS = Maps.newHashMap();
+	static final ModelBaker HEAD = new SimpleBaker(9);
+	static final ModelBaker LEFT_FEET = new SimpleBaker(5);
+	static final ModelBaker RIGHT_FEET = new SimpleBaker(2);
+	static final ModelBaker LEFT_ARM = new Limb(16, 17, 19, 19.0F, false);
+	static final ModelBaker LEFT_ARM_CHILD = new SimpleSeparateBaker(16, 17, 19.0F);
+	static final ModelBaker RIGHT_ARM = new Limb(11, 12, 14, 19.0F, false);
+	static final ModelBaker RIGHT_ARM_CHILD = new SimpleSeparateBaker(11, 12, 19.0F);
+	static final ModelBaker LEFT_LEG = new Limb(4, 5, 6, 6.0F, true);
+	static final ModelBaker LEFT_LEG_CHILD = new SimpleSeparateBaker(4, 5, 6.0F);
+	static final ModelBaker RIGHT_LEG = new Limb(1, 2, 3, 6.0F, true);
+	static final ModelBaker RIGHT_LEG_CHILD = new SimpleSeparateBaker(1, 2, 6.0F);
+	static final ModelBaker CHEST = new Chest();
+	static final ModelBaker CHEST_CHILD = new SimpleSeparateBaker(8, 7, 18.0F);
+	
+	public static void exportModels(File resourcePackDirectory) throws IOException {
+		File zipFile = new File(resourcePackDirectory, "epicfight_custom_armors.zip");
 		
-		model.head.setPos(0.0F, 0.0F, 0.0F);
-		resetRotation(model.head);
-		model.hat.setPos(0.0F, 0.0F, 0.0F);
-		resetRotation(model.hat);
-		model.body.setPos(0.0F, 0.0F, 0.0F);
-		resetRotation(model.body);
-	    model.rightArm.setPos(-5.0F, 2.0F, 0.0F);
-	    resetRotation(model.rightArm);
-	    model.leftArm.setPos(5.0F, 2.0F, 0.0F);
-	    resetRotation(model.leftArm);
-	    model.rightLeg.setPos(-1.9F, 12.0F, 0.0F);
-	    resetRotation(model.rightLeg);
-	    model.leftLeg.setPos(1.9F, 12.0F, 0.0F);
-	    resetRotation(model.leftLeg);
+		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFile));
+		for (Map.Entry<ResourceLocation, ClientModel> entry : BAKED_MODELS.entrySet()) {
+			ZipEntry zipEntry = new ZipEntry(String.format("assets/%s/%s", entry.getValue().getLocation().getNamespace(), entry.getValue().getLocation().getPath()));
+			Gson gson = new GsonBuilder().create();
+			out.putNextEntry(zipEntry);
+			out.write(gson.toJson(entry.getValue().getMesh().toJsonObject()).getBytes());
+			out.closeEntry();
+			EpicFightMod.LOGGER.info("Exported custom armor model : " + entry.getKey());
+		}
+
+		ZipEntry zipEntry = new ZipEntry("pack.mcmeta");
+		Gson gson = new GsonBuilder().setPrettyPrinting().create();
+		JsonObject root = new JsonObject();
+		JsonObject pack = new JsonObject();
+		pack.addProperty("description", "epicfight_custom_armor_models");
+		pack.addProperty("pack_format", PackType.CLIENT_RESOURCES.getVersion(SharedConstants.getCurrentVersion()));
+		root.add("pack", pack);
+		out.putNextEntry(zipEntry);
+		out.write(gson.toJson(root).getBytes());
+		out.closeEntry();
+		out.close();
+	}
+	
+	public static ClientModel bakeBipedCustomArmorModel(HumanoidModel<?> model, ArmorItem armorItem, EquipmentSlot slot, boolean debuggingMode) {
+		List<ModelPartition> boxes = Lists.<ModelPartition>newArrayList();
 		
-		switch (equipmentSlot) {
+		model.head.setRotation(0.0F, 0.0F, 0.0F);
+		model.hat.setRotation(0.0F, 0.0F, 0.0F);
+		model.body.setRotation(0.0F, 0.0F, 0.0F);
+	    model.rightArm.setRotation(0.0F, 0.0F, 0.0F);
+	    model.leftArm.setRotation(0.0F, 0.0F, 0.0F);
+	    model.rightLeg.setRotation(0.0F, 0.0F, 0.0F);
+	    model.leftLeg.setRotation(0.0F, 0.0F, 0.0F);
+		
+		switch (slot) {
 		case HEAD:
-			allBoxes.add(new ModelPartBind(HEAD, model.head));
-			allBoxes.add(new ModelPartBind(HEAD, model.hat));
+			boxes.add(new ModelPartition(HEAD, HEAD, model.head));
+			boxes.add(new ModelPartition(HEAD, HEAD, model.hat));
 			break;
 		case CHEST:
-			allBoxes.add(new ModelPartBind(CHEST, model.body));
-			allBoxes.add(new ModelPartBind(RIGHT_ARM, model.rightArm));
-			allBoxes.add(new ModelPartBind(LEFT_ARM, model.leftArm));
+			boxes.add(new ModelPartition(CHEST, CHEST_CHILD, model.body));
+			boxes.add(new ModelPartition(RIGHT_ARM, RIGHT_ARM_CHILD, model.rightArm));
+			boxes.add(new ModelPartition(LEFT_ARM, LEFT_ARM_CHILD, model.leftArm));
 			break;
 		case LEGS:
-			allBoxes.add(new ModelPartBind(CHEST, model.body));
-			allBoxes.add(new ModelPartBind(LEFT_LEG, model.leftLeg));
-			allBoxes.add(new ModelPartBind(RIGHT_LEG, model.rightLeg));
+			boxes.add(new ModelPartition(CHEST, CHEST_CHILD, model.body));
+			boxes.add(new ModelPartition(LEFT_LEG, LEFT_LEG_CHILD, model.leftLeg));
+			boxes.add(new ModelPartition(RIGHT_LEG, RIGHT_LEG_CHILD, model.rightLeg));
 			break;
 		case FEET:
-			allBoxes.add(new ModelPartBind(LEFT_FEET, model.leftLeg));
-			allBoxes.add(new ModelPartBind(RIGHT_FEET, model.rightLeg));
+			boxes.add(new ModelPartition(LEFT_FEET, LEFT_FEET, model.leftLeg));
+			boxes.add(new ModelPartition(RIGHT_FEET, RIGHT_FEET, model.rightLeg));
 			break;
 		default:
 			return null;
 		}
 		
-		ClientModel customModel = new ClientModel(bakeMeshFromCubes(allBoxes));
+		ResourceLocation rl = new ResourceLocation(armorItem.getRegistryName().getNamespace(), "armor/" + armorItem.getRegistryName().getPath());
+		ClientModel customModel = new ClientModel(rl, bakeMeshFromCubes(boxes, debuggingMode));
+		ClientModels.LOGICAL_CLIENT.register(rl, customModel);
+		BAKED_MODELS.put(armorItem.getRegistryName(), customModel);
 		return customModel;
 	}
 	
-	private static Mesh bakeMeshFromCubes(List<ModelPartBind> cubes) {
+	private static Mesh bakeMeshFromCubes(List<ModelPartition> partitions, boolean debuggingMode) {
 		List<CustomArmorVertex> vertices = Lists.newArrayList();
 		List<Integer> indices = Lists.newArrayList();
-		PoseStack matrixStack = new PoseStack();
+		PoseStack poseStack = new PoseStack();
 		indexCount = 0;
-		matrixStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
-		matrixStack.mulPose(Vector3f.XP.rotationDegrees(180.0F));
-		matrixStack.translate(0, -24, 0);
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
+		poseStack.mulPose(Vector3f.XP.rotationDegrees(180.0F));
+		poseStack.translate(0, -24, 0);
 		
-		for (ModelPartBind modelPart : cubes) {
-			bake(matrixStack, modelPart.partedBaker, modelPart.modelRenderer, vertices, indices);
+		for (ModelPartition modelpartition : partitions) {
+			bake(poseStack, modelpartition, modelpartition.part, modelpartition.partBaker, vertices, indices, debuggingMode);
 		}
 		
 		return CustomArmorVertex.loadVertexInformation(vertices, ArrayUtils.toPrimitive(indices.toArray(new Integer[0])));
 	}
 	
-	private static void bake(PoseStack matrixStack, ModelPartition part, ModelPart renderer, List<CustomArmorVertex> vertices, List<Integer> indices) {
-		matrixStack.pushPose();
-		matrixStack.translate(renderer.x, renderer.y, renderer.z);
+	private static void bake(PoseStack poseStack, ModelPartition modelpartition, ModelPart part, ModelBaker partBaker, List<CustomArmorVertex> vertices, List<Integer> indices, boolean debuggingMode) {
+		poseStack.pushPose();
+		poseStack.translate(part.x, part.y, part.z);
 		
-		if (renderer.zRot != 0.0F) {
-			matrixStack.mulPose(Vector3f.ZP.rotation(renderer.zRot));
+		if (part.zRot != 0.0F) {
+			poseStack.mulPose(Vector3f.ZP.rotation(part.zRot));
 		}
 		
-		if (renderer.yRot != 0.0F) {
-			matrixStack.mulPose(Vector3f.YP.rotation(renderer.yRot));
+		if (part.yRot != 0.0F) {
+			poseStack.mulPose(Vector3f.YP.rotation(part.yRot));
 		}
 		
-		if (renderer.xRot != 0.0F) {
-			matrixStack.mulPose(Vector3f.XP.rotation(renderer.xRot));
+		if (part.xRot != 0.0F) {
+			poseStack.mulPose(Vector3f.XP.rotation(part.xRot));
 		}
 		
-		for (ModelPart.Cube cube : renderer.cubes) {
-			if (renderer.visible) {
-				part.bakeCube(matrixStack, cube, vertices, indices);
-			}
+		for (ModelPart.Cube cube : part.cubes) {
+			partBaker.bakeCube(poseStack, cube, vertices, indices);
 		}
 		
-		for (ModelPart childRenderer : renderer.children.values()) {
-			bake(matrixStack, part, childRenderer, vertices, indices);
+		for (ModelPart childParts : part.children.values()) {
+			bake(poseStack, modelpartition, childParts, modelpartition.childBaker, vertices, indices, debuggingMode);
 		}
 		
-		matrixStack.popPose();
+		poseStack.popPose();
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class ModelPartBind {
-		ModelPartition partedBaker;
-		ModelPart modelRenderer;
+	static class ModelPartition {
+		final ModelBaker partBaker;
+		final ModelBaker childBaker;
+		final ModelPart part;
 		
-		private ModelPartBind(ModelPartition partedBaker, ModelPart modelRenderer) {
-			this.partedBaker = partedBaker;
-			this.modelRenderer = modelRenderer;
+		private ModelPartition(ModelBaker partedBaker, ModelBaker childBaker, ModelPart modelRenderer) {
+			this.partBaker = partedBaker;
+			this.childBaker = childBaker;
+			this.part = modelRenderer;
 		}
 	}
 	
-	static void resetRotation(ModelPart modelRenderer) {
-		modelRenderer.setRotation(0.0F, 0.0F, 0.0F);
-	}
-	
 	@OnlyIn(Dist.CLIENT)
-	abstract static class ModelPartition {
-		public abstract void bakeCube(PoseStack matrixStack, ModelPart.Cube cube, List<CustomArmorVertex> vertices, List<Integer> indices);
+	abstract static class ModelBaker {
+		public abstract void bakeCube(PoseStack poseStack, ModelPart.Cube cube, List<CustomArmorVertex> vertices, List<Integer> indices);
 	}
 	
 	static void putIndexCount(List<Integer> indices, int value) {
@@ -150,21 +190,21 @@ public class CustomModelBakery {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class SimplePart extends ModelPartition {
+	static class SimpleBaker extends ModelBaker {
 		final int jointId;
 		
-		public SimplePart (int jointId) {
+		public SimpleBaker (int jointId) {
 			this.jointId = jointId;
 		}
 		
-		public void bakeCube(PoseStack matrixStack, ModelPart.Cube cube, List<CustomArmorVertex> vertices, List<Integer> indices) {
+		public void bakeCube(PoseStack poseStack, ModelPart.Cube cube, List<CustomArmorVertex> vertices, List<Integer> indices) {
 			for (ModelPart.Polygon quad : cube.polygons) {
 				Vector3f norm = quad.normal.copy();
-				norm.transform(matrixStack.last().normal());
+				norm.transform(poseStack.last().normal());
 				
 				for (ModelPart.Vertex vertex : quad.vertices) {
 					Vector4f pos = new Vector4f(vertex.pos);
-					pos.transform(matrixStack.last().pose());
+					pos.transform(poseStack.last().pose());
 					vertices.add(new CustomArmorVertex()
 						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
@@ -187,98 +227,128 @@ public class CustomModelBakery {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class Chest extends ModelPartition {
-		final float cutX = 0.0F;
-		final WeightPair[] cutYList = { new WeightPair(13.6666F, 0.254F, 0.746F), new WeightPair(15.8333F, 0.254F, 0.746F), new WeightPair(18.0F, 0.5F, 0.5F), new WeightPair(20.1666F, 0.744F, 0.256F), new WeightPair(22.3333F, 0.770F, 0.230F)};
+	static class SimpleSeparateBaker extends ModelBaker {
+		final SimpleBaker upperBaker;
+		final SimpleBaker lowerBaker;
+		final float yClipCoord;
+		
+		public SimpleSeparateBaker(int upperJoint, int lowerJoint, float yClipCoord) {
+			this.upperBaker = new SimpleBaker(upperJoint);
+			this.lowerBaker = new SimpleBaker(lowerJoint);
+			this.yClipCoord = yClipCoord;
+		}
 		
 		@Override
-		public void bakeCube(PoseStack matrixStack, ModelPart.Cube cube, List<CustomArmorVertex> vertices, List<Integer> indices) {
-			List<AnimatableCube> seperatedX = Lists.<AnimatableCube>newArrayList();
-			List<AnimatableCube> seperatedXY = Lists.<AnimatableCube>newArrayList();
+		public void bakeCube(PoseStack poseStack, Cube cube, List<CustomArmorVertex> vertices, List<Integer> indices) {
+			Vector4f cubeCenter = new Vector4f(cube.minX + (cube.maxX - cube.minX) * 0.5F, cube.minY + (cube.maxY - cube.minY) * 0.5F, cube.minZ + (cube.maxZ - cube.minZ) * 0.5F, 1.0F);
+			cubeCenter.transform(poseStack.last().pose());
 			
-			for (ModelPart.Polygon quad : cube.polygons) {
-				Matrix4f matrix = matrixStack.last().pose();
-				ModelPart.Vertex pos0 = getTranslatedVertex(quad.vertices[0], matrix);
-				ModelPart.Vertex pos1 = getTranslatedVertex(quad.vertices[1], matrix);
-				ModelPart.Vertex pos2 = getTranslatedVertex(quad.vertices[2], matrix);
-				ModelPart.Vertex pos3 = getTranslatedVertex(quad.vertices[3], matrix);
-				Direction direction = getDirectionFromVector(quad.normal);
+			if (cubeCenter.y() > this.yClipCoord) {
+				this.upperBaker.bakeCube(poseStack, cube, vertices, indices);
+			} else {
+				this.lowerBaker.bakeCube(poseStack, cube, vertices, indices);
+			}
+		}
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	static class Chest extends ModelBaker {
+		static final float X_PLANE = 0.0F;
+		static final VertexWeight[] WEIGHT_ALONG_Y = { new VertexWeight(13.6666F, 0.230F, 0.770F), new VertexWeight(15.8333F, 0.254F, 0.746F), new VertexWeight(18.0F, 0.5F, 0.5F), new VertexWeight(20.1666F, 0.744F, 0.256F), new VertexWeight(22.3333F, 0.770F, 0.230F)};
+		
+		@Override
+		public void bakeCube(PoseStack poseStack, ModelPart.Cube cube, List<CustomArmorVertex> vertices, List<Integer> indices) {
+			List<AnimatedPolygon> xClipPolygons = Lists.<AnimatedPolygon>newArrayList();
+			List<AnimatedPolygon> xyClipPolygons = Lists.<AnimatedPolygon>newArrayList();
+			
+			for (ModelPart.Polygon polygon : cube.polygons) {
+				Matrix4f matrix = poseStack.last().pose();
 				
-				WeightPair pos0Weight = getMatchingWeightPair(pos0.pos.y());
-				WeightPair pos1Weight = getMatchingWeightPair(pos1.pos.y());
-				WeightPair pos2Weight = getMatchingWeightPair(pos2.pos.y());
-				WeightPair pos3Weight = getMatchingWeightPair(pos3.pos.y());
+				ModelPart.Vertex pos0 = getTranslatedVertex(polygon.vertices[0], matrix);
+				ModelPart.Vertex pos1 = getTranslatedVertex(polygon.vertices[1], matrix);
+				ModelPart.Vertex pos2 = getTranslatedVertex(polygon.vertices[2], matrix);
+				ModelPart.Vertex pos3 = getTranslatedVertex(polygon.vertices[3], matrix);
+				Direction direction = getDirectionFromVector(polygon.normal);
 				
-				if (pos1.pos.x() > this.cutX != pos2.pos.x() > this.cutX) {
+				VertexWeight pos0Weight = getYClipWeight(pos0.pos.y());
+				VertexWeight pos1Weight = getYClipWeight(pos1.pos.y());
+				VertexWeight pos2Weight = getYClipWeight(pos2.pos.y());
+				VertexWeight pos3Weight = getYClipWeight(pos3.pos.y());
+				
+				if (pos1.pos.x() > X_PLANE != pos2.pos.x() > X_PLANE) {
 					float distance = pos2.pos.x() - pos1.pos.x();
-					float textureU = pos1.u + (pos2.u - pos1.u) * ((this.cutX - pos1.pos.x()) / distance);
-					ModelPart.Vertex pos4 = new ModelPart.Vertex(pos0.pos.x(), this.cutX, pos0.pos.z(), textureU, pos0.v);
-					ModelPart.Vertex pos5 = new ModelPart.Vertex(pos1.pos.x(), this.cutX, pos1.pos.z(), textureU, pos1.v);
+					float textureU = pos1.u + (pos2.u - pos1.u) * ((X_PLANE - pos1.pos.x()) / distance);
+					ModelPart.Vertex pos4 = new ModelPart.Vertex(X_PLANE, pos0.pos.y(), pos0.pos.z(), textureU, pos0.v);
+					ModelPart.Vertex pos5 = new ModelPart.Vertex(X_PLANE, pos1.pos.y(), pos1.pos.z(), textureU, pos1.v);
 					
-					seperatedX.add(new AnimatableCube(new AnimatableVertex[] {
-							new AnimatableVertex(pos0, 8, 7, 0, pos0Weight.weightLower, pos0Weight.weightUpper, 0),
-							new AnimatableVertex(pos4, 8, 7, 0, pos0Weight.weightLower, pos0Weight.weightUpper, 0),
-							new AnimatableVertex(pos5, 8, 7, 0, pos1Weight.weightLower, pos1Weight.weightUpper, 0),
-							new AnimatableVertex(pos3, 8, 7, 0, pos3Weight.weightLower, pos3Weight.weightUpper, 0)}, direction));
-					seperatedX.add(new AnimatableCube(new AnimatableVertex[] {
-							new AnimatableVertex(pos4, 8, 7, 0, pos0Weight.weightLower, pos0Weight.weightUpper, 0),
-							new AnimatableVertex(pos1, 8, 7, 0, pos1Weight.weightLower, pos1Weight.weightUpper, 0),
-							new AnimatableVertex(pos2, 8, 7, 0, pos2Weight.weightLower, pos2Weight.weightUpper, 0),
-							new AnimatableVertex(pos5, 8, 7, 0, pos1Weight.weightLower, pos1Weight.weightUpper, 0)}, direction));
+					xClipPolygons.add(new AnimatedPolygon(new AnimatedVertex[] {
+						new AnimatedVertex(pos0, 8, 7, 0, pos0Weight.chestWeight, pos0Weight.torsoWeight, 0),
+						new AnimatedVertex(pos4, 8, 7, 0, pos0Weight.chestWeight, pos0Weight.torsoWeight, 0),
+						new AnimatedVertex(pos5, 8, 7, 0, pos1Weight.chestWeight, pos1Weight.torsoWeight, 0),
+						new AnimatedVertex(pos3, 8, 7, 0, pos3Weight.chestWeight, pos3Weight.torsoWeight, 0)
+					}, direction));
+					xClipPolygons.add(new AnimatedPolygon(new AnimatedVertex[] {
+						new AnimatedVertex(pos4, 8, 7, 0, pos0Weight.chestWeight, pos0Weight.torsoWeight, 0),
+						new AnimatedVertex(pos1, 8, 7, 0, pos1Weight.chestWeight, pos1Weight.torsoWeight, 0),
+						new AnimatedVertex(pos2, 8, 7, 0, pos2Weight.chestWeight, pos2Weight.torsoWeight, 0),
+						new AnimatedVertex(pos5, 8, 7, 0, pos1Weight.chestWeight, pos1Weight.torsoWeight, 0)
+					}, direction));
 				} else {
-					seperatedX.add(new AnimatableCube(new AnimatableVertex[] {
-							new AnimatableVertex(pos0, 8, 7, 0, pos0Weight.weightLower, pos0Weight.weightUpper, 0),
-							new AnimatableVertex(pos1, 8, 7, 0, pos1Weight.weightLower, pos1Weight.weightUpper, 0),
-							new AnimatableVertex(pos2, 8, 7, 0, pos2Weight.weightLower, pos2Weight.weightUpper, 0),
-							new AnimatableVertex(pos3, 8, 7, 0, pos3Weight.weightLower, pos3Weight.weightUpper, 0)}, direction));
+					xClipPolygons.add(new AnimatedPolygon(new AnimatedVertex[] {
+						new AnimatedVertex(pos0, 8, 7, 0, pos0Weight.chestWeight, pos0Weight.torsoWeight, 0),
+						new AnimatedVertex(pos1, 8, 7, 0, pos1Weight.chestWeight, pos1Weight.torsoWeight, 0),
+						new AnimatedVertex(pos2, 8, 7, 0, pos2Weight.chestWeight, pos2Weight.torsoWeight, 0),
+						new AnimatedVertex(pos3, 8, 7, 0, pos3Weight.chestWeight, pos3Weight.torsoWeight, 0)
+					}, direction));
 				}
 			}
 			
-			for (AnimatableCube quad : seperatedX) {
-				boolean upsideDown = quad.animatedVertexPositions[1].pos.y() > quad.animatedVertexPositions[2].pos.y();
-				AnimatableVertex pos0 = upsideDown ? quad.animatedVertexPositions[2] : quad.animatedVertexPositions[0];
-				AnimatableVertex pos1 = upsideDown ? quad.animatedVertexPositions[3] : quad.animatedVertexPositions[1];
-				AnimatableVertex pos2 = upsideDown ? quad.animatedVertexPositions[0] : quad.animatedVertexPositions[2];
-				AnimatableVertex pos3 = upsideDown ? quad.animatedVertexPositions[1] : quad.animatedVertexPositions[3];
-				Direction direction = getDirectionFromVector(quad.normal);
-				List<WeightPair> weightPairList = getMatchingWeightPairs(pos1.pos.y(), pos2.pos.y());
-				List<AnimatableVertex> addedVertexList = Lists.<AnimatableVertex>newArrayList();
-				addedVertexList.add(pos0);
-				addedVertexList.add(pos1);
+			for (AnimatedPolygon polygon : xClipPolygons) {
+				boolean upsideDown = polygon.animatedVertexPositions[1].pos.y() > polygon.animatedVertexPositions[2].pos.y();
+				AnimatedVertex pos0 = upsideDown ? polygon.animatedVertexPositions[2] : polygon.animatedVertexPositions[0];
+				AnimatedVertex pos1 = upsideDown ? polygon.animatedVertexPositions[3] : polygon.animatedVertexPositions[1];
+				AnimatedVertex pos2 = upsideDown ? polygon.animatedVertexPositions[0] : polygon.animatedVertexPositions[2];
+				AnimatedVertex pos3 = upsideDown ? polygon.animatedVertexPositions[1] : polygon.animatedVertexPositions[3];
+				Direction direction = getDirectionFromVector(polygon.normal);
+				List<VertexWeight> vertexWeights = getMiddleYClipWeights(pos1.pos.y(), pos2.pos.y());
+				List<AnimatedVertex> animatedVertices = Lists.<AnimatedVertex>newArrayList();
+				animatedVertices.add(pos0);
+				animatedVertices.add(pos1);
 				
-				if (weightPairList.size() > 0) {
-					for (WeightPair weightPair : weightPairList) {
+				if (vertexWeights.size() > 0) {
+					for (VertexWeight vertexWeight : vertexWeights) {
 						float distance = pos2.pos.y() - pos1.pos.y();
-						float textureV = pos1.v + (pos2.v - pos1.v) * ((weightPair.cutY - pos1.pos.y()) / distance);
-						ModelPart.Vertex pos4 = new ModelPart.Vertex(pos0.pos.x(), weightPair.cutY, pos0.pos.z(), pos0.u, textureV);
-						ModelPart.Vertex pos5 = new ModelPart.Vertex(pos1.pos.x(), weightPair.cutY, pos1.pos.z(), pos1.u, textureV);
-						
-						addedVertexList.add(new AnimatableVertex(pos4, 8, 7, 0, weightPair.weightLower, weightPair.weightUpper, 0));
-						addedVertexList.add(new AnimatableVertex(pos5, 8, 7, 0, weightPair.weightLower, weightPair.weightUpper, 0));
+						float textureV = pos1.v + (pos2.v - pos1.v) * ((vertexWeight.yClipCoord - pos1.pos.y()) / distance);
+						ModelPart.Vertex pos4 = new ModelPart.Vertex(pos0.pos.x(), vertexWeight.yClipCoord, pos0.pos.z(), pos0.u, textureV);
+						ModelPart.Vertex pos5 = new ModelPart.Vertex(pos1.pos.x(), vertexWeight.yClipCoord, pos1.pos.z(), pos1.u, textureV);
+						animatedVertices.add(new AnimatedVertex(pos4, 8, 7, 0, vertexWeight.chestWeight, vertexWeight.torsoWeight, 0));
+						animatedVertices.add(new AnimatedVertex(pos5, 8, 7, 0, vertexWeight.chestWeight, vertexWeight.torsoWeight, 0));
 					}
 				}
 				
-				addedVertexList.add(pos3);
-				addedVertexList.add(pos2);
+				animatedVertices.add(pos3);
+				animatedVertices.add(pos2);
 				
-				for (int i = 0; i < (addedVertexList.size() - 2) / 2; i++) {
+				for (int i = 0; i < (animatedVertices.size() - 2) / 2; i++) {
 					int start = i*2;
-					AnimatableVertex p0 = addedVertexList.get(start);
-					AnimatableVertex p1 = addedVertexList.get(start + 1);
-					AnimatableVertex p2 = addedVertexList.get(start + 3);
-					AnimatableVertex p3 = addedVertexList.get(start + 2);
-					seperatedXY.add(new AnimatableCube(new AnimatableVertex[] {
-							new AnimatableVertex(p0, 8, 7, 0, p0.weight.x, p0.weight.y, 0),
-							new AnimatableVertex(p1, 8, 7, 0, p1.weight.x, p1.weight.y, 0),
-							new AnimatableVertex(p2, 8, 7, 0, p2.weight.x, p2.weight.y, 0),
-							new AnimatableVertex(p3, 8, 7, 0, p3.weight.x, p3.weight.y, 0)}, direction));
+					AnimatedVertex p0 = animatedVertices.get(start);
+					AnimatedVertex p1 = animatedVertices.get(start + 1);
+					AnimatedVertex p2 = animatedVertices.get(start + 3);
+					AnimatedVertex p3 = animatedVertices.get(start + 2);
+					xyClipPolygons.add(new AnimatedPolygon(new AnimatedVertex[] {
+						new AnimatedVertex(p0, 8, 7, 0, p0.weight.x, p0.weight.y, 0),
+						new AnimatedVertex(p1, 8, 7, 0, p1.weight.x, p1.weight.y, 0),
+						new AnimatedVertex(p2, 8, 7, 0, p2.weight.x, p2.weight.y, 0),
+						new AnimatedVertex(p3, 8, 7, 0, p3.weight.x, p3.weight.y, 0)
+					}, direction));
 				}
 			}
 			
-			for (AnimatableCube quad : seperatedXY) {
-				Vector3f norm = quad.normal.copy();
-				norm.transform(matrixStack.last().normal());
-				for (AnimatableVertex vertex : quad.animatedVertexPositions) {
+			for (AnimatedPolygon polygon : xyClipPolygons) {
+				Vector3f norm = polygon.normal.copy();
+				norm.transform(poseStack.last().normal());
+				
+				for (AnimatedVertex vertex : polygon.animatedVertexPositions) {
 					Vector4f pos = new Vector4f(vertex.pos);
 					float weight1 = vertex.weight.x;
 					float weight2 = vertex.weight.y;
@@ -311,136 +381,143 @@ public class CustomModelBakery {
 			}
 		}
 		
-		WeightPair getMatchingWeightPair(float y) {
-			if (y < this.cutYList[0].cutY) {
-				return new WeightPair(y, 0.0F, 1.0F);
+		static VertexWeight getYClipWeight(float y) {
+			if (y < WEIGHT_ALONG_Y[0].yClipCoord) {
+				return new VertexWeight(y, 0.0F, 1.0F);
 			}
 			
 			int index = -1;
-			for (int i = 0; i < this.cutYList.length; i++) {
+			for (int i = 0; i < WEIGHT_ALONG_Y.length; i++) {
 				
 			}
 			
 			if (index > 0) {
-				WeightPair pair = cutYList[index];
-				return new WeightPair(y, pair.weightLower, pair.weightUpper);
+				VertexWeight pair = WEIGHT_ALONG_Y[index];
+				return new VertexWeight(y, pair.chestWeight, pair.torsoWeight);
 			}
 			
-			return new WeightPair(y, 1.0F, 0.0F);
+			return new VertexWeight(y, 1.0F, 0.0F);
 		}
 		
-		List<WeightPair> getMatchingWeightPairs(float minY, float maxY) {
-			List<WeightPair> cutYs = Lists.<WeightPair>newArrayList();
-			for (WeightPair pair : this.cutYList) {
-				if(pair.cutY > minY && maxY >= pair.cutY) {
-					cutYs.add(pair);
+		static List<VertexWeight> getMiddleYClipWeights(float minY, float maxY) {
+			List<VertexWeight> cutYs = Lists.<VertexWeight>newArrayList();
+			for (VertexWeight vertexWeight : WEIGHT_ALONG_Y) {
+				if (vertexWeight.yClipCoord > minY && maxY >= vertexWeight.yClipCoord) {
+					cutYs.add(vertexWeight);
 				}
 			}
 			return cutYs;
 		}
 		
-		static class WeightPair {
-			final float cutY;
-			final float weightLower;
-			final float weightUpper;
+		static class VertexWeight {
+			final float yClipCoord;
+			final float chestWeight;
+			final float torsoWeight;
 			
-			public WeightPair(float cutY, float weightLower, float weightUpper) {
-				this.cutY = cutY;
-				this.weightLower = weightLower;
-				this.weightUpper = weightUpper;
+			public VertexWeight(float yClipCoord, float chestWeight, float torsoWeight) {
+				this.yClipCoord = yClipCoord;
+				this.chestWeight = chestWeight;
+				this.torsoWeight = torsoWeight;
 			}
 		}
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class Limb extends ModelPartition {
-		final int upperJointId;
-		final int lowerJointId;
-		final int middleJointId;
-		final float cutY;
-		final boolean frontOrBack;
+	static class Limb extends ModelBaker {
+		final int upperJoint;
+		final int lowerJoint;
+		final int middleJoint;
+		final float yClipCoord;
+		final boolean bendInFront;
 		
-		public Limb (int upperJointId, int lowerJointId, int middleJointId, float cutY, boolean frontOrBack) {
-			this.upperJointId = upperJointId;
-			this.lowerJointId = lowerJointId;
-			this.middleJointId = middleJointId;
-			this.cutY = cutY;
-			this.frontOrBack = frontOrBack;
+		public Limb(int upperJoint, int lowerJoint, int middleJoint, float yClipCoord, boolean bendInFront) {
+			this.upperJoint = upperJoint;
+			this.lowerJoint = lowerJoint;
+			this.middleJoint = middleJoint;
+			this.yClipCoord = yClipCoord;
+			this.bendInFront = bendInFront;
 		}
 		
 		@Override
-		public void bakeCube(PoseStack matrixStack, ModelPart.Cube cube, List<CustomArmorVertex> vertices, List<Integer> indices) {
-			List<AnimatableCube> polygons = Lists.<AnimatableCube>newArrayList();
+		public void bakeCube(PoseStack poseStack, ModelPart.Cube cube, List<CustomArmorVertex> vertices, List<Integer> indices) {
+			List<AnimatedPolygon> polygons = Lists.<AnimatedPolygon>newArrayList();
 			
 			for (ModelPart.Polygon quad : cube.polygons) {
-				Matrix4f matrix = matrixStack.last().pose();
+				Matrix4f matrix = poseStack.last().pose();
 				ModelPart.Vertex pos0 = getTranslatedVertex(quad.vertices[0], matrix);
 				ModelPart.Vertex pos1 = getTranslatedVertex(quad.vertices[1], matrix);
 				ModelPart.Vertex pos2 = getTranslatedVertex(quad.vertices[2], matrix);
 				ModelPart.Vertex pos3 = getTranslatedVertex(quad.vertices[3], matrix);
 				Direction direction = getDirectionFromVector(quad.normal);
 				
-				if (pos1.pos.y() > this.cutY != pos2.pos.y() > this.cutY) {
+				if (pos1.pos.y() > this.yClipCoord != pos2.pos.y() > this.yClipCoord) {
 					float distance = pos2.pos.y() - pos1.pos.y();
-					float textureV = pos1.v + (pos2.v - pos1.v) * ((this.cutY - pos1.pos.y()) / distance);
-					ModelPart.Vertex pos4 = new ModelPart.Vertex(pos0.pos.x(), this.cutY, pos0.pos.z(), pos0.u, textureV);
-					ModelPart.Vertex pos5 = new ModelPart.Vertex(pos1.pos.x(), this.cutY, pos1.pos.z(), pos1.u, textureV);
+					float textureV = pos1.v + (pos2.v - pos1.v) * ((this.yClipCoord - pos1.pos.y()) / distance);
+					ModelPart.Vertex pos4 = new ModelPart.Vertex(pos0.pos.x(), this.yClipCoord, pos0.pos.z(), pos0.u, textureV);
+					ModelPart.Vertex pos5 = new ModelPart.Vertex(pos1.pos.x(), this.yClipCoord, pos1.pos.z(), pos1.u, textureV);
 					
 					int upperId, lowerId;
 					if (distance > 0) {
-						upperId = this.lowerJointId;
-						lowerId = this.upperJointId;
+						upperId = this.lowerJoint;
+						lowerId = this.upperJoint;
 					} else {
-						upperId = this.upperJointId;
-						lowerId = this.lowerJointId;
+						upperId = this.upperJoint;
+						lowerId = this.lowerJoint;
 					}
 					
-					polygons.add(new AnimatableCube(new AnimatableVertex[] {
-							new AnimatableVertex(pos0, upperId), new AnimatableVertex(pos1, upperId),
-							new AnimatableVertex(pos5, upperId), new AnimatableVertex(pos4, upperId)}, direction));
-					polygons.add(new AnimatableCube(new AnimatableVertex[] {
-							new AnimatableVertex(pos4, lowerId), new AnimatableVertex(pos5, lowerId),
-							new AnimatableVertex(pos2, lowerId), new AnimatableVertex(pos3, lowerId)}, direction));
+					polygons.add(new AnimatedPolygon(new AnimatedVertex[] {
+						new AnimatedVertex(pos0, upperId), new AnimatedVertex(pos1, upperId),
+						new AnimatedVertex(pos5, upperId), new AnimatedVertex(pos4, upperId)
+					}, direction));
+					polygons.add(new AnimatedPolygon(new AnimatedVertex[] {
+						new AnimatedVertex(pos4, lowerId), new AnimatedVertex(pos5, lowerId),
+						new AnimatedVertex(pos2, lowerId), new AnimatedVertex(pos3, lowerId)
+					}, direction));
 					
 					boolean hasSameZ = pos4.pos.z() < 0.0F == pos5.pos.z() < 0.0F;
-					boolean isFront = hasSameZ && (pos4.pos.z() < 0.0F == this.frontOrBack);
+					boolean isFront = hasSameZ && (pos4.pos.z() < 0.0F == this.bendInFront);
 					
 					if (isFront) {
-						polygons.add(new AnimatableCube(new AnimatableVertex[] {
-								new AnimatableVertex(pos4, this.middleJointId), new AnimatableVertex(pos5, this.middleJointId),
-								new AnimatableVertex(pos5, this.upperJointId), new AnimatableVertex(pos4, this.upperJointId)}, 0.001F, direction));
-						polygons.add(new AnimatableCube(new AnimatableVertex[] {
-								new AnimatableVertex(pos4, this.lowerJointId), new AnimatableVertex(pos5, this.lowerJointId),
-								new AnimatableVertex(pos5, this.middleJointId), new AnimatableVertex(pos4, this.middleJointId)}, 0.001F, direction));
+						polygons.add(new AnimatedPolygon(new AnimatedVertex[] {
+							new AnimatedVertex(pos4, this.middleJoint), new AnimatedVertex(pos5, this.middleJoint),
+							new AnimatedVertex(pos5, this.upperJoint), new AnimatedVertex(pos4, this.upperJoint)
+						}, 0.001F, direction));
+						polygons.add(new AnimatedPolygon(new AnimatedVertex[] {
+							new AnimatedVertex(pos4, this.lowerJoint), new AnimatedVertex(pos5, this.lowerJoint),
+							new AnimatedVertex(pos5, this.middleJoint), new AnimatedVertex(pos4, this.middleJoint)
+						}, 0.001F, direction));
 					} else if (!hasSameZ) {
 						boolean startFront = pos4.pos.z() > 0;
-						int firstJoint = this.lowerJointId;
-						int secondJoint = this.lowerJointId;
-						int thirdJoint = startFront ? this.upperJointId : this.middleJointId;
-						int fourthJoint = startFront ? this.middleJointId : this.upperJointId;
-						int fifthJoint = this.upperJointId;
-						int sixthJoint = this.upperJointId;
+						int firstJoint = this.lowerJoint;
+						int secondJoint = this.lowerJoint;
+						int thirdJoint = startFront ? this.upperJoint : this.middleJoint;
+						int fourthJoint = startFront ? this.middleJoint : this.upperJoint;
+						int fifthJoint = this.upperJoint;
+						int sixthJoint = this.upperJoint;
 						
-						polygons.add(new AnimatableCube(new AnimatableVertex[] {
-								new AnimatableVertex(pos4, firstJoint), new AnimatableVertex(pos5, secondJoint),
-								new AnimatableVertex(pos5, thirdJoint), new AnimatableVertex(pos4, fourthJoint)}, 0.001F, direction));
-						polygons.add(new AnimatableCube(new AnimatableVertex[] {
-								new AnimatableVertex(pos4, fourthJoint), new AnimatableVertex(pos5, thirdJoint),
-								new AnimatableVertex(pos5, fifthJoint), new AnimatableVertex(pos4, sixthJoint)}, 0.001F, direction));
+						polygons.add(new AnimatedPolygon(new AnimatedVertex[] {
+							new AnimatedVertex(pos4, firstJoint), new AnimatedVertex(pos5, secondJoint),
+							new AnimatedVertex(pos5, thirdJoint), new AnimatedVertex(pos4, fourthJoint)
+						}, 0.001F, direction));
+						polygons.add(new AnimatedPolygon(new AnimatedVertex[] {
+							new AnimatedVertex(pos4, fourthJoint), new AnimatedVertex(pos5, thirdJoint),
+							new AnimatedVertex(pos5, fifthJoint), new AnimatedVertex(pos4, sixthJoint)
+						}, 0.001F, direction));
 					}
 				} else {
-					int jointId = pos0.pos.y() > this.cutY ? this.upperJointId : this.lowerJointId;
-					polygons.add(new AnimatableCube(new AnimatableVertex[] {
-							new AnimatableVertex(pos0, jointId), new AnimatableVertex(pos1, jointId),
-							new AnimatableVertex(pos2, jointId), new AnimatableVertex(pos3, jointId)}, direction));
+					int jointId = pos0.pos.y() > this.yClipCoord ? this.upperJoint : this.lowerJoint;
+					polygons.add(new AnimatedPolygon(new AnimatedVertex[] {
+						new AnimatedVertex(pos0, jointId), new AnimatedVertex(pos1, jointId),
+						new AnimatedVertex(pos2, jointId), new AnimatedVertex(pos3, jointId)
+					}, direction));
 				}
 			}
 			
-			for (AnimatableCube quad : polygons) {
+			for (AnimatedPolygon quad : polygons) {
 				Vector3f norm = quad.normal.copy();
-				norm.transform(matrixStack.last().normal());
+				norm.transform(poseStack.last().normal());
 				
-				for (AnimatableVertex vertex : quad.animatedVertexPositions) {
+				for (AnimatedVertex vertex : quad.animatedVertexPositions) {
 					Vector4f pos = new Vector4f(vertex.pos);
 					vertices.add(new CustomArmorVertex()
 						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
@@ -482,23 +559,23 @@ public class CustomModelBakery {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class AnimatableVertex extends ModelPart.Vertex {
+	static class AnimatedVertex extends ModelPart.Vertex {
 		final Vec3i jointId;
 		final Vec3f weight;
 		
-		public AnimatableVertex(ModelPart.Vertex posTexVertx, int jointId) {
+		public AnimatedVertex(ModelPart.Vertex posTexVertx, int jointId) {
 			this(posTexVertx, jointId, 0, 0, 1.0F, 0.0F, 0.0F);
 		}
 		
-		public AnimatableVertex(ModelPart.Vertex posTexVertx, int jointId1, int jointId2, int jointId3, float weight1, float weight2, float weight3) {
+		public AnimatedVertex(ModelPart.Vertex posTexVertx, int jointId1, int jointId2, int jointId3, float weight1, float weight2, float weight3) {
 			this(posTexVertx, new Vec3i(jointId1, jointId2, jointId3), new Vec3f(weight1, weight2, weight3));
 		}
 		
-		public AnimatableVertex(ModelPart.Vertex posTexVertx, Vec3i ids, Vec3f weights) {
+		public AnimatedVertex(ModelPart.Vertex posTexVertx, Vec3i ids, Vec3f weights) {
 			this(posTexVertx, posTexVertx.u, posTexVertx.v, ids, weights);
 		}
 		
-		public AnimatableVertex(ModelPart.Vertex posTexVertx, float u, float v, Vec3i ids, Vec3f weights) {
+		public AnimatedVertex(ModelPart.Vertex posTexVertx, float u, float v, Vec3i ids, Vec3f weights) {
 			super(posTexVertx.pos.x(), posTexVertx.pos.y(), posTexVertx.pos.z(), u, v);
 			this.jointId = ids;
 			this.weight = weights;
@@ -506,21 +583,21 @@ public class CustomModelBakery {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class AnimatableCube {
-		public final AnimatableVertex[] animatedVertexPositions;
+	static class AnimatedPolygon {
+		public final AnimatedVertex[] animatedVertexPositions;
 		public final Vector3f normal;
 		
-		public AnimatableCube(AnimatableVertex[] positionsIn, Direction directionIn) {
+		public AnimatedPolygon(AnimatedVertex[] positionsIn, Direction directionIn) {
 			this.animatedVertexPositions = positionsIn;
 			this.normal = directionIn.step();
 		}
 		
-		public AnimatableCube(AnimatableVertex[] positionsIn, float cor, Direction directionIn) {
+		public AnimatedPolygon(AnimatedVertex[] positionsIn, float cor, Direction directionIn) {
 			this.animatedVertexPositions = positionsIn;
-			positionsIn[0] = new AnimatableVertex(positionsIn[0], positionsIn[0].u, positionsIn[0].v + cor, positionsIn[0].jointId, positionsIn[0].weight);
-			positionsIn[1] = new AnimatableVertex(positionsIn[1], positionsIn[1].u, positionsIn[1].v + cor, positionsIn[1].jointId, positionsIn[1].weight);
-			positionsIn[2] = new AnimatableVertex(positionsIn[2], positionsIn[2].u, positionsIn[2].v - cor, positionsIn[2].jointId, positionsIn[2].weight);
-			positionsIn[3] = new AnimatableVertex(positionsIn[3], positionsIn[3].u, positionsIn[3].v - cor, positionsIn[3].jointId, positionsIn[3].weight);
+			positionsIn[0] = new AnimatedVertex(positionsIn[0], positionsIn[0].u, positionsIn[0].v + cor, positionsIn[0].jointId, positionsIn[0].weight);
+			positionsIn[1] = new AnimatedVertex(positionsIn[1], positionsIn[1].u, positionsIn[1].v + cor, positionsIn[1].jointId, positionsIn[1].weight);
+			positionsIn[2] = new AnimatedVertex(positionsIn[2], positionsIn[2].u, positionsIn[2].v - cor, positionsIn[2].jointId, positionsIn[2].weight);
+			positionsIn[3] = new AnimatedVertex(positionsIn[3], positionsIn[3].u, positionsIn[3].v - cor, positionsIn[3].jointId, positionsIn[3].weight);
 			this.normal = directionIn.step();
 		}
 	}

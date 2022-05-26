@@ -24,7 +24,7 @@ public class TargetIndicator extends EntityIndicator {
 		} else {
 			LocalPlayerPatch playerpatch = ClientEngine.instance.getPlayerPatch();
 			
-			if (playerpatch != null && entityIn != playerpatch.getAttackTarget()) {
+			if (playerpatch != null && entityIn != playerpatch.getTarget()) {
 				return false;
 			} else if (entityIn.isInvisible() || !entityIn.isAlive() || entityIn == player.getVehicle()) {
 				return false;

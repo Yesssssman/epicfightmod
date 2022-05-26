@@ -39,7 +39,8 @@ public class SPSetSkillValue {
 	
 	public static void handle(SPSetSkillValue msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
-			LocalPlayerPatch playerpatch = (LocalPlayerPatch) Minecraft.getInstance().player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+			Minecraft mc = Minecraft.getInstance();
+			LocalPlayerPatch playerpatch = (LocalPlayerPatch) mc.player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
 			if (playerpatch != null) {
 				switch (msg.target) {
 				case COOLDOWN:

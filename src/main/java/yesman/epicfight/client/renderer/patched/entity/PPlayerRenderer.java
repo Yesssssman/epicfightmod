@@ -8,7 +8,7 @@ import net.minecraft.client.renderer.entity.layers.CapeLayer;
 import net.minecraft.client.renderer.entity.layers.PlayerItemInHandLayer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.client.renderer.patched.layer.NoRenderingLayer;
+import yesman.epicfight.client.renderer.patched.layer.EmptyLayer;
 import yesman.epicfight.client.renderer.patched.layer.PatchedCapeLayer;
 import yesman.epicfight.client.renderer.patched.layer.PatchedItemInHandLayer;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.AbstractClientPlayerPatch;
@@ -16,9 +16,9 @@ import yesman.epicfight.client.world.capabilites.entitypatch.player.AbstractClie
 @OnlyIn(Dist.CLIENT)
 public class PPlayerRenderer extends PHumanoidRenderer<AbstractClientPlayer, AbstractClientPlayerPatch<AbstractClientPlayer>, PlayerModel<AbstractClientPlayer>> {
 	public PPlayerRenderer() {
-		this.layerRendererReplace.put(ArrowLayer.class, new NoRenderingLayer<>());
-		this.layerRendererReplace.put(BeeStingerLayer.class, new NoRenderingLayer<>());
-		this.layerRendererReplace.put(CapeLayer.class, new PatchedCapeLayer());
-		this.layerRendererReplace.put(PlayerItemInHandLayer.class, new PatchedItemInHandLayer<>());
+		this.addPatchedLayer(ArrowLayer.class, new EmptyLayer<>());
+		this.addPatchedLayer(BeeStingerLayer.class, new EmptyLayer<>());
+		this.addPatchedLayer(CapeLayer.class, new PatchedCapeLayer());
+		this.addPatchedLayer(PlayerItemInHandLayer.class, new PatchedItemInHandLayer<>());
 	}
 }

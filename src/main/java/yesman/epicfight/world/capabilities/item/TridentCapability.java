@@ -39,11 +39,6 @@ public class TridentCapability extends RangedWeaponCapability {
 	}
 	
 	@Override
-	public HoldingOption getHoldOption() {
-		return HoldingOption.MAINHAND_ONLY;
-	}
-	
-	@Override
 	public Style getStyle(LivingEntityPatch<?> entitypatch) {
 		return Style.ONE_HAND;
 	}

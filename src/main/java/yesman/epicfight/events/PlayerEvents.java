@@ -30,7 +30,7 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 import yesman.epicfight.world.entity.eventlistener.RightClickItemEvent;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
-@Mod.EventBusSubscriber(modid=EpicFightMod.MODID)
+@Mod.EventBusSubscriber(modid = EpicFightMod.MODID)
 public class PlayerEvents {
 	/**@SubscribeEvent
 	public static void arrowLooseEvent(ArrowLooseEvent event) {
@@ -52,7 +52,7 @@ public class PlayerEvents {
 		if (event.getSide() == LogicalSide.SERVER) {
 			ServerPlayerPatch playerpatch = (ServerPlayerPatch) event.getPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
 			
-			if (playerpatch != null && (playerpatch.getOriginal().getOffhandItem().getUseAnimation() == UseAnim.NONE || playerpatch.getHoldingItemCapability(InteractionHand.MAIN_HAND).isTwoHanded())) {
+			if (playerpatch != null && (playerpatch.getOriginal().getOffhandItem().getUseAnimation() == UseAnim.NONE || !playerpatch.getHoldingItemCapability(InteractionHand.MAIN_HAND).getStyle(playerpatch).canUseOffhand())) {
 				boolean canceled = playerpatch.getEventListener().triggerEvents(EventType.SERVER_ITEM_USE_EVENT, new RightClickItemEvent<>(playerpatch));
 				event.setCanceled(canceled);
 			}
@@ -69,7 +69,7 @@ public class PlayerEvents {
 			
 			if (!playerpatch.getEntityState().canUseSkill()) {
 				event.setCanceled(true);
-			} else if (event.getItem() == player.getOffhandItem() && playerpatch.getHoldingItemCapability(InteractionHand.MAIN_HAND).isTwoHanded()) {
+			} else if (event.getItem() == player.getOffhandItem() && !playerpatch.getHoldingItemCapability(InteractionHand.MAIN_HAND).getStyle(playerpatch).canUseOffhand()) {
 				event.setCanceled(true);
 			}
 			

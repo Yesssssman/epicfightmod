@@ -22,7 +22,7 @@ public class KatanaItem extends WeaponItem {
 	private List<Component> tooltipExpand;
 
 	public KatanaItem(Item.Properties build) {
-		super(ModItemTier.KATANA, 0, -2.0F, build);
+		super(EpicFightItemTier.KATANA, 0, -2.0F, build);
 		if (EpicFightMod.isPhysicalClient()) {
 			this.tooltipExpand = new ArrayList<Component> ();
 			this.tooltipExpand.add(new TextComponent(""));

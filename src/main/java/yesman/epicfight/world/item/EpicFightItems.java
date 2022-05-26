@@ -42,10 +42,10 @@ public class EpicFightItems {
 	public static final RegistryObject<Item> DIAMOND_DAGGER = ITEMS.register("diamond_dagger", () -> new DaggerItem(new Item.Properties().tab(EpicFightItemGroup.ITEMS), Tiers.DIAMOND));
 	public static final RegistryObject<Item> NETHERITE_DAGGER = ITEMS.register("netherite_dagger", () -> new DaggerItem(new Item.Properties().tab(EpicFightItemGroup.ITEMS).fireResistant(), Tiers.NETHERITE));
 	
-	public static final RegistryObject<Item> KNUCKLE = ITEMS.register("knuckle", () -> new KnuckleItem(new Item.Properties().tab(EpicFightItemGroup.ITEMS), ModItemTier.KNUCKLE));
+	public static final RegistryObject<Item> KNUCKLE = ITEMS.register("knuckle", () -> new KnuckleItem(new Item.Properties().tab(EpicFightItemGroup.ITEMS), EpicFightItemTier.KNUCKLE));
 	
-	public static final RegistryObject<Item> STRAY_HAT = ITEMS.register("stray_hat", () -> new ArmorItem(ModArmorMaterials.STRAY_CLOTH, EquipmentSlot.HEAD, new Item.Properties().tab(EpicFightItemGroup.ITEMS)));
-	public static final RegistryObject<Item> STRAY_ROBE = ITEMS.register("stray_robe", () -> new ArmorItem(ModArmorMaterials.STRAY_CLOTH, EquipmentSlot.CHEST, new Item.Properties().tab(EpicFightItemGroup.ITEMS)));
-	public static final RegistryObject<Item> STRAY_PANTS = ITEMS.register("stray_pants", () -> new ArmorItem(ModArmorMaterials.STRAY_CLOTH, EquipmentSlot.LEGS, new Item.Properties().tab(EpicFightItemGroup.ITEMS)));
+	public static final RegistryObject<Item> STRAY_HAT = ITEMS.register("stray_hat", () -> new ArmorItem(EpicFightArmorMaterials.STRAY_CLOTH, EquipmentSlot.HEAD, new Item.Properties().tab(EpicFightItemGroup.ITEMS)));
+	public static final RegistryObject<Item> STRAY_ROBE = ITEMS.register("stray_robe", () -> new ArmorItem(EpicFightArmorMaterials.STRAY_CLOTH, EquipmentSlot.CHEST, new Item.Properties().tab(EpicFightItemGroup.ITEMS)));
+	public static final RegistryObject<Item> STRAY_PANTS = ITEMS.register("stray_pants", () -> new ArmorItem(EpicFightArmorMaterials.STRAY_CLOTH, EquipmentSlot.LEGS, new Item.Properties().tab(EpicFightItemGroup.ITEMS)));
 	public static final RegistryObject<Item> SKILLBOOK = ITEMS.register("skillbook", () -> new SkillBookItem(new Item.Properties().tab(EpicFightItemGroup.ITEMS).rarity(Rarity.RARE).stacksTo(1)));
 }

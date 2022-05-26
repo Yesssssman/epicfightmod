@@ -9,36 +9,39 @@ import net.minecraftforge.network.NetworkEvent;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
-public class SPTogglePlayerMode {
+public class SPChangePlayerMode {
 	private int entityId;
-	private boolean battleMode;
+	private PlayerPatch.PlayerMode battleMode;
 
-	public SPTogglePlayerMode() {
+	public SPChangePlayerMode() {
 		this.entityId = 0;
-		this.battleMode = false;
+		this.battleMode = PlayerPatch.PlayerMode.MINING;
 	}
 
-	public SPTogglePlayerMode(int entityId, boolean battleMode) {
+	public SPChangePlayerMode(int entityId, PlayerPatch.PlayerMode battleMode) {
 		this.entityId = entityId;
 		this.battleMode = battleMode;
 	}
 
-	public static SPTogglePlayerMode fromBytes(FriendlyByteBuf buf) {
-		return new SPTogglePlayerMode(buf.readInt(), buf.readBoolean());
+	public static SPChangePlayerMode fromBytes(FriendlyByteBuf buf) {
+		return new SPChangePlayerMode(buf.readInt(), PlayerPatch.PlayerMode.values()[buf.readInt()]);
 	}
 
-	public static void toBytes(SPTogglePlayerMode msg, FriendlyByteBuf buf) {
+	public static void toBytes(SPChangePlayerMode msg, FriendlyByteBuf buf) {
 		buf.writeInt(msg.entityId);
-		buf.writeBoolean(msg.battleMode);
+		buf.writeInt(msg.battleMode.ordinal());
 	}
 	
-	public static void handle(SPTogglePlayerMode msg, Supplier<NetworkEvent.Context> ctx) {
+	public static void handle(SPChangePlayerMode msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(()->{
-			Entity entity = Minecraft.getInstance().player.level.getEntity(msg.entityId);
+			Minecraft mc = Minecraft.getInstance();
+			Entity entity = mc.player.level.getEntity(msg.entityId);
+			
 			if (entity != null) {
 				PlayerPatch<?> playerpatch = (PlayerPatch<?>) entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+				
 				if (playerpatch != null) {
-					playerpatch.setBattleMode(msg.battleMode);
+					playerpatch.toMode(msg.battleMode);
 				}
 			}
 		});

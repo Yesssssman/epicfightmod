@@ -7,11 +7,13 @@ import net.minecraft.client.renderer.entity.WitherSkeletonRenderer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers;
+import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.particle.BladeRushParticle;
 import yesman.epicfight.client.particle.BloodParticle;
 import yesman.epicfight.client.particle.CutParticle;
@@ -27,6 +29,7 @@ import yesman.epicfight.client.particle.HitCutParticle;
 import yesman.epicfight.client.particle.LaserParticle;
 import yesman.epicfight.client.renderer.entity.DroppedNetherStarRenderer;
 import yesman.epicfight.client.renderer.entity.WitherGhostRenderer;
+import yesman.epicfight.client.renderer.patched.layer.WearableItemLayer;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.world.entity.EpicFightEntities;
@@ -64,5 +67,11 @@ public class ClientModBusEvent {
 		event.registerEntityRenderer(EpicFightEntities.DROPPED_NETHER_STAR.get(), DroppedNetherStarRenderer::new);
 		event.registerEntityRenderer(EpicFightEntities.WITHER_SKELETON_MINION.get(), WitherSkeletonRenderer::new);
 		event.registerEntityRenderer(EpicFightEntities.WITHER_GHOST_CLONE.get(), WitherGhostRenderer::new);
+	}
+	
+	@SubscribeEvent
+	public static void reloadEvent(EntityRenderersEvent.AddLayers event) {
+		ClientEngine.instance.renderEngine.registerRenderer();
+		WearableItemLayer.clear();
 	}
 }

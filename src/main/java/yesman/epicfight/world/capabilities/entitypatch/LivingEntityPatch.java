@@ -322,7 +322,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		}
 	}
 	
-	public LivingEntity getAttackTarget() {
+	public LivingEntity getTarget() {
 		return this.original.getLastHurtMob();
 	}
 	
@@ -500,7 +500,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	}
 	
 	public boolean isOffhandItemValid() {
-		return this.getHoldingItemCapability(InteractionHand.MAIN_HAND).checkOffhandUsable(this.original.getOffhandItem());
+		return this.getHoldingItemCapability(InteractionHand.MAIN_HAND).checkOffhandValid(this);
 	}
 	
 	public boolean isTeammate(Entity entityIn) {

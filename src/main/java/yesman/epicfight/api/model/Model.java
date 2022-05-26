@@ -4,12 +4,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 
 public class Model {
+	protected final ResourceLocation location;
 	protected Armature armature;
-	protected ResourceLocation location;
-	
-	public Model() {
-		this.location = null;
-	}
 	
 	public Model(ResourceLocation location) {
 		this.location = new ResourceLocation(location.getNamespace(), "animmodels/" + location.getPath() + ".json");
@@ -29,6 +25,6 @@ public class Model {
 	}
 	
 	public Armature getArmature() {
-		return armature;
+		return this.armature;
 	}
 }

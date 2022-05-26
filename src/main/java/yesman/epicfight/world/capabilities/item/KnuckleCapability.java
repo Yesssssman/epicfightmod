@@ -6,6 +6,7 @@ import net.minecraft.world.item.SwordItem;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.Skills;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class KnuckleCapability extends WeaponCapability {
 	public KnuckleCapability() {
@@ -17,14 +18,15 @@ public class KnuckleCapability extends WeaponCapability {
 	}
 	
 	@Override
-	public boolean checkOffhandUsable(ItemStack item) {
-		CapabilityItem itemCap = EpicFightCapabilities.getItemStackCapability(item);
-		boolean isFist = itemCap != null && itemCap.getWeaponCategory() == WeaponCategory.FIST;
-		return isFist || !(item.getItem() instanceof SwordItem || item.getItem() instanceof DiggerItem);
+	public boolean checkOffhandValid(LivingEntityPatch<?> entitypatch) {
+		ItemStack offhandItme = entitypatch.getOriginal().getOffhandItem();
+		CapabilityItem itemCap = EpicFightCapabilities.getItemStackCapability(offhandItme);
+		boolean isFist = itemCap.getWeaponCategory() == WeaponCategory.FIST;
+		return isFist || !(offhandItme.getItem() instanceof SwordItem || offhandItme.getItem() instanceof DiggerItem);
 	}
 	
 	@Override
-	public boolean canUsedInOffhandAlone() {
+	public boolean canHoldInOffhandAlone() {
 		return true;
 	}
 }

@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
@@ -122,7 +123,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			else
 				currentCompositeMotion = currentLivingMotion;
 		} else {
-			if (CrossbowItem.isCharged(this.original.getMainHandItem()))
+			if (this.original.getMainHandItem().getItem() instanceof ProjectileWeaponItem && CrossbowItem.isCharged(this.original.getMainHandItem()))
 				currentCompositeMotion = LivingMotion.AIM;
 			else if (this.getClientAnimator().getCompositeLayer(Layer.Priority.MIDDLE).animationPlayer.getPlay().isReboundAnimation())
 				currentCompositeMotion = LivingMotion.NONE;
@@ -131,7 +132,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			else
 				currentCompositeMotion = currentLivingMotion;
 			
-			if (this.getClientAnimator().isAiming() && currentCompositeMotion != LivingMotion.AIM) {
+			if (this.getClientAnimator().isAiming() && currentCompositeMotion != LivingMotion.AIM && this.original.getMainHandItem().getItem() instanceof ProjectileWeaponItem) {
 				this.playReboundAnimation();
 			}
 		}
@@ -190,7 +191,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	
 	@Override
 	public boolean shouldSkipRender() {
-		return !this.isBattleMode && EpicFightMod.CLIENT_INGAME_CONFIG.filterAnimation.getValue();
+		return !this.isBattleMode() && EpicFightMod.CLIENT_INGAME_CONFIG.filterAnimation.getValue();
 	}
 	
 	@OnlyIn(Dist.CLIENT)

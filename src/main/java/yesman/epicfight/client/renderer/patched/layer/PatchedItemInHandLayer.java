@@ -25,7 +25,7 @@ public class PatchedItemInHandLayer<E extends LivingEntity, T extends LivingEnti
 		
 		if (mainHandStack.getItem() != Items.AIR) {
 			if (entitypatch.getOriginal().getVehicle() != null) {
-				if (!entitypatch.getHoldingItemCapability(InteractionHand.MAIN_HAND).canUseOnMount()) {
+				if (!entitypatch.getHoldingItemCapability(InteractionHand.MAIN_HAND).availableOnHorse()) {
 					renderEngine.getItemRenderer(mainHandStack.getItem()).renderUnusableItemMount(mainHandStack, entitypatch, buffer, matrixStackIn, packedLightIn);
 					return;
 				}

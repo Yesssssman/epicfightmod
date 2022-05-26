@@ -91,6 +91,8 @@ public class AnimationDataReader {
 			return JointMaskEntry.BIPED_UPPER_JOINTS;
 		case "root_upper_joints":
 			return JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT;
+		case "wings":
+			return JointMaskEntry.WINGS;
 		default:
 			return JointMaskEntry.NONE;
 		}

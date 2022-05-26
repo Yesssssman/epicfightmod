@@ -78,7 +78,7 @@ public class ZoglinPatch extends MobPatch<Zoglin> {
 	}
 
 	@Override
-	public LivingEntity getAttackTarget() {
+	public LivingEntity getTarget() {
 		Optional<LivingEntity> opt = this.original.getBrain().getMemory(MemoryModuleType.ATTACK_TARGET);
 		return opt.orElse(null);
 	}

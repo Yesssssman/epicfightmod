@@ -5,12 +5,12 @@ import net.minecraft.client.renderer.entity.layers.StrayClothingLayer;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.client.renderer.patched.layer.NoRenderingLayer;
+import yesman.epicfight.client.renderer.patched.layer.EmptyLayer;
 import yesman.epicfight.world.capabilities.entitypatch.mob.SkeletonPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class PStrayRenderer extends PHumanoidRenderer<PathfinderMob, SkeletonPatch<PathfinderMob>, HumanoidModel<PathfinderMob>> {
 	public PStrayRenderer() {
-		this.layerRendererReplace.put(StrayClothingLayer.class, new NoRenderingLayer<>());
+		this.addPatchedLayer(StrayClothingLayer.class, new EmptyLayer<>());
 	}
 }

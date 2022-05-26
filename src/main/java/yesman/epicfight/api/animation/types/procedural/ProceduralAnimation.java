@@ -116,7 +116,7 @@ public interface ProceduralAnimation {
     	OpenMatrix4f tipRotationMatrix = OpenMatrix4f.fromQuaternion(tipRotation);
     	OpenMatrix4f animRotation = Animator.getBindedJointTransformByName(pose, armature, endJoint).removeTranslation();
     	OpenMatrix4f animToTipRotation = OpenMatrix4f.mul(OpenMatrix4f.invert(animRotation, null), tipRotationMatrix, null);
-    	pose.getTransformByName(endJoint).overwriteRotation(JointTransform.fromMatrixNoScale(animToTipRotation));
+    	pose.getOrDefaultTransform(endJoint).overwriteRotation(JointTransform.fromMatrixNoScale(animToTipRotation));
 	}
 	
 	default void startPartAnimation(IKSetter ikSetter, TipPointAnimation tipAnim, TransformSheet partAnimation, Vec3f targetpos) {

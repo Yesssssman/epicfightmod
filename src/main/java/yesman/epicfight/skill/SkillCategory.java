@@ -32,7 +32,7 @@ public enum SkillCategory {
 		return this.shouldSyncronized;
 	}
 	
-	public boolean modifiable() {
+	public boolean learnable() {
 		return this.modifiable;
 	}
 }

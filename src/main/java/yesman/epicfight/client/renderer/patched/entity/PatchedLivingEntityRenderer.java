@@ -33,11 +33,7 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>> extends PatchedEntityRenderer<E, T, LivingEntityRenderer<E, M>> {
-	protected Map<Class<?>, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>>> layerRendererReplace;
-	
-	public PatchedLivingEntityRenderer() {
-		this.layerRendererReplace = Maps.newHashMap();
-	}
+	private Map<Class<?>, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>>> patchedLayers = Maps.newHashMap();
 	
 	@Override
 	public void render(E entityIn, T entitypatch, LivingEntityRenderer<E, M> renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
@@ -76,7 +72,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		poseStack.popPose();
 	}
 	
-	protected void renderLayer(LivingEntityRenderer<E, M> renderer, T entitypatch, E entityIn, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack matrixStackIn, int packedLightIn, float partialTicks) {
+	protected void renderLayer(LivingEntityRenderer<E, M> renderer, T entitypatch, E entityIn, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLightIn, float partialTicks) {
 		List<RenderLayer<E, M>> layers = Lists.newArrayList();
 		renderer.layers.forEach(layers::add);
 		Iterator<RenderLayer<E, M>> iter = layers.iterator();
@@ -93,8 +89,8 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 				rendererClass = rendererClass.getSuperclass();
 			}
 			
-			this.layerRendererReplace.computeIfPresent(rendererClass, (key, val) -> {
-				val.renderLayer(0, entitypatch, entityIn, layer, matrixStackIn, buffer, packedLightIn, poses, f2, f7, partialTicks);
+			this.patchedLayers.computeIfPresent(rendererClass, (key, val) -> {
+				val.renderLayer(0, entitypatch, entityIn, layer, poseStack, buffer, packedLightIn, poses, f2, f7, partialTicks);
 				iter.remove();
 				return val;
 			});
@@ -104,17 +100,17 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		modelMatrix.mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointById(this.getRootJointIndex()).getAnimatedTransform());
 		OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);
 		
-		matrixStackIn.pushPose();
-		MathUtils.translateStack(matrixStackIn, modelMatrix);
-		MathUtils.rotateStack(matrixStackIn, transpose);
-		matrixStackIn.translate(0.0D, this.getLayerCorrection(), 0.0D);
-		matrixStackIn.scale(-1.0F, -1.0F, 1.0F);
+		poseStack.pushPose();
+		MathUtils.translateStack(poseStack, modelMatrix);
+		MathUtils.rotateStack(poseStack, transpose);
+		poseStack.translate(0.0D, this.getLayerCorrection(), 0.0D);
+		poseStack.scale(-1.0F, -1.0F, 1.0F);
 		
 		layers.forEach((layer) -> {
-			layer.render(matrixStackIn, buffer, packedLightIn, entityIn, entityIn.animationPosition, entityIn.animationSpeed, partialTicks, entityIn.tickCount, f2, f7);
+			layer.render(poseStack, buffer, packedLightIn, entityIn, entityIn.animationPosition, entityIn.animationSpeed, partialTicks, entityIn.tickCount, f2, f7);
 		});
 		
-		matrixStackIn.popPose();
+		poseStack.popPose();
 	}
 	
 	public RenderType getRenderType(E entityIn, T entitypatch, LivingEntityRenderer<E, M> renderer, boolean isVisible, boolean isVisibleToPlayer, boolean isGlowing) {
@@ -140,6 +136,10 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
         if (entityIn.isShiftKeyDown()) {
 			poseStack.translate(0.0D, 0.15D, 0.0D);
 		}
+	}
+	
+	public void addPatchedLayer(Class<?> originalLayerClass, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>> patchedLayer) {
+		this.patchedLayers.put(originalLayerClass, patchedLayer);
 	}
 	
 	protected boolean isVisible(E entityIn, T entitypatch) {

@@ -69,8 +69,8 @@ public class AimAnimation extends StaticAnimation {
 	@Override
 	protected void modifyPose(Pose pose, LivingEntityPatch<?> entitypatch, float time) {
 		if (!entitypatch.isFirstPerson()) {
-			JointTransform chest = pose.getTransformByName("Chest");
-			JointTransform head = pose.getTransformByName("Head");
+			JointTransform chest = pose.getOrDefaultTransform("Chest");
+			JointTransform head = pose.getOrDefaultTransform("Head");
 			float f = 90.0F;
 			float ratio = (f - Math.abs(entitypatch.getOriginal().getXRot())) / f;
 			float yawOffset = entitypatch.getOriginal().getVehicle() != null ? entitypatch.getOriginal().getYRot() : entitypatch.getOriginal().yBodyRot;

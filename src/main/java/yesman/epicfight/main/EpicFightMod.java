@@ -1,17 +1,13 @@
 package yesman.epicfight.main;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ReloadableResourceManager;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ConfigGuiHandler;
 import net.minecraftforge.common.MinecraftForge;
@@ -42,7 +38,6 @@ import yesman.epicfight.client.events.engine.ControllEngine;
 import yesman.epicfight.client.events.engine.RenderEngine;
 import yesman.epicfight.client.gui.screen.IngameConfigurationScreen;
 import yesman.epicfight.client.input.EpicFightKeyMappings;
-import yesman.epicfight.client.renderer.patched.layer.WearableItemLayer;
 import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.config.ConfigurationIngame;
 import yesman.epicfight.data.loot.EpicFightLootModifiers;
@@ -102,7 +97,7 @@ public class EpicFightMod {
     	bus.addGenericListener(GlobalLootModifierSerializer.class, EpicFightLootModifiers::register);
     	
     	this.animationManager.registerAnimations();
-    	Skills.init();
+    	Skills.registerSkills();
     	
     	EpicFightMobEffects.EFFECTS.register(bus);
     	EpicFightPotions.POTIONS.register(bus);
@@ -125,15 +120,12 @@ public class EpicFightMod {
 	private void doClientStuff(final FMLClientSetupEvent event) {
     	new ClientEngine();
 		ProviderEntity.registerEntityPatchesClient();
-		
 		ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
-		ClientModels.LOGICAL_CLIENT.loadMeshData(resourceManager);
-		ClientModels.LOGICAL_CLIENT.loadArmatureData(resourceManager);
-		Models.LOGICAL_SERVER.loadArmatureData(resourceManager);
+		ClientModels.LOGICAL_CLIENT.loadModels(resourceManager);
+		ClientModels.LOGICAL_CLIENT.loadArmatures(resourceManager);
+		Models.LOGICAL_SERVER.loadArmatures(resourceManager);
 		this.animationManager.loadAnimationsInit(resourceManager);
 		Animations.buildClient();
-		
-		ClientEngine.instance.renderEngine.registerRenderer();
 		EpicFightKeyMappings.registerKeys();
 		MinecraftForge.EVENT_BUS.register(ControllEngine.Events.class);
         MinecraftForge.EVENT_BUS.register(RenderEngine.Events.class);
@@ -141,15 +133,6 @@ public class EpicFightMod {
         MinecraftForge.EVENT_BUS.register(ClientEvents.class);
         ((ReloadableResourceManager)resourceManager).registerReloadListener(ClientModels.LOGICAL_CLIENT);
         ((ReloadableResourceManager)resourceManager).registerReloadListener(this.animationManager);
-        ((ReloadableResourceManager)resourceManager).registerReloadListener(new PreparableReloadListener() {
-			@Override
-			public CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
-				return CompletableFuture.runAsync(() -> {
-					ClientEngine.instance.renderEngine.registerRenderer();
-					WearableItemLayer.clear();
-				}, gameExecutor).thenCompose(stage::wait);
-			}
-        });
         
         CLIENT_INGAME_CONFIG = new ConfigurationIngame();
         this.animatorProvider = ClientAnimator::getAnimator;
@@ -157,7 +140,7 @@ public class EpicFightMod {
     }
 	
 	private void doServerStuff(final FMLDedicatedServerSetupEvent event) {
-		Models.LOGICAL_SERVER.loadArmatureData(null);
+		Models.LOGICAL_SERVER.loadArmatures(null);
 		this.animationManager.loadAnimationsInit(null);
 		this.animatorProvider = ServerAnimator::getAnimator;
 		this.model = Models.LOGICAL_SERVER;

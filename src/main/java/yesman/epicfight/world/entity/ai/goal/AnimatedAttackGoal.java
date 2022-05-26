@@ -22,7 +22,7 @@ public class AnimatedAttackGoal<T extends MobPatch<?>> extends Goal {
 	
 	@Override
 	public void tick() {
-		if (this.mobpatch.getAttackTarget() != null) {
+		if (this.mobpatch.getTarget() != null) {
 			EntityState state = this.mobpatch.getEntityState();
 			this.combatBehaviors.tick();
 			
@@ -47,7 +47,7 @@ public class AnimatedAttackGoal<T extends MobPatch<?>> extends Goal {
 	}
 	
 	private boolean checkTargetValid() {
-		LivingEntity livingentity = this.mobpatch.getAttackTarget();
+		LivingEntity livingentity = this.mobpatch.getTarget();
 		
 		if (livingentity == null) {
 			return false;

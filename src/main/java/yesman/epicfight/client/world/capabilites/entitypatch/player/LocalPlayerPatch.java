@@ -7,6 +7,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
@@ -25,7 +26,7 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.client.CPPlayAnimation;
 import yesman.epicfight.network.client.CPSetPlayerTarget;
-import yesman.epicfight.network.client.CPToggleMode;
+import yesman.epicfight.network.client.CPChangePlayerMode;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 
 @OnlyIn(Dist.CLIENT)
@@ -44,12 +45,12 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	@Override
 	public void onJoinWorld(LocalPlayer entity, EntityJoinWorldEvent event) {
 		super.onJoinWorld(entity, event);
-		EpicFightNetworkManager.sendToServer(new CPToggleMode(ClientEngine.instance.isBattleMode()));
+		EpicFightNetworkManager.sendToServer(new CPChangePlayerMode(this.playerMode));
 	}
 	
 	public void onJoinWorld(ClientPlayerNetworkEvent.RespawnEvent event) {
 		super.onJoinWorld(event.getNewPlayer(), new EntityJoinWorldEvent(event.getNewPlayer(), event.getNewPlayer().level));
-		EpicFightNetworkManager.sendToServer(new CPToggleMode(ClientEngine.instance.isBattleMode()));
+		EpicFightNetworkManager.sendToServer(new CPChangePlayerMode(this.playerMode));
 	}
 	
 	@Override
@@ -74,7 +75,9 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 			
 			if (hit != this.rayTarget) {
 				if (hit instanceof LivingEntity) {
-					this.rayTarget = (LivingEntity)hit;
+					if (!(hit instanceof ArmorStand)) {
+						this.rayTarget = (LivingEntity)hit;this.rayTarget = (LivingEntity)hit;
+					}
 				} else if (hit instanceof PartEntity<?>) {
 					Entity parent = ((PartEntity<?>)hit).getParent();
 					
@@ -86,7 +89,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 				}
 				
 				if (this.rayTarget != null) {
-					EpicFightNetworkManager.sendToServer(new CPSetPlayerTarget(this.getAttackTarget().getId()));
+					EpicFightNetworkManager.sendToServer(new CPSetPlayerTarget(this.getTarget().getId()));
 				}
 			}
 		}
@@ -115,9 +118,9 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		super.updateHeldItem(mainHandCap, offHandCap);
 		
 		if (EpicFightMod.CLIENT_INGAME_CONFIG.battleAutoSwitchItems.contains(this.original.getMainHandItem().getItem())) {
-			ClientEngine.instance.switchToBattleMode();
+			this.toBattleMode();
 		} else if (EpicFightMod.CLIENT_INGAME_CONFIG.miningAutoSwitchItems.contains(this.original.getMainHandItem().getItem())) {
-			ClientEngine.instance.switchToMiningMode();
+			this.toMiningMode();
 		}
 	}
 	
@@ -125,21 +128,49 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	public AttackResult tryHurt(DamageSource damageSource, float amount) {
 		AttackResult result = super.tryHurt(damageSource, amount);
 		
-		if (EpicFightMod.CLIENT_INGAME_CONFIG.autoPreparation.getValue() && result.resultType == AttackResult.ResultType.SUCCESS && !ClientEngine.instance.isBattleMode()) {
-			ClientEngine.instance.toggleActingMode();
+		if (EpicFightMod.CLIENT_INGAME_CONFIG.autoPreparation.getValue() && result.resultType == AttackResult.ResultType.SUCCESS && !this.isBattleMode()) {
+			this.toBattleMode();
 		}
 		
 		return result;
 	}
 	
 	@Override
-	public LivingEntity getAttackTarget() {
+	public LivingEntity getTarget() {
 		return this.rayTarget;
 	}
 	
 	@Override
 	public boolean shouldSkipRender() {
-		return !ClientEngine.instance.isBattleMode() && EpicFightMod.CLIENT_INGAME_CONFIG.filterAnimation.getValue();
+		return !this.isBattleMode() && EpicFightMod.CLIENT_INGAME_CONFIG.filterAnimation.getValue();
+	}
+	
+	@Override
+	public void toMiningMode() {
+		if (this.playerMode != PlayerMode.MINING) {
+			ClientEngine.instance.renderEngine.guiSkillBar.slideDown();
+			if (EpicFightMod.CLIENT_INGAME_CONFIG.cameraAutoSwitch.getValue()) {
+				this.minecraft.options.setCameraType(CameraType.FIRST_PERSON);
+			}
+			
+			EpicFightNetworkManager.sendToServer(new CPChangePlayerMode(PlayerMode.MINING));
+		}
+		
+		super.toMiningMode();
+	}
+	
+	@Override
+	public void toBattleMode() {
+		if (this.playerMode != PlayerMode.BATTLE) {
+			ClientEngine.instance.renderEngine.guiSkillBar.slideUp();
+			if (EpicFightMod.CLIENT_INGAME_CONFIG.cameraAutoSwitch.getValue()) {
+				this.minecraft.options.setCameraType(CameraType.THIRD_PERSON_BACK);
+			}
+			
+			EpicFightNetworkManager.sendToServer(new CPChangePlayerMode(PlayerMode.BATTLE));
+		}
+		
+		super.toBattleMode();
 	}
 	
 	@Override

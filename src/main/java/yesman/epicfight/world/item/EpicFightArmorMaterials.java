@@ -11,7 +11,8 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import yesman.epicfight.main.EpicFightMod;
 
-public enum ModArmorMaterials implements ArmorMaterial {
+@SuppressWarnings("deprecation")
+public enum EpicFightArmorMaterials implements ArmorMaterial {
 	STRAY_CLOTH("stray_cloth", 4, new int[]{1, 2, 3, 1}, 15, SoundEvents.ARMOR_EQUIP_LEATHER, 0.0F, 0.0F, () -> {
 	      return Ingredient.of(Items.STRING);
 	   });
@@ -26,7 +27,7 @@ public enum ModArmorMaterials implements ArmorMaterial {
 	private final float knockbackResistance;
 	private final LazyLoadedValue<Ingredient> repairMaterial;
 
-	private ModArmorMaterials(String nameIn, int maxDamageFactorIn, int[] damageReductionAmountsIn, int enchantabilityIn,
+	private EpicFightArmorMaterials(String nameIn, int maxDamageFactorIn, int[] damageReductionAmountsIn, int enchantabilityIn,
 			SoundEvent equipSoundIn, float toughness, float knockbackResistance, Supplier<Ingredient> repairMaterialSupplier) {
 		this.name = nameIn;
 	    this.durabilityMultiplier = maxDamageFactorIn;

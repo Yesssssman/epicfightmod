@@ -56,10 +56,18 @@ public class EpicFightRenderTypes extends RenderType {
 				.setTextureState(new RenderStateShard.TextureStateShard(p_173206_, false, false))
 				.setTransparencyState(NO_TRANSPARENCY).setCullState(NO_CULL).setLightmapState(LIGHTMAP)
 				.setOverlayState(OVERLAY).setLayeringState(VIEW_OFFSET_Z_LAYERING).createCompositeState(true);
-		return create(EpicFightMod.MODID + ":armor_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.TRIANGLES, 256, true, false,
-				rendertype$compositestate);
+		return create(EpicFightMod.MODID + ":armor_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.TRIANGLES, 256, true, false, rendertype$compositestate);
 	});
-
+	
+	private static final Function<ResourceLocation, RenderType> ANIMATED_ARMOR_TRANSLUCENT_CUTOUT_NO_CULL = Util.memoize((p_173206_) -> {
+		RenderType.CompositeState rendertype$compositestate = RenderType.CompositeState.builder()
+				.setShaderState(RENDERTYPE_ARMOR_CUTOUT_NO_CULL_SHADER)
+				.setTextureState(new RenderStateShard.TextureStateShard(p_173206_, false, false))
+				.setTransparencyState(TRANSLUCENT_TRANSPARENCY).setCullState(NO_CULL).setLightmapState(LIGHTMAP)
+				.setOverlayState(OVERLAY).setLayeringState(VIEW_OFFSET_Z_LAYERING).createCompositeState(true);
+		return create(EpicFightMod.MODID + ":armor_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.TRIANGLES, 256, true, true, rendertype$compositestate);
+	});
+	
 	private static final RenderType ANIMATED_ARMOR_GLINT = create(EpicFightMod.MODID + ":animated_armor_glint", DefaultVertexFormat.POSITION_TEX, VertexFormat.Mode.TRIANGLES, 256, false, false,
 		RenderType.CompositeState.builder()
 			.setShaderState(RENDERTYPE_ARMOR_GLINT_SHADER)
@@ -134,8 +142,8 @@ public class EpicFightRenderTypes extends RenderType {
 		return ANIMATED_ITEM_ENTITY_TRANSLUCENT_CULL.apply(locationIn);
 	}
 	
-	public static RenderType animatedArmor(ResourceLocation locationIn) {
-		return ANIMATED_ARMOR_CUTOUT_NO_CULL.apply(locationIn);
+	public static RenderType animatedArmor(ResourceLocation locationIn, boolean transparent) {
+		return transparent ? ANIMATED_ARMOR_TRANSLUCENT_CUTOUT_NO_CULL.apply(locationIn) : ANIMATED_ARMOR_CUTOUT_NO_CULL.apply(locationIn);
 	}
 	
 	public static RenderType enchantedAnimatedArmor() {

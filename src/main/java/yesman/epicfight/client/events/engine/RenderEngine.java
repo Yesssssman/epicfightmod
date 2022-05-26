@@ -53,8 +53,10 @@ import net.minecraftforge.client.event.RenderLevelLastEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.registries.ForgeRegistries;
+import yesman.epicfight.api.client.model.forgeevent.PatchedRenderersEvent;
 import yesman.epicfight.api.client.model.forgeevent.RenderEnderDragonEvent;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -66,14 +68,13 @@ import yesman.epicfight.client.input.EpicFightKeyMappings;
 import yesman.epicfight.client.renderer.AimHelperRenderer;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.FirstPersonRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PIllagerRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PCaveSpiderRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PCreeperRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PDrownedRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PEnderDragonRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PEndermanRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PHoglinRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PHumanoidRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PIllagerRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PIronGolemRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PPlayerRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PRavagerRenderer;
@@ -149,7 +150,7 @@ public class RenderEngine {
 		this.entityRendererProvider.put(EntityType.STRAY, PStrayRenderer::new);
 		this.entityRendererProvider.put(EntityType.PLAYER, PPlayerRenderer::new);
 		this.entityRendererProvider.put(EntityType.SPIDER, PSpiderRenderer::new);
-		this.entityRendererProvider.put(EntityType.CAVE_SPIDER, PCaveSpiderRenderer::new);
+		this.entityRendererProvider.put(EntityType.CAVE_SPIDER, PSpiderRenderer::new);
 		this.entityRendererProvider.put(EntityType.IRON_GOLEM, PIronGolemRenderer::new);
 		this.entityRendererProvider.put(EntityType.VINDICATOR, PVindicatorRenderer::new);
 		this.entityRendererProvider.put(EntityType.EVOKER, PIllagerRenderer::new);
@@ -184,6 +185,14 @@ public class RenderEngine {
 		this.itemRendererMapByClass.put(ShieldItem.class, shieldRenderer);
 		this.itemRendererMapByClass.put(TridentItem.class, tridentRenderer);
 		this.aimHelper = new AimHelperRenderer();
+		
+		ModLoader.get().postEvent(new PatchedRenderersEvent.Add(this.entityRendererProvider, this.itemRendererMapByInstance));
+		
+		for (Map.Entry<EntityType<?>, Supplier<PatchedEntityRenderer>> entry : this.entityRendererProvider.entrySet()) {
+			this.entityRendererCache.put(entry.getKey(), entry.getValue().get());
+		}
+		
+		ModLoader.get().postEvent(new PatchedRenderersEvent.Modify(this.entityRendererCache));
 	}
 	
 	public void registerCustomEntityRenderer(EntityType<?> entityType, String renderer) {
@@ -483,18 +492,19 @@ public class RenderEngine {
 		@SuppressWarnings("unchecked")
 		@SubscribeEvent
 		public static void renderHand(RenderHandEvent event) {
-			boolean isBattleMode = ClientEngine.instance.isBattleMode();
+			LocalPlayerPatch playerpatch = ClientEngine.instance.getPlayerPatch();
 			
-			if (isBattleMode || !EpicFightMod.CLIENT_INGAME_CONFIG.filterAnimation.getValue()) {
-				if (event.getHand() == InteractionHand.MAIN_HAND) {
-					if (ClientEngine.instance.getPlayerPatch() != null) {
-						renderEngine.firstPersonRenderer.render(renderEngine.minecraft.player, ClientEngine.instance.getPlayerPatch(),
-							(LivingEntityRenderer)renderEngine.minecraft.getEntityRenderDispatcher().getRenderer(ClientEngine.instance.getPlayerPatch().getOriginal()),
+			if (playerpatch != null) {
+				boolean isBattleMode = playerpatch.isBattleMode();
+				
+				if (isBattleMode || !EpicFightMod.CLIENT_INGAME_CONFIG.filterAnimation.getValue()) {
+					if (event.getHand() == InteractionHand.MAIN_HAND) {
+						renderEngine.firstPersonRenderer.render(playerpatch.getOriginal(), playerpatch, (LivingEntityRenderer)renderEngine.minecraft.getEntityRenderDispatcher().getRenderer(playerpatch.getOriginal()),
 								event.getMultiBufferSource(), event.getPoseStack(), event.getPackedLight(), event.getPartialTicks());
 					}
+					
+					event.setCanceled(true);
 				}
-				
-				event.setCanceled(true);
 			}
 		}
 		
@@ -507,7 +517,7 @@ public class RenderEngine {
 		
 		@SuppressWarnings("unchecked")
 		@SubscribeEvent
-		public static void renderEnderDragonEvent(RenderEnderDragonEvent.Pre event) {
+		public static void renderEnderDragonEvent(RenderEnderDragonEvent event) {
 			EnderDragon livingentity = event.getEntity();
 			
 			if (renderEngine.hasRendererFor(livingentity)) {

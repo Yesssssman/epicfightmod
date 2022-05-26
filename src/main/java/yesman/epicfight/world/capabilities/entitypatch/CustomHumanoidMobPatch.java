@@ -14,6 +14,7 @@ import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.game.ExtendedDamageSource.StunType;
+import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
@@ -119,5 +120,11 @@ public class CustomHumanoidMobPatch<T extends PathfinderMob> extends HumanoidMob
 	@Override
 	public StaticAnimation getHitAnimation(StunType stunType) {
 		return this.provider.getStunAnimations().get(stunType);
+	}
+	
+	@Override
+	public OpenMatrix4f getModelMatrix(float partialTicks) {
+		float scale = this.provider.getScale();
+		return super.getModelMatrix(partialTicks).scale(scale, scale, scale);
 	}
 }

@@ -43,7 +43,8 @@ public class SPPotion {
 	
 	public static void handle(SPPotion msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(()->{
-			Entity entity = Minecraft.getInstance().level.getEntity(msg.entityId);
+			Minecraft mc = Minecraft.getInstance();
+			Entity entity = mc.level.getEntity(msg.entityId);
 			
 			if (entity != null && entity instanceof LivingEntity) {
 				LivingEntity livEntity = ((LivingEntity)entity);

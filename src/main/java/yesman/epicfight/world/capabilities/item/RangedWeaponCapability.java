@@ -35,7 +35,7 @@ public class RangedWeaponCapability extends CapabilityItem {
 	
 	@Override
 	public void setConfigFileAttribute(double armorNegation1, double impact1, int maxStrikes1, double armorNegation2, double impact2, int maxStrikes2) {
-		this.addStyleAttributeSimple(Style.AIMING, armorNegation1, impact1, maxStrikes1);
+		this.addStyleAttributeSimple(Style.RANGED, armorNegation1, impact1, maxStrikes1);
 	}
 	
 	@Override
@@ -43,16 +43,17 @@ public class RangedWeaponCapability extends CapabilityItem {
 		if (hand == InteractionHand.MAIN_HAND) {
 			return this.rangeAnimationSet;
 		}
+		
 		return super.getLivingMotionModifier(playerdata, hand);
 	}
 
 	@Override
-	public boolean canUseOnMount() {
+	public boolean availableOnHorse() {
 		return true;
 	}
 	
 	@Override
-	public HoldingOption getHoldOption() {
-		return HoldingOption.TWO_HANDED;
+	public boolean canBePlacedOffhand() {
+		return false;
 	}
 }

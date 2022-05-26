@@ -17,7 +17,7 @@ public class PEndermanRenderer extends PatchedLivingEntityRenderer<EnderMan, End
 	private static final ResourceLocation ENDERMAN_EYE_TEXTURE = new ResourceLocation("textures/entity/enderman/enderman_eyes.png");
 	
 	public PEndermanRenderer() {
-		this.layerRendererReplace.put(EnderEyesLayer.class, new PatchedEyeLayer<>(ENDERMAN_EYE_TEXTURE, ClientModels.LOGICAL_CLIENT.endermanEye));
+		this.addPatchedLayer(EnderEyesLayer.class, new PatchedEyeLayer<>(ENDERMAN_EYE_TEXTURE, ClientModels.LOGICAL_CLIENT.endermanEye));
 	}
 	
 	@Override

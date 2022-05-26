@@ -3,7 +3,6 @@ package yesman.epicfight.network.server;
 import java.util.function.Supplier;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
@@ -45,8 +44,8 @@ public class SPAddSkill {
 	
 	public static void handle(SPAddSkill msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
-			LocalPlayer player = Minecraft.getInstance().player;
-			LocalPlayerPatch playerpatch = (LocalPlayerPatch) player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+			Minecraft mc = Minecraft.getInstance();
+			LocalPlayerPatch playerpatch = (LocalPlayerPatch) mc.player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
 			CapabilitySkill skillCapability = playerpatch.getSkillCapability();
 			for (String skillName : msg.skillNames) {
 				skillCapability.addLearnedSkills(Skills.findSkill(skillName));

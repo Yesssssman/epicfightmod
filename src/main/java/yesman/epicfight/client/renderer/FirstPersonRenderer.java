@@ -18,7 +18,6 @@ import net.minecraft.client.renderer.entity.layers.PlayerItemInHandLayer;
 import net.minecraft.client.renderer.entity.layers.SpinAttackEffectLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -31,7 +30,7 @@ import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec4f;
 import yesman.epicfight.client.renderer.patched.entity.PatchedLivingEntityRenderer;
-import yesman.epicfight.client.renderer.patched.layer.NoRenderingLayer;
+import yesman.epicfight.client.renderer.patched.layer.EmptyLayer;
 import yesman.epicfight.client.renderer.patched.layer.PatchedElytraLayer;
 import yesman.epicfight.client.renderer.patched.layer.PatchedItemInHandLayer;
 import yesman.epicfight.client.renderer.patched.layer.WearableItemLayer;
@@ -41,13 +40,13 @@ import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerP
 public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer, LocalPlayerPatch, PlayerModel<LocalPlayer>> {
 	public FirstPersonRenderer() {
 		super();
-		this.layerRendererReplace.put(ElytraLayer.class, new PatchedElytraLayer<>());
-		this.layerRendererReplace.put(PlayerItemInHandLayer.class, new PatchedItemInHandLayer<>());
-		this.layerRendererReplace.put(HumanoidArmorLayer.class, new WearableItemLayer<>(EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET));
-		this.layerRendererReplace.put(CustomHeadLayer.class, new NoRenderingLayer<>());
-		this.layerRendererReplace.put(ArrowLayer.class, new NoRenderingLayer<>());
-		this.layerRendererReplace.put(BeeStingerLayer.class, new NoRenderingLayer<>());
-		this.layerRendererReplace.put(SpinAttackEffectLayer.class, new NoRenderingLayer<>());
+		this.addPatchedLayer(ElytraLayer.class, new PatchedElytraLayer<>());
+		this.addPatchedLayer(PlayerItemInHandLayer.class, new PatchedItemInHandLayer<>());
+		this.addPatchedLayer(HumanoidArmorLayer.class, new WearableItemLayer<>(true));
+		this.addPatchedLayer(CustomHeadLayer.class, new EmptyLayer<>());
+		this.addPatchedLayer(ArrowLayer.class, new EmptyLayer<>());
+		this.addPatchedLayer(BeeStingerLayer.class, new EmptyLayer<>());
+		this.addPatchedLayer(SpinAttackEffectLayer.class, new EmptyLayer<>());
 	}
 	
 	@Override

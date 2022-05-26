@@ -29,7 +29,7 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 	private static final ResourceLocation WITHER_LOCATION = new ResourceLocation("textures/entity/wither/wither.png");
 	
 	public PWitherRenderer() {
-		this.layerRendererReplace.put(WitherArmorLayer.class, new PatchedWitherArmorLayer());
+		this.addPatchedLayer(WitherArmorLayer.class, new PatchedWitherArmorLayer());
 	}
 	
 	@Override

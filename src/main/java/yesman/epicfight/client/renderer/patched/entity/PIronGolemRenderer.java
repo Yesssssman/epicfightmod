@@ -12,7 +12,7 @@ import yesman.epicfight.world.capabilities.entitypatch.mob.IronGolemPatch;
 @OnlyIn(Dist.CLIENT)
 public class PIronGolemRenderer extends PatchedLivingEntityRenderer<IronGolem, IronGolemPatch, IronGolemModel<IronGolem>> {
 	public PIronGolemRenderer() {
-		this.layerRendererReplace.put(IronGolemCrackinessLayer.class, new PatchedGolemCrackLayer());
+		this.addPatchedLayer(IronGolemCrackinessLayer.class, new PatchedGolemCrackLayer());
 	}
 	
 	@Override

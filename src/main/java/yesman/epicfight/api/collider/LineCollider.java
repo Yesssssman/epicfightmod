@@ -41,7 +41,7 @@ public class LineCollider extends Collider {
 	}
 	
 	@Override
-	public boolean collide(Entity entity) {
+	public boolean isCollide(Entity entity) {
 		AABB opponent = entity.getBoundingBox();
 		double maxStart;
 		double minEnd;

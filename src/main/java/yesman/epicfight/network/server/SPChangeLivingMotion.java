@@ -101,7 +101,7 @@ public class SPChangeLivingMotion {
 		ctx.get().enqueueWork(() -> {
 			Minecraft mc = Minecraft.getInstance();
 			Entity entity = mc.player.level.getEntity(msg.entityId);
-			 
+			
 			if (entity != null) {
 				LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>) entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
 				ClientAnimator animator = entitypatch.getClientAnimator();

@@ -71,12 +71,13 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			ResourceLocation rl = entry.getKey();
 			String pathString = rl.getPath();
 			ResourceLocation registryName = new ResourceLocation(rl.getNamespace(), pathString);
-			EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(registryName);
 			
-			if (entityType == null) {
-				EpicFightMod.LOGGER.warn("Tried to add a mob patch for entity " + registryName + ", but it's not exist");
-				return;
+			if (!ForgeRegistries.ENTITIES.containsKey(registryName)) {
+				EpicFightMod.LOGGER.warn("[Custom Entity] Entity named " + registryName + " does not exist");
+				continue;
 			}
+			
+			EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(registryName);
 			
 			CompoundTag tag = null;
 			
@@ -159,6 +160,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		protected Map<Attribute, Double> attributeValues;
 		protected Faction faction;
 		protected double chasingSpeed;
+		protected float scale;
 		
 		@Override
 		@SuppressWarnings("rawtypes")
@@ -188,6 +190,10 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		
 		public double getChasingSpeed() {
 			return this.chasingSpeed;
+		}
+		
+		public float getScale() {
+			return this.scale;
 		}
 	}
 	
@@ -255,6 +261,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 				provider.modelLocation = new ResourceLocation(tag.getString("model"));
 				provider.defaultAnimations = deserializeDefaultAnimations(tag.getCompound("default_livingmotions"));
 				provider.faction = Faction.valueOf(tag.getString("faction").toUpperCase(Locale.ROOT));
+				provider.scale = tag.getCompound("attributes").contains("scale") ? (float)tag.getCompound("attributes").getDouble("scale") : 1.0F;
 				
 				if (!clientSide) {
 					provider.stunAnimations = deserializeStunAnimations(tag.getCompound("stun_animations"));

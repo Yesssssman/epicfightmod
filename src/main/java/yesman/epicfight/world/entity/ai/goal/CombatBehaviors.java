@@ -391,7 +391,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 	
 	public static class TargetWithinEyeHeight<T extends MobPatch<?>> extends BehaviorPredicate<T> {
 		public boolean test(T mobpatch) {
-			double veticalDistance = Math.abs(mobpatch.getOriginal().getY() - mobpatch.getAttackTarget().getY());
+			double veticalDistance = Math.abs(mobpatch.getOriginal().getY() - mobpatch.getTarget().getY());
 			return veticalDistance < mobpatch.getOriginal().getEyeHeight();
 		}
 	}
@@ -406,7 +406,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 		}
 		
 		public boolean test(T mobpatch) {
-			double distanceSqr = mobpatch.getOriginal().distanceToSqr(mobpatch.getAttackTarget());
+			double distanceSqr = mobpatch.getOriginal().distanceToSqr(mobpatch.getTarget());
 			return this.minDistance < distanceSqr && distanceSqr < this.maxDistance;
 		}
 	}
@@ -421,7 +421,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 		}
 		
 		public boolean test(T mobpatch) {
-			Entity target = mobpatch.getAttackTarget();
+			Entity target = mobpatch.getTarget();
 			double degree = mobpatch.getAngleTo(target);
 			return this.minDegree < degree && degree < this.maxDegree;
 		}
@@ -433,7 +433,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 			
 			@Override
 			public boolean test(T mobpatch) {
-				Entity target = mobpatch.getAttackTarget();
+				Entity target = mobpatch.getTarget();
 				double degree = mobpatch.getAngleToHorizontal(target);
 				return this.minDegree < degree && degree < this.maxDegree;
 			}

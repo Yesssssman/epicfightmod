@@ -83,10 +83,10 @@ public class BasicAttack extends Skill {
 		if (player.isPassenger()) {
 			Entity entity = player.getVehicle();
 			
-			if ((entity instanceof PlayerRideableJumping && ((PlayerRideableJumping)entity).canJump()) && cap.canUseOnMount() && cap.getMountAttackMotion() != null) {
+			if ((entity instanceof PlayerRideableJumping && ((PlayerRideableJumping)entity).canJump()) && cap.availableOnHorse() && cap.getMountAttackMotion() != null) {
+				comboCounter %= cap.getMountAttackMotion().size();
 				attackMotion = cap.getMountAttackMotion().get(comboCounter);
 				comboCounter++;
-				comboCounter %= cap.getMountAttackMotion().size();
 			}
 		} else {
 			List<StaticAnimation> combo = cap.getAutoAttckMotion(executer);

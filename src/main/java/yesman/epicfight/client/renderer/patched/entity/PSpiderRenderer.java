@@ -15,6 +15,6 @@ public class PSpiderRenderer extends PatchedLivingEntityRenderer<Spider, SpiderP
 	private static final ResourceLocation SPIDER_EYE_TEXTURE = new ResourceLocation("textures/entity/spider_eyes.png");
 	
 	public PSpiderRenderer() {
-		this.layerRendererReplace.put(SpiderEyesLayer.class, new PatchedEyeLayer<>(SPIDER_EYE_TEXTURE, ClientModels.LOGICAL_CLIENT.spiderEye));
+		this.addPatchedLayer(SpiderEyesLayer.class, new PatchedEyeLayer<>(SPIDER_EYE_TEXTURE, ClientModels.LOGICAL_CLIENT.spiderEye));
 	}
 }

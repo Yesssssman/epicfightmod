@@ -11,6 +11,7 @@ import net.minecraftforge.eventbus.api.Cancelable;
 import net.minecraftforge.eventbus.api.Event;
 
 @OnlyIn(Dist.CLIENT)
+@Cancelable
 public class RenderEnderDragonEvent extends Event {
 	private final EnderDragon entity;
     private final EnderDragonRenderer renderer;
@@ -35,7 +36,7 @@ public class RenderEnderDragonEvent extends Event {
 	public EnderDragonRenderer getRenderer() {
 		return renderer;
 	}
-
+	
 	public float getPartialRenderTick() {
 		return partialRenderTick;
 	}
@@ -51,11 +52,4 @@ public class RenderEnderDragonEvent extends Event {
 	public int getLight() {
 		return light;
 	}
-	
-	@Cancelable
-	public static class Pre extends RenderEnderDragonEvent {
-        public Pre(EnderDragon entity, EnderDragonRenderer renderer, float partialRenderTick, PoseStack matrixStack, MultiBufferSource buffers, int light) {
-            super(entity, renderer, partialRenderTick, matrixStack, buffers, light);
-        }
-    }
 }

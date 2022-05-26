@@ -24,15 +24,15 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class WeaponCapability extends CapabilityItem {
 	protected final Function<LivingEntityPatch<?>, Style> stylegetter;
-	protected final Function<ItemStack, Boolean> offhandPredicator;
+	protected final Function<ItemStack, Boolean> weaponCombinationPredicator;
 	protected final Skill passiveSkill;
 	protected final SoundEvent smashingSound;
 	protected final SoundEvent hitSound;
 	protected final Collider weaponCollider;
-	protected final HoldingOption holdOption;
 	protected final Map<Style, List<StaticAnimation>> autoAttackMotions;
 	protected final Map<Style, Skill> specialAttacks;
 	protected final Map<Style, Map<LivingMotion, StaticAnimation>> livingMotionModifiers;
+	protected final boolean canBePlacedOffhand;
 	
 	public WeaponCapability(WeaponCapability.Builder builder) {
 		super(builder.category);
@@ -40,12 +40,12 @@ public class WeaponCapability extends CapabilityItem {
 		this.specialAttacks = builder.specialAttackMap;
 		this.livingMotionModifiers = builder.livingMotionModifiers;
 		this.stylegetter = builder.styleProvider;
-		this.offhandPredicator = builder.offhandPredicator;
+		this.weaponCombinationPredicator = builder.weaponCombinationPredicator;
 		this.passiveSkill = builder.passiveSkill;
 		this.smashingSound = builder.swingSound;
 		this.hitSound = builder.hitSound;
-		this.holdOption = builder.holdingOption;
 		this.weaponCollider = builder.collider;
+		this.canBePlacedOffhand = builder.canBePlacedOffhand;
 	}
 	
 	@Override
@@ -94,8 +94,8 @@ public class WeaponCapability extends CapabilityItem {
 	}
 	
 	@Override
-	public HoldingOption getHoldOption() {
-		return this.holdOption;
+	public boolean canBePlacedOffhand() {
+		return this.canBePlacedOffhand;
 	}
 	
 	@Override
@@ -117,13 +117,13 @@ public class WeaponCapability extends CapabilityItem {
 	}
 	
 	@Override
-	public boolean canUsedInOffhandAlone() {
+	public boolean canHoldInOffhandAlone() {
 		return false;
 	}
 	
 	@Override
-	public boolean checkOffhandUsable(ItemStack itemstack) {
-		return super.checkOffhandUsable(itemstack) || this.offhandPredicator.apply(itemstack);
+	public boolean checkOffhandValid(LivingEntityPatch<?> entitypatch) {
+		return super.checkOffhandValid(entitypatch) || this.weaponCombinationPredicator.apply(entitypatch.getOriginal().getOffhandItem());
 	}
 	
 	public static WeaponCapability.Builder builder() {
@@ -133,28 +133,28 @@ public class WeaponCapability extends CapabilityItem {
 	public static class Builder {
 		WeaponCategory category;
 		Function<LivingEntityPatch<?>, Style> styleProvider;
-		Function<ItemStack, Boolean> offhandPredicator;
+		Function<ItemStack, Boolean> weaponCombinationPredicator;
 		Skill passiveSkill;
 		SoundEvent swingSound;
 		SoundEvent hitSound;
 		Collider collider;
-		HoldingOption holdingOption;
 		Map<Style, List<StaticAnimation>> autoAttackMotionMap;
 		Map<Style, Skill> specialAttackMap;
 		Map<Style, Map<LivingMotion, StaticAnimation>> livingMotionModifiers;
+		boolean canBePlacedOffhand;
 		
 		public Builder() {
 			this.category = WeaponCategory.FIST;
 			this.styleProvider = (entitypatch) -> Style.ONE_HAND;
-			this.offhandPredicator = (entitypatch) -> false;
+			this.weaponCombinationPredicator = (entitypatch) -> false;
 			this.passiveSkill = null;
 			this.swingSound = EpicFightSounds.WHOOSH;
 			this.hitSound = EpicFightSounds.BLUNT_HIT;
 			this.collider = ColliderPreset.FIST;
-			this.holdingOption = HoldingOption.GENERAL;
 			this.autoAttackMotionMap = Maps.<Style, List<StaticAnimation>>newHashMap();
 			this.specialAttackMap = Maps.<Style, Skill>newHashMap();
 			this.livingMotionModifiers = null;
+			this.canBePlacedOffhand = true;
 		}
 		
 		public Builder category(WeaponCategory category) {
@@ -187,8 +187,8 @@ public class WeaponCapability extends CapabilityItem {
 			return this;
 		}
 		
-		public Builder holdingOption(HoldingOption holdingOption) {
-			this.holdingOption = holdingOption;
+		public Builder canBePlacedOffhand(boolean canBePlacedOffhand) {
+			this.canBePlacedOffhand = canBePlacedOffhand;
 			return this;
 		}
 		
@@ -208,8 +208,8 @@ public class WeaponCapability extends CapabilityItem {
 			return this;
 		}
 		
-		public Builder offhandPredicator(Function<ItemStack, Boolean> predicator) {
-			this.offhandPredicator = predicator;
+		public Builder weaponCombinationPredicator(Function<ItemStack, Boolean> predicator) {
+			this.weaponCombinationPredicator = predicator;
 			return this;
 		}
 		

@@ -5,35 +5,25 @@ import java.util.Iterator;
 import java.util.Set;
 
 import net.minecraft.sounds.SoundEvents;
-import net.minecraft.util.Mth;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.monster.Vex;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.LivingMotion;
-import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.game.ExtendedDamageSource.StunType;
-import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
-import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.Models;
-import yesman.epicfight.network.server.SPPlayAnimationAndSetTarget;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 import yesman.epicfight.world.entity.eventlistener.HurtEventPre;
 
 public class VexPatch extends MobPatch<Vex> {
-	private float targetXRotO;
-	private float targetXRot;
-	
 	public VexPatch() {
 		super(Faction.ILLAGER);
 	}
@@ -41,6 +31,7 @@ public class VexPatch extends MobPatch<Vex> {
 	@Override
 	protected void initAI() {
 		super.initAI();
+		
         this.original.goalSelector.addGoal(0, new ChargeAttackGoal());
         this.original.goalSelector.addGoal(1, new StopStandGoal());
 	}
@@ -75,12 +66,6 @@ public class VexPatch extends MobPatch<Vex> {
 	}
 	
 	@Override
-	public void tick(LivingUpdateEvent event) {
-		this.targetXRotO = this.targetXRot;
-		super.tick(event);
-	}
-	
-	@Override
 	public void updateMotion(boolean considerInaction) {
 		if (this.state.inaction() && considerInaction) {
 			currentLivingMotion = LivingMotion.INACTION;
@@ -91,16 +76,6 @@ public class VexPatch extends MobPatch<Vex> {
 				currentLivingMotion = LivingMotion.IDLE;
 				currentCompositeMotion = LivingMotion.IDLE;
 			}
-		}
-	}
-	
-	@Override
-	public void playAnimationSynchronized(StaticAnimation animation, float convertTimeModifier) {
-		if (animation instanceof AttackAnimation && this.getAttackTarget() != null) {
-			this.animator.playAnimation(animation, convertTimeModifier);
-			this.playAnimationSynchronized(animation, convertTimeModifier, SPPlayAnimationAndSetTarget::new);	
-		} else {
-			super.playAnimationSynchronized(animation, convertTimeModifier);
 		}
 	}
 	
@@ -122,24 +97,7 @@ public class VexPatch extends MobPatch<Vex> {
 	
 	@Override
 	public OpenMatrix4f getModelMatrix(float partialTicks) {
-		OpenMatrix4f mat = super.getModelMatrix(partialTicks);
-		
-		if (this.original.isCharging()) {
-			if (this.targetXRot == 0.0F && this.getAttackTarget() != null) {
-				Entity target = this.getAttackTarget();
-				double d0 = VexPatch.this.original.getX() - target.getX();
-		        double d1 = VexPatch.this.original.getY() - (target.getY() + (double)target.getBbHeight() * 0.5D);
-		        double d2 = VexPatch.this.original.getZ() - target.getZ();
-		        double d3 = Math.sqrt(d0 * d0 + d2 * d2);
-		        this.targetXRot = (float)(-(Mth.atan2(d1, d3) * (double)(180F / (float)Math.PI)));
-			}
-		} else {
-			this.targetXRot = 0.0F;
-		}
-		
-		mat.rotateDeg(MathUtils.lerpBetween(this.targetXRotO, this.targetXRot, partialTicks), Vec3f.X_AXIS);
-		
-		return mat;
+		return super.getModelMatrix(partialTicks).scale(0.4F, 0.4F, 0.4F);
 	}
 	
 	class StopStandGoal extends Goal {
@@ -154,12 +112,7 @@ public class VexPatch extends MobPatch<Vex> {
 
 		@Override
 		public void start() {
-			
-		}
-		
-		@Override
-		public void tick() {
-			VexPatch.this.original.getMoveControl().setWantedPosition(VexPatch.this.original.getX(), VexPatch.this.original.getY(), VexPatch.this.original.getZ(), 0.0F);
+			VexPatch.this.original.getMoveControl().setWantedPosition(VexPatch.this.original.getX(), VexPatch.this.original.getY(), VexPatch.this.original.getZ(), 0.25F);
 		}
 	}
 	
@@ -182,30 +135,23 @@ public class VexPatch extends MobPatch<Vex> {
 	    
 		@Override
 		public boolean canContinueToUse() {
-			return chargingCounter > 0;
+			return this.chargingCounter > 0;
 		}
-
+		
 		@Override
 		public void start() {
-	    	Entity target = VexPatch.this.getAttackTarget();
+			VexPatch.this.original.getMoveControl().setWantedPosition(VexPatch.this.original.getX(), VexPatch.this.original.getY(), VexPatch.this.original.getZ(), 0.25F);
 	    	VexPatch.this.playAnimationSynchronized(Animations.VEX_CHARGE, 0.0F);
 	    	VexPatch.this.original.playSound(SoundEvents.VEX_CHARGE, 1.0F, 1.0F);
 	    	VexPatch.this.original.setIsCharging(true);
-	    	
-	    	double d0 = VexPatch.this.original.getX() - target.getX();
-	        double d1 = VexPatch.this.original.getY() - (target.getY() + (double)target.getBbHeight() * 0.5D);
-	        double d2 = VexPatch.this.original.getZ() - target.getZ();
-	        double d3 = (double)Math.sqrt(d0 * d0 + d2 * d2);
-	        VexPatch.this.targetXRot = (float)(-(Mth.atan2(d1, d3) * (double)(180F / (float)Math.PI)));
 	    	this.chargingCounter = 20;
 	    }
 	    
 		@Override
 		public void stop() {
 			VexPatch.this.original.setIsCharging(false);
-			VexPatch.this.targetXRot = 0;
 		}
-
+		
 		@Override
 		public void tick() {
 			--this.chargingCounter;

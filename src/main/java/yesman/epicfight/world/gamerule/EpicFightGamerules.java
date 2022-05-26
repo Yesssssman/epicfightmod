@@ -22,7 +22,7 @@ public class EpicFightGamerules {
 			EpicFightNetworkManager.sendToAll(new SPChangeGamerule(SynchronizedGameRules.WEIGHT_PENALTY, value.get()));
 		}));
 		KEEP_SKILLS = GameRules.register("keepSkills", GameRules.Category.PLAYER, GameRules.BooleanValue.create(ConfigManager.KEEP_SKILLS.get()));
-		DISABLE_ENTITY_UI = GameRules.register("disableEntityUI", GameRules.Category.MISC, GameRules.BooleanValue.create(false, (server, value) -> {
+		DISABLE_ENTITY_UI = GameRules.register("disableEntityUI", GameRules.Category.MISC, GameRules.BooleanValue.create(ConfigManager.DISABLE_ENTITY_UI.get(), (server, value) -> {
 			EpicFightNetworkManager.sendToAll(new SPChangeGamerule(SynchronizedGameRules.DIABLE_ENTITY_UI, value.get()));
 		}));
 	}

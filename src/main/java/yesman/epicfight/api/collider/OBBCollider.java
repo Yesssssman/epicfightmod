@@ -12,6 +12,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 
 public class OBBCollider extends Collider {
@@ -19,6 +20,7 @@ public class OBBCollider extends Collider {
 	protected final Vec3[] modelNormal;
 	protected Vec3[] rotatedVertex;
 	protected Vec3[] rotatedNormal;
+	protected Vec3f scale;
 	
 	/**
 	 * make 3d obb
@@ -112,21 +114,30 @@ public class OBBCollider extends Collider {
 	 * Transform every elements of this Bounding Box
 	 **/
 	@Override
-	public void transform(OpenMatrix4f mat) {
-		OpenMatrix4f rotationMatrix = mat.removeTranslation();
+	public void transform(OpenMatrix4f modelMatrix) {
+		OpenMatrix4f noTranslation = modelMatrix.removeTranslation();
 		
 		for (int i = 0; i < this.modelVertex.length; i++) {
-			this.rotatedVertex[i] = OpenMatrix4f.transform(rotationMatrix, this.modelVertex[i]);
+			this.rotatedVertex[i] = OpenMatrix4f.transform(noTranslation, this.modelVertex[i]);
 		}
 		
 		for (int i = 0; i < this.modelNormal.length; i++) {
-			this.rotatedNormal[i] = OpenMatrix4f.transform(rotationMatrix, this.modelNormal[i]);
+			this.rotatedNormal[i] = OpenMatrix4f.transform(noTranslation, this.modelNormal[i]);
 		}
 		
-		super.transform(mat);
+		this.scale = noTranslation.toScaleVector();
+		
+		super.transform(modelMatrix);
 	}
 	
-	public boolean isCollideWith(OBBCollider opponent) {
+	@Override
+	protected AABB getHitboxAABB() {
+		return this.outerAABB.inflate((this.outerAABB.maxX - this.outerAABB.minX) * this.scale.x,
+				(this.outerAABB.maxY - this.outerAABB.minY) * this.scale.y,
+				(this.outerAABB.maxZ - this.outerAABB.minZ) * this.scale.z).move(-this.worldCenter.x, this.worldCenter.y, -this.worldCenter.z);
+	}
+	
+	public boolean isCollide(OBBCollider opponent) {
 		Vec3 toOpponent = opponent.worldCenter.subtract(this.worldCenter);
 		
 		for (Vec3 seperateAxis : this.rotatedNormal) {
@@ -164,9 +175,9 @@ public class OBBCollider extends Collider {
 	}
 	
 	@Override
-	public boolean collide(Entity entity) {
+	public boolean isCollide(Entity entity) {
 		OBBCollider obb = new OBBCollider(entity.getBoundingBox());
-		return isCollideWith(obb);
+		return isCollide(obb);
 	}
 	
 	private static boolean collisionDetection(Vec3 seperateAxis, Vec3 toOpponent, OBBCollider box1, OBBCollider box2) {

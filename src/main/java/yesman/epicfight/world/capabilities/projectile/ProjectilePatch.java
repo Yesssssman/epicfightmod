@@ -36,7 +36,7 @@ public abstract class ProjectilePatch<T extends Projectile> {
 			CapabilityItem itemCap = EpicFightCapabilities.getItemStackCapability(heldItem);
 			
 			if (itemCap instanceof RangedWeaponCapability) {
-				Map<Attribute, AttributeModifier> modifierMap = itemCap.getDamageAttributesInCondition(Style.AIMING);
+				Map<Attribute, AttributeModifier> modifierMap = itemCap.getDamageAttributesInCondition(Style.RANGED);
 				
 				if (modifierMap != null) {
 					this.armorNegation = modifierMap.containsKey(EpicFightAttributes.ARMOR_NEGATION.get()) ? (float)modifierMap.get(EpicFightAttributes.ARMOR_NEGATION.get()).getAmount() : (float)EpicFightAttributes.ARMOR_NEGATION.get().getDefaultValue();

@@ -16,7 +16,7 @@ import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 @OnlyIn(Dist.CLIENT)
 public class PVindicatorRenderer extends PIllagerRenderer<AbstractIllager, MobPatch<AbstractIllager>> {
 	public PVindicatorRenderer() {
-		this.layerRendererReplace.put(ItemInHandLayer.class, new PatchedItemInHandLayer<>() {
+		this.addPatchedLayer(ItemInHandLayer.class, new PatchedItemInHandLayer<>() {
 			@Override
 			public void renderLayer(MobPatch<AbstractIllager> entitypatch, AbstractIllager entityliving, RenderLayer<AbstractIllager, IllagerModel<AbstractIllager>> originalRenderer, PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn, OpenMatrix4f[] poses, float netYawHead, float pitchHead, float partialTicks) {
 				if (entityliving.isAggressive()) {

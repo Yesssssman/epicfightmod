@@ -26,7 +26,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import yesman.epicfight.api.animation.types.EntityState;
-import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.gui.screen.SkillEditScreen;
 import yesman.epicfight.client.input.EpicFightKeyMappings;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
@@ -95,7 +94,7 @@ public class ControllEngine {
 	
 	private void attackKeyPressed(int key, int action) {
 		if (action == 1) {
-			if (ClientEngine.instance.isBattleMode()) {
+			if (this.playerpatch.isBattleMode()) {
 				this.setKeyBind(this.options.keyAttack, false);
 				while (this.options.keyAttack.consumeClick()) {
 				}
@@ -112,7 +111,7 @@ public class ControllEngine {
 	private void dodgeKeyPressed(int key, int action) {
 		if (action == 1) {
 			if (key == this.options.keyShift.getKey().getValue()) {
-				if (this.player.getVehicle() == null && ClientEngine.instance.isBattleMode()) {
+				if (this.player.getVehicle() == null && this.playerpatch.isBattleMode()) {
 					if (!this.sneakPressToggle) {
 						this.sneakPressToggle = true;
 					}
@@ -129,7 +128,7 @@ public class ControllEngine {
 	}
 	
 	private void swapHandKeyPressed(int key, int action) {
-		if (this.playerpatch.getEntityState().inaction() || (!this.playerpatch.getHoldingItemCapability(InteractionHand.MAIN_HAND).canUsedInOffhand())) {
+		if (this.playerpatch.getEntityState().inaction() || (!this.playerpatch.getHoldingItemCapability(InteractionHand.MAIN_HAND).canBePlacedOffhand())) {
 			while (this.options.keySwapOffhand.consumeClick()) {}
 			this.setKeyBind(this.options.keySwapOffhand, false);
 		}
@@ -137,7 +136,7 @@ public class ControllEngine {
 	
 	private void switchModeKeyPressed(int key, int action) {
 		if (action == 1) {
-			ClientEngine.instance.toggleActingMode();
+			this.playerpatch.toggleMode();
 		}
 	}
 	

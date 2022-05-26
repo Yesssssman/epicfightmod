@@ -12,7 +12,7 @@ import yesman.epicfight.network.client.CPExecuteSkill;
 import yesman.epicfight.network.client.CPPlayAnimation;
 import yesman.epicfight.network.client.CPRotatePlayerYaw;
 import yesman.epicfight.network.client.CPSetPlayerTarget;
-import yesman.epicfight.network.client.CPToggleMode;
+import yesman.epicfight.network.client.CPChangePlayerMode;
 import yesman.epicfight.network.server.SPAddSkill;
 import yesman.epicfight.network.server.SPChangeGamerule;
 import yesman.epicfight.network.server.SPChangeLivingMotion;
@@ -29,7 +29,7 @@ import yesman.epicfight.network.server.SPSetAttackTarget;
 import yesman.epicfight.network.server.SPSetSkillValue;
 import yesman.epicfight.network.server.SPSkillExecutionFeedback;
 import yesman.epicfight.network.server.SPSpawnData;
-import yesman.epicfight.network.server.SPTogglePlayerMode;
+import yesman.epicfight.network.server.SPChangePlayerMode;
 
 public class EpicFightNetworkManager {
 	private static final String PROTOCOL_VERSION = "1";
@@ -62,7 +62,7 @@ public class EpicFightNetworkManager {
 		INSTANCE.registerMessage(id++, CPExecuteSkill.class, CPExecuteSkill::toBytes, CPExecuteSkill::fromBytes, CPExecuteSkill::handle);
 		INSTANCE.registerMessage(id++, CPPlayAnimation.class, CPPlayAnimation::toBytes, CPPlayAnimation::fromBytes, CPPlayAnimation::handle);
 		INSTANCE.registerMessage(id++, CPRotatePlayerYaw.class, CPRotatePlayerYaw::toBytes, CPRotatePlayerYaw::fromBytes, CPRotatePlayerYaw::handle);
-		INSTANCE.registerMessage(id++, CPToggleMode.class, CPToggleMode::toBytes, CPToggleMode::fromBytes, CPToggleMode::handle);
+		INSTANCE.registerMessage(id++, CPChangePlayerMode.class, CPChangePlayerMode::toBytes, CPChangePlayerMode::fromBytes, CPChangePlayerMode::handle);
 		INSTANCE.registerMessage(id++, CPSetPlayerTarget.class, CPSetPlayerTarget::toBytes, CPSetPlayerTarget::fromBytes, CPSetPlayerTarget::handle);
 		INSTANCE.registerMessage(id++, CPChangeSkill.class, CPChangeSkill::toBytes, CPChangeSkill::fromBytes, CPChangeSkill::handle);
 		
@@ -79,7 +79,7 @@ public class EpicFightNetworkManager {
 		INSTANCE.registerMessage(id++, SPPotion.class, SPPotion::toBytes, SPPotion::fromBytes, SPPotion::handle);
 		INSTANCE.registerMessage(id++, SPModifySkillData.class, SPModifySkillData::toBytes, SPModifySkillData::fromBytes, SPModifySkillData::handle);
 		INSTANCE.registerMessage(id++, SPChangeGamerule.class, SPChangeGamerule::toBytes, SPChangeGamerule::fromBytes, SPChangeGamerule::handle);
-		INSTANCE.registerMessage(id++, SPTogglePlayerMode.class, SPTogglePlayerMode::toBytes, SPTogglePlayerMode::fromBytes, SPTogglePlayerMode::handle);
+		INSTANCE.registerMessage(id++, SPChangePlayerMode.class, SPChangePlayerMode::toBytes, SPChangePlayerMode::fromBytes, SPChangePlayerMode::handle);
 		INSTANCE.registerMessage(id++, SPAddSkill.class, SPAddSkill::toBytes, SPAddSkill::fromBytes, SPAddSkill::handle);
 		INSTANCE.registerMessage(id++, SPDatapackSync.class, SPDatapackSync::toBytes, SPDatapackSync::fromBytes, SPDatapackSync::handle);
 		INSTANCE.registerMessage(id++, SPSetAttackTarget.class, SPSetAttackTarget::toBytes, SPSetAttackTarget::fromBytes, SPSetAttackTarget::handle);

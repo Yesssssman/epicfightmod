@@ -18,7 +18,7 @@ import yesman.epicfight.api.client.model.forgeevent.RenderEnderDragonEvent;
 public abstract class MixinEnderDragonRenderer {
 	@Inject(at = @At(value = "HEAD"), method = "render(Lnet/minecraft/world/entity/Entity;FFLcom/mojang/blaze3d/vertex/PoseStack;Lnet/minecraft/client/renderer/MultiBufferSource;I)V", cancellable = true)
 	private void epicfight_render(Entity enderdragon, float yRot, float partialTicks, PoseStack poseStack, MultiBufferSource multiSourceBuffer, int packedLight, CallbackInfo info) {
-		RenderEnderDragonEvent renderDragonEvent = new RenderEnderDragonEvent.Pre((EnderDragon)enderdragon, (EnderDragonRenderer)((Object)this), partialTicks, poseStack, multiSourceBuffer, packedLight);
+		RenderEnderDragonEvent renderDragonEvent = new RenderEnderDragonEvent((EnderDragon)enderdragon, (EnderDragonRenderer)((Object)this), partialTicks, poseStack, multiSourceBuffer, packedLight);
 		
 		if (MinecraftForge.EVENT_BUS.post(renderDragonEvent)) {
 			info.cancel();

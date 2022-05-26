@@ -149,7 +149,7 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 		
 		if (cap != null && cap instanceof MobPatch) {
 			if (((MobPatch<?>) cap).mobFaction.equals(this.mobFaction)) {
-				Optional<LivingEntity> opt = Optional.ofNullable(this.getAttackTarget());
+				Optional<LivingEntity> opt = Optional.ofNullable(this.getTarget());
 				return opt.map((attackTarget) -> !attackTarget.is(entityIn)).orElse(true);
 			}
 		}
@@ -158,7 +158,7 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	}
 	
 	@Override
-	public LivingEntity getAttackTarget() {
+	public LivingEntity getTarget() {
 		return this.original.getTarget();
 	}
 	
@@ -171,7 +171,7 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	
 	@Override
 	public float getAttackDirectionPitch() {
-		Entity attackTarget = this.getAttackTarget();
+		Entity attackTarget = this.getTarget();
 		if (attackTarget != null) {
 			float partialTicks = EpicFightMod.isPhysicalClient() ? Minecraft.getInstance().getFrameTime() : 1.0F;
 			Vec3 target = attackTarget.getEyePosition(partialTicks);

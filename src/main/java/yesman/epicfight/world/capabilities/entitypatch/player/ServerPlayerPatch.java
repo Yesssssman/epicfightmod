@@ -22,10 +22,10 @@ import yesman.epicfight.api.utils.game.ExtendedDamageSource;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPAddSkill;
 import yesman.epicfight.network.server.SPChangeLivingMotion;
+import yesman.epicfight.network.server.SPChangePlayerMode;
 import yesman.epicfight.network.server.SPChangePlayerYaw;
 import yesman.epicfight.network.server.SPChangeSkill;
 import yesman.epicfight.network.server.SPPlayAnimation;
-import yesman.epicfight.network.server.SPTogglePlayerMode;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
@@ -45,8 +45,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 		
 		for (SkillContainer skill : skillCapability.skillContainers) {
 			if (skill.getSkill() != null && skill.getSkill().getCategory().shouldSynchronized()) {
-				EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(skill.getSkill().getCategory().getIndex(), skill.getSkill().getName(),
-						SPChangeSkill.State.ENABLE), this.original);
+				EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(skill.getSkill().getCategory().getIndex(), skill.getSkill().getName(), SPChangeSkill.State.ENABLE), this.original);
 			}
 		}
 		
@@ -66,7 +65,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 		SPChangeLivingMotion msg = new SPChangeLivingMotion(this.getOriginal().getId());
 		msg.putEntries(this.getAnimator().getLivingAnimationEntrySet());
 		EpicFightNetworkManager.sendToPlayer(msg, trackingPlayer);
-		EpicFightNetworkManager.sendToPlayer(new SPTogglePlayerMode(this.getOriginal().getId(), this.isBattleMode()), trackingPlayer);
+		EpicFightNetworkManager.sendToPlayer(new SPChangePlayerMode(this.getOriginal().getId(), this.playerMode), trackingPlayer);
 	}
 	
 	@Override
@@ -92,7 +91,6 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
-		;
 	}
 	
 	@Override
@@ -109,6 +107,8 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 				fromCap.getAttributeModifiers(EquipmentSlot.MAINHAND, this).get(EpicFightAttributes.ARMOR_NEGATION.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get())::removeModifier);
 				fromCap.getAttributeModifiers(EquipmentSlot.MAINHAND, this).get(EpicFightAttributes.IMPACT.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_IMPACT.get())::removeModifier);
 				fromCap.getAttributeModifiers(EquipmentSlot.MAINHAND, this).get(EpicFightAttributes.MAX_STRIKES.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_MAX_STRIKES.get())::removeModifier);
+				fromCap.getAttributeModifiers(EquipmentSlot.MAINHAND, this).get(Attributes.ATTACK_DAMAGE).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get())::removeModifier);
+				fromCap.getAttributeModifiers(EquipmentSlot.MAINHAND, this).get(Attributes.ATTACK_SPEED).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get())::removeModifier);
 			}
 			
 			if (!to.isEmpty()) {
@@ -119,6 +119,8 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 				toCap.getAttributeModifiers(EquipmentSlot.MAINHAND, this).get(EpicFightAttributes.ARMOR_NEGATION.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get())::addTransientModifier);
 				toCap.getAttributeModifiers(EquipmentSlot.MAINHAND, this).get(EpicFightAttributes.IMPACT.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_IMPACT.get())::addTransientModifier);
 				toCap.getAttributeModifiers(EquipmentSlot.MAINHAND, this).get(EpicFightAttributes.MAX_STRIKES.get()).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_MAX_STRIKES.get())::addTransientModifier);
+				toCap.getAttributeModifiers(EquipmentSlot.MAINHAND, this).get(Attributes.ATTACK_DAMAGE).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get())::addTransientModifier);
+				toCap.getAttributeModifiers(EquipmentSlot.MAINHAND, this).get(Attributes.ATTACK_SPEED).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get())::addTransientModifier);
 			}
 		}
 		
@@ -178,12 +180,18 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 		}
 	}
 	
+	@Override
+	public void toMode(PlayerMode playerMode) {
+		super.toMode(playerMode);
+		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(new SPChangePlayerMode(this.original.getId(), playerMode), this.original);
+	}
+	
 	public void setAttackTarget(LivingEntity entity) {
 		this.attackTarget = entity;
 	}
 	
 	@Override
-	public LivingEntity getAttackTarget() {
+	public LivingEntity getTarget() {
 		return this.attackTarget;
 	}
 }

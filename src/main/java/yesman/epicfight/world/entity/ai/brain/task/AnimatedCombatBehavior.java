@@ -28,12 +28,12 @@ public class AnimatedCombatBehavior<T extends MobPatch<?>> extends Behavior<Mob>
 	
 	@Override
 	protected boolean checkExtraStartConditions(ServerLevel levelIn, Mob entityIn) {
-		return !this.isHoldingRangeWeapon(entityIn) && this.isValidTarget(this.mobpatch.getAttackTarget());
+		return !this.isHoldingRangeWeapon(entityIn) && this.isValidTarget(this.mobpatch.getTarget());
 	}
 	
 	@Override
 	protected boolean canStillUse(ServerLevel levelIn, Mob entityIn, long gameTimeIn) {
-		return this.checkExtraStartConditions(levelIn, entityIn) && BehaviorUtils.canSee(entityIn, this.mobpatch.getAttackTarget()) && !this.mobpatch.getEntityState().hurt();
+		return this.checkExtraStartConditions(levelIn, entityIn) && BehaviorUtils.canSee(entityIn, this.mobpatch.getTarget()) && !this.mobpatch.getEntityState().hurt();
 	}
 	
 	@Override

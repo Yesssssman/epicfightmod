@@ -41,7 +41,7 @@ public class SkillEditScreen extends Screen {
 		
 		for (SkillContainer skillContainer : this.skills.skillContainers) {
 			Skill skill = skillContainer.getSkill();
-			if (skill != null && skill.getCategory().modifiable()) {
+			if (skill != null && skill.getCategory().learnable()) {
 				CategoryButton categoryButton = new CategoryButton(i, j, 18, 18, skillContainer.getSkill(), (button) -> {
 					for (Button shownButton : this.learnedSkillButtons) {
 						this.children().remove(shownButton);

@@ -413,7 +413,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 			WitherPatch.this.setGhost(true);
 			List<LivingEntity> nearbyEnemies = this.getNearbyTargets();
 			this.ghostSummonCount = 0;
-			this.summonInverval = 40;
+			this.summonInverval = 25;
 			this.maxGhostSpawn = Mth.clamp(nearbyEnemies.size() / 2, 2, 4);
 		}
 		
@@ -434,7 +434,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 				}
 				
 				this.ghostSummonCount++;
-				this.summonInverval = (this.ghostSummonCount < this.maxGhostSpawn) ? 50 : 70;
+				this.summonInverval = (this.ghostSummonCount < this.maxGhostSpawn) ? 25 : 35;
 				
 				if (this.ghostSummonCount == this.maxGhostSpawn) {
 					LivingEntity target = WitherPatch.this.original.getTarget();
@@ -450,7 +450,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 		
 		@Override
 		public void stop() {
-			this.cooldown = 600;
+			this.cooldown = 300;
 			
 			if (WitherPatch.this.original.getTarget() != null) {
 				WitherPatch.this.playSound(SoundEvents.WITHER_AMBIENT, -0.1F, 0.1F);

@@ -70,9 +70,9 @@ public class AttackAnimation extends ActionAnimation {
 		super(convertTime, path, model);
 		
 		this.addProperty(ActionAnimationProperty.COORD_SET_BEGIN, (self, entitypatch, transformSheet) -> {
-			LivingEntity attackTarget = entitypatch.getAttackTarget();
+			LivingEntity attackTarget = entitypatch.getTarget();
 			
-			if (!self.getProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE).orElse(false) && attackTarget != null) {
+			if (!self.getRealAnimation().getProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE).orElse(false) && attackTarget != null) {
 				TransformSheet transform = self.getTransfroms().get("Root").copyAll();
 				Keyframe[] keyframes = transform.getKeyframes();
 				int startFrame = 0;
@@ -96,9 +96,9 @@ public class AttackAnimation extends ActionAnimation {
 		});
 		
 		this.addProperty(ActionAnimationProperty.COORD_SET_TICK, (self, entitypatch, transformSheet) -> {
-			LivingEntity attackTarget = entitypatch.getAttackTarget();
+			LivingEntity attackTarget = entitypatch.getTarget();
 			
-			if (!self.getProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE).orElse(false) && attackTarget != null) {
+			if (!self.getRealAnimation().getProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE).orElse(false) && attackTarget != null) {
 				TransformSheet transform = self.getTransfroms().get("Root").copyAll();
 				Keyframe[] keyframes = transform.getKeyframes();
 				int startFrame = 0;
@@ -107,7 +107,6 @@ public class AttackAnimation extends ActionAnimation {
 				Vec3 pos = entitypatch.getOriginal().getEyePosition();
 				Vec3 targetpos = attackTarget.position();
 				float horizontalDistance = Math.max((float)targetpos.subtract(pos).horizontalDistance() - (attackTarget.getBbWidth() + entitypatch.getOriginal().getBbWidth()) * 0.75F, 0.0F);
-				
 				Vec3f worldPosition = new Vec3f(keyLast.x, 0.0F, -horizontalDistance);
 				float scale = Math.min(worldPosition.length() / keyLast.length(), 2.0F);
 				
@@ -142,7 +141,7 @@ public class AttackAnimation extends ActionAnimation {
 				if (entitypatch instanceof MobPatch) {
 					((Mob)entitypatch.getOriginal()).getNavigation().stop();
 					entitypatch.getOriginal().attackAnim = 2;
-					LivingEntity target = entitypatch.getAttackTarget();
+					LivingEntity target = entitypatch.getTarget();
 					
 					if (target != null) {
 						entitypatch.rotateTo(target, entitypatch.getYRotLimit(), false);
@@ -153,6 +152,7 @@ public class AttackAnimation extends ActionAnimation {
 					entitypatch.playSound(this.getSwingSound(entitypatch, phase), 0.0F, 0.0F);
 					entitypatch.currentlyAttackedEntity.clear();
 				}
+				
 				this.doAttack(entitypatch, prevElapsedTime, elapsedTime, prevState, state, phase);
 			}
 		}
@@ -333,11 +333,11 @@ public class AttackAnimation extends ActionAnimation {
 		Pose pose = super.getPoseByTime(entitypatch, time, partialTicks);
 		this.getProperty(AttackAnimationProperty.ROTATE_X).ifPresent((flag) -> {
 			float pitch = entitypatch.getAttackDirectionPitch();
-			JointTransform chest = pose.getTransformByName("Chest");
+			JointTransform chest = pose.getOrDefaultTransform("Chest");
 			chest.frontResult(JointTransform.getRotation(Vector3f.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginFront);
 			
 			if (entitypatch instanceof PlayerPatch) {
-				JointTransform head = pose.getTransformByName("Head");
+				JointTransform head = pose.getOrDefaultTransform("Head");
 				MathUtils.mulQuaternion(Vector3f.XP.rotationDegrees(pitch), head.rotation(), head.rotation());
 			}
 		});
@@ -347,9 +347,10 @@ public class AttackAnimation extends ActionAnimation {
 	@Override
 	public float getPlaySpeed(LivingEntityPatch<?> entitypatch) {
 		if (entitypatch instanceof PlayerPatch<?>) {
+			Phase phase = this.getPhaseByTime(entitypatch.getAnimator().getPlayerFor(this).getElapsedTime());
 			float speedFactor = this.getProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR).orElse(1.0F);
 			Optional<Float> property = this.getProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED);
-			float correctedSpeed = property.map((value) -> ((PlayerPatch<?>)entitypatch).getAttackSpeed() / value).orElse(this.totalTime * ((PlayerPatch<?>)entitypatch).getAttackSpeed());
+			float correctedSpeed = property.map((value) -> ((PlayerPatch<?>)entitypatch).getAttackSpeed(phase.hand) / value).orElse(this.totalTime * ((PlayerPatch<?>)entitypatch).getAttackSpeed(phase.hand));
 			return 1.0F + (correctedSpeed - 1.0F) * speedFactor;
 		} else {
 			return 1.0F;
@@ -377,13 +378,14 @@ public class AttackAnimation extends ActionAnimation {
 	public Phase getPhaseByTime(float elapsedTime) {
 		Phase currentPhase = null;
 		
-		for(Phase phase : this.phases) {
+		for (Phase phase : this.phases) {
 			currentPhase = phase;
 			
-			if(phase.recovery > elapsedTime) {
+			if (phase.recovery > elapsedTime) {
 				break;
 			}
 		}
+		
 		return currentPhase;
 	}
 	

@@ -19,8 +19,8 @@ import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
-import yesman.epicfight.api.animation.property.Property.ActionAnimationProperty;
 import yesman.epicfight.api.animation.property.Property.ActionAnimationCoordSetter;
+import yesman.epicfight.api.animation.property.Property.ActionAnimationProperty;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -57,6 +57,22 @@ public class ActionAnimation extends MainFrameAnimation {
 		ActionAnimationCoordSetter actionCoordSetter = this.getProperty(ActionAnimationProperty.COORD_SET_BEGIN).orElse((self, entitypatch$2, transformSheet) -> {
 			transformSheet.readFrom(self.jointTransforms.get("Root"));
 		});
+		
+		LivingEntity livingentity = entitypatch.getOriginal();
+		
+		if (entitypatch.isLogicalClient()) {
+			if (!(livingentity instanceof LocalPlayer)) {
+				actionCoordSetter = (self, entitypatch$2, transformSheet) -> {
+					transformSheet.readFrom(self.jointTransforms.get("Root"));
+				};
+			}
+		} else {
+			if ((livingentity instanceof ServerPlayer)) {
+				actionCoordSetter = (self, entitypatch$2, transformSheet) -> {
+					transformSheet.readFrom(self.jointTransforms.get("Root"));
+				};
+			}
+		}
 		
 		entitypatch.getAnimator().getPlayerFor(this).setActionAnimationCoord(this, entitypatch, actionCoordSetter);
 	}
@@ -140,7 +156,7 @@ public class ActionAnimation extends MainFrameAnimation {
 	
 	@Override
 	protected void modifyPose(Pose pose, LivingEntityPatch<?> entitypatch, float time) {
-		JointTransform jt = pose.getTransformByName("Root");
+		JointTransform jt = pose.getOrDefaultTransform("Root");
 		Vec3f jointPosition = jt.translation();
 		OpenMatrix4f toRootTransformApplied = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature().searchJointByName("Root").getLocalTrasnform().removeTranslation();
 		OpenMatrix4f toOrigin = OpenMatrix4f.invert(toRootTransformApplied, null);
@@ -169,7 +185,7 @@ public class ActionAnimation extends MainFrameAnimation {
 		dest.setNextAnimation(this);
 		Map<String, JointTransform> data1 = pose1.getJointTransformData();
 		Pose pose = this.getPoseByTime(entitypatch, nextStart, 1.0F);
-		JointTransform jt = pose.getTransformByName("Root");
+		JointTransform jt = pose.getOrDefaultTransform("Root");
 		Vec3f withPosition = entitypatch.getAnimator().getPlayerFor(this).getActionAnimationCoord().getInterpolatedTranslation(nextStart);
 		
 		jt.translation().set(withPosition);

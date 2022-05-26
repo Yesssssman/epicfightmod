@@ -3,6 +3,8 @@ package yesman.epicfight.api.utils.math;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
+import yesman.epicfight.main.EpicFightMod;
+
 public class Vec3f extends Vec2f {
 	public static final Vec3f X_AXIS = new Vec3f(1.0F, 0.0F, 0.0F);
 	public static final Vec3f Y_AXIS = new Vec3f(0.0F, 1.0F, 0.0F);
@@ -135,7 +137,15 @@ public class Vec3f extends Vec2f {
 	
 	public static Quaternion getRotatorBetween(Vec3f a, Vec3f b) {
 		Vec3f axis = Vec3f.cross(a, b, null).normalise();
-		float radian = (float) Math.acos(Math.min(1.0F, Vec3f.dot(a, b) / (a.length() * b.length())));
+		float dotDivLength = Vec3f.dot(a, b) / (a.length() * b.length());
+		
+		if (!Float.isFinite(dotDivLength)) {
+			EpicFightMod.LOGGER.info("Warning : given vector's length is zero");
+			(new IllegalArgumentException()).printStackTrace();
+			dotDivLength = 1.0F;
+		}
+		
+		float radian = (float)Math.acos(Math.min(1.0F, dotDivLength));
 		return new Quaternion(axis.toMojangVector(), radian, false);
 	}
 	

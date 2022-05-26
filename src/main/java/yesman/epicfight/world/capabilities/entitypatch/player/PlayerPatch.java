@@ -44,7 +44,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	protected float yaw;
 	protected PlayerEventListener eventListeners;
 	protected int tickSinceLastAction;
-	protected boolean isBattleMode;
+	protected PlayerMode playerMode = PlayerMode.MINING;
 	
 	public PlayerPatch() {
 		this.eventListeners = new PlayerEventListener(this);
@@ -126,14 +126,6 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		this.yaw = amount;
 	}
 	
-	public void setBattleMode(boolean isBattleMode) {
-		this.isBattleMode = isBattleMode;
-	}
-	
-	public boolean isBattleMode() {
-		return this.isBattleMode;
-	}
-	
 	@Override
 	public void serverTick(LivingUpdateEvent event) {
 		super.serverTick(event);
@@ -191,8 +183,8 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		return event.getAttackDamage();
 	}
 	
-	public float getAttackSpeed() {
-		return this.getAttackSpeed(this.getHoldingItemCapability(InteractionHand.MAIN_HAND), (float)this.original.getAttributeValue(Attributes.ATTACK_SPEED));
+	public float getAttackSpeed(InteractionHand hand) {
+		return this.getAttackSpeed(this.getHoldingItemCapability(hand), (float)this.original.getAttributeValue((hand == InteractionHand.MAIN_HAND) ? Attributes.ATTACK_SPEED : EpicFightAttributes.OFFHAND_ATTACK_SPEED.get()));
 	}
 	
 	public float getAttackSpeed(CapabilityItem itemCapability, float baseSpeed) {
@@ -236,6 +228,40 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		;
 	}
 	
+	public void toggleMode() {
+		switch (this.playerMode) {
+		case MINING:
+			this.toBattleMode();
+			break;
+		case BATTLE:
+			this.toMiningMode();
+			break;
+		}
+	}
+	
+	public void toMode(PlayerMode playerMode) {
+		switch (playerMode) {
+		case MINING:
+			this.toMiningMode();
+			break;
+		case BATTLE:
+			this.toBattleMode();
+			break;
+		}
+	}
+	
+	public void toMiningMode() {
+		this.playerMode = PlayerMode.MINING;
+	}
+	
+	public void toBattleMode() {
+		this.playerMode = PlayerMode.BATTLE;
+	}
+	
+	public boolean isBattleMode() {
+		return this.playerMode == PlayerMode.BATTLE;
+	}
+	
 	@Override
 	public StaticAnimation getHitAnimation(StunType stunType) {
 		if (this.original.getVehicle() != null) {
@@ -263,5 +289,9 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	@Override
 	public <M extends Model> M getEntityModel(Models<M> modelDB) {
 		return modelDB.biped;
+	}
+	
+	public static enum PlayerMode {
+		MINING, BATTLE
 	}
 }

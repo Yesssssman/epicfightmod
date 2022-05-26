@@ -19,6 +19,8 @@ public class ConfigManager {
 	public static final ForgeConfigSpec.BooleanValue HAS_FALL_ANIMATION;
 	public static final ForgeConfigSpec.BooleanValue DISABLE_ENTITY_UI;
 	public static final ForgeConfigSpec.IntValue WEIGHT_PENALTY;
+	public static final ForgeConfigSpec.BooleanValue SKILLBOOK_MOB_LOOT;
+	public static final ForgeConfigSpec.BooleanValue SKILLBOOK_CHEST_LOOT;
 	
 	static {
 		CommentedFileConfig file = CommentedFileConfig.builder(new File(FMLPaths.CONFIGDIR.get().resolve(EpicFightMod.CONFIG_FILE_PATH).toString())).sync().autosave().writingMode(WritingMode.REPLACE).build();
@@ -31,6 +33,8 @@ public class ConfigManager {
 		HAS_FALL_ANIMATION = server.define("default_gamerule.hasFallAnimation", true);
 		DISABLE_ENTITY_UI = server.define("default_gamerule.disapleEntityUI", false);
 		WEIGHT_PENALTY = server.defineInRange("default_gamerule.weightPenalty", 100, 0, 100);
+		SKILLBOOK_MOB_LOOT = server.define("loot.skill_book_mob_loot", true);
+		SKILLBOOK_CHEST_LOOT = server.define("loot.skill_book_chest_loot", true);
 		
 		INGAME_CONFIG = new ClientConfig(client);
 		CLIENT_CONFIG = client.build();

@@ -53,15 +53,14 @@ public class SkillBookItem extends Item {
 	@OnlyIn(Dist.CLIENT)
 	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
 		if (stack.getTag() != null && stack.getTag().contains("skill")) {
-			tooltip.add(new TranslatableComponent(String.format("skill.%s.%s", EpicFightMod.MODID, stack.getTag().get("skill").getAsString()))
-				.withStyle(ChatFormatting.DARK_GRAY));
+			tooltip.add(new TranslatableComponent(String.format("skill.%s.%s", EpicFightMod.MODID, stack.getTag().get("skill").getAsString())).withStyle(ChatFormatting.DARK_GRAY));
 		}
 	}
 	
 	@Override
 	public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
 		if (group == EpicFightItemGroup.ITEMS) {
-			Skills.getModifiableSkillCollection().forEach((skill) -> {
+			Skills.getLearnableSkillCollection().forEach((skill) -> {
 				ItemStack stack = new ItemStack(this);
 				setContainingSkill(skill, stack);
 				items.add(stack);

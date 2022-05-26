@@ -87,10 +87,8 @@ public class CapabilityItem {
 	}
 	
 	public void modifyItemTooltip(ItemStack itemstack, List<Component> itemTooltip, LivingEntityPatch<?> entitypatch) {
-		if (this.isTwoHanded()) {
+		if (!this.getStyle(entitypatch).canUseOffhand()) {
 			itemTooltip.add(1, new TextComponent(" ").append(new TranslatableComponent("attribute.name." + EpicFightMod.MODID + ".twohanded").withStyle(ChatFormatting.DARK_GRAY)));
-		} else if(this.isMainhandOnly()) {
-			itemTooltip.add(1, new TextComponent(" ").append(new TranslatableComponent("attribute.name." + EpicFightMod.MODID + ".mainhand_only").withStyle(ChatFormatting.DARK_GRAY)));
 		}
 		
 		Map<Attribute, AttributeModifier> attribute = this.getDamageAttributesInCondition(this.getStyle(entitypatch));
@@ -240,27 +238,11 @@ public class CapabilityItem {
 	}
 	
 	public Style getStyle(LivingEntityPatch<?> entitypatch) {
-		if (this.isTwoHanded()) {
-			return Style.TWO_HAND;
-		} else {
-			if (this.isMainhandOnly()) {
-				return entitypatch.getOriginal().getOffhandItem().isEmpty() ? Style.TWO_HAND : Style.ONE_HAND;
-			} else {
-				return Style.ONE_HAND;
-			}
-		}
+		return this.canBePlacedOffhand() ? Style.ONE_HAND : Style.TWO_HAND;
 	}
 	
-	public final boolean canUsedInOffhand() {
-		return this.getHoldOption() == HoldingOption.GENERAL ? true : false;
-	}
-
-	public final boolean isTwoHanded() {
-		return this.getHoldOption() == HoldingOption.TWO_HANDED;
-	}
-	
-	public final boolean isMainhandOnly() {
-		return this.getHoldOption() == HoldingOption.MAINHAND_ONLY;
+	public boolean canBePlacedOffhand() {
+		return true;
 	}
 	
 	public boolean isEmpty() {
@@ -271,12 +253,8 @@ public class CapabilityItem {
 		return this;
 	}
 	
-	public boolean canUseOnMount() {
-		return !this.isTwoHanded();
-	}
-	
-	public HoldingOption getHoldOption() {
-		return HoldingOption.GENERAL;
+	public boolean availableOnHorse() {
+		return this.getMountAttackMotion() != null;
 	}
 	
 	public void setConfigFileAttribute(double armorNegation1, double impact1, int maxStrikes1, double armorNegation2, double impact2, int maxStrikes2) {
@@ -284,15 +262,15 @@ public class CapabilityItem {
 		this.addStyleAttributeSimple(Style.TWO_HAND, armorNegation2, impact2, maxStrikes2);
 	}
 	
-	public boolean checkOffhandUsable(ItemStack offhandItem) {
-		return !this.isTwoHanded() && EpicFightCapabilities.getItemStackCapability(offhandItem).canUsedInOffhandAlone();
+	public boolean checkOffhandValid(LivingEntityPatch<?> entitypatch) {
+		return this.getStyle(entitypatch).canUseOffhand() && EpicFightCapabilities.getItemStackCapability(entitypatch.getOriginal().getOffhandItem()).canHoldInOffhandAlone();
 	}
 	
-	public boolean canUsedInOffhandAlone() {
+	public boolean canHoldInOffhandAlone() {
 		return true;
 	}
 	
-	public UseAnim getUseAnimation(LivingEntityPatch<?> playerpatch) {
+	public UseAnim getUseAnimation(LivingEntityPatch<?> entitypatch) {
 		return UseAnim.NONE;
 	}
 	
@@ -301,10 +279,20 @@ public class CapabilityItem {
 	}
 	
 	public enum HoldingOption {
-		TWO_HANDED, MAINHAND_ONLY, GENERAL
+		TWO_HANDED, MAINHAND_ONLY, ONE_HANDED
 	}
 	
 	public enum Style {
-		COMMON, ONE_HAND, TWO_HAND, MOUNT, AIMING, SHEATH, LIECHTENAUER
+		COMMON(true), ONE_HAND(true), TWO_HAND(false), MOUNT(true), RANGED(false), SHEATH(false), LIECHTENAUER(false);
+		
+		boolean canUseOffhand;
+		
+		Style(boolean canUseOffhand) {
+			this.canUseOffhand = canUseOffhand;
+		}
+		
+		public boolean canUseOffhand() {
+			return this.canUseOffhand;
+		}
 	}
 }

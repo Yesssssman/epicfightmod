@@ -161,9 +161,13 @@ public class EditSwitchingItemScreen extends Screen {
 			
 			@Override
 			public void render(PoseStack matrixStack, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
-				EditSwitchingItemScreen.this.itemRenderer.renderGuiItem(new ItemStack(this.item), left+4, top+1);
+				try {
+					EditSwitchingItemScreen.this.itemRenderer.renderGuiItem(new ItemStack(this.item), left + 4, top + 1);
+				} catch (Exception e) {
+				}
+				
 				Component Component = this.item.getName(ItemStack.EMPTY);
-				RegisteredItemList.this.minecraft.font.draw(matrixStack, Component, (float) (left + 30), (float) top+5, 16777215);
+				RegisteredItemList.this.minecraft.font.draw(matrixStack, Component, (float) (left + 30), (float) top + 5, 16777215);
 			}
 			
 			@Override

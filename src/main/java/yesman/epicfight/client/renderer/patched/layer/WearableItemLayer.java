@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart.Cube;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
@@ -25,38 +26,50 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.RenderProperties;
 import yesman.epicfight.api.client.model.ClientModel;
 import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.client.model.CustomModelBakery;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
-import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends HumanoidModel<E>> extends PatchedLayer<E, T, M, HumanoidArmorLayer<E, M, M>> {
-	private static final Map<ResourceLocation, ClientModel> ARMOR_MODEL_MAP = new HashMap<ResourceLocation, ClientModel>();
-	private static final Map<String, ResourceLocation> EPICFIGHT_ARMOR_LOCATION_CACHE = Maps.newHashMap();
-	private final EquipmentSlot[] slots;
+	private static final Map<ResourceLocation, ClientModel> ARMOR_MODELS = new HashMap<ResourceLocation, ClientModel>();
+	private static final Map<String, ResourceLocation> EPICFIGHT_OVERRIDING_TEXTURES = Maps.newHashMap();
 	
 	public static void clear() {
-		ARMOR_MODEL_MAP.clear();
-		EPICFIGHT_ARMOR_LOCATION_CACHE.clear();
+		ARMOR_MODELS.clear();
+		EPICFIGHT_OVERRIDING_TEXTURES.clear();
 	}
 	
-	public WearableItemLayer(EquipmentSlot... slotType) {
-		this.slots = slotType;
+	final boolean doNotRenderHelment;
+	
+	public WearableItemLayer() {
+		this(false);
+	} 
+	
+	public WearableItemLayer(boolean doNotRenderHelment) {
+		this.doNotRenderHelment = doNotRenderHelment;
 	}
 	
 	private void renderArmor(PoseStack matStack, MultiBufferSource multiBufferSource, int packedLightIn, boolean hasEffect, ClientModel model, float r, float g, float b, ResourceLocation armorTexture, OpenMatrix4f[] poses) {
-		VertexConsumer ivertexbuilder = EpicFightRenderTypes.getArmorVertexBuilder(multiBufferSource, EpicFightRenderTypes.animatedArmor(armorTexture), hasEffect);
-		model.drawAnimatedModel(matStack, ivertexbuilder, packedLightIn, r, g, b, 1.0F, OverlayTexture.NO_OVERLAY, poses);
+		VertexConsumer vertexConsumer = EpicFightRenderTypes.getArmorVertexBuilder(multiBufferSource, EpicFightRenderTypes.animatedArmor(armorTexture, model.getProperties().isTransparent()), hasEffect);
+		model.drawAnimatedModel(matStack, vertexConsumer, packedLightIn, r, g, b, 1.0F, OverlayTexture.NO_OVERLAY, poses);
 	}
 	
 	@Override
 	public void renderLayer(T entitypatch, E entityliving, HumanoidArmorLayer<E, M, M> originalRenderer, PoseStack poseStack, MultiBufferSource buf, int packedLightIn, OpenMatrix4f[] poses, float netYawHead, float pitchHead, float partialTicks) {
-		for (EquipmentSlot slot : this.slots) {
+		for (EquipmentSlot slot : EquipmentSlot.values()) {
+			if (slot.getType() != EquipmentSlot.Type.ARMOR) {
+				continue;
+			}
+			
+			if (slot == EquipmentSlot.HEAD && this.doNotRenderHelment) {
+				continue;
+			}
+			
 			ItemStack stack = entityliving.getItemBySlot(slot);
 			Item item = stack.getItem();
 			
@@ -92,6 +105,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				} else {
 					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, model, 1.0F, 1.0F, 1.0F, this.getArmorTexture(stack, entityliving, slot, null), poses);
 				}
+				
 				poseStack.popPose();
 			}
 		}
@@ -99,21 +113,30 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 	
 	private ClientModel getArmorModel(HumanoidArmorLayer<E, M, M> originalRenderer, E entityliving, ArmorItem armorItem, ItemStack stack, EquipmentSlot slot) {
 		ResourceLocation registryName = armorItem.getRegistryName();
+		boolean debuggingMode = ClientEngine.instance.isArmorModelDebuggingMode();
 		
-		if (ARMOR_MODEL_MAP.containsKey(registryName)) {
-			return ARMOR_MODEL_MAP.get(registryName);
+		if (ARMOR_MODELS.containsKey(registryName) && !debuggingMode) {
+			return ARMOR_MODELS.get(registryName);
 		} else {
-			HumanoidModel<?> customModel = RenderProperties.get(stack).getArmorModel(entityliving, stack, slot, originalRenderer.getArmorModel(slot));
-			ClientModel model;
+			ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
+			ResourceLocation rl = new ResourceLocation(armorItem.getRegistryName().getNamespace(), "armor/" + armorItem.getRegistryName().getPath());
+			ClientModel model = new ClientModel(rl);
 			
-			if (customModel == null) {
-				model = getDefaultArmorModel(slot);
+			if (resourceManager.hasResource(model.getLocation())) {
+				model.loadMeshAndProperties(resourceManager);
 			} else {
-				EpicFightMod.LOGGER.info("baked new model for " + registryName);
-				model = CustomModelBakery.bakeBipedCustomArmorModel(customModel, armorItem, slot);
+				HumanoidModel<?> defaultModel = originalRenderer.getArmorModel(slot);
+				Model customModel = ForgeHooksClient.getArmorModel(entityliving, stack, slot, defaultModel);
+				
+				if (customModel == defaultModel || !(customModel instanceof HumanoidModel)) {
+					model = getDefaultArmorModel(slot);
+				} else {
+					model = CustomModelBakery.bakeBipedCustomArmorModel((HumanoidModel<?>)customModel, armorItem, slot, debuggingMode);
+				}
 			}
 			
-			ARMOR_MODEL_MAP.put(registryName, model);
+			ARMOR_MODELS.put(registryName, model);
+			
 			return model;
 		}
 	}
@@ -133,19 +156,19 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		s1 = ForgeHooksClient.getArmorTexture(entity, stack, s1, slot, type);
 		int idx2 = s1.lastIndexOf('/');
 		String s2 = String.format("%s/epicfight/%s", s1.substring(0, idx2), s1.substring(idx2 + 1));
-		ResourceLocation resourcelocation2 = EPICFIGHT_ARMOR_LOCATION_CACHE.get(s2);
+		ResourceLocation resourcelocation2 = EPICFIGHT_OVERRIDING_TEXTURES.get(s2);
 		
 		if (resourcelocation2 != null) {
 			return resourcelocation2;
-		} else if (!EPICFIGHT_ARMOR_LOCATION_CACHE.containsKey(s2)) {
+		} else if (!EPICFIGHT_OVERRIDING_TEXTURES.containsKey(s2)) {
 			resourcelocation2 = new ResourceLocation(s2);
 			ResourceManager rm = Minecraft.getInstance().getResourceManager();
 			
 			if (rm.hasResource(resourcelocation2)) {
-				EPICFIGHT_ARMOR_LOCATION_CACHE.put(s2, resourcelocation2);
+				EPICFIGHT_OVERRIDING_TEXTURES.put(s2, resourcelocation2);
 				return resourcelocation2;
 			} else {
-				EPICFIGHT_ARMOR_LOCATION_CACHE.put(s2, null);
+				EPICFIGHT_OVERRIDING_TEXTURES.put(s2, null);
 			}
 		}
 		

@@ -105,18 +105,14 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 		this.teleportAttacks = new EndermanTeleportMove(this, MobCombatBehaviors.ENDERMAN_TELEPORT.build(this));
 		this.rageAttacks = new AnimatedAttackGoal<>(this, MobCombatBehaviors.ENDERMAN_RAGE.build(this));
 		this.rageTargeting = new NearestAttackableTargetGoal<>(this.original, Player.class, true);
-		
 		this.original.goalSelector.addGoal(1, new TargetChasingGoal(this, this.getOriginal(), 0.75D, false));
-		this.original.goalSelector.addGoal(1, this.rageAttacks);
 		
 		if (this.isRaging()) {
 			this.original.targetSelector.addGoal(3, this.rageTargeting);
 			this.original.goalSelector.addGoal(1, this.rageAttacks);
-			this.original.goalSelector.addGoal(1, this.rageAttacks);
 		} else {
 			this.original.goalSelector.addGoal(1, this.normalAttacks);
 			this.original.goalSelector.addGoal(0, this.teleportAttacks);
-			this.original.goalSelector.addGoal(1, this.rageAttacks);
 		}
 	}
 	
@@ -306,7 +302,7 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 		
 		@Override
 		public void start() {
-			this.delayCounter = 35 + this.mob.getRandom().nextInt(10);
+			this.delayCounter = 20 + this.mob.getRandom().nextInt(5);
 			this.waitingCounter = 0;
 		}
 		

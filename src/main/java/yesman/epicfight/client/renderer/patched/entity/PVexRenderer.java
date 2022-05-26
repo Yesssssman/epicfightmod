@@ -12,7 +12,7 @@ import yesman.epicfight.world.capabilities.entitypatch.mob.VexPatch;
 @OnlyIn(Dist.CLIENT)
 public class PVexRenderer extends PatchedLivingEntityRenderer<Vex, VexPatch, VexModel> {
 	public PVexRenderer() {
-		this.layerRendererReplace.put(ItemInHandLayer.class, new PatchedItemInHandLayer<>());
+		this.addPatchedLayer(ItemInHandLayer.class, new PatchedItemInHandLayer<>());
 	}
 	
 	@Override

@@ -60,7 +60,7 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 		this.animationById.values().forEach((map) -> {
 			map.values().forEach((animation) -> {
 				animation.loadAnimation(resourceManager);
-				this.setAnimationMetadata(resourceManager, animation);
+				this.setAnimationProperties(resourceManager, animation);
 			});
 		});
 	}
@@ -70,7 +70,7 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 		if (EpicFightMod.isPhysicalClient()) {
 			this.animationById.values().forEach((map) -> {
 				map.values().forEach((animation) -> {
-					this.setAnimationMetadata(resourceManager, animation);
+					this.setAnimationProperties(resourceManager, animation);
 				});
 			});
 		}
@@ -88,7 +88,7 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 		});
 	}
 	
-	private void setAnimationMetadata(ResourceManager resourceManager, StaticAnimation animation) {
+	private void setAnimationProperties(ResourceManager resourceManager, StaticAnimation animation) {
 		if (resourceManager == null) {
 			return;
 		}

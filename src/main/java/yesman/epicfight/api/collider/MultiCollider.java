@@ -53,10 +53,9 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 				transformMatrix = Animator.getBindedJointTransformByIndex(entitypatch.getAnimator().getPose(interpolation), armature, pathIndex);
 			}
 			
-			double x = original.xo + (original.getX() - original.xo) * interpolation;
-			double y = original.yo + (original.getY() - original.yo) * interpolation;
-			double z = original.zo + (original.getZ() - original.zo) * interpolation;
-			
+			double x = original.xOld + (original.getX() - original.xOld) * interpolation;
+			double y = original.yOld + (original.getY() - original.yOld) * interpolation;
+			double z = original.zOld + (original.getZ() - original.zOld) * interpolation;
 			OpenMatrix4f mvMatrix = OpenMatrix4f.createTranslation(-(float)x, (float)y, -(float)z);
 			transformMatrix.mulFront(mvMatrix.mulBack(entitypatch.getModelMatrix(interpolation)));
 			collider.transform(transformMatrix);
@@ -80,7 +79,7 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 			boolean remove = true;
 			
 			for (T collider : colliders) {
-				if (collider.collide(entity)) {
+				if (collider.isCollide(entity)) {
 					remove = false;
 				}
 			}
@@ -97,7 +96,7 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 	}
 	
 	protected void filterHitEntities(List<Entity> entities) {
-		entities.removeIf((entity) -> !this.collide(entity));
+		entities.removeIf((entity) -> !this.isCollide(entity));
 	}
 	
 	@Override
@@ -106,7 +105,7 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 	}
 	
 	@Override
-	protected boolean collide(Entity opponent) {
+	protected boolean isCollide(Entity opponent) {
 		return false;
 	}
 }

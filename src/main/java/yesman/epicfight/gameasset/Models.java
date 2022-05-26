@@ -73,7 +73,7 @@ public abstract class Models<T extends Model> {
 		return this.models.get(location);
 	}
 	
-	public void loadArmatureData(ResourceManager resourceManager) {
+	public void loadArmatures(ResourceManager resourceManager) {
 		this.biped.loadArmatureData(resourceManager);
 		this.bipedOldTexture.loadArmatureData(this.biped.getArmature());
 		this.bipedAlex.loadArmatureData(this.biped.getArmature());

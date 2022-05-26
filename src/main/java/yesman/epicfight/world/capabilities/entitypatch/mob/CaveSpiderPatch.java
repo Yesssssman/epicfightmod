@@ -6,15 +6,14 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.monster.CaveSpider;
+import net.minecraft.world.entity.PathfinderMob;
 import yesman.epicfight.api.utils.game.ExtendedDamageSource;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
-import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 
-public class CaveSpiderPatch extends SpiderPatch<CaveSpider> {
+public class CaveSpiderPatch<T extends PathfinderMob> extends SpiderPatch<T> {
 	@Override
 	protected void initAI() {
 		super.initAI();
@@ -41,7 +40,6 @@ public class CaveSpiderPatch extends SpiderPatch<CaveSpider> {
 	
 	@Override
 	public OpenMatrix4f getModelMatrix(float partialTicks) {
-		OpenMatrix4f mat = super.getModelMatrix(partialTicks);
-		return OpenMatrix4f.scale(new Vec3f(0.7F, 0.7F, 0.7F), mat, mat);
+		return super.getModelMatrix(partialTicks).scale(0.7F, 0.7F, 0.7F);
 	}
 }

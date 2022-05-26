@@ -20,7 +20,6 @@ import yesman.epicfight.skill.KatanaPassive;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.HoldingOption;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Style;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
@@ -32,7 +31,7 @@ public class WeaponCapabilityPresets {
 			.category(WeaponCategory.AXE)
 			.hitSound(EpicFightSounds.BLADE_HIT)
 			.collider(ColliderPreset.TOOLS)
-			.newStyleCombo(Style.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH,Animations.AXE_AIRSLASH)
+			.newStyleCombo(Style.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
 			.newStyleCombo(Style.MOUNT, Animations.SWORD_MOUNT_ATTACK)
 			.specialAttack(Style.ONE_HAND, Skills.GUILLOTINE_AXE)
 			.livingMotionModifier(Style.ONE_HAND, LivingMotion.BLOCK, Animations.SWORD_GUARD)
@@ -111,7 +110,7 @@ public class WeaponCapabilityPresets {
 			.specialAttack(Style.TWO_HAND, Skills.DANCING_EDGE)
 			.livingMotionModifier(Style.ONE_HAND, LivingMotion.BLOCK, Animations.SWORD_GUARD)
 			.livingMotionModifier(Style.TWO_HAND, LivingMotion.BLOCK, Animations.SWORD_DUAL_GUARD)
-			.offhandPredicator((itemstack) -> EpicFightCapabilities.getItemStackCapability(itemstack).weaponCategory == WeaponCategory.SWORD)
+			.weaponCombinationPredicator((itemstack) -> EpicFightCapabilities.getItemStackCapability(itemstack).weaponCategory == WeaponCategory.SWORD)
 		);
 		
 		if (item instanceof TieredItem) {
@@ -125,10 +124,10 @@ public class WeaponCapabilityPresets {
 	public static final Function<Item, CapabilityItem> SPEAR = (item) -> {
 		WeaponCapability cap = new WeaponCapability(WeaponCapability.builder()
 			.category(WeaponCategory.SPEAR)
-			.styleProvider((playerpatch) -> playerpatch.getOriginal().getOffhandItem().isEmpty() ? Style.TWO_HAND : Style.ONE_HAND)
+			.styleProvider((playerpatch) -> playerpatch.getHoldingItemCapability(InteractionHand.OFF_HAND).getWeaponCategory() == WeaponCategory.SHIELD ? Style.ONE_HAND : Style.TWO_HAND)
 			.collider(ColliderPreset.SPEAR)
 			.hitSound(EpicFightSounds.BLADE_HIT)
-			.holdingOption(HoldingOption.MAINHAND_ONLY)
+			.canBePlacedOffhand(false)
 			.newStyleCombo(Style.ONE_HAND, Animations.SPEAR_ONEHAND_AUTO, Animations.SPEAR_DASH, Animations.SPEAR_ONEHAND_AIR_SLASH)
 			.newStyleCombo(Style.TWO_HAND, Animations.SPEAR_TWOHAND_AUTO_1, Animations.SPEAR_TWOHAND_AUTO_2, Animations.SPEAR_DASH, Animations.SPEAR_TWOHAND_AIR_SLASH)
 			.newStyleCombo(Style.MOUNT, Animations.SPEAR_MOUNT_ATTACK)
@@ -151,7 +150,7 @@ public class WeaponCapabilityPresets {
 			.collider(ColliderPreset.GREATSWORD)
 			.swingSound(EpicFightSounds.WHOOSH_BIG)
 			.hitSound(EpicFightSounds.BLADE_HIT)
-			.holdingOption(HoldingOption.TWO_HANDED)
+			.canBePlacedOffhand(false)
 			.newStyleCombo(Style.TWO_HAND, Animations.GREATSWORD_AUTO1, Animations.GREATSWORD_AUTO2, Animations.GREATSWORD_DASH, Animations.GREATSWORD_AIR_SLASH)
 			.specialAttack(Style.TWO_HAND, Skills.GIANT_WHIRLWIND)
 			.livingMotionModifier(Style.TWO_HAND, LivingMotion.IDLE, Animations.BIPED_HOLD_GREATSWORD)
@@ -183,7 +182,7 @@ public class WeaponCapabilityPresets {
 			.passiveSkill(Skills.KATANA_PASSIVE)
 			.hitSound(EpicFightSounds.BLADE_HIT)
 			.collider(ColliderPreset.KATANA)
-			.holdingOption(HoldingOption.TWO_HANDED)
+			.canBePlacedOffhand(false)
 			.newStyleCombo(Style.SHEATH, Animations.KATANA_SHEATHING_AUTO, Animations.KATANA_SHEATHING_DASH, Animations.KATANA_SHEATH_AIR_SLASH)
 			.newStyleCombo(Style.TWO_HAND, Animations.KATANA_AUTO_1, Animations.KATANA_AUTO_2, Animations.KATANA_AUTO_3, Animations.SWORD_DASH, Animations.KATANA_AIR_SLASH)
 			.newStyleCombo(Style.MOUNT, Animations.SWORD_MOUNT_ATTACK)
@@ -217,7 +216,7 @@ public class WeaponCapabilityPresets {
 			.styleProvider((playerpatch) -> Style.TWO_HAND)
 			.collider(ColliderPreset.KATANA)
 			.hitSound(EpicFightSounds.BLADE_HIT)
-			.holdingOption(HoldingOption.TWO_HANDED)
+			.canBePlacedOffhand(false)
 			.newStyleCombo(Style.TWO_HAND, Animations.LONGSWORD_AUTO1, Animations.LONGSWORD_AUTO2, Animations.LONGSWORD_AUTO3, Animations.TACHI_DASH, Animations.LONGSWORD_AIR_SLASH)
 			.newStyleCombo(Style.MOUNT, Animations.SWORD_MOUNT_ATTACK)
 			.specialAttack(Style.TWO_HAND, Skills.LETHAL_SLICING)
@@ -248,7 +247,7 @@ public class WeaponCapabilityPresets {
 			})
 			.hitSound(EpicFightSounds.BLADE_HIT)
 			.collider(ColliderPreset.LONGSWORD)
-			.holdingOption(HoldingOption.TWO_HANDED)
+			.canBePlacedOffhand(false)
 			.newStyleCombo(Style.TWO_HAND, Animations.LONGSWORD_AUTO1, Animations.LONGSWORD_AUTO2, Animations.LONGSWORD_AUTO3, Animations.LONGSWORD_DASH, Animations.LONGSWORD_AIR_SLASH)
 			.newStyleCombo(Style.LIECHTENAUER, Animations.LONGSWORD_AUTO1, Animations.LONGSWORD_AUTO2, Animations.LONGSWORD_AUTO3, Animations.LONGSWORD_DASH, Animations.LONGSWORD_AIR_SLASH)
 			.newStyleCombo(Style.MOUNT, Animations.SWORD_MOUNT_ATTACK)
@@ -283,7 +282,7 @@ public class WeaponCapabilityPresets {
 			.styleProvider((playerpatch) -> playerpatch.getHoldingItemCapability(InteractionHand.OFF_HAND).getWeaponCategory() == WeaponCategory.DAGGER ? Style.TWO_HAND : Style.ONE_HAND)
 			.hitSound(EpicFightSounds.BLADE_HIT)
 			.collider(ColliderPreset.DAGGER)
-			.offhandPredicator((itemstack) -> EpicFightCapabilities.getItemStackCapability(itemstack).weaponCategory == WeaponCategory.DAGGER)
+			.weaponCombinationPredicator((itemstack) -> EpicFightCapabilities.getItemStackCapability(itemstack).weaponCategory == WeaponCategory.DAGGER)
 			.newStyleCombo(Style.ONE_HAND, Animations.DAGGER_AUTO_1, Animations.DAGGER_AUTO_2, Animations.DAGGER_AUTO_3, Animations.SWORD_DASH, Animations.DAGGER_AIR_SLASH)
 			.newStyleCombo(Style.TWO_HAND, Animations.DAGGER_DUAL_AUTO_1, Animations.DAGGER_DUAL_AUTO_2, Animations.DAGGER_DUAL_AUTO_3, Animations.DAGGER_DUAL_AUTO_4, Animations.DAGGER_DUAL_DASH, Animations.DAGGER_DUAL_AIR_SLASH)
 			.newStyleCombo(Style.MOUNT, Animations.SWORD_MOUNT_ATTACK)

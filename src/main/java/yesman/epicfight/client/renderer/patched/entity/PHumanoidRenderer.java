@@ -5,7 +5,6 @@ import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.ElytraLayer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -21,14 +20,10 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 @OnlyIn(Dist.CLIENT)
 public class PHumanoidRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends HumanoidModel<E>> extends PatchedLivingEntityRenderer<E, T, M> {
 	public PHumanoidRenderer() {
-		this(EquipmentSlot.HEAD, EquipmentSlot.CHEST, EquipmentSlot.LEGS, EquipmentSlot.FEET);
-	}
-	
-	public PHumanoidRenderer(EquipmentSlot... renderSlots) {
-		this.layerRendererReplace.put(ElytraLayer.class, new PatchedElytraLayer<>());
-		this.layerRendererReplace.put(ItemInHandLayer.class, new PatchedItemInHandLayer<>());
-		this.layerRendererReplace.put(HumanoidArmorLayer.class, new WearableItemLayer<>(renderSlots));
-		this.layerRendererReplace.put(CustomHeadLayer.class, new PatchedHeadLayer<>());
+		this.addPatchedLayer(ElytraLayer.class, new PatchedElytraLayer<>());
+		this.addPatchedLayer(ItemInHandLayer.class, new PatchedItemInHandLayer<>());
+		this.addPatchedLayer(HumanoidArmorLayer.class, new WearableItemLayer<>());
+		this.addPatchedLayer(CustomHeadLayer.class, new PatchedHeadLayer<>());
 	}
 	
 	@Override

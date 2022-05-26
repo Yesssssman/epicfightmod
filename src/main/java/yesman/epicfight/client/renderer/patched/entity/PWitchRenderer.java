@@ -12,7 +12,7 @@ import yesman.epicfight.world.capabilities.entitypatch.mob.WitchPatch;
 @OnlyIn(Dist.CLIENT)
 public class PWitchRenderer extends PatchedLivingEntityRenderer<Witch, WitchPatch, WitchModel<Witch>> {
 	public PWitchRenderer() {
-		this.layerRendererReplace.put(WitchItemLayer.class, new PatchedItemInHandLayer<>());
+		this.addPatchedLayer(WitchItemLayer.class, new PatchedItemInHandLayer<>());
 	}
 	
 	@Override

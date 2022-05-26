@@ -57,7 +57,7 @@ public class HitEntitySet {
 			for (Entity entity : list) {
 				double distance = attacker.getOriginal().distanceToSqr(entity);
 				int index = 0;
-				if (entity.equals(attacker.getAttackTarget())) {
+				if (entity.equals(attacker.getTarget())) {
 					hitEntites.add(0, entity);
 					distanceToAttacker.add(0, 0.0D);
 					continue Outer;

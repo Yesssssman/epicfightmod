@@ -812,7 +812,7 @@ public class Animations {
 				IKSetter.make("Leg_Back_R1", "Leg_Back_R3", null, Pair.of(0, 5), 0.1344F, 0, new boolean[] {true, true, true, true, true})
 		}).addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.65F, (entitypatch) -> {
 			LivingEntity original = entitypatch.getOriginal();
-			Entity target = entitypatch.getAttackTarget();
+			Entity target = entitypatch.getTarget();
             Vec3 pos = original.position();
             Vec3 toTarget = target.position().subtract(original.position()).normalize().scale(original.getBbWidth() * 0.5D);
             
@@ -947,6 +947,24 @@ public class Animations {
 		VEX_CHARGE = new AttackAnimation(0.11F, 0.3F, 0.3F, 0.5F, 1.2F, ColliderPreset.VEX_CHARGE, "Root", "vex/charge", vex)
 				.addProperty(AttackPhaseProperty.SOURCE_LOCATION_PROVIDER, (entitypatch) -> entitypatch.getLastAttackPosition())
 				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
+				.addProperty(ActionAnimationProperty.COORD_SET_BEGIN, (self, entitypatch, transformSheet) -> {
+					TransformSheet transform = self.getTransfroms().get("Root").copyAll();
+					Keyframe[] keyframes = transform.getKeyframes();
+					int startFrame = 0;
+					int endFrame = 6;
+					Vec3 pos = entitypatch.getOriginal().position();
+					Vec3 targetpos = entitypatch.getTarget().position();
+					float verticalDistance = (float) (targetpos.y - pos.y);
+					Quaternion rotator = Vec3f.getRotatorBetween(new Vec3f(0.0F, verticalDistance, -(float)targetpos.subtract(pos).horizontalDistance()), new Vec3f(0.0F, 0.0F, -1.0F));
+					
+					for (int i = startFrame; i <= endFrame; i++) {
+						Vec3f translation = keyframes[i].transform().translation();
+						OpenMatrix4f.transform3v(OpenMatrix4f.fromQuaternion(rotator), translation, translation);
+					}
+					
+					transformSheet.readFrom(transform);
+				})
+				.addProperty(ActionAnimationProperty.COORD_SET_TICK, (self, entitypatch, transformSheet) -> {})
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true)
 				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {
 					Event.create(0.0F, (entitypatch) -> entitypatch.setLastAttackPosition(), Side.SERVER)
@@ -973,7 +991,7 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true)
 				.addProperty(ActionAnimationProperty.COORD_SET_BEGIN, (self, entitypatch, transformSheet) -> {
-					if (entitypatch instanceof WitherPatch && !entitypatch.isLogicalClient() && ((WitherPatch)entitypatch).getOriginal().getAlternativeTarget(0) > 0) {
+					if (entitypatch instanceof WitherPatch && ((WitherPatch)entitypatch).getOriginal().getAlternativeTarget(0) > 0) {
 						WitherPatch witherpatch = (WitherPatch)entitypatch;
 						TransformSheet transform = self.getTransfroms().get("Root").copyAll();
 						Keyframe[] keyframes = transform.getKeyframes();
@@ -1000,6 +1018,8 @@ public class Animations {
 					} else {
 						transformSheet.readFrom(self.getTransfroms().get("Root").copyAll());
 					}
+				}).addProperty(ActionAnimationProperty.COORD_SET_TICK, (self, entitypatch, transformSheet) -> {
+					
 				}).addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.4F, (entitypatch) -> {
 						if (entitypatch instanceof WitherPatch) {
 							((WitherPatch)entitypatch).startCharging();
@@ -1187,9 +1207,9 @@ public class Animations {
 				.addProperty(AttackPhaseProperty.DAMAGE, ValueCorrector.setter(10.0F))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN);
 		
-		ZOMBIE_ATTACK1 = new AttackAnimation(0.1F, 0.3F, 0.35F, 0.55F, 0.85F, ColliderPreset.FIST, "Tool_R", "zombie/attack1", biped)
+		ZOMBIE_ATTACK1 = new AttackAnimation(0.1F, 0.3F, 0.4F, 0.6F, 0.85F, ColliderPreset.FIST, "Tool_R", "zombie/attack1", biped)
 				.addProperty(AttackAnimationProperty.ROTATE_X, true);
-		ZOMBIE_ATTACK2 = new AttackAnimation(0.1F, 0.3F, 0.33F, 0.55F, 0.85F, ColliderPreset.FIST, "Tool_L", "zombie/attack2", biped)
+		ZOMBIE_ATTACK2 = new AttackAnimation(0.1F, 0.3F, 0.4F, 0.6F, 0.85F, ColliderPreset.FIST, "Tool_L", "zombie/attack2", biped)
 				.addProperty(AttackAnimationProperty.ROTATE_X, true);
 		ZOMBIE_ATTACK3 = new AttackAnimation(0.1F, 0.5F, 0.5F, 0.6F, 1.15F, ColliderPreset.HEAD, "Head", "zombie/attack3", biped);
 		

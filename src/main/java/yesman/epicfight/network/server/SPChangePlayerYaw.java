@@ -33,8 +33,9 @@ public class SPChangePlayerYaw {
 	}
 	
 	public static void handle(SPChangePlayerYaw msg, Supplier<NetworkEvent.Context> ctx) {
-		ctx.get().enqueueWork(()->{
-			Entity entity = Minecraft.getInstance().player.level.getEntity(msg.entityId);
+		ctx.get().enqueueWork(() -> {
+			Minecraft mc = Minecraft.getInstance();
+			Entity entity = mc.player.level.getEntity(msg.entityId);
 			if (entity != null) {
 				PlayerPatch<?> playerpatch = (PlayerPatch<?>) entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
 				if (playerpatch != null) {

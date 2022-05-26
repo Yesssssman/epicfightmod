@@ -9,8 +9,6 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.WitherSkeleton;
 import net.minecraft.world.level.Level;
-import yesman.epicfight.world.capabilities.EpicFightCapabilities;
-import yesman.epicfight.world.capabilities.entitypatch.boss.WitherPatch;
 
 public class WitherSkeletonMinion extends WitherSkeleton {
 	private WitherBoss summoner;
@@ -25,8 +23,7 @@ public class WitherSkeletonMinion extends WitherSkeleton {
 		this.summoner = summoner;
 		
 		if (this.summoner != null && this.summoner.isAlive()) {
-			WitherPatch witherpatch = (WitherPatch)this.summoner.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
-			this.setTarget((LivingEntity)this.summoner.level.getEntity(witherpatch.getOriginal().getAlternativeTarget(0)));
+			this.setTarget((LivingEntity)this.summoner.level.getEntity(this.summoner.getAlternativeTarget(0)));
 		}
 	}
 	

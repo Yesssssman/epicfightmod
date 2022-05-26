@@ -1,7 +1,10 @@
 package yesman.epicfight.api.client.model;
 
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+
+import org.apache.commons.compress.utils.Lists;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -13,17 +16,19 @@ import yesman.epicfight.main.EpicFightMod;
 public class ClientModels extends Models<ClientModel> implements PreparableReloadListener {
 	public static final ClientModels LOGICAL_CLIENT = new ClientModels();
 	
-	/** Entity Models **/
+	/** Entities **/
 	public final ClientModel playerFirstPerson;
 	public final ClientModel playerFirstPersonAlex;
 	public final ClientModel drownedOuterLayer;
+	/** Layers **/
+	public final ClientModel endermanEye;
+	public final ClientModel spiderEye;
+	/** Armors **/
 	public final ClientModel helmet;
 	public final ClientModel chestplate;
 	public final ClientModel leggins;
 	public final ClientModel boots;
-	public final ClientModel endermanEye;
-	public final ClientModel spiderEye;
-	/** Particle Models **/
+	/** Particles **/
 	public final ClientModel forceField;
 	public final ClientModel laser;
 	
@@ -49,12 +54,13 @@ public class ClientModels extends Models<ClientModel> implements PreparableReloa
 		this.drownedOuterLayer = register(new ResourceLocation(EpicFightMod.MODID, "entity/biped_outer_layer"));
 		this.endermanEye = register(new ResourceLocation(EpicFightMod.MODID, "entity/enderman_face"));
 		this.spiderEye = register(new ResourceLocation(EpicFightMod.MODID, "entity/spider_face"));
-		this.helmet = register(new ResourceLocation(EpicFightMod.MODID, "item/armor/armor_helmet"));
-		this.chestplate = register(new ResourceLocation(EpicFightMod.MODID, "item/armor/armor_chestplate"));
-		this.leggins = register(new ResourceLocation(EpicFightMod.MODID, "item/armor/armor_leggins"));
-		this.boots = register(new ResourceLocation(EpicFightMod.MODID, "item/armor/armor_boots"));
 		this.dragon = register(new ResourceLocation(EpicFightMod.MODID, "entity/dragon"));
 		this.wither = register(new ResourceLocation(EpicFightMod.MODID, "entity/wither"));
+		
+		this.helmet = register(new ResourceLocation(EpicFightMod.MODID, "armor/helmet_default"));
+		this.chestplate = register(new ResourceLocation(EpicFightMod.MODID, "armor/chestplate_default"));
+		this.leggins = register(new ResourceLocation(EpicFightMod.MODID, "armor/leggings_default"));
+		this.boots = register(new ResourceLocation(EpicFightMod.MODID, "armor/boots_default"));
 		
 		this.forceField = register(new ResourceLocation(EpicFightMod.MODID, "particle/force_field"));
 		this.laser = register(new ResourceLocation(EpicFightMod.MODID, "particle/laser"));
@@ -63,14 +69,24 @@ public class ClientModels extends Models<ClientModel> implements PreparableReloa
 	@Override
 	public ClientModel register(ResourceLocation rl) {
 		ClientModel model = new ClientModel(rl);
-		this.models.put(rl, model);
+		this.register(rl, model);
 		return model;
 	}
 	
-	public void loadMeshData(ResourceManager resourceManager) {
-		this.models.values().forEach((model) -> {
-			model.loadMeshData(resourceManager);
+	public void register(ResourceLocation rl, ClientModel model) {
+		this.models.put(rl, model);
+	}
+	
+	public void loadModels(ResourceManager resourceManager) {
+		List<ResourceLocation> emptyResourceLocations = Lists.newArrayList();
+		
+		this.models.entrySet().forEach((entry) -> {
+			if (!entry.getValue().loadMeshAndProperties(resourceManager)) {
+				emptyResourceLocations.add(entry.getKey());
+			}
 		});
+		
+		emptyResourceLocations.forEach(this.models::remove);
 	}
 	
 	@Override
@@ -81,8 +97,8 @@ public class ClientModels extends Models<ClientModel> implements PreparableReloa
 	@Override
 	public CompletableFuture<Void> reload(PreparableReloadListener.PreparationBarrier stage, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
 		return CompletableFuture.runAsync(() -> {
-			this.loadMeshData(resourceManager);
-			this.loadArmatureData(resourceManager);
+			this.loadModels(resourceManager);
+			this.loadArmatures(resourceManager);
 		}, gameExecutor).thenCompose(stage::wait);
 	}
 }

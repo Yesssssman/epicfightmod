@@ -14,6 +14,7 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 import net.minecraftforge.common.loot.LootModifier;
+import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.gameasset.Skills;
 import yesman.epicfight.world.item.EpicFightItems;
 import yesman.epicfight.world.item.SkillBookItem;
@@ -26,7 +27,7 @@ public class SkillBookModifier extends LootModifier {
 	@Override
 	protected List<ItemStack> doApply(List<ItemStack> generatedLoot, LootContext context) {
 		Entity entity = context.getParamOrNull(LootContextParams.THIS_ENTITY);
-		if (entity instanceof Monster) {
+		if (ConfigManager.SKILLBOOK_MOB_LOOT.get() && entity instanceof Monster) {
 			Random random = new Random();
 			if (random.nextFloat() < 0.025F) {
 				ItemStack skillBook = new ItemStack(EpicFightItems.SKILLBOOK.get());

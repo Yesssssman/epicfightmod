@@ -1,7 +1,11 @@
 package yesman.epicfight.client.gui.screen;
 
+import java.io.File;
+import java.io.IOException;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -11,6 +15,7 @@ import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.client.model.CustomModelBakery;
 import yesman.epicfight.client.gui.widget.ColorSlider;
 import yesman.epicfight.client.gui.widget.RewindableButton;
 import yesman.epicfight.config.Option;
@@ -120,8 +125,21 @@ public class IngameConfigurationScreen extends Screen {
 	        this.renderTooltip(matrixStack, this.minecraft.font.split(new TranslatableComponent("gui.epicfight.auto_switching_items.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 		}));
 		
-		this.addRenderableWidget(new ColorSlider(this.width / 2 - 150, this.height / 4 + 108, 300, 20, new TranslatableComponent("gui.epicfight.aim_helper_color"), aimHelperColor.getValue(), EpicFightMod.CLIENT_INGAME_CONFIG.aimHelperColor));
+		this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 4 + 64, 160, 20, new TranslatableComponent("gui."+EpicFightMod.MODID+".export_custom_armor"),  (button) -> {
+			File resourcePackDirectory = Minecraft.getInstance().getResourcePackDirectory();
+			try {
+				CustomModelBakery.exportModels(resourcePackDirectory);
+				Util.getPlatform().openFile(resourcePackDirectory);
+			} catch (IOException e) {
+				EpicFightMod.LOGGER.info("Failed to export custom armor models");
+				e.printStackTrace();
+			}
+		}, (button, matrixStack, mouseX, mouseY) -> {
+	        this.renderTooltip(matrixStack, this.minecraft.font.split(new TranslatableComponent("gui.epicfight.export_custom_armor.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+		}));
 		
+		this.addRenderableWidget(new ColorSlider(this.width / 2 - 150, this.height / 4 + 108, 300, 20, new TranslatableComponent("gui.epicfight.aim_helper_color"), aimHelperColor.getValue(), EpicFightMod.CLIENT_INGAME_CONFIG.aimHelperColor));
+			
 		this.addRenderableWidget(new Button(this.width / 2 + 90, this.height / 4 + 150, 48, 20, CommonComponents.GUI_DONE, (button) -> {
 			EpicFightMod.CLIENT_INGAME_CONFIG.save();
 			this.onClose();
@@ -136,7 +154,7 @@ public class IngameConfigurationScreen extends Screen {
 			enableAimHelperButton.setMessage(new TranslatableComponent("gui."+EpicFightMod.MODID+".aim_helper." + (enableAimHelper.getValue() ? "on" : "off")));
 			cameraAutoSwitchButton.setMessage(new TranslatableComponent("gui."+EpicFightMod.MODID+".camera_auto_switch." + (cameraAutoSwitch.getValue() ? "on" : "off")));
 			autoPreparationButton.setMessage(new TranslatableComponent("gui."+EpicFightMod.MODID+".auto_preparation." + (autoPreparation.getValue() ? "on" : "off")));
-			offGoreButton.setMessage(new TranslatableComponent("gui."+EpicFightMod.MODID+".off_gore_effect." + (offBlood.getValue() ? "on" : "off")));
+			offGoreButton.setMessage(new TranslatableComponent("gui."+EpicFightMod.MODID+".off_blood_effect." + (offBlood.getValue() ? "on" : "off")));
 		}));
 	}
 	

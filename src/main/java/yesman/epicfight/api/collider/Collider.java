@@ -82,10 +82,10 @@ public abstract class Collider {
 		this.drawInternal(matrixStackIn, buffer, mat, flag3);
 	}
 	
-	protected abstract boolean collide(Entity opponent);
+	protected abstract boolean isCollide(Entity opponent);
 	
 	protected void filterHitEntities(List<Entity> entities) {
-		entities.removeIf((entity) -> !this.collide(entity));
+		entities.removeIf((entity) -> !this.isCollide(entity));
 	}
 	
 	protected AABB getHitboxAABB() {

@@ -5,7 +5,8 @@
 	"package": "yesman.epicfight.mixin",
 	"client": [
 		"MixinEnderDragonRenderer",
-		"MixinBufferBuilder"
+		"MixinBufferBuilder",
+		"MixinKeyboardHandler"
 	],
 	"mixins": [
 		"MixinEndCrystal",

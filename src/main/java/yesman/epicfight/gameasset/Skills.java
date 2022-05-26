@@ -2,13 +2,16 @@ package yesman.epicfight.gameasset;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import com.google.common.collect.Maps;
+
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.fml.ModLoader;
 import yesman.epicfight.api.animation.property.Property.AttackPhaseProperty;
+import yesman.epicfight.api.forgeevent.SkillRegistryEvent;
 import yesman.epicfight.api.utils.game.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.math.ExtraDamageType;
 import yesman.epicfight.api.utils.math.ValueCorrector;
@@ -41,9 +44,9 @@ import yesman.epicfight.skill.SwordmasterSkill;
 import yesman.epicfight.skill.TechnicianSkill;
 
 public class Skills {
-	private static final Map<ResourceLocation, Skill> SKILLS = new HashMap<ResourceLocation, Skill> ();
-	private static final Map<ResourceLocation, Skill> MODIFIABLE_SKILLS = new HashMap<ResourceLocation, Skill> ();
-	private static final Random RANDOM_SEED = new Random();
+	private static final Map<ResourceLocation, Skill> SKILLS = Maps.newHashMap();
+	private static final Map<ResourceLocation, Skill> LEARNABLE_SKILLS = Maps.newHashMap();
+	private static final Random RANDOM = new Random();
 	private static int LAST_PICK = 0;
 	
 	public static Skill findSkill(String skillName) {
@@ -55,13 +58,13 @@ public class Skills {
 		}
 	}
 	
-	public static Collection<Skill> getModifiableSkillCollection() {
-		return MODIFIABLE_SKILLS.values();
+	public static Collection<Skill> getLearnableSkillCollection() {
+		return LEARNABLE_SKILLS.values();
 	}
 	
 	public static String getRandomModifiableSkillName() {
-		List<Skill> values = new ArrayList<Skill>(MODIFIABLE_SKILLS.values());
-		LAST_PICK = (LAST_PICK + RANDOM_SEED.nextInt(values.size() - 1) + 1) % values.size();
+		List<Skill> values = new ArrayList<Skill>(LEARNABLE_SKILLS.values());
+		LAST_PICK = (LAST_PICK + RANDOM.nextInt(values.size() - 1) + 1) % values.size();
 		return values.get(LAST_PICK).getName();
 	}
 	
@@ -96,7 +99,7 @@ public class Skills {
 	public static Skill EVISCERATE;
 	public static Skill BLADE_RUSH;
 	
-	public static void init() {
+	public static void registerSkills() {
 		BASIC_ATTACK = registerSkill(new BasicAttack(BasicAttack.createBuilder()));
 		AIR_ATTACK = registerSkill(new AirAttack(AirAttack.createBuilder()));
 		ROLL = registerSkill(new DodgeSkill(DodgeSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "roll")).setConsumption(4.0F).setAnimations(Animations.BIPED_ROLL_FORWARD, Animations.BIPED_ROLL_BACKWARD)));
@@ -216,24 +219,26 @@ public class Skills {
 				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLADE_RUSH_FINISHER)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.BLADE_RUSH_SKILL)
 				.registerPropertiesToAnimation());
+		
+		SkillRegistryEvent skillRegistryEvent = new SkillRegistryEvent(SKILLS, LEARNABLE_SKILLS);
+		ModLoader.get().postEvent(skillRegistryEvent);
 	}
 	
-	public static Skill registerSkill(Skill skill) {
+	private static Skill registerSkill(Skill skill) {
 		registerIfAbsent(SKILLS, skill);
 		
-		if (skill.getCategory().modifiable()) {
-			registerIfAbsent(MODIFIABLE_SKILLS, skill);
+		if (skill.getCategory().learnable()) {
+			registerIfAbsent(LEARNABLE_SKILLS, skill);
 		}
 		
 		return skill;
 	}
 	
 	private static void registerIfAbsent(Map<ResourceLocation, Skill> map, Skill skill) {
-		ResourceLocation rl = new ResourceLocation(EpicFightMod.MODID, skill.getName());
-		if (map.containsKey(rl)) {
-			throw new IllegalArgumentException("Duplicated skill name " + skill.getName());
+		if (map.containsKey(skill.getRegistryName())) {
+			EpicFightMod.LOGGER.info("Duplicated skill name : " + skill.getRegistryName() + ". Registration was skipped.");
 		} else {
-			map.put(rl, skill);
+			map.put(skill.getRegistryName(), skill);
 		}
 	}
 }

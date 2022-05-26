@@ -26,7 +26,7 @@ public class SPPlayAnimationAndSetTarget extends SPPlayAnimation {
 	
 	public SPPlayAnimationAndSetTarget(StaticAnimation animation, float modifyTime, LivingEntityPatch<?> entitypatch) {
 		super(animation, modifyTime, entitypatch);
-		this.targetId = entitypatch.getAttackTarget().getId();
+		this.targetId = entitypatch.getTarget().getId();
 	}
 	
 	@Override

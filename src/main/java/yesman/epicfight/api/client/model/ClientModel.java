@@ -18,59 +18,92 @@ import yesman.epicfight.api.utils.math.Vec4f;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientModel extends Model {
-	private Mesh mesh;
-
+	protected Mesh mesh;
+	protected RenderProperties properties;
+	
 	public ClientModel(ResourceLocation location) {
+		this(location, null);
+	}
+	
+	public ClientModel(ResourceLocation location, Mesh mesh) {
 		super(location);
-	}
-	
-	public ClientModel(Mesh mesh) {
 		this.mesh = mesh;
+		this.properties = RenderProperties.DEFAULT;
 	}
 	
-	public void loadMeshData(ResourceManager resourceManager) {
-		JsonModelLoader loader = new JsonModelLoader(resourceManager, this.location);
-		this.mesh = loader.getMesh();
-	}
-	
-	public void drawRawModel(PoseStack matrixStackIn, VertexConsumer builder, int packedLightIn, float r, float g, float b, float a, int overlayCoord) {
-		Matrix4f matrix4f = matrixStackIn.last().pose();
-		Matrix3f matrix3f = matrixStackIn.last().normal();
+	public boolean loadMeshAndProperties(ResourceManager resourceManager) {
+		JsonModelLoader loader = new JsonModelLoader(resourceManager, this.getLocation());
 		
-		for (VertexIndicator vi : this.mesh.vertexIndicators) {
+		if (loader.isValidSource()) {
+			ResourceLocation parent = loader.getParent();
+			
+			if (parent == null) {
+				this.mesh = loader.getMesh();
+			} else {
+				ClientModel model = ClientModels.LOGICAL_CLIENT.get(parent);
+				if (model == null) {
+					throw new IllegalStateException("the parent location " + parent + " not exists!");
+				}
+				
+				this.mesh = ClientModels.LOGICAL_CLIENT.get(parent).getMesh();
+			}
+			
+			this.properties = loader.getRenderProperties();
+			
+			return true;
+		}
+		
+		return false;
+	}
+	
+	public RenderProperties getProperties() {
+		return this.properties;
+	}
+	
+	public Mesh getMesh() {
+		return this.mesh;
+	}
+	
+	public void drawRawModel(PoseStack posetStack, VertexConsumer builder, int packedLightIn, float r, float g, float b, float a, int overlayCoord) {
+		Matrix4f matrix4f = posetStack.last().pose();
+		Matrix3f matrix3f = posetStack.last().normal();
+		Mesh mesh = this.getMesh();
+		
+		for (VertexIndicator vi : mesh.vertexIndicators) {
 			int pos = vi.position * 3;
 			int norm = vi.normal * 3;
 			int uv = vi.uv * 2;
-			Vector4f posVec = new Vector4f(this.mesh.positions[pos], this.mesh.positions[pos + 1], this.mesh.positions[pos + 2], 1.0F);
-			Vector3f normVec = new Vector3f(this.mesh.noramls[norm], this.mesh.noramls[norm + 1], this.mesh.noramls[norm + 2]);
+			Vector4f posVec = new Vector4f(mesh.positions[pos], mesh.positions[pos + 1], mesh.positions[pos + 2], 1.0F);
+			Vector3f normVec = new Vector3f(mesh.noramls[norm], mesh.noramls[norm + 1], mesh.noramls[norm + 2]);
 			posVec.transform(matrix4f);
 			normVec.transform(matrix3f);
-			builder.vertex(posVec.x(), posVec.y(), posVec.z(), r, g, b, a, this.mesh.uvs[uv], this.mesh.uvs[uv + 1], overlayCoord, packedLightIn, normVec.x(), normVec.y(), normVec.z());
+			builder.vertex(posVec.x(), posVec.y(), posVec.z(), r, g, b, a, mesh.uvs[uv], mesh.uvs[uv + 1], overlayCoord, packedLightIn, normVec.x(), normVec.y(), normVec.z());
 		}
 	}
 	
-	public void drawAnimatedModel(PoseStack matrixStackIn, VertexConsumer builder, int packedLightIn, float r, float g, float b, float a, int overlayCoord, OpenMatrix4f[] poses) {
-		Matrix4f matrix4f = matrixStackIn.last().pose();
-		Matrix3f matrix3f = matrixStackIn.last().normal();
+	public void drawAnimatedModel(PoseStack posetStack, VertexConsumer builder, int packedLightIn, float r, float g, float b, float a, int overlayCoord, OpenMatrix4f[] poses) {
+		Matrix4f matrix4f = posetStack.last().pose();
+		Matrix3f matrix3f = posetStack.last().normal();
 		OpenMatrix4f[] posesNoTranslation = new OpenMatrix4f[poses.length];
+		Mesh mesh = this.getMesh();
 		
 		for (int i = 0; i < poses.length; i++) {
 			posesNoTranslation[i] = poses[i].removeTranslation();
 		}
 		
-		for (VertexIndicator vi : this.mesh.vertexIndicators) {
+		for (VertexIndicator vi : mesh.vertexIndicators) {
 			int pos = vi.position * 3;
 			int norm = vi.normal * 3;
 			int uv = vi.uv * 2;
-			Vec4f position = new Vec4f(this.mesh.positions[pos], this.mesh.positions[pos + 1], this.mesh.positions[pos + 2], 1.0F);
-			Vec4f normal = new Vec4f(this.mesh.noramls[norm], this.mesh.noramls[norm + 1], this.mesh.noramls[norm + 2], 1.0F);
+			Vec4f position = new Vec4f(mesh.positions[pos], mesh.positions[pos + 1], mesh.positions[pos + 2], 1.0F);
+			Vec4f normal = new Vec4f(mesh.noramls[norm], mesh.noramls[norm + 1], mesh.noramls[norm + 2], 1.0F);
 			Vec4f totalPos = new Vec4f(0.0F, 0.0F, 0.0F, 0.0F);
 			Vec4f totalNorm = new Vec4f(0.0F, 0.0F, 0.0F, 0.0F);
 			
 			for (int i = 0; i < vi.joint.size(); i++) {
 				int jointIndex = vi.joint.get(i);
 				int weightIndex = vi.weight.get(i);
-				float weight = this.mesh.weights[weightIndex];
+				float weight = mesh.weights[weightIndex];
 				Vec4f.add(OpenMatrix4f.transform(poses[jointIndex], position, null).scale(weight), totalPos, totalPos);
 				Vec4f.add(OpenMatrix4f.transform(posesNoTranslation[jointIndex], normal, null).scale(weight), totalNorm, totalNorm);
 			}
@@ -79,31 +112,32 @@ public class ClientModel extends Model {
 			Vector3f normVec = new Vector3f(totalNorm.x, totalNorm.y, totalNorm.z);
 			posVec.transform(matrix4f);
 			normVec.transform(matrix3f);
-			builder.vertex(posVec.x(), posVec.y(), posVec.z(), r, g, b, a, this.mesh.uvs[uv], this.mesh.uvs[uv + 1], overlayCoord, packedLightIn, normVec.x(), normVec.y(), normVec.z());
+			builder.vertex(posVec.x(), posVec.y(), posVec.z(), r, g, b, a, mesh.uvs[uv], mesh.uvs[uv + 1], overlayCoord, packedLightIn, normVec.x(), normVec.y(), normVec.z());
 		}
 	}
 	
-	public void drawAnimatedModelNoTexture(PoseStack matrixStackIn, VertexConsumer builder, int packedLightIn, float r, float g, float b, float a, int overlayCoord, OpenMatrix4f[] poses) {
-		Matrix4f matrix4f = matrixStackIn.last().pose();
-		Matrix3f matrix3f = matrixStackIn.last().normal();
+	public void drawAnimatedModelNoTexture(PoseStack posetStack, VertexConsumer builder, int packedLightIn, float r, float g, float b, float a, int overlayCoord, OpenMatrix4f[] poses) {
+		Matrix4f matrix4f = posetStack.last().pose();
+		Matrix3f matrix3f = posetStack.last().normal();
 		OpenMatrix4f[] posesNoTranslation = new OpenMatrix4f[poses.length];
+		Mesh mesh = this.getMesh();
 		
 		for (int i = 0; i < poses.length; i++) {
 			posesNoTranslation[i] = poses[i].removeTranslation();
 		}
 		
-		for (VertexIndicator vi : this.mesh.vertexIndicators) {
+		for (VertexIndicator vi : mesh.vertexIndicators) {
 			int pos = vi.position * 3;
 			int norm = vi.normal * 3;
-			Vec4f position = new Vec4f(this.mesh.positions[pos], this.mesh.positions[pos + 1], this.mesh.positions[pos + 2], 1.0F);
-			Vec4f normal = new Vec4f(this.mesh.noramls[norm], this.mesh.noramls[norm + 1], this.mesh.noramls[norm + 2], 1.0F);
+			Vec4f position = new Vec4f(mesh.positions[pos], mesh.positions[pos + 1], mesh.positions[pos + 2], 1.0F);
+			Vec4f normal = new Vec4f(mesh.noramls[norm], mesh.noramls[norm + 1], mesh.noramls[norm + 2], 1.0F);
 			Vec4f totalPos = new Vec4f(0.0F, 0.0F, 0.0F, 0.0F);
 			Vec4f totalNorm = new Vec4f(0.0F, 0.0F, 0.0F, 0.0F);
 			
 			for (int i = 0; i < vi.joint.size(); i++) {
 				int jointIndex = vi.joint.get(i);
 				int weightIndex = vi.weight.get(i);
-				float weight = this.mesh.weights[weightIndex];
+				float weight = mesh.weights[weightIndex];
 				Vec4f.add(OpenMatrix4f.transform(poses[jointIndex], position, null).scale(weight), totalPos, totalPos);
 				Vec4f.add(OpenMatrix4f.transform(posesNoTranslation[jointIndex], normal, null).scale(weight), totalNorm, totalNorm);
 			}
@@ -116,6 +150,37 @@ public class ClientModel extends Model {
 			builder.color(r, g, b, a);
 			builder.uv2(packedLightIn);
 			builder.endVertex();
+		}
+	}
+	
+	public static class RenderProperties {
+		public static final RenderProperties DEFAULT = RenderProperties.builder().build();
+		
+		boolean isTransparent;
+		
+		public RenderProperties(Builder builder) {
+			this.isTransparent = builder.isTransparent;
+		}
+		
+		public boolean isTransparent() {
+			return this.isTransparent;
+		}
+		
+		public static RenderProperties.Builder builder() {
+			return new Builder();
+		}
+		
+		public static class Builder {
+			boolean isTransparent = false;
+			
+			public RenderProperties.Builder transparency(boolean isTransparent) {
+				this.isTransparent = isTransparent;
+				return this;
+			}
+			
+			public RenderProperties build() {
+				return new RenderProperties(this);
+			}
 		}
 	}
 }

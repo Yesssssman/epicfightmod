@@ -72,7 +72,7 @@ public class HealthBarIndicator extends EntityIndicator {
 					if (effect instanceof VisibleMobEffect) {
 						rl = ((VisibleMobEffect)effect).getIcon();
 					} else {
-						rl = new ResourceLocation("textures/mob_effect/" + effect.getRegistryName().getPath() + ".png");
+						rl = new ResourceLocation(effect.getRegistryName().getNamespace(), "textures/mob_effect/" + effect.getRegistryName().getPath() + ".png");
 					}
 					
 					Minecraft.getInstance().getTextureManager().bindForSetup(rl);

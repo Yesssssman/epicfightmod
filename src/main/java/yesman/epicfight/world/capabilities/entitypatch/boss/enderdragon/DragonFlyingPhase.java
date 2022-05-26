@@ -31,7 +31,7 @@ public class DragonFlyingPhase extends PatchedDragonPhase {
 	public void doServerTick() {
 		double d0 = this.targetLocation == null ? 0.0D : this.targetLocation.distanceToSqr(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ());
 		
-		if (d0 < 100.0D || d0 > 22500.0D || this.dragon.horizontalCollision || this.dragon.verticalCollision) {
+		if (d0 < 100.0D || d0 > 22500.0D || this.dragon.horizontalCollision || this.dragon.verticalCollision && this.dragon.getDragonFight() != null) {
 			this.findNewTarget();
 		}
 	}
