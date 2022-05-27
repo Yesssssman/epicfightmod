@@ -23,25 +23,25 @@ public class KatanaPassive extends Skill {
 	public void onInitiate(SkillContainer container) {
 		super.onInitiate(container);
 		container.getDataManager().registerData(SHEATH);
-		container.executer.getEventListener().addEventListener(EventType.ACTION_EVENT, EVENT_UUID, (event) -> {
+		container.getExecuter().getEventListener().addEventListener(EventType.ACTION_EVENT, EVENT_UUID, (event) -> {
 			container.getSkill().setConsumptionSynchronize(event.getPlayerPatch(), 0.0F);
 			container.getSkill().setStackSynchronize(event.getPlayerPatch(), 0);
 		});
 		
-		container.executer.getEventListener().addEventListener(EventType.SERVER_ITEM_USE_EVENT, EVENT_UUID, (event) -> {
+		container.getExecuter().getEventListener().addEventListener(EventType.SERVER_ITEM_USE_EVENT, EVENT_UUID, (event) -> {
 			this.onReset(container);
 		});
 	}
 	
 	@Override
 	public void onRemoved(SkillContainer container) {
-		container.executer.getEventListener().removeListener(EventType.ACTION_EVENT, EVENT_UUID);
-		container.executer.getEventListener().removeListener(EventType.SERVER_ITEM_USE_EVENT, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.ACTION_EVENT, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.SERVER_ITEM_USE_EVENT, EVENT_UUID);
 	}
 	
 	@Override
 	public void onReset(SkillContainer container) {
-		PlayerPatch<?> executer = container.executer;
+		PlayerPatch<?> executer = container.getExecuter();
 		
 		if (!executer.isLogicalClient()) {
 			if (container.getDataManager().getDataValue(SHEATH)) {
@@ -55,13 +55,13 @@ public class KatanaPassive extends Skill {
 	
 	@Override
 	public void setConsumption(SkillContainer container, float value) {
-		PlayerPatch<?> executer = container.executer;
+		PlayerPatch<?> executer = container.getExecuter();
 		
 		if (!executer.isLogicalClient()) {
 			if (this.consumption < value) {
 				ServerPlayer serverPlayer = (ServerPlayer) executer.getOriginal();
 				container.getDataManager().setDataSync(SHEATH, true, serverPlayer);
-				((ServerPlayerPatch)container.executer).modifyLivingMotionByCurrentItem();
+				((ServerPlayerPatch)container.getExecuter()).modifyLivingMotionByCurrentItem();
 				SPPlayAnimation msg3 = new SPPlayAnimation(Animations.BIPED_KATANA_SCRAP, serverPlayer.getId(), 0.0F);
 				EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(msg3, serverPlayer);
 			}

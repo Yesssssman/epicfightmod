@@ -52,7 +52,7 @@ public class BladeRushSkill extends SpecialAttackSkill {
 	public void onInitiate(SkillContainer container) {
 		super.onInitiate(container);
 		container.getDataManager().registerData(COMBO_COUNT);
-		container.executer.getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID, (event) -> {
+		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID, (event) -> {
 			int animationId = event.getDamageSource().getAnimationId();
 			
 			if (animationId >= Animations.BLADE_RUSH_FIRST.getId() && animationId <= Animations.BLADE_RUSH_FINISHER.getId() && !event.getTarget().isAlive()) {
@@ -60,7 +60,7 @@ public class BladeRushSkill extends SpecialAttackSkill {
 			}
 		});
 		
-		container.executer.getEventListener().addEventListener(EventType.BASIC_ATTACK_EVENT, EVENT_UUID, (event) -> {
+		container.getExecuter().getEventListener().addEventListener(EventType.BASIC_ATTACK_EVENT, EVENT_UUID, (event) -> {
 			if (container.isActivated() && !container.isDisabled()) {
 				FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
 				buf.writeBoolean(false);
@@ -72,8 +72,8 @@ public class BladeRushSkill extends SpecialAttackSkill {
 	
 	@Override
 	public void onRemoved(SkillContainer container) {
-		container.executer.getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID);
-		container.executer.getEventListener().removeListener(EventType.BASIC_ATTACK_EVENT, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.BASIC_ATTACK_EVENT, EVENT_UUID);
 	}
 	
 	@Override

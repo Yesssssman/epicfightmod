@@ -446,5 +446,9 @@ public class AttackAnimation extends ActionAnimation {
 		public String getColliderJointName() {
 			return this.jointName;
 		}
+		
+		public InteractionHand getHand() {
+			return this.hand;
+		}
 	}
 }

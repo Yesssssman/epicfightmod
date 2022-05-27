@@ -9,11 +9,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
-import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.fml.event.IModBusEvent;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.AnimationDataReader;
+import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.main.EpicFightMod;
 
@@ -34,14 +33,14 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 		throw new IllegalArgumentException("Unable to find animation. id: " + animationId + ", namespcae hash: " + namespaceId);
 	}
 	
-	public StaticAnimation findAnimationByResourceLocation(String resourceLocation) {
+	public StaticAnimation findAnimationByPath(String resourceLocation) {
 		ResourceLocation rl = new ResourceLocation(resourceLocation);
 		
 		if (this.animationByName.containsKey(rl)) {
 			return this.animationByName.get(rl);
 		}
 		
-		throw new IllegalArgumentException("Unable to find animation. resource location: " + rl);
+		throw new IllegalArgumentException("Unable to find animation: " + rl);
 	}
 	
 	public void registerAnimations() {
@@ -125,17 +124,5 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 	
 	public Map<ResourceLocation, StaticAnimation> getNameMap() {
 		return this.animationByName;
-	}
-	
-	public class AnimationRegistryEvent extends Event implements IModBusEvent {
-		private Map<String, Runnable> registryMap;
-		
-		public AnimationRegistryEvent(Map<String, Runnable> registryMap) {
-			this.registryMap = registryMap;
-		}
-		
-		public Map<String, Runnable> getRegistryMap() {
-			return this.registryMap;
-		}
 	}
 }

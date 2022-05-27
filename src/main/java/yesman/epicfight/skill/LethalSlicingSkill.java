@@ -30,7 +30,7 @@ public class LethalSlicingSkill extends SpecialAttackSkill {
 	@Override
 	public void onInitiate(SkillContainer container) {
 		super.onInitiate(container);
-		container.executer.getEventListener().addEventListener(EventType.ATTACK_ANIMATION_END_EVENT, EVENT_UUID, (event) -> {
+		container.getExecuter().getEventListener().addEventListener(EventType.ATTACK_ANIMATION_END_EVENT, EVENT_UUID, (event) -> {
 			if (event.getAnimationId() == Animations.LETHAL_SLICING.getId()) {
 				List<LivingEntity> hitEnemies = event.getHitEntity();
 				if (hitEnemies.size() <= 1) {
@@ -44,7 +44,7 @@ public class LethalSlicingSkill extends SpecialAttackSkill {
 	
 	@Override
 	public void onRemoved(SkillContainer container) {
-		container.executer.getEventListener().removeListener(EventType.ATTACK_ANIMATION_END_EVENT, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.ATTACK_ANIMATION_END_EVENT, EVENT_UUID);
 	}
 	
 	@Override

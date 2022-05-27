@@ -10,7 +10,7 @@ import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 public class SkillContainer {
 	protected Skill containingSkill;
-	protected PlayerPatch<?> executer;
+	private PlayerPatch<?> executer;
 	protected int prevDuration = 0;
 	protected int duration = 0;
 	protected int maxDuration = 0;
@@ -28,6 +28,10 @@ public class SkillContainer {
 	
 	public void setExecuter(PlayerPatch<?> executer) {
 		this.executer = executer;
+	}
+	
+	public PlayerPatch<?> getExecuter() {
+		return this.executer;
 	}
 	
 	public SkillContainer setSkill(Skill skill) {

@@ -1,4 +1,4 @@
-package yesman.epicfight.api.client.model.forgeevent;
+package yesman.epicfight.api.client.forgeevent;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 

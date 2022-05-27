@@ -48,7 +48,7 @@ public class ActiveGuardSkill extends GuardSkill {
 	public void onInitiate(SkillContainer container) {
 		super.onInitiate(container);
 		container.getDataManager().registerData(LAST_ACTIVE);
-		container.executer.getEventListener().addEventListener(EventType.SERVER_ITEM_USE_EVENT, EVENT_UUID, (event) -> {
+		container.getExecuter().getEventListener().addEventListener(EventType.SERVER_ITEM_USE_EVENT, EVENT_UUID, (event) -> {
 			CapabilityItem itemCapability = event.getPlayerPatch().getHoldingItemCapability(InteractionHand.MAIN_HAND);
 			
 			if (GuardSkill.AVAILABLE_WEAPON_TYPES.getOrDefault(itemCapability.getWeaponCategory(), (a, b) -> null).apply(itemCapability, event.getPlayerPatch()) != null && this.isExecutableState(event.getPlayerPatch())) {
@@ -92,7 +92,7 @@ public class ActiveGuardSkill extends GuardSkill {
 				float stamina = event.getPlayerPatch().getStamina() - penalty * impact;
 				event.getPlayerPatch().setStamina(stamina);
 				
-				StaticAnimation animation = this.getAvailableWeaponTypes(successParrying ? 2 : stamina >= 0.0F ? 1 : 0).get(itemCapability.getWeaponCategory()).apply(itemCapability, container.executer);
+				StaticAnimation animation = this.getAvailableWeaponTypes(successParrying ? 2 : stamina >= 0.0F ? 1 : 0).get(itemCapability.getWeaponCategory()).apply(itemCapability, container.getExecuter());
 				
 				if (animation != null) {
 					event.getPlayerPatch().playAnimationSynchronized(animation, 0);

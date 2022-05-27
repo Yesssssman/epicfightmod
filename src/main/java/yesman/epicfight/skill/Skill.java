@@ -179,7 +179,7 @@ public abstract class Skill {
 	}
 	
 	public void updateContainer(SkillContainer container) {
-		PlayerPatch<?> executer = container.executer;
+		PlayerPatch<?> executer = container.getExecuter();
 		container.prevResource = container.resource;
 		container.prevDuration = container.duration;
 		
@@ -207,7 +207,7 @@ public abstract class Skill {
 			}
 			
 			if (isEnd) {
-				if(!container.executer.isLogicalClient()) {
+				if (!container.getExecuter().isLogicalClient()) {
 					container.containingSkill.cancelOnServer((ServerPlayerPatch)executer, null);
 				}
 				container.deactivate();

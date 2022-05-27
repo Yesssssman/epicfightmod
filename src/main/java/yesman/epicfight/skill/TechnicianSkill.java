@@ -21,13 +21,13 @@ public class TechnicianSkill extends PassiveSkill {
 	@Override
 	public void onInitiate(SkillContainer container) {
 		container.getDataManager().registerData(CURRENTLY_ACTIVATED);
-		container.executer.getEventListener().addEventListener(EventType.ACTION_EVENT, EVENT_UUID, (event) -> {
+		container.getExecuter().getEventListener().addEventListener(EventType.ACTION_EVENT, EVENT_UUID, (event) -> {
 			if (event.getAnimation() instanceof DodgeAnimation) {
 				container.getDataManager().setData(CURRENTLY_ACTIVATED, false);
 			}
 		});
 		
-		container.executer.getEventListener().addEventListener(EventType.HURT_EVENT_PRE, EVENT_UUID, (event) -> {
+		container.getExecuter().getEventListener().addEventListener(EventType.HURT_EVENT_PRE, EVENT_UUID, (event) -> {
 			ServerPlayerPatch executer = event.getPlayerPatch();
 			
 			if (executer.getAnimator().getPlayerFor(null).getPlay() instanceof DodgeAnimation) {
@@ -48,7 +48,7 @@ public class TechnicianSkill extends PassiveSkill {
 	
 	@Override
 	public void onRemoved(SkillContainer container) {
-		container.executer.getEventListener().removeListener(EventType.ACTION_EVENT, EVENT_UUID);
-		container.executer.getEventListener().removeListener(EventType.HURT_EVENT_PRE, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.ACTION_EVENT, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.HURT_EVENT_PRE, EVENT_UUID);
 	}
 }

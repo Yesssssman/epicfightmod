@@ -1,4 +1,4 @@
-package yesman.epicfight.api.client.model.forgeevent;
+package yesman.epicfight.api.client.forgeevent;
 
 import java.util.Map;
 import java.util.function.Supplier;

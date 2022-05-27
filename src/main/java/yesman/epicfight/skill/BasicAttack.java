@@ -42,7 +42,7 @@ public class BasicAttack extends Skill {
 	public void onInitiate(SkillContainer container) {
 		container.getDataManager().registerData(COMBO_COUNTER);
 		
-		container.executer.getEventListener().addEventListener(EventType.ACTION_EVENT, EVENT_UUID, (event) -> {
+		container.getExecuter().getEventListener().addEventListener(EventType.ACTION_EVENT, EVENT_UUID, (event) -> {
 			if (!event.getAnimation().isBasicAttackAnimation()) {
 				container.getDataManager().setData(COMBO_COUNTER, 0);
 			}
@@ -51,7 +51,7 @@ public class BasicAttack extends Skill {
 	
 	@Override
 	public void onRemoved(SkillContainer container) {
-		container.executer.getEventListener().removeListener(EventType.ACTION_EVENT, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.ACTION_EVENT, EVENT_UUID);
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -113,7 +113,7 @@ public class BasicAttack extends Skill {
 	
 	@Override
 	public void updateContainer(SkillContainer container) {
-		if (container.executer.getTickSinceLastAction() > 10 && container.getDataManager().getDataValue(COMBO_COUNTER) > 0) {
+		if (container.getExecuter().getTickSinceLastAction() > 10 && container.getDataManager().getDataValue(COMBO_COUNTER) > 0) {
 			container.getDataManager().setData(COMBO_COUNTER, 0);
 		}
 	}

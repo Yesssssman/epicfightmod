@@ -28,7 +28,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.loading.FMLEnvironment;
-import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.TransformSheet;
@@ -71,6 +70,7 @@ import yesman.epicfight.api.client.animation.JointMaskEntry;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.collider.OBBCollider;
+import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.game.ExtendedDamageSource;
 import yesman.epicfight.api.utils.game.ExtendedDamageSource.StunType;
@@ -363,7 +363,7 @@ public class Animations {
 	public static StaticAnimation OFF_ANIMATION_HIGHEST;
 	public static StaticAnimation OFF_ANIMATION_MIDDLE;
 	
-	public static void registerAnimations(AnimationManager.AnimationRegistryEvent event) {
+	public static void registerAnimations(AnimationRegistryEvent event) {
 		event.getRegistryMap().put(EpicFightMod.MODID, Animations::build);
 	}
 	

@@ -33,11 +33,11 @@ public class LiechtenauerSkill extends SpecialAttackSkill {
 	
 	@Override
 	public void onInitiate(SkillContainer container) {
-		if (!container.executer.isLogicalClient()) {
-			this.setMaxDurationSynchronize((ServerPlayerPatch)container.executer, this.maxDuration + EnchantmentHelper.getEnchantmentLevel(Enchantments.SWEEPING_EDGE, container.executer.getOriginal()));
+		if (!container.getExecuter().isLogicalClient()) {
+			this.setMaxDurationSynchronize((ServerPlayerPatch)container.getExecuter(), this.maxDuration + EnchantmentHelper.getEnchantmentLevel(Enchantments.SWEEPING_EDGE, container.getExecuter().getOriginal()));
 		}
 		
-		container.executer.getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID, (event) -> {
+		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID, (event) -> {
 			if (container.isActivated()) {
 				if (!event.getTarget().isAlive()) {
 					this.setDurationSynchronize(event.getPlayerPatch(), container.duration + 1);
@@ -45,7 +45,7 @@ public class LiechtenauerSkill extends SpecialAttackSkill {
 			}
 		});
 		
-		container.executer.getEventListener().addEventListener(EventType.HURT_EVENT_PRE, EVENT_UUID, (event) -> {
+		container.getExecuter().getEventListener().addEventListener(EventType.HURT_EVENT_PRE, EVENT_UUID, (event) -> {
 			if (event.getAmount() > 0.0F && container.duration > 0 && this.isExecutableState(event.getPlayerPatch()) && this.canExecute(event.getPlayerPatch()) && isBlockableSource(event.getDamageSource())) {
 				DamageSource damageSource = event.getDamageSource();
 				boolean isFront = false;
@@ -84,7 +84,7 @@ public class LiechtenauerSkill extends SpecialAttackSkill {
 			}
 		}, 0);
 		
-		container.executer.getEventListener().addEventListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID, (event) -> {
+		container.getExecuter().getEventListener().addEventListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID, (event) -> {
 			if (event.getPlayerPatch().getSkill(this.category).isActivated()) {
 				LocalPlayer clientPlayer = event.getPlayerPatch().getOriginal();
 				clientPlayer.setSprinting(false);
@@ -97,9 +97,9 @@ public class LiechtenauerSkill extends SpecialAttackSkill {
 	
 	@Override
 	public void onRemoved(SkillContainer container) {
-		container.executer.getEventListener().removeListener(EventType.HURT_EVENT_PRE, EVENT_UUID, 0);
-		container.executer.getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID);
-		container.executer.getEventListener().removeListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.HURT_EVENT_PRE, EVENT_UUID, 0);
+		container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID);
 	}
 	
 	@Override

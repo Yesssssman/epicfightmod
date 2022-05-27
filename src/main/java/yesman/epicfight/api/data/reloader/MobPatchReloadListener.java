@@ -305,7 +305,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		
 		for (String key : defaultLivingmotions.getAllKeys()) {
 			String animation = defaultLivingmotions.getString(key);
-			defaultAnimations.add(Pair.of(LivingMotion.valueOf(key.toUpperCase(Locale.ROOT)), EpicFightMod.getInstance().animationManager.findAnimationByResourceLocation(animation)));
+			defaultAnimations.add(Pair.of(LivingMotion.valueOf(key.toUpperCase(Locale.ROOT)), EpicFightMod.getInstance().animationManager.findAnimationByPath(animation)));
 		}
 		
 		return defaultAnimations;
@@ -313,11 +313,11 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 	
 	public static Map<StunType, StaticAnimation> deserializeStunAnimations(CompoundTag tag) {
 		Map<StunType, StaticAnimation> stunAnimations = Maps.newHashMap();
-		stunAnimations.put(StunType.SHORT, EpicFightMod.getInstance().animationManager.findAnimationByResourceLocation(tag.getString("short")));
-		stunAnimations.put(StunType.LONG, EpicFightMod.getInstance().animationManager.findAnimationByResourceLocation(tag.getString("long")));
-		stunAnimations.put(StunType.FALL, EpicFightMod.getInstance().animationManager.findAnimationByResourceLocation(tag.getString("fall")));
-		stunAnimations.put(StunType.KNOCKDOWN, EpicFightMod.getInstance().animationManager.findAnimationByResourceLocation(tag.getString("knockdown")));
-		stunAnimations.put(StunType.HOLD, EpicFightMod.getInstance().animationManager.findAnimationByResourceLocation(tag.getString("short")));
+		stunAnimations.put(StunType.SHORT, EpicFightMod.getInstance().animationManager.findAnimationByPath(tag.getString("short")));
+		stunAnimations.put(StunType.LONG, EpicFightMod.getInstance().animationManager.findAnimationByPath(tag.getString("long")));
+		stunAnimations.put(StunType.FALL, EpicFightMod.getInstance().animationManager.findAnimationByPath(tag.getString("fall")));
+		stunAnimations.put(StunType.KNOCKDOWN, EpicFightMod.getInstance().animationManager.findAnimationByPath(tag.getString("knockdown")));
+		stunAnimations.put(StunType.HOLD, EpicFightMod.getInstance().animationManager.findAnimationByPath(tag.getString("short")));
 		
 		return stunAnimations;
 	}
@@ -344,7 +344,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			CompoundTag motionsTag = weaponMotionTag.getCompound("livingmotions");
 			
 			for (String key : motionsTag.getAllKeys()) {
-				motions.add(Pair.of(LivingMotion.valueOf(key.toUpperCase(Locale.ROOT)), EpicFightMod.getInstance().animationManager.findAnimationByResourceLocation(motionsTag.getString(key))));
+				motions.add(Pair.of(LivingMotion.valueOf(key.toUpperCase(Locale.ROOT)), EpicFightMod.getInstance().animationManager.findAnimationByPath(motionsTag.getString(key))));
 			}
 			
 			Tag weponTypeTag = weaponMotionTag.get("weapon_categories");
@@ -388,7 +388,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			for (int j = 0; j < behaviorList.size(); j++) {
 				Behavior.Builder<T> behaviorBuilder = Behavior.builder();
 				CompoundTag behavior = behaviorList.getCompound(j);
-				StaticAnimation animation = EpicFightMod.getInstance().animationManager.findAnimationByResourceLocation(behavior.getString("animation"));
+				StaticAnimation animation = EpicFightMod.getInstance().animationManager.findAnimationByPath(behavior.getString("animation"));
 				ListTag conditionList = behavior.getList("conditions", 10);
 				behaviorBuilder.animationBehavior(animation);
 				

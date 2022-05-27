@@ -20,7 +20,7 @@ public class SwordmasterSkill extends PassiveSkill {
 	
 	@Override
 	public void onInitiate(SkillContainer container) {
-		container.executer.getEventListener().addEventListener(EventType.ATTACK_SPEED_MODIFY_EVENT, EVENT_UUID, (event) -> {
+		container.getExecuter().getEventListener().addEventListener(EventType.ATTACK_SPEED_MODIFY_EVENT, EVENT_UUID, (event) -> {
 			WeaponCategory heldWeaponCategory = event.getItemCapability().getWeaponCategory();
 			
 			for (WeaponCategory weaponCategory : AVAILABLE_WEAPON_TYPES) {
@@ -35,7 +35,7 @@ public class SwordmasterSkill extends PassiveSkill {
 	
 	@Override
 	public void onRemoved(SkillContainer container) {
-		container.executer.getEventListener().removeListener(EventType.ATTACK_SPEED_MODIFY_EVENT, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.ATTACK_SPEED_MODIFY_EVENT, EVENT_UUID);
 	}
 	
 	@OnlyIn(Dist.CLIENT)

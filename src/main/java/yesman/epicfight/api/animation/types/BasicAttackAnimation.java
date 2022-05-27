@@ -21,7 +21,7 @@ public class BasicAttackAnimation extends AttackAnimation {
 		this.addProperty(AttackAnimationProperty.ROTATE_X, true);
 	}
 	
-	public BasicAttackAnimation(float convertTime, float antic, float contact, float recovery, InteractionHand hand, @Nullable Collider collider,  String index, String path, Model model) {
+	public BasicAttackAnimation(float convertTime, float antic, float contact, float recovery, InteractionHand hand, @Nullable Collider collider, String index, String path, Model model) {
 		super(convertTime, antic, antic, contact, recovery, hand, collider, index, path, model);
 		this.addProperty(AttackAnimationProperty.ROTATE_X, true);
 	}
