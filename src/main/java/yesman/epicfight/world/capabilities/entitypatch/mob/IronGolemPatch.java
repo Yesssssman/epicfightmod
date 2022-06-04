@@ -12,7 +12,7 @@ import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
@@ -65,9 +65,9 @@ public class IronGolemPatch extends MobPatch<IronGolem> {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.GOLEM_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.GOLEM_WALK);
-		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.GOLEM_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.GOLEM_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.GOLEM_WALK);
+		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.GOLEM_DEATH);
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 

@@ -30,7 +30,6 @@ import yesman.epicfight.api.animation.property.Property.AttackPhaseProperty;
 import yesman.epicfight.api.utils.game.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.math.ValueCorrector;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
-import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.client.CPExecuteSkill;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
@@ -39,7 +38,7 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
 public abstract class SpecialAttackSkill extends Skill {
 	public static Skill.Builder<? extends SpecialAttackSkill> createBuilder(ResourceLocation resourceLocation) {
-		return (new Skill.Builder<SpecialAttackSkill>(resourceLocation)).setCategory(SkillCategory.WEAPON_SPECIAL_ATTACK).setResource(Resource.SPECIAL_GAUAGE);
+		return (new Skill.Builder<SpecialAttackSkill>(resourceLocation)).setCategory(SkillCategories.WEAPON_SPECIAL_ATTACK).setResource(Resource.SPECIAL_GAUAGE);
 	}
 	
 	protected List<Map<AttackPhaseProperty<?>, Object>> properties;
@@ -53,7 +52,7 @@ public abstract class SpecialAttackSkill extends Skill {
 	@Override
 	public void executeOnClient(LocalPlayerPatch executer, FriendlyByteBuf args) {
 		if (this.canExecute(executer)) {
-			EpicFightNetworkManager.sendToServer(new CPExecuteSkill(this.category.getIndex(), true, args));
+			EpicFightNetworkManager.sendToServer(new CPExecuteSkill(this.category.universalOrdinal(), true, args));
 		}
 	}
 	
@@ -70,8 +69,10 @@ public abstract class SpecialAttackSkill extends Skill {
 	@Override
 	public List<Component> getTooltipOnItem(ItemStack itemStack, CapabilityItem cap, PlayerPatch<?> playerCap) {
 		List<Component> list = Lists.<Component>newArrayList();
-		list.add(new TranslatableComponent("skill." + EpicFightMod.MODID + "." + this.getName()).withStyle(ChatFormatting.WHITE).append(new TextComponent(String.format("[%.0f]", this.consumption)).withStyle(ChatFormatting.AQUA)));
-		list.add(new TranslatableComponent("skill." + EpicFightMod.MODID + "." + this.getName() + ".tooltip").withStyle(ChatFormatting.DARK_GRAY));
+		String traslatableText = this.getTranslatableText();
+		
+		list.add(new TranslatableComponent(traslatableText).withStyle(ChatFormatting.WHITE).append(new TextComponent(String.format("[%.0f]", this.consumption)).withStyle(ChatFormatting.AQUA)));
+		list.add(new TranslatableComponent(traslatableText + ".tooltip").withStyle(ChatFormatting.DARK_GRAY));
 		return list;
 	}
 	

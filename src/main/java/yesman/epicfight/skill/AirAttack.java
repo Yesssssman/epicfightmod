@@ -8,7 +8,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
@@ -20,7 +20,7 @@ import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 public class AirAttack extends Skill {
 	public static Skill.Builder<AirAttack> createBuilder() {
-		return (new Skill.Builder<AirAttack>(new ResourceLocation(EpicFightMod.MODID, "air_attack"))).setCategory(SkillCategory.AIR_ATTACK).setConsumption(2.0F).setActivateType(ActivateType.ONE_SHOT).setResource(Resource.STAMINA);
+		return (new Skill.Builder<AirAttack>(new ResourceLocation(EpicFightMod.MODID, "air_attack"))).setCategory(SkillCategories.AIR_ATTACK).setConsumption(2.0F).setActivateType(ActivateType.ONE_SHOT).setResource(Resource.STAMINA);
 	}
 	
 	public AirAttack(Builder<? extends Skill> builder) {
@@ -30,14 +30,14 @@ public class AirAttack extends Skill {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void executeOnClient(LocalPlayerPatch executer, FriendlyByteBuf args) {
-		EpicFightNetworkManager.sendToServer(new CPExecuteSkill(this.category.getIndex(), true, args));
+		EpicFightNetworkManager.sendToServer(new CPExecuteSkill(this.category.universalOrdinal(), true, args));
 	}
 	
 	@Override
 	public boolean isExecutableState(PlayerPatch<?> executer) {
 		EntityState playerState = executer.getEntityState();
 		Player player = executer.getOriginal();
-		return !(player.isPassenger() || player.isSpectator() || player.isFallFlying() || executer.currentLivingMotion == LivingMotion.FALL
+		return !(player.isPassenger() || player.isSpectator() || player.isFallFlying() || executer.currentLivingMotion == LivingMotions.FALL
 				|| !playerState.canBasicAttack());
 	}
 	

@@ -19,7 +19,7 @@ import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
@@ -68,19 +68,19 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	
 	protected final void commonMobUpdateMotion(boolean considerInaction) {
 		if (this.state.inaction() && considerInaction) {
-			currentLivingMotion = LivingMotion.INACTION;
+			currentLivingMotion = LivingMotions.INACTION;
 		} else {
 			if (this.original.getHealth() <= 0.0F)
-				currentLivingMotion = LivingMotion.DEATH;
+				currentLivingMotion = LivingMotions.DEATH;
 			else if (original.getVehicle() != null)
-				currentLivingMotion = LivingMotion.MOUNT;
+				currentLivingMotion = LivingMotions.MOUNT;
 			else
 				if (this.original.getDeltaMovement().y < -0.55F)
-					currentLivingMotion = LivingMotion.FALL;
+					currentLivingMotion = LivingMotions.FALL;
 				else if (original.animationSpeed > 0.01F)
-					currentLivingMotion = LivingMotion.WALK;
+					currentLivingMotion = LivingMotions.WALK;
 				else
-					currentLivingMotion = LivingMotion.IDLE;
+					currentLivingMotion = LivingMotions.IDLE;
 		}
 		
 		this.currentCompositeMotion = this.currentLivingMotion;
@@ -88,22 +88,22 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	
 	protected final void commonAggressiveMobUpdateMotion(boolean considerInaction) {
 		if (this.state.inaction() && considerInaction) {
-			currentLivingMotion = LivingMotion.INACTION;
+			currentLivingMotion = LivingMotions.INACTION;
 		} else {
 			if (this.original.getHealth() <= 0.0F) {
-				currentLivingMotion = LivingMotion.DEATH;
+				currentLivingMotion = LivingMotions.DEATH;
 			} else if (original.getVehicle() != null) {
-				currentLivingMotion = LivingMotion.MOUNT;
+				currentLivingMotion = LivingMotions.MOUNT;
 			} else {
 				if (this.original.getDeltaMovement().y < -0.55F)
-					currentLivingMotion = LivingMotion.FALL;
+					currentLivingMotion = LivingMotions.FALL;
 				else if (original.animationSpeed > 0.01F)
 					if (original.isAggressive())
-						currentLivingMotion = LivingMotion.CHASE;
+						currentLivingMotion = LivingMotions.CHASE;
 					else
-						currentLivingMotion = LivingMotion.WALK;
+						currentLivingMotion = LivingMotions.WALK;
 				else
-					currentLivingMotion = LivingMotion.IDLE;
+					currentLivingMotion = LivingMotions.IDLE;
 			}
 		}
 		
@@ -116,17 +116,17 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 		
 		if (this.original.isUsingItem()) {
 			if (useAction == UseAnim.CROSSBOW)
-				currentCompositeMotion = LivingMotion.RELOAD;
+				currentCompositeMotion = LivingMotions.RELOAD;
 			else
-				currentCompositeMotion = LivingMotion.AIM;
+				currentCompositeMotion = LivingMotions.AIM;
 		} else {
 			if (this.getClientAnimator().getCompositeLayer(Layer.Priority.MIDDLE).animationPlayer.getPlay().isReboundAnimation())
-				currentCompositeMotion = LivingMotion.NONE;
+				currentCompositeMotion = LivingMotions.NONE;
 		}
 		
 		if (CrossbowItem.isCharged(this.original.getMainHandItem()))
-			currentCompositeMotion = LivingMotion.AIM;
-		else if (this.getClientAnimator().isAiming() && currentCompositeMotion != LivingMotion.AIM)
+			currentCompositeMotion = LivingMotions.AIM;
+		else if (this.getClientAnimator().isAiming() && currentCompositeMotion != LivingMotions.AIM)
 			this.playReboundAnimation();
 	}
 	

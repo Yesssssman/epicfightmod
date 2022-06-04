@@ -63,7 +63,7 @@ public class SimpleSpecialAttackSkill extends SpecialAttackSkill {
 	}
 	
 	public static Builder createBuilder(ResourceLocation resourceLocation) {
-		return (new Builder(resourceLocation)).setCategory(SkillCategory.WEAPON_SPECIAL_ATTACK).setResource(Resource.SPECIAL_GAUAGE);
+		return (new Builder(resourceLocation)).setCategory(SkillCategories.WEAPON_SPECIAL_ATTACK).setResource(Resource.SPECIAL_GAUAGE);
 	}
 	
 	protected final StaticAnimation attackAnimation;

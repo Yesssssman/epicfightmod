@@ -9,7 +9,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
@@ -27,8 +27,8 @@ public class VindicatorPatch<T extends PathfinderMob> extends AbstractIllagerPat
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
 		super.initAnimator(clientAnimator);
-		clientAnimator.addLivingAnimation(LivingMotion.ANGRY, Animations.VINDICATOR_IDLE_AGGRESSIVE);
-		clientAnimator.addLivingAnimation(LivingMotion.CHASE, Animations.VINDICATOR_CHASE);
+		clientAnimator.addLivingAnimation(LivingMotions.ANGRY, Animations.VINDICATOR_IDLE_AGGRESSIVE);
+		clientAnimator.addLivingAnimation(LivingMotions.CHASE, Animations.VINDICATOR_CHASE);
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
@@ -43,29 +43,29 @@ public class VindicatorPatch<T extends PathfinderMob> extends AbstractIllagerPat
 		super.setWeaponMotions();
 		
 		this.weaponLivingMotions.put(WeaponCategory.GREATSWORD, ImmutableMap.of(
-			CapabilityItem.Style.TWO_HAND, Set.of(
-				Pair.of(LivingMotion.WALK, Animations.ILLAGER_WALK),
-				Pair.of(LivingMotion.CHASE, Animations.BIPED_WALK_TWOHAND)
+			CapabilityItem.Styles.TWO_HAND, Set.of(
+				Pair.of(LivingMotions.WALK, Animations.ILLAGER_WALK),
+				Pair.of(LivingMotions.CHASE, Animations.BIPED_WALK_TWOHAND)
 			)
 		));
 		
-		this.weaponAttackMotions.put(WeaponCategory.AXE, ImmutableMap.of(CapabilityItem.Style.COMMON, MobCombatBehaviors.VINDICATOR_ONEHAND));
-		this.weaponAttackMotions.put(WeaponCategory.SWORD, ImmutableMap.of(CapabilityItem.Style.COMMON, MobCombatBehaviors.VINDICATOR_ONEHAND));
+		this.weaponAttackMotions.put(WeaponCategory.AXE, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.VINDICATOR_ONEHAND));
+		this.weaponAttackMotions.put(WeaponCategory.SWORD, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.VINDICATOR_ONEHAND));
 	}
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		if (this.state.inaction() && considerInaction) {
-			currentLivingMotion = LivingMotion.INACTION;
+			currentLivingMotion = LivingMotions.INACTION;
 		} else {
 			boolean isAngry = this.original.isAggressive();
 			
 			if (this.original.getHealth() <= 0.0F) {
-				currentLivingMotion = LivingMotion.DEATH;
+				currentLivingMotion = LivingMotions.DEATH;
 			} else if (this.original.animationSpeed > 0.01F) {
-				currentLivingMotion = isAngry ? LivingMotion.CHASE : LivingMotion.WALK;
+				currentLivingMotion = isAngry ? LivingMotions.CHASE : LivingMotions.WALK;
 			} else {
-				currentLivingMotion = isAngry ? LivingMotion.ANGRY : LivingMotion.IDLE;
+				currentLivingMotion = isAngry ? LivingMotions.ANGRY : LivingMotions.IDLE;
 			}
 		}
 	}

@@ -16,7 +16,7 @@ import yesman.epicfight.api.utils.game.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.game.IndirectEpicFightDamageSource;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.Style;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.RangedWeaponCapability;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
@@ -36,7 +36,7 @@ public abstract class ProjectilePatch<T extends Projectile> {
 			CapabilityItem itemCap = EpicFightCapabilities.getItemStackCapability(heldItem);
 			
 			if (itemCap instanceof RangedWeaponCapability) {
-				Map<Attribute, AttributeModifier> modifierMap = itemCap.getDamageAttributesInCondition(Style.RANGED);
+				Map<Attribute, AttributeModifier> modifierMap = itemCap.getDamageAttributesInCondition(Styles.RANGED);
 				
 				if (modifierMap != null) {
 					this.armorNegation = modifierMap.containsKey(EpicFightAttributes.ARMOR_NEGATION.get()) ? (float)modifierMap.get(EpicFightAttributes.ARMOR_NEGATION.get()).getAmount() : (float)EpicFightAttributes.ARMOR_NEGATION.get().getDefaultValue();

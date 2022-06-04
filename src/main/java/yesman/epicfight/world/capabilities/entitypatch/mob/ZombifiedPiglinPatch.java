@@ -4,7 +4,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.monster.ZombifiedPiglin;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.game.AttackResult;
@@ -24,12 +24,12 @@ public class ZombifiedPiglinPatch extends HumanoidMobPatch<ZombifiedPiglin> {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.PIGLIN_ZOMBIFIED_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.PIGLIN_ZOMBIFIED_WALK);
-		clientAnimator.addLivingAnimation(LivingMotion.CHASE, Animations.PIGLIN_ZOMBIFIED_CHASE);
-		clientAnimator.addLivingAnimation(LivingMotion.FALL, Animations.BIPED_FALL);
-		clientAnimator.addLivingAnimation(LivingMotion.MOUNT, Animations.BIPED_MOUNT);
-		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.PIGLIN_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.PIGLIN_ZOMBIFIED_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.PIGLIN_ZOMBIFIED_WALK);
+		clientAnimator.addLivingAnimation(LivingMotions.CHASE, Animations.PIGLIN_ZOMBIFIED_CHASE);
+		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
+		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
+		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.PIGLIN_DEATH);
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	

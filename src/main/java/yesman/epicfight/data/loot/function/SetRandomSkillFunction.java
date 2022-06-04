@@ -19,7 +19,7 @@ public class SetRandomSkillFunction implements LootItemFunction {
 	
 	@Override
 	public ItemStack apply(ItemStack t, LootContext u) {
-		t.getOrCreateTag().putString("skill", Skills.getRandomModifiableSkillName());
+		t.getOrCreateTag().putString("skill", Skills.getRandomLearnableSkillName());
 		return t;
 	}
 

@@ -32,6 +32,7 @@ import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.ServerAnimator;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -61,8 +62,8 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	private float stunTimeReduction;
 	protected EntityState state = EntityState.FREE;
 	protected Animator animator;
-	public LivingMotion currentLivingMotion = LivingMotion.IDLE;
-	public LivingMotion currentCompositeMotion = LivingMotion.IDLE;
+	public LivingMotion currentLivingMotion = LivingMotions.IDLE;
+	public LivingMotion currentCompositeMotion = LivingMotions.IDLE;
 	public List<LivingEntity> currentlyAttackedEntity;
 	protected Vec3 lastAttackPosition;
 	

@@ -31,7 +31,7 @@ public class SkillBookModifier extends LootModifier {
 			Random random = new Random();
 			if (random.nextFloat() < 0.025F) {
 				ItemStack skillBook = new ItemStack(EpicFightItems.SKILLBOOK.get());
-				SkillBookItem.setContainingSkill(Skills.getRandomModifiableSkillName(), skillBook);
+				SkillBookItem.setContainingSkill(Skills.getRandomLearnableSkillName(), skillBook);
 				generatedLoot.add(skillBook);
 			}
 		}

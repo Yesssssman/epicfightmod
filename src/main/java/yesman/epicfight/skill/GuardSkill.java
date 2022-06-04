@@ -23,7 +23,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.game.AttackResult;
@@ -39,7 +39,7 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.Style;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
 import yesman.epicfight.world.entity.eventlistener.HurtEventPre;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
@@ -55,13 +55,13 @@ public class GuardSkill extends Skill {
 		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.GREATSWORD, (item, player) -> Animations.GREATSWORD_GUARD_HIT);
 		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.KATANA, (item, player) -> Animations.KATANA_GUARD_HIT);
 		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.LONGSWORD, (item, player) -> Animations.LONGSWORD_GUARD_HIT);
-		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.SPEAR, (item, player) -> item.getStyle(player) == Style.TWO_HAND ? Animations.SPEAR_GUARD_HIT : null);
-		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.SWORD, (item, player) -> item.getStyle(player) == Style.ONE_HAND ? Animations.SWORD_GUARD_HIT : Animations.SWORD_DUAL_GUARD_HIT);
+		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.SPEAR, (item, player) -> item.getStyle(player) == Styles.TWO_HAND ? Animations.SPEAR_GUARD_HIT : null);
+		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.SWORD, (item, player) -> item.getStyle(player) == Styles.ONE_HAND ? Animations.SWORD_GUARD_HIT : Animations.SWORD_DUAL_GUARD_HIT);
 		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.TACHI, (item, player) -> Animations.LONGSWORD_GUARD_HIT);
 	}
 	
 	public static Skill.Builder<GuardSkill> createBuilder(ResourceLocation resourceLocation) {
-		return (new Skill.Builder<GuardSkill>(resourceLocation)).setCategory(SkillCategory.GUARD).setMaxStack(0).setActivateType(ActivateType.ONE_SHOT).setResource(Resource.STAMINA);
+		return (new Skill.Builder<GuardSkill>(resourceLocation)).setCategory(SkillCategories.GUARD).setMaxStack(0).setActivateType(ActivateType.ONE_SHOT).setResource(Resource.STAMINA);
 	}
 	
 	public GuardSkill(Builder<? extends Skill> builder) {
@@ -216,7 +216,7 @@ public class GuardSkill extends Skill {
 	@Override
 	public boolean isExecutableState(PlayerPatch<?> executer) {
 		EntityState playerState = executer.getEntityState();
-		return !(executer.getOriginal().isFallFlying() || executer.currentLivingMotion == LivingMotion.FALL || playerState.hurt()) && executer.isBattleMode();
+		return !(executer.getOriginal().isFallFlying() || executer.currentLivingMotion == LivingMotions.FALL || playerState.hurt()) && executer.isBattleMode();
 	}
 	
 	protected boolean isBlockableSource(DamageSource damageSource, boolean specialSourceBlockCondition) {

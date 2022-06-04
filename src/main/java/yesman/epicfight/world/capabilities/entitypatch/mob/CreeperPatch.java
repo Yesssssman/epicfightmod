@@ -9,7 +9,7 @@ import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
@@ -54,9 +54,9 @@ public class CreeperPatch extends MobPatch<Creeper> {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.CREEPER_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.CREEPER_WALK);
-		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.CREEPER_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.CREEPER_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.CREEPER_WALK);
+		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.CREEPER_DEATH);
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 

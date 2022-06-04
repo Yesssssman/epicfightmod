@@ -1,7 +1,6 @@
 package yesman.epicfight.api.data.reloader;
 
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -35,6 +34,7 @@ import yesman.epicfight.network.server.SPDatapackSync;
 import yesman.epicfight.world.capabilities.item.ArmorCapability;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.NBTSeparativeCapability;
+import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.capabilities.item.WeaponCapabilityPresets;
 import yesman.epicfight.world.capabilities.provider.ProviderItem;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
@@ -125,7 +125,7 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 				for (String key : attributes.getAllKeys()) {
 					Map<Attribute, AttributeModifier> attributeEntry = deserializeAttribute(attributes.getCompound(key));
 					for (Map.Entry<Attribute, AttributeModifier> attribute : attributeEntry.entrySet()) {
-						innerDefaultCapability.addStyleAttibute(CapabilityItem.Style.valueOf(key.toUpperCase(Locale.ROOT)), Pair.of(attribute.getKey(), attribute.getValue()));
+						innerDefaultCapability.addStyleAttibute(Style.get(key), Pair.of(attribute.getKey(), attribute.getValue()));
 					}
 				}
 			}
@@ -139,7 +139,7 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 				for (String key : attributes.getAllKeys()) {
 					Map<Attribute, AttributeModifier> attributeEntry = deserializeAttribute(attributes.getCompound(key));
 					for (Map.Entry<Attribute, AttributeModifier> attribute : attributeEntry.entrySet()) {
-						capability.addStyleAttibute(CapabilityItem.Style.valueOf(key.toUpperCase(Locale.ROOT)), Pair.of(attribute.getKey(), attribute.getValue()));
+						capability.addStyleAttibute(Style.get(key), Pair.of(attribute.getKey(), attribute.getValue()));
 					}
 				}
 			}

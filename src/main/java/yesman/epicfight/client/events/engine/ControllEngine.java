@@ -30,6 +30,7 @@ import yesman.epicfight.client.gui.screen.SkillEditScreen;
 import yesman.epicfight.client.input.EpicFightKeyMappings;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.entity.eventlistener.MovementInputEvent;
@@ -117,7 +118,7 @@ public class ControllEngine {
 					}
 				}
 			} else {
-				SkillCategory skillCategory = (this.playerpatch.getEntityState() == EntityState.KNOCKDOWN) ? SkillCategory.KNOCKDOWN_WAKEUP : SkillCategory.DODGE;
+				SkillCategory skillCategory = (this.playerpatch.getEntityState() == EntityState.KNOCKDOWN) ? SkillCategories.KNOCKDOWN_WAKEUP : SkillCategories.DODGE;
 				SkillContainer skill = this.playerpatch.getSkill(skillCategory);
 				
 				if (skill.canExecute(this.playerpatch) && skill.getSkill().isExecutableState(this.playerpatch)) {
@@ -143,9 +144,9 @@ public class ControllEngine {
 	private void specialSkillKeyPressed(int key, int action) {
 		if (action == 1) {
 			if (key != 0) {
-				if (!this.playerpatch.getSkill(SkillCategory.WEAPON_SPECIAL_ATTACK).sendExecuteRequest(this.playerpatch)) {
+				if (!this.playerpatch.getSkill(SkillCategories.WEAPON_SPECIAL_ATTACK).sendExecuteRequest(this.playerpatch)) {
 					if (!this.player.isSpectator()) {
-						this.reserveKey(SkillCategory.WEAPON_SPECIAL_ATTACK);
+						this.reserveKey(SkillCategories.WEAPON_SPECIAL_ATTACK);
 					}
 				}
 			} else {
@@ -171,9 +172,9 @@ public class ControllEngine {
 			} else {
 				if (EpicFightKeyMappings.SPECIAL_SKILL.getKey().equals(this.options.keyAttack.getKey())) {
 					if (this.mouseLeftPressCounter > EpicFightMod.CLIENT_INGAME_CONFIG.longPressCount.getValue()) {
-						if (!this.playerpatch.getSkill(SkillCategory.WEAPON_SPECIAL_ATTACK).sendExecuteRequest(this.playerpatch)) {
+						if (!this.playerpatch.getSkill(SkillCategories.WEAPON_SPECIAL_ATTACK).sendExecuteRequest(this.playerpatch)) {
 							if (!this.player.isSpectator()) {
-								this.reserveKey(SkillCategory.WEAPON_SPECIAL_ATTACK);
+								this.reserveKey(SkillCategories.WEAPON_SPECIAL_ATTACK);
 							}
 						}
 						this.mouseLeftPressToggle = false;
@@ -187,14 +188,14 @@ public class ControllEngine {
 		}
 		
 		if (this.lightPress) {
-			SkillCategory slot = (!this.player.isOnGround() && !this.player.isInWater() && this.player.getDeltaMovement().y > -0.05D) ? SkillCategory.AIR_ATTACK : SkillCategory.BASIC_ATTACK;
+			SkillCategory slot = (!this.player.isOnGround() && !this.player.isInWater() && this.player.getDeltaMovement().y > -0.05D) ? SkillCategories.AIR_ATTACK : SkillCategories.BASIC_ATTACK;
 			
 			if (this.playerpatch.getSkill(slot).sendExecuteRequest(this.playerpatch)) {
 				this.player.resetAttackStrengthTicker();
 				this.lightPress = false;
 				this.resetReservedKey();
 			} else {
-				if (!(this.player.isSpectator() || slot == SkillCategory.AIR_ATTACK)) {
+				if (!(this.player.isSpectator() || slot == SkillCategories.AIR_ATTACK)) {
 					this.reserveKey(slot);
 				}
 			}
@@ -206,11 +207,11 @@ public class ControllEngine {
 		
 		if (this.sneakPressToggle) {
 			if (!this.isKeyDown(this.options.keyShift)) {
-				SkillCategory skillCategory = (this.playerpatch.getEntityState() == EntityState.KNOCKDOWN) ? SkillCategory.KNOCKDOWN_WAKEUP : SkillCategory.DODGE;
+				SkillCategory skillCategory = (this.playerpatch.getEntityState() == EntityState.KNOCKDOWN) ? SkillCategories.KNOCKDOWN_WAKEUP : SkillCategories.DODGE;
 				SkillContainer skill = this.playerpatch.getSkill(skillCategory);
 				
 				if (!skill.sendExecuteRequest(this.playerpatch)) {
-					this.reserveKey(SkillCategory.DODGE);
+					this.reserveKey(SkillCategories.DODGE);
 				}
 				
 				this.sneakPressToggle = false;
@@ -257,7 +258,7 @@ public class ControllEngine {
 	}
 	
 	private void reserveKey(SkillCategory slot) {
-		this.reservedKey = slot.getIndex();
+		this.reservedKey = slot.universalOrdinal();
 		this.reserveCounter = 8;
 	}
 	

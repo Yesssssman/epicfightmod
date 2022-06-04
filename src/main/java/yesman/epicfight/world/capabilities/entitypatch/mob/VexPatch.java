@@ -10,7 +10,7 @@ import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.monster.Vex;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
@@ -59,22 +59,22 @@ public class VexPatch extends MobPatch<Vex> {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.VEX_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.VEX_DEATH);
-		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.VEX_FLIPPING);
+		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.VEX_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.VEX_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.VEX_FLIPPING);
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		if (this.state.inaction() && considerInaction) {
-			currentLivingMotion = LivingMotion.INACTION;
+			currentLivingMotion = LivingMotions.INACTION;
 		} else {
 			if (this.original.getHealth() <= 0.0F) {
-				currentLivingMotion = LivingMotion.DEATH;
+				currentLivingMotion = LivingMotions.DEATH;
 			} else {
-				currentLivingMotion = LivingMotion.IDLE;
-				currentCompositeMotion = LivingMotion.IDLE;
+				currentLivingMotion = LivingMotions.IDLE;
+				currentCompositeMotion = LivingMotions.IDLE;
 			}
 		}
 	}

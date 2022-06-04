@@ -17,7 +17,7 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.client.CPChangeSkill;
 import yesman.epicfight.skill.Skill;
-import yesman.epicfight.skill.SkillContainer;
+import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 
 public class SkillEditScreen extends Screen {
@@ -35,14 +35,12 @@ public class SkillEditScreen extends Screen {
 	public void init() {
 		int i = this.width / 2 - 80;
 		int j = this.height / 2 - 82;
-		
 		this.categoryButtons.clear();
 		this.learnedSkillButtons.clear();
 		
-		for (SkillContainer skillContainer : this.skills.skillContainers) {
-			Skill skill = skillContainer.getSkill();
-			if (skill != null && skill.getCategory().learnable()) {
-				CategoryButton categoryButton = new CategoryButton(i, j, 18, 18, skillContainer.getSkill(), (button) -> {
+		for (SkillCategory skillCategory : SkillCategory.ASSIGNMENT_MANAGER.universalValues()) {
+			if (this.skills.hasCategory(skillCategory) && skillCategory.learnable()) {
+				CategoryButton categoryButton = new CategoryButton(i, j, 18, 18, this.skills.skillContainers[skillCategory.universalOrdinal()].getSkill(), (button) -> {
 					for (Button shownButton : this.learnedSkillButtons) {
 						this.children().remove(shownButton);
 					}
@@ -51,15 +49,14 @@ public class SkillEditScreen extends Screen {
 					int k = this.width / 2 - 53;
 					int l = this.height / 2 - 78;
 					
-					for (Skill learnedSkill : this.skills.getLearnedSkills(skillContainer.getSkill().getCategory())) {
-						ResourceLocation skillRegistryName = learnedSkill.getRegistryName();
-						this.learnedSkillButtons.add(new LearnSkillButton(k, l, 117, 24, learnedSkill, new TranslatableComponent("skill."+skillRegistryName.getNamespace()+"."+skillRegistryName.getPath()), (pressedButton) -> {
+					for (Skill learnedSkill : this.skills.getLearnedSkills(skillCategory)) {
+						this.learnedSkillButtons.add(new LearnSkillButton(k, l, 117, 24, learnedSkill, new TranslatableComponent(learnedSkill.getTranslatableText()), (pressedButton) -> {
 							if (this.minecraft.player.experienceLevel >= learnedSkill.getRequiredXp() || this.minecraft.player.isCreative()) {
-								this.skills.skillContainers[learnedSkill.getCategory().getIndex()].setSkill(learnedSkill);
-								EpicFightNetworkManager.sendToServer(new CPChangeSkill(learnedSkill.getCategory().getIndex(), -1, learnedSkill.getName(), !this.minecraft.player.isCreative()));
+								this.skills.skillContainers[learnedSkill.getCategory().universalOrdinal()].setSkill(learnedSkill);
+								EpicFightNetworkManager.sendToServer(new CPChangeSkill(learnedSkill.getCategory().universalOrdinal(), -1, learnedSkill.toString(), !this.minecraft.player.isCreative()));
 								this.onClose();
 							}
-						}).setActive(!learnedSkill.equals(skillContainer.getSkill())));
+						}).setActive(!learnedSkill.equals(this.skills.skillContainers[skillCategory.universalOrdinal()].getSkill())));
 						l+=26;
 					}
 					
@@ -67,8 +64,7 @@ public class SkillEditScreen extends Screen {
 						this.addWidget(shownButton);
 					}
 				}, (button, PoseStack, x, y) -> {
-					this.renderTooltip(PoseStack, this.minecraft.font.split(
-							new TextComponent(skill.getCategory().toString()), Math.max(this.width / 2 - 43, 170)), x, y);
+					this.renderTooltip(PoseStack, this.minecraft.font.split(new TextComponent(skillCategory.toString()), Math.max(this.width / 2 - 43, 170)), x, y);
 				});
 				
 				this.categoryButtons.add(categoryButton);
@@ -113,9 +109,11 @@ public class SkillEditScreen extends Screen {
 			int y = this.isHovered ? 35 : 17;
 			this.blit(PoseStack, this.x, this.y, 237, y, this.width, this.height);
 			
-			RenderSystem.enableBlend();
-			RenderSystem.setShaderTexture(0, this.skill.getSkillTexture());
-			GuiComponent.blit(PoseStack, this.x + 1, this.y + 1, 16, 16, 0, 0, 128, 128, 128, 128);
+			if (this.skill != null) {
+				RenderSystem.enableBlend();
+				RenderSystem.setShaderTexture(0, this.skill.getSkillTexture());
+				GuiComponent.blit(PoseStack, this.x + 1, this.y + 1, 16, 16, 0, 0, 128, 128, 128, 128);
+			}
 			
 			if (this.isHoveredOrFocused()) {
 				this.renderToolTip(PoseStack, mouseX, mouseY);

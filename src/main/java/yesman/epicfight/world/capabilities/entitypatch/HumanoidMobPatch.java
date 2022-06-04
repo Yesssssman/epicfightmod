@@ -24,6 +24,7 @@ import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.TridentItem;
 import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.utils.game.ExtendedDamageSource.StunType;
@@ -32,16 +33,16 @@ import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPChangeLivingMotion;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.Style;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
+import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 
 public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch<T> {
-	protected Map<WeaponCategory, Map<CapabilityItem.Style, Set<Pair<LivingMotion, StaticAnimation>>>> weaponLivingMotions;
-	protected Map<WeaponCategory, Map<CapabilityItem.Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> weaponAttackMotions;
+	protected Map<WeaponCategory, Map<Style, Set<Pair<LivingMotion, StaticAnimation>>>> weaponLivingMotions;
+	protected Map<WeaponCategory, Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> weaponAttackMotions;
 	
 	public HumanoidMobPatch(Faction faction) {
 		super(faction);
@@ -67,38 +68,38 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 	protected void setWeaponMotions() {
 		this.weaponLivingMotions = Maps.newHashMap();
 		this.weaponLivingMotions.put(WeaponCategory.GREATSWORD, ImmutableMap.of(
-			CapabilityItem.Style.TWO_HAND, Set.of(
-				Pair.of(LivingMotion.WALK, Animations.BIPED_WALK_TWOHAND),
-				Pair.of(LivingMotion.CHASE, Animations.BIPED_WALK_TWOHAND)
+			CapabilityItem.Styles.TWO_HAND, Set.of(
+				Pair.of(LivingMotions.WALK, Animations.BIPED_WALK_TWOHAND),
+				Pair.of(LivingMotions.CHASE, Animations.BIPED_WALK_TWOHAND)
 			)
 		));
 		
 		this.weaponAttackMotions = Maps.newHashMap();
-		this.weaponAttackMotions.put(WeaponCategory.AXE, ImmutableMap.of(CapabilityItem.Style.COMMON, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS));
-		this.weaponAttackMotions.put(WeaponCategory.HOE, ImmutableMap.of(CapabilityItem.Style.COMMON, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS));
-		this.weaponAttackMotions.put(WeaponCategory.PICKAXE, ImmutableMap.of(CapabilityItem.Style.COMMON, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS));
-		this.weaponAttackMotions.put(WeaponCategory.SHOVEL, ImmutableMap.of(CapabilityItem.Style.COMMON, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS));
-		this.weaponAttackMotions.put(WeaponCategory.SWORD, ImmutableMap.of(CapabilityItem.Style.ONE_HAND, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS, CapabilityItem.Style.TWO_HAND, MobCombatBehaviors.HUMANOID_DUAL_SWORD));
-		this.weaponAttackMotions.put(WeaponCategory.GREATSWORD, ImmutableMap.of(CapabilityItem.Style.TWO_HAND, MobCombatBehaviors.HUMANOID_GREATSWORD));
-		this.weaponAttackMotions.put(WeaponCategory.KATANA, ImmutableMap.of(CapabilityItem.Style.TWO_HAND, MobCombatBehaviors.HUMANOID_KATANA));
-		this.weaponAttackMotions.put(WeaponCategory.LONGSWORD, ImmutableMap.of(CapabilityItem.Style.TWO_HAND, MobCombatBehaviors.HUMANOID_LONGSWORD));
-		this.weaponAttackMotions.put(WeaponCategory.TACHI, ImmutableMap.of(CapabilityItem.Style.TWO_HAND, MobCombatBehaviors.HUMANOID_TACHI));
-		this.weaponAttackMotions.put(WeaponCategory.SPEAR, ImmutableMap.of(CapabilityItem.Style.ONE_HAND, MobCombatBehaviors.HUMANOID_SPEAR_ONEHAND, CapabilityItem.Style.TWO_HAND, MobCombatBehaviors.HUMANOID_SPEAR_TWOHAND));
-		this.weaponAttackMotions.put(WeaponCategory.FIST, ImmutableMap.of(CapabilityItem.Style.COMMON, MobCombatBehaviors.HUMANOID_FIST));
-		this.weaponAttackMotions.put(WeaponCategory.DAGGER, ImmutableMap.of(CapabilityItem.Style.ONE_HAND, MobCombatBehaviors.HUMANOID_ONEHAND_DAGGER, CapabilityItem.Style.TWO_HAND, MobCombatBehaviors.HUMANOID_TWOHAND_DAGGER));
-		this.weaponAttackMotions.put(WeaponCategory.RANGED, ImmutableMap.of(CapabilityItem.Style.COMMON, MobCombatBehaviors.HUMANOID_FIST));
-		this.weaponAttackMotions.put(WeaponCategory.TRIDENT, ImmutableMap.of(CapabilityItem.Style.COMMON, MobCombatBehaviors.HUMANOID_SPEAR_ONEHAND));
+		this.weaponAttackMotions.put(WeaponCategory.AXE, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS));
+		this.weaponAttackMotions.put(WeaponCategory.HOE, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS));
+		this.weaponAttackMotions.put(WeaponCategory.PICKAXE, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS));
+		this.weaponAttackMotions.put(WeaponCategory.SHOVEL, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS));
+		this.weaponAttackMotions.put(WeaponCategory.SWORD, ImmutableMap.of(CapabilityItem.Styles.ONE_HAND, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS, CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_DUAL_SWORD));
+		this.weaponAttackMotions.put(WeaponCategory.GREATSWORD, ImmutableMap.of(CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_GREATSWORD));
+		this.weaponAttackMotions.put(WeaponCategory.KATANA, ImmutableMap.of(CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_KATANA));
+		this.weaponAttackMotions.put(WeaponCategory.LONGSWORD, ImmutableMap.of(CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_LONGSWORD));
+		this.weaponAttackMotions.put(WeaponCategory.TACHI, ImmutableMap.of(CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_TACHI));
+		this.weaponAttackMotions.put(WeaponCategory.SPEAR, ImmutableMap.of(CapabilityItem.Styles.ONE_HAND, MobCombatBehaviors.HUMANOID_SPEAR_ONEHAND, CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_SPEAR_TWOHAND));
+		this.weaponAttackMotions.put(WeaponCategory.FIST, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_FIST));
+		this.weaponAttackMotions.put(WeaponCategory.DAGGER, ImmutableMap.of(CapabilityItem.Styles.ONE_HAND, MobCombatBehaviors.HUMANOID_ONEHAND_DAGGER, CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_TWOHAND_DAGGER));
+		this.weaponAttackMotions.put(WeaponCategory.RANGED, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_FIST));
+		this.weaponAttackMotions.put(WeaponCategory.TRIDENT, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_SPEAR_ONEHAND));
 	}
 	
 	protected CombatBehaviors.Builder<HumanoidMobPatch<?>> getHoldingItemWeaponMotionBuilder() {
 		CapabilityItem itemCap = this.getHoldingItemCapability(InteractionHand.MAIN_HAND);
 		
 		if (this.weaponAttackMotions.containsKey(itemCap.getWeaponCategory())) {
-			Map<CapabilityItem.Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>> motionByStyle = this.weaponAttackMotions.get(itemCap.getWeaponCategory());
-			CapabilityItem.Style style = itemCap.getStyle(this);
+			Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>> motionByStyle = this.weaponAttackMotions.get(itemCap.getWeaponCategory());
+			Style style = itemCap.getStyle(this);
 			
-			if (motionByStyle.containsKey(style) || motionByStyle.containsKey(CapabilityItem.Style.COMMON)) {
-				return motionByStyle.getOrDefault(style, motionByStyle.get(CapabilityItem.Style.COMMON));
+			if (motionByStyle.containsKey(style) || motionByStyle.containsKey(CapabilityItem.Styles.COMMON)) {
+				return motionByStyle.getOrDefault(style, motionByStyle.get(CapabilityItem.Styles.COMMON));
 			}
 		}
 		
@@ -124,21 +125,21 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 	}
 	
 	protected final void commonMobAnimatorInit(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.BIPED_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.BIPED_WALK);
-		clientAnimator.addLivingAnimation(LivingMotion.FALL, Animations.BIPED_FALL);
-		clientAnimator.addLivingAnimation(LivingMotion.MOUNT, Animations.BIPED_MOUNT);
-		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.BIPED_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK);
+		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
+		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
+		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
 	protected final void commonAggresiveMobAnimatorInit(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.BIPED_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.BIPED_WALK);
-		clientAnimator.addLivingAnimation(LivingMotion.CHASE, Animations.BIPED_WALK);
-		clientAnimator.addLivingAnimation(LivingMotion.FALL, Animations.BIPED_FALL);
-		clientAnimator.addLivingAnimation(LivingMotion.MOUNT, Animations.BIPED_MOUNT);
-		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.BIPED_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK);
+		clientAnimator.addLivingAnimation(LivingMotions.CHASE, Animations.BIPED_WALK);
+		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
+		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
+		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
@@ -186,11 +187,11 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 		}
 		
 		if (this.weaponLivingMotions != null && this.weaponLivingMotions.containsKey(mainhandCap.getWeaponCategory())) {
-			Map<CapabilityItem.Style, Set<Pair<LivingMotion, StaticAnimation>>> mapByStyle = this.weaponLivingMotions.get(mainhandCap.getWeaponCategory());
+			Map<Style, Set<Pair<LivingMotion, StaticAnimation>>> mapByStyle = this.weaponLivingMotions.get(mainhandCap.getWeaponCategory());
 			Style style = mainhandCap.getStyle(this);
 			
-			if (mapByStyle.containsKey(style) || mapByStyle.containsKey(CapabilityItem.Style.COMMON)) {
-				Set<Pair<LivingMotion, StaticAnimation>> animModifierSet = mapByStyle.getOrDefault(style, mapByStyle.get(CapabilityItem.Style.COMMON));
+			if (mapByStyle.containsKey(style) || mapByStyle.containsKey(CapabilityItem.Styles.COMMON)) {
+				Set<Pair<LivingMotion, StaticAnimation>> animModifierSet = mapByStyle.getOrDefault(style, mapByStyle.get(CapabilityItem.Styles.COMMON));
 				
 				for (Pair<LivingMotion, StaticAnimation> pair : animModifierSet) {
 					this.animator.addLivingAnimation(pair.getFirst(), pair.getSecond());

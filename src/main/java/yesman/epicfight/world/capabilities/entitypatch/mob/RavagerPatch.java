@@ -6,7 +6,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.Ravager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
@@ -37,9 +37,9 @@ public class RavagerPatch extends MobPatch<Ravager> {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.RAVAGER_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.RAVAGER_WALK);
-		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.RAVAGER_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.RAVAGER_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.RAVAGER_WALK);
+		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.RAVAGER_DEATH);
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	

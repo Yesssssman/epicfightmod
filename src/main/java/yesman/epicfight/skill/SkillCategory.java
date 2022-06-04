@@ -1,38 +1,14 @@
 package yesman.epicfight.skill;
 
-public enum SkillCategory {
-	BASIC_ATTACK(false, false, false),
-	AIR_ATTACK(false, false, false),
-	DODGE(true, true, true),
-	PASSIVE(true, true, true),
-	WEAPON_PASSIVE(false, false, false),
-	WEAPON_SPECIAL_ATTACK(false, true, false),
-	GUARD(true, true, true),
-	KNOCKDOWN_WAKEUP(false, false, false);
+import yesman.epicfight.api.utils.game.EnumerateAssignmentManager;
+import yesman.epicfight.api.utils.game.ExtendableEnum;
+
+public interface SkillCategory extends ExtendableEnum {
+	public static final EnumerateAssignmentManager<SkillCategory> ASSIGNMENT_MANAGER = new EnumerateAssignmentManager<> ();
 	
-	boolean shouldSaved;
-	boolean shouldSyncronized;
-	boolean modifiable;
+	public boolean shouldSaved();
 	
-	SkillCategory(boolean shouldSave, boolean shouldSyncronized, boolean modifiable) {
-		this.shouldSaved = shouldSave;
-		this.shouldSyncronized = shouldSyncronized;
-		this.modifiable = modifiable;
-	}
+	public boolean shouldSynchronized();
 	
-	public int getIndex() {
-		return this.ordinal();
-	}
-	
-	public boolean shouldSaved() {
-		return this.shouldSaved;
-	}
-	
-	public boolean shouldSynchronized() {
-		return this.shouldSyncronized;
-	}
-	
-	public boolean learnable() {
-		return this.modifiable;
-	}
+	public boolean learnable();
 }

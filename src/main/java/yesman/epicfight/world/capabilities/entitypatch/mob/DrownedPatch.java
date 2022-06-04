@@ -16,7 +16,7 @@ public class DrownedPatch extends ZombiePatch<Drowned> {
 	@Override
 	protected void setWeaponMotions() {
 		super.setWeaponMotions();
-		this.weaponAttackMotions.put(WeaponCategory.TRIDENT, ImmutableMap.of(CapabilityItem.Style.COMMON, MobCombatBehaviors.DROWNED_TRIDENT));
+		this.weaponAttackMotions.put(WeaponCategory.TRIDENT, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.DROWNED_TRIDENT));
 	}
 	
 	@Override

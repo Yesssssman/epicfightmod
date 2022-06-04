@@ -12,6 +12,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.gameasset.ColliderPreset;
@@ -65,7 +66,7 @@ public class WeaponCapability extends CapabilityItem {
 	
 	@Override
 	public final List<StaticAnimation> getMountAttackMotion() {
-		return this.autoAttackMotions.get(Style.MOUNT);
+		return this.autoAttackMotions.get(Styles.MOUNT);
 	}
 	
 	@Override
@@ -108,7 +109,7 @@ public class WeaponCapability extends CapabilityItem {
 		if (this.livingMotionModifiers != null) {
 			Style style = this.getStyle(playerpatch);
 			if (this.livingMotionModifiers.containsKey(style)) {
-				if (this.livingMotionModifiers.get(style).containsKey(LivingMotion.BLOCK)) {
+				if (this.livingMotionModifiers.get(style).containsKey(LivingMotions.BLOCK)) {
 					return UseAnim.BLOCK;
 				}
 			}
@@ -145,7 +146,7 @@ public class WeaponCapability extends CapabilityItem {
 		
 		public Builder() {
 			this.category = WeaponCategory.FIST;
-			this.styleProvider = (entitypatch) -> Style.ONE_HAND;
+			this.styleProvider = (entitypatch) -> Styles.ONE_HAND;
 			this.weaponCombinationPredicator = (entitypatch) -> false;
 			this.passiveSkill = null;
 			this.swingSound = EpicFightSounds.WHOOSH;

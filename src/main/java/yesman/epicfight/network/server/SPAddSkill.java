@@ -48,7 +48,7 @@ public class SPAddSkill {
 			LocalPlayerPatch playerpatch = (LocalPlayerPatch) mc.player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
 			CapabilitySkill skillCapability = playerpatch.getSkillCapability();
 			for (String skillName : msg.skillNames) {
-				skillCapability.addLearnedSkills(Skills.findSkill(skillName));
+				skillCapability.addLearnedSkill(Skills.getSkill(skillName));
 			}
 		});
 		ctx.get().setPacketHandled(true);

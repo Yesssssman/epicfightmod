@@ -5,19 +5,22 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.network.PacketDistributor.PacketTarget;
 import net.minecraftforge.network.simple.SimpleChannel;
 import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.network.client.CPChangePlayerMode;
 import yesman.epicfight.network.client.CPChangeSkill;
 import yesman.epicfight.network.client.CPExecuteSkill;
 import yesman.epicfight.network.client.CPPlayAnimation;
 import yesman.epicfight.network.client.CPRotatePlayerYaw;
 import yesman.epicfight.network.client.CPSetPlayerTarget;
-import yesman.epicfight.network.client.CPChangePlayerMode;
 import yesman.epicfight.network.server.SPAddSkill;
 import yesman.epicfight.network.server.SPChangeGamerule;
 import yesman.epicfight.network.server.SPChangeLivingMotion;
+import yesman.epicfight.network.server.SPChangePlayerMode;
 import yesman.epicfight.network.server.SPChangePlayerYaw;
 import yesman.epicfight.network.server.SPChangeSkill;
+import yesman.epicfight.network.server.SPClearSkills;
 import yesman.epicfight.network.server.SPDatapackSync;
 import yesman.epicfight.network.server.SPModifySkillData;
 import yesman.epicfight.network.server.SPPlayAnimation;
@@ -25,11 +28,11 @@ import yesman.epicfight.network.server.SPPlayAnimationAndSetTarget;
 import yesman.epicfight.network.server.SPPlayAnimationAndSyncTransform;
 import yesman.epicfight.network.server.SPPlayAnimationInstant;
 import yesman.epicfight.network.server.SPPotion;
+import yesman.epicfight.network.server.SPRemoveSkill;
 import yesman.epicfight.network.server.SPSetAttackTarget;
 import yesman.epicfight.network.server.SPSetSkillValue;
 import yesman.epicfight.network.server.SPSkillExecutionFeedback;
 import yesman.epicfight.network.server.SPSpawnData;
-import yesman.epicfight.network.server.SPChangePlayerMode;
 
 public class EpicFightNetworkManager {
 	private static final String PROTOCOL_VERSION = "1";
@@ -40,21 +43,25 @@ public class EpicFightNetworkManager {
 		INSTANCE.sendToServer(message);
 	}
 	
+	public static <MSG> void sendToClient(MSG message, PacketTarget packetTarget) {
+		INSTANCE.send(packetTarget, message);
+	}
+	
 	public static <MSG> void sendToAll(MSG message) {
-		INSTANCE.send(PacketDistributor.ALL.noArg(), message);
+		sendToClient(message, PacketDistributor.ALL.noArg());
 	}
 
 	public static <MSG> void sendToAllPlayerTrackingThisEntity(MSG message, Entity entity) {
-		INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> {return entity;}), message);
+		sendToClient(message, PacketDistributor.TRACKING_ENTITY.with(() -> entity));
 	}
 	
 	public static <MSG> void sendToPlayer(MSG message, ServerPlayer player) {
-		INSTANCE.send(PacketDistributor.PLAYER.with(() -> {return player;}), message);
+		sendToClient(message, PacketDistributor.PLAYER.with(() -> player));
 	}
 
 	public static <MSG> void sendToAllPlayerTrackingThisEntityWithSelf(MSG message, ServerPlayer entity) {
 		sendToPlayer(message, entity);
-		INSTANCE.send(PacketDistributor.TRACKING_ENTITY.with(() -> {return entity;}), message);
+		sendToClient(message, PacketDistributor.TRACKING_ENTITY.with(() -> entity));
 	}
 	
 	public static void registerPackets() {
@@ -83,5 +90,7 @@ public class EpicFightNetworkManager {
 		INSTANCE.registerMessage(id++, SPAddSkill.class, SPAddSkill::toBytes, SPAddSkill::fromBytes, SPAddSkill::handle);
 		INSTANCE.registerMessage(id++, SPDatapackSync.class, SPDatapackSync::toBytes, SPDatapackSync::fromBytes, SPDatapackSync::handle);
 		INSTANCE.registerMessage(id++, SPSetAttackTarget.class, SPSetAttackTarget::toBytes, SPSetAttackTarget::fromBytes, SPSetAttackTarget::handle);
+		INSTANCE.registerMessage(id++, SPClearSkills.class, SPClearSkills::toBytes, SPClearSkills::fromBytes, SPClearSkills::handle);
+		INSTANCE.registerMessage(id++, SPRemoveSkill.class, SPRemoveSkill::toBytes, SPRemoveSkill::fromBytes, SPRemoveSkill::handle);
 	}
 }

@@ -7,6 +7,7 @@ import java.util.function.Supplier;
 
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
@@ -69,7 +70,7 @@ public class SPChangeLivingMotion {
 		List<StaticAnimation> animationList = Lists.newArrayList();
 		
 		for (int i = 0; i < msg.count; i++) {
-			motionList.add(LivingMotion.values()[buf.readInt()]);
+			motionList.add(LivingMotion.ASSIGNMENT_MANAGER.get(buf.readInt()));
 		}
 		
 		for (int i = 0; i < msg.count; i++) {
@@ -88,7 +89,7 @@ public class SPChangeLivingMotion {
 		buf.writeBoolean(msg.setChangesAsDefault);
 		
 		for (LivingMotion motion : msg.motionList) {
-			buf.writeInt(motion.getId());
+			buf.writeInt(motion.universalOrdinal());
 		}
 		
 		for (StaticAnimation anim : msg.animationList) {

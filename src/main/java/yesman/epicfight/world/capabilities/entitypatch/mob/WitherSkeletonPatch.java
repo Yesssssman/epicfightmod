@@ -11,7 +11,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.game.ExtendedDamageSource;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -39,14 +39,14 @@ public class WitherSkeletonPatch<T extends PathfinderMob> extends SkeletonPatch<
 	protected void setWeaponMotions() {
 		super.setWeaponMotions();
 		this.weaponLivingMotions.put(WeaponCategory.SWORD, ImmutableMap.of(
-			CapabilityItem.Style.ONE_HAND, Set.of(
-				Pair.of(LivingMotion.CHASE, Animations.WITHER_SKELETON_CHASE),
-				Pair.of(LivingMotion.WALK, Animations.WITHER_SKELETON_WALK),
-				Pair.of(LivingMotion.IDLE, Animations.WITHER_SKELETON_IDLE)
+			CapabilityItem.Styles.ONE_HAND, Set.of(
+				Pair.of(LivingMotions.CHASE, Animations.WITHER_SKELETON_CHASE),
+				Pair.of(LivingMotions.WALK, Animations.WITHER_SKELETON_WALK),
+				Pair.of(LivingMotions.IDLE, Animations.WITHER_SKELETON_IDLE)
 			)
 		));
 		
-		this.weaponAttackMotions.put(WeaponCategory.SWORD, ImmutableMap.of(CapabilityItem.Style.COMMON, MobCombatBehaviors.SKELETON_SWORD));
+		this.weaponAttackMotions.put(WeaponCategory.SWORD, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.SKELETON_SWORD));
 	}
 	
 	@Override

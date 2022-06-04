@@ -6,7 +6,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.client.events.engine.ControllEngine;
@@ -66,7 +66,7 @@ public class DodgeSkill extends Skill {
 	}
 	
 	public static Builder createBuilder(ResourceLocation registryName) {
-		return (new Builder(registryName)).setCategory(SkillCategory.DODGE).setActivateType(ActivateType.ONE_SHOT).setResource(Resource.STAMINA).setRequiredXp(5);
+		return (new Builder(registryName)).setCategory(SkillCategories.DODGE).setActivateType(ActivateType.ONE_SHOT).setResource(Resource.STAMINA).setRequiredXp(5);
 	}
 	
 	protected final StaticAnimation[] animations;
@@ -104,7 +104,7 @@ public class DodgeSkill extends Skill {
 		int vertic = forward + backward;
 		int horizon = left + right;
 		int degree = -(90 * horizon * (1 - Math.abs(vertic)) + 45 * vertic * horizon);
-		CPExecuteSkill packet = new CPExecuteSkill(this.category.getIndex());
+		CPExecuteSkill packet = new CPExecuteSkill(this.category.universalOrdinal());
 		packet.getBuffer().writeInt(vertic >= 0 ? 0 : 1);
 		packet.getBuffer().writeFloat(degree);
 		EpicFightNetworkManager.sendToServer(packet);
@@ -123,6 +123,6 @@ public class DodgeSkill extends Skill {
 	public boolean isExecutableState(PlayerPatch<?> executer) {
 		executer.updateEntityState();
 		EntityState playerState = executer.getEntityState();
-		return !(executer.getOriginal().isFallFlying() || executer.currentLivingMotion == LivingMotion.FALL || !playerState.canUseSkill()) && !executer.getOriginal().isInWater() && !executer.getOriginal().onClimbable();
+		return !(executer.getOriginal().isFallFlying() || executer.currentLivingMotion == LivingMotions.FALL || !playerState.canUseSkill()) && !executer.getOriginal().isInWater() && !executer.getOriginal().onClimbable();
 	}
 }

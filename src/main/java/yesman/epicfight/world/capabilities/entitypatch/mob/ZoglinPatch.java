@@ -12,7 +12,7 @@ import net.minecraft.world.entity.monster.Zoglin;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
@@ -39,9 +39,9 @@ public class ZoglinPatch extends MobPatch<Zoglin> {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.HOGLIN_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.HOGLIN_WALK);
-		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.HOGLIN_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.HOGLIN_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.HOGLIN_WALK);
+		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.HOGLIN_DEATH);
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	

@@ -31,7 +31,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.property.Property.ActionAnimationProperty;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -107,17 +107,17 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.WITHER_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.WITHER_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.WITHER_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.WITHER_DEATH);
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		if (this.getEntityState().inaction() && considerInaction) {
-			currentLivingMotion = LivingMotion.INACTION;
+			currentLivingMotion = LivingMotions.INACTION;
 		} else {
-			currentLivingMotion = LivingMotion.IDLE;
+			currentLivingMotion = LivingMotions.IDLE;
 		}
 	}
 	

@@ -12,7 +12,7 @@ public class RangedAttackAnimation extends AttackAnimation {
 	
 	@Override
 	public void doAttack(LivingEntityPatch<?> entitypatch, float prevElapsedTime, float elapsedTime, EntityState prevState, EntityState state, Phase phase) {
-		if (state.attacking() && (entitypatch.getOriginal() instanceof RangedAttackMob)) {
+		if (state.attacking() && entitypatch.getTarget() != null && (entitypatch.getOriginal() instanceof RangedAttackMob)) {
 			((RangedAttackMob)entitypatch.getOriginal()).performRangedAttack(entitypatch.getTarget(), elapsedTime);
 		}
 	}

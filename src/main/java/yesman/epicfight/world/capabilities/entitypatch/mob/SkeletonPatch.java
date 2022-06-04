@@ -8,7 +8,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.gameasset.Animations;
@@ -46,12 +46,12 @@ public class SkeletonPatch<T extends PathfinderMob> extends HumanoidMobPatch<T> 
 	protected void setWeaponMotions() {
 		super.setWeaponMotions();
 		this.weaponLivingMotions.put(WeaponCategory.SWORD, ImmutableMap.of(
-			CapabilityItem.Style.ONE_HAND, Set.of(
-				Pair.of(LivingMotion.CHASE, Animations.WITHER_SKELETON_CHASE)
+			CapabilityItem.Styles.ONE_HAND, Set.of(
+				Pair.of(LivingMotions.CHASE, Animations.WITHER_SKELETON_CHASE)
 			)
 		));
 		
-		this.weaponAttackMotions.put(WeaponCategory.SWORD, ImmutableMap.of(CapabilityItem.Style.COMMON, MobCombatBehaviors.SKELETON_SWORD));
+		this.weaponAttackMotions.put(WeaponCategory.SWORD, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.SKELETON_SWORD));
 	}
 	
 	@Override

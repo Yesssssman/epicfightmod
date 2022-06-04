@@ -17,7 +17,7 @@ import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.game.AttackResult;
 import yesman.epicfight.client.ClientEngine;
@@ -57,7 +57,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	public void updateMotion(boolean considerInaction) {
 		super.updateMotion(considerInaction);
 		if (!this.getClientAnimator().isAiming()) {
-			if (this.currentCompositeMotion == LivingMotion.AIM) {
+			if (this.currentCompositeMotion == LivingMotions.AIM) {
 				this.original.getUseItemRemainingTicks();
 				ClientEngine.instance.renderEngine.zoomIn();
 			}

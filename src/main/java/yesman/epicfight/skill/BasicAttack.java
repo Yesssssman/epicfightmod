@@ -12,7 +12,7 @@ import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
@@ -31,7 +31,7 @@ public class BasicAttack extends Skill {
 	private static final UUID EVENT_UUID = UUID.fromString("a42e0198-fdbc-11eb-9a03-0242ac130003");
 	
 	public static Skill.Builder<BasicAttack> createBuilder() {
-		return (new Builder<BasicAttack>(new ResourceLocation(EpicFightMod.MODID, "basic_attack"))).setCategory(SkillCategory.BASIC_ATTACK).setConsumption(0.0F).setActivateType(ActivateType.ONE_SHOT).setResource(Resource.NONE);
+		return (new Builder<BasicAttack>(new ResourceLocation(EpicFightMod.MODID, "basic_attack"))).setCategory(SkillCategories.BASIC_ATTACK).setConsumption(0.0F).setActivateType(ActivateType.ONE_SHOT).setResource(Resource.NONE);
 	}
 	
 	public BasicAttack(Builder<? extends Skill> builder) {
@@ -57,7 +57,7 @@ public class BasicAttack extends Skill {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void executeOnClient(LocalPlayerPatch executer, FriendlyByteBuf args) {
-		EpicFightNetworkManager.sendToServer(new CPExecuteSkill(this.category.getIndex(), true, args));
+		EpicFightNetworkManager.sendToServer(new CPExecuteSkill(this.category.universalOrdinal(), true, args));
 	}
 	
 	@Override
@@ -65,7 +65,7 @@ public class BasicAttack extends Skill {
 		executer.updateEntityState();
 		EntityState playerState = executer.getEntityState();
 		Player player = executer.getOriginal();
-		return !(player.isSpectator() || player.isFallFlying() || executer.currentLivingMotion == LivingMotion.FALL || !playerState.canBasicAttack());
+		return !(player.isSpectator() || player.isFallFlying() || executer.currentLivingMotion == LivingMotions.FALL || !playerState.canBasicAttack());
 	}
 	
 	@Override

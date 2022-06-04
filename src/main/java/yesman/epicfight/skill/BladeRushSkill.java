@@ -100,7 +100,7 @@ public class BladeRushSkill extends SpecialAttackSkill {
 	public void cancelOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
 		executer.getSkill(this.category).deactivate();
 		executer.getSkill(this.category).getDataManager().setData(COMBO_COUNT, 0);
-		EpicFightNetworkManager.sendToPlayer(new SPSkillExecutionFeedback(this.category.getIndex(), false), executer.getOriginal());
+		EpicFightNetworkManager.sendToPlayer(new SPSkillExecutionFeedback(this.category.universalOrdinal(), false), executer.getOriginal());
 	}
 	
 	@Override

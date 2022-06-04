@@ -5,7 +5,7 @@ import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -36,10 +36,10 @@ public class WitchPatch extends HumanoidMobPatch<Witch> {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.BIPED_DEATH);
-		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.ILLAGER_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.ILLAGER_WALK);
-		clientAnimator.addLivingAnimation(LivingMotion.DRINK, Animations.WITCH_DRINKING);
+		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.ILLAGER_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.ILLAGER_WALK);
+		clientAnimator.addLivingAnimation(LivingMotions.DRINK, Animations.WITCH_DRINKING);
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
@@ -48,7 +48,7 @@ public class WitchPatch extends HumanoidMobPatch<Witch> {
 		super.commonMobUpdateMotion(considerInaction);
 		
 		if (this.original.isDrinkingPotion()) {
-			this.currentCompositeMotion = LivingMotion.DRINK;
+			this.currentCompositeMotion = LivingMotions.DRINK;
 		}
 	}
 	

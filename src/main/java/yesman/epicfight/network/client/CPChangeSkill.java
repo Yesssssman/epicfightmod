@@ -43,18 +43,21 @@ public class CPChangeSkill {
 		ctx.get().enqueueWork(() -> {
 			ServerPlayer serverPlayer = ctx.get().getSender();
 			ServerPlayerPatch playerpatch = (ServerPlayerPatch) serverPlayer.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-			Skill skill = Skills.findSkill(msg.skillName);
-			playerpatch.getSkill(msg.skillSlotIndex).setSkill(skill);
 			
-			if (skill.getCategory().learnable()) {
-				playerpatch.getSkillCapability().addLearnedSkills(skill);
-			}
-			
-			if (msg.consumeXp) {
-				serverPlayer.giveExperienceLevels(-skill.getRequiredXp());
-			} else {
-				if (!serverPlayer.isCreative()) {
-					serverPlayer.getInventory().removeItem(serverPlayer.getInventory().getItem(msg.itemSlotIndex));
+			if (playerpatch != null) {
+				Skill skill = Skills.getSkill(msg.skillName);
+				playerpatch.getSkill(msg.skillSlotIndex).setSkill(skill);
+				
+				if (skill.getCategory().learnable()) {
+					playerpatch.getSkillCapability().addLearnedSkill(skill);
+				}
+				
+				if (msg.consumeXp) {
+					serverPlayer.giveExperienceLevels(-skill.getRequiredXp());
+				} else {
+					if (!serverPlayer.isCreative()) {
+						serverPlayer.getInventory().removeItem(serverPlayer.getInventory().getItem(msg.itemSlotIndex));
+					}
 				}
 			}
 		});

@@ -26,7 +26,7 @@ import net.minecraftforge.common.ForgeConfig;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.animation.Layer;
@@ -59,21 +59,21 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		if (this.state.inaction() && considerInaction) {
-			currentLivingMotion = LivingMotion.INACTION;
+			currentLivingMotion = LivingMotions.INACTION;
 		} else {
 			ClientAnimator animator = this.getClientAnimator();
 			if (this.original.getHealth() <= 0.0F) {
-				currentLivingMotion = LivingMotion.DEATH;
+				currentLivingMotion = LivingMotions.DEATH;
 			} else if (original.isFallFlying() || original.isAutoSpinAttack()) {
-				currentLivingMotion = LivingMotion.FLY;
+				currentLivingMotion = LivingMotions.FLY;
 			} else if (original.getVehicle() != null) {
-				currentLivingMotion = LivingMotion.MOUNT;
+				currentLivingMotion = LivingMotions.MOUNT;
 			} else if (original.isVisuallySwimming()) {
-				currentLivingMotion = LivingMotion.SWIM;
+				currentLivingMotion = LivingMotions.SWIM;
 			} else if (original.isSleeping()) {
-				currentLivingMotion = LivingMotion.SLEEP;
+				currentLivingMotion = LivingMotions.SLEEP;
 			} else if (!original.isOnGround() && original.onClimbable()) {
-				currentLivingMotion = LivingMotion.CLIMB;
+				currentLivingMotion = LivingMotions.CLIMB;
 				double y = original.yCloak - original.yCloakO;
 				if (Math.abs(y) < 0.04D) {
 					animator.baseLayer.pause();
@@ -82,16 +82,16 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 				}
 			} else {
 				if (original.isUnderWater() && (original.yCloak - original.yCloakO) < -0.005)
-					currentLivingMotion = LivingMotion.FLOAT;
+					currentLivingMotion = LivingMotions.FLOAT;
 				else if (original.yCloak - original.yCloakO < -0.25F)
-					currentLivingMotion = LivingMotion.FALL;
+					currentLivingMotion = LivingMotions.FALL;
 				else if (original.animationSpeed > 0.01F) {
 					if (original.isShiftKeyDown())
-						currentLivingMotion = LivingMotion.SNEAK;
+						currentLivingMotion = LivingMotions.SNEAK;
 					else if (original.isSprinting())
-						currentLivingMotion = LivingMotion.RUN;
+						currentLivingMotion = LivingMotions.RUN;
 					else
-						currentLivingMotion = LivingMotion.WALK;
+						currentLivingMotion = LivingMotions.WALK;
 					
 					if (original.zza > 0)
 						animator.baseLayer.animationPlayer.setReversed(false);
@@ -101,9 +101,9 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 				} else {
 					animator.baseLayer.animationPlayer.setReversed(false);
 					if (original.isShiftKeyDown())
-						currentLivingMotion = LivingMotion.KNEEL;
+						currentLivingMotion = LivingMotions.KNEEL;
 					else
-						currentLivingMotion = LivingMotion.IDLE;
+						currentLivingMotion = LivingMotions.IDLE;
 				}
 			}
 		}
@@ -117,26 +117,26 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			
 			if (useAnim == UseAnim.BLOCK || secondUseAnim == UseAnim.BLOCK)
 				if (activeItem.getWeaponCategory() == WeaponCategory.SHIELD)
-					currentCompositeMotion = LivingMotion.BLOCK_SHIELD;
+					currentCompositeMotion = LivingMotions.BLOCK_SHIELD;
 				else
-					currentCompositeMotion = LivingMotion.BLOCK;
+					currentCompositeMotion = LivingMotions.BLOCK;
 			else if (useAnim == UseAnim.BOW || useAnim == UseAnim.SPEAR)
-				currentCompositeMotion = LivingMotion.AIM;
+				currentCompositeMotion = LivingMotions.AIM;
 			else if (useAnim == UseAnim.CROSSBOW)
-				currentCompositeMotion = LivingMotion.RELOAD;
+				currentCompositeMotion = LivingMotions.RELOAD;
 			else
 				currentCompositeMotion = currentLivingMotion;
 		} else {
 			if (this.original.getMainHandItem().getItem() instanceof ProjectileWeaponItem && CrossbowItem.isCharged(this.original.getMainHandItem()))
-				currentCompositeMotion = LivingMotion.AIM;
+				currentCompositeMotion = LivingMotions.AIM;
 			else if (this.getClientAnimator().getCompositeLayer(Layer.Priority.MIDDLE).animationPlayer.getPlay().isReboundAnimation())
-				currentCompositeMotion = LivingMotion.NONE;
+				currentCompositeMotion = LivingMotions.NONE;
 			else if (this.original.swinging && this.original.getSleepingPos().isEmpty())
-				currentCompositeMotion = LivingMotion.DIGGING;
+				currentCompositeMotion = LivingMotions.DIGGING;
 			else
 				currentCompositeMotion = currentLivingMotion;
 			
-			if (this.getClientAnimator().isAiming() && currentCompositeMotion != LivingMotion.AIM && this.original.getMainHandItem().getItem() instanceof ProjectileWeaponItem) {
+			if (this.getClientAnimator().isAiming() && currentCompositeMotion != LivingMotions.AIM && this.original.getMainHandItem().getItem() instanceof ProjectileWeaponItem) {
 				this.playReboundAnimation();
 			}
 		}

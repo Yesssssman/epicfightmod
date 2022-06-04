@@ -36,7 +36,7 @@ import yesman.epicfight.skill.SimpleSpecialAttackSkill;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.Skill.ActivateType;
 import yesman.epicfight.skill.Skill.Resource;
-import yesman.epicfight.skill.SkillCategory;
+import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SpecialAttackSkill;
 import yesman.epicfight.skill.StaminaPillagerSkill;
 import yesman.epicfight.skill.StepSkill;
@@ -49,8 +49,19 @@ public class Skills {
 	private static final Random RANDOM = new Random();
 	private static int LAST_PICK = 0;
 	
-	public static Skill findSkill(String skillName) {
-		ResourceLocation rl = new ResourceLocation(EpicFightMod.MODID, skillName);
+	static {
+		SKILLS.put(new ResourceLocation(EpicFightMod.MODID, "empty"), null);
+	}
+	
+	public static Skill getSkill(String name) {
+		ResourceLocation rl;
+		
+		if (name.indexOf(':') >= 0) {
+			rl = new ResourceLocation(name);
+		} else {
+			rl = new ResourceLocation(EpicFightMod.MODID, name);
+		}
+		
 		if (SKILLS.containsKey(rl)) {
 			return SKILLS.get(rl);
 		} else {
@@ -58,14 +69,18 @@ public class Skills {
 		}
 	}
 	
-	public static Collection<Skill> getLearnableSkillCollection() {
+	public static Collection<ResourceLocation> getLearnableSkillNames() {
+		return LEARNABLE_SKILLS.keySet();
+	}
+	
+	public static Collection<Skill> getLearnableSkills() {
 		return LEARNABLE_SKILLS.values();
 	}
 	
-	public static String getRandomModifiableSkillName() {
+	public static String getRandomLearnableSkillName() {
 		List<Skill> values = new ArrayList<Skill>(LEARNABLE_SKILLS.values());
 		LAST_PICK = (LAST_PICK + RANDOM.nextInt(values.size() - 1) + 1) % values.size();
-		return values.get(LAST_PICK).getName();
+		return values.get(LAST_PICK).toString();
 	}
 	
 	/** Default skills **/
@@ -104,7 +119,7 @@ public class Skills {
 		AIR_ATTACK = registerSkill(new AirAttack(AirAttack.createBuilder()));
 		ROLL = registerSkill(new DodgeSkill(DodgeSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "roll")).setConsumption(4.0F).setAnimations(Animations.BIPED_ROLL_FORWARD, Animations.BIPED_ROLL_BACKWARD)));
 		STEP = registerSkill(new StepSkill(DodgeSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "step")).setConsumption(3.0F).setAnimations(Animations.BIPED_STEP_FORWARD, Animations.BIPED_STEP_BACKWARD, Animations.BIPED_STEP_LEFT, Animations.BIPED_STEP_RIGHT)));
-		KNOCKDOWN_WAKEUP = registerSkill(new KnockdownWakeupSkill(DodgeSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "knockdown_wakeup")).setConsumption(6.0F).setAnimations(Animations.BIPED_KNOCKDOWN_WAKEUP_LEFT, Animations.BIPED_KNOCKDOWN_WAKEUP_RIGHT).setCategory(SkillCategory.KNOCKDOWN_WAKEUP)));
+		KNOCKDOWN_WAKEUP = registerSkill(new KnockdownWakeupSkill(DodgeSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "knockdown_wakeup")).setConsumption(6.0F).setAnimations(Animations.BIPED_KNOCKDOWN_WAKEUP_LEFT, Animations.BIPED_KNOCKDOWN_WAKEUP_RIGHT).setCategory(SkillCategories.KNOCKDOWN_WAKEUP)));
 		
 		GUARD = registerSkill(new GuardSkill(GuardSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "guard")).setRequiredXp(5)));
 		ACTIVE_GUARD = registerSkill(new ActiveGuardSkill(GuardSkill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "active_guard")).setRequiredXp(8)));
@@ -166,7 +181,7 @@ public class Skills {
 				.registerPropertiesToAnimation());
 		
 		KATANA_PASSIVE = registerSkill(new KatanaPassive(Skill.createBuilder(new ResourceLocation(EpicFightMod.MODID, "katana_passive"))
-				.setCategory(SkillCategory.WEAPON_PASSIVE)
+				.setCategory(SkillCategories.WEAPON_PASSIVE)
 				.setConsumption(5.0F)
 				.setActivateType(ActivateType.ONE_SHOT)
 				.setResource(Resource.COOLDOWN)

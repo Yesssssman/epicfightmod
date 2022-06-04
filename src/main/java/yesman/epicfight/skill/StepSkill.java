@@ -34,7 +34,7 @@ public class StepSkill extends DodgeSkill {
 			animation = vertic >= 0 ? 0 : 1;
 		}
 		
-		CPExecuteSkill packet = new CPExecuteSkill(this.category.getIndex());
+		CPExecuteSkill packet = new CPExecuteSkill(this.category.universalOrdinal());
 		packet.getBuffer().writeInt(animation);
 		packet.getBuffer().writeFloat(degree);
 		

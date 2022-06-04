@@ -7,6 +7,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.gameasset.Skills;
+import yesman.epicfight.skill.Skill;
+import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 
 public class SPChangeSkill {
@@ -39,10 +41,18 @@ public class SPChangeSkill {
 		ctx.get().enqueueWork(() -> {
 			Minecraft mc = Minecraft.getInstance();
 			LocalPlayerPatch playerpatch = (LocalPlayerPatch) mc.player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-			if (!msg.skillName.equals("empty")) {
-				playerpatch.getSkill(msg.slotIndex).setSkill(Skills.findSkill(msg.skillName));
+			
+			if (playerpatch != null) {
+				if (!msg.skillName.equals("")) {
+					Skill skill = Skills.getSkill(msg.skillName);
+					playerpatch.getSkill(msg.slotIndex).setSkill(skill);
+					
+					if (SkillCategory.ASSIGNMENT_MANAGER.get(msg.slotIndex).learnable()) {
+						playerpatch.getSkillCapability().addLearnedSkill(skill);
+					}
+				}
+				playerpatch.getSkill(msg.slotIndex).setDisabled(msg.state.setter);
 			}
-			playerpatch.getSkill(msg.slotIndex).setDisabled(msg.state.setter);
 		});
 		ctx.get().setPacketHandled(true);
 	}

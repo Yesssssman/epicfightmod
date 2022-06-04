@@ -14,7 +14,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
@@ -25,6 +25,7 @@ import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.gameasset.Skills;
 import yesman.epicfight.skill.Skill;
+import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
@@ -60,9 +61,9 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	public void onJoinWorld(T entityIn, EntityJoinWorldEvent event) {
 		super.onJoinWorld(entityIn, event);
 		CapabilitySkill skillCapability = this.getSkillCapability();
-		skillCapability.skillContainers[SkillCategory.BASIC_ATTACK.getIndex()].setSkill(Skills.BASIC_ATTACK);
-		skillCapability.skillContainers[SkillCategory.AIR_ATTACK.getIndex()].setSkill(Skills.AIR_ATTACK);
-		skillCapability.skillContainers[SkillCategory.KNOCKDOWN_WAKEUP.getIndex()].setSkill(Skills.KNOCKDOWN_WAKEUP);
+		skillCapability.skillContainers[SkillCategories.BASIC_ATTACK.universalOrdinal()].setSkill(Skills.BASIC_ATTACK);
+		skillCapability.skillContainers[SkillCategories.AIR_ATTACK.universalOrdinal()].setSkill(Skills.AIR_ATTACK);
+		skillCapability.skillContainers[SkillCategories.KNOCKDOWN_WAKEUP.universalOrdinal()].setSkill(Skills.KNOCKDOWN_WAKEUP);
 		this.tickSinceLastAction = 0;
 		this.eventListeners.addEventListener(EventType.ACTION_EVENT, ACTION_EVENT_UUID, (playerEvent) -> {
 			this.resetActionTick();
@@ -78,23 +79,23 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.BIPED_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.BIPED_WALK);
-		clientAnimator.addLivingAnimation(LivingMotion.RUN, Animations.BIPED_RUN);
-		clientAnimator.addLivingAnimation(LivingMotion.SNEAK, Animations.BIPED_SNEAK);
-		clientAnimator.addLivingAnimation(LivingMotion.SWIM, Animations.BIPED_SWIM);
-		clientAnimator.addLivingAnimation(LivingMotion.FLOAT, Animations.BIPED_FLOAT);
-		clientAnimator.addLivingAnimation(LivingMotion.KNEEL, Animations.BIPED_KNEEL);
-		clientAnimator.addLivingAnimation(LivingMotion.FALL, Animations.BIPED_FALL);
-		clientAnimator.addLivingAnimation(LivingMotion.MOUNT, Animations.BIPED_MOUNT);
-		clientAnimator.addLivingAnimation(LivingMotion.FLY, Animations.BIPED_FLYING);
-		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.BIPED_DEATH);
-		clientAnimator.addLivingAnimation(LivingMotion.JUMP, Animations.BIPED_JUMP);
-		clientAnimator.addLivingAnimation(LivingMotion.CLIMB, Animations.BIPED_CLIMBING);
-		clientAnimator.addLivingAnimation(LivingMotion.SLEEP, Animations.BIPED_SLEEPING);
-		clientAnimator.addLivingAnimation(LivingMotion.DIGGING, Animations.BIPED_DIG);
-		clientAnimator.addLivingAnimation(LivingMotion.AIM, Animations.BIPED_BOW_AIM);
-		clientAnimator.addLivingAnimation(LivingMotion.SHOT, Animations.BIPED_BOW_SHOT);
+		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK);
+		clientAnimator.addLivingAnimation(LivingMotions.RUN, Animations.BIPED_RUN);
+		clientAnimator.addLivingAnimation(LivingMotions.SNEAK, Animations.BIPED_SNEAK);
+		clientAnimator.addLivingAnimation(LivingMotions.SWIM, Animations.BIPED_SWIM);
+		clientAnimator.addLivingAnimation(LivingMotions.FLOAT, Animations.BIPED_FLOAT);
+		clientAnimator.addLivingAnimation(LivingMotions.KNEEL, Animations.BIPED_KNEEL);
+		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
+		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
+		clientAnimator.addLivingAnimation(LivingMotions.FLY, Animations.BIPED_FLYING);
+		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotions.JUMP, Animations.BIPED_JUMP);
+		clientAnimator.addLivingAnimation(LivingMotions.CLIMB, Animations.BIPED_CLIMBING);
+		clientAnimator.addLivingAnimation(LivingMotions.SLEEP, Animations.BIPED_SLEEPING);
+		clientAnimator.addLivingAnimation(LivingMotions.DIGGING, Animations.BIPED_DIG);
+		clientAnimator.addLivingAnimation(LivingMotions.AIM, Animations.BIPED_BOW_AIM);
+		clientAnimator.addLivingAnimation(LivingMotions.SHOT, Animations.BIPED_BOW_SHOT);
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
@@ -113,10 +114,10 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 			i++;
 		}
 		
-		for (SkillCategory skillCategory : SkillCategory.values()) {
+		for (SkillCategory skillCategory : SkillCategory.ASSIGNMENT_MANAGER.universalValues()) {
 			if (oldSkill.hasCategory(skillCategory)) {
 				for (Skill learnedSkill : oldSkill.getLearnedSkills(skillCategory)) {
-					newSkill.addLearnedSkills(learnedSkill);
+					newSkill.addLearnedSkill(learnedSkill);
 				}
 			}
 		}
@@ -161,7 +162,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	public SkillContainer getSkill(SkillCategory category) {
-		return this.getSkill(category.getIndex());
+		return this.getSkill(category.universalOrdinal());
 	}
 	
 	public SkillContainer getSkill(int categoryIndex) {

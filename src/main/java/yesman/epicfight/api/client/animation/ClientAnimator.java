@@ -15,6 +15,7 @@ import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.ServerAnimator;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
@@ -42,8 +43,8 @@ public class ClientAnimator extends Animator {
 	
 	public ClientAnimator(LivingEntityPatch<?> entitypatch) {
 		this.entitypatch = entitypatch;
-		this.currentMotion = LivingMotion.IDLE;
-		this.currentCompositeMotion = LivingMotion.IDLE;
+		this.currentMotion = LivingMotions.IDLE;
+		this.currentCompositeMotion = LivingMotions.IDLE;
 		this.compositeLivingAnimations = Maps.newHashMap();
 		this.defaultLivingAnimations = Maps.<LivingMotion, StaticAnimation>newHashMap();
 		this.defaultCompositeLivingAnimations = Maps.<LivingMotion, StaticAnimation>newHashMap();
@@ -163,7 +164,7 @@ public class ClientAnimator extends Animator {
 		this.baseLayer.update(this.entitypatch);
 		this.updatePose();
 		
-		if (this.baseLayer.animationPlayer.isEnd() && this.baseLayer.nextAnimation == null && this.currentMotion != LivingMotion.DEATH) {
+		if (this.baseLayer.animationPlayer.isEnd() && this.baseLayer.nextAnimation == null && this.currentMotion != LivingMotions.DEATH) {
 			this.entitypatch.updateMotion(false);
 			this.baseLayer.playAnimation(this.getLivingMotion(this.entitypatch.currentLivingMotion), this.entitypatch, 0.0F);
 		}
@@ -188,12 +189,12 @@ public class ClientAnimator extends Animator {
 	
 	@Override
 	public void playDeathAnimation() {
-		this.playAnimation(this.livingAnimations.get(LivingMotion.DEATH), 0);
-		this.currentMotion = LivingMotion.DEATH;
+		this.playAnimation(this.livingAnimations.get(LivingMotions.DEATH), 0);
+		this.currentMotion = LivingMotions.DEATH;
 	}
 	
 	public StaticAnimation getJumpAnimation() {
-		return this.livingAnimations.get(LivingMotion.JUMP);
+		return this.livingAnimations.get(LivingMotions.JUMP);
 	}
 	
 	public Layer getCompositeLayer(Layer.Priority priority) {
@@ -276,7 +277,7 @@ public class ClientAnimator extends Animator {
 	}
 	
 	public boolean compareMotion(LivingMotion motion) {
-		boolean flag = this.currentMotion == motion || (this.currentMotion == LivingMotion.INACTION && motion == LivingMotion.IDLE);
+		boolean flag = this.currentMotion == motion || (this.currentMotion == LivingMotions.INACTION && motion == LivingMotions.IDLE);
 		
 		if (flag) {
 			this.currentMotion = motion;
@@ -290,23 +291,23 @@ public class ClientAnimator extends Animator {
 	}
 	
 	public void startInaction() {
-		this.currentMotion = LivingMotion.INACTION;
-		this.entitypatch.currentLivingMotion = LivingMotion.INACTION;
+		this.currentMotion = LivingMotions.INACTION;
+		this.entitypatch.currentLivingMotion = LivingMotions.INACTION;
 	}
 	
 	public void resetCompositeMotion() {
-		this.currentCompositeMotion = LivingMotion.NONE;
-		this.entitypatch.currentCompositeMotion = LivingMotion.NONE;
+		this.currentCompositeMotion = LivingMotions.NONE;
+		this.entitypatch.currentCompositeMotion = LivingMotions.NONE;
 	}
 	
 	public boolean isAiming() {
-		return this.currentCompositeMotion == LivingMotion.AIM;
+		return this.currentCompositeMotion == LivingMotions.AIM;
 	}
 	
 	public void playReboundAnimation() {
-		if (this.compositeLivingAnimations.containsKey(LivingMotion.SHOT)) {
-			this.playAnimation(this.compositeLivingAnimations.get(LivingMotion.SHOT), 0.0F);
-			this.entitypatch.currentCompositeMotion = LivingMotion.NONE;
+		if (this.compositeLivingAnimations.containsKey(LivingMotions.SHOT)) {
+			this.playAnimation(this.compositeLivingAnimations.get(LivingMotions.SHOT), 0.0F);
+			this.entitypatch.currentCompositeMotion = LivingMotions.NONE;
 			this.resetCompositeMotion();
 		}
 	}

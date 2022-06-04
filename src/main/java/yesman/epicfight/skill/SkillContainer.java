@@ -34,7 +34,11 @@ public class SkillContainer {
 		return this.executer;
 	}
 	
-	public SkillContainer setSkill(Skill skill) {
+	public boolean setSkill(Skill skill) {
+		if (this.containingSkill == skill) {
+			return false;
+		}
+		
 		if (this.containingSkill != null) {
 			this.containingSkill.onRemoved(this);
 		}
@@ -47,7 +51,8 @@ public class SkillContainer {
 		}
 		
 		this.stack = 0;
-		return this;
+		
+		return true;
 	}
 	
 	public boolean isDisabled() {

@@ -26,6 +26,7 @@ import yesman.epicfight.network.server.SPChangePlayerMode;
 import yesman.epicfight.network.server.SPChangePlayerYaw;
 import yesman.epicfight.network.server.SPChangeSkill;
 import yesman.epicfight.network.server.SPPlayAnimation;
+import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
@@ -45,15 +46,15 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 		
 		for (SkillContainer skill : skillCapability.skillContainers) {
 			if (skill.getSkill() != null && skill.getSkill().getCategory().shouldSynchronized()) {
-				EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(skill.getSkill().getCategory().getIndex(), skill.getSkill().getName(), SPChangeSkill.State.ENABLE), this.original);
+				EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(skill.getSkill().getCategory().universalOrdinal(), skill.getSkill().toString(), SPChangeSkill.State.ENABLE), this.original);
 			}
 		}
 		
 		List<String> learnedSkill = Lists.newArrayList();
 		
-		for (SkillCategory category : SkillCategory.values()) {
+		for (SkillCategory category : SkillCategory.ASSIGNMENT_MANAGER.universalValues()) {
 			if (skillCapability.hasCategory(category)) {
-				learnedSkill.addAll(Lists.newArrayList(skillCapability.getLearnedSkills(category).stream().map((skill)->skill.getName()).iterator()));
+				learnedSkill.addAll(Lists.newArrayList(skillCapability.getLearnedSkills(category).stream().map((skill) -> skill.toString()).iterator()));
 			}
 		}
 		
@@ -71,13 +72,13 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	@Override
 	public void gatherDamageDealt(ExtendedDamageSource source, float amount) {
 		if (source.isBasicAttack()) {
-			SkillContainer container = this.getSkill(SkillCategory.WEAPON_SPECIAL_ATTACK);
+			SkillContainer container = this.getSkill(SkillCategories.WEAPON_SPECIAL_ATTACK);
 			
 			if (!container.isFull() && container.hasSkill(this.getHoldingItemCapability(InteractionHand.MAIN_HAND).getSpecialAttack(this))) {
 				float value = container.getResource() + amount;
 				
 				if (value > 0.0F) {
-					this.getSkill(SkillCategory.WEAPON_SPECIAL_ATTACK).getSkill().setConsumptionSynchronize(this, value);
+					this.getSkill(SkillCategories.WEAPON_SPECIAL_ATTACK).getSkill().setConsumptionSynchronize(this, value);
 				}
 			}
 		}

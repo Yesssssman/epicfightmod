@@ -24,7 +24,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
@@ -86,8 +86,8 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 	@Override
 	public void processSpawnData(ByteBuf buf) {
 		ClientAnimator animator = this.getClientAnimator();
-		animator.addLivingAnimation(LivingMotion.IDLE, Animations.ENDERMAN_RAGE_IDLE);
-		animator.addLivingAnimation(LivingMotion.WALK, Animations.ENDERMAN_RAGE_WALK);
+		animator.addLivingAnimation(LivingMotions.IDLE, Animations.ENDERMAN_RAGE_IDLE);
+		animator.addLivingAnimation(LivingMotions.WALK, Animations.ENDERMAN_RAGE_WALK);
 		animator.setCurrentMotionsAsDefault();
 	}
 	
@@ -119,9 +119,9 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.ENDERMAN_DEATH);
-		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.ENDERMAN_WALK);
-		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.ENDERMAN_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.ENDERMAN_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.ENDERMAN_WALK);
+		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.ENDERMAN_IDLE);
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
@@ -207,8 +207,8 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 			this.original.getAttribute(Attributes.MOVEMENT_SPEED).addTransientModifier(SPEED_MODIFIER_RAGE);
 			
 			SPChangeLivingMotion msg = new SPChangeLivingMotion(this.original.getId(), true)
-					.putPair(LivingMotion.IDLE, Animations.ENDERMAN_RAGE_IDLE)
-					.putPair(LivingMotion.WALK, Animations.ENDERMAN_RAGE_WALK);
+					.putPair(LivingMotions.IDLE, Animations.ENDERMAN_RAGE_IDLE)
+					.putPair(LivingMotions.WALK, Animations.ENDERMAN_RAGE_WALK);
 			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(msg, this.original);
 		}
 	}
@@ -230,8 +230,8 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 			this.original.getAttribute(Attributes.MOVEMENT_SPEED).removeModifier(SPEED_MODIFIER_RAGE);
 			
 			SPChangeLivingMotion msg = new SPChangeLivingMotion(this.original.getId(), true)
-					.putPair(LivingMotion.IDLE, Animations.ENDERMAN_IDLE)
-					.putPair(LivingMotion.WALK, Animations.ENDERMAN_WALK);
+					.putPair(LivingMotions.IDLE, Animations.ENDERMAN_IDLE)
+					.putPair(LivingMotions.WALK, Animations.ENDERMAN_WALK);
 			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(msg, this.original);
 		}
 	}

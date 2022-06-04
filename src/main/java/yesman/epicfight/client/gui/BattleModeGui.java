@@ -25,6 +25,7 @@ import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.Skill.ActivateType;
+import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillContainer;
 
@@ -105,11 +106,11 @@ public class BattleModeGui extends ModIngameGui {
 			matStack.popPose();
 		}
 		
-		for (int i = 0; i < SkillCategory.values().length; i++) {
+		for (int i = 0; i < SkillCategory.ASSIGNMENT_MANAGER.universalValues().size(); i++) {
 			SkillContainer container = playerpatch.getSkill(i);
 			if (container != null && !container.isEmpty()) {
 				SkillCategory slot = container.getSkill().getCategory();
-				if (slot == SkillCategory.WEAPON_SPECIAL_ATTACK) {
+				if (slot == SkillCategories.WEAPON_SPECIAL_ATTACK) {
 					this.drawSpecialAttack(playerpatch, container, matStack, partialTicks);
 				} else {
 					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);

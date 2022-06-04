@@ -71,7 +71,7 @@ public class AnimationDataReader {
 					if (livingMotionName.equals("ALL")) {
 						builder.defaultMask(getJointMaskEntry(GsonHelper.getAsString(jointMaskEntry, "type")));
 					} else {
-						LivingMotion livingMotion = LivingMotion.valueOf(livingMotionName);
+						LivingMotion livingMotion = LivingMotion.ASSIGNMENT_MANAGER.get(livingMotionName);
 						builder.mask(livingMotion, getJointMaskEntry(GsonHelper.getAsString(jointMaskEntry, "type")));
 					}
 				});

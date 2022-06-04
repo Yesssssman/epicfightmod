@@ -25,6 +25,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.animation.types.procedural.IKSetter;
@@ -47,21 +48,21 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	public static EnderDragonPatch INSTANCE_CLIENT;
 	public static EnderDragonPatch INSTANCE_SERVER;
 	private Map<String, TipPointAnimation> tipPointAnimations = Maps.newHashMap();
-	private Map<LivingMotion, StaticAnimation> livingMotions = Maps.newHashMap();
+	private Map<LivingMotions, StaticAnimation> livingMotions = Maps.newHashMap();
 	private boolean groundPhase;
 	public float xRoot;
 	public float xRootO;
 	public float zRoot;
 	public float zRootO;
-	public LivingMotion prevMotion = LivingMotion.IDLE;
+	public LivingMotion prevMotion = LivingMotions.IDLE;
 	
 	@Override
 	public void onConstructed(EnderDragon entityIn) {
-		this.livingMotions.put(LivingMotion.IDLE, Animations.DRAGON_IDLE);
-		this.livingMotions.put(LivingMotion.WALK, Animations.DRAGON_WALK);
-		this.livingMotions.put(LivingMotion.FLY, Animations.DRAGON_FLY);
-		this.livingMotions.put(LivingMotion.CHASE, Animations.DRAGON_AIRSTRIKE);
-		this.livingMotions.put(LivingMotion.DEATH, Animations.DRAGON_DEATH);
+		this.livingMotions.put(LivingMotions.IDLE, Animations.DRAGON_IDLE);
+		this.livingMotions.put(LivingMotions.WALK, Animations.DRAGON_WALK);
+		this.livingMotions.put(LivingMotions.FLY, Animations.DRAGON_FLY);
+		this.livingMotions.put(LivingMotions.CHASE, Animations.DRAGON_AIRSTRIKE);
+		this.livingMotions.put(LivingMotions.DEATH, Animations.DRAGON_DEATH);
 		super.onConstructed(entityIn);
 	}
 	
@@ -92,7 +93,7 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		for (Map.Entry<LivingMotion, StaticAnimation> livingmotionEntry : this.livingMotions.entrySet()) {
+		for (Map.Entry<LivingMotions, StaticAnimation> livingmotionEntry : this.livingMotions.entrySet()) {
 			clientAnimator.addLivingAnimation(livingmotionEntry.getKey(), livingmotionEntry.getValue());
 		}
 		clientAnimator.setCurrentMotionsAsDefault();
@@ -101,25 +102,25 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		if (this.state.inaction() && considerInaction) {
-			this.currentLivingMotion = LivingMotion.INACTION;
+			this.currentLivingMotion = LivingMotions.INACTION;
 		} else {
 			DragonPhaseInstance phase = this.original.getPhaseManager().getCurrentPhase();
 			
 			if (!this.groundPhase) {
 				if (phase.getPhase() == PatchedPhases.AIRSTRIKE && ((DragonAirstrikePhase)phase).isActuallyAttacking()) {
-					this.currentLivingMotion = LivingMotion.CHASE;
+					this.currentLivingMotion = LivingMotions.CHASE;
 				} else {
-					this.currentLivingMotion = LivingMotion.FLY;
+					this.currentLivingMotion = LivingMotions.FLY;
 				}
 			} else {
 				if (phase.getPhase() == PatchedPhases.GROUND_BATTLE) {
 					if (this.original.getTarget() != null) {
-						this.currentLivingMotion = LivingMotion.WALK;
+						this.currentLivingMotion = LivingMotions.WALK;
 					} else {
-						this.currentLivingMotion = LivingMotion.IDLE;
+						this.currentLivingMotion = LivingMotions.IDLE;
 					}
 				} else {
-					this.currentLivingMotion = LivingMotion.IDLE;
+					this.currentLivingMotion = LivingMotions.IDLE;
 				}
 			}
 		}

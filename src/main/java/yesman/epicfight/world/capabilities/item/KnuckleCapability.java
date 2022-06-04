@@ -12,8 +12,8 @@ public class KnuckleCapability extends WeaponCapability {
 	public KnuckleCapability() {
 		super(new WeaponCapability.Builder()
 			.category(WeaponCategory.FIST)
-			.newStyleCombo(Style.ONE_HAND, Animations.FIST_AUTO_1, Animations.FIST_AUTO_2, Animations.FIST_AUTO_3, Animations.FIST_DASH, Animations.FIST_AIR_SLASH)
-			.specialAttack(Style.ONE_HAND, Skills.RELENTLESS_COMBO)
+			.newStyleCombo(Styles.ONE_HAND, Animations.FIST_AUTO_1, Animations.FIST_AUTO_2, Animations.FIST_AUTO_3, Animations.FIST_DASH, Animations.FIST_AIR_SLASH)
+			.specialAttack(Styles.ONE_HAND, Skills.RELENTLESS_COMBO)
 		);
 	}
 	

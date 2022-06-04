@@ -45,10 +45,8 @@ import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
-import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.Style;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
-import yesman.epicfight.world.capabilities.item.WeaponCapability;
+import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.capabilities.provider.ProviderEntity;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
@@ -134,8 +132,8 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 	}
 	
 	public static class CustomHumanoidMobPatchProvider extends CustomMobPatchProvider {
-		protected Map<WeaponCategory, Map<CapabilityItem.Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> humanoidCombatBehaviors;
-		protected Map<WeaponCategory, Map<WeaponCapability.Style, Set<Pair<LivingMotion, StaticAnimation>>>> humanoidWeaponMotions;
+		protected Map<WeaponCategory, Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> humanoidCombatBehaviors;
+		protected Map<WeaponCategory, Map<Style, Set<Pair<LivingMotion, StaticAnimation>>>> humanoidWeaponMotions;
 		
 		@SuppressWarnings("rawtypes")
 		@Override
@@ -143,11 +141,11 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			return new CustomHumanoidMobPatch(this.faction, this);
 		}
 		
-		public Map<WeaponCategory, Map<WeaponCapability.Style, Set<Pair<LivingMotion, StaticAnimation>>>> getHumanoidWeaponMotions() {
+		public Map<WeaponCategory, Map<Style, Set<Pair<LivingMotion, StaticAnimation>>>> getHumanoidWeaponMotions() {
 			return this.humanoidWeaponMotions;
 		}
 		
-		public Map<WeaponCategory, Map<CapabilityItem.Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> getHumanoidCombatBehaviors() {
+		public Map<WeaponCategory, Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> getHumanoidCombatBehaviors() {
 			return this.humanoidCombatBehaviors;
 		}
 	}
@@ -281,13 +279,13 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		}
 	}
 	
-	public static Map<WeaponCategory, Map<CapabilityItem.Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> deserializeHumanoidCombatBehaviors(ListTag tag) {
-		Map<WeaponCategory, Map<CapabilityItem.Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> combatBehaviorsMapBuilder = Maps.newHashMap();
+	public static Map<WeaponCategory, Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> deserializeHumanoidCombatBehaviors(ListTag tag) {
+		Map<WeaponCategory, Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> combatBehaviorsMapBuilder = Maps.newHashMap();
 		
 		for (int i = 0; i < tag.size(); i++) {
 			CompoundTag combatBehavior = tag.getCompound(i);
 			ListTag categories = combatBehavior.getList("weapon_categories", 8);
-			CapabilityItem.Style style = CapabilityItem.Style.valueOf(combatBehavior.getString("style").toUpperCase());
+			Style style = Style.get(combatBehavior.getString("style"));
 			CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = deserializeCombatBehaviorsBuilder(combatBehavior.getList("behavior_series", 10));
 			
 			for (int j = 0; j < categories.size(); j++) {
@@ -305,7 +303,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		
 		for (String key : defaultLivingmotions.getAllKeys()) {
 			String animation = defaultLivingmotions.getString(key);
-			defaultAnimations.add(Pair.of(LivingMotion.valueOf(key.toUpperCase(Locale.ROOT)), EpicFightMod.getInstance().animationManager.findAnimationByPath(animation)));
+			defaultAnimations.add(Pair.of(LivingMotion.ASSIGNMENT_MANAGER.get(key), EpicFightMod.getInstance().animationManager.findAnimationByPath(animation)));
 		}
 		
 		return defaultAnimations;
@@ -334,17 +332,17 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		return attributes;
 	}
 	
-	public static Map<WeaponCategory, Map<WeaponCapability.Style, Set<Pair<LivingMotion, StaticAnimation>>>> deserializeHumanoidWeaponMotions(ListTag tag) {
-		Map<WeaponCategory, Map<WeaponCapability.Style, Set<Pair<LivingMotion, StaticAnimation>>>> map = Maps.newHashMap();
+	public static Map<WeaponCategory, Map<Style, Set<Pair<LivingMotion, StaticAnimation>>>> deserializeHumanoidWeaponMotions(ListTag tag) {
+		Map<WeaponCategory, Map<Style, Set<Pair<LivingMotion, StaticAnimation>>>> map = Maps.newHashMap();
 		
 		for (int i = 0; i < tag.size(); i++) {
 			ImmutableSet.Builder<Pair<LivingMotion, StaticAnimation>> motions = ImmutableSet.builder();
 			CompoundTag weaponMotionTag = tag.getCompound(i);
-			Style style = Style.valueOf(weaponMotionTag.getString("style").toUpperCase(Locale.ROOT));
+			Style style = Style.get(weaponMotionTag.getString("style"));
 			CompoundTag motionsTag = weaponMotionTag.getCompound("livingmotions");
 			
 			for (String key : motionsTag.getAllKeys()) {
-				motions.add(Pair.of(LivingMotion.valueOf(key.toUpperCase(Locale.ROOT)), EpicFightMod.getInstance().animationManager.findAnimationByPath(motionsTag.getString(key))));
+				motions.add(Pair.of(LivingMotion.ASSIGNMENT_MANAGER.get(key), EpicFightMod.getInstance().animationManager.findAnimationByPath(motionsTag.getString(key))));
 			}
 			
 			Tag weponTypeTag = weaponMotionTag.get("weapon_categories");

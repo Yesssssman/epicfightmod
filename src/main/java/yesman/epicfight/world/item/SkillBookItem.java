@@ -21,23 +21,22 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.gameasset.Skills;
-import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class SkillBookItem extends Item {
-	public static void setContainingSkill(String skillName, ItemStack stack) {
-		stack.getOrCreateTag().put("skill", StringTag.valueOf(skillName));
+	public static void setContainingSkill(String name, ItemStack stack) {
+		stack.getOrCreateTag().put("skill", StringTag.valueOf(name));
 	}
 	
 	public static void setContainingSkill(Skill skill, ItemStack stack) {
-		setContainingSkill(skill.getName(), stack);
+		setContainingSkill(skill.toString(), stack);
 	}
 	
 	public static Skill getContainSkill(ItemStack stack) {
 		String skillName = stack.getTag().getString("skill");
-		return Skills.findSkill(skillName);
+		return Skills.getSkill(skillName);
 	}
 	
 	public SkillBookItem(Properties properties) {
@@ -53,14 +52,18 @@ public class SkillBookItem extends Item {
 	@OnlyIn(Dist.CLIENT)
 	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
 		if (stack.getTag() != null && stack.getTag().contains("skill")) {
-			tooltip.add(new TranslatableComponent(String.format("skill.%s.%s", EpicFightMod.MODID, stack.getTag().get("skill").getAsString())).withStyle(ChatFormatting.DARK_GRAY));
+			;
+			
+			
+			
+			tooltip.add(new TranslatableComponent(Skills.getSkill(stack.getTag().getString("skill")).getTranslatableText()).withStyle(ChatFormatting.DARK_GRAY));
 		}
 	}
 	
 	@Override
 	public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
 		if (group == EpicFightItemGroup.ITEMS) {
-			Skills.getLearnableSkillCollection().forEach((skill) -> {
+			Skills.getLearnableSkills().forEach((skill) -> {
 				ItemStack stack = new ItemStack(this);
 				setContainingSkill(skill, stack);
 				items.add(stack);

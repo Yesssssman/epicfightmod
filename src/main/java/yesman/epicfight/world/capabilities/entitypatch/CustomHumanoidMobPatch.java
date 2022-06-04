@@ -8,6 +8,7 @@ import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.animation.Layer;
@@ -87,26 +88,26 @@ public class CustomHumanoidMobPatch<T extends PathfinderMob> extends HumanoidMob
 			
 			if (useAnim == UseAnim.BLOCK || secondUseAnim == UseAnim.BLOCK)
 				if (activeItem.getWeaponCategory() == WeaponCategory.SHIELD)
-					currentCompositeMotion = LivingMotion.BLOCK_SHIELD;
+					currentCompositeMotion = LivingMotions.BLOCK_SHIELD;
 				else
-					currentCompositeMotion = LivingMotion.BLOCK;
+					currentCompositeMotion = LivingMotions.BLOCK;
 			else if (useAnim == UseAnim.BOW || useAnim == UseAnim.SPEAR)
-				currentCompositeMotion = LivingMotion.AIM;
+				currentCompositeMotion = LivingMotions.AIM;
 			else if (useAnim == UseAnim.CROSSBOW)
-				currentCompositeMotion = LivingMotion.RELOAD;
+				currentCompositeMotion = LivingMotions.RELOAD;
 			else
 				currentCompositeMotion = currentLivingMotion;
 		} else {
 			if (CrossbowItem.isCharged(this.original.getMainHandItem()))
-				currentCompositeMotion = LivingMotion.AIM;
+				currentCompositeMotion = LivingMotions.AIM;
 			else if (this.getClientAnimator().getCompositeLayer(Layer.Priority.MIDDLE).animationPlayer.getPlay().isReboundAnimation())
-				currentCompositeMotion = LivingMotion.NONE;
+				currentCompositeMotion = LivingMotions.NONE;
 			else if (this.original.swinging && this.original.getSleepingPos().isEmpty())
-				currentCompositeMotion = LivingMotion.DIGGING;
+				currentCompositeMotion = LivingMotions.DIGGING;
 			else
 				currentCompositeMotion = currentLivingMotion;
 			
-			if (this.getClientAnimator().isAiming() && currentCompositeMotion != LivingMotion.AIM) {
+			if (this.getClientAnimator().isAiming() && currentCompositeMotion != LivingMotions.AIM) {
 				this.playReboundAnimation();
 			}
 		}

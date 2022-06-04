@@ -13,7 +13,7 @@ import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.gameasset.Animations;
@@ -44,17 +44,17 @@ public class PiglinPatch extends HumanoidMobPatch<Piglin> {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.PIGLIN_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotion.FALL, Animations.BIPED_FALL);
-		clientAnimator.addLivingAnimation(LivingMotion.MOUNT, Animations.BIPED_MOUNT);
-		clientAnimator.addLivingAnimation(LivingMotion.CELEBRATE, EpicFightMod.getInstance().animationManager.findAnimationById(EpicFightMod.MODID.hashCode(), Animations.PIGLIN_CELEBRATE1.getId() + this.original.getRandom().nextInt(3)));
-		clientAnimator.addLivingAnimation(LivingMotion.ADMIRE, Animations.PIGLIN_ADMIRE);
-		clientAnimator.addLivingAnimation(LivingMotion.WALK, Animations.PIGLIN_WALK);
-		clientAnimator.addLivingAnimation(LivingMotion.CHASE, Animations.PIGLIN_WALK);
-		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.PIGLIN_DEATH);
-		clientAnimator.addLivingAnimation(LivingMotion.RELOAD, Animations.BIPED_CROSSBOW_RELOAD);
-		clientAnimator.addLivingAnimation(LivingMotion.AIM, Animations.BIPED_CROSSBOW_AIM);
-		clientAnimator.addLivingAnimation(LivingMotion.SHOT, Animations.BIPED_CROSSBOW_SHOT);
+		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.PIGLIN_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
+		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
+		clientAnimator.addLivingAnimation(LivingMotions.CELEBRATE, EpicFightMod.getInstance().animationManager.findAnimationById(EpicFightMod.MODID.hashCode(), Animations.PIGLIN_CELEBRATE1.getId() + this.original.getRandom().nextInt(3)));
+		clientAnimator.addLivingAnimation(LivingMotions.ADMIRE, Animations.PIGLIN_ADMIRE);
+		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.PIGLIN_WALK);
+		clientAnimator.addLivingAnimation(LivingMotions.CHASE, Animations.PIGLIN_WALK);
+		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.PIGLIN_DEATH);
+		clientAnimator.addLivingAnimation(LivingMotions.RELOAD, Animations.BIPED_CROSSBOW_RELOAD);
+		clientAnimator.addLivingAnimation(LivingMotions.AIM, Animations.BIPED_CROSSBOW_AIM);
+		clientAnimator.addLivingAnimation(LivingMotions.SHOT, Animations.BIPED_CROSSBOW_SHOT);
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
@@ -71,16 +71,16 @@ public class PiglinPatch extends HumanoidMobPatch<Piglin> {
 	@Override
 	public void processSpawnData(ByteBuf buf) {
 		ClientAnimator animator = this.getClientAnimator();
-		animator.addLivingAnimation(LivingMotion.WALK, Animations.BIPED_RUN);
+		animator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_RUN);
 		animator.setCurrentMotionsAsDefault();
 	}
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		if (this.getOriginal().getOffhandItem().is(ItemTags.PIGLIN_LOVED))
-			this.currentLivingMotion = LivingMotion.ADMIRE;
+			this.currentLivingMotion = LivingMotions.ADMIRE;
 		else if (this.original.isDancing())
-			this.currentLivingMotion = LivingMotion.CELEBRATE;
+			this.currentLivingMotion = LivingMotions.CELEBRATE;
 		else
 			super.commonAggressiveRangedMobUpdateMotion(considerInaction);
 	}

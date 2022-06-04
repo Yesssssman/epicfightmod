@@ -2,8 +2,11 @@ package yesman.epicfight.world.capabilities.item;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import javax.annotation.Nullable;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
@@ -37,7 +40,7 @@ import yesman.epicfight.network.server.SPChangeSkill;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.skill.Skill;
-import yesman.epicfight.skill.SkillCategory;
+import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
@@ -132,11 +135,13 @@ public class CapabilityItem {
 	public List<StaticAnimation> getMountAttackMotion() {
 		return null;
 	}
-
+	
+	@Nullable
 	public Skill getSpecialAttack(PlayerPatch<?> playerpatch) {
 		return null;
 	}
-
+	
+	@Nullable
 	public Skill getPassiveSkill() {
 		return null;
 	}
@@ -147,36 +152,34 @@ public class CapabilityItem {
 	
 	public void changeWeaponSpecialSkill(PlayerPatch<?> playerpatch) {
 		Skill specialSkill = this.getSpecialAttack(playerpatch);
-		String skillName = "empty";
+		String skillName = "";
 		SPChangeSkill.State state = SPChangeSkill.State.ENABLE;
-		SkillContainer specialSkillContainer = playerpatch.getSkill(SkillCategory.WEAPON_SPECIAL_ATTACK);
+		SkillContainer specialSkillContainer = playerpatch.getSkill(SkillCategories.WEAPON_SPECIAL_ATTACK);
 		
 		if (specialSkill != null) {
 			if (specialSkillContainer.getSkill() != specialSkill) {
 				specialSkillContainer.setSkill(specialSkill);
-				skillName = specialSkill.getName();
-			} else {
-				specialSkillContainer.getSkill().onInitiate(specialSkillContainer);
 			}
-			specialSkillContainer.setDisabled(false);
+			
+			skillName = specialSkill.toString();
 		} else {
 			state = SPChangeSkill.State.DISABLE;
-			specialSkillContainer.setDisabled(true);
 		}
 		
-		EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillCategory.WEAPON_SPECIAL_ATTACK.getIndex(), skillName, state), (ServerPlayer)playerpatch.getOriginal());
+		specialSkillContainer.setDisabled(specialSkill == null);
+		EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillCategories.WEAPON_SPECIAL_ATTACK.universalOrdinal(), skillName, state), (ServerPlayer)playerpatch.getOriginal());
 		
 		Skill skill = this.getPassiveSkill();
-		SkillContainer passiveSkillContainer = playerpatch.getSkill(SkillCategory.WEAPON_PASSIVE);
+		SkillContainer passiveSkillContainer = playerpatch.getSkill(SkillCategories.WEAPON_PASSIVE);
 		
 		if (skill != null) {
 			if (passiveSkillContainer.getSkill() != skill) {
 				passiveSkillContainer.setSkill(skill);
-				EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(skill.getCategory().getIndex(), skill.getName(), SPChangeSkill.State.ENABLE), (ServerPlayer)playerpatch.getOriginal());
+				EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(skill.getCategory().universalOrdinal(), skill.toString(), SPChangeSkill.State.ENABLE), (ServerPlayer)playerpatch.getOriginal());
 			}
 		} else {
 			passiveSkillContainer.setSkill(null);
-			EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillCategory.WEAPON_PASSIVE.getIndex(), "empty", SPChangeSkill.State.ENABLE), (ServerPlayer)playerpatch.getOriginal());
+			EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillCategories.WEAPON_PASSIVE.universalOrdinal(), "empty", SPChangeSkill.State.ENABLE), (ServerPlayer)playerpatch.getOriginal());
 		}
 	}
 	
@@ -214,7 +217,7 @@ public class CapabilityItem {
 	}
 	
 	public final Map<Attribute, AttributeModifier> getDamageAttributesInCondition(Style style) {
-		return this.attributeMap.getOrDefault(style, this.attributeMap.get(Style.COMMON));
+		return this.attributeMap.getOrDefault(style, this.attributeMap.get(Styles.COMMON));
 	}
 	
 	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot equipmentSlot, LivingEntityPatch<?> entitypatch) {
@@ -238,7 +241,7 @@ public class CapabilityItem {
 	}
 	
 	public Style getStyle(LivingEntityPatch<?> entitypatch) {
-		return this.canBePlacedOffhand() ? Style.ONE_HAND : Style.TWO_HAND;
+		return this.canBePlacedOffhand() ? Styles.ONE_HAND : Styles.TWO_HAND;
 	}
 	
 	public boolean canBePlacedOffhand() {
@@ -258,8 +261,8 @@ public class CapabilityItem {
 	}
 	
 	public void setConfigFileAttribute(double armorNegation1, double impact1, int maxStrikes1, double armorNegation2, double impact2, int maxStrikes2) {
-		this.addStyleAttributeSimple(Style.ONE_HAND, armorNegation1, impact1, maxStrikes1);
-		this.addStyleAttributeSimple(Style.TWO_HAND, armorNegation2, impact2, maxStrikes2);
+		this.addStyleAttributeSimple(Styles.ONE_HAND, armorNegation1, impact1, maxStrikes1);
+		this.addStyleAttributeSimple(Styles.TWO_HAND, armorNegation2, impact2, maxStrikes2);
 	}
 	
 	public boolean checkOffhandValid(LivingEntityPatch<?> entitypatch) {
@@ -282,13 +285,19 @@ public class CapabilityItem {
 		TWO_HANDED, MAINHAND_ONLY, ONE_HANDED
 	}
 	
-	public enum Style {
+	public enum Styles implements Style {
 		COMMON(true), ONE_HAND(true), TWO_HAND(false), MOUNT(true), RANGED(false), SHEATH(false), LIECHTENAUER(false);
 		
 		boolean canUseOffhand;
 		
-		Style(boolean canUseOffhand) {
+		Styles(boolean canUseOffhand) {
 			this.canUseOffhand = canUseOffhand;
+			Style.put(this.toString(), this);
+		}
+		
+		@Override
+		public String toString() {
+			return super.toString().toLowerCase(Locale.ROOT);
 		}
 		
 		public boolean canUseOffhand() {

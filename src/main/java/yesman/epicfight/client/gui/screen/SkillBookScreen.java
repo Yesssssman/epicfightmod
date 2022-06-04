@@ -52,16 +52,14 @@ public class SkillBookScreen extends Screen {
 			if (condition) {
 				if (playerpatch.getSkill(this.skill.getCategory()).getSkill() != null) {
 					tooltip = (button, matrixStack, mouseX, mouseY) -> {
-						this.renderTooltip(matrixStack, this.minecraft.font.split(new TranslatableComponent(
-								"gui." + EpicFightMod.MODID + ".replace", new TranslatableComponent("skill." + EpicFightMod.MODID + "." +
-									playerpatch.getSkill(this.skill.getCategory()).getSkill().getName()).getString()), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+						this.renderTooltip(matrixStack, this.minecraft.font.split(new TranslatableComponent("gui." + EpicFightMod.MODID + ".replace",
+								new TranslatableComponent(skill.getTranslatableText()).getString()), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 					};
 				}
 			} else {
 				tooltip = (button, matrixStack, mouseX, mouseY) -> {
-					this.renderTooltip(matrixStack, this.minecraft.font.split(new TranslatableComponent(
-							"gui." + EpicFightMod.MODID + ".require_learning", new TranslatableComponent("skill." + EpicFightMod.MODID + "." +
-									priorSkill.getName()).getString()), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+					this.renderTooltip(matrixStack, this.minecraft.font.split(new TranslatableComponent("gui." + EpicFightMod.MODID + ".require_learning",
+							new TranslatableComponent(priorSkill.getTranslatableText()).getString()), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 				};
 			}
 		}
@@ -71,9 +69,9 @@ public class SkillBookScreen extends Screen {
 				if (playerpatch != null) {
 					playerpatch.getSkill(this.skill.getCategory()).setSkill(this.skill);
 					this.minecraft.setScreen((Screen) null);
-					playerpatch.getSkillCapability().addLearnedSkills(this.skill);
+					playerpatch.getSkillCapability().addLearnedSkill(this.skill);
 					int i = this.hand == InteractionHand.MAIN_HAND ? this.opener.getInventory().selected : 40;
-					EpicFightNetworkManager.sendToServer(new CPChangeSkill(this.skill.getCategory().getIndex(), i, this.skill.getName(), false));
+					EpicFightNetworkManager.sendToServer(new CPChangeSkill(this.skill.getCategory().universalOrdinal(), i, this.skill.toString(), false));
 				}
 			}, tooltip);
 		
@@ -93,13 +91,15 @@ public class SkillBookScreen extends Screen {
 		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 		RenderSystem.setShaderTexture(0, BACKGROUND);
 		this.blit(matrixStack, posX, posY, 0, 0, 256, 181);
-		RenderSystem.setShaderTexture(0, getSkillTexture(this.skill));
+		RenderSystem.setShaderTexture(0, this.skill.getSkillTexture());
 		
 		RenderSystem.enableBlend();
 		GuiComponent.blit(matrixStack, posX + 25, posY + 50, 50, 50, 0, 0, 64, 64, 64, 64);
 		RenderSystem.disableBlend();
 		
-		String skillName = new TranslatableComponent("skill." + EpicFightMod.MODID + "." + this.skill.getName()).getString();
+		String translationName = this.skill.getTranslatableText();
+		
+		String skillName = new TranslatableComponent(translationName).getString();
 		int width = this.font.width(skillName);
 		this.font.draw(matrixStack, skillName, posX + 50 - width / 2, posY + 115, 0);
 		
@@ -107,7 +107,7 @@ public class SkillBookScreen extends Screen {
 		width = this.font.width(skillCategory);
 		this.font.draw(matrixStack, skillCategory, posX + 50 - width / 2, posY + 130, 0);
 		
-		List<FormattedCharSequence> list = this.font.split(new TranslatableComponent("skill." + EpicFightMod.MODID + "." + this.skill.getName() + ".tooltip", this.skill.getTooltipArgs().toArray(new Object[0])), 140);
+		List<FormattedCharSequence> list = this.font.split(new TranslatableComponent(translationName + ".tooltip", this.skill.getTooltipArgs().toArray(new Object[0])), 140);
 		int height = posY + 20;
 		
 		for (int l1 = 0; l1 < list.size(); ++l1) {
@@ -120,10 +120,5 @@ public class SkillBookScreen extends Screen {
 		}
 		
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
-	}
-	
-	private static ResourceLocation getSkillTexture(Skill skill) {
-		ResourceLocation name = skill.getRegistryName();
-		return new ResourceLocation(name.getNamespace(), "textures/gui/skills/" + name.getPath() + ".png");
 	}
 }

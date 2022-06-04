@@ -1,4 +1,4 @@
-package yesman.epicfight.server.command;
+package yesman.epicfight.server.commands;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -23,7 +23,7 @@ import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 public class PlayerModeCommand {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
-		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("setPlayerMode").requires((commandSourceStack) -> commandSourceStack.hasPermission(2));
+		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("mode").requires((commandSourceStack) -> commandSourceStack.hasPermission(2));
 		
 		for (PlayerMode mode : PlayerPatch.PlayerMode.values()) {
 			builder.then(Commands.literal(mode.name().toLowerCase(Locale.ROOT)).executes((command) -> {

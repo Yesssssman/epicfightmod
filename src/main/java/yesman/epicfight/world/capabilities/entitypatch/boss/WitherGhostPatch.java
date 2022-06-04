@@ -2,7 +2,7 @@ package yesman.epicfight.world.capabilities.entitypatch.boss;
 
 import net.minecraft.sounds.SoundEvents;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
@@ -26,8 +26,8 @@ public class WitherGhostPatch extends MobPatch<WitherGhostClone> {
 	
 	@Override
 	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotion.IDLE, Animations.WITHER_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotion.DEATH, Animations.WITHER_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.WITHER_IDLE);
+		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.WITHER_IDLE);
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
@@ -39,7 +39,7 @@ public class WitherGhostPatch extends MobPatch<WitherGhostClone> {
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
-		this.currentLivingMotion = LivingMotion.IDLE;
+		this.currentLivingMotion = LivingMotions.IDLE;
 	}
 	
 	@Override

@@ -7,6 +7,18 @@
 	"attribute.name.epicfight.stun_armor" : "Stun Armor",
 	"attribute.name.epicfight.weight" : "Weight",
 	
+	"commands.epicfight.skill.add.success.single": "Added skill %s to %s",
+	"commands.epicfight.skill.add.success.multiple": "Added skill %s to %s targets",
+	"commands.epicfight.skill.add.failed": "Unable to add this skill (Skill already applied)",
+	
+	"commands.epicfight.skill.remove.success.single": "Removed %s from %s",
+	"commands.epicfight.skill.remove.success.multiple": "Removed %s from %s targets",
+	"commands.epicfight.skill.remove.failed": "Unable to remove this skill (Skill does not exist)",
+	
+	"commands.epicfight.skill.clear.success.single": "Removed every skill from %s",
+	"commands.epicfight.skill.clear.success.multiple": "Removed every skill from %s targets",
+	"commands.epicfight.skill.clear.failed": "Target has no skills to remove",
+	
 	"death.attack.wither_beam": "%1$s was vaporised by wither beam",
 	
 	"debug.armor_model_debugging.on": "Armor model debugging: On",
@@ -37,6 +49,8 @@
 	"epicfight.gui.tooltip_mining": "Automatically registers all items not included in the battle mode.",
 	"epicfight.gui.delete_all": "Delete All",
 	"epicfight.gui.auto_add": "Auto Add",
+	
+	"epicfight.skillNotFound": "Unknown skill: %s",
 	
 	"gameMode.epicfight.mining": "Mining",
 	"gameMode.epicfight.battle": "Battle",

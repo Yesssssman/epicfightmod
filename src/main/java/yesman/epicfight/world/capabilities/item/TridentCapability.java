@@ -40,12 +40,12 @@ public class TridentCapability extends RangedWeaponCapability {
 	
 	@Override
 	public Style getStyle(LivingEntityPatch<?> entitypatch) {
-		return Style.ONE_HAND;
+		return Styles.ONE_HAND;
 	}
 	
 	@Override
 	protected void registerAttribute() {
-		this.addStyleAttibute(Style.ONE_HAND, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(2.3D)));
+		this.addStyleAttibute(Styles.ONE_HAND, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(2.3D)));
 	}
 	
 	@Override

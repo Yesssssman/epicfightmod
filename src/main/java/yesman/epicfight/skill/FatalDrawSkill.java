@@ -11,7 +11,7 @@ public class FatalDrawSkill extends SeperativeMotionSkill {
 	
 	@Override
 	public void executeOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
-		boolean isSheathed = executer.getSkill(SkillCategory.WEAPON_PASSIVE).getDataManager().getDataValue(KatanaPassive.SHEATH);
+		boolean isSheathed = executer.getSkill(SkillCategories.WEAPON_PASSIVE).getDataManager().getDataValue(KatanaPassive.SHEATH);
 		
 		if (isSheathed) {
 			executer.playAnimationSynchronized(this.attackAnimations[this.getAnimationInCondition(executer)], -0.666F);

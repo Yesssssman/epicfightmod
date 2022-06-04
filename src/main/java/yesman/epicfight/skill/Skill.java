@@ -13,7 +13,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.utils.math.Formulars;
 import yesman.epicfight.client.events.engine.ControllEngine;
@@ -113,7 +113,7 @@ public abstract class Skill {
 	public boolean isExecutableState(PlayerPatch<?> executer) {
 		executer.updateEntityState();
 		EntityState playerState = executer.getEntityState();
-		return !(executer.getOriginal().isFallFlying() || executer.currentLivingMotion == LivingMotion.FALL || !playerState.canUseSkill());
+		return !(executer.getOriginal().isFallFlying() || executer.currentLivingMotion == LivingMotions.FALL || !playerState.canUseSkill());
 	}
 	
 	public boolean canExecute(PlayerPatch<?> executer) {
@@ -130,7 +130,7 @@ public abstract class Skill {
 	}
 	
 	public void cancelOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
-		EpicFightNetworkManager.sendToPlayer(new SPSkillExecutionFeedback(this.category.getIndex(), false), executer.getOriginal());
+		EpicFightNetworkManager.sendToPlayer(new SPSkillExecutionFeedback(this.category.universalOrdinal(), false), executer.getOriginal());
 	}
 	
 	public void executeOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
@@ -233,22 +233,22 @@ public abstract class Skill {
 	
 	public static void setConsumptionSynchronize(ServerPlayerPatch executer, SkillCategory slot, float amount) {
 		executer.getSkill(slot).setResource(amount);
-		EpicFightNetworkManager.sendToPlayer(new SPSetSkillValue(Target.COOLDOWN, slot.getIndex(), amount, false), executer.getOriginal());
+		EpicFightNetworkManager.sendToPlayer(new SPSetSkillValue(Target.COOLDOWN, slot.universalOrdinal(), amount, false), executer.getOriginal());
 	}
 	
 	public static void setDurationSynchronize(ServerPlayerPatch executer, SkillCategory slot, int amount) {
 		executer.getSkill(slot).setDuration(amount);
-		EpicFightNetworkManager.sendToPlayer(new SPSetSkillValue(Target.DURATION, slot.getIndex(), amount, false), executer.getOriginal());
+		EpicFightNetworkManager.sendToPlayer(new SPSetSkillValue(Target.DURATION, slot.universalOrdinal(), amount, false), executer.getOriginal());
 	}
 	
 	public static void setMaxDurationSynchronize(ServerPlayerPatch executer, SkillCategory slot, int amount) {
 		executer.getSkill(slot).setMaxDuration(amount);
-		EpicFightNetworkManager.sendToPlayer(new SPSetSkillValue(Target.MAX_DURATION, slot.getIndex(), amount, false), executer.getOriginal());
+		EpicFightNetworkManager.sendToPlayer(new SPSetSkillValue(Target.MAX_DURATION, slot.universalOrdinal(), amount, false), executer.getOriginal());
 	}
 	
 	public static void setStackSynchronize(ServerPlayerPatch executer, SkillCategory slot, int amount) {
 		executer.getSkill(slot).setStack(amount);
-		EpicFightNetworkManager.sendToPlayer(new SPSetSkillValue(Target.STACK, slot.getIndex(), amount, false), executer.getOriginal());
+		EpicFightNetworkManager.sendToPlayer(new SPSetSkillValue(Target.STACK, slot.universalOrdinal(), amount, false), executer.getOriginal());
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -265,8 +265,8 @@ public abstract class Skill {
 		return this.registryName;
 	}
 	
-	public String getName() {
-		return this.registryName.getPath();
+	public String getTranslatableText() {
+		return String.format("skill.%s.%s", this.getRegistryName().getNamespace(), this.getRegistryName().getPath());
 	}
 	
 	public float getCooldownRegenPerSecond(PlayerPatch<?> player) {
@@ -330,7 +330,7 @@ public abstract class Skill {
 	
 	@Override
 	public String toString() {
-		return this.getName();
+		return this.getRegistryName().toString();
 	}
 	
 	public static enum ActivateType {
