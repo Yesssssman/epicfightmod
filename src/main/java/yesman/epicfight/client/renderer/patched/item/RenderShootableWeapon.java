@@ -11,7 +11,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.ClientModels;
-import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -26,11 +25,9 @@ public class RenderShootableWeapon extends RenderItemBase {
 		OpenMatrix4f modelMatrix = this.getCorrectionMatrix(stack, entitypatch, hand);
 		OpenMatrix4f jointTransform = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointByName("Tool_L").getAnimatedTransform();
 		modelMatrix.mulFront(jointTransform);
-		OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);
 		
 		poseStack.pushPose();
-		MathUtils.translateStack(poseStack, modelMatrix);
-		MathUtils.rotateStack(poseStack, transpose);
+		this.mulPoseStack(poseStack, modelMatrix);
 		Minecraft.getInstance().getItemInHandRenderer().renderItem(entitypatch.getOriginal(), stack, TransformType.THIRD_PERSON_RIGHT_HAND, false, poseStack, buffer, packedLight);
 		poseStack.popPose();
 		

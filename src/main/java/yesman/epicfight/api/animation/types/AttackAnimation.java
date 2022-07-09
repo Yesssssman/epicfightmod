@@ -153,7 +153,7 @@ public class AttackAnimation extends ActionAnimation {
 					entitypatch.currentlyAttackedEntity.clear();
 				}
 				
-				this.doAttack(entitypatch, prevElapsedTime, elapsedTime, prevState, state, phase);
+				this.hurtCollidingEntities(entitypatch, prevElapsedTime, elapsedTime, prevState, state, phase);
 			}
 		}
 	}
@@ -178,13 +178,13 @@ public class AttackAnimation extends ActionAnimation {
 		}
 	}
 	
-	public void doAttack(LivingEntityPatch<?> entitypatch, float prevElapsedTime, float elapsedTime, EntityState prevState, EntityState state, Phase phase) {
+	public void hurtCollidingEntities(LivingEntityPatch<?> entitypatch, float prevElapsedTime, float elapsedTime, EntityState prevState, EntityState state, Phase phase) {
 		Collider collider = this.getCollider(entitypatch, elapsedTime);
 		LivingEntity entity = entitypatch.getOriginal();
-		entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature().initializeTransform();				
+		entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature().initializeTransform();
 		float prevPoseTime = prevState.attacking() ? prevElapsedTime : phase.preDelay;
 		float poseTime = state.attacking() ? elapsedTime : phase.contact;
-		List<Entity> list = collider.updateAndFilterCollideEntity(entitypatch, this, prevPoseTime, poseTime, phase.getColliderJointName(), this.getPlaySpeed(entitypatch));
+		List<Entity> list = collider.updateAndSelectCollideEntity(entitypatch, this, prevPoseTime, poseTime, phase.getColliderJointName(), this.getPlaySpeed(entitypatch));
 		
 		if (list.size() > 0) {
 			HitEntitySet hitEntities = new HitEntitySet(entitypatch, list, phase.getProperty(AttackPhaseProperty.HIT_PRIORITY).orElse(HitEntitySet.Priority.DISTANCE));
@@ -332,13 +332,15 @@ public class AttackAnimation extends ActionAnimation {
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		Pose pose = super.getPoseByTime(entitypatch, time, partialTicks);
 		this.getProperty(AttackAnimationProperty.ROTATE_X).ifPresent((flag) -> {
-			float pitch = entitypatch.getAttackDirectionPitch();
-			JointTransform chest = pose.getOrDefaultTransform("Chest");
-			chest.frontResult(JointTransform.getRotation(Vector3f.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginFront);
-			
-			if (entitypatch instanceof PlayerPatch) {
-				JointTransform head = pose.getOrDefaultTransform("Head");
-				MathUtils.mulQuaternion(Vector3f.XP.rotationDegrees(pitch), head.rotation(), head.rotation());
+			if (flag) {
+				float pitch = entitypatch.getAttackDirectionPitch();
+				JointTransform chest = pose.getOrDefaultTransform("Chest");
+				chest.frontResult(JointTransform.getRotation(Vector3f.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginFront);
+				
+				if (entitypatch instanceof PlayerPatch) {
+					JointTransform head = pose.getOrDefaultTransform("Head");
+					MathUtils.mulQuaternion(Vector3f.XP.rotationDegrees(pitch), head.rotation(), head.rotation());
+				}
 			}
 		});
 		return pose;

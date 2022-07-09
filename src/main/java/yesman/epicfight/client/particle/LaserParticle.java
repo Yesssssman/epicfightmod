@@ -20,6 +20,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.ClientModels;
 
+@OnlyIn(Dist.CLIENT)
 public class LaserParticle extends CustomModelParticle {
 	private float length;
 	private float xRot;

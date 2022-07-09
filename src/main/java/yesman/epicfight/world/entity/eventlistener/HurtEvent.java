@@ -2,21 +2,22 @@ package yesman.epicfight.world.entity.eventlistener;
 
 import net.minecraft.world.damagesource.DamageSource;
 import yesman.epicfight.api.utils.game.AttackResult;
+import yesman.epicfight.api.utils.game.ExtendedDamageSource;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
-public class HurtEventPre extends PlayerEvent<ServerPlayerPatch> {
-	private final DamageSource damageSource;
+public abstract class HurtEvent<T> extends PlayerEvent<ServerPlayerPatch> {
+	private final T damageSource;
 	private float amount;
 	private AttackResult.ResultType result;
 	
-	public HurtEventPre(ServerPlayerPatch playerpatch, DamageSource damageSource, float amount) {
+	public HurtEvent(ServerPlayerPatch playerpatch, T damageSource, float amount) {
 		super(playerpatch, true);
 		this.damageSource = damageSource;
 		this.amount = amount;
 		this.result = AttackResult.ResultType.SUCCESS;
 	}
 	
-	public DamageSource getDamageSource() {
+	public T getDamageSource() {
 		return this.damageSource;
 	}
 	
@@ -34,5 +35,17 @@ public class HurtEventPre extends PlayerEvent<ServerPlayerPatch> {
 	
 	public void setResult(AttackResult.ResultType result) {
 		this.result = result;
+	}
+	
+	public static class Pre extends HurtEvent<DamageSource> {
+		public Pre(ServerPlayerPatch playerpatch, DamageSource damageSource, float amount) {
+			super(playerpatch, damageSource, amount);
+		}
+	}
+	
+	public static class Post extends HurtEvent<ExtendedDamageSource> {
+		public Post(ServerPlayerPatch playerpatch, ExtendedDamageSource damageSource, float amount) {
+			super(playerpatch, damageSource, amount);
+		}
 	}
 }

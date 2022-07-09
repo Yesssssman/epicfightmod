@@ -1,10 +1,10 @@
 package yesman.epicfight.skill;
 
-import yesman.epicfight.api.utils.game.EnumerateAssignmentManager;
+import yesman.epicfight.api.utils.game.ExtendableEnumManager;
 import yesman.epicfight.api.utils.game.ExtendableEnum;
 
 public interface SkillCategory extends ExtendableEnum {
-	public static final EnumerateAssignmentManager<SkillCategory> ASSIGNMENT_MANAGER = new EnumerateAssignmentManager<> ();
+	public static final ExtendableEnumManager<SkillCategory> ENUM_MANAGER = new ExtendableEnumManager<> ();
 	
 	public boolean shouldSaved();
 	

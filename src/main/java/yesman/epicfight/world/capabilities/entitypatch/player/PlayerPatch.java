@@ -114,7 +114,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 			i++;
 		}
 		
-		for (SkillCategory skillCategory : SkillCategory.ASSIGNMENT_MANAGER.universalValues()) {
+		for (SkillCategory skillCategory : SkillCategory.ENUM_MANAGER.universalValues()) {
 			if (oldSkill.hasCategory(skillCategory)) {
 				for (Skill learnedSkill : oldSkill.getLearnedSkills(skillCategory)) {
 					newSkill.addLearnedSkill(learnedSkill);
@@ -232,30 +232,30 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	public void toggleMode() {
 		switch (this.playerMode) {
 		case MINING:
-			this.toBattleMode();
+			this.toBattleMode(true);
 			break;
 		case BATTLE:
-			this.toMiningMode();
+			this.toMiningMode(true);
 			break;
 		}
 	}
 	
-	public void toMode(PlayerMode playerMode) {
+	public void toMode(PlayerMode playerMode, boolean sendPacket) {
 		switch (playerMode) {
 		case MINING:
-			this.toMiningMode();
+			this.toMiningMode(sendPacket);
 			break;
 		case BATTLE:
-			this.toBattleMode();
+			this.toBattleMode(sendPacket);
 			break;
 		}
 	}
 	
-	public void toMiningMode() {
+	public void toMiningMode(boolean sendPacket) {
 		this.playerMode = PlayerMode.MINING;
 	}
 	
-	public void toBattleMode() {
+	public void toBattleMode(boolean sendPacket) {
 		this.playerMode = PlayerMode.BATTLE;
 	}
 	

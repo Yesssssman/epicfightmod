@@ -16,7 +16,7 @@ public class ShieldCapability extends CapabilityItem {
 	protected StaticAnimation blockingMotion;
 	
 	public ShieldCapability(Item item) {
-		super(item, WeaponCategory.SHIELD);
+		super(item, WeaponCategories.SHIELD);
 		this.blockingMotion = Animations.BIPED_BLOCK;
 	}
 	

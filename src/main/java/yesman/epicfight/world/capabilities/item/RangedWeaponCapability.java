@@ -14,10 +14,10 @@ public class RangedWeaponCapability extends CapabilityItem {
 	protected Map<LivingMotion, StaticAnimation> rangeAnimationSet;
 	
 	public RangedWeaponCapability(Item item, StaticAnimation reload, StaticAnimation aiming, StaticAnimation shot) {
-		this(item, reload, aiming, shot, WeaponCategory.RANGED);
+		this(item, reload, aiming, shot, WeaponCategories.RANGED);
 	}
 	
-	public RangedWeaponCapability(Item item, StaticAnimation reload, StaticAnimation aiming, StaticAnimation shot, WeaponCategory weaponCategory) {
+	public RangedWeaponCapability(Item item, StaticAnimation reload, StaticAnimation aiming, StaticAnimation shot, WeaponCategories weaponCategory) {
 		super(item, weaponCategory);
 		this.rangeAnimationSet = new HashMap<LivingMotion, StaticAnimation> ();
 		

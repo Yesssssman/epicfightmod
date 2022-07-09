@@ -1,15 +1,29 @@
 package yesman.epicfight.api.utils.game;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
 
-public class EnumerateAssignmentManager<T> {
+import yesman.epicfight.main.EpicFightMod;
+
+public class ExtendableEnumManager<T> {
 	private int lastOrdinal = 0;
 	private Map<Integer, T> enumMapByOrdinal = Maps.newLinkedHashMap();
 	private Map<String, T> enumMapByName = Maps.newLinkedHashMap();
+	
+	public void load(Class<?> targetClss) {
+		try {
+			Method m = targetClss.getMethod("values");
+			m.invoke(null);
+		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			EpicFightMod.LOGGER.warn("Error when loading extendable enum " + targetClss);
+			e.printStackTrace();
+		}
+	}
 	
 	public int assign(T value) {
 		int lastOrdinal = this.lastOrdinal;
@@ -24,7 +38,7 @@ public class EnumerateAssignmentManager<T> {
 	}
 	
 	public T get(String name) {
-		return this.enumMapByName.get(name);
+		return this.enumMapByName.get(name.toLowerCase(Locale.ROOT));
 	}
 	
 	public Collection<T> universalValues() {

@@ -13,6 +13,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.client.CPChangeSkill;
@@ -20,6 +22,7 @@ import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 
+@OnlyIn(Dist.CLIENT)
 public class SkillEditScreen extends Screen {
 	private static final ResourceLocation SKILL_EDIT_UI = new ResourceLocation(EpicFightMod.MODID, "textures/gui/screen/skill_edit.png");
 	private CapabilitySkill skills;
@@ -38,7 +41,7 @@ public class SkillEditScreen extends Screen {
 		this.categoryButtons.clear();
 		this.learnedSkillButtons.clear();
 		
-		for (SkillCategory skillCategory : SkillCategory.ASSIGNMENT_MANAGER.universalValues()) {
+		for (SkillCategory skillCategory : SkillCategory.ENUM_MANAGER.universalValues()) {
 			if (this.skills.hasCategory(skillCategory) && skillCategory.learnable()) {
 				CategoryButton categoryButton = new CategoryButton(i, j, 18, 18, this.skills.skillContainers[skillCategory.universalOrdinal()].getSkill(), (button) -> {
 					for (Button shownButton : this.learnedSkillButtons) {

@@ -44,7 +44,7 @@ public class PlayerModeCommand {
 			
 			if (playerpatch != null) {
 				logGamemodeChange(command.getSource(), serverplayer, playerMode);
-				playerpatch.toMode(playerMode);
+				playerpatch.toMode(playerMode, true);
 				++i;
 			}
 		}

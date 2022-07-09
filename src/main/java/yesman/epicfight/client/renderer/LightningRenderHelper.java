@@ -8,6 +8,10 @@ import com.mojang.math.Matrix4f;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+
+@OnlyIn(Dist.CLIENT)
 public class LightningRenderHelper {
 	private static final float HALF_SQRT_3 = (float)(Math.sqrt(3.0D) / 2.0D);
 	

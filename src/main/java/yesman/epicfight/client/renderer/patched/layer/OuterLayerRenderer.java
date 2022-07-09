@@ -8,12 +8,15 @@ import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.DrownedOuterLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.monster.Drowned;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.ClientModel;
 import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.world.capabilities.entitypatch.mob.DrownedPatch;
 
+@OnlyIn(Dist.CLIENT)
 public class OuterLayerRenderer extends PatchedLayer<Drowned, DrownedPatch, DrownedModel<Drowned>, DrownedOuterLayer<Drowned>> {
 	public static final ResourceLocation DROWNED_OUTER_LAYER = new ResourceLocation("textures/entity/zombie/drowned_outer_layer.png");
 	

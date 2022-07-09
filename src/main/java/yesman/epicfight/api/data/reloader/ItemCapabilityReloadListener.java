@@ -125,7 +125,7 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 				for (String key : attributes.getAllKeys()) {
 					Map<Attribute, AttributeModifier> attributeEntry = deserializeAttribute(attributes.getCompound(key));
 					for (Map.Entry<Attribute, AttributeModifier> attribute : attributeEntry.entrySet()) {
-						innerDefaultCapability.addStyleAttibute(Style.get(key), Pair.of(attribute.getKey(), attribute.getValue()));
+						innerDefaultCapability.addStyleAttibute(Style.ENUM_MANAGER.get(key), Pair.of(attribute.getKey(), attribute.getValue()));
 					}
 				}
 			}
@@ -139,7 +139,7 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 				for (String key : attributes.getAllKeys()) {
 					Map<Attribute, AttributeModifier> attributeEntry = deserializeAttribute(attributes.getCompound(key));
 					for (Map.Entry<Attribute, AttributeModifier> attribute : attributeEntry.entrySet()) {
-						capability.addStyleAttibute(Style.get(key), Pair.of(attribute.getKey(), attribute.getValue()));
+						capability.addStyleAttibute(Style.ENUM_MANAGER.get(key), Pair.of(attribute.getKey(), attribute.getValue()));
 					}
 				}
 			}

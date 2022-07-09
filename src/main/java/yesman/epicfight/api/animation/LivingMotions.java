@@ -7,7 +7,7 @@ public enum LivingMotions implements LivingMotion {
 	final int id;
 	
 	LivingMotions() {
-		this.id = LivingMotion.ASSIGNMENT_MANAGER.assign(this);
+		this.id = LivingMotion.ENUM_MANAGER.assign(this);
 	}
 	
 	public int universalOrdinal() {

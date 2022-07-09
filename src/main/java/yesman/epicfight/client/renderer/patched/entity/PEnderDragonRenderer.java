@@ -39,7 +39,7 @@ public class PEnderDragonRenderer extends PatchedEntityRenderer<EnderDragon, End
 		ClientModel model = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT);
 		Armature armature = model.getArmature();
 		poseStack.pushPose();
-        this.setupPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
+        this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
 		OpenMatrix4f[] poses = this.getPoseMatrices(entitypatch, armature, partialTicks);
 		
 		if (entityIn.dragonDeathTime > 0) {
@@ -88,7 +88,7 @@ public class PEnderDragonRenderer extends PatchedEntityRenderer<EnderDragon, End
 	
 	@SuppressWarnings("deprecation")
 	@Override
-	public void setupPoseStack(PoseStack matStack, Armature armature, EnderDragon entityIn, EnderDragonPatch entitypatch, float partialTicks) {
+	public void mulPoseStack(PoseStack matStack, Armature armature, EnderDragon entityIn, EnderDragonPatch entitypatch, float partialTicks) {
 		OpenMatrix4f modelMatrix;
 		
 		if (!entitypatch.isGroundPhase() || entitypatch.getOriginal().dragonDeathTime > 0) {

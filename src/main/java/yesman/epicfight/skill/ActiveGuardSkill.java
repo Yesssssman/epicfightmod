@@ -25,19 +25,19 @@ import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
-import yesman.epicfight.world.entity.eventlistener.HurtEventPre;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
+import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 public class ActiveGuardSkill extends GuardSkill {
 	private static final SkillDataKey<Integer> LAST_ACTIVE = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
-	private static final Map<WeaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, StaticAnimation>> AVAILABLE_WEAPON_TYPES = Maps.<WeaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, StaticAnimation>>newLinkedHashMap();
+	private static final Map<WeaponCategories, BiFunction<CapabilityItem, PlayerPatch<?>, StaticAnimation>> AVAILABLE_WEAPON_TYPES = Maps.<WeaponCategories, BiFunction<CapabilityItem, PlayerPatch<?>, StaticAnimation>>newLinkedHashMap();
 	
 	static {
-		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.KATANA, (item, playerpatch) -> Animations.KATANA_GUARD_HIT);
-		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.LONGSWORD, (item, playerpatch) -> Animations.LONGSWORD_GUARD_HIT);
-		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.SWORD, (item, playerpatch) -> item.getStyle(playerpatch) == Styles.ONE_HAND ? Animations.SWORD_GUARD_HIT : Animations.SWORD_DUAL_GUARD_HIT);
-		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.TACHI, (item, playerpatch) -> Animations.LONGSWORD_GUARD_HIT);
+		AVAILABLE_WEAPON_TYPES.put(WeaponCategories.KATANA, (item, playerpatch) -> Animations.KATANA_GUARD_HIT);
+		AVAILABLE_WEAPON_TYPES.put(WeaponCategories.LONGSWORD, (item, playerpatch) -> Animations.LONGSWORD_GUARD_HIT);
+		AVAILABLE_WEAPON_TYPES.put(WeaponCategories.SWORD, (item, playerpatch) -> item.getStyle(playerpatch) == Styles.ONE_HAND ? Animations.SWORD_GUARD_HIT : Animations.SWORD_DUAL_GUARD_HIT);
+		AVAILABLE_WEAPON_TYPES.put(WeaponCategories.TACHI, (item, playerpatch) -> Animations.LONGSWORD_GUARD_HIT);
 	}
 	
 	public ActiveGuardSkill(Builder<? extends Skill> builder) {
@@ -65,7 +65,7 @@ public class ActiveGuardSkill extends GuardSkill {
 	}
 	
 	@Override
-	public void guard(SkillContainer container, CapabilityItem itemCapability, HurtEventPre event, float knockback, float impact, boolean reinforced) {
+	public void guard(SkillContainer container, CapabilityItem itemCapability, HurtEvent.Pre event, float knockback, float impact, boolean reinforced) {
 		if (this.getAvailableWeaponTypes(2).getOrDefault(itemCapability.getWeaponCategory(), (a, b) -> null).apply(itemCapability, event.getPlayerPatch()) != null) {
 			DamageSource damageSource = event.getDamageSource();
 			
@@ -115,7 +115,7 @@ public class ActiveGuardSkill extends GuardSkill {
 	}
 	
 	@Override
-	public Map<WeaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, StaticAnimation>> getAvailableWeaponTypes(int meta) {
+	public Map<WeaponCategories, BiFunction<CapabilityItem, PlayerPatch<?>, StaticAnimation>> getAvailableWeaponTypes(int meta) {
 		if (meta == 2) {
 			return AVAILABLE_WEAPON_TYPES;
 		} else {
@@ -137,7 +137,7 @@ public class ActiveGuardSkill extends GuardSkill {
 	@Override
 	public List<Object> getTooltipArgs() {
 		List<Object> list = Lists.<Object>newArrayList();
-		list.add(String.format("%s, %s, %s, %s", WeaponCategory.KATANA, WeaponCategory.LONGSWORD, WeaponCategory.SWORD, WeaponCategory.TACHI).toLowerCase());
+		list.add(String.format("%s, %s, %s, %s", WeaponCategories.KATANA, WeaponCategories.LONGSWORD, WeaponCategories.SWORD, WeaponCategories.TACHI).toLowerCase());
 		return list;
 	}
 }

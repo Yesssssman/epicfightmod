@@ -47,7 +47,7 @@ public class SPChangeSkill {
 					Skill skill = Skills.getSkill(msg.skillName);
 					playerpatch.getSkill(msg.slotIndex).setSkill(skill);
 					
-					if (SkillCategory.ASSIGNMENT_MANAGER.get(msg.slotIndex).learnable()) {
+					if (SkillCategory.ENUM_MANAGER.get(msg.slotIndex).learnable()) {
 						playerpatch.getSkillCapability().addLearnedSkill(skill);
 					}
 				}

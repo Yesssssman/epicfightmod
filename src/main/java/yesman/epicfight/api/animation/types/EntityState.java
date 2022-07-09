@@ -11,15 +11,15 @@ import net.minecraft.world.damagesource.EntityDamageSource;
 import yesman.epicfight.api.utils.game.ExtendedDamageSource;
 
 public class EntityState {
-	public static final EntityState FREE = new EntityState(false, false, false, true, true, false, false, 0, (damagesource) -> false);
-	public static final EntityState ROTATABLE_PRE_DELAY = new EntityState(false, true, false, false, false, true, false, 1, (damagesource) -> false);
-	public static final EntityState PRE_DELAY = new EntityState(true, true, false, false, false, true, false, 1, (damagesource) -> false);
-	public static final EntityState ROTATABLE_CONTACT = new EntityState(false, true, true, false, false, true, false, 2, (damagesource) -> false);
-	public static final EntityState CONTACT = new EntityState(true, true, true, false, false, true, false, 2, (damagesource) -> false);
-	public static final EntityState ROTATABLE_RECOVERY = new EntityState(false, true, false, false, true, true, false, 3, (damagesource) -> false);
-	public static final EntityState RECOVERY = new EntityState(true, true, false, false, true, true, false, 3, (damagesource) -> false);
-	public static final EntityState CANCELABLE_RECOVERY = new EntityState(false, false, false, true, true, true, false, 3, (damagesource) -> false);
-	public static final EntityState HIT = new EntityState(true, true, false, false, false, true, true, 3, (damagesource) -> false);
+	public static final EntityState FREE = new EntityState(false, false, false, true, true, false, false, 0, (damagesource) -> false, "free");
+	public static final EntityState ROTATABLE_PRE_DELAY = new EntityState(false, true, false, false, false, true, false, 1, (damagesource) -> false, "predelay_rotatable");
+	public static final EntityState PRE_DELAY = new EntityState(true, true, false, false, false, true, false, 1, (damagesource) -> false, "predelay");
+	public static final EntityState ROTATABLE_CONTACT = new EntityState(false, true, true, false, false, true, false, 2, (damagesource) -> false, "contact_rotatable");
+	public static final EntityState CONTACT = new EntityState(true, true, true, false, false, true, false, 2, (damagesource) -> false, "contact");
+	public static final EntityState ROTATABLE_RECOVERY = new EntityState(false, true, false, false, true, true, false, 3, (damagesource) -> false, "recovery_rotatable");
+	public static final EntityState RECOVERY = new EntityState(true, true, false, false, true, true, false, 3, (damagesource) -> false, "recovery");
+	public static final EntityState CANCELABLE_RECOVERY = new EntityState(false, false, false, true, true, true, false, 3, (damagesource) -> false, "recovery_cancelable");
+	public static final EntityState HIT = new EntityState(true, true, false, false, false, true, true, 3, (damagesource) -> false, "hit");
 	public static final EntityState KNOCKDOWN = new EntityState(true, true, false, false, false, true, true, 3, (damagesource) -> {
 		if (damagesource instanceof EntityDamageSource && !damagesource.isExplosion() && !damagesource.isMagic() && !damagesource.isBypassInvul()) {
 			if (damagesource instanceof ExtendedDamageSource) {
@@ -29,15 +29,15 @@ public class EntityState {
 			}
 		}
 		return false;
-	});
+	}, "knockdown");
 	public static final EntityState DODGE = new EntityState(true, true, false, false, false, true, false, 3, (damagesource) -> {
 		if (damagesource instanceof EntityDamageSource && !damagesource.isExplosion() && !damagesource.isMagic() && !damagesource.isBypassInvul()) {
 			return true;
 		}
 		return false;
-	});
+	}, "dodge");
 	
-	public static final EntityState INVINCIBLE = new EntityState(true, true, false, false, false, true, false, 0, (damagesource) -> !damagesource.isBypassInvul());
+	public static final EntityState INVINCIBLE = new EntityState(true, true, false, false, false, true, false, 0, (damagesource) -> !damagesource.isBypassInvul(), "invincible");
 	
 	static final Map<EntityState, Map<Translation, EntityState>> TRANSLATION_MAP = Maps.<EntityState, Map<Translation, EntityState>>newHashMap();
 	
@@ -67,9 +67,10 @@ public class EntityState {
 	final boolean hurt;
 	// free : 0, preDelay : 1, contact : 2, recovery : 3
 	final int phaseLevel;
+	final String name;
 	final Function<DamageSource, Boolean> invulnerabilityChecker;
 	
-	private EntityState(boolean turningLocked, boolean movementLocked, boolean attacking, boolean basicAttackPossible, boolean skillExecutionPossible, boolean inaction, boolean hurt, int phaseLevel, Function<DamageSource, Boolean> invulnerabilityChecker) {
+	private EntityState(boolean turningLocked, boolean movementLocked, boolean attacking, boolean basicAttackPossible, boolean skillExecutionPossible, boolean inaction, boolean hurt, int phaseLevel, Function<DamageSource, Boolean> invulnerabilityChecker, String name) {
 		this.turningLocked = turningLocked;
 		this.movementLocked = movementLocked;
 		this.attacking = attacking;
@@ -79,6 +80,7 @@ public class EntityState {
 		this.hurt = hurt;
 		this.phaseLevel = phaseLevel;
 		this.invulnerabilityChecker = invulnerabilityChecker;
+		this.name = name;
 	}
 	
 	public boolean turningLocked() {
@@ -115,5 +117,10 @@ public class EntityState {
 	
 	public int getLevel() {
 		return this.phaseLevel;
+	}
+	
+	@Override
+	public String toString() {
+		return this.name;
 	}
 }

@@ -37,8 +37,8 @@ public class SpiderPatch<T extends PathfinderMob> extends MobPatch<T> {
 	}
 	
 	@Override
-	protected void onResetAI(Set<Goal> toRemove) {
-		super.onResetAI(toRemove);
+	protected void selectGoalToRemove(Set<Goal> toRemove) {
+		super.selectGoalToRemove(toRemove);
 		
 		for (WrappedGoal wrappedGoal : this.original.goalSelector.getAvailableGoals()) {
 			Goal goal = wrappedGoal.getGoal();

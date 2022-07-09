@@ -12,6 +12,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RenderNameplateEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event.Result;
@@ -21,6 +23,7 @@ import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
+@OnlyIn(Dist.CLIENT)
 public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, R extends EntityRenderer<E>> {
 	protected static Method shouldShowName;
 	protected static Method renderNameTag;
@@ -62,9 +65,9 @@ public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends Li
 		modelArmature.searchJointById(jointId).getAnimatedTransform().mulFront(mat);
 	}
 	
-	public void setupPoseStack(PoseStack poseStack, Armature armature, E entityIn, T entitypatch, float partialTicks) {
+	public void mulPoseStack(PoseStack poseStack, Armature armature, E entityIn, T entitypatch, float partialTicks) {
 		OpenMatrix4f modelMatrix = entitypatch.getModelMatrix(partialTicks);
-        OpenMatrix4f transpose = new OpenMatrix4f(modelMatrix).transpose();
+        OpenMatrix4f transpose = modelMatrix.transpose(null);
         poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
         MathUtils.translateStack(poseStack, modelMatrix);
         MathUtils.rotateStack(poseStack, transpose);

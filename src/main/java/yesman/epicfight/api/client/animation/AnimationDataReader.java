@@ -36,7 +36,7 @@ public class AnimationDataReader {
         AnimationDataReader propertySetter = GsonHelper.fromJson(GSON, reader, TYPE);
         
         if (propertySetter.jointMaskEntry.isValid()) {
-        	animation.addProperty(ClientAnimationProperties.POSE_MODIFIER, propertySetter.jointMaskEntry);
+        	animation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.jointMaskEntry);
         }
         
         animation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.priority);
@@ -66,12 +66,12 @@ public class AnimationDataReader {
 				JsonArray maskArray = jsonObject.get("masks").getAsJsonArray();
 				maskArray.forEach((element) -> {
 					JsonObject jointMaskEntry = element.getAsJsonObject();
-					
 					String livingMotionName = GsonHelper.getAsString(jointMaskEntry, "livingmotion");
+					
 					if (livingMotionName.equals("ALL")) {
 						builder.defaultMask(getJointMaskEntry(GsonHelper.getAsString(jointMaskEntry, "type")));
 					} else {
-						LivingMotion livingMotion = LivingMotion.ASSIGNMENT_MANAGER.get(livingMotionName);
+						LivingMotion livingMotion = LivingMotion.ENUM_MANAGER.get(livingMotionName);
 						builder.mask(livingMotion, getJointMaskEntry(GsonHelper.getAsString(jointMaskEntry, "type")));
 					}
 				});

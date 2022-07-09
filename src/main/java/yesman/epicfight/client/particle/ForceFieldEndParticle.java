@@ -17,6 +17,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.renderer.LightningRenderHelper;
 
+@OnlyIn(Dist.CLIENT)
 public class ForceFieldEndParticle extends Particle {
 	private boolean init;
 	

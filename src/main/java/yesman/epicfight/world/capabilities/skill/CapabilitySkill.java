@@ -18,7 +18,7 @@ public class CapabilitySkill {
 	private final HashMultimap<SkillCategory, Skill> learnedSkills = HashMultimap.create();
 	
 	public CapabilitySkill(PlayerPatch<?> playerpatch) {
-		Collection<SkillCategory> categories = SkillCategory.ASSIGNMENT_MANAGER.universalValues();
+		Collection<SkillCategory> categories = SkillCategory.ENUM_MANAGER.universalValues();
 		this.skillContainers = new SkillContainer[categories.size()];
 		
 		for (SkillCategory slot : categories) {
@@ -30,7 +30,7 @@ public class CapabilitySkill {
 		int i = 0;
 		
 		for (SkillContainer container : this.skillContainers) {
-			if (SkillCategory.ASSIGNMENT_MANAGER.get(i).learnable()) {
+			if (SkillCategory.ENUM_MANAGER.get(i).learnable()) {
 				container.setSkill(null);
 			}
 			++i;
@@ -102,7 +102,7 @@ public class CapabilitySkill {
 			i++;
 		}
 		
-		for (SkillCategory category : SkillCategory.ASSIGNMENT_MANAGER.universalValues()) {
+		for (SkillCategory category : SkillCategory.ENUM_MANAGER.universalValues()) {
 			if (nbt.contains("learned" + String.valueOf(category.universalOrdinal()))) {
 				CompoundTag learnedNBT = nbt.getCompound("learned" + String.valueOf(category.universalOrdinal()));
 				for (String key : learnedNBT.getAllKeys()) {

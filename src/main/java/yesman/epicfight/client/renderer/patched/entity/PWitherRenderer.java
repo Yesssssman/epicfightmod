@@ -13,6 +13,8 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.model.ClientModel;
@@ -24,6 +26,7 @@ import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.patched.layer.PatchedWitherArmorLayer;
 import yesman.epicfight.world.capabilities.entitypatch.boss.WitherPatch;
 
+@OnlyIn(Dist.CLIENT)
 public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, WitherPatch, WitherBossModel<WitherBoss>> {
 	public static final ResourceLocation WITHER_INVULNERABLE_LOCATION = new ResourceLocation("textures/entity/wither/wither_invulnerable.png");
 	private static final ResourceLocation WITHER_LOCATION = new ResourceLocation("textures/entity/wither/wither.png");
@@ -42,7 +45,7 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 		ClientModel model = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT);
 		Armature armature = model.getArmature();
 		poseStack.pushPose();
-		this.setupPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
+		this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
 		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks);
 		
 		if (renderType != null) {
@@ -91,8 +94,8 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 	}
 	
 	@Override
-	public void setupPoseStack(PoseStack poseStack, Armature armature, WitherBoss witherboss, WitherPatch entitypatch, float partialTicks) {
-		super.setupPoseStack(poseStack, armature, witherboss, entitypatch, partialTicks);
+	public void mulPoseStack(PoseStack poseStack, Armature armature, WitherBoss witherboss, WitherPatch entitypatch, float partialTicks) {
+		super.mulPoseStack(poseStack, armature, witherboss, entitypatch, partialTicks);
         
 		float f = 1.0F;
 		int i = witherboss.getInvulnerableTicks();

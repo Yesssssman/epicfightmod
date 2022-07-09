@@ -17,7 +17,7 @@ import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
@@ -45,13 +45,13 @@ public class SkeletonPatch<T extends PathfinderMob> extends HumanoidMobPatch<T> 
 	@Override
 	protected void setWeaponMotions() {
 		super.setWeaponMotions();
-		this.weaponLivingMotions.put(WeaponCategory.SWORD, ImmutableMap.of(
+		this.weaponLivingMotions.put(WeaponCategories.SWORD, ImmutableMap.of(
 			CapabilityItem.Styles.ONE_HAND, Set.of(
 				Pair.of(LivingMotions.CHASE, Animations.WITHER_SKELETON_CHASE)
 			)
 		));
 		
-		this.weaponAttackMotions.put(WeaponCategory.SWORD, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.SKELETON_SWORD));
+		this.weaponAttackMotions.put(WeaponCategories.SWORD, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.SKELETON_SWORD));
 	}
 	
 	@Override

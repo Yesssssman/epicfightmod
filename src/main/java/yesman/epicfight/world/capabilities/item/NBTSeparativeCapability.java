@@ -12,7 +12,7 @@ public class NBTSeparativeCapability extends CapabilityItem {
 	private CapabilityItem defaultCapability;
 	
 	public NBTSeparativeCapability(List<Pair<Predicate<ItemStack>, CapabilityItem>> variables, CapabilityItem defaultCapability) {
-		super(WeaponCategory.NOT_WEAON);
+		super(WeaponCategories.NOT_WEAON);
 		this.variables = variables;
 		this.defaultCapability = defaultCapability;
 	}

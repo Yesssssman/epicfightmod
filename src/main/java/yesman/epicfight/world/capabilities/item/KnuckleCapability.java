@@ -11,7 +11,7 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 public class KnuckleCapability extends WeaponCapability {
 	public KnuckleCapability() {
 		super(new WeaponCapability.Builder()
-			.category(WeaponCategory.FIST)
+			.category(WeaponCategories.FIST)
 			.newStyleCombo(Styles.ONE_HAND, Animations.FIST_AUTO_1, Animations.FIST_AUTO_2, Animations.FIST_AUTO_3, Animations.FIST_DASH, Animations.FIST_AIR_SLASH)
 			.specialAttack(Styles.ONE_HAND, Skills.RELENTLESS_COMBO)
 		);
@@ -21,7 +21,7 @@ public class KnuckleCapability extends WeaponCapability {
 	public boolean checkOffhandValid(LivingEntityPatch<?> entitypatch) {
 		ItemStack offhandItme = entitypatch.getOriginal().getOffhandItem();
 		CapabilityItem itemCap = EpicFightCapabilities.getItemStackCapability(offhandItme);
-		boolean isFist = itemCap.getWeaponCategory() == WeaponCategory.FIST;
+		boolean isFist = itemCap.getWeaponCategory() == WeaponCategories.FIST;
 		return isFist || !(offhandItme.getItem() instanceof SwordItem || offhandItme.getItem() instanceof DiggerItem);
 	}
 	

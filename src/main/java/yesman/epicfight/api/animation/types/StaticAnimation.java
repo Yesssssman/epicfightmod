@@ -136,7 +136,7 @@ public class StaticAnimation extends DynamicAnimation {
 		if (!super.isJointEnabled(entitypatch, joint)) {
 			return false;
 		} else {
-			boolean bool = this.getProperty(ClientAnimationProperties.POSE_MODIFIER).map((bindModifier) -> {
+			boolean bool = this.getProperty(ClientAnimationProperties.JOINT_MASK).map((bindModifier) -> {
 				return !bindModifier.isMasked(entitypatch.getCurrentLivingMotion(), joint);
 			}).orElse(true);
 			
@@ -146,7 +146,7 @@ public class StaticAnimation extends DynamicAnimation {
 	
 	@Override
 	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, String joint) {
-		return this.getProperty(ClientAnimationProperties.POSE_MODIFIER).map((jointMaskEntry) -> {
+		return this.getProperty(ClientAnimationProperties.JOINT_MASK).map((jointMaskEntry) -> {
 			List<JointMask> list = jointMaskEntry.getMask(entitypatch.getCurrentLivingMotion());
 			int position = list.indexOf(JointMask.of(joint));
 			

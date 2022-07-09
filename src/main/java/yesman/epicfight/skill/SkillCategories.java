@@ -19,7 +19,7 @@ public enum SkillCategories implements SkillCategory {
 		this.shouldSaved = shouldSave;
 		this.shouldSyncronized = shouldSyncronized;
 		this.modifiable = modifiable;
-		this.id = SkillCategory.ASSIGNMENT_MANAGER.assign(this);
+		this.id = SkillCategory.ENUM_MANAGER.assign(this);
 	}
 	
 	public boolean shouldSaved() {

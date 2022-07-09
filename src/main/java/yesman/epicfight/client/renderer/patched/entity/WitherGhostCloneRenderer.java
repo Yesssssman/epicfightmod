@@ -9,6 +9,8 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.model.ClientModel;
@@ -20,6 +22,7 @@ import yesman.epicfight.client.renderer.entity.NoopLivingEntityRenderer;
 import yesman.epicfight.world.capabilities.entitypatch.boss.WitherGhostPatch;
 import yesman.epicfight.world.entity.WitherGhostClone;
 
+@OnlyIn(Dist.CLIENT)
 public class WitherGhostCloneRenderer extends PatchedEntityRenderer<WitherGhostClone, WitherGhostPatch, NoopLivingEntityRenderer<WitherGhostClone>> {
 	@Override
 	public void render(WitherGhostClone entityIn, WitherGhostPatch entitypatch, NoopLivingEntityRenderer<WitherGhostClone> renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
@@ -29,7 +32,7 @@ public class WitherGhostCloneRenderer extends PatchedEntityRenderer<WitherGhostC
 		float tranparency = Mth.sin((entityIn.tickCount + partialTicks) / 40.0F * 3.1415F) * 0.6F;
 		
 		poseStack.pushPose();
-		this.setupPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
+		this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
 		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks);
 		VertexConsumer builder = buffer.getBuffer(renderType);
 		model.drawAnimatedModel(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, tranparency, OverlayTexture.NO_OVERLAY, poseMatrices);

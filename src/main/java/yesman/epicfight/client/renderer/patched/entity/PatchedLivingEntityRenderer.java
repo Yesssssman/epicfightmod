@@ -47,7 +47,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		ClientModel model = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT);
 		Armature armature = model.getArmature();
 		poseStack.pushPose();
-		this.setupPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
+		this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
 		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks);
 		
 		if (renderType != null) {
@@ -130,8 +130,8 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 	}
 	
 	@Override
-	public void setupPoseStack(PoseStack poseStack, Armature armature, E entityIn, T entitypatch, float partialTicks) {
-		super.setupPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
+	public void mulPoseStack(PoseStack poseStack, Armature armature, E entityIn, T entitypatch, float partialTicks) {
+		super.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
         
         if (entityIn.isShiftKeyDown()) {
 			poseStack.translate(0.0D, 0.15D, 0.0D);

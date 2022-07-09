@@ -79,7 +79,8 @@ public class PlayerEventListener {
 		public static final EventType<AttackSpeedModifyEvent> ATTACK_SPEED_MODIFY_EVENT = new EventType<>(null);
 		public static final EventType<DealtDamageEvent<PlayerPatch<?>>> DEALT_DAMAGE_EVENT_PRE = new EventType<>(null);
 		public static final EventType<DealtDamageEvent<ServerPlayerPatch>> DEALT_DAMAGE_EVENT_POST = new EventType<>(LogicalSide.SERVER);
-		public static final EventType<HurtEventPre> HURT_EVENT_PRE = new EventType<>(LogicalSide.SERVER);
+		public static final EventType<HurtEvent.Pre> HURT_EVENT_PRE = new EventType<>(LogicalSide.SERVER);
+		public static final EventType<HurtEvent.Post> HURT_EVENT_POST = new EventType<>(LogicalSide.SERVER);
 		public static final EventType<AttackEndEvent> ATTACK_ANIMATION_END_EVENT = new EventType<>(LogicalSide.SERVER);
 		public static final EventType<BasicAttackEvent> BASIC_ATTACK_EVENT = new EventType<>(LogicalSide.SERVER);
 		public static final EventType<MovementInputEvent> MOVEMENT_INPUT_EVENT = new EventType<>(LogicalSide.CLIENT);
@@ -95,7 +96,7 @@ public class PlayerEventListener {
 		}
 		
 		public boolean shouldActive(boolean isRemote) {
-			return side == null ? true : this.side.isClient() == isRemote;
+			return this.side == null ? true : this.side.isClient() == isRemote;
 		}
 	}
 }

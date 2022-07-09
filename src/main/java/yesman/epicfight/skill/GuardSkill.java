@@ -30,34 +30,34 @@ import yesman.epicfight.api.utils.game.AttackResult;
 import yesman.epicfight.api.utils.game.ExtendedDamageSource;
 import yesman.epicfight.client.gui.BattleModeGui;
 import yesman.epicfight.gameasset.Animations;
-import yesman.epicfight.gameasset.Skills;
 import yesman.epicfight.gameasset.EpicFightSounds;
-import yesman.epicfight.particle.HitParticleType;
+import yesman.epicfight.gameasset.Skills;
 import yesman.epicfight.particle.EpicFightParticles;
+import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
-import yesman.epicfight.world.entity.eventlistener.HurtEventPre;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
+import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 public class GuardSkill extends Skill {
 	protected static final SkillDataKey<Integer> LAST_HIT_TICK = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
 	protected static final SkillDataKey<Float> PENALTY = SkillDataKey.createDataKey(SkillDataManager.ValueType.FLOAT);
 	public static final UUID EVENT_UUID = UUID.fromString("b422f7a0-f378-11eb-9a03-0242ac130003");
-	protected static final Map<WeaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, StaticAnimation>> AVAILABLE_WEAPON_TYPES = Maps.<WeaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, StaticAnimation>>newLinkedHashMap();
+	protected static final Map<WeaponCategories, BiFunction<CapabilityItem, PlayerPatch<?>, StaticAnimation>> AVAILABLE_WEAPON_TYPES = Maps.<WeaponCategories, BiFunction<CapabilityItem, PlayerPatch<?>, StaticAnimation>>newLinkedHashMap();
 	
 	static {
-		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.AXE, (item, player) -> Animations.SWORD_GUARD_HIT);
-		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.GREATSWORD, (item, player) -> Animations.GREATSWORD_GUARD_HIT);
-		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.KATANA, (item, player) -> Animations.KATANA_GUARD_HIT);
-		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.LONGSWORD, (item, player) -> Animations.LONGSWORD_GUARD_HIT);
-		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.SPEAR, (item, player) -> item.getStyle(player) == Styles.TWO_HAND ? Animations.SPEAR_GUARD_HIT : null);
-		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.SWORD, (item, player) -> item.getStyle(player) == Styles.ONE_HAND ? Animations.SWORD_GUARD_HIT : Animations.SWORD_DUAL_GUARD_HIT);
-		AVAILABLE_WEAPON_TYPES.put(WeaponCategory.TACHI, (item, player) -> Animations.LONGSWORD_GUARD_HIT);
+		AVAILABLE_WEAPON_TYPES.put(WeaponCategories.AXE, (item, player) -> Animations.SWORD_GUARD_HIT);
+		AVAILABLE_WEAPON_TYPES.put(WeaponCategories.GREATSWORD, (item, player) -> Animations.GREATSWORD_GUARD_HIT);
+		AVAILABLE_WEAPON_TYPES.put(WeaponCategories.KATANA, (item, player) -> Animations.KATANA_GUARD_HIT);
+		AVAILABLE_WEAPON_TYPES.put(WeaponCategories.LONGSWORD, (item, player) -> Animations.LONGSWORD_GUARD_HIT);
+		AVAILABLE_WEAPON_TYPES.put(WeaponCategories.SPEAR, (item, player) -> item.getStyle(player) == Styles.TWO_HAND ? Animations.SPEAR_GUARD_HIT : null);
+		AVAILABLE_WEAPON_TYPES.put(WeaponCategories.SWORD, (item, player) -> item.getStyle(player) == Styles.ONE_HAND ? Animations.SWORD_GUARD_HIT : Animations.SWORD_DUAL_GUARD_HIT);
+		AVAILABLE_WEAPON_TYPES.put(WeaponCategories.TACHI, (item, player) -> Animations.LONGSWORD_GUARD_HIT);
 	}
 	
 	public static Skill.Builder<GuardSkill> createBuilder(ResourceLocation resourceLocation) {
@@ -130,7 +130,7 @@ public class GuardSkill extends Skill {
 		}, 1);
 	}
 	
-	public void guard(SkillContainer container, CapabilityItem itemCapability, HurtEventPre event, float knockback, float impact, boolean reinforced) {
+	public void guard(SkillContainer container, CapabilityItem itemCapability, HurtEvent.Pre event, float knockback, float impact, boolean reinforced) {
 		DamageSource damageSource = event.getDamageSource();
 		
 		if (this.isBlockableSource(damageSource, reinforced)) {
@@ -160,7 +160,7 @@ public class GuardSkill extends Skill {
 		}
 	}
 	
-	public void dealEvent(PlayerPatch<?> playerpatch, HurtEventPre event) {
+	public void dealEvent(PlayerPatch<?> playerpatch, HurtEvent.Pre event) {
 		event.setCanceled(true);
 		event.setResult(AttackResult.ResultType.BLOCKED);
 		
@@ -176,7 +176,7 @@ public class GuardSkill extends Skill {
 		return 0.6F;
 	}
 	
-	protected Map<WeaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, StaticAnimation>> getAvailableWeaponTypes(int metadata) {
+	protected Map<WeaponCategories, BiFunction<CapabilityItem, PlayerPatch<?>, StaticAnimation>> getAvailableWeaponTypes(int metadata) {
 		return AVAILABLE_WEAPON_TYPES;
 	}
 	

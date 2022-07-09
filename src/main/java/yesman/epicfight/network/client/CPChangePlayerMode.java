@@ -24,14 +24,14 @@ public class CPChangePlayerMode {
 	}
 	
 	public static void handle(CPChangePlayerMode msg, Supplier<NetworkEvent.Context> ctx) {
-		ctx.get().enqueueWork(()->{
+		ctx.get().enqueueWork(() -> {
 			ServerPlayer player = ctx.get().getSender();
 			
 			if (player != null) {
-				PlayerPatch<?> playerpatch = (PlayerPatch<?>) player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+				PlayerPatch<?> playerpatch = (PlayerPatch<?>) player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
 				
 				if (playerpatch != null) {
-					playerpatch.toMode(msg.mode);
+					playerpatch.toMode(msg.mode, false);
 				}
 			}
 		});

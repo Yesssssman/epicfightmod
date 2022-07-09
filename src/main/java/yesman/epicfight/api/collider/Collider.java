@@ -34,7 +34,7 @@ public abstract class Collider {
 		this.worldCenter = OpenMatrix4f.transform(mat, this.modelCenter);
 	}
 	
-	public List<Entity> updateAndFilterCollideEntity(LivingEntityPatch<?> entitypatch, AttackAnimation attackAnimation, float prevElapsedTime, float elapsedTime, String jointName, float attackSpeed) {
+	public List<Entity> updateAndSelectCollideEntity(LivingEntityPatch<?> entitypatch, AttackAnimation attackAnimation, float prevElapsedTime, float elapsedTime, String jointName, float attackSpeed) {
 		OpenMatrix4f transformMatrix;
 		Armature armature = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature();
 		int pathIndex = armature.searchPathIndex(jointName);
@@ -42,22 +42,21 @@ public abstract class Collider {
 		if (pathIndex == -1) {
 			transformMatrix = new OpenMatrix4f();
 		} else {
-			transformMatrix = Animator.getBindedJointTransformByIndex(entitypatch.getAnimator().getPose(1.0F), armature, pathIndex);
+			transformMatrix = Animator.getBindedJointTransformByIndex(attackAnimation.getPoseByTime(entitypatch, elapsedTime, 1.0F), armature, pathIndex);
+			//transformMatrix = Animator.getBindedJointTransformByIndex(entitypatch.getAnimator().getPose(1.0F), armature, pathIndex);
 		}
 		
 		OpenMatrix4f toWorldCoord = OpenMatrix4f.createTranslation(-(float)entitypatch.getOriginal().getX(), (float)entitypatch.getOriginal().getY(), -(float)entitypatch.getOriginal().getZ());
 		transformMatrix.mulFront(toWorldCoord.mulBack(entitypatch.getModelMatrix(1.0F)));		
 		this.transform(transformMatrix);
 		
-		List<Entity> list = entitypatch.getOriginal().level.getEntities(entitypatch.getOriginal(), this.getHitboxAABB());
-		this.filterHitEntities(list);
-		
 		return this.getCollideEntities(entitypatch.getOriginal());
 	}
 	
-	public List<Entity> getCollideEntities(Entity self) {
-		List<Entity> list = self.level.getEntities(self, this.getHitboxAABB());
-		this.filterHitEntities(list);
+	public List<Entity> getCollideEntities(Entity entity) {
+		List<Entity> list = entity.level.getEntities(entity, this.getHitboxAABB());
+		list.removeIf((e) -> !this.isCollide(e));
+		
 		return list;
 	}
 	
@@ -84,11 +83,12 @@ public abstract class Collider {
 	
 	protected abstract boolean isCollide(Entity opponent);
 	
-	protected void filterHitEntities(List<Entity> entities) {
-		entities.removeIf((entity) -> !this.isCollide(entity));
-	}
-	
 	protected AABB getHitboxAABB() {
 		return this.outerAABB.move(-this.worldCenter.x, this.worldCenter.y, -this.worldCenter.z);
+	}
+	
+	@Override
+	public String toString() {
+		return "[ColliderInfo] type: " + this.getClass() + " center: " + this.modelCenter;
 	}
 }

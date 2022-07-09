@@ -9,7 +9,7 @@ import net.minecraftforge.event.LootTableLoadEvent;
 import yesman.epicfight.data.loot.function.SetRandomSkillFunction;
 import yesman.epicfight.world.item.EpicFightItems;
 
-public class ModLootTables {
+public class EpicFightLootTables {
 	public static void modifyVanillaLootPools(final LootTableLoadEvent event) {
     	if (event.getName().equals(BuiltInLootTables.DESERT_PYRAMID)) {
     		event.getTable().addPool(LootPool.lootPool().setRolls(UniformGenerator.between(1.0F, 2.0F))

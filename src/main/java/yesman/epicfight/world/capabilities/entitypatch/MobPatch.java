@@ -52,11 +52,11 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	
 	protected void initAI() {
 		Set<Goal> toRemove = Sets.newHashSet();
-		this.onResetAI(toRemove);
+		this.selectGoalToRemove(toRemove);
 		toRemove.forEach(this.original.goalSelector::removeGoal);
 	}
 	
-	protected void onResetAI(Set<Goal> toRemove) {
+	protected void selectGoalToRemove(Set<Goal> toRemove) {
 		for (WrappedGoal wrappedGoal : this.original.goalSelector.getAvailableGoals()) {
 			Goal goal = wrappedGoal.getGoal();
 			

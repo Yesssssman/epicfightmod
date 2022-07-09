@@ -118,9 +118,9 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		super.updateHeldItem(mainHandCap, offHandCap);
 		
 		if (EpicFightMod.CLIENT_INGAME_CONFIG.battleAutoSwitchItems.contains(this.original.getMainHandItem().getItem())) {
-			this.toBattleMode();
+			this.toBattleMode(true);
 		} else if (EpicFightMod.CLIENT_INGAME_CONFIG.miningAutoSwitchItems.contains(this.original.getMainHandItem().getItem())) {
-			this.toMiningMode();
+			this.toMiningMode(true);
 		}
 	}
 	
@@ -129,7 +129,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		AttackResult result = super.tryHurt(damageSource, amount);
 		
 		if (EpicFightMod.CLIENT_INGAME_CONFIG.autoPreparation.getValue() && result.resultType == AttackResult.ResultType.SUCCESS && !this.isBattleMode()) {
-			this.toBattleMode();
+			this.toBattleMode(true);
 		}
 		
 		return result;
@@ -146,31 +146,35 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	}
 	
 	@Override
-	public void toMiningMode() {
+	public void toMiningMode(boolean sendPacket) {
 		if (this.playerMode != PlayerMode.MINING) {
 			ClientEngine.instance.renderEngine.guiSkillBar.slideDown();
 			if (EpicFightMod.CLIENT_INGAME_CONFIG.cameraAutoSwitch.getValue()) {
 				this.minecraft.options.setCameraType(CameraType.FIRST_PERSON);
 			}
 			
-			EpicFightNetworkManager.sendToServer(new CPChangePlayerMode(PlayerMode.MINING));
+			if (sendPacket) {
+				EpicFightNetworkManager.sendToServer(new CPChangePlayerMode(PlayerMode.MINING));
+			}
 		}
 		
-		super.toMiningMode();
+		super.toMiningMode(sendPacket);
 	}
 	
 	@Override
-	public void toBattleMode() {
+	public void toBattleMode(boolean sendPacket) {
 		if (this.playerMode != PlayerMode.BATTLE) {
 			ClientEngine.instance.renderEngine.guiSkillBar.slideUp();
 			if (EpicFightMod.CLIENT_INGAME_CONFIG.cameraAutoSwitch.getValue()) {
 				this.minecraft.options.setCameraType(CameraType.THIRD_PERSON_BACK);
 			}
 			
-			EpicFightNetworkManager.sendToServer(new CPChangePlayerMode(PlayerMode.BATTLE));
+			if (sendPacket) {
+				EpicFightNetworkManager.sendToServer(new CPChangePlayerMode(PlayerMode.BATTLE));
+			}
 		}
 		
-		super.toBattleMode();
+		super.toBattleMode(sendPacket);
 	}
 	
 	@Override

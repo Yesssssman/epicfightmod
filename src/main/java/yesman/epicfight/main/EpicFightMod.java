@@ -26,6 +26,8 @@ import net.minecraftforge.fml.loading.FMLPaths;
 import net.minecraftforge.registries.DataSerializerEntry;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.Animator;
+import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.ServerAnimator;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.model.ClientModels;
@@ -51,9 +53,16 @@ import yesman.epicfight.gameasset.Skills;
 import yesman.epicfight.network.EpicFightDataSerializers;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.particle.EpicFightParticles;
+import yesman.epicfight.server.commands.arguments.SkillArgument;
+import yesman.epicfight.skill.SkillCategories;
+import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
+import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.capabilities.item.WeaponCapabilityPresets;
+import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.capabilities.provider.ProviderEntity;
 import yesman.epicfight.world.capabilities.provider.ProviderItem;
 import yesman.epicfight.world.capabilities.provider.ProviderProjectile;
@@ -96,8 +105,14 @@ public class EpicFightMod {
     	bus.addGenericListener(DataSerializerEntry.class, EpicFightDataSerializers::register);
     	bus.addGenericListener(GlobalLootModifierSerializer.class, EpicFightLootModifiers::register);
     	
+    	LivingMotion.ENUM_MANAGER.load(LivingMotions.class);
+    	SkillCategory.ENUM_MANAGER.load(SkillCategories.class);
+    	Style.ENUM_MANAGER.load(Styles.class);
+    	WeaponCategory.ENUM_MANAGER.load(WeaponCategories.class);
+    	
     	this.animationManager.registerAnimations();
     	Skills.registerSkills();
+    	SkillArgument.registerArgumentTypes();
     	
     	EpicFightMobEffects.EFFECTS.register(bus);
     	EpicFightPotions.POTIONS.register(bus);

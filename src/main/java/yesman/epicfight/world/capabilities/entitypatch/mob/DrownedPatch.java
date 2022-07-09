@@ -7,7 +7,7 @@ import net.minecraft.world.entity.monster.Drowned;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
@@ -16,7 +16,7 @@ public class DrownedPatch extends ZombiePatch<Drowned> {
 	@Override
 	protected void setWeaponMotions() {
 		super.setWeaponMotions();
-		this.weaponAttackMotions.put(WeaponCategory.TRIDENT, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.DROWNED_TRIDENT));
+		this.weaponAttackMotions.put(WeaponCategories.TRIDENT, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.DROWNED_TRIDENT));
 	}
 	
 	@Override

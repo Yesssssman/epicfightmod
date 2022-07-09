@@ -1,7 +1,6 @@
 package yesman.epicfight.api.model;
 
 import java.io.BufferedInputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.FloatBuffer;
@@ -9,11 +8,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.ArrayUtils;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -25,6 +26,7 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
@@ -65,22 +67,22 @@ public class JsonModelLoader {
 	private JsonObject rootJson;
 	
 	public JsonModelLoader(ResourceManager resourceManager, ResourceLocation resourceLocation) {
-		if (resourceManager == null) {
-			BufferedInputStream inputstream = new BufferedInputStream(EpicFightMod.class.getResourceAsStream("/assets/" + resourceLocation.getNamespace() + "/" + resourceLocation.getPath()));
-			Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
-			JsonReader in = new JsonReader(reader);
-			in.setLenient(true);
-			this.rootJson = Streams.parse(in).getAsJsonObject();	
-		} else {
-			try {
+		try {
+			if (resourceManager == null) {
+				Class<?> modClass = ModList.get().getModObjectById(resourceLocation.getNamespace()).get().getClass();
+				BufferedInputStream inputstream = new BufferedInputStream(modClass.getResourceAsStream("/assets/" + resourceLocation.getNamespace() + "/" + resourceLocation.getPath()));
+				Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
+				JsonReader in = new JsonReader(reader);
+				in.setLenient(true);
+				this.rootJson = Streams.parse(in).getAsJsonObject();	
+			} else {
 				Resource resource = resourceManager.getResource(resourceLocation);
 				JsonReader in = new JsonReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
 				in.setLenient(true);
 				this.rootJson = Streams.parse(in).getAsJsonObject();
-			} catch (IOException e) {
-				EpicFightMod.LOGGER.info("Can't read " + resourceLocation.toString());
-				e.printStackTrace();
 			}
+		} catch (Exception e) {
+			EpicFightMod.LOGGER.info("Can't read " + resourceLocation.toString() + " because " + e);
 		}
 	}
 	
@@ -201,7 +203,7 @@ public class JsonModelLoader {
 			}
 		}
 		
-		List<String> allowedJointList = Lists.<String>newArrayList();
+		Set<String> allowedJoints = Sets.<String>newLinkedHashSet();
 		
 		if (attack) {
 			for (Phase phase : ((AttackAnimation)animation).phases) {
@@ -210,7 +212,7 @@ public class JsonModelLoader {
 				int pathIndex = armature.searchPathIndex(phase.getColliderJointName());
 				
 				while (joint != null) {
-					allowedJointList.add(joint.getName());
+					allowedJoints.add(joint.getName());
 					int nextJoint = pathIndex % 10;
 					
 					if (nextJoint > 0) {
@@ -221,13 +223,15 @@ public class JsonModelLoader {
 					}
 				}
 			}
+		} else if (action) {
+			allowedJoints.add("Root");
 		}
 		
 		for (JsonElement element : array) {
 			JsonObject keyObject = element.getAsJsonObject();
 			String name = keyObject.get("name").getAsString();
 			
-			if (attack && FMLEnvironment.dist == Dist.DEDICATED_SERVER && !allowedJointList.contains(name)) {
+			if (attack && FMLEnvironment.dist == Dist.DEDICATED_SERVER && !allowedJoints.contains(name)) {
 				continue;
 			}
 			
@@ -259,12 +263,6 @@ public class JsonModelLoader {
 			animation.addSheet(name, sheet);
 			animation.setTotalTime(times[times.length - 1]);
 			root = false;
-			
-			if (action) {
-				if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
-					break;
-				}
-			}
 		}
 	}
 	

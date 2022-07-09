@@ -33,7 +33,7 @@ import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPChangeLivingMotion;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
@@ -41,8 +41,8 @@ import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 
 public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch<T> {
-	protected Map<WeaponCategory, Map<Style, Set<Pair<LivingMotion, StaticAnimation>>>> weaponLivingMotions;
-	protected Map<WeaponCategory, Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> weaponAttackMotions;
+	protected Map<WeaponCategories, Map<Style, Set<Pair<LivingMotion, StaticAnimation>>>> weaponLivingMotions;
+	protected Map<WeaponCategories, Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> weaponAttackMotions;
 	
 	public HumanoidMobPatch(Faction faction) {
 		super(faction);
@@ -67,7 +67,7 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 	
 	protected void setWeaponMotions() {
 		this.weaponLivingMotions = Maps.newHashMap();
-		this.weaponLivingMotions.put(WeaponCategory.GREATSWORD, ImmutableMap.of(
+		this.weaponLivingMotions.put(WeaponCategories.GREATSWORD, ImmutableMap.of(
 			CapabilityItem.Styles.TWO_HAND, Set.of(
 				Pair.of(LivingMotions.WALK, Animations.BIPED_WALK_TWOHAND),
 				Pair.of(LivingMotions.CHASE, Animations.BIPED_WALK_TWOHAND)
@@ -75,20 +75,20 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 		));
 		
 		this.weaponAttackMotions = Maps.newHashMap();
-		this.weaponAttackMotions.put(WeaponCategory.AXE, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS));
-		this.weaponAttackMotions.put(WeaponCategory.HOE, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS));
-		this.weaponAttackMotions.put(WeaponCategory.PICKAXE, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS));
-		this.weaponAttackMotions.put(WeaponCategory.SHOVEL, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS));
-		this.weaponAttackMotions.put(WeaponCategory.SWORD, ImmutableMap.of(CapabilityItem.Styles.ONE_HAND, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS, CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_DUAL_SWORD));
-		this.weaponAttackMotions.put(WeaponCategory.GREATSWORD, ImmutableMap.of(CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_GREATSWORD));
-		this.weaponAttackMotions.put(WeaponCategory.KATANA, ImmutableMap.of(CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_KATANA));
-		this.weaponAttackMotions.put(WeaponCategory.LONGSWORD, ImmutableMap.of(CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_LONGSWORD));
-		this.weaponAttackMotions.put(WeaponCategory.TACHI, ImmutableMap.of(CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_TACHI));
-		this.weaponAttackMotions.put(WeaponCategory.SPEAR, ImmutableMap.of(CapabilityItem.Styles.ONE_HAND, MobCombatBehaviors.HUMANOID_SPEAR_ONEHAND, CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_SPEAR_TWOHAND));
-		this.weaponAttackMotions.put(WeaponCategory.FIST, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_FIST));
-		this.weaponAttackMotions.put(WeaponCategory.DAGGER, ImmutableMap.of(CapabilityItem.Styles.ONE_HAND, MobCombatBehaviors.HUMANOID_ONEHAND_DAGGER, CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_TWOHAND_DAGGER));
-		this.weaponAttackMotions.put(WeaponCategory.RANGED, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_FIST));
-		this.weaponAttackMotions.put(WeaponCategory.TRIDENT, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_SPEAR_ONEHAND));
+		this.weaponAttackMotions.put(WeaponCategories.AXE, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS));
+		this.weaponAttackMotions.put(WeaponCategories.HOE, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS));
+		this.weaponAttackMotions.put(WeaponCategories.PICKAXE, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS));
+		this.weaponAttackMotions.put(WeaponCategories.SHOVEL, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS));
+		this.weaponAttackMotions.put(WeaponCategories.SWORD, ImmutableMap.of(CapabilityItem.Styles.ONE_HAND, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS, CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_DUAL_SWORD));
+		this.weaponAttackMotions.put(WeaponCategories.GREATSWORD, ImmutableMap.of(CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_GREATSWORD));
+		this.weaponAttackMotions.put(WeaponCategories.KATANA, ImmutableMap.of(CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_KATANA));
+		this.weaponAttackMotions.put(WeaponCategories.LONGSWORD, ImmutableMap.of(CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_LONGSWORD));
+		this.weaponAttackMotions.put(WeaponCategories.TACHI, ImmutableMap.of(CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_TACHI));
+		this.weaponAttackMotions.put(WeaponCategories.SPEAR, ImmutableMap.of(CapabilityItem.Styles.ONE_HAND, MobCombatBehaviors.HUMANOID_SPEAR_ONEHAND, CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_SPEAR_TWOHAND));
+		this.weaponAttackMotions.put(WeaponCategories.FIST, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_FIST));
+		this.weaponAttackMotions.put(WeaponCategories.DAGGER, ImmutableMap.of(CapabilityItem.Styles.ONE_HAND, MobCombatBehaviors.HUMANOID_ONEHAND_DAGGER, CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_TWOHAND_DAGGER));
+		this.weaponAttackMotions.put(WeaponCategories.RANGED, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_FIST));
+		this.weaponAttackMotions.put(WeaponCategories.TRIDENT, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_SPEAR_ONEHAND));
 	}
 	
 	protected CombatBehaviors.Builder<HumanoidMobPatch<?>> getHoldingItemWeaponMotionBuilder() {
@@ -217,7 +217,7 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 		
 		if (!this.original.level.isClientSide() && !this.original.isNoAi()) {
 			Set<Goal> toRemove = Sets.newHashSet();
-			this.onResetAI(toRemove);
+			this.selectGoalToRemove(toRemove);
 			toRemove.forEach(this.original.goalSelector::removeGoal);
 			
 			if (isMountOrDismount) {

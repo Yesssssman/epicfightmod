@@ -32,7 +32,7 @@ import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-import yesman.epicfight.world.entity.eventlistener.HurtEventPre;
+import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
@@ -52,7 +52,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 		
 		List<String> learnedSkill = Lists.newArrayList();
 		
-		for (SkillCategory category : SkillCategory.ASSIGNMENT_MANAGER.universalValues()) {
+		for (SkillCategory category : SkillCategory.ENUM_MANAGER.universalValues()) {
 			if (skillCapability.hasCategory(category)) {
 				learnedSkill.addAll(Lists.newArrayList(skillCapability.getLearnedSkills(category).stream().map((skill) -> skill.toString()).iterator()));
 			}
@@ -172,19 +172,22 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	
 	@Override
 	public AttackResult tryHurt(DamageSource damageSource, float amount) {
-		HurtEventPre hitEvent = new HurtEventPre(this, damageSource, amount);
+		HurtEvent.Pre hurtEvent = new HurtEvent.Pre(this, damageSource, amount);
 		
-		if (this.getEventListener().triggerEvents(EventType.HURT_EVENT_PRE, hitEvent)) {
-			return new AttackResult(hitEvent.getResult(), hitEvent.getAmount());
+		if (this.getEventListener().triggerEvents(EventType.HURT_EVENT_PRE, hurtEvent)) {
+			return new AttackResult(hurtEvent.getResult(), hurtEvent.getAmount());
 		} else {
 			return super.tryHurt(damageSource, amount);
 		}
 	}
 	
 	@Override
-	public void toMode(PlayerMode playerMode) {
-		super.toMode(playerMode);
-		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(new SPChangePlayerMode(this.original.getId(), playerMode), this.original);
+	public void toMode(PlayerMode playerMode, boolean sendPacket) {
+		super.toMode(playerMode, sendPacket);
+		
+		if (sendPacket) {
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(new SPChangePlayerMode(this.original.getId(), playerMode), this.original);
+		}
 	}
 	
 	public void setAttackTarget(LivingEntity entity) {

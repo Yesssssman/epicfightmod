@@ -11,7 +11,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.ClientModels;
-import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.item.EpicFightItems;
@@ -22,21 +21,19 @@ public class RenderKatana extends RenderItemBase {
 	
 	@Override
 	public void renderItemInHand(ItemStack stack, LivingEntityPatch<?> entitypatch, InteractionHand hand, MultiBufferSource buffer, PoseStack poseStack, int packedLight) {
-		poseStack.pushPose();
 		OpenMatrix4f modelMatrix = new OpenMatrix4f(this.mainhandcorrectionMatrix);
 		modelMatrix.mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointByName("Tool_R").getAnimatedTransform());
-		OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);
-		MathUtils.translateStack(poseStack, modelMatrix);
-		MathUtils.rotateStack(poseStack, transpose);
-        Minecraft.getInstance().getItemRenderer().renderStatic(stack, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, packedLight, OverlayTexture.NO_OVERLAY, poseStack, buffer, 0);
-        poseStack.popPose();
-		modelMatrix = new OpenMatrix4f(this.mainhandcorrectionMatrix);
-		modelMatrix.mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointByName("Tool_L").getAnimatedTransform());
-		transpose = OpenMatrix4f.transpose(modelMatrix, null);
 		
 		poseStack.pushPose();
-		MathUtils.translateStack(poseStack, modelMatrix);
-		MathUtils.rotateStack(poseStack, transpose);
+		this.mulPoseStack(poseStack, modelMatrix);
+        Minecraft.getInstance().getItemRenderer().renderStatic(stack, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, packedLight, OverlayTexture.NO_OVERLAY, poseStack, buffer, 0);
+        poseStack.popPose();
+        
+		modelMatrix = new OpenMatrix4f(this.mainhandcorrectionMatrix);
+		modelMatrix.mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointByName("Tool_L").getAnimatedTransform());
+		
+		poseStack.pushPose();
+		this.mulPoseStack(poseStack, modelMatrix);
         Minecraft.getInstance().getItemRenderer().renderStatic(this.sheathStack, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, packedLight, OverlayTexture.NO_OVERLAY, poseStack, buffer, 0);
         poseStack.popPose();
     }

@@ -21,7 +21,7 @@ import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
 public class WitherSkeletonPatch<T extends PathfinderMob> extends SkeletonPatch<T> {
@@ -38,7 +38,7 @@ public class WitherSkeletonPatch<T extends PathfinderMob> extends SkeletonPatch<
 	@Override
 	protected void setWeaponMotions() {
 		super.setWeaponMotions();
-		this.weaponLivingMotions.put(WeaponCategory.SWORD, ImmutableMap.of(
+		this.weaponLivingMotions.put(WeaponCategories.SWORD, ImmutableMap.of(
 			CapabilityItem.Styles.ONE_HAND, Set.of(
 				Pair.of(LivingMotions.CHASE, Animations.WITHER_SKELETON_CHASE),
 				Pair.of(LivingMotions.WALK, Animations.WITHER_SKELETON_WALK),
@@ -46,7 +46,7 @@ public class WitherSkeletonPatch<T extends PathfinderMob> extends SkeletonPatch<
 			)
 		));
 		
-		this.weaponAttackMotions.put(WeaponCategory.SWORD, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.SKELETON_SWORD));
+		this.weaponAttackMotions.put(WeaponCategories.SWORD, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.SKELETON_SWORD));
 	}
 	
 	@Override

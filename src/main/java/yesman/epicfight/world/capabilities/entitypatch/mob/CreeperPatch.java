@@ -35,7 +35,7 @@ public class CreeperPatch extends MobPatch<Creeper> {
 	}
 	
 	@Override
-	protected void onResetAI(Set<Goal> toRemove) {
+	protected void selectGoalToRemove(Set<Goal> toRemove) {
 		for (WrappedGoal wrappedGoal : this.original.goalSelector.getAvailableGoals()) {
 			Goal goal = wrappedGoal.getGoal();
 			

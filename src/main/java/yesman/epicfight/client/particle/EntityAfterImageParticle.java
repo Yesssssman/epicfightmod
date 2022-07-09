@@ -22,6 +22,7 @@ import yesman.epicfight.client.renderer.patched.entity.PatchedEntityRenderer;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
+@OnlyIn(Dist.CLIENT)
 public class EntityAfterImageParticle extends CustomModelParticle {
 	private OpenMatrix4f[] poseMatrices;
 	private Matrix4f modelMatrix;
@@ -72,7 +73,7 @@ public class EntityAfterImageParticle extends CustomModelParticle {
 				Armature armature = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature();
 				PoseStack poseStack = new PoseStack();
 				OpenMatrix4f[] matrices = renderer.getPoseMatrices(entitypatch, armature, 1.0F);
-				renderer.setupPoseStack(poseStack, armature, entitypatch.getOriginal(), entitypatch, 1.0F);
+				renderer.mulPoseStack(poseStack, armature, entitypatch.getOriginal(), entitypatch, 1.0F);
 				EntityAfterImageParticle particle = new EntityAfterImageParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT), matrices, poseStack.last().pose());
 				return particle;
 			} else {

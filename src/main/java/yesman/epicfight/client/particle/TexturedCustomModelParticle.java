@@ -5,8 +5,11 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.ClientModel;
 
+@OnlyIn(Dist.CLIENT)
 public abstract class TexturedCustomModelParticle extends CustomModelParticle {
 	protected final ResourceLocation texture;
 	

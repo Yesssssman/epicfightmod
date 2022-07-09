@@ -37,15 +37,12 @@ public class RenderItemBase {
 	public void renderItemInHand(ItemStack stack, LivingEntityPatch<?> entitypatch, InteractionHand hand, MultiBufferSource buffer, PoseStack poseStack, int packedLight) {
 		OpenMatrix4f modelMatrix = this.getCorrectionMatrix(stack, entitypatch, hand);
 		boolean isInMainhand = (hand == InteractionHand.MAIN_HAND);
-		
 		String holdingHand = isInMainhand ? "Tool_R" : "Tool_L";
 		OpenMatrix4f jointTransform = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointByName(holdingHand).getAnimatedTransform();
 		modelMatrix.mulFront(jointTransform);
-		OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);
 		
 		poseStack.pushPose();
-		MathUtils.translateStack(poseStack, modelMatrix);
-		MathUtils.rotateStack(poseStack, transpose);
+		this.mulPoseStack(poseStack, modelMatrix);
 		TransformType transformType = isInMainhand ? TransformType.THIRD_PERSON_RIGHT_HAND : TransformType.THIRD_PERSON_LEFT_HAND;
 		Minecraft.getInstance().getItemInHandRenderer().renderItem(entitypatch.getOriginal(), stack, transformType, !isInMainhand, poseStack, buffer, packedLight);
 		poseStack.popPose();
@@ -54,13 +51,18 @@ public class RenderItemBase {
 	public void renderUnusableItemMount(ItemStack stack, LivingEntityPatch<?> entitypatch, MultiBufferSource buffer, PoseStack poseStack, int packedLight) {
 		OpenMatrix4f modelMatrix = new OpenMatrix4f(BACK_COORECTION);
 		modelMatrix.mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointById(0).getAnimatedTransform());
-		OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);
 		
 		poseStack.pushPose();
-		MathUtils.translateStack(poseStack, modelMatrix);
-		MathUtils.rotateStack(poseStack, transpose);
+		this.mulPoseStack(poseStack, modelMatrix);
         Minecraft.getInstance().getItemRenderer().renderStatic(stack, ItemTransforms.TransformType.THIRD_PERSON_RIGHT_HAND, packedLight, OverlayTexture.NO_OVERLAY, poseStack, buffer, 0);
         poseStack.popPose();
+	}
+	
+	protected void mulPoseStack(PoseStack poseStack, OpenMatrix4f pose) {
+		OpenMatrix4f transposed = pose.transpose(null);
+		MathUtils.translateStack(poseStack, pose);
+		MathUtils.rotateStack(poseStack, transposed);
+		MathUtils.scaleStack(poseStack, transposed);
 	}
 	
 	public OpenMatrix4f getCorrectionMatrix(ItemStack stack, LivingEntityPatch<?> itemHolder, InteractionHand hand) {

@@ -62,6 +62,7 @@ import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.projectile.ProjectilePatch;
 import yesman.epicfight.world.effect.EpicFightMobEffects;
+import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.ProjectileHitEvent;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
@@ -122,10 +123,18 @@ public class EntityEvents {
 			}
 			
 			if (extendedDamageSource != null) {
-				float totalDamage = event.getAmount();
-				float ignoreDamage = event.getAmount() * extendedDamageSource.getArmorNegation() * 0.01F;
-				float calculatedDamage = ignoreDamage;
 				LivingEntity hitEntity = event.getEntityLiving();
+				float totalDamage = event.getAmount();
+				
+				if (hitEntity instanceof ServerPlayer) {
+					ServerPlayerPatch playerpatch = (ServerPlayerPatch)hitEntity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+					HurtEvent.Post hurtEvent = new HurtEvent.Post(playerpatch, extendedDamageSource, totalDamage);
+					playerpatch.getEventListener().triggerEvents(EventType.HURT_EVENT_POST, hurtEvent);
+					totalDamage = hurtEvent.getAmount();
+				}
+				
+				float ignoreDamage = totalDamage * extendedDamageSource.getArmorNegation() * 0.01F;
+				float calculatedDamage = ignoreDamage;
 				
 			    if (hitEntity.hasEffect(MobEffects.DAMAGE_RESISTANCE)) {
 			    	int i = (hitEntity.getEffect(MobEffects.DAMAGE_RESISTANCE).getAmplifier() + 1) * 5;

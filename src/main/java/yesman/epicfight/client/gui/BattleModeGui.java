@@ -106,7 +106,7 @@ public class BattleModeGui extends ModIngameGui {
 			matStack.popPose();
 		}
 		
-		for (int i = 0; i < SkillCategory.ASSIGNMENT_MANAGER.universalValues().size(); i++) {
+		for (int i = 0; i < SkillCategory.ENUM_MANAGER.universalValues().size(); i++) {
 			SkillContainer container = playerpatch.getSkill(i);
 			if (container != null && !container.isEmpty()) {
 				SkillCategory slot = container.getSkill().getCategory();

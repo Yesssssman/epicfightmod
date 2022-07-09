@@ -10,6 +10,8 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -17,6 +19,7 @@ import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.boss.WitherPatch;
 
+@OnlyIn(Dist.CLIENT)
 public class PatchedWitherArmorLayer extends PatchedLayer<WitherBoss, WitherPatch, WitherBossModel<WitherBoss>, WitherArmorLayer> {
 	private static final ResourceLocation WITHER_ARMOR_LOCATION = new ResourceLocation("textures/entity/wither/wither_armor.png");
 	

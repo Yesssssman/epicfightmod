@@ -2,7 +2,6 @@ package yesman.epicfight.world.capabilities.item;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 
@@ -48,9 +47,9 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
 public class CapabilityItem {
-	public static CapabilityItem EMPTY = new CapabilityItem(WeaponCategory.FIST);
+	public static CapabilityItem EMPTY = new CapabilityItem(WeaponCategories.FIST);
 	protected static List<StaticAnimation> commonAutoAttackMotion;
-	protected final WeaponCategory weaponCategory;
+	protected final WeaponCategories weaponCategory;
 	
 	static {
 		commonAutoAttackMotion = new ArrayList<StaticAnimation> ();
@@ -71,7 +70,7 @@ public class CapabilityItem {
 	
 	protected Map<Style, Map<Attribute, AttributeModifier>> attributeMap;
 	
-	public CapabilityItem(WeaponCategory category) {
+	public CapabilityItem(WeaponCategories category) {
 		if (EpicFightMod.isPhysicalClient()) {
 			loadClientThings();
 		}
@@ -80,7 +79,7 @@ public class CapabilityItem {
 		registerAttribute();
 	}
 	
-	public CapabilityItem(Item item, WeaponCategory category) {
+	public CapabilityItem(Item item, WeaponCategories category) {
 		this.attributeMap = Maps.<Style, Map<Attribute, AttributeModifier>>newHashMap();
 		this.weaponCategory = category;
 	}
@@ -146,7 +145,7 @@ public class CapabilityItem {
 		return null;
 	}
 	
-	public WeaponCategory getWeaponCategory() {
+	public WeaponCategories getWeaponCategory() {
 		return this.weaponCategory;
 	}
 	
@@ -277,8 +276,19 @@ public class CapabilityItem {
 		return UseAnim.NONE;
 	}
 	
-	public enum WeaponCategory {
-		NOT_WEAON, AXE, FIST, GREATSWORD, HOE, PICKAXE, SHOVEL, SWORD, KATANA, SPEAR, TACHI, TRIDENT, LONGSWORD, DAGGER, SHIELD, RANGED
+	public enum WeaponCategories implements WeaponCategory {
+		NOT_WEAON, AXE, FIST, GREATSWORD, HOE, PICKAXE, SHOVEL, SWORD, KATANA, SPEAR, TACHI, TRIDENT, LONGSWORD, DAGGER, SHIELD, RANGED;
+		
+		final int id;
+		
+		WeaponCategories() {
+			this.id = WeaponCategory.ENUM_MANAGER.assign(this);
+		}
+		
+		@Override
+		public int universalOrdinal() {
+			return this.id;
+		}
 	}
 	
 	public enum HoldingOption {
@@ -288,16 +298,17 @@ public class CapabilityItem {
 	public enum Styles implements Style {
 		COMMON(true), ONE_HAND(true), TWO_HAND(false), MOUNT(true), RANGED(false), SHEATH(false), LIECHTENAUER(false);
 		
-		boolean canUseOffhand;
+		final boolean canUseOffhand;
+		final int id;
 		
 		Styles(boolean canUseOffhand) {
+			this.id = Style.ENUM_MANAGER.assign(this);
 			this.canUseOffhand = canUseOffhand;
-			Style.put(this.toString(), this);
 		}
 		
 		@Override
-		public String toString() {
-			return super.toString().toLowerCase(Locale.ROOT);
+		public int universalOrdinal() {
+			return this.id;
 		}
 		
 		public boolean canUseOffhand() {

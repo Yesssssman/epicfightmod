@@ -9,7 +9,6 @@ import com.google.common.collect.Maps;
 
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
@@ -25,7 +24,7 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class WeaponCapability extends CapabilityItem {
 	protected final Function<LivingEntityPatch<?>, Style> stylegetter;
-	protected final Function<ItemStack, Boolean> weaponCombinationPredicator;
+	protected final Function<LivingEntityPatch<?>, Boolean> weaponCombinationPredicator;
 	protected final Skill passiveSkill;
 	protected final SoundEvent smashingSound;
 	protected final SoundEvent hitSound;
@@ -124,7 +123,7 @@ public class WeaponCapability extends CapabilityItem {
 	
 	@Override
 	public boolean checkOffhandValid(LivingEntityPatch<?> entitypatch) {
-		return super.checkOffhandValid(entitypatch) || this.weaponCombinationPredicator.apply(entitypatch.getOriginal().getOffhandItem());
+		return super.checkOffhandValid(entitypatch) || this.weaponCombinationPredicator.apply(entitypatch);
 	}
 	
 	public static WeaponCapability.Builder builder() {
@@ -132,9 +131,9 @@ public class WeaponCapability extends CapabilityItem {
 	}
 	
 	public static class Builder {
-		WeaponCategory category;
+		WeaponCategories category;
 		Function<LivingEntityPatch<?>, Style> styleProvider;
-		Function<ItemStack, Boolean> weaponCombinationPredicator;
+		Function<LivingEntityPatch<?>, Boolean> weaponCombinationPredicator;
 		Skill passiveSkill;
 		SoundEvent swingSound;
 		SoundEvent hitSound;
@@ -145,7 +144,7 @@ public class WeaponCapability extends CapabilityItem {
 		boolean canBePlacedOffhand;
 		
 		public Builder() {
-			this.category = WeaponCategory.FIST;
+			this.category = WeaponCategories.FIST;
 			this.styleProvider = (entitypatch) -> Styles.ONE_HAND;
 			this.weaponCombinationPredicator = (entitypatch) -> false;
 			this.passiveSkill = null;
@@ -158,7 +157,7 @@ public class WeaponCapability extends CapabilityItem {
 			this.canBePlacedOffhand = true;
 		}
 		
-		public Builder category(WeaponCategory category) {
+		public Builder category(WeaponCategories category) {
 			this.category = category;
 			return this;
 		}
@@ -209,7 +208,7 @@ public class WeaponCapability extends CapabilityItem {
 			return this;
 		}
 		
-		public Builder weaponCombinationPredicator(Function<ItemStack, Boolean> predicator) {
+		public Builder weaponCombinationPredicator(Function<LivingEntityPatch<?>, Boolean> predicator) {
 			this.weaponCombinationPredicator = predicator;
 			return this;
 		}

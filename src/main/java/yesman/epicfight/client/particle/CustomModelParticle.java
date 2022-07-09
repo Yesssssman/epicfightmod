@@ -11,8 +11,11 @@ import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.ClientModel;
 
+@OnlyIn(Dist.CLIENT)
 public abstract class CustomModelParticle extends Particle {
 	protected final ClientModel particleMesh;
 	protected float pitch;

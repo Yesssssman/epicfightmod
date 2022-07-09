@@ -53,7 +53,7 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributeSupplier;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-import yesman.epicfight.world.entity.eventlistener.HurtEventPre;
+import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 
 public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPatch<T> {
 	public static final EntityDataAccessor<Float> STUN_SHIELD = new EntityDataAccessor<Float> (251, EntityDataSerializers.FLOAT);
@@ -425,7 +425,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	public void updateArmor(CapabilityItem fromCap, CapabilityItem toCap, EquipmentSlot slotType) {
 	}
 	
-	public void onAttackBlocked(HurtEventPre hurtEvent, LivingEntityPatch<?> opponent) {
+	public void onAttackBlocked(HurtEvent.Pre hurtEvent, LivingEntityPatch<?> opponent) {
 	}
 	
 	public void onMount(boolean isMountOrDismount, Entity ridingEntity) {

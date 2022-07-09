@@ -21,14 +21,14 @@ import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
 @SuppressWarnings("deprecation")
 public class WeaponCapabilityPresets {
 	public static final Function<Item, CapabilityItem> AXE = (item) -> {
 		WeaponCapability cap = new WeaponCapability(WeaponCapability.builder()
-			.category(WeaponCategory.AXE)
+			.category(WeaponCategories.AXE)
 			.hitSound(EpicFightSounds.BLADE_HIT)
 			.collider(ColliderPreset.TOOLS)
 			.newStyleCombo(Styles.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
@@ -50,7 +50,7 @@ public class WeaponCapabilityPresets {
 	public static final Function<Item, CapabilityItem> FIST = (item) -> new KnuckleCapability();
 	public static final Function<Item, CapabilityItem> HOE = (item) -> {
 		WeaponCapability cap = new WeaponCapability(WeaponCapability.builder()
-			.category(WeaponCategory.HOE)
+			.category(WeaponCategories.HOE)
 			.hitSound(EpicFightSounds.BLADE_HIT)
 			.collider(ColliderPreset.TOOLS).newStyleCombo(Styles.ONE_HAND, Animations.TOOL_AUTO_1, Animations.TOOL_AUTO_2, Animations.TOOL_DASH, Animations.SWORD_AIR_SLASH)
 			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
@@ -65,7 +65,7 @@ public class WeaponCapabilityPresets {
 	};
 	public static final Function<Item, CapabilityItem> PICKAXE = (item) -> {
 		WeaponCapability cap = new WeaponCapability(WeaponCapability.builder()
-			.category(WeaponCategory.PICKAXE)
+			.category(WeaponCategories.PICKAXE)
 			.hitSound(EpicFightSounds.BLADE_HIT)
 			.collider(ColliderPreset.TOOLS)
 			.newStyleCombo(Styles.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
@@ -84,7 +84,7 @@ public class WeaponCapabilityPresets {
 	};
 	public static final Function<Item, CapabilityItem> SHOVEL = (item) -> {
 		WeaponCapability cap = new WeaponCapability(WeaponCapability.builder()
-			.category(WeaponCategory.SHOVEL)
+			.category(WeaponCategories.SHOVEL)
 			.collider(ColliderPreset.TOOLS)
 			.newStyleCombo(Styles.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
 			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
@@ -99,8 +99,8 @@ public class WeaponCapabilityPresets {
 	};
 	public static final Function<Item, CapabilityItem> SWORD = (item) -> {
 		WeaponCapability cap = new WeaponCapability(WeaponCapability.builder()
-			.category(WeaponCategory.SWORD)
-			.styleProvider((playerpatch) -> playerpatch.getHoldingItemCapability(InteractionHand.OFF_HAND).getWeaponCategory() == WeaponCategory.SWORD ? Styles.TWO_HAND : Styles.ONE_HAND)
+			.category(WeaponCategories.SWORD)
+			.styleProvider((playerpatch) -> playerpatch.getHoldingItemCapability(InteractionHand.OFF_HAND).getWeaponCategory() == WeaponCategories.SWORD ? Styles.TWO_HAND : Styles.ONE_HAND)
 			.collider(ColliderPreset.SWORD)
 			.hitSound(EpicFightSounds.BLADE_HIT)
 			.newStyleCombo(Styles.ONE_HAND, Animations.SWORD_AUTO_1, Animations.SWORD_AUTO_2, Animations.SWORD_AUTO_3, Animations.SWORD_DASH, Animations.SWORD_AIR_SLASH)
@@ -110,7 +110,7 @@ public class WeaponCapabilityPresets {
 			.specialAttack(Styles.TWO_HAND, Skills.DANCING_EDGE)
 			.livingMotionModifier(Styles.ONE_HAND, LivingMotions.BLOCK, Animations.SWORD_GUARD)
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.SWORD_DUAL_GUARD)
-			.weaponCombinationPredicator((itemstack) -> EpicFightCapabilities.getItemStackCapability(itemstack).weaponCategory == WeaponCategory.SWORD)
+			.weaponCombinationPredicator((entitypatch) -> EpicFightCapabilities.getItemStackCapability(entitypatch.getOriginal().getOffhandItem()).weaponCategory == WeaponCategories.SWORD)
 		);
 		
 		if (item instanceof TieredItem) {
@@ -123,8 +123,8 @@ public class WeaponCapabilityPresets {
 	};
 	public static final Function<Item, CapabilityItem> SPEAR = (item) -> {
 		WeaponCapability cap = new WeaponCapability(WeaponCapability.builder()
-			.category(WeaponCategory.SPEAR)
-			.styleProvider((playerpatch) -> playerpatch.getHoldingItemCapability(InteractionHand.OFF_HAND).getWeaponCategory() == WeaponCategory.SHIELD ? Styles.ONE_HAND : Styles.TWO_HAND)
+			.category(WeaponCategories.SPEAR)
+			.styleProvider((playerpatch) -> playerpatch.getHoldingItemCapability(InteractionHand.OFF_HAND).getWeaponCategory() == WeaponCategories.SHIELD ? Styles.ONE_HAND : Styles.TWO_HAND)
 			.collider(ColliderPreset.SPEAR)
 			.hitSound(EpicFightSounds.BLADE_HIT)
 			.canBePlacedOffhand(false)
@@ -145,7 +145,7 @@ public class WeaponCapabilityPresets {
 	};
 	public static final Function<Item, CapabilityItem> GREATSWORD = (item) -> {
 		WeaponCapability cap = new WeaponCapability(WeaponCapability.builder()
-			.category(WeaponCategory.GREATSWORD)
+			.category(WeaponCategories.GREATSWORD)
 			.styleProvider((playerpatch) -> Styles.TWO_HAND)
 			.collider(ColliderPreset.GREATSWORD)
 			.swingSound(EpicFightSounds.WHOOSH_BIG)
@@ -168,7 +168,7 @@ public class WeaponCapabilityPresets {
 	};
 	public static final Function<Item, CapabilityItem> KATANA = (item) -> {
 		WeaponCapability cap = new WeaponCapability(WeaponCapability.builder()
-			.category(WeaponCategory.KATANA)
+			.category(WeaponCategories.KATANA)
 			.styleProvider((entitypatch) -> {
 				if (entitypatch instanceof PlayerPatch) {
 					PlayerPatch<?> playerpatch = (PlayerPatch<?>)entitypatch;
@@ -212,7 +212,7 @@ public class WeaponCapabilityPresets {
 	};
 	public static final Function<Item, CapabilityItem> TACHI = (item) -> {
 		WeaponCapability cap = new WeaponCapability(WeaponCapability.builder()
-			.category(WeaponCategory.TACHI)
+			.category(WeaponCategories.TACHI)
 			.styleProvider((playerpatch) -> Styles.TWO_HAND)
 			.collider(ColliderPreset.KATANA)
 			.hitSound(EpicFightSounds.BLADE_HIT)
@@ -236,7 +236,7 @@ public class WeaponCapabilityPresets {
 	};
 	public static final Function<Item, CapabilityItem> LONGSWORD = (item) -> {
 		WeaponCapability weaponCapability = new WeaponCapability(WeaponCapability.builder()
-			.category(WeaponCategory.LONGSWORD)
+			.category(WeaponCategories.LONGSWORD)
 			.styleProvider((entitypatch) -> {
 				if (entitypatch instanceof PlayerPatch<?>) {
 					if (((PlayerPatch<?>)entitypatch).getSkill(SkillCategories.WEAPON_SPECIAL_ATTACK).getRemainDuration() > 0) {
@@ -278,11 +278,11 @@ public class WeaponCapabilityPresets {
 	};
 	public static final Function<Item, CapabilityItem> DAGGER = (item) -> {
 		WeaponCapability weaponCapability = new WeaponCapability(WeaponCapability.builder()
-			.category(WeaponCategory.DAGGER)
-			.styleProvider((playerpatch) -> playerpatch.getHoldingItemCapability(InteractionHand.OFF_HAND).getWeaponCategory() == WeaponCategory.DAGGER ? Styles.TWO_HAND : Styles.ONE_HAND)
+			.category(WeaponCategories.DAGGER)
+			.styleProvider((playerpatch) -> playerpatch.getHoldingItemCapability(InteractionHand.OFF_HAND).getWeaponCategory() == WeaponCategories.DAGGER ? Styles.TWO_HAND : Styles.ONE_HAND)
 			.hitSound(EpicFightSounds.BLADE_HIT)
 			.collider(ColliderPreset.DAGGER)
-			.weaponCombinationPredicator((itemstack) -> EpicFightCapabilities.getItemStackCapability(itemstack).weaponCategory == WeaponCategory.DAGGER)
+			.weaponCombinationPredicator((entitypatch) -> EpicFightCapabilities.getItemStackCapability(entitypatch.getOriginal().getOffhandItem()).weaponCategory == WeaponCategories.DAGGER)
 			.newStyleCombo(Styles.ONE_HAND, Animations.DAGGER_AUTO_1, Animations.DAGGER_AUTO_2, Animations.DAGGER_AUTO_3, Animations.SWORD_DASH, Animations.DAGGER_AIR_SLASH)
 			.newStyleCombo(Styles.TWO_HAND, Animations.DAGGER_DUAL_AUTO_1, Animations.DAGGER_DUAL_AUTO_2, Animations.DAGGER_DUAL_AUTO_3, Animations.DAGGER_DUAL_AUTO_4, Animations.DAGGER_DUAL_DASH, Animations.DAGGER_DUAL_AIR_SLASH)
 			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)

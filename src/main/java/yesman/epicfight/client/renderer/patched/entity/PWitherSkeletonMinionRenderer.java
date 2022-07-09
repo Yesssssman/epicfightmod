@@ -2,12 +2,15 @@ package yesman.epicfight.client.renderer.patched.entity;
 
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 
+@OnlyIn(Dist.CLIENT)
 public class PWitherSkeletonMinionRenderer extends PHumanoidRenderer<PathfinderMob, HumanoidMobPatch<PathfinderMob>, HumanoidModel<PathfinderMob>> {
 	@Override
 	protected void setJointTransforms(HumanoidMobPatch<PathfinderMob> entitypatch, Armature armature, float partialTicks) {

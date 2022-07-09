@@ -15,6 +15,8 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.synchronization.ArgumentTypes;
+import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import yesman.epicfight.gameasset.Skills;
@@ -25,15 +27,19 @@ public class SkillArgument implements ArgumentType<Skill> {
 	public static final DynamicCommandExceptionType ERROR_UNKNOWN_SKILL = new DynamicCommandExceptionType((obj) -> {
 		return new TranslatableComponent("epicfight.skillNotFound", obj);
 	});
-
+	
 	public static SkillArgument skill() {
 		return new SkillArgument();
 	}
-
+	
+	public static void registerArgumentTypes() {
+		ArgumentTypes.register("epicfight:skill", SkillArgument.class, new EmptyArgumentSerializer<>(SkillArgument::skill));
+	}
+	
 	public static Skill getSkill(CommandContext<CommandSourceStack> commandContext, String name) {
 		return commandContext.getArgument(name, Skill.class);
 	}
-
+	
 	public Skill parse(StringReader p_98428_) throws CommandSyntaxException {
 		ResourceLocation resourcelocation = ResourceLocation.read(p_98428_);
 		Skill skill = Skills.getSkill(resourcelocation.toString());

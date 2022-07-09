@@ -8,7 +8,10 @@ import com.google.common.collect.Maps;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
+@OnlyIn(Dist.CLIENT)
 public class OverlayManager {
 	private Map<String, OverlayManager.Overlay> overlays = Maps.newHashMap();
 	

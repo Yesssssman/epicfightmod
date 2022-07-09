@@ -26,10 +26,10 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 		this.numberOfColliders = arrayLength;
 	}
 	
-	public abstract T createCollider();
+	protected abstract T createCollider();
 	
 	@Override
-	public List<Entity> updateAndFilterCollideEntity(LivingEntityPatch<?> entitypatch, AttackAnimation attackAnimation, float prevElapsedTime, float elapsedTime, String jointName, float attackSpeed) {
+	public List<Entity> updateAndSelectCollideEntity(LivingEntityPatch<?> entitypatch, AttackAnimation attackAnimation, float prevElapsedTime, float elapsedTime, String jointName, float attackSpeed) {
 		int numberOf = Math.max(Math.round((this.numberOfColliders + attackAnimation.getProperty(AttackAnimationProperty.COLLIDER_ADDER).orElse(0)) * attackSpeed), 1);
 		float partialScale = 1.0F / (numberOf - 1);
 		float interpolation = 0.0F;
@@ -50,7 +50,9 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 			if (pathIndex == -1) {
 				transformMatrix = new OpenMatrix4f();
 			} else {
-				transformMatrix = Animator.getBindedJointTransformByIndex(entitypatch.getAnimator().getPose(interpolation), armature, pathIndex);
+				//transformMatrix = Animator.getBindedJointTransformByIndex(entitypatch.getAnimator().getPose(interpolation), armature, pathIndex);
+				float interpolateTime = prevElapsedTime + (elapsedTime - prevElapsedTime) * interpolation;
+				transformMatrix = Animator.getBindedJointTransformByIndex(attackAnimation.getPoseByTime(entitypatch, interpolateTime, 1.0F), armature, pathIndex);
 			}
 			
 			double x = original.xOld + (original.getX() - original.xOld) * interpolation;
@@ -76,15 +78,13 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 		List<Entity> entities = entitypatch.getOriginal().level.getEntities(entitypatch.getOriginal(), outerBox);
 		
 		entities.removeIf((entity) -> {
-			boolean remove = true;
-			
 			for (T collider : colliders) {
 				if (collider.isCollide(entity)) {
-					remove = false;
+					return false;
 				}
 			}
 			
-			return remove;
+			return true;
 		});
 		
 		return entities;
@@ -95,10 +95,6 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 		;
 	}
 	
-	protected void filterHitEntities(List<Entity> entities) {
-		entities.removeIf((entity) -> !this.isCollide(entity));
-	}
-	
 	@Override
 	protected AABB getHitboxAABB() {
 		return null;
@@ -107,5 +103,10 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 	@Override
 	protected boolean isCollide(Entity opponent) {
 		return false;
+	}
+	
+	@Override
+	public String toString() {
+		return super.toString() + " collider count: " + this.numberOfColliders + " real collider" + this.bigCollider.toString();
 	}
 }

@@ -323,6 +323,10 @@ public class RenderEngine {
 		return this.overlayManager;
 	}
 	
+	public FirstPersonRenderer getFirstPersonRenderer() {
+		return firstPersonRenderer;
+	}
+
 	@Mod.EventBusSubscriber(modid = EpicFightMod.MODID, value = Dist.CLIENT)
 	public static class Events {
 		static RenderEngine renderEngine;

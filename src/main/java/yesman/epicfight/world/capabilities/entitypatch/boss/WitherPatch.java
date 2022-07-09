@@ -54,7 +54,7 @@ import yesman.epicfight.world.entity.DroppedNetherStar;
 import yesman.epicfight.world.entity.WitherGhostClone;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
-import yesman.epicfight.world.entity.eventlistener.HurtEventPre;
+import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 
 public class WitherPatch extends MobPatch<WitherBoss> {
 	private static final EntityDataAccessor<Boolean> DATA_ARMOR_ACTIVED = SynchedEntityData.defineId(WitherBoss.class, EntityDataSerializers.BOOLEAN);
@@ -225,7 +225,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	}
 	
 	@Override
-	public void onAttackBlocked(HurtEventPre hurtEvent, LivingEntityPatch<?> opponent) {
+	public void onAttackBlocked(HurtEvent.Pre hurtEvent, LivingEntityPatch<?> opponent) {
 		DamageSource damageSource = hurtEvent.getDamageSource();
 		
 		if (damageSource instanceof ExtendedDamageSource) {

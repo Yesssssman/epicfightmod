@@ -21,7 +21,7 @@ import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
-import yesman.epicfight.world.entity.eventlistener.HurtEventPre;
+import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 
 public class VexPatch extends MobPatch<Vex> {
 	public VexPatch() {
@@ -37,8 +37,8 @@ public class VexPatch extends MobPatch<Vex> {
 	}
 	
 	@Override
-	protected void onResetAI(Set<Goal> toRemove) {
-		super.onResetAI(toRemove);
+	protected void selectGoalToRemove(Set<Goal> toRemove) {
+		super.selectGoalToRemove(toRemove);
 		
 		Iterator<WrappedGoal> iterator = this.original.goalSelector.getAvailableGoals().iterator();
 		
@@ -80,7 +80,7 @@ public class VexPatch extends MobPatch<Vex> {
 	}
 	
 	@Override
-	public void onAttackBlocked(HurtEventPre hurtEvent, LivingEntityPatch<?> opponent) {
+	public void onAttackBlocked(HurtEvent.Pre hurtEvent, LivingEntityPatch<?> opponent) {
 		this.original.setPos(opponent.getOriginal().getEyePosition().add(opponent.getOriginal().getLookAngle()));
 		this.playAnimationSynchronized(Animations.VEX_NEUTRALIZED, 0.0F);
 	}

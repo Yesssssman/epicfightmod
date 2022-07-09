@@ -23,7 +23,7 @@ public class TridentCapability extends RangedWeaponCapability {
 	private static List<StaticAnimation> mountAttackMotion;
 	
 	public TridentCapability(Item item) {
-		super(item, null, Animations.BIPED_JAVELIN_AIM, Animations.BIPED_JAVELIN_THROW, WeaponCategory.TRIDENT);
+		super(item, null, Animations.BIPED_JAVELIN_AIM, Animations.BIPED_JAVELIN_THROW, WeaponCategories.TRIDENT);
 		
 		if (attackMotion == null) {
 			attackMotion = new ArrayList<StaticAnimation> ();

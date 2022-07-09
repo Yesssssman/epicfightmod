@@ -15,17 +15,17 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
-import yesman.epicfight.world.entity.eventlistener.HurtEventPre;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
+import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 
 public class EnergizingGuardSkill extends GuardSkill {
-	private static final List<WeaponCategory> AVAILABLE_WEAPON_TYPES = Lists.<WeaponCategory>newLinkedList();
+	private static final List<WeaponCategories> AVAILABLE_WEAPON_TYPES = Lists.<WeaponCategories>newLinkedList();
 	
 	static {
-		AVAILABLE_WEAPON_TYPES.add(WeaponCategory.GREATSWORD);
-		AVAILABLE_WEAPON_TYPES.add(WeaponCategory.LONGSWORD);
-		AVAILABLE_WEAPON_TYPES.add(WeaponCategory.SPEAR);
-		AVAILABLE_WEAPON_TYPES.add(WeaponCategory.TACHI);
+		AVAILABLE_WEAPON_TYPES.add(WeaponCategories.GREATSWORD);
+		AVAILABLE_WEAPON_TYPES.add(WeaponCategories.LONGSWORD);
+		AVAILABLE_WEAPON_TYPES.add(WeaponCategories.SPEAR);
+		AVAILABLE_WEAPON_TYPES.add(WeaponCategories.TACHI);
 	}
 	
 	public EnergizingGuardSkill(Builder<? extends Skill> builder) {
@@ -33,7 +33,7 @@ public class EnergizingGuardSkill extends GuardSkill {
 	}
 	
 	@Override
-	public void guard(SkillContainer container, CapabilityItem itemCapapbility, HurtEventPre event, float knockback, float impact, boolean reinforced) {
+	public void guard(SkillContainer container, CapabilityItem itemCapapbility, HurtEvent.Pre event, float knockback, float impact, boolean reinforced) {
 		boolean reinforce = AVAILABLE_WEAPON_TYPES.contains(itemCapapbility.getWeaponCategory());
 		
 		if (event.getDamageSource().isExplosion()) {
@@ -44,7 +44,7 @@ public class EnergizingGuardSkill extends GuardSkill {
 	}
 	
 	@Override
-	public void dealEvent(PlayerPatch<?> playerpatch, HurtEventPre event) {
+	public void dealEvent(PlayerPatch<?> playerpatch, HurtEvent.Pre event) {
 		boolean isSpecialSource = isSpecialDamageSource(event.getDamageSource());
 		event.setAmount(isSpecialSource ? event.getAmount() * 0.2F : 0.0F);
 		event.setResult(isSpecialSource ? AttackResult.ResultType.SUCCESS : AttackResult.ResultType.BLOCKED);
@@ -90,7 +90,7 @@ public class EnergizingGuardSkill extends GuardSkill {
 	@Override
 	public List<Object> getTooltipArgs() {
 		List<Object> list = Lists.<Object>newArrayList();
-		list.add(String.format("%s, %s, %s, %s", WeaponCategory.GREATSWORD, WeaponCategory.LONGSWORD, WeaponCategory.SPEAR, WeaponCategory.TACHI).toLowerCase());
+		list.add(String.format("%s, %s, %s, %s", WeaponCategories.GREATSWORD, WeaponCategories.LONGSWORD, WeaponCategories.SPEAR, WeaponCategories.TACHI).toLowerCase());
 		
 		return list;
 	}

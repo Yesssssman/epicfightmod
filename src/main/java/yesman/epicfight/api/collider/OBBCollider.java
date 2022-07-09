@@ -214,7 +214,7 @@ public class OBBCollider extends Collider {
 	
 	@Override
 	public String toString() {
-		return String.format("Center : [%f, %f, %f],  Direction : [%f, %f, %f]", this.worldCenter.x, this.worldCenter.y, this.worldCenter.z, this.rotatedVertex[1].x, this.rotatedVertex[1].y, this.rotatedVertex[1].z);
+		return super.toString() + " direction : " + this.worldCenter;
 	}
 	
 	@OnlyIn(Dist.CLIENT) @Override

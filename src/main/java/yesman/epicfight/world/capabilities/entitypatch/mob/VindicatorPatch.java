@@ -15,7 +15,7 @@ import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
 public class VindicatorPatch<T extends PathfinderMob> extends AbstractIllagerPatch<T> {
@@ -42,15 +42,15 @@ public class VindicatorPatch<T extends PathfinderMob> extends AbstractIllagerPat
 	protected void setWeaponMotions() {
 		super.setWeaponMotions();
 		
-		this.weaponLivingMotions.put(WeaponCategory.GREATSWORD, ImmutableMap.of(
+		this.weaponLivingMotions.put(WeaponCategories.GREATSWORD, ImmutableMap.of(
 			CapabilityItem.Styles.TWO_HAND, Set.of(
 				Pair.of(LivingMotions.WALK, Animations.ILLAGER_WALK),
 				Pair.of(LivingMotions.CHASE, Animations.BIPED_WALK_TWOHAND)
 			)
 		));
 		
-		this.weaponAttackMotions.put(WeaponCategory.AXE, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.VINDICATOR_ONEHAND));
-		this.weaponAttackMotions.put(WeaponCategory.SWORD, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.VINDICATOR_ONEHAND));
+		this.weaponAttackMotions.put(WeaponCategories.AXE, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.VINDICATOR_ONEHAND));
+		this.weaponAttackMotions.put(WeaponCategories.SWORD, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.VINDICATOR_ONEHAND));
 	}
 	
 	@Override

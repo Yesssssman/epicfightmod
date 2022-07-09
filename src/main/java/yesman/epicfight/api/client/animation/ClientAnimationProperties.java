@@ -8,5 +8,5 @@ import yesman.epicfight.api.animation.property.Property.StaticAnimationProperty;
 public class ClientAnimationProperties {
 	public static final StaticAnimationProperty<Layer.LayerType> LAYER_TYPE = new StaticAnimationProperty<Layer.LayerType> ();
 	public static final StaticAnimationProperty<Layer.Priority> PRIORITY = new StaticAnimationProperty<Layer.Priority> ();
-	public static final StaticAnimationProperty<JointMaskEntry> POSE_MODIFIER = new StaticAnimationProperty<JointMaskEntry> ();
+	public static final StaticAnimationProperty<JointMaskEntry> JOINT_MASK = new StaticAnimationProperty<JointMaskEntry> ();
 }

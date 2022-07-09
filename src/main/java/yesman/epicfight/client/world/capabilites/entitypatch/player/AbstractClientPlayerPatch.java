@@ -39,7 +39,7 @@ import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 
 @OnlyIn(Dist.CLIENT)
 public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends PlayerPatch<T> {
@@ -116,7 +116,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			UseAnim secondUseAnim = activeItem.getUseAnimation(this);
 			
 			if (useAnim == UseAnim.BLOCK || secondUseAnim == UseAnim.BLOCK)
-				if (activeItem.getWeaponCategory() == WeaponCategory.SHIELD)
+				if (activeItem.getWeaponCategory() == WeaponCategories.SHIELD)
 					currentCompositeMotion = LivingMotions.BLOCK_SHIELD;
 				else
 					currentCompositeMotion = LivingMotions.BLOCK;

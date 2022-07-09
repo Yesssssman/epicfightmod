@@ -18,7 +18,7 @@ import yesman.epicfight.api.utils.game.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategory;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
@@ -87,7 +87,7 @@ public class CustomHumanoidMobPatch<T extends PathfinderMob> extends HumanoidMob
 			UseAnim secondUseAnim = activeItem.getUseAnimation(this);
 			
 			if (useAnim == UseAnim.BLOCK || secondUseAnim == UseAnim.BLOCK)
-				if (activeItem.getWeaponCategory() == WeaponCategory.SHIELD)
+				if (activeItem.getWeaponCategory() == WeaponCategories.SHIELD)
 					currentCompositeMotion = LivingMotions.BLOCK_SHIELD;
 				else
 					currentCompositeMotion = LivingMotions.BLOCK;
