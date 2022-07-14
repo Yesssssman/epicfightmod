@@ -22,6 +22,7 @@ import yesman.epicfight.skill.AirAttack;
 import yesman.epicfight.skill.BasicAttack;
 import yesman.epicfight.skill.BerserkerSkill;
 import yesman.epicfight.skill.BladeRushSkill;
+import yesman.epicfight.skill.ChargingJumpSkill;
 import yesman.epicfight.skill.DodgeSkill;
 import yesman.epicfight.skill.EnergizingGuardSkill;
 import yesman.epicfight.skill.EviscerateSkill;
@@ -94,7 +95,7 @@ public class Skills {
 	public static Skill GUARD;
 	public static Skill ACTIVE_GUARD;
 	public static Skill ENERGIZING_GUARD;
-	/** Passive Skills **/
+	/** Passive skills **/
 	public static Skill BERSERKER;
 	public static Skill STAMINA_PILLAGER;
 	public static Skill SWORD_MASTER;
@@ -113,6 +114,9 @@ public class Skills {
 	public static Skill LIECHTENAUER;
 	public static Skill EVISCERATE;
 	public static Skill BLADE_RUSH;
+	/** etc skills **/
+	public static Skill CHARGING_JUMP;
+	public static Skill GROUND_SLAM;
 	
 	public static void registerSkills() {
 		BASIC_ATTACK = registerSkill(new BasicAttack(BasicAttack.createBuilder()));
@@ -234,6 +238,8 @@ public class Skills {
 				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLADE_RUSH_FINISHER)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.BLADE_RUSH_SKILL)
 				.registerPropertiesToAnimation());
+		
+		CHARGING_JUMP = registerSkill(new ChargingJumpSkill(ChargingJumpSkill.createBuilder()));
 		
 		SkillRegistryEvent skillRegistryEvent = new SkillRegistryEvent(SKILLS, LEARNABLE_SKILLS);
 		ModLoader.get().postEvent(skillRegistryEvent);

@@ -8,7 +8,10 @@ public enum SkillCategories implements SkillCategory {
 	WEAPON_PASSIVE(false, false, false),
 	WEAPON_SPECIAL_ATTACK(false, true, false),
 	GUARD(true, true, true),
-	KNOCKDOWN_WAKEUP(false, false, false);
+	KNOCKDOWN_WAKEUP(false, false, false),
+	
+	CHARGING_JUMP(true, true, true),
+	GROUND_SLAM(true, true, true);
 	
 	boolean shouldSaved;
 	boolean shouldSyncronized;

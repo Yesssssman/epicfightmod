@@ -1,6 +1,7 @@
 package yesman.epicfight.skill;
 
 import java.util.Map;
+import java.util.function.Function;
 
 import com.google.common.collect.Maps;
 
@@ -13,7 +14,7 @@ import yesman.epicfight.skill.SkillDataManager.Data.FloatData;
 import yesman.epicfight.skill.SkillDataManager.Data.IntegerData;
 
 public class SkillDataManager {
-	private final Map<Integer, Data> data = Maps.<Integer, Data>newHashMap();
+	private final Map<Integer, Data> data = Maps.newHashMap();
 	private final int slotIndex;
 	
 	public SkillDataManager(int slotIndex) {
@@ -24,15 +25,33 @@ public class SkillDataManager {
 		this.data.put(key.getId(), key.valueType.create());
 	}
 	
-	public <T> void setData(SkillDataKey<T> key, Object data) {
+	/**
+	 * Use setData() or setDataSync() which is type-safe method
+	 */
+	@Deprecated
+	public void setDataRawtype(SkillDataKey<?> key, Object data) {
 		if (this.hasData(key)) {
 			key.valueType.set(this.data.get(key.getId()), data);
 		}
 	}
 	
-	public <T> void setDataSync(SkillDataKey<T> key, Object data, ServerPlayer player) {
+	public <T> void setData(SkillDataKey<T> key, T data) {
+		this.setDataRawtype(key, data);
+	}
+	
+	public <T> void setDataF(SkillDataKey<T> key, Function<T, T> dataManipulator) {
+		this.setDataRawtype(key, dataManipulator.apply(this.getDataValue(key)));
+	}
+	
+	public <T> void setDataSync(SkillDataKey<T> key, T data, ServerPlayer player) {
 		this.setData(key, data);
 		SPModifySkillData msg2 = new SPModifySkillData(key, this.slotIndex, data);
+		EpicFightNetworkManager.sendToPlayer(msg2, player);
+	}
+	
+	public <T> void setDataSyncF(SkillDataKey<T> key, Function<T, T> dataManipulator, ServerPlayer player) {
+		this.setDataF(key, dataManipulator);
+		SPModifySkillData msg2 = new SPModifySkillData(key, this.slotIndex, this.data.get(key.getId()));
 		EpicFightNetworkManager.sendToPlayer(msg2, player);
 	}
 	
