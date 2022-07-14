@@ -8,6 +8,7 @@ public class MovementInputEvent extends PlayerEvent<LocalPlayerPatch> {
 	
 	public MovementInputEvent(LocalPlayerPatch playerpatch, Input movementInput) {
 		super(playerpatch, false);
+		this.movementInput = movementInput;
 	}
 	
 	public Input getMovementInput() {
