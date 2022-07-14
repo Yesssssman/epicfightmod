@@ -38,13 +38,14 @@ public class SPModifySkillData {
 		SkillDataKey.findById(msg.id).getValueType().writeToBuffer(buf, msg.value);
 	}
 	
+	@SuppressWarnings("deprecation")
 	public static void handle(SPModifySkillData msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
 			Minecraft mc = Minecraft.getInstance();
 			LocalPlayerPatch playerpatch = (LocalPlayerPatch) mc.player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
 			if (playerpatch != null) {
 				SkillDataManager dataManager = playerpatch.getSkill(msg.slot).getDataManager();
-				dataManager.setData(SkillDataKey.findById(msg.id), msg.value);
+				dataManager.setDataRawtype(SkillDataKey.findById(msg.id), msg.value);
 			}
 		});
 		ctx.get().setPacketHandled(true);
