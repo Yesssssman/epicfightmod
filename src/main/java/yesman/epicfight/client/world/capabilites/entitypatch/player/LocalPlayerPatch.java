@@ -42,15 +42,8 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		ClientEngine.instance.inputController.setPlayerPatch(this);
 	}
 	
-	@Override
-	public void onJoinWorld(LocalPlayer entity, EntityJoinWorldEvent event) {
-		super.onJoinWorld(entity, event);
-		EpicFightNetworkManager.sendToServer(new CPChangePlayerMode(this.playerMode));
-	}
-	
 	public void onJoinWorld(ClientPlayerNetworkEvent.RespawnEvent event) {
 		super.onJoinWorld(event.getNewPlayer(), new EntityJoinWorldEvent(event.getNewPlayer(), event.getNewPlayer().level));
-		EpicFightNetworkManager.sendToServer(new CPChangePlayerMode(this.playerMode));
 	}
 	
 	@Override
@@ -148,7 +141,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	@Override
 	public void toMiningMode(boolean sendPacket) {
 		if (this.playerMode != PlayerMode.MINING) {
-			ClientEngine.instance.renderEngine.guiSkillBar.slideDown();
+			ClientEngine.instance.renderEngine.downSlideSkillUI();
 			if (EpicFightMod.CLIENT_INGAME_CONFIG.cameraAutoSwitch.getValue()) {
 				this.minecraft.options.setCameraType(CameraType.FIRST_PERSON);
 			}
@@ -164,7 +157,8 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	@Override
 	public void toBattleMode(boolean sendPacket) {
 		if (this.playerMode != PlayerMode.BATTLE) {
-			ClientEngine.instance.renderEngine.guiSkillBar.slideUp();
+			ClientEngine.instance.renderEngine.upSlideSkillUI();
+			
 			if (EpicFightMod.CLIENT_INGAME_CONFIG.cameraAutoSwitch.getValue()) {
 				this.minecraft.options.setCameraType(CameraType.THIRD_PERSON_BACK);
 			}

@@ -59,6 +59,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 		}
 		
 		EpicFightNetworkManager.sendToPlayer(new SPAddSkill(learnedSkill.toArray(new String[0])), this.original);
+		EpicFightNetworkManager.sendToPlayer(new SPChangePlayerMode(this.getOriginal().getId(), this.playerMode), this.original);
 	}
 	
 	@Override
@@ -182,11 +183,20 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	}
 	
 	@Override
-	public void toMode(PlayerMode playerMode, boolean sendPacket) {
-		super.toMode(playerMode, sendPacket);
+	public void toMiningMode(boolean sendPacket) {
+		super.toMiningMode(sendPacket);
 		
 		if (sendPacket) {
-			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(new SPChangePlayerMode(this.original.getId(), playerMode), this.original);
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(new SPChangePlayerMode(this.original.getId(), PlayerMode.MINING), this.original);
+		}
+	}
+	
+	@Override
+	public void toBattleMode(boolean sendPacket) {
+		super.toBattleMode(sendPacket);
+		
+		if (sendPacket) {
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(new SPChangePlayerMode(this.original.getId(), PlayerMode.BATTLE), this.original);
 		}
 	}
 	

@@ -16,7 +16,7 @@ import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-import yesman.epicfight.world.entity.ai.brain.BrainRemodeler;
+import yesman.epicfight.world.entity.ai.brain.BrainRecomposer;
 import yesman.epicfight.world.entity.ai.brain.task.AnimatedCombatBehavior;
 import yesman.epicfight.world.entity.ai.brain.task.MoveToTargetSinkStopInaction;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
@@ -60,10 +60,10 @@ public class PiglinBrutePatch extends HumanoidMobPatch<PiglinBrute> {
 		CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
 		
 		if (builder != null) {
-			BrainRemodeler.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 12, MeleeAttack.class, new AnimatedCombatBehavior<>(this, builder.build(this)));
+			BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 12, MeleeAttack.class, new AnimatedCombatBehavior<>(this, builder.build(this)));
 		}
 		
-		BrainRemodeler.replaceBehavior(this.original.getBrain(), Activity.CORE, 1, MoveToTargetSink.class, new MoveToTargetSinkStopInaction());
+		BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.CORE, 1, MoveToTargetSink.class, new MoveToTargetSinkStopInaction());
 	}
 	
 	@Override

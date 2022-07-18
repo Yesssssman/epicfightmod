@@ -83,10 +83,12 @@ public class PlayerEvents {
 	public static void cloneEvent(PlayerEvent.Clone event) {
 		event.getOriginal().reviveCaps();
 		ServerPlayerPatch oldOne = (ServerPlayerPatch)event.getOriginal().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+		
 		if (oldOne != null && (!event.isWasDeath() || event.getOriginal().level.getGameRules().getBoolean(EpicFightGamerules.KEEP_SKILLS))) {
 			ServerPlayerPatch newOne = (ServerPlayerPatch)event.getPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
 			newOne.initFromOldOne(oldOne);
 		}
+		
 		event.getOriginal().invalidateCaps();
 	}
 	

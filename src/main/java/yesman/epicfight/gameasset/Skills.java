@@ -22,7 +22,6 @@ import yesman.epicfight.skill.AirAttack;
 import yesman.epicfight.skill.BasicAttack;
 import yesman.epicfight.skill.BerserkerSkill;
 import yesman.epicfight.skill.BladeRushSkill;
-import yesman.epicfight.skill.ChargingJumpSkill;
 import yesman.epicfight.skill.DodgeSkill;
 import yesman.epicfight.skill.EnergizingGuardSkill;
 import yesman.epicfight.skill.EviscerateSkill;
@@ -239,7 +238,7 @@ public class Skills {
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.BLADE_RUSH_SKILL)
 				.registerPropertiesToAnimation());
 		
-		CHARGING_JUMP = registerSkill(new ChargingJumpSkill(ChargingJumpSkill.createBuilder()));
+		//CHARGING_JUMP = registerSkill(new ChargingJumpSkill(ChargingJumpSkill.createBuilder()));
 		
 		SkillRegistryEvent skillRegistryEvent = new SkillRegistryEvent(SKILLS, LEARNABLE_SKILLS);
 		ModLoader.get().postEvent(skillRegistryEvent);

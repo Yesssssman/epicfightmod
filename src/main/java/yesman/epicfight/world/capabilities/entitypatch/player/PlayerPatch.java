@@ -99,6 +99,13 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
+	
+	/**
+	 * This event called when player recreated
+	 * Client: when changing the dimension
+	 * Server: when respawned after death
+	 * @param old
+	 */
 	public void initFromOldOne(PlayerPatch<?> old) {
 		CapabilitySkill oldSkill = old.getSkillCapability();
 		CapabilitySkill newSkill = this.getSkillCapability();
@@ -121,6 +128,9 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 				}
 			}
 		}
+		
+		PlayerMode oldPlayerMode = old.isBattleMode() ? PlayerMode.BATTLE :PlayerMode.MINING;
+		this.toMode(oldPlayerMode, false);
 	}
 	
 	public void changeYaw(float amount) {

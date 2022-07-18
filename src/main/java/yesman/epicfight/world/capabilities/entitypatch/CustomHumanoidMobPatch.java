@@ -3,7 +3,12 @@ package yesman.epicfight.world.capabilities.entitypatch;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.ai.behavior.MeleeAttack;
+import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
+import net.minecraft.world.entity.ai.behavior.RunIf;
+import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
@@ -20,6 +25,10 @@ import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+import yesman.epicfight.world.entity.ai.brain.BrainRecomposer;
+import yesman.epicfight.world.entity.ai.brain.task.AnimatedCombatBehavior;
+import yesman.epicfight.world.entity.ai.brain.task.BackUpIfTooCloseStopInaction;
+import yesman.epicfight.world.entity.ai.brain.task.MoveToTargetSinkStopInaction;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
@@ -34,14 +43,30 @@ public class CustomHumanoidMobPatch<T extends PathfinderMob> extends HumanoidMob
 		this.weaponAttackMotions = this.provider.getHumanoidCombatBehaviors();
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void setAIAsInfantry(boolean holdingRanedWeapon) {
-		if (!holdingRanedWeapon) {
-			CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
-			
-			if (builder != null) {
-				this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, builder.build(this)));
-				this.original.goalSelector.addGoal(1, new TargetChasingGoal(this, this.getOriginal(), this.provider.getChasingSpeed(), true));
+		boolean isUsingBrain = this.getOriginal().getBrain().availableBehaviorsByPriority.size() > 0;
+		
+		if (isUsingBrain) {
+			if (!holdingRanedWeapon) {
+				CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
+				
+				if (builder != null) {
+					BrainRecomposer.replaceBehaviors((Brain<T>)this.original.getBrain(), Activity.FIGHT, MeleeAttack.class, new AnimatedCombatBehavior<>(this, builder.build(this)));
+				}
+				
+				BrainRecomposer.replaceBehaviors((Brain<T>)this.original.getBrain(), Activity.FIGHT, RunIf.class, new RunIf<>((entity) -> entity.isHolding(is -> is.getItem() instanceof CrossbowItem), new BackUpIfTooCloseStopInaction<>(5, 0.75F)));
+				BrainRecomposer.replaceBehaviors((Brain<T>)this.original.getBrain(), Activity.CORE, MoveToTargetSink.class, new MoveToTargetSinkStopInaction());
+			}
+		} else {
+			if (!holdingRanedWeapon) {
+				CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
+				
+				if (builder != null) {
+					this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, builder.build(this)));
+					this.original.goalSelector.addGoal(1, new TargetChasingGoal(this, this.getOriginal(), this.provider.getChasingSpeed(), true));
+				}
 			}
 		}
 	}

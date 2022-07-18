@@ -23,7 +23,7 @@ import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-import yesman.epicfight.world.entity.ai.brain.BrainRemodeler;
+import yesman.epicfight.world.entity.ai.brain.BrainRecomposer;
 import yesman.epicfight.world.entity.ai.brain.task.AnimatedCombatBehavior;
 import yesman.epicfight.world.entity.ai.brain.task.MoveToTargetSinkStopInaction;
 
@@ -31,9 +31,9 @@ public class HoglinPatch extends MobPatch<Hoglin> {
 	@Override
 	public void initAI() {
 		super.initAI();
-		BrainRemodeler.replaceBehavior(this.original.getBrain(), Activity.CORE, 1, MoveToTargetSink.class, new MoveToTargetSinkStopInaction());
-		BrainRemodeler.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 13, RunIf.class, new AnimatedCombatBehavior<>(this, MobCombatBehaviors.HOGLIN.build(this)));
-		BrainRemodeler.removeBehavior(this.original.getBrain(), Activity.FIGHT, 14, RunIf.class);
+		BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.CORE, 1, MoveToTargetSink.class, new MoveToTargetSinkStopInaction());
+		BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 13, RunIf.class, new AnimatedCombatBehavior<>(this, MobCombatBehaviors.HOGLIN.build(this)));
+		BrainRecomposer.removeBehavior(this.original.getBrain(), Activity.FIGHT, 14, RunIf.class);
 	}
 	
 	@OnlyIn(Dist.CLIENT)

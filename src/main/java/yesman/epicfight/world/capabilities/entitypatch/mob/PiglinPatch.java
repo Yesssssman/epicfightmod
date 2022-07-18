@@ -24,7 +24,7 @@ import yesman.epicfight.network.server.SPSpawnData;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-import yesman.epicfight.world.entity.ai.brain.BrainRemodeler;
+import yesman.epicfight.world.entity.ai.brain.BrainRecomposer;
 import yesman.epicfight.world.entity.ai.brain.task.AnimatedCombatBehavior;
 import yesman.epicfight.world.entity.ai.brain.task.BackUpIfTooCloseStopInaction;
 import yesman.epicfight.world.entity.ai.brain.task.MoveToTargetSinkStopInaction;
@@ -95,12 +95,12 @@ public class PiglinPatch extends HumanoidMobPatch<Piglin> {
 		CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
 		
 		if (builder != null) {
-			BrainRemodeler.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 13, MeleeAttack.class, new AnimatedCombatBehavior<>(this, builder.build(this)));
+			BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 13, MeleeAttack.class, new AnimatedCombatBehavior<>(this, builder.build(this)));
 		}
 		
-		BrainRemodeler.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 11, RunIf.class, new RunIf<>((entity) -> entity.isHolding(is -> is.getItem() instanceof CrossbowItem), new BackUpIfTooCloseStopInaction<>(5, 0.75F)));
-		BrainRemodeler.replaceBehavior(this.original.getBrain(), Activity.CORE, 1, MoveToTargetSink.class, new MoveToTargetSinkStopInaction());
-		BrainRemodeler.removeBehavior(this.original.getBrain(), Activity.CELEBRATE, 15, RunOne.class);
+		BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 11, RunIf.class, new RunIf<>((entity) -> entity.isHolding(is -> is.getItem() instanceof CrossbowItem), new BackUpIfTooCloseStopInaction<>(5, 0.75F)));
+		BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.CORE, 1, MoveToTargetSink.class, new MoveToTargetSinkStopInaction());
+		BrainRecomposer.removeBehavior(this.original.getBrain(), Activity.CELEBRATE, 15, RunOne.class);
 	}
 	
 	@Override

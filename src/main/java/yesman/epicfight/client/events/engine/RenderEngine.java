@@ -111,7 +111,7 @@ public class RenderEngine {
 	private static final Vec3f AIMING_CORRECTION = new Vec3f(-1.5F, 0.0F, 1.25F);
 	
 	public AimHelperRenderer aimHelper;
-	public BattleModeGui guiSkillBar = new BattleModeGui(Minecraft.getInstance());
+	private BattleModeGui guiSkillBar = new BattleModeGui(Minecraft.getInstance());
 	private Minecraft minecraft;
 	private Map<EntityType<?>, Supplier<PatchedEntityRenderer>> entityRendererProvider;
 	private Map<EntityType<?>, PatchedEntityRenderer> entityRendererCache;
@@ -326,7 +326,15 @@ public class RenderEngine {
 	public FirstPersonRenderer getFirstPersonRenderer() {
 		return firstPersonRenderer;
 	}
-
+	
+	public void upSlideSkillUI() {
+		this.guiSkillBar.slideUp();
+	}
+	
+	public void downSlideSkillUI() {
+		this.guiSkillBar.slideDown();
+	}
+	
 	@Mod.EventBusSubscriber(modid = EpicFightMod.MODID, value = Dist.CLIENT)
 	public static class Events {
 		static RenderEngine renderEngine;
