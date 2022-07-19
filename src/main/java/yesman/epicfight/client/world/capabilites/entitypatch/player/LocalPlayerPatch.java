@@ -139,23 +139,23 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	}
 	
 	@Override
-	public void toMiningMode(boolean sendPacket) {
+	public void toMiningMode(boolean synchronize) {
 		if (this.playerMode != PlayerMode.MINING) {
 			ClientEngine.instance.renderEngine.downSlideSkillUI();
 			if (EpicFightMod.CLIENT_INGAME_CONFIG.cameraAutoSwitch.getValue()) {
 				this.minecraft.options.setCameraType(CameraType.FIRST_PERSON);
 			}
 			
-			if (sendPacket) {
+			if (synchronize) {
 				EpicFightNetworkManager.sendToServer(new CPChangePlayerMode(PlayerMode.MINING));
 			}
 		}
 		
-		super.toMiningMode(sendPacket);
+		super.toMiningMode(synchronize);
 	}
 	
 	@Override
-	public void toBattleMode(boolean sendPacket) {
+	public void toBattleMode(boolean synchronize) {
 		if (this.playerMode != PlayerMode.BATTLE) {
 			ClientEngine.instance.renderEngine.upSlideSkillUI();
 			
@@ -163,12 +163,12 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 				this.minecraft.options.setCameraType(CameraType.THIRD_PERSON_BACK);
 			}
 			
-			if (sendPacket) {
+			if (synchronize) {
 				EpicFightNetworkManager.sendToServer(new CPChangePlayerMode(PlayerMode.BATTLE));
 			}
 		}
 		
-		super.toBattleMode(sendPacket);
+		super.toBattleMode(synchronize);
 	}
 	
 	@Override

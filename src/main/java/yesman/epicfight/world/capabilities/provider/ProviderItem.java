@@ -24,7 +24,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.ArmorCapability;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.NBTSeparativeCapability;
+import yesman.epicfight.world.capabilities.item.TagBasedSeparativeCapability;
 import yesman.epicfight.world.capabilities.item.WeaponCapabilityPresets;
 
 public class ProviderItem implements ICapabilityProvider, NonNullSupplier<CapabilityItem> {
@@ -77,7 +77,7 @@ public class ProviderItem implements ICapabilityProvider, NonNullSupplier<Capabi
 	
 	public ProviderItem(ItemStack itemstack) {
 		this.capability = CAPABILITIES.get(itemstack.getItem());
-		if (this.capability instanceof NBTSeparativeCapability) {
+		if (this.capability instanceof TagBasedSeparativeCapability) {
 			this.capability = this.capability.getResult(itemstack);
 		}
 	}

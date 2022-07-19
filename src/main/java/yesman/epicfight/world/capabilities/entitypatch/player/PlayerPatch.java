@@ -99,14 +99,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
-	
-	/**
-	 * This event called when player recreated
-	 * Client: when changing the dimension
-	 * Server: when respawned after death
-	 * @param old
-	 */
-	public void initFromOldOne(PlayerPatch<?> old) {
+	public void copySkillsFrom(PlayerPatch<?> old) {
 		CapabilitySkill oldSkill = old.getSkillCapability();
 		CapabilitySkill newSkill = this.getSkillCapability();
 		int i = 0;
@@ -128,9 +121,6 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 				}
 			}
 		}
-		
-		PlayerMode oldPlayerMode = old.isBattleMode() ? PlayerMode.BATTLE :PlayerMode.MINING;
-		this.toMode(oldPlayerMode, false);
 	}
 	
 	public void changeYaw(float amount) {
@@ -250,22 +240,26 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		}
 	}
 	
-	public void toMode(PlayerMode playerMode, boolean sendPacket) {
+	public void toMode(PlayerMode playerMode, boolean synchronize) {
 		switch (playerMode) {
 		case MINING:
-			this.toMiningMode(sendPacket);
+			this.toMiningMode(synchronize);
 			break;
 		case BATTLE:
-			this.toBattleMode(sendPacket);
+			this.toBattleMode(synchronize);
 			break;
 		}
 	}
 	
-	public void toMiningMode(boolean sendPacket) {
+	public PlayerMode getPlayerMode() {
+		return this.playerMode;
+	}
+	
+	public void toMiningMode(boolean synchronize) {
 		this.playerMode = PlayerMode.MINING;
 	}
 	
-	public void toBattleMode(boolean sendPacket) {
+	public void toBattleMode(boolean synchronize) {
 		this.playerMode = PlayerMode.BATTLE;
 	}
 	

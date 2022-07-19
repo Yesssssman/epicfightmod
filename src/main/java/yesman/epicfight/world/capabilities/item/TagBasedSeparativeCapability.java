@@ -7,11 +7,11 @@ import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.world.item.ItemStack;
 
-public class NBTSeparativeCapability extends CapabilityItem {
+public class TagBasedSeparativeCapability extends CapabilityItem {
 	private List<Pair<Predicate<ItemStack>, CapabilityItem>> variables;
 	private CapabilityItem defaultCapability;
 	
-	public NBTSeparativeCapability(List<Pair<Predicate<ItemStack>, CapabilityItem>> variables, CapabilityItem defaultCapability) {
+	public TagBasedSeparativeCapability(List<Pair<Predicate<ItemStack>, CapabilityItem>> variables, CapabilityItem defaultCapability) {
 		super(WeaponCategories.NOT_WEAON);
 		this.variables = variables;
 		this.defaultCapability = defaultCapability;

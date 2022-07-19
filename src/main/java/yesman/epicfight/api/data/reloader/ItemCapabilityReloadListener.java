@@ -33,8 +33,8 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.server.SPDatapackSync;
 import yesman.epicfight.world.capabilities.item.ArmorCapability;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.item.NBTSeparativeCapability;
 import yesman.epicfight.world.capabilities.item.Style;
+import yesman.epicfight.world.capabilities.item.TagBasedSeparativeCapability;
 import yesman.epicfight.world.capabilities.item.WeaponCapabilityPresets;
 import yesman.epicfight.world.capabilities.provider.ProviderItem;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
@@ -52,10 +52,10 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 	protected void apply(Map<ResourceLocation, JsonElement> objectIn, ResourceManager resourceManagerIn, ProfilerFiller profilerIn) {
 		for (Map.Entry<ResourceLocation, JsonElement> entry : objectIn.entrySet()) {
 			ResourceLocation rl = entry.getKey();
-			String pathString = rl.getPath();
+			String path = rl.getPath();
 			
-			if (pathString.contains("/")) {
-				String[] str = pathString.split("/");
+			if (path.contains("/")) {
+				String[] str = path.split("/");
 				ResourceLocation registryName = new ResourceLocation(rl.getNamespace(), str[1]);
 				Item item = ForgeRegistries.ITEMS.getValue(registryName);
 				
@@ -89,6 +89,7 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 	
 	public static CapabilityItem deserializeArmor(Item item, CompoundTag tag) {
 		CapabilityItem capability = null;
+		
 		if (tag.contains("attributes")) {
 			CompoundTag attributes = tag.getCompound("attributes");
 			capability = new ArmorCapability(item, attributes.getDouble("weight"), attributes.getDouble("stun_armor"));
@@ -101,8 +102,9 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 	
 	public static CapabilityItem deserializeWeapon(Item item, CompoundTag tag, CapabilityItem defaultCapability) {
 		CapabilityItem capability;
-		if (tag.contains("variables")) {
-			ListTag jsonArray = tag.getList("variables", 10);
+		
+		if (tag.contains("variations")) {
+			ListTag jsonArray = tag.getList("variations", 10);
 			List<Pair<Predicate<ItemStack>, CapabilityItem>> list = Lists.newArrayList();
 			CapabilityItem innerDefaultCapability = tag.contains("type") ? WeaponCapabilityPresets.get(tag.getString("type")).apply(item) : CapabilityItem.EMPTY;
 			
@@ -112,9 +114,11 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 				String nbtValue = innerTag.getString("nbt_value");
 				Predicate<ItemStack> predicate = (itemstack) -> {
 					CompoundTag compound = itemstack.getTag();
+					
 					if (compound == null) {
 						return false;
 					}
+					
 					return compound.contains(nbtKey) ? compound.getString(nbtKey).equals(nbtValue) : false;
 				};
 				list.add(Pair.of(predicate, deserializeWeapon(item, innerTag, innerDefaultCapability)));
@@ -122,22 +126,26 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 			
 			if (tag.contains("attributes")) {
 				CompoundTag attributes = tag.getCompound("attributes");
+				
 				for (String key : attributes.getAllKeys()) {
 					Map<Attribute, AttributeModifier> attributeEntry = deserializeAttribute(attributes.getCompound(key));
+					
 					for (Map.Entry<Attribute, AttributeModifier> attribute : attributeEntry.entrySet()) {
 						innerDefaultCapability.addStyleAttibute(Style.ENUM_MANAGER.get(key), Pair.of(attribute.getKey(), attribute.getValue()));
 					}
 				}
 			}
 			
-			capability = new NBTSeparativeCapability(list, innerDefaultCapability);
+			capability = new TagBasedSeparativeCapability(list, innerDefaultCapability);
 		} else {
 			capability = tag.contains("type") ? WeaponCapabilityPresets.get(tag.getString("type")).apply(item) : defaultCapability;
 			
 			if (tag.contains("attributes")) {
 				CompoundTag attributes = tag.getCompound("attributes");
+				
 				for (String key : attributes.getAllKeys()) {
 					Map<Attribute, AttributeModifier> attributeEntry = deserializeAttribute(attributes.getCompound(key));
+					
 					for (Map.Entry<Attribute, AttributeModifier> attribute : attributeEntry.entrySet()) {
 						capability.addStyleAttibute(Style.ENUM_MANAGER.get(key), Pair.of(attribute.getKey(), attribute.getValue()));
 					}

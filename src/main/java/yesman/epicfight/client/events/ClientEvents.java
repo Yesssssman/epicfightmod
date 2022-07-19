@@ -114,12 +114,14 @@ public class ClientEvents {
 	
 	@SubscribeEvent
 	public static void clientRespawnEvent(ClientPlayerNetworkEvent.RespawnEvent event) {
-		LocalPlayerPatch oldOne = (LocalPlayerPatch)event.getOldPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+		LocalPlayerPatch oldCap = (LocalPlayerPatch)event.getOldPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
 		
-		if (oldOne != null) {
-			LocalPlayerPatch newOne = (LocalPlayerPatch)event.getNewPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
-			newOne.onJoinWorld(event);
-			newOne.initFromOldOne(oldOne);
+		if (oldCap != null) {
+			LocalPlayerPatch newCap = (LocalPlayerPatch)event.getNewPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+			
+			newCap.onJoinWorld(event);
+			newCap.copySkillsFrom(oldCap);
+			newCap.toMode(oldCap.getPlayerMode(), false);
 		}
 	}
 	
