@@ -27,21 +27,14 @@ public class ArmorCapability extends CapabilityItem {
 	protected final double stunArmor;
 	private final EquipmentSlot equipmentSlot;
 	
-	public ArmorCapability(Item item) {
-		super(item, WeaponCategories.FIST);
-		ArmorItem armorItem = (ArmorItem) item;
-		ArmorMaterial armorMaterial = armorItem.getMaterial();
-		this.equipmentSlot = armorItem.getSlot();
-		this.weight = armorMaterial.getDefenseForSlot(this.equipmentSlot) * 2.5F;
-		this.stunArmor = armorMaterial.getDefenseForSlot(this.equipmentSlot) * 0.375F;
-	}
-	
-	public ArmorCapability(Item item, double customWeight, double customStunArmor) {
-		super(item, WeaponCategories.FIST);
-		ArmorItem armorItem = (ArmorItem) item;
-		this.equipmentSlot = armorItem.getSlot();
-		this.weight = customWeight;
-		this.stunArmor = customStunArmor;
+	protected ArmorCapability(CapabilityItem.Builder builder) {
+		super(builder);
+		
+		ArmorCapability.Builder armorBuilder = (ArmorCapability.Builder)builder;
+		
+		this.equipmentSlot = armorBuilder.equipmentSlot;
+		this.weight = armorBuilder.weight;
+		this.stunArmor = armorBuilder.weight;
 	}
 	
 	@Override
@@ -64,4 +57,48 @@ public class ArmorCapability extends CapabilityItem {
 		
         return map;
     }
+	
+	public static ArmorCapability.Builder builder() {
+		return new ArmorCapability.Builder();
+	}
+	
+	public static class Builder extends CapabilityItem.Builder {
+		EquipmentSlot equipmentSlot;
+		double weight;
+		double stunArmor;
+		
+		protected Builder() {
+			weight = -1.0D;
+			stunArmor = -1.0D;
+		}
+		
+		public Builder item(Item item) {
+			if (item instanceof ArmorItem) {
+				ArmorItem armorItem = (ArmorItem) item;
+				ArmorMaterial armorMaterial = armorItem.getMaterial();
+				
+				this.equipmentSlot = armorItem.getSlot();
+				
+				if (this.weight < 0.0D) {
+					this.weight = armorMaterial.getDefenseForSlot(this.equipmentSlot) * 2.5F;
+				}
+				
+				if (this.stunArmor < 0.0D) {
+					this.stunArmor = armorMaterial.getDefenseForSlot(this.equipmentSlot) * 0.375F;
+				}
+			}
+			
+			return this;
+		}
+		
+		public Builder weight(double weight) {
+			this.weight = weight;
+			return this;
+		}
+		
+		public Builder stunArmor(double stunArmor) {
+			this.stunArmor = stunArmor;
+			return this;
+		}
+	}
 }

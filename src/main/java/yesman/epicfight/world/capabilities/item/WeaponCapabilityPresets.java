@@ -26,79 +26,78 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
 @SuppressWarnings("deprecation")
 public class WeaponCapabilityPresets {
-	public static final Function<Item, CapabilityItem> AXE = (item) -> {
-		WeaponCapability cap = new WeaponCapability(WeaponCapability.builder()
+	public static final Function<Item, CapabilityItem.Builder> AXE = (item) -> {
+		CapabilityItem.Builder builder = WeaponCapability.builder()
 			.category(WeaponCategories.AXE)
 			.hitSound(EpicFightSounds.BLADE_HIT)
 			.collider(ColliderPreset.TOOLS)
 			.newStyleCombo(Styles.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
 			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
 			.specialAttack(Styles.ONE_HAND, Skills.GUILLOTINE_AXE)
-			.livingMotionModifier(Styles.ONE_HAND, LivingMotions.BLOCK, Animations.SWORD_GUARD)
-		);
+			.livingMotionModifier(Styles.ONE_HAND, LivingMotions.BLOCK, Animations.SWORD_GUARD);
 		
 		if (item instanceof TieredItem) {
 			int harvestLevel = ((TieredItem)item).getTier().getLevel();
+			
 			if (harvestLevel != 0) {
-				cap.addStyleAttibute(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.ARMOR_NEGATION.get(), EpicFightAttributes.getArmorNegationModifier(10.0D * harvestLevel)));
+				builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.ARMOR_NEGATION.get(), EpicFightAttributes.getArmorNegationModifier(10.0D * harvestLevel)));
 			}
-			cap.addStyleAttibute(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.7D + 0.3D * harvestLevel)));
+			
+			builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.7D + 0.3D * harvestLevel)));
 		}
 		
-		return cap;
+		return builder;
 	};
-	public static final Function<Item, CapabilityItem> FIST = (item) -> new KnuckleCapability();
-	public static final Function<Item, CapabilityItem> HOE = (item) -> {
-		WeaponCapability cap = new WeaponCapability(WeaponCapability.builder()
+	public static final Function<Item, CapabilityItem.Builder> HOE = (item) -> {
+		WeaponCapability.Builder builder = WeaponCapability.builder()
 			.category(WeaponCategories.HOE)
 			.hitSound(EpicFightSounds.BLADE_HIT)
 			.collider(ColliderPreset.TOOLS).newStyleCombo(Styles.ONE_HAND, Animations.TOOL_AUTO_1, Animations.TOOL_AUTO_2, Animations.TOOL_DASH, Animations.SWORD_AIR_SLASH)
-			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
-		);
+			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK);
 		
 		if (item instanceof TieredItem) {
 			int harvestLevel = ((TieredItem)item).getTier().getLevel();
-			cap.addStyleAttibute(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(-0.4D + 0.1D * harvestLevel)));
+			builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(-0.4D + 0.1D * harvestLevel)));
 		}
 		
-		return cap;
+		return builder;
 	};
-	public static final Function<Item, CapabilityItem> PICKAXE = (item) -> {
-		WeaponCapability cap = new WeaponCapability(WeaponCapability.builder()
+	public static final Function<Item, CapabilityItem.Builder> PICKAXE = (item) -> {
+		WeaponCapability.Builder builder = WeaponCapability.builder()
 			.category(WeaponCategories.PICKAXE)
 			.hitSound(EpicFightSounds.BLADE_HIT)
 			.collider(ColliderPreset.TOOLS)
 			.newStyleCombo(Styles.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
-			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
-		);
+			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK);
 		
 		if (item instanceof TieredItem) {
 			int harvestLevel = ((TieredItem)item).getTier().getLevel();
+			
 			if (harvestLevel != 0) {
-				cap.addStyleAttibute(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.ARMOR_NEGATION.get(), EpicFightAttributes.getArmorNegationModifier(6.0D * harvestLevel)));
+				builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.ARMOR_NEGATION.get(), EpicFightAttributes.getArmorNegationModifier(6.0D * harvestLevel)));
 			}
-			cap.addStyleAttibute(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.4D + 0.1D * harvestLevel)));
+			
+			builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.4D + 0.1D * harvestLevel)));
 		}
 		
-		return cap;
+		return builder;
 	};
-	public static final Function<Item, CapabilityItem> SHOVEL = (item) -> {
-		WeaponCapability cap = new WeaponCapability(WeaponCapability.builder()
+	public static final Function<Item, CapabilityItem.Builder> SHOVEL = (item) -> {
+		WeaponCapability.Builder builder = WeaponCapability.builder()
 			.category(WeaponCategories.SHOVEL)
 			.collider(ColliderPreset.TOOLS)
 			.newStyleCombo(Styles.ONE_HAND, Animations.AXE_AUTO1, Animations.AXE_AUTO2, Animations.AXE_DASH, Animations.AXE_AIRSLASH)
-			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
-		);
+			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK);
 		
 		if (item instanceof TieredItem) {
 			int harvestLevel = ((TieredItem)item).getTier().getLevel();
-			cap.addStyleAttibute(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.8D + 0.4D * harvestLevel)));
+			builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.8D + 0.4D * harvestLevel)));
 		}
 		
-		return cap;
+		return builder;
 	};
-	public static final Function<Item, CapabilityItem> SWORD = (item) -> {
-		WeaponCapability cap = new WeaponCapability(WeaponCapability.builder()
+	public static final Function<Item, CapabilityItem.Builder> SWORD = (item) -> {
+		WeaponCapability.Builder builder = WeaponCapability.builder()
 			.category(WeaponCategories.SWORD)
 			.styleProvider((playerpatch) -> playerpatch.getHoldingItemCapability(InteractionHand.OFF_HAND).getWeaponCategory() == WeaponCategories.SWORD ? Styles.TWO_HAND : Styles.ONE_HAND)
 			.collider(ColliderPreset.SWORD)
@@ -110,19 +109,18 @@ public class WeaponCapabilityPresets {
 			.specialAttack(Styles.TWO_HAND, Skills.DANCING_EDGE)
 			.livingMotionModifier(Styles.ONE_HAND, LivingMotions.BLOCK, Animations.SWORD_GUARD)
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.SWORD_DUAL_GUARD)
-			.weaponCombinationPredicator((entitypatch) -> EpicFightCapabilities.getItemStackCapability(entitypatch.getOriginal().getOffhandItem()).weaponCategory == WeaponCategories.SWORD)
-		);
+			.weaponCombinationPredicator((entitypatch) -> EpicFightCapabilities.getItemStackCapability(entitypatch.getOriginal().getOffhandItem()).weaponCategory == WeaponCategories.SWORD);
 		
 		if (item instanceof TieredItem) {
 			int harvestLevel = ((TieredItem)item).getTier().getLevel();
-			cap.addStyleAttibute(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.5D + 0.2D * harvestLevel)));
-			cap.addStyleAttibute(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.MAX_STRIKES.get(), EpicFightAttributes.getMaxStrikesModifier(1)));
+			builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.5D + 0.2D * harvestLevel)));
+			builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.MAX_STRIKES.get(), EpicFightAttributes.getMaxStrikesModifier(1)));
 		}
 		
-		return cap;
+		return builder;
 	};
-	public static final Function<Item, CapabilityItem> SPEAR = (item) -> {
-		WeaponCapability cap = new WeaponCapability(WeaponCapability.builder()
+	public static final Function<Item, CapabilityItem.Builder> SPEAR = (item) -> {
+		WeaponCapability.Builder builder = WeaponCapability.builder()
 			.category(WeaponCategories.SPEAR)
 			.styleProvider((playerpatch) -> playerpatch.getHoldingItemCapability(InteractionHand.OFF_HAND).getWeaponCategory() == WeaponCategories.SHIELD ? Styles.ONE_HAND : Styles.TWO_HAND)
 			.collider(ColliderPreset.SPEAR)
@@ -139,12 +137,12 @@ public class WeaponCapabilityPresets {
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.CHASE, Animations.BIPED_HOLD_SPEAR)
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.RUN, Animations.BIPED_RUN_SPEAR)
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SWIM, Animations.BIPED_HOLD_SPEAR)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.SPEAR_GUARD)
-		);
-		return cap;
+			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.SPEAR_GUARD);
+		
+		return builder;
 	};
-	public static final Function<Item, CapabilityItem> GREATSWORD = (item) -> {
-		WeaponCapability cap = new WeaponCapability(WeaponCapability.builder()
+	public static final Function<Item, CapabilityItem.Builder> GREATSWORD = (item) -> {
+		WeaponCapability.Builder builder = WeaponCapability.builder()
 			.category(WeaponCategories.GREATSWORD)
 			.styleProvider((playerpatch) -> Styles.TWO_HAND)
 			.collider(ColliderPreset.GREATSWORD)
@@ -162,12 +160,12 @@ public class WeaponCapabilityPresets {
 	    	.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SNEAK, Animations.BIPED_HOLD_GREATSWORD)
 	    	.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SWIM, Animations.BIPED_HOLD_GREATSWORD)
 	    	.livingMotionModifier(Styles.TWO_HAND, LivingMotions.INACTION, Animations.BIPED_HOLD_GREATSWORD)
-	    	.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.GREATSWORD_GUARD)
-		);
-		return cap;
+	    	.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.GREATSWORD_GUARD);
+		
+		return builder;
 	};
-	public static final Function<Item, CapabilityItem> KATANA = (item) -> {
-		WeaponCapability cap = new WeaponCapability(WeaponCapability.builder()
+	public static final Function<Item, CapabilityItem.Builder> KATANA = (item) -> {
+		WeaponCapability.Builder builder = WeaponCapability.builder()
 			.category(WeaponCategories.KATANA)
 			.styleProvider((entitypatch) -> {
 				if (entitypatch instanceof PlayerPatch) {
@@ -206,12 +204,12 @@ public class WeaponCapabilityPresets {
 			.livingMotionModifier(Styles.SHEATH, LivingMotions.SWIM, Animations.BIPED_HOLD_KATANA_SHEATHING)
 			.livingMotionModifier(Styles.SHEATH, LivingMotions.FLOAT, Animations.BIPED_HOLD_KATANA_SHEATHING)
 			.livingMotionModifier(Styles.SHEATH, LivingMotions.FALL, Animations.BIPED_HOLD_KATANA_SHEATHING)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.KATANA_GUARD)
-		);
-		return cap;
+			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.KATANA_GUARD);
+		
+		return builder;
 	};
-	public static final Function<Item, CapabilityItem> TACHI = (item) -> {
-		WeaponCapability cap = new WeaponCapability(WeaponCapability.builder()
+	public static final Function<Item, CapabilityItem.Builder> TACHI = (item) -> {
+		WeaponCapability.Builder builder = WeaponCapability.builder()
 			.category(WeaponCategories.TACHI)
 			.styleProvider((playerpatch) -> Styles.TWO_HAND)
 			.collider(ColliderPreset.KATANA)
@@ -230,12 +228,12 @@ public class WeaponCapabilityPresets {
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.FLOAT, Animations.BIPED_HOLD_TACHI)
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.FALL, Animations.BIPED_HOLD_TACHI)
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.INACTION, Animations.BIPED_HOLD_TACHI)
-			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.LONGSWORD_GUARD)
-		);
-		return cap;
+			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.LONGSWORD_GUARD);
+		
+		return builder;
 	};
-	public static final Function<Item, CapabilityItem> LONGSWORD = (item) -> {
-		WeaponCapability weaponCapability = new WeaponCapability(WeaponCapability.builder()
+	public static final Function<Item, CapabilityItem.Builder> LONGSWORD = (item) -> {
+		WeaponCapability.Builder builder = WeaponCapability.builder()
 			.category(WeaponCategories.LONGSWORD)
 			.styleProvider((entitypatch) -> {
 				if (entitypatch instanceof PlayerPatch<?>) {
@@ -272,12 +270,12 @@ public class WeaponCapabilityPresets {
 			.livingMotionModifier(Styles.LIECHTENAUER, LivingMotions.JUMP, Animations.BIPED_HOLD_LONGSWORD)
 			.livingMotionModifier(Styles.LIECHTENAUER, LivingMotions.INACTION, Animations.BIPED_HOLD_LONGSWORD)
 			.livingMotionModifier(Styles.LIECHTENAUER, LivingMotions.SWIM, Animations.BIPED_HOLD_GREATSWORD)
-			.livingMotionModifier(Styles.LIECHTENAUER, LivingMotions.BLOCK, Animations.LONGSWORD_GUARD)
-		);
-		return weaponCapability;
+			.livingMotionModifier(Styles.LIECHTENAUER, LivingMotions.BLOCK, Animations.LONGSWORD_GUARD);
+		
+		return builder;
 	};
-	public static final Function<Item, CapabilityItem> DAGGER = (item) -> {
-		WeaponCapability weaponCapability = new WeaponCapability(WeaponCapability.builder()
+	public static final Function<Item, CapabilityItem.Builder> DAGGER = (item) -> {
+		WeaponCapability.Builder builder = WeaponCapability.builder()
 			.category(WeaponCategories.DAGGER)
 			.styleProvider((playerpatch) -> playerpatch.getHoldingItemCapability(InteractionHand.OFF_HAND).getWeaponCategory() == WeaponCategories.DAGGER ? Styles.TWO_HAND : Styles.ONE_HAND)
 			.hitSound(EpicFightSounds.BLADE_HIT)
@@ -287,19 +285,51 @@ public class WeaponCapabilityPresets {
 			.newStyleCombo(Styles.TWO_HAND, Animations.DAGGER_DUAL_AUTO_1, Animations.DAGGER_DUAL_AUTO_2, Animations.DAGGER_DUAL_AUTO_3, Animations.DAGGER_DUAL_AUTO_4, Animations.DAGGER_DUAL_DASH, Animations.DAGGER_DUAL_AIR_SLASH)
 			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
 			.specialAttack(Styles.ONE_HAND, Skills.EVISCERATE)
-			.specialAttack(Styles.TWO_HAND, Skills.BLADE_RUSH)
-		);
-		return weaponCapability;
+			.specialAttack(Styles.TWO_HAND, Skills.BLADE_RUSH);
+		
+		return builder;
 	};
-	public static final Function<Item, CapabilityItem> BOW = BowCapability::new;
-	public static final Function<Item, CapabilityItem> CROSSBOW = CrossbowCapability::new;
-	public static final Function<Item, CapabilityItem> TRIDENT = TridentCapability::new;
-	public static final Function<Item, CapabilityItem> SHIELD = ShieldCapability::new;
+	public static final Function<Item, CapabilityItem.Builder> FIST = (item) -> WeaponCapability.builder()
+			.newStyleCombo(Styles.ONE_HAND, Animations.FIST_AUTO_1, Animations.FIST_AUTO_2, Animations.FIST_AUTO_3, Animations.FIST_DASH, Animations.FIST_AIR_SLASH)
+			.specialAttack(Styles.ONE_HAND, Skills.RELENTLESS_COMBO)
+			.category(WeaponCategories.FIST)
+			.constructor(KnuckleCapability::new);
 	
-	private static final Map<String, Function<Item, CapabilityItem>> PRESETS = Maps.newHashMap();
+	public static final Function<Item, CapabilityItem.Builder> BOW =  (item) -> RangedWeaponCapability.builder()
+			.addAnimationsModifier(LivingMotions.IDLE, Animations.BIPED_IDLE)
+			.addAnimationsModifier(LivingMotions.WALK, Animations.BIPED_WALK)
+			.addAnimationsModifier(LivingMotions.AIM, Animations.BIPED_BOW_AIM)
+			.addAnimationsModifier(LivingMotions.SHOT, Animations.BIPED_BOW_SHOT);
+			
+	public static final Function<Item, CapabilityItem.Builder> CROSSBOW =  (item) -> RangedWeaponCapability.builder()
+			.addAnimationsModifier(LivingMotions.IDLE, Animations.BIPED_HOLD_CROSSBOW)
+			.addAnimationsModifier(LivingMotions.KNEEL, Animations.BIPED_HOLD_CROSSBOW)
+			.addAnimationsModifier(LivingMotions.WALK, Animations.BIPED_HOLD_CROSSBOW)
+			.addAnimationsModifier(LivingMotions.RUN, Animations.BIPED_HOLD_CROSSBOW)
+			.addAnimationsModifier(LivingMotions.SNEAK, Animations.BIPED_HOLD_CROSSBOW)
+			.addAnimationsModifier(LivingMotions.SWIM, Animations.BIPED_HOLD_CROSSBOW)
+			.addAnimationsModifier(LivingMotions.FLOAT, Animations.BIPED_HOLD_CROSSBOW)
+			.addAnimationsModifier(LivingMotions.FALL, Animations.BIPED_HOLD_CROSSBOW)
+			.addAnimationsModifier(LivingMotions.RELOAD, Animations.BIPED_CROSSBOW_RELOAD)
+			.addAnimationsModifier(LivingMotions.AIM, Animations.BIPED_CROSSBOW_AIM)
+			.addAnimationsModifier(LivingMotions.SHOT, Animations.BIPED_CROSSBOW_SHOT);
+	
+	public static final Function<Item, CapabilityItem.Builder> TRIDENT = (item) -> RangedWeaponCapability.builder()
+			.addAnimationsModifier(LivingMotions.IDLE, Animations.BIPED_IDLE)
+			.addAnimationsModifier(LivingMotions.WALK, Animations.BIPED_WALK)
+			.addAnimationsModifier(LivingMotions.AIM, Animations.BIPED_JAVELIN_AIM)
+			.addAnimationsModifier(LivingMotions.SHOT, Animations.BIPED_JAVELIN_THROW)
+			.constructor(TridentCapability::new)
+			.category(WeaponCategories.TRIDENT);
+	
+	public static final Function<Item, CapabilityItem.Builder> SHIELD = (item) -> CapabilityItem.builder()
+			.constructor(ShieldCapability::new)
+			.category(WeaponCategories.SHIELD);
+	
+	private static final Map<String, Function<Item, CapabilityItem.Builder>> PRESETS = Maps.newHashMap();
 	
 	public static void register() {
-		Map<String, Function<Item, CapabilityItem>> typeEntry = Maps.newHashMap();
+		Map<String, Function<Item, CapabilityItem.Builder>> typeEntry = Maps.newHashMap();
 		typeEntry.put("axe", AXE);
 		typeEntry.put("fist", FIST);
 		typeEntry.put("hoe", HOE);
@@ -322,7 +352,7 @@ public class WeaponCapabilityPresets {
 		weaponCapabilityPresetRegistryEvent.getTypeEntry().forEach(PRESETS::put);
 	}
 	
-	public static Function<Item, CapabilityItem> get(String typeName) {
+	public static Function<Item, CapabilityItem.Builder> get(String typeName) {
 		return PRESETS.get(typeName);
 	}
 }

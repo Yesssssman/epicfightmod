@@ -8,18 +8,18 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.world.item.ItemStack;
 
 public class TagBasedSeparativeCapability extends CapabilityItem {
-	private List<Pair<Predicate<ItemStack>, CapabilityItem>> variables;
-	private CapabilityItem defaultCapability;
+	private final List<Pair<Predicate<ItemStack>, CapabilityItem>> variations;
+	private final CapabilityItem defaultCapability;
 	
-	public TagBasedSeparativeCapability(List<Pair<Predicate<ItemStack>, CapabilityItem>> variables, CapabilityItem defaultCapability) {
-		super(WeaponCategories.NOT_WEAON);
-		this.variables = variables;
+	public TagBasedSeparativeCapability(List<Pair<Predicate<ItemStack>, CapabilityItem>> variations, CapabilityItem defaultCapability) {
+		super(CapabilityItem.builder().category(WeaponCategories.NOT_WEAON));
+		this.variations = variations;
 		this.defaultCapability = defaultCapability;
 	}
 	
 	@Override
 	public CapabilityItem getResult(ItemStack item) {
-		for (Pair<Predicate<ItemStack>, CapabilityItem> pair : this.variables) {
+		for (Pair<Predicate<ItemStack>, CapabilityItem> pair : this.variations) {
 			if (pair.getFirst().test(item)) {
 				return pair.getSecond().getResult(item);
 			}

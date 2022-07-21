@@ -9,13 +9,13 @@ import net.minecraftforge.fml.event.IModBusEvent;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 
 public class WeaponCapabilityPresetRegistryEvent extends Event implements IModBusEvent {
-	private final Map<String, Function<Item, CapabilityItem>> typeEntry;
+	private final Map<String, Function<Item, CapabilityItem.Builder>> typeEntry;
 	
-	public WeaponCapabilityPresetRegistryEvent(Map<String, Function<Item, CapabilityItem>> typeEntry) {
+	public WeaponCapabilityPresetRegistryEvent(Map<String, Function<Item, CapabilityItem.Builder>> typeEntry) {
 		this.typeEntry = typeEntry;
 	}
 	
-	public Map<String, Function<Item, CapabilityItem>> getTypeEntry() {
+	public Map<String, Function<Item, CapabilityItem.Builder>> getTypeEntry() {
 		return this.typeEntry;
 	}
 }

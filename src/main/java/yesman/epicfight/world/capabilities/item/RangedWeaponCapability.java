@@ -1,24 +1,24 @@
 package yesman.epicfight.world.capabilities.item;
 
-import java.util.HashMap;
 import java.util.Map;
 
+import com.google.common.collect.Maps;
+
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.Item;
 import yesman.epicfight.api.animation.LivingMotion;
-import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class RangedWeaponCapability extends CapabilityItem {
-	protected Map<LivingMotion, StaticAnimation> rangeAnimationSet;
+	protected Map<LivingMotion, StaticAnimation> rangeAnimationModifiers;
 	
-	public RangedWeaponCapability(Item item, StaticAnimation reload, StaticAnimation aiming, StaticAnimation shot) {
-		this(item, reload, aiming, shot, WeaponCategories.RANGED);
+	/**
+	public RangedWeaponCapability(StaticAnimation reload, StaticAnimation aiming, StaticAnimation shot) {
+		this(reload, aiming, shot, WeaponCategories.RANGED);
 	}
 	
-	public RangedWeaponCapability(Item item, StaticAnimation reload, StaticAnimation aiming, StaticAnimation shot, WeaponCategories weaponCategory) {
-		super(item, weaponCategory);
+	public RangedWeaponCapability(StaticAnimation reload, StaticAnimation aiming, StaticAnimation shot, WeaponCategories weaponCategory) {
+		super(weaponCategory);
 		this.rangeAnimationSet = new HashMap<LivingMotion, StaticAnimation> ();
 		
 		if (reload != null) {
@@ -32,17 +32,24 @@ public class RangedWeaponCapability extends CapabilityItem {
 		if (shot != null) {
 			this.rangeAnimationSet.put(LivingMotions.SHOT, shot);
 		}
+	}**/
+	
+	protected RangedWeaponCapability(CapabilityItem.Builder builder) {
+		super(builder);
+		
+		RangedWeaponCapability.Builder rangedBuilder = (RangedWeaponCapability.Builder)builder;
+		this.rangeAnimationModifiers = rangedBuilder.rangeAnimationModifiers;
 	}
 	
 	@Override
 	public void setConfigFileAttribute(double armorNegation1, double impact1, int maxStrikes1, double armorNegation2, double impact2, int maxStrikes2) {
-		this.addStyleAttributeSimple(Styles.RANGED, armorNegation1, impact1, maxStrikes1);
+		this.addStyleAttributes(Styles.RANGED, armorNegation1, impact1, maxStrikes1);
 	}
 	
 	@Override
 	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(LivingEntityPatch<?> playerdata, InteractionHand hand) {
 		if (hand == InteractionHand.MAIN_HAND) {
-			return this.rangeAnimationSet;
+			return this.rangeAnimationModifiers;
 		}
 		
 		return super.getLivingMotionModifier(playerdata, hand);
@@ -56,5 +63,24 @@ public class RangedWeaponCapability extends CapabilityItem {
 	@Override
 	public boolean canBePlacedOffhand() {
 		return false;
+	}
+	
+	public static RangedWeaponCapability.Builder builder() {
+		return new RangedWeaponCapability.Builder();
+	}
+	
+	public static class Builder extends CapabilityItem.Builder {
+		Map<LivingMotion, StaticAnimation> rangeAnimationModifiers;
+		
+		protected Builder() {
+			this.category = WeaponCategories.RANGED;
+			this.constructor = RangedWeaponCapability::new;
+			this.rangeAnimationModifiers = Maps.newHashMap();
+		}
+		
+		public Builder addAnimationsModifier(LivingMotion livingMotion, StaticAnimation animations) {
+			this.rangeAnimationModifiers.put(livingMotion, animations);
+			return this;
+		}
 	}
 }

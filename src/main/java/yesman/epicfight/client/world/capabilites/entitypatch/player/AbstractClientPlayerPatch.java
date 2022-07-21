@@ -40,6 +40,7 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
+import yesman.epicfight.world.capabilities.item.RangedWeaponCapability;
 
 @OnlyIn(Dist.CLIENT)
 public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends PlayerPatch<T> {
@@ -109,9 +110,9 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 		}
 		
 		MinecraftForge.EVENT_BUS.post(new UpdatePlayerMotionEvent.BaseLayer(this, this.currentLivingMotion));
+		CapabilityItem activeItem = this.getHoldingItemCapability(this.original.getUsedItemHand());
 		
 		if (this.original.isUsingItem()) {
-			CapabilityItem activeItem = this.getHoldingItemCapability(this.original.getUsedItemHand());
 			UseAnim useAnim = this.original.getItemInHand(this.original.getUsedItemHand()).getUseAnimation();
 			UseAnim secondUseAnim = activeItem.getUseAnimation(this);
 			
@@ -136,7 +137,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			else
 				currentCompositeMotion = currentLivingMotion;
 			
-			if (this.getClientAnimator().isAiming() && currentCompositeMotion != LivingMotions.AIM && this.original.getMainHandItem().getItem() instanceof ProjectileWeaponItem) {
+			if (this.getClientAnimator().isAiming() && currentCompositeMotion != LivingMotions.AIM && activeItem instanceof RangedWeaponCapability) {
 				this.playReboundAnimation();
 			}
 		}

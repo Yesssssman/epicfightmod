@@ -1,8 +1,9 @@
 package yesman.epicfight.world.capabilities.provider;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
+
+import com.google.common.collect.Maps;
 
 import net.minecraft.core.Direction;
 import net.minecraft.world.item.ArmorItem;
@@ -28,11 +29,11 @@ import yesman.epicfight.world.capabilities.item.TagBasedSeparativeCapability;
 import yesman.epicfight.world.capabilities.item.WeaponCapabilityPresets;
 
 public class ProviderItem implements ICapabilityProvider, NonNullSupplier<CapabilityItem> {
-	private static final Map<Class<? extends Item>, Function<Item, CapabilityItem>> CAPABILITY_BY_CLASS = new HashMap<Class<? extends Item>, Function<Item, CapabilityItem>> ();
-	private static final Map<Item, CapabilityItem> CAPABILITIES = new HashMap<Item, CapabilityItem> ();
+	private static final Map<Class<? extends Item>, Function<Item, CapabilityItem.Builder>> CAPABILITY_BY_CLASS = Maps.newHashMap();
+	private static final Map<Item, CapabilityItem> CAPABILITIES = Maps.newHashMap();
 	
 	public static void registerWeaponTypesByClass() {
-		CAPABILITY_BY_CLASS.put(ArmorItem.class, ArmorCapability::new);
+		CAPABILITY_BY_CLASS.put(ArmorItem.class, ArmorCapability.builder()::item);
 		CAPABILITY_BY_CLASS.put(ShieldItem.class, WeaponCapabilityPresets.SHIELD);
 		CAPABILITY_BY_CLASS.put(SwordItem.class, WeaponCapabilityPresets.SWORD);
 		CAPABILITY_BY_CLASS.put(PickaxeItem.class, WeaponCapabilityPresets.PICKAXE);
@@ -62,7 +63,9 @@ public class ProviderItem implements ICapabilityProvider, NonNullSupplier<Capabi
 				CapabilityItem capability = null;
 				
 				for (; clazz != null && capability == null; clazz = clazz.getSuperclass()) {
-					capability = CAPABILITY_BY_CLASS.getOrDefault(clazz, (argIn) -> null).apply(item);
+					if (CAPABILITY_BY_CLASS.containsKey(clazz)) {
+						capability = CAPABILITY_BY_CLASS.get(clazz).apply(item).build();
+					}
 				}
 				
 				if (capability != null) {
@@ -77,6 +80,7 @@ public class ProviderItem implements ICapabilityProvider, NonNullSupplier<Capabi
 	
 	public ProviderItem(ItemStack itemstack) {
 		this.capability = CAPABILITIES.get(itemstack.getItem());
+		
 		if (this.capability instanceof TagBasedSeparativeCapability) {
 			this.capability = this.capability.getResult(itemstack);
 		}

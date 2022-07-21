@@ -6,9 +6,12 @@ import java.util.function.Function;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.UseAnim;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
@@ -34,18 +37,22 @@ public class WeaponCapability extends CapabilityItem {
 	protected final Map<Style, Map<LivingMotion, StaticAnimation>> livingMotionModifiers;
 	protected final boolean canBePlacedOffhand;
 	
-	public WeaponCapability(WeaponCapability.Builder builder) {
-		super(builder.category);
-		this.autoAttackMotions = builder.autoAttackMotionMap;
-		this.specialAttacks = builder.specialAttackMap;
-		this.livingMotionModifiers = builder.livingMotionModifiers;
-		this.stylegetter = builder.styleProvider;
-		this.weaponCombinationPredicator = builder.weaponCombinationPredicator;
-		this.passiveSkill = builder.passiveSkill;
-		this.smashingSound = builder.swingSound;
-		this.hitSound = builder.hitSound;
-		this.weaponCollider = builder.collider;
-		this.canBePlacedOffhand = builder.canBePlacedOffhand;
+	protected WeaponCapability(CapabilityItem.Builder builder) {
+		super(builder);
+		
+		WeaponCapability.Builder weaponBuilder = (WeaponCapability.Builder)builder;
+		
+		this.autoAttackMotions = weaponBuilder.autoAttackMotionMap;
+		this.specialAttacks = weaponBuilder.specialAttackMap;
+		this.livingMotionModifiers = weaponBuilder.livingMotionModifiers;
+		this.stylegetter = weaponBuilder.styleProvider;
+		this.weaponCombinationPredicator = weaponBuilder.weaponCombinationPredicator;
+		this.passiveSkill = weaponBuilder.passiveSkill;
+		this.smashingSound = weaponBuilder.swingSound;
+		this.hitSound = weaponBuilder.hitSound;
+		this.weaponCollider = weaponBuilder.collider;
+		this.canBePlacedOffhand = weaponBuilder.canBePlacedOffhand;
+		this.attributeMap.putAll(weaponBuilder.attributeMap);
 	}
 	
 	@Override
@@ -130,8 +137,7 @@ public class WeaponCapability extends CapabilityItem {
 		return new WeaponCapability.Builder();
 	}
 	
-	public static class Builder {
-		WeaponCategories category;
+	public static class Builder extends CapabilityItem.Builder {
 		Function<LivingEntityPatch<?>, Style> styleProvider;
 		Function<LivingEntityPatch<?>, Boolean> weaponCombinationPredicator;
 		Skill passiveSkill;
@@ -143,22 +149,23 @@ public class WeaponCapability extends CapabilityItem {
 		Map<Style, Map<LivingMotion, StaticAnimation>> livingMotionModifiers;
 		boolean canBePlacedOffhand;
 		
-		public Builder() {
-			this.category = WeaponCategories.FIST;
+		protected Builder() {
+			this.constructor = WeaponCapability::new;
 			this.styleProvider = (entitypatch) -> Styles.ONE_HAND;
 			this.weaponCombinationPredicator = (entitypatch) -> false;
 			this.passiveSkill = null;
 			this.swingSound = EpicFightSounds.WHOOSH;
 			this.hitSound = EpicFightSounds.BLUNT_HIT;
 			this.collider = ColliderPreset.FIST;
-			this.autoAttackMotionMap = Maps.<Style, List<StaticAnimation>>newHashMap();
-			this.specialAttackMap = Maps.<Style, Skill>newHashMap();
+			this.autoAttackMotionMap = Maps.newHashMap();
+			this.specialAttackMap = Maps.newHashMap();
 			this.livingMotionModifiers = null;
 			this.canBePlacedOffhand = true;
 		}
 		
+		@Override
 		public Builder category(WeaponCategories category) {
-			this.category = category;
+			super.category(category);
 			return this;
 		}
 		
@@ -196,10 +203,18 @@ public class WeaponCapability extends CapabilityItem {
 			if (this.livingMotionModifiers == null) {
 				this.livingMotionModifiers = Maps.<Style, Map<LivingMotion, StaticAnimation>>newHashMap();
 			}
+			
 			if (!this.livingMotionModifiers.containsKey(wieldStyle)) {
 				this.livingMotionModifiers.put(wieldStyle, Maps.<LivingMotion, StaticAnimation>newHashMap());
 			}
+			
 			this.livingMotionModifiers.get(wieldStyle).put(livingMotion, animation);
+			
+			return this;
+		}
+		
+		public Builder addStyleAttibutes(Style style, Pair<Attribute, AttributeModifier> attributePair) {
+			super.addStyleAttibutes(style, attributePair);
 			return this;
 		}
 		

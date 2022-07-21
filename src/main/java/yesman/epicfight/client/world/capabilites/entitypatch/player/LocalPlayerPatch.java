@@ -97,7 +97,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	
 	@Override
 	protected void playReboundAnimation() {
-		this.getClientAnimator().playReboundAnimation();
+		super.playReboundAnimation();
 		ClientEngine.instance.renderEngine.zoomOut(40);
 	}
 	
