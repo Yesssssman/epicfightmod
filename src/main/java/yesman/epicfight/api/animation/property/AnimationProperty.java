@@ -9,46 +9,52 @@ import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource.StunType;
-import yesman.epicfight.api.utils.game.HitEntitySet.Priority;
+import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
+import yesman.epicfight.api.utils.HitEntitySet.Priority;
 import yesman.epicfight.api.utils.math.ExtraDamageType;
 import yesman.epicfight.api.utils.math.ValueCorrector;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
-public abstract class Property<T> {
-	public static class StaticAnimationProperty<T> extends Property<T> {
+public abstract class AnimationProperty<T> {
+	public static class StaticAnimationProperty<T> extends AnimationProperty<T> {
 		/**
 		 * You can put the sound event in animation. Must be registered in order of time.
 		 */
 		public static final StaticAnimationProperty<StaticAnimation.Event[]> EVENTS = new StaticAnimationProperty<StaticAnimation.Event[]> ();
 	}
 	
-	public static class ActionAnimationProperty<T> extends Property<T> {
+	public static class ActionAnimationProperty<T> extends AnimationProperty<T> {
 		/**
 		 * This property will set the entity's delta movement to (0, 0, 0) on beginning of the animation if true.
 		 */
-		public static final ActionAnimationProperty<Boolean> INTERRUPT_PREVIOUS_DELTA_MOVEMENT = new ActionAnimationProperty<Boolean> ();
+		public static final ActionAnimationProperty<Boolean> STOP_MOVEMENT = new ActionAnimationProperty<Boolean> ();
+		
 		/**
 		 * This property will move entity's coord of y axis according to animation's coord if true.
 		 */
 		public static final ActionAnimationProperty<Boolean> MOVE_VERTICAL = new ActionAnimationProperty<Boolean> ();
+		
 		/**
 		 * This property determines whether to move the entity in link animation or not.
 		 */
 		public static final ActionAnimationProperty<Boolean> MOVE_ON_LINK = new ActionAnimationProperty<Boolean> ();
+		
 		/**
 		 * You can specify the coord movement time in action animation. Must be registered in order of time.
 		 */
 		public static final ActionAnimationProperty<ActionAnimation.ActionTime[]> ACTION_TIME = new ActionAnimationProperty<ActionAnimation.ActionTime[]> ();
+		
 		/**
 		 * Set the dynamic coordinates of action animation.
 		 */
 		public static final ActionAnimationProperty<ActionAnimationCoordSetter> COORD_SET_BEGIN = new ActionAnimationProperty<ActionAnimationCoordSetter> ();
+		
 		/**
 		 * Set the dynamic coordinates of action animation.
 		 */
 		public static final ActionAnimationProperty<ActionAnimationCoordSetter> COORD_SET_TICK = new ActionAnimationProperty<ActionAnimationCoordSetter> ();
+		
 		/**
 		 * This property determines if the speed effect will increase the move distance.
 		 */
@@ -60,7 +66,7 @@ public abstract class Property<T> {
 		public void set(DynamicAnimation self, LivingEntityPatch<?> entitypatch, TransformSheet transformSheet);
 	}
 	
-	public static class AttackAnimationProperty<T> extends Property<T> {
+	public static class AttackAnimationProperty<T> extends AnimationProperty<T> {
 		/**
 		 * This property determines if the player's camera is fixed during the attacking phase.
 		 */
@@ -92,7 +98,7 @@ public abstract class Property<T> {
 		public static final AttackAnimationProperty<Integer> COLLIDER_ADDER = new AttackAnimationProperty<Integer> ();
 	}
 	
-	public static class AttackPhaseProperty<T> extends Property<T> {
+	public static class AttackPhaseProperty<T> extends AnimationProperty<T> {
 		public static final AttackPhaseProperty<ValueCorrector> MAX_STRIKES = new AttackPhaseProperty<ValueCorrector> ();
 		public static final AttackPhaseProperty<ValueCorrector> DAMAGE = new AttackPhaseProperty<ValueCorrector> ();
 		public static final AttackPhaseProperty<ExtraDamageType> EXTRA_DAMAGE = new AttackPhaseProperty<ExtraDamageType> ();

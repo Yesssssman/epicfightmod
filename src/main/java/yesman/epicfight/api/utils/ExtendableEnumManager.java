@@ -1,4 +1,4 @@
-package yesman.epicfight.api.utils.game;
+package yesman.epicfight.api.utils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;

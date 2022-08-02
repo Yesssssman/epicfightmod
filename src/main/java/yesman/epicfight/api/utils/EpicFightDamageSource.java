@@ -1,4 +1,4 @@
-package yesman.epicfight.api.utils.game;
+package yesman.epicfight.api.utils;
 
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.EntityDamageSource;

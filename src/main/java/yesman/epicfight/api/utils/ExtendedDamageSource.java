@@ -1,4 +1,4 @@
-package yesman.epicfight.api.utils.game;
+package yesman.epicfight.api.utils;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.world.InteractionHand;

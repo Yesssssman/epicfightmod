@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import net.minecraft.client.Minecraft;
 import yesman.epicfight.api.animation.Pose;
-import yesman.epicfight.api.animation.property.Property;
+import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.client.animation.Layer.Priority;
 import yesman.epicfight.api.client.animation.JointMask.BindModifier;
 import yesman.epicfight.gameasset.Animations;
@@ -42,7 +42,7 @@ public class LayerOffAnimation extends DynamicAnimation {
 	}
 	
 	@Override
-	public <V> Optional<V> getProperty(Property<V> propertyType) {
+	public <V> Optional<V> getProperty(AnimationProperty<V> propertyType) {
 		return this.lastAnimation.getProperty(propertyType);
 	}
 	

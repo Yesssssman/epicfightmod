@@ -4,7 +4,7 @@ import javax.annotation.Nullable;
 
 import net.minecraft.world.InteractionHand;
 import yesman.epicfight.api.animation.Pose;
-import yesman.epicfight.api.animation.property.Property.AttackAnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.math.Vec3f;

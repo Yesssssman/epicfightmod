@@ -2,7 +2,7 @@ package yesman.epicfight.api.client.animation;
 
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.property.Property.StaticAnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientAnimationProperties {

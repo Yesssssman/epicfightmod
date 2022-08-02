@@ -12,8 +12,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource.StunType;
-import yesman.epicfight.api.utils.game.IndirectEpicFightDamageSource;
+import yesman.epicfight.api.utils.IndirectEpicFightDamageSource;
+import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
@@ -65,6 +65,7 @@ public abstract class ProjectilePatch<T extends Projectile> {
 	
 	public IndirectEpicFightDamageSource getEpicFightDamageSource(DamageSource original) {
 		IndirectEpicFightDamageSource extSource = new IndirectEpicFightDamageSource(original.msgId, original.getEntity(), original.getDirectEntity(), StunType.SHORT);
+		extSource.setProjectile();
 		extSource.setArmorNegation(this.armorNegation);
 		extSource.setImpact(this.impact);
 		extSource.setInitialPosition(this.initialFirePosition);

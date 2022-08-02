@@ -4,7 +4,7 @@ import java.util.UUID;
 
 import net.minecraft.world.damagesource.DamageSource;
 import yesman.epicfight.api.animation.types.DodgeAnimation;
-import yesman.epicfight.api.utils.game.AttackResult;
+import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.math.Formulars;
 import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;

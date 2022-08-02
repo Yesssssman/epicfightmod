@@ -3,10 +3,10 @@ package yesman.epicfight.api.animation.types;
 import javax.annotation.Nullable;
 
 import net.minecraft.world.entity.Entity;
-import yesman.epicfight.api.animation.property.Property.AttackAnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Model;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource;
+import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class DashAttackAnimation extends AttackAnimation {

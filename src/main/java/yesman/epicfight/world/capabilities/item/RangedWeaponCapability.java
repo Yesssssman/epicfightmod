@@ -12,28 +12,6 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 public class RangedWeaponCapability extends CapabilityItem {
 	protected Map<LivingMotion, StaticAnimation> rangeAnimationModifiers;
 	
-	/**
-	public RangedWeaponCapability(StaticAnimation reload, StaticAnimation aiming, StaticAnimation shot) {
-		this(reload, aiming, shot, WeaponCategories.RANGED);
-	}
-	
-	public RangedWeaponCapability(StaticAnimation reload, StaticAnimation aiming, StaticAnimation shot, WeaponCategories weaponCategory) {
-		super(weaponCategory);
-		this.rangeAnimationSet = new HashMap<LivingMotion, StaticAnimation> ();
-		
-		if (reload != null) {
-			this.rangeAnimationSet.put(LivingMotions.RELOAD, reload);
-		}
-		
-		if (aiming != null) {
-			this.rangeAnimationSet.put(LivingMotions.AIM, aiming);
-		}
-		
-		if (shot != null) {
-			this.rangeAnimationSet.put(LivingMotions.SHOT, shot);
-		}
-	}**/
-	
 	protected RangedWeaponCapability(CapabilityItem.Builder builder) {
 		super(builder);
 		

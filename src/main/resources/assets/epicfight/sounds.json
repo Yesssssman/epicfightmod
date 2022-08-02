@@ -118,11 +118,18 @@
         "sounds":[{"name":"epicfight:sfx/laser_blast", "stream":true, "attenuation_distance":100}]
     },
     
-    "sfx.neutralize":
+    "sfx.neutralize_mobs":
     {
         "category":"master",
-        "subtitle":"sfx.neutralize",
-        "sounds":[{"name":"epicfight:sfx/neutralize", "stream":true, "attenuation_distance":100}]
+        "subtitle":"sfx.neutralize_mobs",
+        "sounds":[{"name":"epicfight:sfx/neutralize_mobs", "stream":true, "attenuation_distance":100}]
+    },
+    
+    "sfx.neutralize_bosses":
+    {
+        "category":"master",
+        "subtitle":"sfx.neutralize_bosses",
+        "sounds":[{"name":"epicfight:sfx/neutralize_bosses", "stream":true, "attenuation_distance":100}]
     },
     
     "sfx.nether_star_glitter":

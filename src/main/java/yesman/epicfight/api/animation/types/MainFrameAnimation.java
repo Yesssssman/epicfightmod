@@ -42,11 +42,6 @@ public class MainFrameAnimation extends StaticAnimation {
 	}
 	
 	@Override
-	public EntityState getState(float time) {
-		return EntityState.PRE_DELAY;
-	}
-	
-	@Override
 	@OnlyIn(Dist.CLIENT)
 	public Layer.Priority getPriority() {
 		return this.getProperty(ClientAnimationProperties.PRIORITY).orElse(Layer.Priority.HIGHEST);

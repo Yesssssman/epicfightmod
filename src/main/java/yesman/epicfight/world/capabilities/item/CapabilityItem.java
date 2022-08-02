@@ -53,9 +53,9 @@ public class CapabilityItem {
 	
 	static {
 		commonAutoAttackMotion = new ArrayList<StaticAnimation> ();
-		commonAutoAttackMotion.add(Animations.FIST_AUTO_1);
-		commonAutoAttackMotion.add(Animations.FIST_AUTO_2);
-		commonAutoAttackMotion.add(Animations.FIST_AUTO_3);
+		commonAutoAttackMotion.add(Animations.FIST_AUTO1);
+		commonAutoAttackMotion.add(Animations.FIST_AUTO2);
+		commonAutoAttackMotion.add(Animations.FIST_AUTO3);
 		commonAutoAttackMotion.add(Animations.FIST_DASH);
 		commonAutoAttackMotion.add(Animations.FIST_AIR_SLASH);
 	}

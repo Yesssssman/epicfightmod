@@ -39,9 +39,9 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Model;
-import yesman.epicfight.api.utils.game.AttackResult;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource.StunType;
+import yesman.epicfight.api.utils.AttackResult;
+import yesman.epicfight.api.utils.ExtendedDamageSource;
+import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Models;
@@ -60,7 +60,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	public static final EntityDataAccessor<Float> MAX_STUN_SHIELD = new EntityDataAccessor<Float> (252, EntityDataSerializers.FLOAT);
 	
 	private float stunTimeReduction;
-	protected EntityState state = EntityState.FREE;
+	protected EntityState state = EntityState.DEFAULT;
 	protected Animator animator;
 	public LivingMotion currentLivingMotion = LivingMotions.IDLE;
 	public LivingMotion currentCompositeMotion = LivingMotions.IDLE;
@@ -157,7 +157,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		return ExtendedDamageSource.causeMobDamage(this.original, stunType, animation);
 	}
 	
-	public float calculateDamageTo(@Nullable Entity targetEntity, @Nullable ExtendedDamageSource source, InteractionHand hand) {
+	public float getDamageTo(@Nullable Entity targetEntity, @Nullable ExtendedDamageSource source, InteractionHand hand) {
 		float damage = 0;
 		
 		if (hand == InteractionHand.MAIN_HAND) {
@@ -180,8 +180,8 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	}
 	
 	public AttackResult tryHarm(Entity target, ExtendedDamageSource damagesource, float amount) {
-		LivingEntityPatch<?> livingpatch = (LivingEntityPatch<?>)target.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
-		AttackResult result = (livingpatch != null) ? livingpatch.tryHurt((DamageSource)damagesource, amount) : new AttackResult(AttackResult.ResultType.SUCCESS, amount);
+		LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>)target.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+		AttackResult result = (entitypatch != null) ? entitypatch.tryHurt((DamageSource)damagesource, amount) : new AttackResult(AttackResult.ResultType.SUCCESS, amount);
 		return result;
 	}
 	
@@ -192,6 +192,8 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		int j = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.FIRE_ASPECT, this.getValidItemInHand(handIn));
 		
 		if (target instanceof LivingEntity) {
+			this.getOriginal().doEnchantDamageEffects(this.getOriginal(), target);
+			
 			if (j > 0 && !target.isOnFire()) {
 				target.setSecondsOnFire(j * 4);
 			}

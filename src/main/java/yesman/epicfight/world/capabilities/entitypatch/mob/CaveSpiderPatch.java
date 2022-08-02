@@ -7,7 +7,7 @@ import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PathfinderMob;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource;
+import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;

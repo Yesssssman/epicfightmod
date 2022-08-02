@@ -1,8 +1,8 @@
 package yesman.epicfight.world.entity.eventlistener;
 
 import net.minecraft.world.damagesource.DamageSource;
-import yesman.epicfight.api.utils.game.AttackResult;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource;
+import yesman.epicfight.api.utils.AttackResult;
+import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 public abstract class HurtEvent<T> extends PlayerEvent<ServerPlayerPatch> {

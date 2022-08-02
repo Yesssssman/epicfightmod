@@ -4,43 +4,45 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.utils.game.AttackResult;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource;
+import yesman.epicfight.api.utils.AttackResult;
+import yesman.epicfight.api.utils.ExtendedDamageSource;
+import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.Skills;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 
 public class EnergizingGuardSkill extends GuardSkill {
-	private static final List<WeaponCategories> AVAILABLE_WEAPON_TYPES = Lists.<WeaponCategories>newLinkedList();
-	
-	static {
-		AVAILABLE_WEAPON_TYPES.add(WeaponCategories.GREATSWORD);
-		AVAILABLE_WEAPON_TYPES.add(WeaponCategories.LONGSWORD);
-		AVAILABLE_WEAPON_TYPES.add(WeaponCategories.SPEAR);
-		AVAILABLE_WEAPON_TYPES.add(WeaponCategories.TACHI);
+	public static GuardSkill.Builder createBuilder(ResourceLocation resourceLocation) {
+		return GuardSkill.createBuilder(resourceLocation)
+				.addAdvancedGuardMotion(WeaponCategories.SWORD, (itemCap, playerpatch) -> Animations.GREATSWORD_GUARD_HIT)
+				.addAdvancedGuardMotion(WeaponCategories.LONGSWORD, (item, player) -> Animations.LONGSWORD_GUARD_HIT)
+				.addAdvancedGuardMotion(WeaponCategories.SPEAR, (item, player) -> item.getStyle(player) == Styles.TWO_HAND ? Animations.SPEAR_GUARD_HIT : null)
+				.addAdvancedGuardMotion(WeaponCategories.TACHI, (item, player) -> Animations.LONGSWORD_GUARD_HIT);
 	}
 	
-	public EnergizingGuardSkill(Builder<? extends Skill> builder) {
+	public EnergizingGuardSkill(GuardSkill.Builder builder) {
 		super(builder);
 	}
 	
 	@Override
-	public void guard(SkillContainer container, CapabilityItem itemCapapbility, HurtEvent.Pre event, float knockback, float impact, boolean reinforced) {
-		boolean reinforce = AVAILABLE_WEAPON_TYPES.contains(itemCapapbility.getWeaponCategory());
+	public void guard(SkillContainer container, CapabilityItem itemCapapbility, HurtEvent.Pre event, float knockback, float impact, boolean advanced) {
+		boolean canUse = this.isHoldingWeaponAvailable(event.getPlayerPatch(), itemCapapbility, BlockType.ADVANCED_GUARD);
 		
 		if (event.getDamageSource().isExplosion()) {
 			impact = event.getAmount();
 		}
 		
-		super.guard(container, itemCapapbility, event, knockback, impact, reinforce);
+		super.guard(container, itemCapapbility, event, knockback, impact, canUse);
 	}
 	
 	@Override
@@ -63,13 +65,13 @@ public class EnergizingGuardSkill extends GuardSkill {
 	}
 	
 	@Override
-	protected boolean isBlockableSource(DamageSource damageSource, boolean specialSourceBlockCondition) {
-		return (!damageSource.isBypassArmor() || damageSource.msgId.equals("indirectMagic")) && (specialSourceBlockCondition || super.isBlockableSource(damageSource, false)) && !damageSource.isBypassInvul();
+	protected boolean isBlockableSource(DamageSource damageSource, boolean advanced) {
+		return (!damageSource.isBypassArmor() || damageSource.msgId.equals("indirectMagic")) && (advanced || super.isBlockableSource(damageSource, false)) && !damageSource.isBypassInvul();
 	}
 	
 	@Override
-	public float getPenaltyStamina(CapabilityItem itemCap) {
-		return AVAILABLE_WEAPON_TYPES.contains(itemCap.getWeaponCategory()) ? 0.2F : 0.6F;
+	public float getPenaltyMultiplier(CapabilityItem itemCap) {
+		return this.advancedGuardMotions.containsKey(itemCap.getWeaponCategory()) ? 0.2F : 0.6F;
 	}
 	
 	private static boolean isSpecialDamageSource(DamageSource damageSource) {

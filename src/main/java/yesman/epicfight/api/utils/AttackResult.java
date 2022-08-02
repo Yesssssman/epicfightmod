@@ -1,4 +1,4 @@
-package yesman.epicfight.api.utils.game;
+package yesman.epicfight.api.utils;
 
 public class AttackResult {
 	public final ResultType resultType;

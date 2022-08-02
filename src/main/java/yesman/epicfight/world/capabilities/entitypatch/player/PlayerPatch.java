@@ -18,8 +18,8 @@ import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource.StunType;
+import yesman.epicfight.api.utils.ExtendedDamageSource;
+import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.math.Formulars;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.Models;
@@ -174,8 +174,8 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	@Override
-	public float calculateDamageTo(@Nullable Entity targetEntity, @Nullable ExtendedDamageSource source, InteractionHand hand) {
-		return this.getDamageToEntity(targetEntity, source, super.calculateDamageTo(targetEntity, source, hand));
+	public float getDamageTo(@Nullable Entity targetEntity, @Nullable ExtendedDamageSource source, InteractionHand hand) {
+		return this.getDamageToEntity(targetEntity, source, super.getDamageTo(targetEntity, source, hand));
 	}
 	
 	public float getDamageToEntity(@Nullable Entity targetEntity, @Nullable ExtendedDamageSource source, float baseDamage) {

@@ -17,7 +17,7 @@ public abstract class HitParticle extends TextureSheetParticle {
 	    this.gCol = 1.0F;
 	    this.bCol = 1.0F;
 		this.animatedSprite = animatedSprite;
-		this.pickSprite(animatedSprite);
+		this.setSpriteFromAge(animatedSprite);
 	}
 	
 	@Override
@@ -29,7 +29,7 @@ public abstract class HitParticle extends TextureSheetParticle {
 		if (this.age++ >= this.lifetime) {
 			this.remove();
 		} else {
-			this.pickSprite(this.animatedSprite);
+			this.setSpriteFromAge(this.animatedSprite);
 		}
 	}
 	

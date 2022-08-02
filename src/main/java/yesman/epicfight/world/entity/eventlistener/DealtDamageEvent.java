@@ -1,7 +1,7 @@
 package yesman.epicfight.world.entity.eventlistener;
 
 import net.minecraft.world.entity.LivingEntity;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource;
+import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class DealtDamageEvent<T extends PlayerPatch<?>> extends PlayerEvent<T> {

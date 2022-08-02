@@ -96,7 +96,6 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 		
 		if (tag.contains("attributes")) {
 			CompoundTag attributes = tag.getCompound("attributes");
-			
 			builder.weight(attributes.getDouble("weight")).stunArmor(attributes.getDouble("stun_armor"));
 		}
 		

@@ -13,8 +13,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.phys.Vec3;
-import yesman.epicfight.api.utils.game.AttackResult;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource;
+import yesman.epicfight.api.utils.AttackResult;
+import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSounds;
@@ -65,7 +65,7 @@ public class LiechtenauerSkill extends SpecialAttackSkill {
 					event.getPlayerPatch().playAnimationSynchronized(Animations.LONGSWORD_GUARD_HIT, 0);
 					event.getPlayerPatch().playSound(EpicFightSounds.CLASH, -0.05F, 0.1F);
 					Entity playerentity = event.getPlayerPatch().getOriginal();
-					EpicFightParticles.HIT_BLUNT.get().spawnParticleWithArgument(((ServerLevel)playerentity.level), HitParticleType.POSITION_FRONT_OF_EYE_POSITION, HitParticleType.ARGUMENT_ZERO, playerentity, damageSource.getDirectEntity());
+					EpicFightParticles.HIT_BLUNT.get().spawnParticleWithArgument(((ServerLevel)playerentity.level), HitParticleType.FRONT_OF_EYES, HitParticleType.ZERO, playerentity, damageSource.getDirectEntity());
 					
 					float knockback = 0.25F;
 					

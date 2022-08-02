@@ -9,16 +9,18 @@ import com.google.common.collect.Maps;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.utils.game.AttackResult;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource;
+import yesman.epicfight.api.utils.AttackResult;
+import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPAddSkill;
 import yesman.epicfight.network.server.SPChangeLivingMotion;
@@ -198,6 +200,15 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 		if (synchronize) {
 			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(new SPChangePlayerMode(this.original.getId(), PlayerMode.BATTLE), this.original);
 		}
+	}
+	
+	@Override
+	public boolean isTeammate(Entity entityIn) {
+		if (entityIn instanceof Player && !this.getOriginal().server.isPvpAllowed()) {
+			return true;
+		}
+		
+		return super.isTeammate(entityIn);
 	}
 	
 	public void setAttackTarget(LivingEntity entity) {

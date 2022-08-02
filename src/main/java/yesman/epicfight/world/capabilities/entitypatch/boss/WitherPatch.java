@@ -32,15 +32,15 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.LivingMotions;
-import yesman.epicfight.api.animation.property.Property.ActionAnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
-import yesman.epicfight.api.utils.game.AttackResult;
-import yesman.epicfight.api.utils.game.AttackResult.ResultType;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource.StunType;
+import yesman.epicfight.api.utils.AttackResult;
+import yesman.epicfight.api.utils.ExtendedDamageSource;
+import yesman.epicfight.api.utils.AttackResult.ResultType;
+import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Animations;
@@ -199,7 +199,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 		if (this.blockedNow) {
 			if (this.blockingCount < 0) {
 				this.playAnimationSynchronized(Animations.WITHER_NEUTRALIZED, 0.0F);
-				this.original.playSound(EpicFightSounds.NEUTRALIZE, 5.0F, 1.0F);
+				this.original.playSound(EpicFightSounds.NEUTRALIZE_BOSSES, 5.0F, 1.0F);
 				this.blockedNow = false;
 				this.blockingEntity = null;
 			} else {

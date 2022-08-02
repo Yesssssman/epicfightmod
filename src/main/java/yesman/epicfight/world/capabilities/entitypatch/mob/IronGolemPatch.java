@@ -16,8 +16,8 @@ import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource.StunType;
+import yesman.epicfight.api.utils.ExtendedDamageSource;
+import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
@@ -100,8 +100,8 @@ public class IronGolemPatch extends MobPatch<IronGolem> {
 	}
 	
 	@Override
-	public float calculateDamageTo(Entity targetEntity, ExtendedDamageSource source, InteractionHand hand) {
-		float damage = super.calculateDamageTo(targetEntity, source, hand);
+	public float getDamageTo(Entity targetEntity, ExtendedDamageSource source, InteractionHand hand) {
+		float damage = super.getDamageTo(targetEntity, source, hand);
 		return (int)damage > 0 ? damage / 2.0F + (float)this.original.getRandom().nextInt((int)damage) : damage;
 	}
 

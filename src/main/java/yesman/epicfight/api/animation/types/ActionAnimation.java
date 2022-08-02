@@ -19,8 +19,8 @@ import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
-import yesman.epicfight.api.animation.property.Property.ActionAnimationCoordSetter;
-import yesman.epicfight.api.animation.property.Property.ActionAnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationCoordSetter;
+import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -29,7 +29,7 @@ import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class ActionAnimation extends MainFrameAnimation {
-	protected float delayTime;
+	//protected float delayTime;
 	
 	public ActionAnimation(float convertTime, String path, Model model) {
 		this(convertTime, Float.MAX_VALUE, path, model);
@@ -37,7 +37,15 @@ public class ActionAnimation extends MainFrameAnimation {
 	
 	public ActionAnimation(float convertTime, float postDelay, String path, Model model) {
 		super(convertTime, path, model);
-		this.delayTime = postDelay;
+		
+		this.stateSpectrumBlueprint.clear()
+			.newTimePair(0.0F, postDelay)
+			.addState(EntityState.TURNING_LOCKED, true)
+			.addState(EntityState.MOVEMENT_LOCKED, true)
+			.addState(EntityState.CAN_BASIC_ATTACK, false)
+			.addState(EntityState.CAN_SKILL_EXECUTION, false)
+			.newTimePair(0.0F, Float.MAX_VALUE)
+			.addState(EntityState.INACTION, true);
 	}
 	
 	public <V> ActionAnimation addProperty(ActionAnimationProperty<V> propertyType, V value) {
@@ -50,7 +58,7 @@ public class ActionAnimation extends MainFrameAnimation {
 		super.begin(entitypatch);
 		entitypatch.cancelUsingItem();
 		
-		if (this.getProperty(ActionAnimationProperty.INTERRUPT_PREVIOUS_DELTA_MOVEMENT).orElse(false)) {
+		if (this.getProperty(ActionAnimationProperty.STOP_MOVEMENT).orElse(false)) {
 			entitypatch.getOriginal().setDeltaMovement(0.0D, entitypatch.getOriginal().getDeltaMovement().y, 0.0D);
 		}
 		
@@ -122,14 +130,14 @@ public class ActionAnimation extends MainFrameAnimation {
 			if (!this.getProperty(ActionAnimationProperty.MOVE_ON_LINK).orElse(true)) {
 				return false;
 			} else {
-				return this.checkMovementTime(0.0F);
+				return this.shouldMove(0.0F);
 			}
 		} else {
-			return this.checkMovementTime(entitypatch.getAnimator().getPlayerFor(animation).getElapsedTime());
+			return this.shouldMove(entitypatch.getAnimator().getPlayerFor(animation).getElapsedTime());
 		}
 	}
 	
-	private boolean checkMovementTime(float currentTime) {
+	private boolean shouldMove(float currentTime) {
 		if (this.properties.containsKey(ActionAnimationProperty.ACTION_TIME)) {
 			ActionTime[] actionTimes = this.getProperty(ActionAnimationProperty.ACTION_TIME).get();
 			for (ActionTime actionTime : actionTimes) {
@@ -142,15 +150,6 @@ public class ActionAnimation extends MainFrameAnimation {
 			return false;
 		} else {
 			return true;
-		}
-	}
-	
-	@Override
-	public EntityState getState(float time) {
-		if (time <= this.delayTime) {
-			return EntityState.PRE_DELAY;
-		} else {
-			return EntityState.CANCELABLE_RECOVERY;
 		}
 	}
 	

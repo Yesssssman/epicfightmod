@@ -1,6 +1,6 @@
 package yesman.epicfight.api.animation;
 
-import yesman.epicfight.api.animation.property.Property.ActionAnimationCoordSetter;
+import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationCoordSetter;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.config.ConfigurationIngame;
 import yesman.epicfight.gameasset.Animations;

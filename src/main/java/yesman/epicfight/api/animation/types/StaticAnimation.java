@@ -15,8 +15,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.AnimationPlayer;
-import yesman.epicfight.api.animation.property.Property;
-import yesman.epicfight.api.animation.property.Property.StaticAnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.client.animation.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.JointMask;
 import yesman.epicfight.api.client.animation.JointMask.BindModifier;
@@ -29,11 +29,14 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class StaticAnimation extends DynamicAnimation {
-	protected final Map<Property<?>, Object> properties = Maps.<Property<?>, Object>newHashMap();
-	protected final Model model;
+	protected final Map<AnimationProperty<?>, Object> properties = Maps.newHashMap();
+	protected final StateSpectrum.Blueprint stateSpectrumBlueprint = new StateSpectrum.Blueprint();
 	protected final ResourceLocation resourceLocation;
+	protected final Model model;
 	protected final int namespaceId;
 	protected final int animationId;
+	
+	private final StateSpectrum stateSpectrum = new StateSpectrum();
 	
 	public StaticAnimation() {
 		super(0.0F, false);
@@ -49,9 +52,11 @@ public class StaticAnimation extends DynamicAnimation {
 	
 	public StaticAnimation(float convertTime, boolean isRepeat, String path, Model model) {
 		super(convertTime, isRepeat);
+		
 		AnimationManager animationManager = EpicFightMod.getInstance().animationManager;
 		this.namespaceId = animationManager.getNamespaceHash();
 		this.animationId = animationManager.getIdCounter();
+		
 		animationManager.getIdMap().put(this.animationId, this);
 		this.resourceLocation = new ResourceLocation(animationManager.getModid(), "animmodels/animations/" + path);
 		animationManager.getNameMap().put(new ResourceLocation(animationManager.getModid(), path), this);
@@ -85,6 +90,12 @@ public class StaticAnimation extends DynamicAnimation {
 		} catch (NumberFormatException e) {
 			load(resourceManager, this);
 		}
+		
+		this.readStates();
+	}
+	
+	protected void readStates() {
+		this.stateSpectrum.readFrom(this.stateSpectrumBlueprint);
 	}
 	
 	@Override
@@ -129,6 +140,11 @@ public class StaticAnimation extends DynamicAnimation {
 				}
 			}
 		});
+	}
+	
+	@Override
+	public final EntityState getState(float time) {
+		return this.stateSpectrum.bindStates(time);
 	}
 	
 	@Override
@@ -191,9 +207,13 @@ public class StaticAnimation extends DynamicAnimation {
 		return this;
 	}
 	
+	public StateSpectrum.Blueprint getStateSpectrumBP() {
+		return this.stateSpectrumBlueprint;
+	}
+	
 	@SuppressWarnings("unchecked")
 	@Override
-	public <V> Optional<V> getProperty(Property<V> propertyType) {
+	public <V> Optional<V> getProperty(AnimationProperty<V> propertyType) {
 		return (Optional<V>) Optional.ofNullable(this.properties.get(propertyType));
 	}
 	

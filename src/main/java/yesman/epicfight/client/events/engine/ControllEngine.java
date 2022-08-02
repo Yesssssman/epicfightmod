@@ -118,7 +118,7 @@ public class ControllEngine {
 					}
 				}
 			} else {
-				SkillCategory skillCategory = (this.playerpatch.getEntityState() == EntityState.KNOCKDOWN) ? SkillCategories.KNOCKDOWN_WAKEUP : SkillCategories.DODGE;
+				SkillCategory skillCategory = (this.playerpatch.getEntityState().knockDown()) ? SkillCategories.KNOCKDOWN_WAKEUP : SkillCategories.DODGE;
 				SkillContainer skill = this.playerpatch.getSkill(skillCategory);
 				
 				if (skill.canExecute(this.playerpatch) && skill.getSkill().isExecutableState(this.playerpatch)) {
@@ -207,7 +207,7 @@ public class ControllEngine {
 		
 		if (this.sneakPressToggle) {
 			if (!this.isKeyDown(this.options.keyShift)) {
-				SkillCategory skillCategory = (this.playerpatch.getEntityState() == EntityState.KNOCKDOWN) ? SkillCategories.KNOCKDOWN_WAKEUP : SkillCategories.DODGE;
+				SkillCategory skillCategory = (this.playerpatch.getEntityState().knockDown()) ? SkillCategories.KNOCKDOWN_WAKEUP : SkillCategories.DODGE;
 				SkillContainer skill = this.playerpatch.getSkill(skillCategory);
 				
 				if (!skill.sendExecuteRequest(this.playerpatch)) {

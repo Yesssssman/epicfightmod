@@ -52,7 +52,7 @@ public class WeaponCapabilityPresets {
 		WeaponCapability.Builder builder = WeaponCapability.builder()
 			.category(WeaponCategories.HOE)
 			.hitSound(EpicFightSounds.BLADE_HIT)
-			.collider(ColliderPreset.TOOLS).newStyleCombo(Styles.ONE_HAND, Animations.TOOL_AUTO_1, Animations.TOOL_AUTO_2, Animations.TOOL_DASH, Animations.SWORD_AIR_SLASH)
+			.collider(ColliderPreset.TOOLS).newStyleCombo(Styles.ONE_HAND, Animations.TOOL_AUTO1, Animations.TOOL_AUTO2, Animations.TOOL_DASH, Animations.SWORD_AIR_SLASH)
 			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK);
 		
 		if (item instanceof TieredItem) {
@@ -102,7 +102,7 @@ public class WeaponCapabilityPresets {
 			.styleProvider((playerpatch) -> playerpatch.getHoldingItemCapability(InteractionHand.OFF_HAND).getWeaponCategory() == WeaponCategories.SWORD ? Styles.TWO_HAND : Styles.ONE_HAND)
 			.collider(ColliderPreset.SWORD)
 			.hitSound(EpicFightSounds.BLADE_HIT)
-			.newStyleCombo(Styles.ONE_HAND, Animations.SWORD_AUTO_1, Animations.SWORD_AUTO_2, Animations.SWORD_AUTO_3, Animations.SWORD_DASH, Animations.SWORD_AIR_SLASH)
+			.newStyleCombo(Styles.ONE_HAND, Animations.SWORD_AUTO1, Animations.SWORD_AUTO2, Animations.SWORD_AUTO3, Animations.SWORD_DASH, Animations.SWORD_AIR_SLASH)
 			.newStyleCombo(Styles.TWO_HAND, Animations.SWORD_DUAL_AUTO1, Animations.SWORD_DUAL_AUTO2, Animations.SWORD_DUAL_AUTO3, Animations.SWORD_DUAL_DASH, Animations.SWORD_DUAL_AIR_SLASH)
 			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
 			.specialAttack(Styles.ONE_HAND, Skills.SWEEPING_EDGE)
@@ -127,7 +127,7 @@ public class WeaponCapabilityPresets {
 			.hitSound(EpicFightSounds.BLADE_HIT)
 			.canBePlacedOffhand(false)
 			.newStyleCombo(Styles.ONE_HAND, Animations.SPEAR_ONEHAND_AUTO, Animations.SPEAR_DASH, Animations.SPEAR_ONEHAND_AIR_SLASH)
-			.newStyleCombo(Styles.TWO_HAND, Animations.SPEAR_TWOHAND_AUTO_1, Animations.SPEAR_TWOHAND_AUTO_2, Animations.SPEAR_DASH, Animations.SPEAR_TWOHAND_AIR_SLASH)
+			.newStyleCombo(Styles.TWO_HAND, Animations.SPEAR_TWOHAND_AUTO1, Animations.SPEAR_TWOHAND_AUTO2, Animations.SPEAR_DASH, Animations.SPEAR_TWOHAND_AIR_SLASH)
 			.newStyleCombo(Styles.MOUNT, Animations.SPEAR_MOUNT_ATTACK)
 			.specialAttack(Styles.ONE_HAND, Skills.HEARTPIERCER)
 			.specialAttack(Styles.TWO_HAND, Skills.SLAUGHTER_STANCE)
@@ -182,7 +182,7 @@ public class WeaponCapabilityPresets {
 			.collider(ColliderPreset.KATANA)
 			.canBePlacedOffhand(false)
 			.newStyleCombo(Styles.SHEATH, Animations.KATANA_SHEATHING_AUTO, Animations.KATANA_SHEATHING_DASH, Animations.KATANA_SHEATH_AIR_SLASH)
-			.newStyleCombo(Styles.TWO_HAND, Animations.KATANA_AUTO_1, Animations.KATANA_AUTO_2, Animations.KATANA_AUTO_3, Animations.SWORD_DASH, Animations.KATANA_AIR_SLASH)
+			.newStyleCombo(Styles.TWO_HAND, Animations.KATANA_AUTO1, Animations.KATANA_AUTO2, Animations.KATANA_AUTO3, Animations.SWORD_DASH, Animations.KATANA_AIR_SLASH)
 			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
 			.specialAttack(Styles.SHEATH, Skills.FATAL_DRAW)
 			.specialAttack(Styles.TWO_HAND, Skills.FATAL_DRAW)
@@ -281,8 +281,8 @@ public class WeaponCapabilityPresets {
 			.hitSound(EpicFightSounds.BLADE_HIT)
 			.collider(ColliderPreset.DAGGER)
 			.weaponCombinationPredicator((entitypatch) -> EpicFightCapabilities.getItemStackCapability(entitypatch.getOriginal().getOffhandItem()).weaponCategory == WeaponCategories.DAGGER)
-			.newStyleCombo(Styles.ONE_HAND, Animations.DAGGER_AUTO_1, Animations.DAGGER_AUTO_2, Animations.DAGGER_AUTO_3, Animations.SWORD_DASH, Animations.DAGGER_AIR_SLASH)
-			.newStyleCombo(Styles.TWO_HAND, Animations.DAGGER_DUAL_AUTO_1, Animations.DAGGER_DUAL_AUTO_2, Animations.DAGGER_DUAL_AUTO_3, Animations.DAGGER_DUAL_AUTO_4, Animations.DAGGER_DUAL_DASH, Animations.DAGGER_DUAL_AIR_SLASH)
+			.newStyleCombo(Styles.ONE_HAND, Animations.DAGGER_AUTO1, Animations.DAGGER_AUTO2, Animations.DAGGER_AUTO3, Animations.SWORD_DASH, Animations.DAGGER_AIR_SLASH)
+			.newStyleCombo(Styles.TWO_HAND, Animations.DAGGER_DUAL_AUTO1, Animations.DAGGER_DUAL_AUTO2, Animations.DAGGER_DUAL_AUTO3, Animations.DAGGER_DUAL_AUTO4, Animations.DAGGER_DUAL_DASH, Animations.DAGGER_DUAL_AIR_SLASH)
 			.newStyleCombo(Styles.MOUNT, Animations.SWORD_MOUNT_ATTACK)
 			.specialAttack(Styles.ONE_HAND, Skills.EVISCERATE)
 			.specialAttack(Styles.TWO_HAND, Skills.BLADE_RUSH);
@@ -290,7 +290,7 @@ public class WeaponCapabilityPresets {
 		return builder;
 	};
 	public static final Function<Item, CapabilityItem.Builder> FIST = (item) -> WeaponCapability.builder()
-			.newStyleCombo(Styles.ONE_HAND, Animations.FIST_AUTO_1, Animations.FIST_AUTO_2, Animations.FIST_AUTO_3, Animations.FIST_DASH, Animations.FIST_AIR_SLASH)
+			.newStyleCombo(Styles.ONE_HAND, Animations.FIST_AUTO1, Animations.FIST_AUTO2, Animations.FIST_AUTO3, Animations.FIST_DASH, Animations.FIST_AIR_SLASH)
 			.specialAttack(Styles.ONE_HAND, Skills.RELENTLESS_COMBO)
 			.category(WeaponCategories.FIST)
 			.constructor(KnuckleCapability::new);

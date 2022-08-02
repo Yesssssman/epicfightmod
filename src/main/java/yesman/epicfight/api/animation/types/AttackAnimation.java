@@ -30,16 +30,16 @@ import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
-import yesman.epicfight.api.animation.property.Property.ActionAnimationProperty;
-import yesman.epicfight.api.animation.property.Property.AttackAnimationProperty;
-import yesman.epicfight.api.animation.property.Property.AttackPhaseProperty;
-import yesman.epicfight.api.animation.types.EntityState.Translation;
+import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationCoordSetter;
+import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProperty;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Model;
-import yesman.epicfight.api.utils.game.AttackResult;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource.StunType;
-import yesman.epicfight.api.utils.game.HitEntitySet;
+import yesman.epicfight.api.utils.AttackResult;
+import yesman.epicfight.api.utils.ExtendedDamageSource;
+import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
+import yesman.epicfight.api.utils.HitEntitySet;
 import yesman.epicfight.api.utils.math.ExtraDamageType;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -56,6 +56,32 @@ import yesman.epicfight.world.entity.eventlistener.DealtDamageEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 public class AttackAnimation extends ActionAnimation {
+	protected static final ActionAnimationCoordSetter COMMON_COORD_SETTER = (self, entitypatch, transformSheet) -> {
+		LivingEntity attackTarget = entitypatch.getTarget();
+		
+		if (!self.getRealAnimation().getProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE).orElse(false) && attackTarget != null) {
+			TransformSheet transform = self.getTransfroms().get("Root").copyAll();
+			Keyframe[] keyframes = transform.getKeyframes();
+			int startFrame = 0;
+			int endFrame = transform.getKeyframes().length - 1;
+			Vec3f keyLast = keyframes[endFrame].transform().translation();
+			Vec3 pos = entitypatch.getOriginal().getEyePosition();
+			Vec3 targetpos = attackTarget.position();
+			float horizontalDistance = Math.max((float)targetpos.subtract(pos).horizontalDistance() - (attackTarget.getBbWidth() + entitypatch.getOriginal().getBbWidth()) * 0.75F, 0.0F);
+			Vec3f worldPosition = new Vec3f(keyLast.x, 0.0F, -horizontalDistance);
+			float scale = Math.min(worldPosition.length() / keyLast.length(), 2.0F);
+			
+			for (int i = startFrame; i <= endFrame; i++) {
+				Vec3f translation = keyframes[i].transform().translation();
+				translation.z *= scale;
+			}
+			
+			transformSheet.readFrom(transform);
+		} else {
+			transformSheet.readFrom(self.getTransfroms().get("Root"));
+		}
+	};
+	
 	public final Phase[] phases;
 	
 	public AttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, @Nullable Collider collider, String index, String path, Model model) {
@@ -69,60 +95,32 @@ public class AttackAnimation extends ActionAnimation {
 	public AttackAnimation(float convertTime, String path, Model model, Phase... phases) {
 		super(convertTime, path, model);
 		
-		this.addProperty(ActionAnimationProperty.COORD_SET_BEGIN, (self, entitypatch, transformSheet) -> {
-			LivingEntity attackTarget = entitypatch.getTarget();
-			
-			if (!self.getRealAnimation().getProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE).orElse(false) && attackTarget != null) {
-				TransformSheet transform = self.getTransfroms().get("Root").copyAll();
-				Keyframe[] keyframes = transform.getKeyframes();
-				int startFrame = 0;
-				int endFrame = transform.getKeyframes().length - 1;
-				Vec3f keyLast = keyframes[endFrame].transform().translation();
-				Vec3 pos = entitypatch.getOriginal().getEyePosition();
-				Vec3 targetpos = attackTarget.position();
-				float horizontalDistance = Math.max((float)targetpos.subtract(pos).horizontalDistance() - (attackTarget.getBbWidth() + entitypatch.getOriginal().getBbWidth()) * 0.75F, 0.0F);
-				Vec3f worldPosition = new Vec3f(keyLast.x, 0.0F, -horizontalDistance);
-				float scale = Math.min(worldPosition.length() / keyLast.length(), 2.0F);
-				
-				for (int i = startFrame; i <= endFrame; i++) {
-					Vec3f translation = keyframes[i].transform().translation();
-					translation.z *= scale;
-				}
-				
-				transformSheet.readFrom(transform);
-			} else {
-				transformSheet.readFrom(self.getTransfroms().get("Root"));
-			}
-		});
-		
-		this.addProperty(ActionAnimationProperty.COORD_SET_TICK, (self, entitypatch, transformSheet) -> {
-			LivingEntity attackTarget = entitypatch.getTarget();
-			
-			if (!self.getRealAnimation().getProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE).orElse(false) && attackTarget != null) {
-				TransformSheet transform = self.getTransfroms().get("Root").copyAll();
-				Keyframe[] keyframes = transform.getKeyframes();
-				int startFrame = 0;
-				int endFrame = transform.getKeyframes().length - 1;
-				Vec3f keyLast = keyframes[endFrame].transform().translation();
-				Vec3 pos = entitypatch.getOriginal().getEyePosition();
-				Vec3 targetpos = attackTarget.position();
-				float horizontalDistance = Math.max((float)targetpos.subtract(pos).horizontalDistance() - (attackTarget.getBbWidth() + entitypatch.getOriginal().getBbWidth()) * 0.75F, 0.0F);
-				Vec3f worldPosition = new Vec3f(keyLast.x, 0.0F, -horizontalDistance);
-				float scale = Math.min(worldPosition.length() / keyLast.length(), 2.0F);
-				
-				for (int i = startFrame; i <= endFrame; i++) {
-					Vec3f translation = keyframes[i].transform().translation();
-					translation.z *= scale;
-				}
-				
-				transformSheet.readFrom(transform);
-			} else {
-				transformSheet.readFrom(self.getTransfroms().get("Root"));
-			}
-		});
-		
-		this.addProperty(ActionAnimationProperty.INTERRUPT_PREVIOUS_DELTA_MOVEMENT, true);
+		this.addProperty(ActionAnimationProperty.COORD_SET_BEGIN, COMMON_COORD_SETTER);
+		this.addProperty(ActionAnimationProperty.COORD_SET_TICK, COMMON_COORD_SETTER);
+		this.addProperty(ActionAnimationProperty.STOP_MOVEMENT, true);
 		this.phases = phases;
+		
+		this.stateSpectrumBlueprint.clear();
+		
+		for (Phase phase : phases) {
+			this.stateSpectrumBlueprint
+				.newTimePair(0.0F, phase.preDelay)
+				.addState(EntityState.PHASE_LEVEL, 1)
+				.newTimePair(0.0F, phase.contact)
+				.addState(EntityState.CAN_SKILL_EXECUTION, false)
+				.newTimePair(0.0F, phase.recovery)
+				.addState(EntityState.MOVEMENT_LOCKED, true)
+				.addState(EntityState.CAN_BASIC_ATTACK, false)
+				.newTimePair(0.0F, Float.MAX_VALUE)
+				.addState(EntityState.INACTION, true)
+				.newTimePair(phase.antic, phase.recovery)
+				.addState(EntityState.TURNING_LOCKED, true)
+				.newTimePair(phase.preDelay, phase.contact)
+				.addState(EntityState.ATTACKING, true)
+				.addState(EntityState.PHASE_LEVEL, 2)
+				.newTimePair(phase.contact, Float.MAX_VALUE)
+				.addState(EntityState.PHASE_LEVEL, 3);
+		}
 	}
 	
 	@Override
@@ -137,7 +135,7 @@ public class AttackAnimation extends ActionAnimation {
 			EntityState prevState = this.getState(prevElapsedTime);
 			Phase phase = this.getPhaseByTime(elapsedTime);
 			
-			if (state == EntityState.ROTATABLE_PRE_DELAY) {
+			if (state.getLevel() == 1 && !state.turningLocked()) {
 				if (entitypatch instanceof MobPatch) {
 					((Mob)entitypatch.getOriginal()).getNavigation().stop();
 					entitypatch.getOriginal().attackAnim = 2;
@@ -148,6 +146,8 @@ public class AttackAnimation extends ActionAnimation {
 					}
 				}
 			} else if (prevState.attacking() || state.attacking() || (prevState.getLevel() < 2 && state.getLevel() > 2)) {
+				System.out.println(prevElapsedTime +" "+ elapsedTime +" "+ prevState.attacking() +" "+ state.attacking());
+				
 				if (!prevState.attacking()) {
 					entitypatch.playSound(this.getSwingSound(entitypatch, phase), 0.0F, 0.0F);
 					entitypatch.currentlyAttackedEntity.clear();
@@ -237,6 +237,15 @@ public class AttackAnimation extends ActionAnimation {
 	}
 	
 	@Override
+	protected void readStates() {
+		if (!this.getProperty(AttackAnimationProperty.LOCK_ROTATION).orElse(false)) {
+			this.stateSpectrumBlueprint.newTimePair(0.0F, Float.MAX_VALUE).addStateRemoveOld(EntityState.TURNING_LOCKED, false);
+		}
+		
+		super.readStates();
+	}
+	/**
+	@Override
 	public EntityState getState(float time) {
 		Phase phase = this.getPhaseByTime(time);
 		EntityState state;
@@ -257,7 +266,7 @@ public class AttackAnimation extends ActionAnimation {
 		}
 		
 		return state;
-	}
+	}**/
 	
 	public Collider getCollider(LivingEntityPatch<?> entitypatch, float elapsedTime) {
 		Phase phase = this.getPhaseByTime(elapsedTime);
@@ -282,7 +291,7 @@ public class AttackAnimation extends ActionAnimation {
 	}
 	
 	protected float getDamageTo(LivingEntityPatch<?> entitypatch, LivingEntity target, Phase phase, ExtendedDamageSource source) {
-		float totalDamage = phase.getProperty(AttackPhaseProperty.DAMAGE).map((valueCorrector) -> valueCorrector.getTotalValue(entitypatch.calculateDamageTo(target, source, phase.hand))).orElse(entitypatch.calculateDamageTo(target, source, phase.hand));
+		float totalDamage = phase.getProperty(AttackPhaseProperty.DAMAGE).map((valueCorrector) -> valueCorrector.getTotalValue(entitypatch.getDamageTo(target, source, phase.hand))).orElse(entitypatch.getDamageTo(target, source, phase.hand));
 		ExtraDamageType extraCalculator = phase.getProperty(AttackPhaseProperty.EXTRA_DAMAGE).orElse(null);
 		
 		if (extraCalculator != null) {

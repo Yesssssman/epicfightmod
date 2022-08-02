@@ -1,26 +1,88 @@
 package yesman.epicfight.api.animation.types;
 
-import java.util.Map;
 import java.util.function.Function;
 
-import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
-
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.EntityDamageSource;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource;
+import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 
 public class EntityState {
-	public static final EntityState FREE = new EntityState(false, false, false, true, true, false, false, 0, (damagesource) -> false, "free");
-	public static final EntityState ROTATABLE_PRE_DELAY = new EntityState(false, true, false, false, false, true, false, 1, (damagesource) -> false, "predelay_rotatable");
-	public static final EntityState PRE_DELAY = new EntityState(true, true, false, false, false, true, false, 1, (damagesource) -> false, "predelay");
-	public static final EntityState ROTATABLE_CONTACT = new EntityState(false, true, true, false, false, true, false, 2, (damagesource) -> false, "contact_rotatable");
-	public static final EntityState CONTACT = new EntityState(true, true, true, false, false, true, false, 2, (damagesource) -> false, "contact");
-	public static final EntityState ROTATABLE_RECOVERY = new EntityState(false, true, false, false, true, true, false, 3, (damagesource) -> false, "recovery_rotatable");
-	public static final EntityState RECOVERY = new EntityState(true, true, false, false, true, true, false, 3, (damagesource) -> false, "recovery");
-	public static final EntityState CANCELABLE_RECOVERY = new EntityState(false, false, false, true, true, true, false, 3, (damagesource) -> false, "recovery_cancelable");
-	public static final EntityState HIT = new EntityState(true, true, false, false, false, true, true, 3, (damagesource) -> false, "hit");
-	public static final EntityState KNOCKDOWN = new EntityState(true, true, false, false, false, true, true, 3, (damagesource) -> {
+	public static class StateFactor<T> implements TypeFlexibleHashMap.TypeKey<T> {
+		String name;
+		T defaultValue;
+		
+		public StateFactor(String name, T defaultValue) {
+			this.name = name;
+			this.defaultValue = defaultValue;
+		}
+		
+		public T getDefaultVal() {
+			return this.defaultValue;
+		}
+	}
+	
+	public static final StateFactor<Boolean> TURNING_LOCKED = new StateFactor<>("turningLocked", false);
+	public static final StateFactor<Boolean> MOVEMENT_LOCKED = new StateFactor<>("movementLocked", false);
+	public static final StateFactor<Boolean> ATTACKING = new StateFactor<>("attacking", false);
+	public static final StateFactor<Boolean> CAN_BASIC_ATTACK = new StateFactor<>("canBasicAttack", true);
+	public static final StateFactor<Boolean> CAN_SKILL_EXECUTION = new StateFactor<>("canExecuteSkill", true);
+	public static final StateFactor<Boolean> INACTION = new StateFactor<>("inaction", false);
+	public static final StateFactor<Boolean> HURT = new StateFactor<>("hurt", false);
+	public static final StateFactor<Boolean> KNOCKDOWN = new StateFactor<>("knockdown", false);
+	public static final StateFactor<Boolean> COUNTER_ATTACKABLE = new StateFactor<>("counterAttackable", false);
+	public static final StateFactor<Integer> PHASE_LEVEL = new StateFactor<>("phaseLevel", 0);
+	public static final StateFactor<Function<DamageSource, Boolean>> INVULNERABILITY_PREDICATE = new StateFactor<>("invulnerabilityPredicate", (damagesource) -> false);
+	
+	/**
+	 * DEFAULT 			   = new EntityState(false, false, false, true,  true,  false, false, false, false, 0, (damagesource) -> false);
+	 * 
+	 * PRE_DELAY 		   = new EntityState(true,  true,  false, false, false, true,  false, false, false, 1, (damagesource) -> false);
+	 * CONTACT 			   = new EntityState(true,  true,  true,  false, false, true,  false, false, false, 2, (damagesource) -> false);
+	 * RECOVERY 		   = new EntityState(true,  true,  false, false, true,  true,  false, false, false, 3, (damagesource) -> false);
+	 * CANCELABLE_RECOVERY = new EntityState(false, false, false, true,  true,  true,  false, false, false, 3, (damagesource) -> false);
+	 * HIT 				   = new EntityState(true,  true,  false, false, false, true,  true,  false, false, 3, (damagesource) -> false);
+	 * KNOCKDOWNED 		   = new EntityState(true,  true,  false, false, false, true,  true,  true,  false, 3, (damagesource) -> {
+	 *	if (damagesource instanceof EntityDamageSource && !damagesource.isExplosion() && !damagesource.isMagic() && !damagesource.isBypassInvul()) {
+	 *		if (damagesource instanceof ExtendedDamageSource) {
+	 *			return !((ExtendedDamageSource)damagesource).isFinisher();
+	 *		} else {
+	 *			return true;
+	 *		}
+	 *	}
+	 *	return false;
+	 * });
+	 * DODGE 			   = new EntityState(true, true, false, false, false, true, false, false, false, 3, (damagesource) -> {
+	 *	if (damagesource instanceof EntityDamageSource && !damagesource.isExplosion() && !damagesource.isMagic() && !damagesource.isBypassInvul()) {
+	 *		return true;
+	 *	}
+	 *	return false;
+	 * });
+	 * INVINCIBLE 		   = new EntityState(true, true, false, false, false, true, false, false, false, 0, (damagesource) -> !damagesource.isBypassInvul());
+	 *
+	 */
+	final boolean turningLocked;
+	final boolean movementLocked;
+	final boolean attacking;
+	final boolean canBasicAttack;
+	final boolean canSkillExecution;
+	final boolean inaction;
+	final boolean hurt;
+	final boolean knockDown;
+	final boolean counterAttackable;
+	// free : 0, preDelay : 1, contact : 2, recovery : 3
+	final int phaseLevel;
+	final Function<DamageSource, Boolean> invulnerabilityChecker;
+	
+	public static final EntityState DEFAULT = new EntityState(false, false, false, true, true, false, false, false, false, 0, (damagesource) -> false);
+	
+	/**
+	 * Old Entity States
+	 * 
+	public static final EntityState PRE_DELAY = new EntityState(true, true, false, false, false, true, false, false, false, 1, (damagesource) -> false);
+	public static final EntityState CONTACT = new EntityState(true, true, true, false, false, true, false, false, false, 2, (damagesource) -> false);
+	public static final EntityState RECOVERY = new EntityState(true, true, false, false, true, true, false, false, false, 3, (damagesource) -> false);
+	public static final EntityState CANCELABLE_RECOVERY = new EntityState(false, false, false, true, true, true, false, false, false, 3, (damagesource) -> false);
+	public static final EntityState HIT = new EntityState(true, true, false, false, false, true, true, false, false, 3, (damagesource) -> false);
+	public static final EntityState KNOCKDOWNED = new EntityState(true, true, false, false, false, true, true, true, false, 3, (damagesource) -> {
 		if (damagesource instanceof EntityDamageSource && !damagesource.isExplosion() && !damagesource.isMagic() && !damagesource.isBypassInvul()) {
 			if (damagesource instanceof ExtendedDamageSource) {
 				return !((ExtendedDamageSource)damagesource).isFinisher();
@@ -29,48 +91,18 @@ public class EntityState {
 			}
 		}
 		return false;
-	}, "knockdown");
-	public static final EntityState DODGE = new EntityState(true, true, false, false, false, true, false, 3, (damagesource) -> {
+	});
+	public static final EntityState DODGE = new EntityState(true, true, false, false, false, true, false, false, false, 3, (damagesource) -> {
 		if (damagesource instanceof EntityDamageSource && !damagesource.isExplosion() && !damagesource.isMagic() && !damagesource.isBypassInvul()) {
 			return true;
 		}
 		return false;
-	}, "dodge");
+	});
 	
-	public static final EntityState INVINCIBLE = new EntityState(true, true, false, false, false, true, false, 0, (damagesource) -> !damagesource.isBypassInvul(), "invincible");
-	
-	static final Map<EntityState, Map<Translation, EntityState>> TRANSLATION_MAP = Maps.<EntityState, Map<Translation, EntityState>>newHashMap();
-	
-	static {
-		TRANSLATION_MAP.put(PRE_DELAY, ImmutableMap.<EntityState.Translation, EntityState>of(Translation.TO_ROTATABLE, ROTATABLE_PRE_DELAY));
-		TRANSLATION_MAP.put(ROTATABLE_PRE_DELAY, ImmutableMap.<EntityState.Translation, EntityState>of(Translation.TO_LOCKED, PRE_DELAY));
-		TRANSLATION_MAP.put(CONTACT, ImmutableMap.<EntityState.Translation, EntityState>of(Translation.TO_ROTATABLE, ROTATABLE_CONTACT));
-		TRANSLATION_MAP.put(ROTATABLE_CONTACT, ImmutableMap.<EntityState.Translation, EntityState>of(Translation.TO_LOCKED, CONTACT));
-		TRANSLATION_MAP.put(RECOVERY, ImmutableMap.<EntityState.Translation, EntityState>of(Translation.TO_ROTATABLE, ROTATABLE_RECOVERY));
-		TRANSLATION_MAP.put(ROTATABLE_RECOVERY, ImmutableMap.<EntityState.Translation, EntityState>of(Translation.TO_LOCKED, RECOVERY));
-	}
-	
-	public static EntityState translation(EntityState state, Translation translation) {
-		return TRANSLATION_MAP.getOrDefault(state, ImmutableMap.<EntityState.Translation, EntityState>of()).getOrDefault(translation, state);
-	}
-	
-	public static enum Translation {
-		TO_LOCKED, TO_ROTATABLE
-	}
-	
-	final boolean turningLocked;
-	final boolean movementLocked;
-	final boolean attacking;
-	final boolean canBasicAttack;
-	final boolean canSkillExecution;
-	final boolean inaction;
-	final boolean hurt;
-	// free : 0, preDelay : 1, contact : 2, recovery : 3
-	final int phaseLevel;
-	final String name;
-	final Function<DamageSource, Boolean> invulnerabilityChecker;
-	
-	private EntityState(boolean turningLocked, boolean movementLocked, boolean attacking, boolean basicAttackPossible, boolean skillExecutionPossible, boolean inaction, boolean hurt, int phaseLevel, Function<DamageSource, Boolean> invulnerabilityChecker, String name) {
+	public static final EntityState INVINCIBLE = new EntityState(true, true, false, false, false, true, false, false, false, 0, (damagesource) -> !damagesource.isBypassInvul());
+	**/
+	EntityState(boolean turningLocked, boolean movementLocked, boolean attacking, boolean basicAttackPossible, boolean skillExecutionPossible,
+			boolean inaction, boolean hurt, boolean knockDown, boolean counterAttackable, int phaseLevel, Function<DamageSource, Boolean> invulnerabilityChecker) {
 		this.turningLocked = turningLocked;
 		this.movementLocked = movementLocked;
 		this.attacking = attacking;
@@ -78,11 +110,12 @@ public class EntityState {
 		this.canSkillExecution = skillExecutionPossible;
 		this.inaction = inaction;
 		this.hurt = hurt;
+		this.knockDown = knockDown;
+		this.counterAttackable = counterAttackable;
 		this.phaseLevel = phaseLevel;
 		this.invulnerabilityChecker = invulnerabilityChecker;
-		this.name = name;
 	}
-	
+
 	public boolean turningLocked() {
 		return this.turningLocked;
 	}
@@ -115,12 +148,15 @@ public class EntityState {
 		return this.hurt;
 	}
 	
-	public int getLevel() {
-		return this.phaseLevel;
+	public boolean knockDown() {
+		return this.knockDown;
 	}
 	
-	@Override
-	public String toString() {
-		return this.name;
+	public boolean counterAttackable() {
+		return this.counterAttackable;
+	}
+	
+	public int getLevel() {
+		return this.phaseLevel;
 	}
 }

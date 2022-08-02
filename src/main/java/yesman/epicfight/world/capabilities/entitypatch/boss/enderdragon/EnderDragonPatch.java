@@ -32,8 +32,8 @@ import yesman.epicfight.api.animation.types.procedural.IKSetter;
 import yesman.epicfight.api.animation.types.procedural.TipPointAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.model.Model;
-import yesman.epicfight.api.utils.game.AttackResult;
-import yesman.epicfight.api.utils.game.ExtendedDamageSource.StunType;
+import yesman.epicfight.api.utils.AttackResult;
+import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -200,7 +200,7 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 			DragonPhaseInstance currentPhase = this.original.getPhaseManager().getCurrentPhase();
 			
 			if (currentPhase.getPhase() == PatchedPhases.CRYSTAL_LINK && ((DragonCrystalLinkPhase)currentPhase).getChargingCount() > 0) {
-				this.original.playSound(EpicFightSounds.NEUTRALIZE, 5.0F, 1.0F);
+				this.original.playSound(EpicFightSounds.NEUTRALIZE_BOSSES, 5.0F, 1.0F);
 				this.original.getPhaseManager().setPhase(PatchedPhases.NEUTRALIZED);
 			}
 		}

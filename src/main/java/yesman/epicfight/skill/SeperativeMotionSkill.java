@@ -9,7 +9,7 @@ import com.google.common.collect.Lists;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import yesman.epicfight.api.animation.property.Property.AttackPhaseProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProperty;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;

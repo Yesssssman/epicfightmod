@@ -24,7 +24,8 @@ public class EpicFightSounds {
 	public static final SoundEvent BUZZ = registerSound("sfx.buzz");
 	public static final SoundEvent LASER_BLAST = registerSound("sfx.laser_blast");
 	public static final SoundEvent GROUND_SLAM = registerSound("sfx.ground_slam");
-	public static final SoundEvent NEUTRALIZE = registerSound("sfx.neutralize");
+	public static final SoundEvent NEUTRALIZE_BOSSES = registerSound("sfx.neutralize_bosses");
+	public static final SoundEvent NEUTRALIZE_MOBS = registerSound("sfx.neutralize_mobs");
 	public static final SoundEvent NETHER_STAR_GLITTER = registerSound("sfx.nether_star_glitter");
 	public static final SoundEvent FAST_MOVE = registerSound("sfx.fast_move");
 	
@@ -51,7 +52,8 @@ public class EpicFightSounds {
 	    	ENDER_DRAGON_BREATH_FINALE,
 	    	ENDER_DRAGON_CRYSTAL_LINK,
 	    	WITHER_SPELL_ARMOR,
-	    	NEUTRALIZE,
+	    	NEUTRALIZE_MOBS,
+	    	NEUTRALIZE_BOSSES,
 	    	NETHER_STAR_GLITTER,
 	    	FAST_MOVE,
 	    	BUZZ, 

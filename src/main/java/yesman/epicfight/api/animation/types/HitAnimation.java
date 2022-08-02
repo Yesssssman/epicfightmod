@@ -12,6 +12,15 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 public class HitAnimation extends MainFrameAnimation {
 	public HitAnimation(float convertTime, String path, Model model) {
 		super(convertTime, path, model);
+		
+		this.stateSpectrumBlueprint.clear()
+			.newTimePair(0.0F, Float.MAX_VALUE)
+			.addState(EntityState.TURNING_LOCKED, true)
+			.addState(EntityState.MOVEMENT_LOCKED, true)
+			.addState(EntityState.CAN_BASIC_ATTACK, false)
+			.addState(EntityState.CAN_SKILL_EXECUTION, false)
+			.addState(EntityState.INACTION, true)
+			.addState(EntityState.HURT,	true);
 	}
 	
 	@Override
@@ -45,10 +54,5 @@ public class HitAnimation extends MainFrameAnimation {
 	@Override
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		return super.getPoseByTime(entitypatch, this.getTotalTime() - 0.000001F, 0.0F);
-	}
-	
-	@Override
-	public EntityState getState(float time) {
-		return EntityState.HIT;
 	}
 }

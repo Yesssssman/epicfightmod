@@ -50,6 +50,7 @@ public class WitherSkullPatch extends ProjectilePatch<WitherSkull> {
 					witherskeletonminion.finalizeSpawn(level, level.getCurrentDifficultyAt(blockpos), MobSpawnType.REINFORCEMENT, (SpawnGroupData)null, (CompoundTag)null);
 					witherskeletonminion.setYRot(projectile.getYRot() - 180.0F);
 					level.addFreshEntity(witherskeletonminion);
+					
 					WitherSkeletonPatch<?> witherskeletonpatch = (WitherSkeletonPatch<?>)witherskeletonminion.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
 					witherskeletonpatch.playAnimationSynchronized(Animations.WITHER_SKELETON_SPECIAL_SPAWN, 0, SPPlayAnimationInstant::new);
 				}
