@@ -86,7 +86,8 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 					currentLivingMotion = LivingMotions.FLOAT;
 				else if (original.yCloak - original.yCloakO < -0.25F)
 					currentLivingMotion = LivingMotions.FALL;
-				else if (original.animationSpeed > 0.01F) {
+				//else if (original.animationSpeed > 0.01F) {
+				else if (original.zza != 0.0F || original.xxa != 0.0F) {
 					if (original.isShiftKeyDown())
 						currentLivingMotion = LivingMotions.SNEAK;
 					else if (original.isSprinting())

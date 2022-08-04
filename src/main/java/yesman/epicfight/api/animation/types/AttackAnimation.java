@@ -104,9 +104,9 @@ public class AttackAnimation extends ActionAnimation {
 		
 		for (Phase phase : phases) {
 			this.stateSpectrumBlueprint
-				.newTimePair(phase.start, phase.preDelay)
+				.newTimePair(phase.start, phase.preDelay + 0.01F)
 				.addState(EntityState.PHASE_LEVEL, 1)
-				.newTimePair(phase.start, phase.contact)
+				.newTimePair(phase.start, phase.contact + 0.01F)
 				.addState(EntityState.CAN_SKILL_EXECUTION, false)
 				.newTimePair(phase.start, phase.recovery)
 				.addState(EntityState.MOVEMENT_LOCKED, true)
@@ -115,10 +115,10 @@ public class AttackAnimation extends ActionAnimation {
 				.addState(EntityState.INACTION, true)
 				.newTimePair(phase.antic, phase.recovery)
 				.addState(EntityState.TURNING_LOCKED, true)
-				.newTimePair(phase.preDelay + 0.01F, phase.contact)
+				.newTimePair(phase.preDelay + 0.01F, phase.contact + 0.01F)
 				.addState(EntityState.ATTACKING, true)
 				.addState(EntityState.PHASE_LEVEL, 2)
-				.newTimePair(phase.contact, phase.end)
+				.newTimePair(phase.contact + 0.01F, phase.end)
 				.addState(EntityState.PHASE_LEVEL, 3);
 		}
 	}
@@ -135,8 +135,6 @@ public class AttackAnimation extends ActionAnimation {
 			EntityState prevState = this.getState(prevElapsedTime);
 			Phase phase = this.getPhaseByTime(elapsedTime);
 			
-			System.out.println(elapsedTime +" "+ prevState.attacking() + " " + state.attacking() );
-			System.out.println(state.getLevel());
 			if (state.getLevel() == 1 && !state.turningLocked()) {
 				if (entitypatch instanceof MobPatch) {
 					((Mob)entitypatch.getOriginal()).getNavigation().stop();

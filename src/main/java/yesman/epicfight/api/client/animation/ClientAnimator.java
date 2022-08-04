@@ -46,8 +46,8 @@ public class ClientAnimator extends Animator {
 		this.currentMotion = LivingMotions.IDLE;
 		this.currentCompositeMotion = LivingMotions.IDLE;
 		this.compositeLivingAnimations = Maps.newHashMap();
-		this.defaultLivingAnimations = Maps.<LivingMotion, StaticAnimation>newHashMap();
-		this.defaultCompositeLivingAnimations = Maps.<LivingMotion, StaticAnimation>newHashMap();
+		this.defaultLivingAnimations = Maps.newHashMap();
+		this.defaultCompositeLivingAnimations = Maps.newHashMap();
 		this.baseLayer = new Layer.BaseLayer(null);
 	}
 	
@@ -277,7 +277,7 @@ public class ClientAnimator extends Animator {
 	}
 	
 	public boolean compareMotion(LivingMotion motion) {
-		boolean flag = this.currentMotion == motion || (this.currentMotion == LivingMotions.INACTION && motion == LivingMotions.IDLE);
+		boolean flag = this.currentMotion == motion;
 		
 		if (flag) {
 			this.currentMotion = motion;
