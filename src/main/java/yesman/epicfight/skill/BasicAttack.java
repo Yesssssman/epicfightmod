@@ -62,7 +62,6 @@ public class BasicAttack extends Skill {
 	
 	@Override
 	public boolean isExecutableState(PlayerPatch<?> executer) {
-		executer.updateEntityState();
 		EntityState playerState = executer.getEntityState();
 		Player player = executer.getOriginal();
 		return !(player.isSpectator() || player.isFallFlying() || executer.currentLivingMotion == LivingMotions.FALL || !playerState.canBasicAttack());
@@ -108,6 +107,7 @@ public class BasicAttack extends Skill {
 		if (attackMotion != null) {
 			executer.playAnimationSynchronized(attackMotion, 0);
 		}
+		
 		executer.updateEntityState();
 	}
 	

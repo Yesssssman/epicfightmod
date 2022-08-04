@@ -113,7 +113,9 @@ public class ActionAnimation extends MainFrameAnimation {
 			return;
 		}
 		
-		if (entitypatch.getEntityState().inaction()) {
+		EntityState state = this.getState(entitypatch.getAnimator().getPlayerFor(this).getElapsedTime());
+		
+		if (state.inaction()) {
 			Vec3f vec3 = this.getCoordVector(entitypatch, animation);
 			BlockPos blockpos = new BlockPos(livingentity.getX(), livingentity.getBoundingBox().minY - 1.0D, livingentity.getZ());
 			BlockState blockState = livingentity.level.getBlockState(blockpos);

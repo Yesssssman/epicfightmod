@@ -23,14 +23,14 @@ public abstract class Animator {
 	
 	public abstract void playAnimation(StaticAnimation nextAnimation, float convertTimeModifier);
 	public abstract void playAnimationInstantly(StaticAnimation nextAnimation);
-	public abstract void update();
+	public abstract void tick();
 	/** Standby until the current animation is completely end. Mostly used for link two animations having the same last & first keyframe pose **/
 	public abstract void reserveAnimation(StaticAnimation nextAnimation);
 	public abstract EntityState getEntityState();
 	/** Give a null value as a parameter to get an animation that is highest priority on client **/
 	public abstract AnimationPlayer getPlayerFor(DynamicAnimation playingAnimation);
 	public abstract void init();
-	public abstract void updatePose();
+	public abstract void poseTick();
 	
 	public final void playAnimation(int namespaceId, int id, float convertTimeModifier) {
 		this.playAnimation(EpicFightMod.getInstance().animationManager.findAnimationById(namespaceId, id), convertTimeModifier);

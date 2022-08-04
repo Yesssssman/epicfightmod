@@ -611,15 +611,15 @@ public class Animations {
 		BIPED_MOB_SPEAR_TWOHAND3 = new AttackAnimation(0.15F, 0.15F, 0.4F, 0.5F, 1.0F, null, "Tool_R", "biped/combat/mob_spear_twohand3", biped)
 				.addProperty(AttackAnimationProperty.ROTATE_X, true);
 		BIPED_MOB_SWORD_DUAL1 = new AttackAnimation(0.1F, "biped/combat/mob_sword_dual1", biped,
-				new Phase(0.35F, 0.4F, 0.5F, 0.55F, InteractionHand.OFF_HAND, "Tool_L", null), new Phase(0.55F, 0.65F, 0.75F, 1.15F, "Tool_R", null))
+				new Phase(0.0F, 0.35F, 0.4F, 0.5F, 0.55F, 0.55F, InteractionHand.OFF_HAND, "Tool_L", null), new Phase(0.55F, 0.55F, 0.65F, 0.75F, 1.15F, Float.MAX_VALUE, "Tool_R", null))
 				.addProperty(AttackAnimationProperty.ROTATE_X, true);
 		BIPED_MOB_SWORD_DUAL2 = new AttackAnimation(0.1F, "biped/combat/mob_sword_dual2", biped,
-				new Phase(0.3F, 0.3F, 0.45F, 0.55F, InteractionHand.OFF_HAND, "Tool_L", null), new Phase(0.55F, 0.65F, 0.75F, 1.15F, "Tool_R", null))
+				new Phase(0.0F, 0.3F, 0.3F, 0.45F, 0.55F, 0.55F, InteractionHand.OFF_HAND, "Tool_L", null), new Phase(0.55F, 0.55F, 0.65F, 0.75F, 1.15F, Float.MAX_VALUE, "Tool_R", null))
 				.addProperty(AttackAnimationProperty.ROTATE_X, true);
 		BIPED_MOB_SWORD_DUAL3 = new AttackAnimation(0.1F, 0.25F, 0.85F, 0.95F, 1.4F, null, "Tool_R", "biped/combat/mob_sword_dual3", biped)
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true);
 		BIPED_MOB_LONGSWORD1 = new AttackAnimation(0.15F, "biped/combat/mob_longsword1", biped,
-				new Phase(0.15F, 0.25F, 0.35F, 0.45F, "Tool_R", null), new Phase(0.85F, 1.0F, 1.1F, 1.55F, "Tool_R", null))
+				new Phase(0.0F, 0.15F, 0.25F, 0.35F, 0.45F, 0.65F, "Tool_R", null), new Phase(0.65F, 0.85F, 1.0F, 1.1F, 1.55F, Float.MAX_VALUE, "Tool_R", null))
 				.addProperty(AttackAnimationProperty.ROTATE_X, true);
 		BIPED_MOB_LONGSWORD2 = new AttackAnimation(0.25F, 0.3F, 0.45F, 0.55F, 1.0F, null, "Tool_R", "biped/combat/mob_longsword2", biped)
 				.addProperty(AttackAnimationProperty.ROTATE_X, true);
@@ -636,8 +636,8 @@ public class Animations {
 		BIPED_MOB_DAGGER_ONEHAND3 = new AttackAnimation(0.1F, 0.3F, 0.5F, 0.6F, 0.9F, null, "Tool_R", "biped/combat/mob_dagger_onehand3", biped)
 				.addProperty(AttackAnimationProperty.ROTATE_X, true);
 		BIPED_MOB_DAGGER_TWOHAND1 = new AttackAnimation(0.15F, "biped/combat/mob_dagger_twohand1", biped,
-				new Phase(0.01F, 0.05F, 0.15F, 0.3F, "Tool_R", null), new Phase(0.3F, 0.3F, 0.4F, 0.5F, InteractionHand.OFF_HAND, "Tool_L", null)
-				,new Phase(0.5F, 0.55F, 0.65F, 1.0F, "Tool_R", null))
+				new Phase(0.0F, 0.0F, 0.05F, 0.15F, 0.3F, 0.3F, "Tool_R", null), new Phase(0.3F, 0.3F, 0.3F, 0.4F, 0.5F, 0.5F, InteractionHand.OFF_HAND, "Tool_L", null)
+				,new Phase(0.5F, 0.5F, 0.55F, 0.65F, 1.0F, Float.MAX_VALUE, "Tool_R", null))
 				.addProperty(AttackAnimationProperty.ROTATE_X, true);
 		BIPED_MOB_DAGGER_TWOHAND2 = new AttackAnimation(0.1F, 0.25F, 0.75F, 0.85F, 1.0F, null, "Tool_R", "biped/combat/mob_dagger_twohand2", biped)
 				.addProperty(AttackAnimationProperty.ROTATE_X, true);
@@ -676,8 +676,8 @@ public class Animations {
 		ENDERMAN_KNEE = new AttackAnimation(0.16F, 0.25F, 0.25F, 0.31F, 1.0F, ColliderPreset.FIST, "Leg_R", "enderman/knee", enderman)
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.LONG);
 		ENDERMAN_KICK_COMBO = new AttackAnimation(0.1F, "enderman/kick_twice", enderman,
-					new Phase(0.15F, 0.15F, 0.21F, 0.46F, "Leg_R", ColliderPreset.ENDERMAN_LIMB),
-					new Phase(0.75F, 0.75F, 0.81F, 1.6F, "Leg_L", ColliderPreset.ENDERMAN_LIMB))
+					new Phase(0.0F, 0.15F, 0.15F, 0.21F, 0.46F, 0.6F, "Leg_R", ColliderPreset.ENDERMAN_LIMB),
+					new Phase(0.6F, 0.75F, 0.75F, 0.81F, 1.6F, Float.MAX_VALUE, "Leg_L", ColliderPreset.ENDERMAN_LIMB))
 				.addProperty(ActionAnimationProperty.STOP_MOVEMENT, true);
 		ENDERMAN_GRASP = new AttackAnimation(0.06F, 0.5F, 0.45F, 1.0F, 1.0F, ColliderPreset.ENDERMAN_LIMB, "Tool_R", "enderman/grasp", enderman)
 				.addProperty(AttackAnimationProperty.ROTATE_X, true);
@@ -1227,8 +1227,8 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.COLLIDER_ADDER, 1);
 		
 		DANCING_EDGE = new SpecialAttackAnimation(0.25F, "biped/skill/dancing_edge", biped,
-				new Phase(0.2F, 0.2F, 0.31F, 0.31F, "Tool_R", null), new Phase(0.5F, 0.5F, 0.61F, 0.61F, InteractionHand.OFF_HAND, "Tool_L", null),
-				new Phase(0.75F, 0.75F, 0.85F, 1.15F, "Tool_R", null))
+				new Phase(0.0F, 0.2F, 0.31F, 0.31F, 0.4F, "Tool_R", null), new Phase(0.4F, 0.5F, 0.61F, 0.61F, 0.65F, InteractionHand.OFF_HAND, "Tool_L", null),
+				new Phase(0.65F, 0.75F, 0.85F, 1.15F, Float.MAX_VALUE, "Tool_R", null))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true);
 		
@@ -1238,21 +1238,21 @@ public class Animations {
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true);
 		
 		SPEAR_THRUST = new SpecialAttackAnimation(0.11F, "biped/skill/spear_thrust", biped,
-				new Phase(0.3F, 0.3F, 0.36F, 0.51F, "Tool_R", null), new Phase(0.51F, 0.51F, 0.56F, 0.73F, "Tool_R", null),
-				new Phase(0.73F, 0.73F, 0.78F, 1.05F, "Tool_R", null))
+				new Phase(0.0F, 0.3F, 0.36F, 0.5F, 0.5F, "Tool_R", null), new Phase(0.5F, 0.5F, 0.56F, 0.75F, 0.75F, "Tool_R", null),
+				new Phase(0.75F, 0.75F, 0.81F, 1.05F, Float.MAX_VALUE, "Tool_R", null))
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
 				.addProperty(AttackAnimationProperty.ROTATE_X, true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		
 		SPEAR_SLASH = new SpecialAttackAnimation(0.1F, "biped/skill/spear_slash", biped,
-				new Phase(0.2F, 0.2F, 0.41F, 0.5F, "Tool_R", null), new Phase(0.5F, 0.75F, 0.95F, 1.25F, "Tool_R", null))
+				new Phase(0.0F, 0.2F, 0.41F, 0.5F, 0.5F, "Tool_R", null), new Phase(0.5F, 0.5F, 0.75F, 0.95F, 1.25F, Float.MAX_VALUE, "Tool_R", null))
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
 				.addProperty(AttackAnimationProperty.ROTATE_X, true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		
 		GIANT_WHIRLWIND = new SpecialAttackAnimation(0.41F, "biped/skill/giant_whirlwind", biped,
-				new Phase(0.3F, 0.35F, 0.55F, 0.85F, "Tool_R", null), new Phase(0.95F, 1.05F, 1.2F, 1.35F, "Tool_R", null),
-				new Phase(1.65F, 1.75F, 1.95F, 2.5F, "Tool_R", null))
+				new Phase(0.0F, 0.3F, 0.35F, 0.55F, 0.85F, 0.9F, "Tool_R", null), new Phase(0.9F, 0.95F, 1.05F, 1.2F, 1.35F, 1.5F, "Tool_R", null),
+				new Phase(1.5F, 1.65F, 1.75F, 1.95F, 2.5F, Float.MAX_VALUE, "Tool_R", null))
 				.addProperty(AttackAnimationProperty.ROTATE_X, true)
 				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.0F);
@@ -1283,15 +1283,15 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
 		
 		LETHAL_SLICING_TWICE = new SpecialAttackAnimation(0.016F, "biped/skill/lethal_slicing_twice", biped,
-				new Phase(0.0F, 0.0F, 0.1F, 0.15F, "Root", ColliderPreset.FATAL_DRAW), new Phase(0.15F, 0.15F, 0.25F, 0.6F, "Root", ColliderPreset.FATAL_DRAW))
+				new Phase(0.0F, 0.0F, 0.1F, 0.15F, 0.15F, "Root", ColliderPreset.FATAL_DRAW), new Phase(0.15F, 0.15F, 0.25F, 0.6F, Float.MAX_VALUE, "Root", ColliderPreset.FATAL_DRAW))
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
 		
 		RELENTLESS_COMBO = new SpecialAttackAnimation(0.05F, "biped/skill/relentless_combo", biped,
-				new Phase(0.016F, 0.016F, 0.066F, 0.133F, InteractionHand.OFF_HAND, "Root", ColliderPreset.FIST_FIXED), new Phase(0.133F, 0.133F, 0.183F, 0.25F, "Root", ColliderPreset.FIST_FIXED),
-				new Phase(0.25F, 0.25F, 0.3F, 0.366F, InteractionHand.OFF_HAND, "Root", ColliderPreset.FIST_FIXED), new Phase(0.366F, 0.366F, 0.416F, 0.483F, "Root", ColliderPreset.FIST_FIXED),
-				new Phase(0.483F, 0.483F, 0.533F, 0.6F, InteractionHand.OFF_HAND, "Root", ColliderPreset.FIST_FIXED), new Phase(0.6F, 0.6F, 0.65F, 0.716F, "Root", ColliderPreset.FIST_FIXED),
-				new Phase(0.716F, 0.716F, 0.766F, 0.833F, InteractionHand.OFF_HAND, "Root", ColliderPreset.FIST_FIXED), new Phase(0.833F, 0.833F, 0.883F, 1.1F, "Root", ColliderPreset.FIST_FIXED))
+				new Phase(0.0F, 0.016F, 0.066F, 0.133F, 0.133F, InteractionHand.OFF_HAND, "Root", ColliderPreset.FIST_FIXED), new Phase(0.133F, 0.133F, 0.183F, 0.25F, 0.25F, "Root", ColliderPreset.FIST_FIXED),
+				new Phase(0.25F, 0.25F, 0.3F, 0.366F, 0.366F, InteractionHand.OFF_HAND, "Root", ColliderPreset.FIST_FIXED), new Phase(0.366F, 0.366F, 0.416F, 0.483F, 0.483F, "Root", ColliderPreset.FIST_FIXED),
+				new Phase(0.483F, 0.483F, 0.533F, 0.6F, 0.6F, InteractionHand.OFF_HAND, "Root", ColliderPreset.FIST_FIXED), new Phase(0.6F, 0.6F, 0.65F, 0.716F, 0.716F, "Root", ColliderPreset.FIST_FIXED),
+				new Phase(0.716F, 0.716F, 0.766F, 0.833F, 0.833F, InteractionHand.OFF_HAND, "Root", ColliderPreset.FIST_FIXED), new Phase(0.833F, 0.833F, 0.883F, 1.1F, 1.1F, "Root", ColliderPreset.FIST_FIXED))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 4.0F);
 		
 		EVISCERATE_FIRST = new SpecialAttackAnimation(0.08F, 0.05F, 0.05F, 0.15F, 0.45F, null, "Tool_R", "biped/skill/eviscerate_first", biped)

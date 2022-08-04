@@ -59,6 +59,11 @@ public abstract class AnimationProperty<T> {
 		 * This property determines if the speed effect will increase the move distance.
 		 */
 		public static final ActionAnimationProperty<Boolean> AFFECT_SPEED = new ActionAnimationProperty<Boolean> ();
+		
+		/**
+		 * This property determines if the movement can be canceled by {@link LivingEntityPatch#shouldBlockMoving()}.
+		 */
+		public static final ActionAnimationProperty<Boolean> CANCELABLE_MOVE = new ActionAnimationProperty<Boolean> ();
 	}
 	
 	@FunctionalInterface

@@ -27,6 +27,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
@@ -98,9 +99,6 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	
 	@Override
 	protected void clientTick(LivingUpdateEvent event) {
-		ClientAnimator animator = this.getClientAnimator();
-		this.updateMotion(true);
-		animator.update();
 	}
 	
 	@Override
@@ -109,13 +107,11 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 			float stunArmor = this.getStunArmor();
 			this.stunTimeReduction = Math.max(0.0F, this.stunTimeReduction - 0.03F * (1 - stunArmor / (7.5F + stunArmor)));
 		}
-		
-		this.animator.update();
 	}
 	
 	@Override
 	public void tick(LivingUpdateEvent event) {
-		this.updateEntityState();
+		this.animator.tick();
 		
 		if (this.isLogicalClient()) {
 			this.clientTick(event);
@@ -138,7 +134,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	
 	public void cancelUsingItem() {
 		this.original.stopUsingItem();
-		net.minecraftforge.event.ForgeEventFactory.onUseItemStop(this.original, this.original.getUseItem(), this.original.getUseItemRemainingTicks());
+		ForgeEventFactory.onUseItemStop(this.original, this.original.getUseItem(), this.original.getUseItemRemainingTicks());
 	}
 	
 	public CapabilityItem getHoldingItemCapability(InteractionHand hand) {

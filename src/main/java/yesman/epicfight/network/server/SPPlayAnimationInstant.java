@@ -31,7 +31,7 @@ public class SPPlayAnimationInstant extends SPPlayAnimation {
 		
 		LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>)entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
 		entitypatch.getAnimator().playAnimationInstantly(this.namespaceId, this.animationId);
-		entitypatch.getAnimator().updatePose();
-		entitypatch.getAnimator().updatePose();
+		entitypatch.getAnimator().poseTick();
+		entitypatch.getAnimator().poseTick();
 	}
 }

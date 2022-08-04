@@ -15,7 +15,7 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class SpecialAttackAnimation extends AttackAnimation {
 	public SpecialAttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, @Nullable Collider collider, String index, String path, Model model) {
-		this(convertTime, path, model, new Phase(antic, preDelay, contact, recovery, index, collider));
+		this(convertTime, path, model, new Phase(0.0F, antic, preDelay, contact, recovery, Float.MAX_VALUE, index, collider));
 	}
 	
 	public SpecialAttackAnimation(float convertTime, String path, Model model, Phase... phases) {

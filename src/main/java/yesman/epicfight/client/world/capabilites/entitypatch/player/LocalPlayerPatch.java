@@ -49,6 +49,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		super.updateMotion(considerInaction);
+		
 		if (!this.getClientAnimator().isAiming()) {
 			if (this.currentCompositeMotion == LivingMotions.AIM) {
 				this.original.getUseItemRemainingTicks();

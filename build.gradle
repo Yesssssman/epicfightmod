@@ -19,7 +19,7 @@ apply plugin: 'org.spongepowered.mixin'
 
 
 version = '18.2.6'
-group = 'com.yesman.epicfight'
+group = 'yesman.epicfight'
 archivesBaseName = 'epicfight'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)

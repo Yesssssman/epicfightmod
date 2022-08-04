@@ -35,7 +35,7 @@ public class EviscerateSkill extends SpecialAttackSkill {
 				
 				if (hitEnemies.size() > 0 && hitEnemies.get(0).isAlive()) {
 					event.getPlayerPatch().reserveAnimation(this.second);
-					event.getPlayerPatch().getServerAnimator().getPlayerFor(null).resetPlayer();
+					event.getPlayerPatch().getServerAnimator().getPlayerFor(null).reset();
 					event.getPlayerPatch().currentlyAttackedEntity.clear();
 					this.second.tick(event.getPlayerPatch());
 				}

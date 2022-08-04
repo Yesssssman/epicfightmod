@@ -162,8 +162,6 @@ public class ControllEngine {
 			return;
 		}
 		
-		this.playerpatch.updateEntityState();
-		
 		if (this.mouseLeftPressToggle) {
 			if (!this.isKeyDown(this.options.keyAttack)) {
 				this.lightPress = true;
@@ -290,6 +288,7 @@ public class ControllEngine {
 		public static void mouseEvent(MouseInputEvent event) {
 			if (controllEngine.minecraft.player != null && Minecraft.getInstance().screen == null) {
 				InputConstants.Key input = InputConstants.Type.MOUSE.getOrCreate(event.getButton());
+				
 				for (KeyMapping keybinding : controllEngine.keyHash.lookupAll(input)) {
 					if (controllEngine.keyFunctionMap.containsKey(keybinding)) {
 						controllEngine.keyFunctionMap.get(keybinding).accept(event.getButton(), event.getAction());
@@ -311,6 +310,7 @@ public class ControllEngine {
 		public static void keyboardEvent(KeyInputEvent event) {
 			if (controllEngine.minecraft.player != null && Minecraft.getInstance().screen == null) {
 				InputConstants.Key input = InputConstants.Type.KEYSYM.getOrCreate(event.getKey());
+				
 				for (KeyMapping keybinding : controllEngine.keyHash.lookupAll(input)) {
 					if (controllEngine.keyFunctionMap.containsKey(keybinding)) {
 						controllEngine.keyFunctionMap.get(keybinding).accept(event.getKey(), event.getAction());
@@ -352,7 +352,9 @@ public class ControllEngine {
 				event.getInput().right = false;
 				event.getInput().jumping = false;
 				event.getInput().shiftKeyDown = false;
+				
 				LocalPlayer clientPlayer = ((LocalPlayer)event.getPlayer());
+				
 				clientPlayer.setSprinting(false);
 				clientPlayer.sprintTriggerTime = -1;
 				controllEngine.setKeyBind(controllEngine.options.keySprint, false);

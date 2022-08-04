@@ -154,15 +154,15 @@ public class ClientAnimator extends Animator {
 	}
 	
 	@Override
-	public void updatePose() {
+	public void poseTick() {
 		this.prevPose = this.currentPose;
 		this.currentPose = this.getComposedLayerPose(1.0F);
 	}
 	
 	@Override
-	public void update() {
+	public void tick() {
 		this.baseLayer.update(this.entitypatch);
-		this.updatePose();
+		this.poseTick();
 		
 		if (this.baseLayer.animationPlayer.isEnd() && this.baseLayer.nextAnimation == null && this.currentMotion != LivingMotions.DEATH) {
 			this.entitypatch.updateMotion(false);

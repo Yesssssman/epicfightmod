@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import net.minecraft.world.InteractionHand;
 import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Model;
@@ -44,7 +45,7 @@ public class BasicAttackAnimation extends AttackAnimation {
 	protected Vec3f getCoordVector(LivingEntityPatch<?> entitypatch, DynamicAnimation dynamicAnimation) {
 		Vec3f vec3 = super.getCoordVector(entitypatch, dynamicAnimation);
 		
-		if (entitypatch.shouldBlockMoving()) {
+		if (entitypatch.shouldBlockMoving() && this.getProperty(ActionAnimationProperty.CANCELABLE_MOVE).orElse(false)) {
 			vec3.scale(0.0F);
 		}
 		

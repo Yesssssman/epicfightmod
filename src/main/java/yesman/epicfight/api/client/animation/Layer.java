@@ -67,7 +67,13 @@ public class Layer {
 			return;
 		}
 		
-		this.animationPlayer.update(entitypatch);
+		this.animationPlayer.tick(entitypatch);
+		
+		if (this.isBaseLayer()) {
+			entitypatch.updateEntityState();
+			entitypatch.updateMotion(true);
+		}
+		
 		this.animationPlayer.getPlay().tick(entitypatch);
 		
 		if (this.animationPlayer.isEnd()) {
@@ -101,6 +107,10 @@ public class Layer {
 	
 	protected boolean isDisabled() {
 		return this.disabled;
+	}
+	
+	protected boolean isBaseLayer() {
+		return false;
 	}
 	
 	public void off(LivingEntityPatch<?> entitypatch) {
@@ -168,6 +178,11 @@ public class Layer {
 		@Override
 		protected boolean isDisabled() {
 			return false;
+		}
+		
+		@Override
+		protected boolean isBaseLayer() {
+			return true;
 		}
 	}
 	

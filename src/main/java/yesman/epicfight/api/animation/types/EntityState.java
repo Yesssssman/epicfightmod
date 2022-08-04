@@ -74,33 +74,6 @@ public class EntityState {
 	
 	public static final EntityState DEFAULT = new EntityState(false, false, false, true, true, false, false, false, false, 0, (damagesource) -> false);
 	
-	/**
-	 * Old Entity States
-	 * 
-	public static final EntityState PRE_DELAY = new EntityState(true, true, false, false, false, true, false, false, false, 1, (damagesource) -> false);
-	public static final EntityState CONTACT = new EntityState(true, true, true, false, false, true, false, false, false, 2, (damagesource) -> false);
-	public static final EntityState RECOVERY = new EntityState(true, true, false, false, true, true, false, false, false, 3, (damagesource) -> false);
-	public static final EntityState CANCELABLE_RECOVERY = new EntityState(false, false, false, true, true, true, false, false, false, 3, (damagesource) -> false);
-	public static final EntityState HIT = new EntityState(true, true, false, false, false, true, true, false, false, 3, (damagesource) -> false);
-	public static final EntityState KNOCKDOWNED = new EntityState(true, true, false, false, false, true, true, true, false, 3, (damagesource) -> {
-		if (damagesource instanceof EntityDamageSource && !damagesource.isExplosion() && !damagesource.isMagic() && !damagesource.isBypassInvul()) {
-			if (damagesource instanceof ExtendedDamageSource) {
-				return !((ExtendedDamageSource)damagesource).isFinisher();
-			} else {
-				return true;
-			}
-		}
-		return false;
-	});
-	public static final EntityState DODGE = new EntityState(true, true, false, false, false, true, false, false, false, 3, (damagesource) -> {
-		if (damagesource instanceof EntityDamageSource && !damagesource.isExplosion() && !damagesource.isMagic() && !damagesource.isBypassInvul()) {
-			return true;
-		}
-		return false;
-	});
-	
-	public static final EntityState INVINCIBLE = new EntityState(true, true, false, false, false, true, false, false, false, 0, (damagesource) -> !damagesource.isBypassInvul());
-	**/
 	EntityState(boolean turningLocked, boolean movementLocked, boolean attacking, boolean basicAttackPossible, boolean skillExecutionPossible,
 			boolean inaction, boolean hurt, boolean knockDown, boolean counterAttackable, int phaseLevel, Function<DamageSource, Boolean> invulnerabilityChecker) {
 		this.turningLocked = turningLocked;

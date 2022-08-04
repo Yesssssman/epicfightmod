@@ -1,6 +1,5 @@
 package yesman.epicfight.api.animation.types;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -8,6 +7,7 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Vector3f;
 
@@ -85,11 +85,11 @@ public class AttackAnimation extends ActionAnimation {
 	public final Phase[] phases;
 	
 	public AttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, @Nullable Collider collider, String index, String path, Model model) {
-		this(convertTime, path, model, new Phase(antic, preDelay, contact, recovery, index, collider));
+		this(convertTime, path, model, new Phase(0.0F, antic, preDelay, contact, recovery, Float.MAX_VALUE, index, collider));
 	}
 	
 	public AttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, InteractionHand hand, @Nullable Collider collider, String index, String path, Model model) {
-		this(convertTime, path, model, new Phase(antic, preDelay, contact, recovery, hand, index, collider));
+		this(convertTime, path, model, new Phase(0.0F, antic, preDelay, contact, recovery, Float.MAX_VALUE, hand, index, collider));
 	}
 	
 	public AttackAnimation(float convertTime, String path, Model model, Phase... phases) {
@@ -104,21 +104,21 @@ public class AttackAnimation extends ActionAnimation {
 		
 		for (Phase phase : phases) {
 			this.stateSpectrumBlueprint
-				.newTimePair(0.0F, phase.preDelay)
+				.newTimePair(phase.start, phase.preDelay)
 				.addState(EntityState.PHASE_LEVEL, 1)
-				.newTimePair(0.0F, phase.contact)
+				.newTimePair(phase.start, phase.contact)
 				.addState(EntityState.CAN_SKILL_EXECUTION, false)
-				.newTimePair(0.0F, phase.recovery)
+				.newTimePair(phase.start, phase.recovery)
 				.addState(EntityState.MOVEMENT_LOCKED, true)
 				.addState(EntityState.CAN_BASIC_ATTACK, false)
-				.newTimePair(0.0F, Float.MAX_VALUE)
+				.newTimePair(phase.start, phase.end)
 				.addState(EntityState.INACTION, true)
 				.newTimePair(phase.antic, phase.recovery)
 				.addState(EntityState.TURNING_LOCKED, true)
-				.newTimePair(phase.preDelay, phase.contact)
+				.newTimePair(phase.preDelay + 0.01F, phase.contact)
 				.addState(EntityState.ATTACKING, true)
 				.addState(EntityState.PHASE_LEVEL, 2)
-				.newTimePair(phase.contact, Float.MAX_VALUE)
+				.newTimePair(phase.contact, phase.end)
 				.addState(EntityState.PHASE_LEVEL, 3);
 		}
 	}
@@ -135,6 +135,8 @@ public class AttackAnimation extends ActionAnimation {
 			EntityState prevState = this.getState(prevElapsedTime);
 			Phase phase = this.getPhaseByTime(elapsedTime);
 			
+			System.out.println(elapsedTime +" "+ prevState.attacking() + " " + state.attacking() );
+			System.out.println(state.getLevel());
 			if (state.getLevel() == 1 && !state.turningLocked()) {
 				if (entitypatch instanceof MobPatch) {
 					((Mob)entitypatch.getOriginal()).getNavigation().stop();
@@ -146,8 +148,6 @@ public class AttackAnimation extends ActionAnimation {
 					}
 				}
 			} else if (prevState.attacking() || state.attacking() || (prevState.getLevel() < 2 && state.getLevel() > 2)) {
-				System.out.println(prevElapsedTime +" "+ elapsedTime +" "+ prevState.attacking() +" "+ state.attacking());
-				
 				if (!prevState.attacking()) {
 					entitypatch.playSound(this.getSwingSound(entitypatch, phase), 0.0F, 0.0F);
 					entitypatch.currentlyAttackedEntity.clear();
@@ -392,7 +392,7 @@ public class AttackAnimation extends ActionAnimation {
 		for (Phase phase : this.phases) {
 			currentPhase = phase;
 			
-			if (phase.recovery > elapsedTime) {
+			if (phase.end > elapsedTime) {
 				break;
 			}
 		}
@@ -415,24 +415,36 @@ public class AttackAnimation extends ActionAnimation {
 	}
 	
 	public static class Phase {
-		protected final Map<AttackPhaseProperty<?>, Object> properties = new HashMap<AttackPhaseProperty<?>, Object> ();;
+		protected final Map<AttackPhaseProperty<?>, Object> properties = Maps.newHashMap();
+		protected final float start;
 		protected final float antic;
 		protected final float preDelay;
 		protected final float contact;
 		protected final float recovery;
+		protected final float end;
 		protected final String jointName;
 		protected final InteractionHand hand;
 		protected Collider collider;
 		
-		public Phase(float antic, float preDelay, float contact, float recovery, String jointName, Collider collider) {
-			this(antic, preDelay, contact, recovery, InteractionHand.MAIN_HAND, jointName, collider);
+		public Phase(float start, float antic, float contact, float recovery, float end, String jointName, Collider collider) {
+			this(start, antic, contact, recovery, end, InteractionHand.MAIN_HAND, jointName, collider);
 		}
 		
-		public Phase(float antic, float preDelay, float contact, float recovery, InteractionHand hand, String jointName, Collider collider) {
+		public Phase(float start, float antic, float contact, float recovery, float end, InteractionHand hand, String jointName, Collider collider) {
+			this(start, antic, antic, contact, recovery, end, hand, jointName, collider);
+		}
+		
+		public Phase(float start, float antic, float preDelay, float contact, float recovery, float end, String jointName, Collider collider) {
+			this(start, antic, preDelay, contact, recovery, end, InteractionHand.MAIN_HAND, jointName, collider);
+		}
+		
+		public Phase(float start, float antic, float preDelay, float contact, float recovery, float end, InteractionHand hand, String jointName, Collider collider) {
+			this.start = start;
 			this.antic = antic;
 			this.preDelay = preDelay;
 			this.contact = contact;
 			this.recovery = recovery;
+			this.end = end;
 			this.collider = collider;
 			this.jointName = jointName;
 			this.hand = hand;

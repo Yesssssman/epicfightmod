@@ -112,7 +112,6 @@ public abstract class Skill {
 	}
 	
 	public boolean isExecutableState(PlayerPatch<?> executer) {
-		executer.updateEntityState();
 		EntityState playerState = executer.getEntityState();
 		return !(executer.getOriginal().isFallFlying() || executer.currentLivingMotion == LivingMotions.FALL || !playerState.canUseSkill());
 	}

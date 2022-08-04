@@ -54,19 +54,21 @@ public class ServerAnimator extends Animator {
 	}
 	
 	@Override
-	public void updatePose() {
+	public void poseTick() {
 		this.prevPose = this.currentPose;
 		this.currentPose = this.animationPlayer.getCurrentPose(this.entitypatch, 1.0F);
 	}
 	
 	@Override
-	public void update() {
+	public void tick() {
 		if (this.pause) {
+			this.entitypatch.updateEntityState();
 			return;
 		}
 		
-		this.animationPlayer.update(this.entitypatch);
-		this.updatePose();
+		this.animationPlayer.tick(this.entitypatch);
+		this.poseTick();
+		this.entitypatch.updateEntityState();
 		this.animationPlayer.getPlay().tick(this.entitypatch);
 		
 		if (this.animationPlayer.isEnd()) {

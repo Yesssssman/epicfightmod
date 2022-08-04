@@ -19,7 +19,7 @@ public class AnimationPlayer {
 		this.setPlayAnimation(Animations.DUMMY_ANIMATION);
 	}
 	
-	public void update(LivingEntityPatch<?> entitypatch) {
+	public void tick(LivingEntityPatch<?> entitypatch) {
 		this.prevElapsedTime = this.elapsedTime;
 		this.elapsedTime += ConfigurationIngame.A_TICK * this.getPlay().getPlaySpeed(entitypatch);
 		
@@ -49,7 +49,7 @@ public class AnimationPlayer {
 		this.isEnd = animationPlayer.isEnd;
 	}
 	
-	public void resetPlayer() {
+	public void reset() {
 		this.elapsedTime = 0;
 		this.prevElapsedTime = 0;
 		this.isEnd = false;
@@ -59,7 +59,7 @@ public class AnimationPlayer {
 		if (this.doNotResetNext) {
 			this.doNotResetNext = false;
 		} else {
-			this.resetPlayer();
+			this.reset();
 		}
 		
 		this.play = animation;
@@ -74,7 +74,7 @@ public class AnimationPlayer {
 	}
 	
 	public void setEmpty() {
-		this.resetPlayer();
+		this.reset();
 		this.play = Animations.DUMMY_ANIMATION;
 	}
 	
