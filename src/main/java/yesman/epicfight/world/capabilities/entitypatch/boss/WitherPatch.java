@@ -115,7 +115,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		if (this.getEntityState().inaction() && considerInaction) {
-			currentLivingMotion = LivingMotions.INACTION;
+			currentLivingMotion = LivingMotions.IDLE;
 		} else {
 			currentLivingMotion = LivingMotions.IDLE;
 		}

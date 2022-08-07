@@ -4,7 +4,7 @@ import yesman.epicfight.api.model.Model;
 
 public class GuardAnimation extends MainFrameAnimation {
 	public GuardAnimation(float convertTime, String path, Model model) {
-		this(convertTime, convertTime, path, model);
+		this(convertTime, Float.MAX_VALUE, path, model);
 	}
 	
 	public GuardAnimation(float convertTime, float lockTime, String path, Model model) {

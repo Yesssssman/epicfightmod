@@ -114,12 +114,14 @@ public class WeaponCapability extends CapabilityItem {
 	public UseAnim getUseAnimation(LivingEntityPatch<?> playerpatch) {
 		if (this.livingMotionModifiers != null) {
 			Style style = this.getStyle(playerpatch);
+			
 			if (this.livingMotionModifiers.containsKey(style)) {
 				if (this.livingMotionModifiers.get(style).containsKey(LivingMotions.BLOCK)) {
 					return UseAnim.BLOCK;
 				}
 			}
 		}
+		
 		return UseAnim.NONE;
 	}
 	

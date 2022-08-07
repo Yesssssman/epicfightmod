@@ -41,6 +41,7 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
+import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
@@ -50,9 +51,9 @@ public class GuardSkill extends Skill {
 	protected static final UUID EVENT_UUID = UUID.fromString("b422f7a0-f378-11eb-9a03-0242ac130003");
 	
 	public static class Builder extends Skill.Builder<GuardSkill> {
-		protected final Map<WeaponCategories, BiFunction<CapabilityItem, PlayerPatch<?>, ?>> guardMotions = Maps.newHashMap();
-		protected final Map<WeaponCategories, BiFunction<CapabilityItem, PlayerPatch<?>, ?>> advancedGuardMotions = Maps.newHashMap();
-		protected final Map<WeaponCategories, BiFunction<CapabilityItem, PlayerPatch<?>, ?>> guardBreakMotions = Maps.newHashMap();
+		protected final Map<WeaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, ?>> guardMotions = Maps.newHashMap();
+		protected final Map<WeaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, ?>> advancedGuardMotions = Maps.newHashMap();
+		protected final Map<WeaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, ?>> guardBreakMotions = Maps.newHashMap();
 		
 		public Builder(ResourceLocation resourceLocation) {
 			super(resourceLocation);
@@ -123,7 +124,7 @@ public class GuardSkill extends Skill {
 				.addGuardMotion(WeaponCategories.SWORD, (item, player) -> item.getStyle(player) == Styles.ONE_HAND ? Animations.SWORD_GUARD_HIT : Animations.SWORD_DUAL_GUARD_HIT)
 				.addGuardMotion(WeaponCategories.TACHI, (item, player) -> Animations.LONGSWORD_GUARD_HIT)
 				.addGuardBreakMotion(WeaponCategories.AXE, (item, player) -> Animations.COMMON_GUARD_BREAK)
-				.addGuardBreakMotion(WeaponCategories.GREATSWORD, (item, player) -> Animations.COMMON_GUARD_BREAK)
+				.addGuardBreakMotion(WeaponCategories.GREATSWORD, (item, player) -> Animations.GREATSWORD_GUARD_BREAK)
 				.addGuardBreakMotion(WeaponCategories.KATANA, (item, player) -> Animations.COMMON_GUARD_BREAK)
 				.addGuardBreakMotion(WeaponCategories.LONGSWORD, (item, player) -> Animations.COMMON_GUARD_BREAK)
 				.addGuardBreakMotion(WeaponCategories.SPEAR, (item, player) -> Animations.COMMON_GUARD_BREAK)
@@ -131,9 +132,9 @@ public class GuardSkill extends Skill {
 				.addGuardBreakMotion(WeaponCategories.TACHI, (item, player) -> Animations.COMMON_GUARD_BREAK);
 	}
 	
-	protected final Map<WeaponCategories, BiFunction<CapabilityItem, PlayerPatch<?>, ?>> guardMotions;
-	protected final Map<WeaponCategories, BiFunction<CapabilityItem, PlayerPatch<?>, ?>> advancedGuardMotions;
-	protected final Map<WeaponCategories, BiFunction<CapabilityItem, PlayerPatch<?>, ?>> guardBreakMotions;
+	protected final Map<WeaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, ?>> guardMotions;
+	protected final Map<WeaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, ?>> advancedGuardMotions;
+	protected final Map<WeaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, ?>> guardBreakMotions;
 	
 	public GuardSkill(GuardSkill.Builder builder) {
 		super(builder);
@@ -255,7 +256,7 @@ public class GuardSkill extends Skill {
 		return 0.6F;
 	}
 	
-	protected Map<WeaponCategories, BiFunction<CapabilityItem, PlayerPatch<?>, ?>> getGuradMotionMap(BlockType blockType) {
+	protected Map<WeaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, ?>> getGuradMotionMap(BlockType blockType) {
 		switch (blockType) {
 		case GUARD_BREAK:
 			return this.guardBreakMotions;
@@ -269,7 +270,7 @@ public class GuardSkill extends Skill {
 	}
 	
 	protected boolean isHoldingWeaponAvailable(PlayerPatch<?> playerpatch, CapabilityItem itemCapability, BlockType blockType) {
-		Map<WeaponCategories, BiFunction<CapabilityItem, PlayerPatch<?>, ?>> guardMotions = this.getGuradMotionMap(blockType);
+		Map<WeaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, ?>> guardMotions = this.getGuradMotionMap(blockType);
 		
 		if (!guardMotions.containsKey(itemCapability.getWeaponCategory())) {
 			return false;

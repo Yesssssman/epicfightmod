@@ -42,6 +42,17 @@ public class BasicAttackAnimation extends AttackAnimation {
 	}
 	
 	@Override
+	protected void onLoaded() {
+		super.onLoaded();
+		
+		if (!this.properties.containsKey(AttackAnimationProperty.BASIS_ATTACK_SPEED)) {
+			float basisSpeed = Float.parseFloat(String.format("%.2f", (1.0F / this.totalTime)));
+			this.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, basisSpeed);
+		}
+		
+	}
+	
+	@Override
 	protected Vec3f getCoordVector(LivingEntityPatch<?> entitypatch, DynamicAnimation dynamicAnimation) {
 		Vec3f vec3 = super.getCoordVector(entitypatch, dynamicAnimation);
 		

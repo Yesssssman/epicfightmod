@@ -56,7 +56,7 @@ public class VindicatorPatch<T extends PathfinderMob> extends AbstractIllagerPat
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		if (this.state.inaction() && considerInaction) {
-			currentLivingMotion = LivingMotions.INACTION;
+			currentLivingMotion = LivingMotions.IDLE;
 		} else {
 			boolean isAngry = this.original.isAggressive();
 			

@@ -235,36 +235,13 @@ public class AttackAnimation extends ActionAnimation {
 	}
 	
 	@Override
-	protected void readStates() {
+	protected void onLoaded() {
 		if (!this.getProperty(AttackAnimationProperty.LOCK_ROTATION).orElse(false)) {
 			this.stateSpectrumBlueprint.newTimePair(0.0F, Float.MAX_VALUE).addStateRemoveOld(EntityState.TURNING_LOCKED, false);
 		}
 		
-		super.readStates();
+		super.onLoaded();
 	}
-	/**
-	@Override
-	public EntityState getState(float time) {
-		Phase phase = this.getPhaseByTime(time);
-		EntityState state;
-		
-		if (phase.antic >= time)
-			state = EntityState.ROTATABLE_PRE_DELAY;
-		else if (phase.antic < time && phase.preDelay > time)
-			state = EntityState.PRE_DELAY;
-		else if (phase.preDelay <= time && phase.contact >= time)
-			state = EntityState.CONTACT;
-		else if (phase.recovery > time)
-			state = EntityState.RECOVERY;
-		else
-			state = EntityState.CANCELABLE_RECOVERY;
-		
-		if (!this.getProperty(AttackAnimationProperty.LOCK_ROTATION).orElse(false)) {
-			state = EntityState.translation(state, Translation.TO_ROTATABLE);
-		}
-		
-		return state;
-	}**/
 	
 	public Collider getCollider(LivingEntityPatch<?> entitypatch, float elapsedTime) {
 		Phase phase = this.getPhaseByTime(elapsedTime);
@@ -359,7 +336,11 @@ public class AttackAnimation extends ActionAnimation {
 			Phase phase = this.getPhaseByTime(entitypatch.getAnimator().getPlayerFor(this).getElapsedTime());
 			float speedFactor = this.getProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR).orElse(1.0F);
 			Optional<Float> property = this.getProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED);
-			float correctedSpeed = property.map((value) -> ((PlayerPatch<?>)entitypatch).getAttackSpeed(phase.hand) / value).orElse(this.totalTime * ((PlayerPatch<?>)entitypatch).getAttackSpeed(phase.hand));
+			float correctedSpeed = property.map((value) -> ((PlayerPatch<?>)entitypatch).getAttackSpeed(phase.hand) / value)
+					.orElse(this.totalTime * ((PlayerPatch<?>)entitypatch).getAttackSpeed(phase.hand));
+			
+			correctedSpeed = Math.round(correctedSpeed * 1000.0F) / 1000.0F;
+			
 			return 1.0F + (correctedSpeed - 1.0F) * speedFactor;
 		} else {
 			return 1.0F;

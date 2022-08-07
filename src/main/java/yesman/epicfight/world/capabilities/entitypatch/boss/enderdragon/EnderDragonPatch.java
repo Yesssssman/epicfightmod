@@ -102,7 +102,7 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		if (this.state.inaction() && considerInaction) {
-			this.currentLivingMotion = LivingMotions.INACTION;
+			this.currentLivingMotion = LivingMotions.IDLE;
 		} else {
 			DragonPhaseInstance phase = this.original.getPhaseManager().getCurrentPhase();
 			

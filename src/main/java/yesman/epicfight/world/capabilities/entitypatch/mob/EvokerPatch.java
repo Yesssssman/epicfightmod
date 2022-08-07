@@ -30,7 +30,7 @@ public class EvokerPatch<T extends SpellcasterIllager> extends AbstractIllagerPa
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		if (this.state.inaction() && considerInaction) {
-			currentLivingMotion = LivingMotions.INACTION;
+			currentLivingMotion = LivingMotions.IDLE;
 		} else {
 			if (this.getOriginal().isCastingSpell()) {
 				currentLivingMotion = LivingMotions.SPELLCAST;

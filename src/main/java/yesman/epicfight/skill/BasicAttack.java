@@ -64,6 +64,7 @@ public class BasicAttack extends Skill {
 	public boolean isExecutableState(PlayerPatch<?> executer) {
 		EntityState playerState = executer.getEntityState();
 		Player player = executer.getOriginal();
+		
 		return !(player.isSpectator() || player.isFallFlying() || executer.currentLivingMotion == LivingMotions.FALL || !playerState.canBasicAttack());
 	}
 	

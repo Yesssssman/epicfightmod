@@ -63,7 +63,7 @@ public class PlayerEvents {
 	public static void itemUseStartEvent(LivingEntityUseItemEvent.Start event) {
 		if (event.getEntity() instanceof Player) {
 			Player player = (Player) event.getEntity();
-			PlayerPatch<?> playerpatch = (PlayerPatch<?>) event.getEntity().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+			PlayerPatch<?> playerpatch = (PlayerPatch<?>) event.getEntity().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
 			InteractionHand hand = player.getItemInHand(InteractionHand.MAIN_HAND).equals(event.getItem()) ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
 			CapabilityItem itemCap = playerpatch.getHoldingItemCapability(hand);
 			
@@ -74,7 +74,7 @@ public class PlayerEvents {
 			}
 			
 			if (itemCap.getUseAnimation(playerpatch) == UseAnim.BLOCK) {
-				event.setDuration(1000000);
+				event.setDuration(Integer.MAX_VALUE);
 			}
 		}
 	}

@@ -14,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.UseAnim;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
@@ -100,7 +101,9 @@ public class ControllEngine {
 				while (this.options.keyAttack.consumeClick()) {
 				}
 				
-				if (this.player.getUseItemRemainingTicks() == 0) {
+				UseAnim useAnim = this.playerpatch.getHoldingItemCapability(this.playerpatch.getOriginal().getUsedItemHand()).getUseAnimation(this.playerpatch);
+				
+				if (this.player.getUseItemRemainingTicks() == 0 || (useAnim == UseAnim.BLOCK)) {
 					if (!this.mouseLeftPressToggle) {
 						this.mouseLeftPressToggle = true;
 					}
@@ -186,7 +189,8 @@ public class ControllEngine {
 		}
 		
 		if (this.lightPress) {
-			SkillCategory slot = (!this.player.isOnGround() && !this.player.isInWater() && this.player.getDeltaMovement().y > -0.05D) ? SkillCategories.AIR_ATTACK : SkillCategories.BASIC_ATTACK;
+			SkillCategory slot = (!this.player.isOnGround() && !this.player.isInWater() && this.player.getDeltaMovement().y > -0.05D)
+					? SkillCategories.AIR_ATTACK : SkillCategories.BASIC_ATTACK;
 			
 			if (this.playerpatch.getSkill(slot).sendExecuteRequest(this.playerpatch)) {
 				this.player.resetAttackStrengthTicker();

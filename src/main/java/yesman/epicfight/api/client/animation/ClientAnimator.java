@@ -291,8 +291,8 @@ public class ClientAnimator extends Animator {
 	}
 	
 	public void startInaction() {
-		this.currentMotion = LivingMotions.INACTION;
-		this.entitypatch.currentLivingMotion = LivingMotions.INACTION;
+		this.currentMotion = LivingMotions.IDLE;
+		this.entitypatch.currentLivingMotion = LivingMotions.IDLE;
 	}
 	
 	public void resetCompositeMotion() {

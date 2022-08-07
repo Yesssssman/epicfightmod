@@ -59,8 +59,8 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
-		if (this.state.inaction() && considerInaction) {
-			currentLivingMotion = LivingMotions.INACTION;
+		if (this.state.movementLocked() && considerInaction) {
+			currentLivingMotion = LivingMotions.IDLE;
 		} else {
 			ClientAnimator animator = this.getClientAnimator();
 			if (this.original.getHealth() <= 0.0F) {
@@ -86,7 +86,6 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 					currentLivingMotion = LivingMotions.FLOAT;
 				else if (original.yCloak - original.yCloakO < -0.25F)
 					currentLivingMotion = LivingMotions.FALL;
-				//else if (original.animationSpeed > 0.01F) {
 				else if (original.zza != 0.0F || original.xxa != 0.0F) {
 					if (original.isShiftKeyDown())
 						currentLivingMotion = LivingMotions.SNEAK;

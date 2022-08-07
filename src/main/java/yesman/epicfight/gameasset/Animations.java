@@ -300,6 +300,7 @@ public class Animations {
 	public static StaticAnimation SWORD_GUARD_HIT;
 	public static StaticAnimation SWORD_GUARD_ACTIVE_HIT1;
 	public static StaticAnimation SWORD_GUARD_ACTIVE_HIT2;
+	public static StaticAnimation SWORD_GUARD_ACTIVE_HIT3;
 	public static StaticAnimation SWORD_DUAL_AUTO1;
 	public static StaticAnimation SWORD_DUAL_AUTO2;
 	public static StaticAnimation SWORD_DUAL_AUTO3;
@@ -308,6 +309,7 @@ public class Animations {
 	public static StaticAnimation SWORD_DUAL_GUARD;
 	public static StaticAnimation SWORD_DUAL_GUARD_HIT;
 	public static StaticAnimation COMMON_GUARD_BREAK;
+	public static StaticAnimation GREATSWORD_GUARD_BREAK;
 	public static StaticAnimation LONGSWORD_AUTO1;
 	public static StaticAnimation LONGSWORD_AUTO2;
 	public static StaticAnimation LONGSWORD_AUTO3;
@@ -528,8 +530,8 @@ public class Animations {
 		AXE_DASH = new DashAttackAnimation(0.25F, 0.08F, 0.4F, 0.46F, 0.9F, null, "Tool_R", "biped/combat/axe_dash", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true);
 		SWORD_DUAL_AUTO1 = new BasicAttackAnimation(0.16F, 0.0F, 0.11F, 0.2F, null, "Tool_R", "biped/combat/sword_dual_auto1", biped);
-		SWORD_DUAL_AUTO2 = new BasicAttackAnimation(0.13F, 0.0F, 0.1F, 0.1F, InteractionHand.OFF_HAND, null, "Tool_L", "biped/combat/sword_dual_auto2", biped);
-		SWORD_DUAL_AUTO3 = new BasicAttackAnimation(0.18F, 0.0F, 0.25F, 0.35F, 0.64F, ColliderPreset.DUAL_SWORD, "Torso", "biped/combat/sword_dual_auto3", biped);
+		SWORD_DUAL_AUTO2 = new BasicAttackAnimation(0.13F, 0.0F, 0.11F, 0.15F, InteractionHand.OFF_HAND, null, "Tool_L", "biped/combat/sword_dual_auto2", biped);
+		SWORD_DUAL_AUTO3 = new BasicAttackAnimation(0.18F, 0.0F, 0.25F, 0.35F, 0.6F, ColliderPreset.DUAL_SWORD, "Torso", "biped/combat/sword_dual_auto3", biped);
 		SWORD_DUAL_DASH = new DashAttackAnimation(0.16F, 0.05F, 0.05F, 0.3F, 0.75F, ColliderPreset.DUAL_SWORD_DASH, "Root", "biped/combat/sword_dual_dash", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true);
@@ -644,10 +646,13 @@ public class Animations {
 		BIPED_MOB_THROW = new RangedAttackAnimation(0.11F, 0.1F, 0.45F, 0.49F, 0.95F, null, "Root", "biped/combat/mob_throw", biped);
 		
 		SWORD_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_sword_hit", biped);
-		SWORD_GUARD_ACTIVE_HIT1 = new GuardAnimation(0.05F, 0.15F, "biped/skill/guard_sword_hit_active1", biped);
-		SWORD_GUARD_ACTIVE_HIT2 = new GuardAnimation(0.05F, 0.15F, "biped/skill/guard_sword_hit_active2", biped);
+		SWORD_GUARD_ACTIVE_HIT1 = new GuardAnimation(0.05F, 0.2F, "biped/skill/guard_sword_hit_active1", biped);
+		SWORD_GUARD_ACTIVE_HIT2 = new GuardAnimation(0.05F, 0.2F, "biped/skill/guard_sword_hit_active2", biped);
+		SWORD_GUARD_ACTIVE_HIT3 = new GuardAnimation(0.05F, 0.2F, "biped/skill/guard_sword_hit_active3", biped);
+		
 		SWORD_DUAL_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_dualsword_hit", biped);
-		COMMON_GUARD_BREAK = new LongHitAnimation(0.05F, "biped/skill/guard_break", biped);
+		COMMON_GUARD_BREAK = new LongHitAnimation(0.05F, "biped/skill/guard_break1", biped);
+		GREATSWORD_GUARD_BREAK = new LongHitAnimation(0.05F, "biped/skill/guard_break2", biped);
 		
 		LONGSWORD_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_longsword_hit", biped);
 		SPEAR_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_spear_hit", biped);
@@ -1227,7 +1232,7 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.COLLIDER_ADDER, 1);
 		
 		DANCING_EDGE = new SpecialAttackAnimation(0.25F, "biped/skill/dancing_edge", biped,
-				new Phase(0.0F, 0.2F, 0.31F, 0.31F, 0.4F, "Tool_R", null), new Phase(0.4F, 0.5F, 0.61F, 0.61F, 0.65F, InteractionHand.OFF_HAND, "Tool_L", null),
+				new Phase(0.0F, 0.2F, 0.31F, 0.4F, 0.4F, "Tool_R", null), new Phase(0.4F, 0.5F, 0.61F, 0.65F, 0.65F, InteractionHand.OFF_HAND, "Tool_L", null),
 				new Phase(0.65F, 0.75F, 0.85F, 1.15F, Float.MAX_VALUE, "Tool_R", null))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true);
@@ -1251,7 +1256,7 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		
 		GIANT_WHIRLWIND = new SpecialAttackAnimation(0.41F, "biped/skill/giant_whirlwind", biped,
-				new Phase(0.0F, 0.3F, 0.35F, 0.55F, 0.85F, 0.9F, "Tool_R", null), new Phase(0.9F, 0.95F, 1.05F, 1.2F, 1.35F, 1.5F, "Tool_R", null),
+				new Phase(0.0F, 0.3F, 0.35F, 0.55F, 0.9F, 0.9F, "Tool_R", null), new Phase(0.9F, 0.95F, 1.05F, 1.2F, 1.5F, 1.5F, "Tool_R", null),
 				new Phase(1.5F, 1.65F, 1.75F, 1.95F, 2.5F, Float.MAX_VALUE, "Tool_R", null))
 				.addProperty(AttackAnimationProperty.ROTATE_X, true)
 				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)

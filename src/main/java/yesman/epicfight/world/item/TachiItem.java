@@ -5,6 +5,6 @@ import net.minecraft.world.item.Tier;
 
 public class TachiItem extends WeaponItem {
 	public TachiItem(Item.Properties build, Tier materialIn) {
-		super(materialIn, 4, -2.5F, build);
+		super(materialIn, 4, -2.8F, build);
 	}
 }

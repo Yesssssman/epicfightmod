@@ -185,12 +185,21 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	public float getAttackSpeed(InteractionHand hand) {
-		return this.getAttackSpeed(this.getHoldingItemCapability(hand), (float)this.original.getAttributeValue((hand == InteractionHand.MAIN_HAND) ? Attributes.ATTACK_SPEED : EpicFightAttributes.OFFHAND_ATTACK_SPEED.get()));
+		float baseSpeed;
+		
+		if (hand == InteractionHand.MAIN_HAND) {
+			baseSpeed = (float)this.original.getAttributeValue(Attributes.ATTACK_SPEED);
+		} else {
+			baseSpeed = (float) (this.isOffhandItemValid() ? this.original.getAttributeValue(Attributes.ATTACK_SPEED) : this.original.getAttributeBaseValue(Attributes.ATTACK_SPEED));
+		}
+		
+		return this.getAttackSpeed(this.getAdvancedHoldingItemCapability(hand), baseSpeed);
 	}
 	
 	public float getAttackSpeed(CapabilityItem itemCapability, float baseSpeed) {
 		AttackSpeedModifyEvent event = new AttackSpeedModifyEvent(this, itemCapability, baseSpeed);
 		this.eventListeners.triggerEvents(EventType.ATTACK_SPEED_MODIFY_EVENT, event);
+		
 		return Formulars.getAttackSpeedPenalty(this.getWeight(), event.getAttackSpeed(), this);
 	}
 	

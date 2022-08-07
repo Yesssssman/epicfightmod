@@ -68,7 +68,7 @@ public class VexPatch extends MobPatch<Vex> {
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		if (this.state.inaction() && considerInaction) {
-			currentLivingMotion = LivingMotions.INACTION;
+			currentLivingMotion = LivingMotions.IDLE;
 		} else {
 			if (this.original.getHealth() <= 0.0F) {
 				currentLivingMotion = LivingMotions.DEATH;

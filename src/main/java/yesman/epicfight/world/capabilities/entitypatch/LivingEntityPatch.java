@@ -141,6 +141,9 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		return EpicFightCapabilities.getItemStackCapability(this.original.getItemInHand(hand));
 	}
 	
+	/**
+	 * Returns an empty capability if the item in mainhand is incompatible with the item in offhand 
+	 */
 	public CapabilityItem getAdvancedHoldingItemCapability(InteractionHand hand) {
 		if (hand == InteractionHand.MAIN_HAND) {
 			return getHoldingItemCapability(hand);

@@ -91,10 +91,10 @@ public class StaticAnimation extends DynamicAnimation {
 			load(resourceManager, this);
 		}
 		
-		this.readStates();
+		this.onLoaded();
 	}
 	
-	protected void readStates() {
+	protected void onLoaded() {
 		this.stateSpectrum.readFrom(this.stateSpectrumBlueprint);
 	}
 	
