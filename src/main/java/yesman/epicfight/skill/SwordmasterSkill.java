@@ -8,6 +8,7 @@ import com.google.common.collect.Lists;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
+import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 public class SwordmasterSkill extends PassiveSkill {
@@ -21,7 +22,7 @@ public class SwordmasterSkill extends PassiveSkill {
 	@Override
 	public void onInitiate(SkillContainer container) {
 		container.getExecuter().getEventListener().addEventListener(EventType.ATTACK_SPEED_MODIFY_EVENT, EVENT_UUID, (event) -> {
-			WeaponCategories heldWeaponCategory = event.getItemCapability().getWeaponCategory();
+			WeaponCategory heldWeaponCategory = event.getItemCapability().getWeaponCategory();
 			
 			for (WeaponCategories weaponCategory : AVAILABLE_WEAPON_TYPES) {
 				if (weaponCategory == heldWeaponCategory) {

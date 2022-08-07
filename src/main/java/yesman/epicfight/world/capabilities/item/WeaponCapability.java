@@ -166,7 +166,7 @@ public class WeaponCapability extends CapabilityItem {
 		}
 		
 		@Override
-		public Builder category(WeaponCategories category) {
+		public Builder category(WeaponCategory category) {
 			super.category(category);
 			return this;
 		}
