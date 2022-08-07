@@ -49,7 +49,7 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 public class CapabilityItem {
 	public static CapabilityItem EMPTY = CapabilityItem.builder().build();
 	protected static List<StaticAnimation> commonAutoAttackMotion;
-	protected final WeaponCategories weaponCategory;
+	protected final WeaponCategory weaponCategory;
 	
 	static {
 		commonAutoAttackMotion = new ArrayList<StaticAnimation> ();
@@ -128,7 +128,7 @@ public class CapabilityItem {
 		return null;
 	}
 	
-	public WeaponCategories getWeaponCategory() {
+	public WeaponCategory getWeaponCategory() {
 		return this.weaponCategory;
 	}
 	
@@ -305,7 +305,7 @@ public class CapabilityItem {
 	
 	public static class Builder {
 		Function<Builder, CapabilityItem> constructor;
-		WeaponCategories category;
+		WeaponCategory category;
 		Map<Style, Map<Attribute, AttributeModifier>> attributeMap;
 		
 		protected Builder() {
@@ -319,7 +319,7 @@ public class CapabilityItem {
 			return this;
 		}
 		
-		public Builder category(WeaponCategories category) {
+		public Builder category(WeaponCategory category) {
 			this.category = category;
 			return this;
 		}
