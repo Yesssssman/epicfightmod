@@ -110,10 +110,6 @@ public class EpicFightMod {
     	Style.ENUM_MANAGER.load(Styles.class);
     	WeaponCategory.ENUM_MANAGER.load(WeaponCategories.class);
     	
-    	this.animationManager.registerAnimations();
-    	Skills.registerSkills();
-    	SkillArgument.registerArgumentTypes();
-    	
     	EpicFightMobEffects.EFFECTS.register(bus);
     	EpicFightPotions.POTIONS.register(bus);
         EpicFightAttributes.ATTRIBUTES.register(bus);
@@ -162,6 +158,9 @@ public class EpicFightMod {
 	}
 	
 	private void doCommonStuff(final FMLCommonSetupEvent event) {
+		event.enqueueWork(this.animationManager::registerAnimations);
+		event.enqueueWork(Skills::registerSkills);
+		event.enqueueWork(SkillArgument::registerArgumentTypes);
 		event.enqueueWork(EpicFightPotions::addRecipes);
 		event.enqueueWork(EpicFightNetworkManager::registerPackets);
 		event.enqueueWork(ProviderItem::registerWeaponTypesByClass);
