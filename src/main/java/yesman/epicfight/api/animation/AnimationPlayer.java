@@ -21,7 +21,7 @@ public class AnimationPlayer {
 	
 	public void tick(LivingEntityPatch<?> entitypatch) {
 		this.prevElapsedTime = this.elapsedTime;
-		this.elapsedTime += ConfigurationIngame.A_TICK * this.getPlay().getPlaySpeed(entitypatch);
+		this.elapsedTime += ConfigurationIngame.A_TICK * this.getAnimation().getPlaySpeed(entitypatch);
 		
 		if (this.elapsedTime >= this.play.getTotalTime()) {
 			if (this.play.isRepeat()) {
@@ -96,7 +96,7 @@ public class AnimationPlayer {
 		this.isEnd = false;
 	}
 	
-	public DynamicAnimation getPlay() {
+	public DynamicAnimation getAnimation() {
 		return this.play;
 	}
 
@@ -114,7 +114,7 @@ public class AnimationPlayer {
 	
 	public void setReversed(boolean reversed) {
 		if (reversed != this.reversed) {
-			this.setElapsedTime(this.getPlay().getTotalTime() - this.getElapsedTime());
+			this.setElapsedTime(this.getAnimation().getTotalTime() - this.getElapsedTime());
 			this.reversed = reversed;
 		}
 	}

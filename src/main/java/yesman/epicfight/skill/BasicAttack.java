@@ -10,15 +10,9 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.main.EpicFightMod;
-import yesman.epicfight.network.EpicFightNetworkManager;
-import yesman.epicfight.network.client.CPExecuteSkill;
 import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
@@ -42,7 +36,7 @@ public class BasicAttack extends Skill {
 	public void onInitiate(SkillContainer container) {
 		container.getDataManager().registerData(COMBO_COUNTER);
 		
-		container.getExecuter().getEventListener().addEventListener(EventType.ACTION_EVENT, EVENT_UUID, (event) -> {
+		container.getExecuter().getEventListener().addEventListener(EventType.ACTION_EVENT_SERVER, EVENT_UUID, (event) -> {
 			if (!event.getAnimation().isBasicAttackAnimation()) {
 				container.getDataManager().setData(COMBO_COUNTER, 0);
 			}
@@ -51,13 +45,7 @@ public class BasicAttack extends Skill {
 	
 	@Override
 	public void onRemoved(SkillContainer container) {
-		container.getExecuter().getEventListener().removeListener(EventType.ACTION_EVENT, EVENT_UUID);
-	}
-	
-	@OnlyIn(Dist.CLIENT)
-	@Override
-	public void executeOnClient(LocalPlayerPatch executer, FriendlyByteBuf args) {
-		EpicFightNetworkManager.sendToServer(new CPExecuteSkill(this.category.universalOrdinal(), true, args));
+		container.getExecuter().getEventListener().removeListener(EventType.ACTION_EVENT_SERVER, EVENT_UUID);
 	}
 	
 	@Override
@@ -65,11 +53,12 @@ public class BasicAttack extends Skill {
 		EntityState playerState = executer.getEntityState();
 		Player player = executer.getOriginal();
 		
-		return !(player.isSpectator() || player.isFallFlying() || executer.currentLivingMotion == LivingMotions.FALL || !playerState.canBasicAttack());
+		return !(player.isSpectator() || executer.isUnstable() || !playerState.canBasicAttack());
 	}
 	
 	@Override
 	public void executeOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
+		
 		if (executer.getEventListener().triggerEvents(EventType.BASIC_ATTACK_EVENT, new BasicAttackEvent(executer))) {
 			return;
 		}

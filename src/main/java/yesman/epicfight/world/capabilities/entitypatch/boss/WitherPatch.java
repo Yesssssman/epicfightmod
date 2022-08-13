@@ -114,8 +114,8 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
-		if (this.getEntityState().inaction() && considerInaction) {
-			currentLivingMotion = LivingMotions.IDLE;
+		if (this.original.getHealth() <= 0.0F) {
+			currentLivingMotion = LivingMotions.DEATH;
 		} else {
 			currentLivingMotion = LivingMotions.IDLE;
 		}
@@ -169,7 +169,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 			}
 		}
 		
-		if (this.animator.getPlayerFor(null).getPlay().equals(Animations.WITHER_CHARGE) && this.getEntityState().attacking() && ForgeEventFactory.getMobGriefingEvent(this.original.level, this.original)) {
+		if (this.animator.getPlayerFor(null).getAnimation().equals(Animations.WITHER_CHARGE) && this.getEntityState().attacking() && ForgeEventFactory.getMobGriefingEvent(this.original.level, this.original)) {
 			int x = Mth.floor(this.original.getX());
 			int y = Mth.floor(this.original.getY());
 			int z = Mth.floor(this.original.getZ());
@@ -250,7 +250,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	
 	@Override
 	public AttackResult tryHurt(DamageSource damageSource, float amount) {
-		DynamicAnimation animation = this.getAnimator().getPlayerFor(null).getPlay();
+		DynamicAnimation animation = this.getAnimator().getPlayerFor(null).getAnimation();
 		
 		if (animation.equals(Animations.WITHER_CHARGE) || animation.equals(Animations.WITHER_BLOCKED)) {
 			Entity entity = damageSource.getDirectEntity();
@@ -488,7 +488,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 					Vec3 vec31 = new Vec3(entity.getX() - witherBoss.getX(), 0.0D, entity.getZ() - witherBoss.getZ());
 					double d0 = vec3.y;
 					
-					if (witherBoss.getY() < entity.getY() || !witherBoss.isPowered() && witherBoss.getY() < entity.getY() + 5.0D && !WitherPatch.this.getAnimator().getPlayerFor(null).getPlay().getProperty(ActionAnimationProperty.MOVE_VERTICAL).orElse(false)) {
+					if (witherBoss.getY() < entity.getY() || !witherBoss.isPowered() && witherBoss.getY() < entity.getY() + 5.0D && !WitherPatch.this.getAnimator().getPlayerFor(null).getAnimation().getProperty(ActionAnimationProperty.MOVE_VERTICAL).orElse(false)) {
 						d0 = Math.max(0.0D, d0);
 						d0 = d0 + (0.3D - d0 * (double) 0.6F);
 					}

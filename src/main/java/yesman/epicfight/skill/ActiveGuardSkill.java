@@ -39,11 +39,11 @@ public class ActiveGuardSkill extends GuardSkill {
 					new StaticAnimation[] { Animations.SWORD_GUARD_ACTIVE_HIT1, Animations.SWORD_GUARD_ACTIVE_HIT2 } :
 					new StaticAnimation[] { Animations.SWORD_GUARD_ACTIVE_HIT2, Animations.SWORD_GUARD_ACTIVE_HIT3 })
 				.addAdvancedGuardMotion(WeaponCategories.LONGSWORD, (itemCap, playerpatch) ->
-					new StaticAnimation[] { Animations.SWORD_GUARD_ACTIVE_HIT1, Animations.SWORD_GUARD_ACTIVE_HIT2 })
+					new StaticAnimation[] { Animations.LONGSWORD_GUARD_ACTIVE_HIT1, Animations.LONGSWORD_GUARD_ACTIVE_HIT2 })
 				.addAdvancedGuardMotion(WeaponCategories.KATANA, (itemCap, playerpatch) ->
 					new StaticAnimation[] { Animations.SWORD_GUARD_ACTIVE_HIT1, Animations.SWORD_GUARD_ACTIVE_HIT2 })
 				.addAdvancedGuardMotion(WeaponCategories.TACHI, (itemCap, playerpatch) ->
-					new StaticAnimation[] { Animations.SWORD_GUARD_ACTIVE_HIT1, Animations.SWORD_GUARD_ACTIVE_HIT2 });
+					new StaticAnimation[] { Animations.LONGSWORD_GUARD_ACTIVE_HIT1, Animations.LONGSWORD_GUARD_ACTIVE_HIT2 });
 	}
 	
 	public ActiveGuardSkill(GuardSkill.Builder builder) {
@@ -134,7 +134,6 @@ public class ActiveGuardSkill extends GuardSkill {
 			
 			if (motions != null) {
 				SkillDataManager dataManager = playerpatch.getSkill(this.getCategory()).getDataManager();
-				
 				int motionCounter = dataManager.getDataValue(PARRY_MOTION_COUNTER);
 				dataManager.setDataF(PARRY_MOTION_COUNTER, (v) -> v + 1);
 				motionCounter %= motions.length;

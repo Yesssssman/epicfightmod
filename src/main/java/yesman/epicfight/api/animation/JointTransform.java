@@ -108,7 +108,7 @@ public class JointTransform {
 	
 	@Override
 	public String toString() {
-		return String.format("%s %s entry number : %d", this.translation, this.rotation, this.entries.size());
+		return String.format("translation:%s, rotation:%s, %d entries ", this.translation, this.rotation, this.entries.size());
 	}
 	
 	private static JointTransform interpolateSimple(JointTransform prev, JointTransform next, float progression) {

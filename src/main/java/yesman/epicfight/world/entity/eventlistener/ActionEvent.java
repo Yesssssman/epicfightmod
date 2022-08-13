@@ -1,13 +1,14 @@
 package yesman.epicfight.world.entity.eventlistener;
 
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
+import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
-public class ActionEvent extends PlayerEvent<ServerPlayerPatch> {
+public class ActionEvent<T extends PlayerPatch<?>> extends PlayerEvent<T> {
 	private StaticAnimation actionAnimation;
 	
-	public ActionEvent(ServerPlayerPatch playerdata, StaticAnimation actionAnimation) {
-		super(playerdata, false);
+	@SuppressWarnings("unchecked")
+	public ActionEvent(PlayerPatch<?> playerdata, StaticAnimation actionAnimation) {
+		super((T)playerdata, false);
 		this.actionAnimation = actionAnimation;
 	}
 	

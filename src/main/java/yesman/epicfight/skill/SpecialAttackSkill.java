@@ -9,7 +9,6 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
@@ -29,9 +28,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProperty;
 import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.math.ValueCorrector;
-import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
-import yesman.epicfight.network.EpicFightNetworkManager;
-import yesman.epicfight.network.client.CPExecuteSkill;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
@@ -45,15 +41,7 @@ public abstract class SpecialAttackSkill extends Skill {
 	
 	public SpecialAttackSkill(Builder<? extends Skill> builder) {
 		super(builder);
-		this.properties = Lists.<Map<AttackPhaseProperty<?>, Object>>newArrayList();
-	}
-	
-	@OnlyIn(Dist.CLIENT)
-	@Override
-	public void executeOnClient(LocalPlayerPatch executer, FriendlyByteBuf args) {
-		if (this.canExecute(executer)) {
-			EpicFightNetworkManager.sendToServer(new CPExecuteSkill(this.category.universalOrdinal(), true, args));
-		}
+		this.properties = Lists.newArrayList();
 	}
 	
 	@Override

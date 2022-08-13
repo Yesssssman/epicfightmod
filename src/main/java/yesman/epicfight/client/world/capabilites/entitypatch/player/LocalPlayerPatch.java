@@ -1,5 +1,7 @@
 package yesman.epicfight.client.world.capabilites.entitypatch.player;
 
+import java.util.UUID;
+
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -28,9 +30,11 @@ import yesman.epicfight.network.client.CPPlayAnimation;
 import yesman.epicfight.network.client.CPSetPlayerTarget;
 import yesman.epicfight.network.client.CPChangePlayerMode;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
+import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 @OnlyIn(Dist.CLIENT)
 public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
+	private static final UUID ACTION_EVENT_UUID = UUID.fromString("d1a1e102-1621-11ed-861d-0242ac120002");
 	private Minecraft minecraft;
 	private LivingEntity rayTarget;
 	private float prevStamina;
@@ -42,8 +46,16 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		ClientEngine.instance.inputController.setPlayerPatch(this);
 	}
 	
-	public void onJoinWorld(ClientPlayerNetworkEvent.RespawnEvent event) {
-		super.onJoinWorld(event.getNewPlayer(), new EntityJoinWorldEvent(event.getNewPlayer(), event.getNewPlayer().level));
+	@Override
+	public void onJoinWorld(LocalPlayer entityIn, EntityJoinWorldEvent event) {
+		super.onJoinWorld(entityIn, event);
+		this.eventListeners.addEventListener(EventType.ACTION_EVENT_CLIENT, ACTION_EVENT_UUID, (playerEvent) -> {
+			ClientEngine.instance.inputController.unlockHoldItem();
+		});
+	}
+	
+	public void onRespawnLocalPlayer(ClientPlayerNetworkEvent.RespawnEvent event) {
+		this.onJoinWorld(event.getNewPlayer(), new EntityJoinWorldEvent(event.getNewPlayer(), event.getNewPlayer().level));
 	}
 	
 	@Override

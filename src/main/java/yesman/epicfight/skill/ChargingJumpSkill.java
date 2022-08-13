@@ -10,10 +10,7 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 
 public class ChargingJumpSkill extends Skill {
 	private static final SkillDataKey<Integer> CHARGE_TICKS = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
-	
-	@Deprecated
-	private static final UUID EVENT_UUID = UUID.randomUUID();
-	
+	private static final UUID EVENT_UUID = UUID.fromString("0bbe389a-1622-11ed-861d-0242ac120002");
 	private static final int LEAST_REQUIRED_TICKS = 10;
 	
 	public static Skill.Builder<ChargingJumpSkill> createBuilder() {

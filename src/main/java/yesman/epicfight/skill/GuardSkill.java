@@ -23,7 +23,6 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.AttackResult;
@@ -94,17 +93,17 @@ public class GuardSkill extends Skill {
 			return this;
 		}
 		
-		public Builder addGuardMotion(WeaponCategories weaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, StaticAnimation> function) {
+		public Builder addGuardMotion(WeaponCategory weaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, StaticAnimation> function) {
 			this.guardMotions.put(weaponCategory, function);
 			return this;
 		}
 		
-		public Builder addAdvancedGuardMotion(WeaponCategories weaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, ?> function) {
+		public Builder addAdvancedGuardMotion(WeaponCategory weaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, ?> function) {
 			this.advancedGuardMotions.put(weaponCategory, function);
 			return this;
 		}
 		
-		public Builder addGuardBreakMotion(WeaponCategories weaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, StaticAnimation> function) {
+		public Builder addGuardBreakMotion(WeaponCategory weaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, StaticAnimation> function) {
 			this.guardBreakMotions.put(weaponCategory, function);
 			return this;
 		}
@@ -323,7 +322,7 @@ public class GuardSkill extends Skill {
 	@Override
 	public boolean isExecutableState(PlayerPatch<?> executer) {
 		EntityState playerState = executer.getEntityState();
-		return !(executer.getOriginal().isFallFlying() || executer.currentLivingMotion == LivingMotions.FALL || playerState.hurt()) && executer.isBattleMode();
+		return !(executer.isUnstable() || playerState.hurt()) && executer.isBattleMode();
 	}
 	
 	protected boolean isBlockableSource(DamageSource damageSource, boolean advanced) {

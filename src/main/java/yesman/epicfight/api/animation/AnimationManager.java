@@ -46,6 +46,7 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 	public void registerAnimations() {
 		Map<String, Runnable> registryMap = Maps.newHashMap();
 		ModLoader.get().postEvent(new AnimationRegistryEvent(registryMap));
+		
 		registryMap.entrySet().forEach((entry) -> {
 			this.modid = entry.getKey();
 			this.namespaceHash = this.modid.hashCode();

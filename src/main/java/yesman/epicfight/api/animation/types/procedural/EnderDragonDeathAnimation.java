@@ -14,6 +14,7 @@ public class EnderDragonDeathAnimation extends LongHitAnimation {
 	@Override
 	public void loadAnimation(ResourceManager resourceManager) {
 		loadBothSide(resourceManager, this);
+		this.onLoaded();
 	}
 	
 	@Override

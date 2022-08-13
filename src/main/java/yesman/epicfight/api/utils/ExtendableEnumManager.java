@@ -15,7 +15,7 @@ public class ExtendableEnumManager<T> {
 	private Map<Integer, T> enumMapByOrdinal = Maps.newLinkedHashMap();
 	private Map<String, T> enumMapByName = Maps.newLinkedHashMap();
 	
-	public void load(Class<?> targetClss) {
+	public void loadPreemptive(Class<?> targetClss) {
 		try {
 			Method m = targetClss.getMethod("values");
 			m.invoke(null);

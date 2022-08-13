@@ -4,7 +4,6 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
-import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.client.CPExecuteSkill;
 
 public class StepSkill extends DodgeSkill {
@@ -14,7 +13,7 @@ public class StepSkill extends DodgeSkill {
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void executeOnClient(LocalPlayerPatch executer, FriendlyByteBuf args) {
+	public Object getExecutionPacket(LocalPlayerPatch executer, FriendlyByteBuf args) {
 		int forward = args.readInt();
 		int backward = args.readInt();
 		int left = args.readInt();
@@ -38,6 +37,6 @@ public class StepSkill extends DodgeSkill {
 		packet.getBuffer().writeInt(animation);
 		packet.getBuffer().writeFloat(degree);
 		
-		EpicFightNetworkManager.sendToServer(packet);
+		return packet;
 	}
 }

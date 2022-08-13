@@ -37,7 +37,7 @@ public class PatchedWitherArmorLayer extends PatchedLayer<WitherBoss, WitherPatc
 				transparency = entitypatch.isGhost() ? 0.0F : 1.0F;
 				AnimationPlayer animationPlayer = entitypatch.getAnimator().getPlayerFor(null);
 				
-				if (animationPlayer.getPlay() == Animations.WITHER_SPELL_ARMOR) {
+				if (animationPlayer.getAnimation() == Animations.WITHER_SPELL_ARMOR) {
 					transparency = (animationPlayer.getPrevElapsedTime() + (animationPlayer.getElapsedTime() - animationPlayer.getPrevElapsedTime()) * partialTicks) / (Animations.WITHER_SPELL_ARMOR.getTotalTime() - 0.5F);
 				}
 			} else {

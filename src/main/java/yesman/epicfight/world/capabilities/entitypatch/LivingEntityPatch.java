@@ -126,6 +126,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	
 	public void onDeath() {
 		this.getAnimator().playDeathAnimation();
+		this.currentLivingMotion = LivingMotions.DEATH;
 	}
 	
 	public void updateEntityState() {

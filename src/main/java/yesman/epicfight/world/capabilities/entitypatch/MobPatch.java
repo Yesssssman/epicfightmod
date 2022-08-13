@@ -67,12 +67,12 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	}
 	
 	protected final void commonMobUpdateMotion(boolean considerInaction) {
-		if (this.state.inaction() && considerInaction) {
+		if (this.original.getHealth() <= 0.0F) {
+			currentLivingMotion = LivingMotions.DEATH;
+		} else if (this.state.inaction() && considerInaction) {
 			currentLivingMotion = LivingMotions.IDLE;
 		} else {
-			if (this.original.getHealth() <= 0.0F)
-				currentLivingMotion = LivingMotions.DEATH;
-			else if (original.getVehicle() != null)
+			if (original.getVehicle() != null)
 				currentLivingMotion = LivingMotions.MOUNT;
 			else
 				if (this.original.getDeltaMovement().y < -0.55F)
@@ -87,12 +87,12 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	}
 	
 	protected final void commonAggressiveMobUpdateMotion(boolean considerInaction) {
-		if (this.state.inaction() && considerInaction) {
+		if (this.original.getHealth() <= 0.0F) {
+			currentLivingMotion = LivingMotions.DEATH;
+		} else if (this.state.inaction() && considerInaction) {
 			currentLivingMotion = LivingMotions.IDLE;
 		} else {
-			if (this.original.getHealth() <= 0.0F) {
-				currentLivingMotion = LivingMotions.DEATH;
-			} else if (original.getVehicle() != null) {
+			if (original.getVehicle() != null) {
 				currentLivingMotion = LivingMotions.MOUNT;
 			} else {
 				if (this.original.getDeltaMovement().y < -0.55F)
@@ -120,7 +120,7 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 			else
 				currentCompositeMotion = LivingMotions.AIM;
 		} else {
-			if (this.getClientAnimator().getCompositeLayer(Layer.Priority.MIDDLE).animationPlayer.getPlay().isReboundAnimation())
+			if (this.getClientAnimator().getCompositeLayer(Layer.Priority.MIDDLE).animationPlayer.getAnimation().isReboundAnimation())
 				currentCompositeMotion = LivingMotions.NONE;
 		}
 		

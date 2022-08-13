@@ -14,7 +14,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.utils.math.Formulars;
 import yesman.epicfight.client.events.engine.ControllEngine;
@@ -22,6 +21,7 @@ import yesman.epicfight.client.gui.BattleModeGui;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.config.ConfigurationIngame;
 import yesman.epicfight.network.EpicFightNetworkManager;
+import yesman.epicfight.network.client.CPExecuteSkill;
 import yesman.epicfight.network.server.SPSetSkillValue;
 import yesman.epicfight.network.server.SPSetSkillValue.Target;
 import yesman.epicfight.network.server.SPSkillExecutionFeedback;
@@ -113,7 +113,7 @@ public abstract class Skill {
 	
 	public boolean isExecutableState(PlayerPatch<?> executer) {
 		EntityState playerState = executer.getEntityState();
-		return !(executer.getOriginal().isFallFlying() || executer.currentLivingMotion == LivingMotions.FALL || !playerState.canUseSkill());
+		return !(executer.isUnstable() || !playerState.canUseSkill());
 	}
 	
 	public boolean canExecute(PlayerPatch<?> executer) {
@@ -121,12 +121,11 @@ public abstract class Skill {
 	}
 	
 	/**
-	 * Gather arguments in client side and send packet to server.
-	 * Process the skill execution with given arguments.
+	 * Get packet to send to the server
 	 */
 	@OnlyIn(Dist.CLIENT)
-	public void executeOnClient(LocalPlayerPatch executer, FriendlyByteBuf args) {
-		
+	public Object getExecutionPacket(LocalPlayerPatch executer, FriendlyByteBuf args) {
+		return new CPExecuteSkill(this.category.universalOrdinal(), true, args);
 	}
 	
 	public void cancelOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {

@@ -29,7 +29,6 @@ import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class ActionAnimation extends MainFrameAnimation {
-	//protected float delayTime;
 	
 	public ActionAnimation(float convertTime, String path, Model model) {
 		this(convertTime, Float.MAX_VALUE, path, model);
@@ -66,22 +65,6 @@ public class ActionAnimation extends MainFrameAnimation {
 			transformSheet.readFrom(self.jointTransforms.get("Root"));
 		});
 		
-		LivingEntity livingentity = entitypatch.getOriginal();
-		
-		if (entitypatch.isLogicalClient()) {
-			if (!(livingentity instanceof LocalPlayer)) {
-				actionCoordSetter = (self, entitypatch$2, transformSheet) -> {
-					transformSheet.readFrom(self.jointTransforms.get("Root"));
-				};
-			}
-		} else {
-			if ((livingentity instanceof ServerPlayer)) {
-				actionCoordSetter = (self, entitypatch$2, transformSheet) -> {
-					transformSheet.readFrom(self.jointTransforms.get("Root"));
-				};
-			}
-		}
-		
 		entitypatch.getAnimator().getPlayerFor(this).setActionAnimationCoord(this, entitypatch, actionCoordSetter);
 	}
 	
@@ -97,18 +80,6 @@ public class ActionAnimation extends MainFrameAnimation {
 	};
 	
 	private void move(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
-		LivingEntity livingentity = entitypatch.getOriginal();
-		
-		if (entitypatch.isLogicalClient()) {
-			if (!(livingentity instanceof LocalPlayer)) {
-				return;
-			}
-		} else {
-			if ((livingentity instanceof ServerPlayer)) {
-				return;
-			}
-		}
-		
 		if (!this.validateMovement(entitypatch, animation)) {
 			return;
 		}
@@ -116,6 +87,7 @@ public class ActionAnimation extends MainFrameAnimation {
 		EntityState state = this.getState(entitypatch.getAnimator().getPlayerFor(this).getElapsedTime());
 		
 		if (state.inaction()) {
+			LivingEntity livingentity = entitypatch.getOriginal();
 			Vec3f vec3 = this.getCoordVector(entitypatch, animation);
 			BlockPos blockpos = new BlockPos(livingentity.getX(), livingentity.getBoundingBox().minY - 1.0D, livingentity.getZ());
 			BlockState blockState = livingentity.level.getBlockState(blockpos);
@@ -128,6 +100,18 @@ public class ActionAnimation extends MainFrameAnimation {
 	}
 	
 	private boolean validateMovement(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
+		LivingEntity livingentity = entitypatch.getOriginal();
+		
+		if (entitypatch.isLogicalClient()) {
+			if (!(livingentity instanceof LocalPlayer)) {
+				return false;
+			}
+		} else {
+			if ((livingentity instanceof ServerPlayer)) {
+				return false;
+			}
+		}
+		
 		if (animation instanceof LinkAnimation) {
 			if (!this.getProperty(ActionAnimationProperty.MOVE_ON_LINK).orElse(true)) {
 				return false;
@@ -140,15 +124,14 @@ public class ActionAnimation extends MainFrameAnimation {
 	}
 	
 	private boolean shouldMove(float currentTime) {
-		if (this.properties.containsKey(ActionAnimationProperty.ACTION_TIME)) {
-			ActionTime[] actionTimes = this.getProperty(ActionAnimationProperty.ACTION_TIME).get();
+		if (this.properties.containsKey(ActionAnimationProperty.MOVE_TIME)) {
+			ActionTime[] actionTimes = this.getProperty(ActionAnimationProperty.MOVE_TIME).get();
 			for (ActionTime actionTime : actionTimes) {
-				if (currentTime <= actionTime.end) {
-					if (actionTime.begin <= currentTime) {
-						return true;
-					}
+				if (actionTime.begin <= currentTime && currentTime <= actionTime.end) {
+					return true;
 				}
 			}
+			
 			return false;
 		} else {
 			return true;
@@ -214,37 +197,43 @@ public class ActionAnimation extends MainFrameAnimation {
 			}
 		}
 		
-		TransformSheet rootCoord = (this.getProperty(ActionAnimationProperty.COORD_SET_TICK).isEmpty() || animation instanceof LinkAnimation) ? animation.jointTransforms.get("Root") : entitypatch.getAnimator().getPlayerFor(this).getActionAnimationCoord();
+		TransformSheet rootCoord;// = (this.getProperty(ActionAnimationProperty.COORD_SET_TICK).isEmpty() || animation instanceof LinkAnimation) ? animation.jointTransforms.get("Root") : entitypatch.getAnimator().getPlayerFor(this).getActionAnimationCoord();
 		
-		if (rootCoord != null) {
-			LivingEntity livingentity = entitypatch.getOriginal();
-			AnimationPlayer player = entitypatch.getAnimator().getPlayerFor(animation);
-			JointTransform jt = rootCoord.getInterpolatedTransform(player.getElapsedTime());
-			JointTransform prevJt = rootCoord.getInterpolatedTransform(player.getPrevElapsedTime());
-			Vec4f currentpos = new Vec4f(jt.translation().x, jt.translation().y, jt.translation().z, 1.0F);
-			Vec4f prevpos = new Vec4f(prevJt.translation().x, prevJt.translation().y, prevJt.translation().z, 1.0F);
-			OpenMatrix4f rotationTransform = entitypatch.getModelMatrix(1.0F).removeTranslation();
-			OpenMatrix4f localTransform = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature().searchJointByName("Root").getLocalTrasnform().removeTranslation();
-			rotationTransform.mulBack(localTransform);
-			currentpos.transform(rotationTransform);
-			prevpos.transform(rotationTransform);
-			boolean hasNoGravity = entitypatch.getOriginal().isNoGravity();
-			boolean moveVertical = this.getProperty(ActionAnimationProperty.MOVE_VERTICAL).orElse(false);
-			float dx = prevpos.x - currentpos.x;
-			float dy = (moveVertical || hasNoGravity) ? currentpos.y - prevpos.y : 0.0F;
-			float dz = prevpos.z - currentpos.z;
-			dx = Math.abs(dx) > 0.0000001F ? dx : 0.0F;
-			dz = Math.abs(dz) > 0.0000001F ? dz : 0.0F;
-			
-			if (moveVertical && currentpos.y > 0.0F && !hasNoGravity) {
-				Vec3 motion = livingentity.getDeltaMovement();
-				livingentity.setDeltaMovement(motion.x, motion.y <= 0 ? (motion.y + 0.08D) : motion.y, motion.z);
-			}
-			
-			return new Vec3f(dx, dy, dz);
+		if (animation instanceof LinkAnimation) {
+			rootCoord = animation.jointTransforms.get("Root");
 		} else {
-			return new Vec3f(0, 0, 0);
+			rootCoord = entitypatch.getAnimator().getPlayerFor(this).getActionAnimationCoord();
+			
+			if (rootCoord == null) {
+				rootCoord = animation.jointTransforms.get("Root");
+			}
 		}
+		
+		LivingEntity livingentity = entitypatch.getOriginal();
+		AnimationPlayer player = entitypatch.getAnimator().getPlayerFor(animation);
+		JointTransform jt = rootCoord.getInterpolatedTransform(player.getElapsedTime());
+		JointTransform prevJt = rootCoord.getInterpolatedTransform(player.getPrevElapsedTime());
+		Vec4f currentpos = new Vec4f(jt.translation().x, jt.translation().y, jt.translation().z, 1.0F);
+		Vec4f prevpos = new Vec4f(prevJt.translation().x, prevJt.translation().y, prevJt.translation().z, 1.0F);
+		OpenMatrix4f rotationTransform = entitypatch.getModelMatrix(1.0F).removeTranslation();
+		OpenMatrix4f localTransform = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature().searchJointByName("Root").getLocalTrasnform().removeTranslation();
+		rotationTransform.mulBack(localTransform);
+		currentpos.transform(rotationTransform);
+		prevpos.transform(rotationTransform);
+		boolean hasNoGravity = entitypatch.getOriginal().isNoGravity();
+		boolean moveVertical = this.getProperty(ActionAnimationProperty.MOVE_VERTICAL).orElse(false);
+		float dx = prevpos.x - currentpos.x;
+		float dy = (moveVertical || hasNoGravity) ? currentpos.y - prevpos.y : 0.0F;
+		float dz = prevpos.z - currentpos.z;
+		dx = Math.abs(dx) > 0.0000001F ? dx : 0.0F;
+		dz = Math.abs(dz) > 0.0000001F ? dz : 0.0F;
+		
+		if (moveVertical && currentpos.y > 0.0F && !hasNoGravity) {
+			Vec3 motion = livingentity.getDeltaMovement();
+			livingentity.setDeltaMovement(motion.x, motion.y <= 0 ? (motion.y + 0.08D) : motion.y, motion.z);
+		}
+		
+		return new Vec3f(dx, dy, dz);
 	}
 	
 	public static class ActionTime {

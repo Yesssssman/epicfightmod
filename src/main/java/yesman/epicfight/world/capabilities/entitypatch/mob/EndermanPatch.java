@@ -166,7 +166,7 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 				}
 				
 				if (extDamageSource == null || extDamageSource.getStunType() != StunType.HOLD) {
-					int percentage = this.getServerAnimator().getPlayerFor(null).getPlay() instanceof AttackAnimation ? 10 : 3;
+					int percentage = this.getServerAnimator().getPlayerFor(null).getAnimation() instanceof AttackAnimation ? 10 : 3;
 					if (this.original.getRandom().nextInt(percentage) == 0) {
 						for (int i = 0; i < 9; i++) {
 							if (this.original.teleport()) {

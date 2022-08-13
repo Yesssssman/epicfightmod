@@ -59,13 +59,14 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
-		if (this.state.movementLocked() && considerInaction) {
+		if (this.original.getHealth() <= 0.0F) {
+			currentLivingMotion = LivingMotions.DEATH;
+		} else if (this.state.movementLocked() && considerInaction) {
 			currentLivingMotion = LivingMotions.IDLE;
 		} else {
 			ClientAnimator animator = this.getClientAnimator();
-			if (this.original.getHealth() <= 0.0F) {
-				currentLivingMotion = LivingMotions.DEATH;
-			} else if (original.isFallFlying() || original.isAutoSpinAttack()) {
+			
+			if (original.isFallFlying() || original.isAutoSpinAttack()) {
 				currentLivingMotion = LivingMotions.FLY;
 			} else if (original.getVehicle() != null) {
 				currentLivingMotion = LivingMotions.MOUNT;
@@ -130,7 +131,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 		} else {
 			if (this.original.getMainHandItem().getItem() instanceof ProjectileWeaponItem && CrossbowItem.isCharged(this.original.getMainHandItem()))
 				currentCompositeMotion = LivingMotions.AIM;
-			else if (this.getClientAnimator().getCompositeLayer(Layer.Priority.MIDDLE).animationPlayer.getPlay().isReboundAnimation())
+			else if (this.getClientAnimator().getCompositeLayer(Layer.Priority.MIDDLE).animationPlayer.getAnimation().isReboundAnimation())
 				currentCompositeMotion = LivingMotions.NONE;
 			else if (this.original.swinging && this.original.getSleepingPos().isEmpty())
 				currentCompositeMotion = LivingMotions.DIGGING;
@@ -172,6 +173,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 		
 		super.clientTick(event);
 		
+		/** {@link LivingDeathEvent} never fired for client players **/
 		if (this.original.deathTime == 1) {
 			this.getClientAnimator().playDeathAnimation();
 		}

@@ -6,7 +6,7 @@ import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.utils.math.Vec3f;
 
 public class TipPointAnimation {
-	public final IKSetter ikSetter;
+	public final IKInfo ikSetter;
 	private final TransformSheet animation;
 	private Vec3f targetpos;
 	private float time;
@@ -16,7 +16,7 @@ public class TipPointAnimation {
 	private boolean isWorking;
 	private boolean isTouchingGround;
 	
-	public TipPointAnimation(TransformSheet animation, Vec3f initpos, IKSetter ikSetter) {
+	public TipPointAnimation(TransformSheet animation, Vec3f initpos, IKInfo ikSetter) {
 		this.animation = animation;
 		this.targetpos = initpos;
 		this.ikSetter = ikSetter;

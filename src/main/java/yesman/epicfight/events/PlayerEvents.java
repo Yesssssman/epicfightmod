@@ -54,6 +54,11 @@ public class PlayerEvents {
 			
 			if (playerpatch != null && (playerpatch.getOriginal().getOffhandItem().getUseAnimation() == UseAnim.NONE || !playerpatch.getHoldingItemCapability(InteractionHand.MAIN_HAND).getStyle(playerpatch).canUseOffhand())) {
 				boolean canceled = playerpatch.getEventListener().triggerEvents(EventType.SERVER_ITEM_USE_EVENT, new RightClickItemEvent<>(playerpatch));
+				
+				if (playerpatch.getEntityState().movementLocked()) {
+					canceled = true;
+				}
+				
 				event.setCanceled(canceled);
 			}
 		}

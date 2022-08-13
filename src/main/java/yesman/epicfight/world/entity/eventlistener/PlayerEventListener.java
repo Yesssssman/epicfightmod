@@ -75,7 +75,8 @@ public class PlayerEventListener {
 	}
 	
 	public static class EventType<T extends PlayerEvent<?>> {
-		public static final EventType<ActionEvent> ACTION_EVENT = new EventType<>(LogicalSide.SERVER);
+		public static final EventType<ActionEvent<LocalPlayerPatch>> ACTION_EVENT_CLIENT = new EventType<>(null);
+		public static final EventType<ActionEvent<ServerPlayerPatch>> ACTION_EVENT_SERVER = new EventType<>(null);
 		public static final EventType<AttackSpeedModifyEvent> ATTACK_SPEED_MODIFY_EVENT = new EventType<>(null);
 		public static final EventType<DealtDamageEvent<PlayerPatch<?>>> DEALT_DAMAGE_EVENT_PRE = new EventType<>(null);
 		public static final EventType<DealtDamageEvent<ServerPlayerPatch>> DEALT_DAMAGE_EVENT_POST = new EventType<>(LogicalSide.SERVER);

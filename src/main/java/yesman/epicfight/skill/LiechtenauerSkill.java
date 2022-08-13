@@ -18,14 +18,17 @@ import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSounds;
-import yesman.epicfight.particle.HitParticleType;
+import yesman.epicfight.gameasset.Skills;
 import yesman.epicfight.particle.EpicFightParticles;
+import yesman.epicfight.particle.HitParticleType;
+import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 public class LiechtenauerSkill extends SpecialAttackSkill {
 	private static final UUID EVENT_UUID = UUID.fromString("244c57c0-a837-11eb-bcbc-0242ac130002");
+	private static final SkillDataKey<Integer> PARRY_MOTION_COUNTER = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
 	
 	public LiechtenauerSkill(Builder<? extends Skill> builder) {
 		super(builder);
@@ -33,6 +36,8 @@ public class LiechtenauerSkill extends SpecialAttackSkill {
 	
 	@Override
 	public void onInitiate(SkillContainer container) {
+		container.getDataManager().registerData(PARRY_MOTION_COUNTER);
+		
 		if (!container.getExecuter().isLogicalClient()) {
 			this.setMaxDurationSynchronize((ServerPlayerPatch)container.getExecuter(), this.maxDuration + EnchantmentHelper.getEnchantmentLevel(Enchantments.SWEEPING_EDGE, container.getExecuter().getOriginal()));
 		}
@@ -62,7 +67,19 @@ public class LiechtenauerSkill extends SpecialAttackSkill {
 				
 				if (isFront) {
 					this.setDurationSynchronize(event.getPlayerPatch(), container.duration - 1);
-					event.getPlayerPatch().playAnimationSynchronized(Animations.LONGSWORD_GUARD_HIT, 0);
+					
+					if (event.getPlayerPatch().getSkill(SkillCategories.GUARD).containingSkill == Skills.ACTIVE_GUARD) {
+						SkillDataManager dataManager = event.getPlayerPatch().getSkill(this.getCategory()).getDataManager();
+						int motionCounter = dataManager.getDataValue(PARRY_MOTION_COUNTER);
+						dataManager.setDataF(PARRY_MOTION_COUNTER, (v) -> v + 1);
+						motionCounter %= 2;
+						
+						event.getPlayerPatch().playAnimationSynchronized((motionCounter == 0) ?
+								Animations.LONGSWORD_GUARD_ACTIVE_HIT1 : Animations.LONGSWORD_GUARD_ACTIVE_HIT2, 0);
+					} else {
+						event.getPlayerPatch().playAnimationSynchronized(Animations.LONGSWORD_GUARD_HIT, 0);
+					}
+					
 					event.getPlayerPatch().playSound(EpicFightSounds.CLASH, -0.05F, 0.1F);
 					Entity playerentity = event.getPlayerPatch().getOriginal();
 					EpicFightParticles.HIT_BLUNT.get().spawnParticleWithArgument(((ServerLevel)playerentity.level), HitParticleType.FRONT_OF_EYES, HitParticleType.ZERO, playerentity, damageSource.getDirectEntity());

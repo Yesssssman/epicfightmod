@@ -60,12 +60,13 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	@Override
 	public void onJoinWorld(T entityIn, EntityJoinWorldEvent event) {
 		super.onJoinWorld(entityIn, event);
+		
 		CapabilitySkill skillCapability = this.getSkillCapability();
 		skillCapability.skillContainers[SkillCategories.BASIC_ATTACK.universalOrdinal()].setSkill(Skills.BASIC_ATTACK);
 		skillCapability.skillContainers[SkillCategories.AIR_ATTACK.universalOrdinal()].setSkill(Skills.AIR_ATTACK);
 		skillCapability.skillContainers[SkillCategories.KNOCKDOWN_WAKEUP.universalOrdinal()].setSkill(Skills.KNOCKDOWN_WAKEUP);
 		this.tickSinceLastAction = 0;
-		this.eventListeners.addEventListener(EventType.ACTION_EVENT, ACTION_EVENT_UUID, (playerEvent) -> {
+		this.eventListeners.addEventListener(EventType.ACTION_EVENT_SERVER, ACTION_EVENT_UUID, (playerEvent) -> {
 			this.resetActionTick();
 		});
 	}
@@ -232,6 +233,10 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	
 	public int getTickSinceLastAction() {
 		return this.tickSinceLastAction;
+	}
+	
+	public boolean isUnstable() {
+		return this.original.isFallFlying() || this.currentLivingMotion == LivingMotions.FALL;
 	}
 	
 	public void openSkillBook(ItemStack itemstack, InteractionHand hand) {

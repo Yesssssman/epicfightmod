@@ -55,14 +55,14 @@ public class VindicatorPatch<T extends PathfinderMob> extends AbstractIllagerPat
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
-		if (this.state.inaction() && considerInaction) {
+		if (this.original.getHealth() <= 0.0F) {
+			currentLivingMotion = LivingMotions.DEATH;
+		} else if (this.state.inaction() && considerInaction) {
 			currentLivingMotion = LivingMotions.IDLE;
 		} else {
 			boolean isAngry = this.original.isAggressive();
 			
-			if (this.original.getHealth() <= 0.0F) {
-				currentLivingMotion = LivingMotions.DEATH;
-			} else if (this.original.animationSpeed > 0.01F) {
+			if (this.original.animationSpeed > 0.01F) {
 				currentLivingMotion = isAngry ? LivingMotions.CHASE : LivingMotions.WALK;
 			} else {
 				currentLivingMotion = isAngry ? LivingMotions.ANGRY : LivingMotions.IDLE;

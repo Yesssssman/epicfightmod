@@ -3,10 +3,8 @@ package yesman.epicfight.skill;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
-import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.client.CPExecuteSkill;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
@@ -17,7 +15,7 @@ public class KnockdownWakeupSkill extends DodgeSkill {
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void executeOnClient(LocalPlayerPatch executer, FriendlyByteBuf args) {
+	public Object getExecutionPacket(LocalPlayerPatch executer, FriendlyByteBuf args) {
 		args.readInt();
 		args.readInt();
 		int left = args.readInt();
@@ -29,14 +27,13 @@ public class KnockdownWakeupSkill extends DodgeSkill {
 		packet.getBuffer().writeInt(animation);
 		packet.getBuffer().writeFloat(0.0F);
 		
-		EpicFightNetworkManager.sendToServer(packet);
+		return packet;
 	}
 	
 	@Override
 	public boolean isExecutableState(PlayerPatch<?> executer) {
 		EntityState playerState = executer.getEntityState();
 		
-		return !(executer.getOriginal().isFallFlying() || executer.currentLivingMotion == LivingMotions.FALL || (playerState.hurt()
-				&& !playerState.knockDown())) && !executer.getOriginal().isInWater() && !executer.getOriginal().onClimbable();
+		return !(executer.isUnstable() || (playerState.hurt() && !playerState.knockDown())) && !executer.getOriginal().isInWater() && !executer.getOriginal().onClimbable();
 	}
 }

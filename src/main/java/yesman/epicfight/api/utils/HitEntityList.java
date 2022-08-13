@@ -8,11 +8,11 @@ import com.google.common.collect.Lists;
 import net.minecraft.world.entity.Entity;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
-public class HitEntitySet {
+public class HitEntityList {
 	private List<Entity> hitEntites;
 	private int index;
 	
-	public HitEntitySet(LivingEntityPatch<?> attacker, List<Entity> entities, Priority priority) {
+	public HitEntityList(LivingEntityPatch<?> attacker, List<Entity> entities, Priority priority) {
 		this.index = -1;
 		this.hitEntites = priority.sortingFunction.apply(attacker, entities);
 	}

@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.entity.PartEntity;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
 import yesman.epicfight.api.animation.types.AttackAnimation;
@@ -75,16 +76,20 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 			}
 		}
 		
-		List<Entity> entities = entitypatch.getOriginal().level.getEntities(entitypatch.getOriginal(), outerBox);
-		
-		entities.removeIf((entity) -> {
-			for (T collider : colliders) {
-				if (collider.isCollide(entity)) {
+		List<Entity> entities = entitypatch.getOriginal().level.getEntities(entitypatch.getOriginal(), outerBox, (entity) -> {
+			if (entity instanceof PartEntity) {
+				if (((PartEntity<?>)entity).getParent().is(entitypatch.getOriginal())) {
 					return false;
 				}
 			}
 			
-			return true;
+			for (T collider : colliders) {
+				if (collider.isCollide(entity)) {
+					return true;
+				}
+			}
+			
+			return false;
 		});
 		
 		return entities;

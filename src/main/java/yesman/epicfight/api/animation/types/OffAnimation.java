@@ -15,7 +15,7 @@ public class OffAnimation extends StaticAnimation {
 		if (entitypatch.isLogicalClient()) {
 			AnimationPlayer player = entitypatch.getClientAnimator().getCompositeLayer(this.getPriority()).animationPlayer;
 			
-			if (!player.isEmpty() && !(player.getPlay() instanceof OffAnimation)) {
+			if (!player.isEmpty() && !(player.getAnimation() instanceof OffAnimation)) {
 				entitypatch.getClientAnimator().getCompositeLayer(this.getPriority()).off(entitypatch);
 			}
 		} else {

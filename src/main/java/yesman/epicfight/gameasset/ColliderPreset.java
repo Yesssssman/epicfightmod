@@ -13,7 +13,7 @@ public class ColliderPreset {
 	public static final Collider DUAL_SWORD = new OBBCollider(0.8D, 0.5D, 1.0D, 0.0D, 0.5D, -1.0D);
 	public static final Collider DUAL_SWORD_DASH = new OBBCollider(0.8D, 0.5D, 1.0D, 0D, 1.0D, -1.0D);
 	public static final Collider FATAL_DRAW = new OBBCollider(1.75D, 0.25D, 1.35D, 0D, 1.0D, -1.0D);
-	public static final Collider FATAL_DRAW_DASH = new OBBCollider(0.7D, 0.7D, 5.0D, 0D, 1.0D, -4.0D);
+	public static final Collider FATAL_DRAW_DASH = new OBBCollider(0.7D, 0.7D, 4.0D, 0D, 1.0D, -4.0D);
 	public static final Collider FIST = new MultiOBBCollider(3, 0.4D, 0.4D, 0.4D, 0D, 0D, 0D);
 	public static final Collider GREATSWORD = new MultiOBBCollider(3, 0.5D, 0.8D, 1.0D, 0D, 0D, -1.0D);
 	public static final Collider HEAD = new OBBCollider(0.4D, 0.4D, 0.4D, 0D, 0D, -0.3D);
@@ -34,7 +34,9 @@ public class ColliderPreset {
 	public static final Collider VEX_CHARGE = new MultiOBBCollider(3, 0.4D, 0.4D, 0.95D, 0D, 1.0D, -0.85D);
 	/**
 	public static void update() {
-		Collider newCOllider = new MultiOBBCollider(3, 0.4D, 0.4D, 0.95D, 0D, 1.0D, -0.85D);
-		((AttackAnimation)Animations.VEX_CHARGE).changeCollider(newCOllider, 0);
+		Collider newCOllider = new OBBCollider(0.7D, 0.7D, 3.5D, 0D, 1.0D, -3.5D);
+		((AttackAnimation)Animations.FATAL_DRAW_DASH).changeCollider(newCOllider, 0);
 	}**/
+	
+	
 }

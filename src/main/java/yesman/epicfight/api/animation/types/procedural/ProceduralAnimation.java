@@ -23,22 +23,22 @@ import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.EnderDragonPatch;
 
 public interface ProceduralAnimation {
-	default void setIKData(IKSetter[] ikSetters, Map<String, TransformSheet> src, Map<String, TransformSheet> dest, Armature armature, boolean correctY, boolean correctZ) {
-		for (IKSetter ikSetter : ikSetters) {
-			ikSetter.pathToEndJoint = Lists.newArrayList();
-			Joint start = armature.searchJointByName(ikSetter.startJoint);
-			int pathToEnd = Integer.parseInt(start.searchPath(new String(""), ikSetter.endJoint));
-			ikSetter.pathToEndJoint.add(start.getName());
+	default void setIKInfo(IKInfo[] ikInfos, Map<String, TransformSheet> src, Map<String, TransformSheet> dest, Armature armature, boolean correctY, boolean correctZ) {
+		for (IKInfo ikInfo : ikInfos) {
+			ikInfo.pathToEndJoint = Lists.newArrayList();
+			Joint start = armature.searchJointByName(ikInfo.startJoint);
+			int pathToEnd = Integer.parseInt(start.searchPath(new String(""), ikInfo.endJoint));
+			ikInfo.pathToEndJoint.add(start.getName());
 			
 			while (pathToEnd > 0) {
 				start = start.getSubJoints().get(pathToEnd % 10 - 1);
 				pathToEnd /= 10;
-				ikSetter.pathToEndJoint.add(start.getName());
+				ikInfo.pathToEndJoint.add(start.getName());
 			}
 			
-			Keyframe[] keyframes = src.get(ikSetter.endJoint).getKeyframes();
+			Keyframe[] keyframes = src.get(ikInfo.endJoint).getKeyframes();
 			Keyframe[] bindedposKeyframes = new Keyframe[keyframes.length];
-			int keyframeLength = src.get(ikSetter.endJoint).getKeyframes().length;
+			int keyframeLength = src.get(ikInfo.endJoint).getKeyframes().length;
 			
 			for (int i = 0; i < keyframeLength; i++) {
 				Keyframe kf = keyframes[i];
@@ -48,7 +48,7 @@ public interface ProceduralAnimation {
 					pose.putJointData(jointName, src.get(jointName).getInterpolatedTransform(kf.time()));
 				}
 				
-				OpenMatrix4f bindedTransform = Animator.getBindedJointTransformByName(pose, armature, ikSetter.endJoint);
+				OpenMatrix4f bindedTransform = Animator.getBindedJointTransformByName(pose, armature, ikInfo.endJoint);
 				JointTransform bindedJointTransform = JointTransform.fromMatrixNoScale(bindedTransform);
 				bindedposKeyframes[i] = new Keyframe(kf);
 				JointTransform tipTransform = bindedposKeyframes[i].transform();
@@ -64,34 +64,34 @@ public interface ProceduralAnimation {
 			}
 			
 			TransformSheet tipAnimation = new TransformSheet(bindedposKeyframes);
-			dest.put(ikSetter.endJoint, tipAnimation);
+			dest.put(ikInfo.endJoint, tipAnimation);
 			
-			if (ikSetter.hasPartAnimation) {
-				TransformSheet part = tipAnimation.copy(ikSetter.startFrame, ikSetter.endFrame);
+			if (ikInfo.clipAnimation) {
+				TransformSheet part = tipAnimation.copy(ikInfo.startFrame, ikInfo.endFrame);
 				Keyframe[] partKeyframes = part.getKeyframes();
-				ikSetter.startpos = partKeyframes[0].transform().translation();
-				ikSetter.endpos = partKeyframes[partKeyframes.length - 1].transform().translation();
+				ikInfo.startpos = partKeyframes[0].transform().translation();
+				ikInfo.endpos = partKeyframes[partKeyframes.length - 1].transform().translation();
 			} else {
-				ikSetter.startpos = tipAnimation.getKeyframes()[0].transform().translation();
-				ikSetter.endpos = ikSetter.startpos;
+				ikInfo.startpos = tipAnimation.getKeyframes()[0].transform().translation();
+				ikInfo.endpos = ikInfo.startpos;
 			}
 			
-			ikSetter.startToEnd = Vec3f.sub(ikSetter.endpos, ikSetter.startpos, null).multiply(-1.0F, 1.0F, -1.0F);
+			ikInfo.startToEnd = Vec3f.sub(ikInfo.endpos, ikInfo.startpos, null).multiply(-1.0F, 1.0F, -1.0F);
 		}
 	}
 	
-	default TransformSheet toInitialAnimation(TransformSheet transformSheet) {
+	default TransformSheet getFirstPart(TransformSheet transformSheet) {
 		TransformSheet part = transformSheet.copy(0, 2);
 		Keyframe[] keyframes = part.getKeyframes();
 		keyframes[1].transform().copyFrom(keyframes[0].transform());
 		return part;
 	}
 	
-	default TransformSheet toPartAnimation(TransformSheet transformSheet, IKSetter ikSetter) {
-		if (ikSetter.hasPartAnimation) {
-			return transformSheet.copy(ikSetter.startFrame, ikSetter.endFrame);
+	default TransformSheet clipAnimation(TransformSheet transformSheet, IKInfo ikInfo) {
+		if (ikInfo.clipAnimation) {
+			return transformSheet.copy(ikInfo.startFrame, ikInfo.endFrame);
 		} else {
-			return this.toInitialAnimation(transformSheet);
+			return this.getFirstPart(transformSheet);
 		}
 	}
 	
@@ -119,14 +119,14 @@ public interface ProceduralAnimation {
     	pose.getOrDefaultTransform(endJoint).overwriteRotation(JointTransform.fromMatrixNoScale(animToTipRotation));
 	}
 	
-	default void startPartAnimation(IKSetter ikSetter, TipPointAnimation tipAnim, TransformSheet partAnimation, Vec3f targetpos) {
+	default void startPartAnimation(IKInfo ikInfo, TipPointAnimation tipAnim, TransformSheet partAnimation, Vec3f targetpos) {
 		Vec3f footpos = tipAnim.getTipPosition(1.0F);
 		Vec3f worldStartToEnd = targetpos.copy().sub(footpos);
-		partAnimation.correctAnimationByNewPosition(ikSetter.startpos, ikSetter.startToEnd, footpos, worldStartToEnd);
+		partAnimation.correctAnimationByNewPosition(ikInfo.startpos, ikInfo.startToEnd, footpos, worldStartToEnd);
 		tipAnim.start(targetpos, partAnimation, 1.0F);
 	}
 	
-	default void startSimple(IKSetter ikSetter, TipPointAnimation tipAnim) {
+	default void startSimple(IKInfo ikInfo, TipPointAnimation tipAnim) {
 		tipAnim.start(new Vec3f(0.0F, 0.0F, 0.0F), tipAnim.getAnimation(), 1.0F);
 	}
 }

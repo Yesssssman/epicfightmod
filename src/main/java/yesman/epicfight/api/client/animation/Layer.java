@@ -34,22 +34,24 @@ public class Layer {
 	
 	public void playAnimation(StaticAnimation nextAnimation, LivingEntityPatch<?> entitypatch, float convertTimeModifier) {
 		Pose lastPose = entitypatch.getAnimator().getPose(1.0F);
-		this.animationPlayer.getPlay().end(entitypatch, this.animationPlayer.isEnd());
+		this.animationPlayer.getAnimation().end(entitypatch, this.animationPlayer.isEnd());
 		this.resume();
 		nextAnimation.begin(entitypatch);
 		
 		if (!nextAnimation.isMetaAnimation()) {
 			this.setLinkAnimation(nextAnimation, entitypatch, lastPose, convertTimeModifier);
 			this.linkAnimationStorage.putOnPlayer(this.animationPlayer);
+			entitypatch.updateEntityState();
 			this.nextAnimation = nextAnimation;
 		}
 	}
 	
 	public void playAnimationInstant(DynamicAnimation nextAnimation, LivingEntityPatch<?> entitypatch) {
-		this.animationPlayer.getPlay().end(entitypatch, this.animationPlayer.isEnd());
+		this.animationPlayer.getAnimation().end(entitypatch, this.animationPlayer.isEnd());
 		this.resume();
 		nextAnimation.begin(entitypatch);
 		nextAnimation.putOnPlayer(this.animationPlayer);
+		entitypatch.updateEntityState();
 		this.nextAnimation = null;
 	}
 	
@@ -74,21 +76,21 @@ public class Layer {
 			entitypatch.updateMotion(true);
 		}
 		
-		this.animationPlayer.getPlay().tick(entitypatch);
+		this.animationPlayer.getAnimation().tick(entitypatch);
 		
 		if (this.animationPlayer.isEnd()) {
 			if (this.nextAnimation != null) {
-				this.animationPlayer.getPlay().end(entitypatch, true);
+				this.animationPlayer.getAnimation().end(entitypatch, true);
 				
-				if (!(this.animationPlayer.getPlay() instanceof LinkAnimation) && !(this.nextAnimation instanceof LinkAnimation)) {
+				if (!(this.animationPlayer.getAnimation() instanceof LinkAnimation) && !(this.nextAnimation instanceof LinkAnimation)) {
 					this.nextAnimation.begin(entitypatch);
 				}
 				
 				this.nextAnimation.putOnPlayer(this.animationPlayer);
 				this.nextAnimation = null;
 			} else {
-				if (this.animationPlayer.getPlay() instanceof LayerOffAnimation) {
-					this.animationPlayer.getPlay().end(entitypatch, true);
+				if (this.animationPlayer.getAnimation() instanceof LayerOffAnimation) {
+					this.animationPlayer.getAnimation().end(entitypatch, true);
 				} else {
 					this.off(entitypatch);
 				}
@@ -114,9 +116,9 @@ public class Layer {
 	}
 	
 	public void off(LivingEntityPatch<?> entitypatch) {
-		if (!this.isDisabled() && !(this.animationPlayer.getPlay() instanceof LayerOffAnimation)) {
-			float convertTime = entitypatch.getClientAnimator().baseLayer.animationPlayer.getPlay().getConvertTime();
-			setLayerOffAnimation(this.animationPlayer.getPlay(), this.animationPlayer.getCurrentPose(entitypatch, 1.0F), this.layerOffAnimation, convertTime);
+		if (!this.isDisabled() && !(this.animationPlayer.getAnimation() instanceof LayerOffAnimation)) {
+			float convertTime = entitypatch.getClientAnimator().baseLayer.animationPlayer.getAnimation().getConvertTime();
+			setLayerOffAnimation(this.animationPlayer.getAnimation(), this.animationPlayer.getCurrentPose(entitypatch, 1.0F), this.layerOffAnimation, convertTime);
 			this.playAnimationInstant(this.layerOffAnimation, entitypatch);
 		}
 	}

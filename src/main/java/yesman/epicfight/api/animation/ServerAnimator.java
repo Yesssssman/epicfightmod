@@ -27,19 +27,21 @@ public class ServerAnimator extends Animator {
 	@Override
 	public void playAnimation(StaticAnimation nextAnimation, float modifyTime) {
 		this.pause = false;
-		this.animationPlayer.getPlay().end(this.entitypatch, this.animationPlayer.isEnd());
+		this.animationPlayer.getAnimation().end(this.entitypatch, this.animationPlayer.isEnd());
 		nextAnimation.begin(this.entitypatch);
 		nextAnimation.setLinkAnimation(nextAnimation.getPoseByTime(this.entitypatch, 0.0F, 0.0F), modifyTime, this.entitypatch, this.linkAnimation);
 		this.linkAnimation.putOnPlayer(this.animationPlayer);
+		this.entitypatch.updateEntityState();
 		this.nextPlaying = nextAnimation;
 	}
 	
 	@Override
 	public void playAnimationInstantly(StaticAnimation nextAnimation) {
 		this.pause = false;
-		this.animationPlayer.getPlay().end(this.entitypatch, this.animationPlayer.isEnd());
+		this.animationPlayer.getAnimation().end(this.entitypatch, this.animationPlayer.isEnd());
 		nextAnimation.begin(this.entitypatch);
 		nextAnimation.putOnPlayer(this.animationPlayer);
+		this.entitypatch.updateEntityState();
 	}
 	
 	@Override
@@ -69,16 +71,16 @@ public class ServerAnimator extends Animator {
 		this.animationPlayer.tick(this.entitypatch);
 		this.poseTick();
 		this.entitypatch.updateEntityState();
-		this.animationPlayer.getPlay().tick(this.entitypatch);
+		this.animationPlayer.getAnimation().tick(this.entitypatch);
 		
 		if (this.animationPlayer.isEnd()) {
-			this.animationPlayer.getPlay().end(this.entitypatch, true);
+			this.animationPlayer.getAnimation().end(this.entitypatch, true);
 			
 			if (this.nextPlaying == null) {
 				Animations.DUMMY_ANIMATION.putOnPlayer(this.animationPlayer);
 				this.pause = true;
 			} else {
-				if (!(this.animationPlayer.getPlay() instanceof LinkAnimation) && !(this.nextPlaying instanceof LinkAnimation)) {
+				if (!(this.animationPlayer.getAnimation() instanceof LinkAnimation) && !(this.nextPlaying instanceof LinkAnimation)) {
 					this.nextPlaying.begin(this.entitypatch);
 				}
 				
@@ -95,6 +97,6 @@ public class ServerAnimator extends Animator {
 	
 	@Override
 	public EntityState getEntityState() {
-		return this.animationPlayer.getPlay().getState(this.animationPlayer.getElapsedTime());
+		return this.animationPlayer.getAnimation().getState(this.animationPlayer.getElapsedTime());
 	}
 }

@@ -39,7 +39,7 @@ import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
-import yesman.epicfight.api.utils.HitEntitySet;
+import yesman.epicfight.api.utils.HitEntityList;
 import yesman.epicfight.api.utils.math.ExtraDamageType;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -103,8 +103,15 @@ public class AttackAnimation extends ActionAnimation {
 		this.stateSpectrumBlueprint.clear();
 		
 		for (Phase phase : phases) {
+			
+			float preDelay = phase.preDelay;
+			
+			if (preDelay == 0.0F) {
+				preDelay += 0.01F;
+			}
+			
 			this.stateSpectrumBlueprint
-				.newTimePair(phase.start, phase.preDelay + 0.01F)
+				.newTimePair(phase.start,preDelay)
 				.addState(EntityState.PHASE_LEVEL, 1)
 				.newTimePair(phase.start, phase.contact + 0.01F)
 				.addState(EntityState.CAN_SKILL_EXECUTION, false)
@@ -115,7 +122,7 @@ public class AttackAnimation extends ActionAnimation {
 				.addState(EntityState.INACTION, true)
 				.newTimePair(phase.antic, phase.recovery)
 				.addState(EntityState.TURNING_LOCKED, true)
-				.newTimePair(phase.preDelay + 0.01F, phase.contact + 0.01F)
+				.newTimePair(preDelay, phase.contact + 0.01F)
 				.addState(EntityState.ATTACKING, true)
 				.addState(EntityState.PHASE_LEVEL, 2)
 				.newTimePair(phase.contact + 0.01F, phase.end)
@@ -185,7 +192,7 @@ public class AttackAnimation extends ActionAnimation {
 		List<Entity> list = collider.updateAndSelectCollideEntity(entitypatch, this, prevPoseTime, poseTime, phase.getColliderJointName(), this.getPlaySpeed(entitypatch));
 		
 		if (list.size() > 0) {
-			HitEntitySet hitEntities = new HitEntitySet(entitypatch, list, phase.getProperty(AttackPhaseProperty.HIT_PRIORITY).orElse(HitEntitySet.Priority.DISTANCE));
+			HitEntityList hitEntities = new HitEntityList(entitypatch, list, phase.getProperty(AttackPhaseProperty.HIT_PRIORITY).orElse(HitEntityList.Priority.DISTANCE));
 			boolean flag1 = true;
 			int maxStrikes = this.getMaxStrikes(entitypatch, phase);
 			
@@ -245,6 +252,7 @@ public class AttackAnimation extends ActionAnimation {
 	
 	public Collider getCollider(LivingEntityPatch<?> entitypatch, float elapsedTime) {
 		Phase phase = this.getPhaseByTime(elapsedTime);
+		
 		return phase.collider != null ? phase.collider : entitypatch.getColliderMatching(phase.hand);
 	}
 	
@@ -258,6 +266,7 @@ public class AttackAnimation extends ActionAnimation {
 				return (LivingEntity)parentEntity;
 			}
 		}
+		
 		return null;
 	}
 	
@@ -315,6 +324,7 @@ public class AttackAnimation extends ActionAnimation {
 	@Override
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		Pose pose = super.getPoseByTime(entitypatch, time, partialTicks);
+		
 		this.getProperty(AttackAnimationProperty.ROTATE_X).ifPresent((flag) -> {
 			if (flag) {
 				float pitch = entitypatch.getAttackDirectionPitch();
@@ -327,6 +337,7 @@ public class AttackAnimation extends ActionAnimation {
 				}
 			}
 		});
+		
 		return pose;
 	}
 	

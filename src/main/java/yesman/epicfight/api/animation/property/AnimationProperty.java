@@ -10,7 +10,7 @@ import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
-import yesman.epicfight.api.utils.HitEntitySet.Priority;
+import yesman.epicfight.api.utils.HitEntityList.Priority;
 import yesman.epicfight.api.utils.math.ExtraDamageType;
 import yesman.epicfight.api.utils.math.ValueCorrector;
 import yesman.epicfight.particle.HitParticleType;
@@ -43,7 +43,7 @@ public abstract class AnimationProperty<T> {
 		/**
 		 * You can specify the coord movement time in action animation. Must be registered in order of time.
 		 */
-		public static final ActionAnimationProperty<ActionAnimation.ActionTime[]> ACTION_TIME = new ActionAnimationProperty<ActionAnimation.ActionTime[]> ();
+		public static final ActionAnimationProperty<ActionAnimation.ActionTime[]> MOVE_TIME = new ActionAnimationProperty<ActionAnimation.ActionTime[]> ();
 		
 		/**
 		 * Set the dynamic coordinates of action animation.

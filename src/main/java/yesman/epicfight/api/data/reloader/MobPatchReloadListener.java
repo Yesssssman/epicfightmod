@@ -45,8 +45,8 @@ import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
-import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.Style;
+import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.capabilities.provider.ProviderEntity;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
@@ -132,8 +132,8 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 	}
 	
 	public static class CustomHumanoidMobPatchProvider extends CustomMobPatchProvider {
-		protected Map<WeaponCategories, Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> humanoidCombatBehaviors;
-		protected Map<WeaponCategories, Map<Style, Set<Pair<LivingMotion, StaticAnimation>>>> humanoidWeaponMotions;
+		protected Map<WeaponCategory, Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> humanoidCombatBehaviors;
+		protected Map<WeaponCategory, Map<Style, Set<Pair<LivingMotion, StaticAnimation>>>> humanoidWeaponMotions;
 		
 		@SuppressWarnings("rawtypes")
 		@Override
@@ -141,11 +141,11 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			return new CustomHumanoidMobPatch(this.faction, this);
 		}
 		
-		public Map<WeaponCategories, Map<Style, Set<Pair<LivingMotion, StaticAnimation>>>> getHumanoidWeaponMotions() {
+		public Map<WeaponCategory, Map<Style, Set<Pair<LivingMotion, StaticAnimation>>>> getHumanoidWeaponMotions() {
 			return this.humanoidWeaponMotions;
 		}
 		
-		public Map<WeaponCategories, Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> getHumanoidCombatBehaviors() {
+		public Map<WeaponCategory, Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> getHumanoidCombatBehaviors() {
 			return this.humanoidCombatBehaviors;
 		}
 	}
@@ -279,8 +279,8 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		}
 	}
 	
-	public static Map<WeaponCategories, Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> deserializeHumanoidCombatBehaviors(ListTag tag) {
-		Map<WeaponCategories, Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> combatBehaviorsMapBuilder = Maps.newHashMap();
+	public static Map<WeaponCategory, Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> deserializeHumanoidCombatBehaviors(ListTag tag) {
+		Map<WeaponCategory, Map<Style, CombatBehaviors.Builder<HumanoidMobPatch<?>>>> combatBehaviorsMapBuilder = Maps.newHashMap();
 		
 		for (int i = 0; i < tag.size(); i++) {
 			CompoundTag combatBehavior = tag.getCompound(i);
@@ -289,7 +289,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = deserializeCombatBehaviorsBuilder(combatBehavior.getList("behavior_series", 10));
 			
 			for (int j = 0; j < categories.size(); j++) {
-				WeaponCategories category = WeaponCategories.valueOf(categories.getString(j).toUpperCase(Locale.ROOT));
+				WeaponCategory category = WeaponCategory.ENUM_MANAGER.get(categories.getString(j));
 				combatBehaviorsMapBuilder.computeIfAbsent(category, (key) -> Maps.newHashMap());
 				combatBehaviorsMapBuilder.get(category).put(style, builder);
 			}
@@ -332,8 +332,8 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		return attributes;
 	}
 	
-	public static Map<WeaponCategories, Map<Style, Set<Pair<LivingMotion, StaticAnimation>>>> deserializeHumanoidWeaponMotions(ListTag tag) {
-		Map<WeaponCategories, Map<Style, Set<Pair<LivingMotion, StaticAnimation>>>> map = Maps.newHashMap();
+	public static Map<WeaponCategory, Map<Style, Set<Pair<LivingMotion, StaticAnimation>>>> deserializeHumanoidWeaponMotions(ListTag tag) {
+		Map<WeaponCategory, Map<Style, Set<Pair<LivingMotion, StaticAnimation>>>> map = Maps.newHashMap();
 		
 		for (int i = 0; i < tag.size(); i++) {
 			ImmutableSet.Builder<Pair<LivingMotion, StaticAnimation>> motions = ImmutableSet.builder();
@@ -348,7 +348,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			Tag weponTypeTag = weaponMotionTag.get("weapon_categories");
 			
 			if (weponTypeTag instanceof StringTag) {
-				WeaponCategories weaponCategory = WeaponCategories.valueOf(weponTypeTag.getAsString().toUpperCase(Locale.ROOT));
+				WeaponCategory weaponCategory = WeaponCategory.ENUM_MANAGER.get(weponTypeTag.getAsString());
 				if (!map.containsKey(weaponCategory)) {
 					map.put(weaponCategory, Maps.newHashMap());
 				}
@@ -358,7 +358,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 				ListTag weponTypesTag = ((ListTag)weponTypeTag);
 				
 				for (int j = 0; j < weponTypesTag.size(); j++) {
-					WeaponCategories weaponCategory = WeaponCategories.valueOf(weponTypesTag.getString(j).toUpperCase(Locale.ROOT));
+					WeaponCategory weaponCategory = WeaponCategory.ENUM_MANAGER.get(weponTypesTag.getString(j));
 					if (!map.containsKey(weaponCategory)) {
 						map.put(weaponCategory, Maps.newHashMap());
 					}

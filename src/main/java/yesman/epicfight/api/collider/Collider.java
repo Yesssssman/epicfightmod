@@ -12,6 +12,7 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.entity.PartEntity;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.model.Armature;
@@ -43,7 +44,6 @@ public abstract class Collider {
 			transformMatrix = new OpenMatrix4f();
 		} else {
 			transformMatrix = Animator.getBindedJointTransformByIndex(attackAnimation.getPoseByTime(entitypatch, elapsedTime, 1.0F), armature, pathIndex);
-			//transformMatrix = Animator.getBindedJointTransformByIndex(entitypatch.getAnimator().getPose(1.0F), armature, pathIndex);
 		}
 		
 		OpenMatrix4f toWorldCoord = OpenMatrix4f.createTranslation(-(float)entitypatch.getOriginal().getX(), (float)entitypatch.getOriginal().getY(), -(float)entitypatch.getOriginal().getZ());
@@ -54,8 +54,15 @@ public abstract class Collider {
 	}
 	
 	public List<Entity> getCollideEntities(Entity entity) {
-		List<Entity> list = entity.level.getEntities(entity, this.getHitboxAABB());
-		list.removeIf((e) -> !this.isCollide(e));
+		List<Entity> list = entity.level.getEntities(entity, this.getHitboxAABB(), (e) -> {
+			if (e instanceof PartEntity) {
+				if (((PartEntity<?>)e).getParent().is(entity)) {
+					return false;
+				}
+			}
+			
+			return this.isCollide(e);
+		});
 		
 		return list;
 	}

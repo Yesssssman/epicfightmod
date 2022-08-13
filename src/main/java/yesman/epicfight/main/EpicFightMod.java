@@ -105,10 +105,10 @@ public class EpicFightMod {
     	bus.addGenericListener(DataSerializerEntry.class, EpicFightDataSerializers::register);
     	bus.addGenericListener(GlobalLootModifierSerializer.class, EpicFightLootModifiers::register);
     	
-    	LivingMotion.ENUM_MANAGER.load(LivingMotions.class);
-    	SkillCategory.ENUM_MANAGER.load(SkillCategories.class);
-    	Style.ENUM_MANAGER.load(Styles.class);
-    	WeaponCategory.ENUM_MANAGER.load(WeaponCategories.class);
+    	LivingMotion.ENUM_MANAGER.loadPreemptive(LivingMotions.class);
+    	SkillCategory.ENUM_MANAGER.loadPreemptive(SkillCategories.class);
+    	Style.ENUM_MANAGER.loadPreemptive(Styles.class);
+    	WeaponCategory.ENUM_MANAGER.loadPreemptive(WeaponCategories.class);
     	
     	EpicFightMobEffects.EFFECTS.register(bus);
     	EpicFightPotions.POTIONS.register(bus);

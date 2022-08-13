@@ -68,8 +68,8 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 		OpenMatrix4f.transform(poses[9], headPos, headPos);
 		float pitch = renderInfo.getXRot();
 		
-		boolean flag1 = entitypatch.getClientAnimator().baseLayer.animationPlayer.getPlay() instanceof ActionAnimation;
-		boolean flag2 = entitypatch.getClientAnimator().getCompositeLayer(Priority.MIDDLE).animationPlayer.getPlay() instanceof AimAnimation;
+		boolean flag1 = entitypatch.getClientAnimator().baseLayer.animationPlayer.getAnimation() instanceof ActionAnimation;
+		boolean flag2 = entitypatch.getClientAnimator().getCompositeLayer(Priority.MIDDLE).animationPlayer.getAnimation() instanceof AimAnimation;
 		
 		float zCoord = flag1 ? 0 : poses[0].m32;
 		float posZ = Math.min(headPos.z - zCoord, 0);

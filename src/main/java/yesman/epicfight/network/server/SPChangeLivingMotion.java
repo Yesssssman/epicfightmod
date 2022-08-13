@@ -6,7 +6,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import com.google.common.collect.Lists;
-import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
@@ -45,22 +44,22 @@ public class SPChangeLivingMotion {
 	}
 	
 	public SPChangeLivingMotion putPair(LivingMotion motion, StaticAnimation animation) {
-		return this.putPair(Pair.of(motion, animation));
-	}
-	
-	public SPChangeLivingMotion putPair(Pair<LivingMotion, StaticAnimation> pair) {
-		this.motionList.add(pair.getFirst());
-		this.animationList.add(pair.getSecond());
-		this.count++;
+		if (animation != null) {
+			this.motionList.add(motion);
+			this.animationList.add(animation);
+			this.count++;
+		}
+		
 		return this;
 	}
 	
 	public void putEntries(Set<Map.Entry<LivingMotion, StaticAnimation>> motionSet) {
-		this.count += motionSet.size();
-		
 		motionSet.forEach((entry) -> {
-			this.motionList.add(entry.getKey());
-			this.animationList.add(entry.getValue());
+			if (entry.getValue() != null) {
+				this.motionList.add(entry.getKey());
+				this.animationList.add(entry.getValue());
+				this.count++;
+			}
 		});
 	}
 	
