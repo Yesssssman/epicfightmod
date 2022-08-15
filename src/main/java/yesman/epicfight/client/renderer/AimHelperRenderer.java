@@ -62,6 +62,7 @@ public class AimHelperRenderer {
 		float length = Vec3f.sub(pos2, pos1, null).length();
 		float ratio = Math.min(50.0F, length);
 		ratio = (51.0F - ratio) / 50.0F;
+		
 		matStackIn.popPose();
 	}
 }

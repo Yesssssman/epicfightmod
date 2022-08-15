@@ -24,10 +24,10 @@ import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 public class EnergizingGuardSkill extends GuardSkill {
 	public static GuardSkill.Builder createBuilder(ResourceLocation resourceLocation) {
 		return GuardSkill.createBuilder(resourceLocation)
-				.addAdvancedGuardMotion(WeaponCategories.SWORD, (itemCap, playerpatch) -> Animations.GREATSWORD_GUARD_HIT)
 				.addAdvancedGuardMotion(WeaponCategories.LONGSWORD, (item, player) -> Animations.LONGSWORD_GUARD_HIT)
 				.addAdvancedGuardMotion(WeaponCategories.SPEAR, (item, player) -> item.getStyle(player) == Styles.TWO_HAND ? Animations.SPEAR_GUARD_HIT : null)
-				.addAdvancedGuardMotion(WeaponCategories.TACHI, (item, player) -> Animations.LONGSWORD_GUARD_HIT);
+				.addAdvancedGuardMotion(WeaponCategories.TACHI, (item, player) -> Animations.LONGSWORD_GUARD_HIT)
+				.addAdvancedGuardMotion(WeaponCategories.GREATSWORD, (item, player) -> Animations.GREATSWORD_GUARD_HIT);
 	}
 	
 	public EnergizingGuardSkill(GuardSkill.Builder builder) {

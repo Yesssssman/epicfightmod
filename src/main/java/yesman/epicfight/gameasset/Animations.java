@@ -66,7 +66,6 @@ import yesman.epicfight.api.animation.types.procedural.EnderDragonDynamicActionA
 import yesman.epicfight.api.animation.types.procedural.EnderDraonWalkAnimation;
 import yesman.epicfight.api.animation.types.procedural.IKInfo;
 import yesman.epicfight.api.client.animation.ClientAnimationProperties;
-import yesman.epicfight.api.client.animation.JointMaskEntry;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.collider.OBBCollider;
@@ -1343,23 +1342,7 @@ public class Animations {
 	
 	@OnlyIn(Dist.CLIENT)
 	public static void buildClient() {
-		BIPED_HOLD_KATANA
-				.addProperty(ClientAnimationProperties.JOINT_MASK, JointMaskEntry.builder().defaultMask(JointMaskEntry.BIPED_ARMS).create())
-				.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.MIDDLE);
-		BIPED_WALK_UNSHEATHING
-				.addProperty(ClientAnimationProperties.JOINT_MASK, JointMaskEntry.builder().defaultMask(JointMaskEntry.BIPED_ARMS).create())
-				.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.MIDDLE);
-		BIPED_RUN_UNSHEATHING
-				.addProperty(ClientAnimationProperties.JOINT_MASK, JointMaskEntry.builder().defaultMask(JointMaskEntry.BIPED_ARMS).create())
-				.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.MIDDLE);
-		BIPED_RUN_SPEAR
-				.addProperty(ClientAnimationProperties.JOINT_MASK, JointMaskEntry.builder().defaultMask(JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT).create())
-				.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.MIDDLE);
-		
 		OFF_ANIMATION_HIGHEST.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.HIGHEST);
 		OFF_ANIMATION_MIDDLE.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.MIDDLE);
-		
-		BIPED_LANDING
-				.addProperty(ClientAnimationProperties.PRIORITY, Layer.Priority.LOWEST);
 	}
 }

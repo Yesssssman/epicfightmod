@@ -57,6 +57,7 @@ public class ControllEngine {
 	private int sneakPressCounter = 0;
 	private int reservedKey;
 	private int reserveCounter;
+	private int lastHotbarLockedTime;
 	private boolean sneakPressToggle = false;
 	private boolean mouseLeftPressToggle = false;
 	private boolean hotbarLocked;
@@ -100,26 +101,24 @@ public class ControllEngine {
 	}
 	
 	private void attackKeyPressed(KeyMapping key, int action) {
-		if (action == 1) {
-			if (this.playerpatch.isBattleMode()) {
-				this.setKeyBind(key, false);
-				while (key.consumeClick());
-				
-				UseAnim useAnim = this.playerpatch.getHoldingItemCapability(this.playerpatch.getOriginal().getUsedItemHand()).getUseAnimation(this.playerpatch);
-				
-				if (this.player.getUseItemRemainingTicks() == 0 || (useAnim == UseAnim.BLOCK)) {
-					if (!this.mouseLeftPressToggle) {
-						this.mouseLeftPressToggle = true;
-					}
+		if (action == 1 && this.playerpatch.isBattleMode()) {
+			this.setKeyBind(key, false);
+			while (key.consumeClick());
+			
+			UseAnim useAnim = this.playerpatch.getHoldingItemCapability(this.playerpatch.getOriginal().getUsedItemHand()).getUseAnimation(this.playerpatch);
+			
+			if (this.player.getUseItemRemainingTicks() == 0 || (useAnim == UseAnim.BLOCK)) {
+				if (!this.mouseLeftPressToggle) {
+					this.mouseLeftPressToggle = true;
 				}
 			}
 		}
 	}
 	
 	private void dodgeKeyPressed(KeyMapping key, int action) {
-		if (action == 1) {
-			if (key == this.options.keyShift) {
-				if (this.player.getVehicle() == null && this.playerpatch.isBattleMode()) {
+		if (action == 1 && this.playerpatch.isBattleMode()) {
+			if (key.getKey().getValue() == this.options.keyShift.getKey().getValue()) {
+				if (this.player.getVehicle() == null) {
 					if (!this.sneakPressToggle) {
 						this.sneakPressToggle = true;
 					}
@@ -156,7 +155,7 @@ public class ControllEngine {
 						this.reserveKey(SkillCategories.WEAPON_SPECIAL_ATTACK);
 					}
 				} else {
-					this.lockSlotHotbar();
+					this.lockHotkeys();
 				}
 			} else {
 				if (this.options.keyAttack.equals(EpicFightKeyMappings.SPECIAL_SKILL)) {
@@ -169,6 +168,10 @@ public class ControllEngine {
 	public void tick() {
 		if (this.playerpatch == null) {
 			return;
+		}
+		
+		if (this.player.tickCount - this.lastHotbarLockedTime > 20 && this.hotbarLocked) {
+			this.unlockHotkeys();
 		}
 		
 		if (this.mouseLeftPressToggle) {
@@ -184,7 +187,7 @@ public class ControllEngine {
 								this.reserveKey(SkillCategories.WEAPON_SPECIAL_ATTACK);
 							}
 						} else {
-							this.lockSlotHotbar();
+							this.lockHotkeys();
 						}
 						
 						this.mouseLeftPressToggle = false;
@@ -205,7 +208,7 @@ public class ControllEngine {
 				this.player.resetAttackStrengthTicker();
 				this.lightPress = false;
 				this.resetReservedKey();
-				this.lockSlotHotbar();
+				this.lockHotkeys();
 			} else {
 				if (!(this.player.isSpectator() || slot == SkillCategories.AIR_ATTACK)) {
 					this.reserveKey(slot);
@@ -247,7 +250,7 @@ public class ControllEngine {
 					if (skill.sendExecuteRequest(this.playerpatch, this.packets)) {
 						this.resetReservedKey();
 					} else {
-						this.lockSlotHotbar();
+						this.lockHotkeys();
 					}
 				}
 			} else {
@@ -296,15 +299,16 @@ public class ControllEngine {
 		KeyMapping.set(key.getKey(), setter);
 	}
 	
-	public void lockSlotHotbar() {
+	public void lockHotkeys() {
 		this.hotbarLocked = true;
+		this.lastHotbarLockedTime = this.player.tickCount;
 		
 		for (int i = 0; i < 9; ++i) {
 			while (this.options.keyHotbarSlots[i].consumeClick());
 		}
 	}
 	
-	public void unlockHoldItem() {
+	public void unlockHotkeys() {
 		this.hotbarLocked = false;
 	}
 	

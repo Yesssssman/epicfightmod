@@ -50,7 +50,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	public void onJoinWorld(LocalPlayer entityIn, EntityJoinWorldEvent event) {
 		super.onJoinWorld(entityIn, event);
 		this.eventListeners.addEventListener(EventType.ACTION_EVENT_CLIENT, ACTION_EVENT_UUID, (playerEvent) -> {
-			ClientEngine.instance.inputController.unlockHoldItem();
+			ClientEngine.instance.inputController.unlockHotkeys();
 		});
 	}
 	

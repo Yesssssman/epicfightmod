@@ -525,7 +525,7 @@ public class RenderEngine {
 		@SubscribeEvent
 		public static void renderWorldLast(RenderLevelStageEvent event) {
 			if (renderEngine.zoomCount > 0 && renderEngine.minecraft.options.getCameraType() == CameraType.THIRD_PERSON_BACK
-					&& event.getStage() == RenderLevelStageEvent.Stage.AFTER_WEATHER) {
+					&& event.getStage() == RenderLevelStageEvent.Stage.AFTER_CUTOUT_BLOCKS) {
 				renderEngine.aimHelper.doRender(event.getPoseStack(), event.getPartialTick());
 			}
 		}

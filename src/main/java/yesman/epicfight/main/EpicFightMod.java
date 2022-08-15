@@ -34,10 +34,6 @@ import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 import yesman.epicfight.client.ClientEngine;
-import yesman.epicfight.client.events.ClientEvents;
-import yesman.epicfight.client.events.ClientModBusEvent;
-import yesman.epicfight.client.events.engine.ControllEngine;
-import yesman.epicfight.client.events.engine.RenderEngine;
 import yesman.epicfight.client.gui.screen.IngameConfigurationScreen;
 import yesman.epicfight.client.input.EpicFightKeyMappings;
 import yesman.epicfight.config.ConfigManager;
@@ -130,6 +126,11 @@ public class EpicFightMod {
     
 	private void doClientStuff(final FMLClientSetupEvent event) {
     	new ClientEngine();
+    	
+    	CLIENT_INGAME_CONFIG = new ConfigurationIngame();
+        this.animatorProvider = ClientAnimator::getAnimator;
+        this.model = ClientModels.LOGICAL_CLIENT;
+    	
 		ProviderEntity.registerEntityPatchesClient();
 		ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
 		ClientModels.LOGICAL_CLIENT.loadModels(resourceManager);
@@ -138,16 +139,8 @@ public class EpicFightMod {
 		this.animationManager.loadAnimationsInit(resourceManager);
 		Animations.buildClient();
 		EpicFightKeyMappings.registerKeys();
-		MinecraftForge.EVENT_BUS.register(ControllEngine.Events.class);
-        MinecraftForge.EVENT_BUS.register(RenderEngine.Events.class);
-        MinecraftForge.EVENT_BUS.register(ClientModBusEvent.class);
-        MinecraftForge.EVENT_BUS.register(ClientEvents.class);
         ((ReloadableResourceManager)resourceManager).registerReloadListener(ClientModels.LOGICAL_CLIENT);
         ((ReloadableResourceManager)resourceManager).registerReloadListener(this.animationManager);
-        
-        CLIENT_INGAME_CONFIG = new ConfigurationIngame();
-        this.animatorProvider = ClientAnimator::getAnimator;
-        this.model = ClientModels.LOGICAL_CLIENT;
     }
 	
 	private void doServerStuff(final FMLDedicatedServerSetupEvent event) {

@@ -197,7 +197,7 @@ public class ActionAnimation extends MainFrameAnimation {
 			}
 		}
 		
-		TransformSheet rootCoord;// = (this.getProperty(ActionAnimationProperty.COORD_SET_TICK).isEmpty() || animation instanceof LinkAnimation) ? animation.jointTransforms.get("Root") : entitypatch.getAnimator().getPlayerFor(this).getActionAnimationCoord();
+		TransformSheet rootCoord;
 		
 		if (animation instanceof LinkAnimation) {
 			rootCoord = animation.jointTransforms.get("Root");

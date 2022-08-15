@@ -5,7 +5,7 @@
 	[
 		{
 			"livingmotion":"ALL",
-			"type":"arms"
+			"type":"root_upper_joints"
 		}
 	]
 }
