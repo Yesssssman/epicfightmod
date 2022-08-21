@@ -19,9 +19,12 @@ public class ShieldCapability extends CapabilityItem {
 		super(builder);
 	}
 	
+	/*
+	 * Avoid duplicated usage with guard skill
+	 */
 	@Override
 	public UseAnim getUseAnimation(LivingEntityPatch<?> entitypatch) {
-		return UseAnim.BLOCK;
+		return UseAnim.NONE;
 	}
 	
 	@Override

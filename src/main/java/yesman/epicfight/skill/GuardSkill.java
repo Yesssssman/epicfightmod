@@ -264,7 +264,7 @@ public class GuardSkill extends Skill {
 		case ADVANCED_GUARD:
 			return this.advancedGuardMotions;
 		default:
-			throw new IllegalArgumentException("guard skill error: given metadata argument must be within 0 - 2");
+			throw new IllegalArgumentException("unsupported block type " + blockType);
 		}
 	}
 	

@@ -62,14 +62,9 @@ public class Layer {
 	public void update(LivingEntityPatch<?> entitypatch) {
 		if (this.paused) {
 			this.animationPlayer.setElapsedTime(this.animationPlayer.getElapsedTime());
-			return;
+		} else {
+			this.animationPlayer.tick(entitypatch);
 		}
-		
-		if (this.animationPlayer.isEmpty()) {
-			return;
-		}
-		
-		this.animationPlayer.tick(entitypatch);
 		
 		if (this.isBaseLayer()) {
 			entitypatch.updateEntityState();
@@ -78,7 +73,7 @@ public class Layer {
 		
 		this.animationPlayer.getAnimation().tick(entitypatch);
 		
-		if (this.animationPlayer.isEnd()) {
+		if (!this.paused && this.animationPlayer.isEnd()) {
 			if (this.nextAnimation != null) {
 				this.animationPlayer.getAnimation().end(entitypatch, true);
 				

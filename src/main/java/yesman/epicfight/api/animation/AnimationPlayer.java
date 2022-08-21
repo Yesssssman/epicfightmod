@@ -73,11 +73,6 @@ public class AnimationPlayer {
 		return this.actionAnimationCoord;
 	}
 	
-	public void setEmpty() {
-		this.reset();
-		this.play = Animations.DUMMY_ANIMATION;
-	}
-	
 	public Pose getCurrentPose(LivingEntityPatch<?> entitypatch, float partialTicks) {
 		return this.play.getPoseByTime(entitypatch, this.prevElapsedTime + (this.elapsedTime - this.prevElapsedTime) * partialTicks, partialTicks);
 	}

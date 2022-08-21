@@ -102,7 +102,6 @@ public class ClientEvents {
 	
 	@SubscribeEvent
 	public static void rightClickItemClient(RightClickItem event) {
-		
 		if (event.getSide() == LogicalSide.CLIENT) {
 			LocalPlayerPatch playerpatch = (LocalPlayerPatch) event.getPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
 			

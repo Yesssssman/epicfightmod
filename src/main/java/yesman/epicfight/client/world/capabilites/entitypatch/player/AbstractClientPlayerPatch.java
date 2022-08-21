@@ -77,6 +77,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			} else if (!original.isOnGround() && original.onClimbable()) {
 				currentLivingMotion = LivingMotions.CLIMB;
 				double y = original.yCloak - original.yCloakO;
+				
 				if (Math.abs(y) < 0.04D) {
 					animator.baseLayer.pause();
 				} else {
@@ -95,11 +96,11 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 					else
 						currentLivingMotion = LivingMotions.WALK;
 					
-					if (original.zza > 0)
-						animator.baseLayer.animationPlayer.setReversed(false);
-					else if (original.zza < 0) {
+					if (original.zza < 0)
 						animator.baseLayer.animationPlayer.setReversed(true);
-					}
+					else 
+						animator.baseLayer.animationPlayer.setReversed(false);
+					
 				} else {
 					animator.baseLayer.animationPlayer.setReversed(false);
 					if (original.isShiftKeyDown())
