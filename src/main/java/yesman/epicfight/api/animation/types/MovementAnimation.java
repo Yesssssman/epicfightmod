@@ -1,6 +1,5 @@
 package yesman.epicfight.api.animation.types;
 
-import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.config.ConfigurationIngame;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
@@ -15,14 +14,6 @@ public class MovementAnimation extends StaticAnimation {
 	}
 	
 	@Override
-	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
-		if (entitypatch.getAnimator().getPlayerFor(this).isReversed()) {
-			time = this.getTotalTime() - time;
-		}
-		return super.getPoseByTime(entitypatch, time, partialTicks);
-	}
-	
-	@Override
 	public float getPlaySpeed(LivingEntityPatch<?> entitypatch) {
 		float movementSpeed = 1.0F;
 		
@@ -31,5 +22,10 @@ public class MovementAnimation extends StaticAnimation {
 		}
 		
 		return movementSpeed;
+	}
+	
+	@Override
+	public boolean canBePlayedReverse() {
+		return true;
 	}
 }

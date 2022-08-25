@@ -149,6 +149,10 @@ public abstract class DynamicAnimation {
 		return this.isRepeat;
 	}
 	
+	public boolean canBePlayedReverse() {
+		return false;
+	}
+	
 	public int getNamespaceId() {
 		return -1;
 	}

@@ -34,7 +34,7 @@ public class ArmorCapability extends CapabilityItem {
 		
 		this.equipmentSlot = armorBuilder.equipmentSlot;
 		this.weight = armorBuilder.weight;
-		this.stunArmor = armorBuilder.weight;
+		this.stunArmor = armorBuilder.stunArmor;
 	}
 	
 	@Override

@@ -34,6 +34,7 @@ public class Layer {
 	
 	public void playAnimation(StaticAnimation nextAnimation, LivingEntityPatch<?> entitypatch, float convertTimeModifier) {
 		Pose lastPose = entitypatch.getAnimator().getPose(1.0F);
+		
 		this.animationPlayer.getAnimation().end(entitypatch, this.animationPlayer.isEnd());
 		this.resume();
 		nextAnimation.begin(entitypatch);

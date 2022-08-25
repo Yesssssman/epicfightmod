@@ -82,6 +82,11 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 					animator.baseLayer.pause();
 				} else {
 					animator.baseLayer.resume();
+					
+					if (y < 0)
+						animator.baseLayer.animationPlayer.setReversed(true);
+					else 
+						animator.baseLayer.animationPlayer.setReversed(false);
 				}
 			} else {
 				if (original.isUnderWater() && (original.yCloak - original.yCloakO) < -0.005)
@@ -103,6 +108,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 					
 				} else {
 					animator.baseLayer.animationPlayer.setReversed(false);
+					
 					if (original.isShiftKeyDown())
 						currentLivingMotion = LivingMotions.KNEEL;
 					else

@@ -21,7 +21,8 @@ public class AnimationPlayer {
 	
 	public void tick(LivingEntityPatch<?> entitypatch) {
 		this.prevElapsedTime = this.elapsedTime;
-		this.elapsedTime += ConfigurationIngame.A_TICK * this.getAnimation().getPlaySpeed(entitypatch);
+		this.elapsedTime += ConfigurationIngame.A_TICK * this.getAnimation().getPlaySpeed(entitypatch) *
+				(this.isReversed() && this.getAnimation().canBePlayedReverse() ? -1.0F : 1.0F); 
 		
 		if (this.elapsedTime >= this.play.getTotalTime()) {
 			if (this.play.isRepeat()) {
@@ -36,7 +37,8 @@ public class AnimationPlayer {
 				this.prevElapsedTime = this.play.getTotalTime();
 				this.elapsedTime = this.play.getTotalTime() + this.elapsedTime;
 			} else {
-				this.elapsedTime = 0;
+				System.out.println("?? " + this.getAnimation());
+				this.elapsedTime = 0.0F;
 				this.isEnd = true;
 			}
 		}
@@ -108,10 +110,7 @@ public class AnimationPlayer {
 	}
 	
 	public void setReversed(boolean reversed) {
-		if (reversed != this.reversed) {
-			this.setElapsedTime(this.getAnimation().getTotalTime() - this.getElapsedTime());
-			this.reversed = reversed;
-		}
+		this.reversed = reversed;
 	}
 	
 	public boolean isEmpty() {

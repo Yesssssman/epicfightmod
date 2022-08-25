@@ -308,10 +308,14 @@ public class EntityEvents {
 	
 	@SubscribeEvent
 	public static void shieldBlockEvent(ShieldBlockEvent event) {
-		LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>)event.getDamageSource().getDirectEntity().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+		Entity attacker = event.getDamageSource().getDirectEntity();
 		
-		if (entitypatch != null) {
-			entitypatch.onBlockedByShield();
+		if (attacker != null) {
+			LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>)attacker.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+			
+			if (entitypatch != null) {
+				entitypatch.onBlockedByShield();
+			}
 		}
 	}
 	

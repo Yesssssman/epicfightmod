@@ -421,7 +421,7 @@ public class Animations {
 		
 		BIPED_HOLD_LONGSWORD = new StaticAnimation(true, "biped/living/hold_longsword", biped);
 		BIPED_HOLD_SPEAR = new StaticAnimation(true, "biped/living/hold_spear", biped);
-		BIPED_CLIMBING = new StaticAnimation(0.16F, true, "biped/living/climb", biped);
+		BIPED_CLIMBING = new MovementAnimation(0.16F, true, "biped/living/climb", biped);
 		BIPED_SLEEPING = new StaticAnimation(0.16F, true, "biped/living/sleep", biped);
 		
 		BIPED_JAVELIN_AIM = new AimAnimation(false, "biped/combat/javelin_aim_mid", "biped/combat/javelin_aim_up", "biped/combat/javelin_aim_down", "biped/combat/javelin_aim_lying", biped);
