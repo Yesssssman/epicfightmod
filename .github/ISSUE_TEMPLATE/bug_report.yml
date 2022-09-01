@@ -17,7 +17,7 @@ body:
     id: checkbox2
     attributes:
       label: Have you read the support policy?
-      description: https://github.com/Yesssssman/epicfightmod/issues/1166 Please take a look at it before you submit any report. the violation of the policy will result in the removal of the report without any notification.
+      description: https://github.com/Yesssssman/epicfightmod/issues/1166\nPlease take a look at it before you submit any report. the violation of the policy will result in the removal of the report without any notification.
       options:
         - label: I read it and I accept the policy.
           required: true
