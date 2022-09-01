@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a report to help us improve
+about: Crash and Bugs in game
 title: ''
 labels: ''
 assignees: ''
