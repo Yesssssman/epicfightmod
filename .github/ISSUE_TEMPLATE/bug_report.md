@@ -16,7 +16,7 @@ Please check if this issue is duplicated with the previous one. It'll really hel
 ### Have you read the support policy?
 
 https://github.com/Yesssssman/epicfightmod/issues/1166
-Please take a look at it before you submit any report. the violation of the policy will result in the elimination of the report without any notification.
+Please take a look at it before you submit any report. the violation of the policy will result in the removal of the report without any notification.
 
 - [ ] I read it and I accept the policy.
 
