@@ -24,7 +24,7 @@ Please take a look at it before you submit any report. the violation of the poli
 
 Please note that most issues regarding mod incompatibility are barely fixed. This is because the mod code is hard to access than the vanilla Minecraft code. 
 
-- [ ] I'm aware of the problem and I understand even if this issue is never fixed.
+- [ ] This is a mod compatibility issue and I'm aware of the problem.
 
 **Describe the bug**
 A clear and concise description of what the bug is.
