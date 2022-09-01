@@ -1,22 +1,34 @@
 name: Bug Report
 description: Report all kinds of crashes and bugs here
-title: "[Bug]: "
-labels: ["bug", "triage"]
+title: "[Bug|Crash]: "
+labels: ["bug", "crash"]
 assignees:
   - octocat
 body:
-  - type: markdown
+  - type: checkboxes
+    id: checkbox1
     attributes:
-      value: |
-        Thanks for taking the time to fill out this bug report!
-  - type: input
-    id: contact
+      label: Have you checked if a similar issue is already reported by someone else?
+      description: Please check if this issue is duplicated with the previous one. It will really help to organize the current issues for the developers.
+      options:
+        - label: I checked there are no similar issues have been reported.
+          required: true
+  - type: checkboxes
+    id: checkbox2
     attributes:
-      label: Contact Details
-      description: How can we get in touch with you if we need more info?
-      placeholder: ex. email@example.com
-    validations:
-      required: false
+      label: Have you read the support policy?
+      description: #1166 Please take a look at it before you submit any report. the violation of the policy will result in the removal of the report without any notification.
+      options:
+        - label: I read it and I accept the policy.
+          required: true
+  - type: checkboxes
+    id: checkbox3
+    attributes:
+      label: Is this issue related to mod incompatibility?
+      description: Please note that most issues regarding mod incompatibility are barely fixed because the mod code is hard to access than the vanilla Minecraft code.
+      options:
+        - label: This is a mod compatibility issue and I''m aware of the problem.
+          required: true
   - type: textarea
     id: what-happened
     attributes:
