@@ -1,5 +1,5 @@
 name: Bug Report
-description: File a bug report
+description: Report all kinds of crashes and bugs here
 title: "[Bug]: "
 labels: ["bug", "triage"]
 assignees:
