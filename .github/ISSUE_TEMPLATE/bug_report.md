@@ -7,11 +7,17 @@ assignees: ''
 
 ---
 
-**Have you checked if the issue you're going to report is already reported by someone or introduced?**
-- [ ] Please check if this issue is duplicated with the previous one!
+### Have you checked if a similar issue is already reported by someone else?
 
-**Is this issue related to mod incompatibility?**
-- [ ] Please note that most issues regarding mod incompatibility are barely fixed. This is because the mod code is hard to access than the vanilla Minecraft code. 
+Please check if this issue is duplicated with the previous one. It'll really helpful to organize the current issues for the developer
+
+- [ ] I checked there are no similar issues have been reported.
+
+### Is this issue related to mod incompatibility? ###
+
+Please note that most issues regarding mod incompatibility are barely fixed. This is because the mod code is hard to access than the vanilla Minecraft code. 
+
+- [ ] I'm aware of the problem and I understand even if this issue is never fixed.
 
 **Describe the bug**
 A clear and concise description of what the bug is.
