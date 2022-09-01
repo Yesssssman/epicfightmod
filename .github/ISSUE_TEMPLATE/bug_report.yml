@@ -59,14 +59,6 @@ body:
     id: what-happened
     attributes:
       label: What happened?
-      description: "Please tell us as detailed as you can. If the issue is a crash, attach the log file and write the step to reproduce it. If it's visual glitches, attach the screenshots or footages so we can understand the problem easily"
+      description: "Please tell us as detailed as you can. If the issue is a crash, attach the log file and write the step to reproduce it. If it's visual glitches, attach the screenshots or footages so we can understand the problem easily."
     validations:
       required: true
-
-  - type: textarea
-    id: logs
-    attributes:
-      label: Relevant log output
-      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
-      render: shell
-
