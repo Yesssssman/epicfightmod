@@ -27,8 +27,16 @@ body:
       label: Is this issue related to mod incompatibility?
       description: Please note that most issues regarding mod incompatibility are barely fixed because the mod code is hard to access than the vanilla Minecraft code.
       options:
-        - label: This is a mod compatibility issue and I''m aware of the problem.
-          required: true
+        - label: "This is a mod compatibility issue and I'm aware of the problem."
+          required: false
+  - type: input
+    id: specify-mod
+    attributes:
+      label: Mod
+      description: Please specify which mod cause this issue.
+      placeholder: Mod name.
+    validations:
+      required: false
   - type: textarea
     id: what-happened
     attributes:
