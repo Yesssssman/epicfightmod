@@ -18,7 +18,7 @@ Please check if this issue is duplicated with the previous one. It'll really hel
 https://github.com/Yesssssman/epicfightmod/issues/1166
 Please take a look at it before you submit any report. the violation of the policy will result in the elimination of the report without any notification.
 
-- [ ] I checked my Epic Fight version is latest.
+- [ ] I read it and I accept the policy.
 
 ### Is this issue related to mod incompatibility? ###
 
