@@ -24,6 +24,14 @@ body:
   - type: checkboxes
     id: checkbox3
     attributes:
+      label: Are you using the latest Epic Fight and recommended Forge version?
+      description: "Please check if you're using proper version of software. You can see the recommended forge version in the file description page at Curseforge"
+      options:
+        - label: "I checked I'm using latest Epic Fight and recommended Forge version."
+          required: true
+  - type: checkboxes
+    id: checkbox4
+    attributes:
       label: Is this issue related to mod incompatibility?
       description: Please note that most issues regarding mod incompatibility are barely fixed because the mod code is hard to access than the vanilla Minecraft code.
       options:
@@ -32,51 +40,35 @@ body:
   - type: input
     id: specify-mod
     attributes:
-      label: Mod
-      description: Please specify which mod cause this issue.
-      placeholder: Mod name.
+      label: The mod
+      description: Please specify the mod causing this issue, if this is mod compatibility issue.
+      placeholder: Mod name or URL.
     validations:
       required: false
+  - type: dropdown
+    id: mc-version
+    attributes:
+      label: Minecraft Version
+      description: Minecraft Version
+      options:
+        - 1.16.5
+        - 1.18.2
+    validations:
+      required: true
   - type: textarea
     id: what-happened
     attributes:
       label: What happened?
-      description: Also tell us, what did you expect to happen?
-      placeholder: Tell us what you see!
-      value: "A bug happened!"
+      description: "Please tell us as detailed as you can. If the issue is a crash, attach the log file and write the step to reproduce it. If it's visual glitches, attach the screenshots or footages so we can understand the problem easily"
+      placeholder: ""
+      value: ""
     validations:
       required: true
-  - type: dropdown
-    id: version
-    attributes:
-      label: Version
-      description: What version of our software are you running?
-      options:
-        - 1.0.2 (Default)
-        - 1.0.3 (Edge)
-    validations:
-      required: true
-  - type: dropdown
-    id: browsers
-    attributes:
-      label: What browsers are you seeing the problem on?
-      multiple: true
-      options:
-        - Firefox
-        - Chrome
-        - Safari
-        - Microsoft Edge
+
   - type: textarea
     id: logs
     attributes:
       label: Relevant log output
       description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
       render: shell
-  - type: checkboxes
-    id: terms
-    attributes:
-      label: Code of Conduct
-      description: By submitting this issue, you agree to follow our [Code of Conduct](https://example.com)
-      options:
-        - label: I agree to follow this project's Code of Conduct
-          required: true
+
