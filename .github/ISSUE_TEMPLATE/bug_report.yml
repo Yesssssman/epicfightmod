@@ -60,8 +60,6 @@ body:
     attributes:
       label: What happened?
       description: "Please tell us as detailed as you can. If the issue is a crash, attach the log file and write the step to reproduce it. If it's visual glitches, attach the screenshots or footages so we can understand the problem easily"
-      placeholder: ""
-      value: ""
     validations:
       required: true
 
