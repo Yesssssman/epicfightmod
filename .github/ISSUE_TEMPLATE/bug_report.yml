@@ -1,7 +1,7 @@
 name: Bug Report
 description: Report all kinds of crashes and bugs here
 title: "[Bug|Crash]: "
-labels: ["bug", "crash"]
+labels: []
 assignees:
   - octocat
 body:
