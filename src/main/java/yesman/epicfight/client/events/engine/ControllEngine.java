@@ -5,7 +5,6 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 
 import org.lwjgl.glfw.GLFW;
-import org.lwjgl.glfw.GLFWCursorPosCallbackI;
 
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -44,15 +43,10 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 public class ControllEngine {
 	private Map<KeyMapping, BiConsumer<KeyMapping, Integer>> keyFunctions;
 	private Set<Object> packets = Sets.newHashSet();
-	private GLFWCursorPosCallbackI blockRotationCallback = (handle, x, y) -> {
-		Minecraft.getInstance().execute(()->{tracingMouseX = x; tracingMouseY = y;});
-	};
 	private Minecraft minecraft;
 	private LocalPlayer player;
 	private LocalPlayerPatch playerpatch;
 	private KeyBindingMap keyHash;
-	private double tracingMouseX;
-	private double tracingMouseY;
 	private int mouseLeftPressCounter = 0;
 	private int sneakPressCounter = 0;
 	private int reservedKey;
@@ -90,6 +84,10 @@ public class ControllEngine {
 		this.lightPress = false;
 		this.player = playerpatch.getOriginal();
 		this.playerpatch = playerpatch;
+	}
+	
+	public LocalPlayerPatch getPlayerPatch() {
+		return this.playerpatch;
 	}
 	
 	public boolean canPlayerMove(EntityState playerState) {
@@ -358,23 +356,7 @@ public class ControllEngine {
 				return;
 			}
 			
-			Minecraft minecraft = Minecraft.getInstance();
 			EntityState playerState = controllEngine.playerpatch.getEntityState();
-			
-			if (!controllEngine.canPlayerRotate(playerState) && controllEngine.player.isAlive()) {
-				GLFW.glfwSetCursorPosCallback(minecraft.getWindow().getWindow(), controllEngine.blockRotationCallback);
-				minecraft.mouseHandler.xpos = controllEngine.tracingMouseX;
-				minecraft.mouseHandler.ypos = controllEngine.tracingMouseY;
-			} else {
-				controllEngine.tracingMouseX = minecraft.mouseHandler.xpos();
-				controllEngine.tracingMouseY = minecraft.mouseHandler.ypos();
-				
-				GLFW.glfwSetCursorPosCallback(minecraft.getWindow().getWindow(), (handle, x, y) -> {
-					minecraft.execute(() -> {
-						minecraft.mouseHandler.onMove(handle, x, y);
-					});
-				});
-			}
 			
 			if (!controllEngine.canPlayerMove(playerState)) {
 				event.getInput().forwardImpulse = 0F;

@@ -15,14 +15,14 @@ public class ClientEngine {
 	public static ClientEngine instance;
 	public Minecraft minecraft;
 	public RenderEngine renderEngine;
-	public ControllEngine inputController;
+	public ControllEngine controllEngine;
 	private boolean armorModelDebuggingMode;
 	
 	public ClientEngine() {
 		instance = this;
 		this.minecraft = Minecraft.getInstance();
 		this.renderEngine = new RenderEngine();
-		this.inputController = new ControllEngine();
+		this.controllEngine = new ControllEngine();
 	}
 	
 	public boolean switchArmorModelDebuggingMode() {

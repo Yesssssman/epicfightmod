@@ -43,14 +43,14 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	public void onConstructed(LocalPlayer entity) {
 		super.onConstructed(entity);
 		this.minecraft = Minecraft.getInstance();
-		ClientEngine.instance.inputController.setPlayerPatch(this);
+		ClientEngine.instance.controllEngine.setPlayerPatch(this);
 	}
 	
 	@Override
 	public void onJoinWorld(LocalPlayer entityIn, EntityJoinWorldEvent event) {
 		super.onJoinWorld(entityIn, event);
 		this.eventListeners.addEventListener(EventType.ACTION_EVENT_CLIENT, ACTION_EVENT_UUID, (playerEvent) -> {
-			ClientEngine.instance.inputController.unlockHotkeys();
+			ClientEngine.instance.controllEngine.unlockHotkeys();
 		});
 	}
 	
@@ -191,7 +191,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	
 	@Override
 	public boolean shouldBlockMoving() {
-		return ClientEngine.instance.inputController.isKeyDown(this.minecraft.options.keyDown);
+		return ClientEngine.instance.controllEngine.isKeyDown(this.minecraft.options.keyDown);
 	}
 	
 	public float getPrevStamina() {

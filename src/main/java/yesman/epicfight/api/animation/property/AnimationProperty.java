@@ -19,9 +19,14 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 public abstract class AnimationProperty<T> {
 	public static class StaticAnimationProperty<T> extends AnimationProperty<T> {
 		/**
-		 * You can put the sound event in animation. Must be registered in order of time.
+		 * You can put the various events in animation. Must be registered in order of time.
 		 */
 		public static final StaticAnimationProperty<StaticAnimation.Event[]> EVENTS = new StaticAnimationProperty<StaticAnimation.Event[]> ();
+		
+		/**
+		 * You can set the fixed play speed of the animation.
+		 */
+		public static final StaticAnimationProperty<Float> PLAY_SPEED = new StaticAnimationProperty<Float> ();
 	}
 	
 	public static class ActionAnimationProperty<T> extends AnimationProperty<T> {

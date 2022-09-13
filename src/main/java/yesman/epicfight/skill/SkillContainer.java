@@ -117,7 +117,8 @@ public class SkillContainer {
 	@OnlyIn(Dist.CLIENT)
 	public boolean sendExecuteRequest(LocalPlayerPatch executer, Set<Object> packetStorage) {
 		if (this.canExecute(executer)) {
-			Object packet = this.containingSkill.getExecutionPacket(executer, this.containingSkill.gatherArguments(executer, ClientEngine.instance.inputController));
+			ClientEngine.instance.renderEngine.unlockRotation(executer.getOriginal());
+			Object packet = this.containingSkill.getExecutionPacket(executer, this.containingSkill.gatherArguments(executer, ClientEngine.instance.controllEngine));
 			
 			if (packet != null) {
 				packetStorage.add(packet);

@@ -83,7 +83,11 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 		}
 		
 		float interpolation = pitch > 0.0F ? pitch / 90.0F : 0.0F;
-		matStackIn.translate(x, y - 0.1D - (0.2D * (flag2 ? 0.8D : interpolation)), z + 0.1D + (0.7D * (flag2 ? 0.0D : interpolation)) - posZ);
+		
+		double yCorrection = y - 0.1D - (0.2D * (flag2 ? 0.8D : interpolation));
+		double zCorrection = z + 0.1D + (0.7D * (flag2 ? 0.0D : interpolation)) - posZ;
+		
+		matStackIn.translate(x, yCorrection, zCorrection);
 		
 		ClientModel firstModel = entityIn.getModelName().equals("slim") ? ClientModels.LOGICAL_CLIENT.playerFirstPersonAlex : ClientModels.LOGICAL_CLIENT.playerFirstPerson;
 		firstModel.drawAnimatedModel(matStackIn, buffer.getBuffer(EpicFightRenderTypes.animatedModel(entitypatch.getOriginal().getSkinTextureLocation())), packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, poses);

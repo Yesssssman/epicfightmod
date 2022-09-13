@@ -96,6 +96,7 @@
 	"gui.epicfight.applied" : "Applied",
 	"gui.epicfight.unusable" : "Unusable",
 	"gui.epicfight.changing_cost": "Cost: %d",
+	"gui.epicfight.no_skills": "There are no skills you've learned yet. You can learn skills by acquiring the skill books from looting mobs and chests.",
 	
 	"item.epicfight.katana" : "Katana",
 	"item.epicfight.stray_hat" : "Stray Hat",

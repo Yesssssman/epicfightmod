@@ -178,7 +178,7 @@ public abstract class MixinWitherBoss extends Monster implements PowerableMob, R
 								this.idleHeadUpdates[i - 1] = 0;
 							}
 						}
-
+						
 						int l1 = self.getAlternativeTarget(i);
 
 						if (this.epicfightPatch.getEntityState().inaction()) {
@@ -188,9 +188,7 @@ public abstract class MixinWitherBoss extends Monster implements PowerableMob, R
 						if (l1 > 0) {
 							LivingEntity livingentity = (LivingEntity) self.level.getEntity(l1);
 
-							if (livingentity != null && self.canAttack(livingentity)
-									&& !(self.distanceToSqr(livingentity) > 900.0D)
-									&& self.hasLineOfSight(livingentity)) {
+							if (livingentity != null && self.canAttack(livingentity) && !(self.distanceToSqr(livingentity) > 900.0D) && self.hasLineOfSight(livingentity)) {
 								if (!this.epicfightPatch.getEntityState().inaction()) {
 									self.performRangedAttack(i + 1, livingentity);
 									this.nextHeadUpdate[i - 1] = self.tickCount + 40 + self.getRandom().nextInt(20);

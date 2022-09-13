@@ -34,6 +34,7 @@ import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimation
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.AttackResult;
@@ -195,6 +196,7 @@ public class AttackAnimation extends ActionAnimation {
 			HitEntityList hitEntities = new HitEntityList(entitypatch, list, phase.getProperty(AttackPhaseProperty.HIT_PRIORITY).orElse(HitEntityList.Priority.DISTANCE));
 			boolean flag1 = true;
 			int maxStrikes = this.getMaxStrikes(entitypatch, phase);
+			entitypatch.getOriginal().setLastHurtMob(list.get(0));
 			
 			while (entitypatch.currentlyAttackedEntity.size() < maxStrikes && hitEntities.next()) {
 				Entity e = hitEntities.getEntity();
@@ -343,6 +345,10 @@ public class AttackAnimation extends ActionAnimation {
 	
 	@Override
 	public float getPlaySpeed(LivingEntityPatch<?> entitypatch) {
+		if (this.getProperty(StaticAnimationProperty.PLAY_SPEED).isPresent()) {
+			return super.getPlaySpeed(entitypatch);
+		}
+		
 		if (entitypatch instanceof PlayerPatch<?>) {
 			Phase phase = this.getPhaseByTime(entitypatch.getAnimator().getPlayerFor(this).getElapsedTime());
 			float speedFactor = this.getProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR).orElse(1.0F);
@@ -353,9 +359,9 @@ public class AttackAnimation extends ActionAnimation {
 			correctedSpeed = Math.round(correctedSpeed * 1000.0F) / 1000.0F;
 			
 			return 1.0F + (correctedSpeed - 1.0F) * speedFactor;
-		} else {
-			return 1.0F;
 		}
+		
+		return 1.0F;
 	}
 	
 	public <V> AttackAnimation addProperty(AttackAnimationProperty<V> propertyType, V value) {

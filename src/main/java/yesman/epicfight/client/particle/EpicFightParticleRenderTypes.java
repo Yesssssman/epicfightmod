@@ -9,6 +9,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.ParticleRenderType;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlas;
@@ -45,11 +46,18 @@ public class EpicFightParticleRenderTypes {
 			RenderSystem.enableBlend();
 			RenderSystem.depthMask(true);
 			RenderSystem.setShader(GameRenderer::getRendertypeEntityCutoutNoCullShader);
+			
+			Minecraft mc = Minecraft.getInstance();
+			mc.gameRenderer.overlayTexture().setupOverlayColor();
+			
 			bufferBuilder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
 		}
 		
 		public void end(Tesselator tesselator) {
 			tesselator.end();
+			
+			Minecraft mc = Minecraft.getInstance();
+			mc.gameRenderer.overlayTexture().teardownOverlayColor();
 		}
 
 		public String toString() {

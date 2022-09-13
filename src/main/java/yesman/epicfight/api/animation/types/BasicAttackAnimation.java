@@ -22,11 +22,13 @@ public class BasicAttackAnimation extends AttackAnimation {
 	public BasicAttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, @Nullable Collider collider, String index, String path, Model model) {
 		super(convertTime, antic, preDelay, contact, recovery, collider, index, path, model);
 		this.addProperty(AttackAnimationProperty.ROTATE_X, true);
+		this.addProperty(ActionAnimationProperty.CANCELABLE_MOVE, true);
 	}
 	
 	public BasicAttackAnimation(float convertTime, float antic, float contact, float recovery, InteractionHand hand, @Nullable Collider collider, String index, String path, Model model) {
 		super(convertTime, antic, antic, contact, recovery, hand, collider, index, path, model);
 		this.addProperty(AttackAnimationProperty.ROTATE_X, true);
+		this.addProperty(ActionAnimationProperty.CANCELABLE_MOVE, true);
 	}
 	
 	@Override

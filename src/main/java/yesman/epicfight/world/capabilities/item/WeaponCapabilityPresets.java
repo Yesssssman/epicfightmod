@@ -138,7 +138,6 @@ public class WeaponCapabilityPresets {
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.RUN, Animations.BIPED_RUN_SPEAR)
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.SWIM, Animations.BIPED_HOLD_SPEAR)
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.SPEAR_GUARD);
-		
 		return builder;
 	};
 	public static final Function<Item, CapabilityItem.Builder> GREATSWORD = (item) -> {

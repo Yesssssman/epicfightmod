@@ -6,7 +6,8 @@
 	"client": [
 		"MixinEnderDragonRenderer",
 		"MixinBufferBuilder",
-		"MixinKeyboardHandler"
+		"MixinKeyboardHandler",
+		"MixinMouseHandler"
 	],
 	"mixins": [
 		"MixinEndCrystal",

@@ -105,7 +105,8 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	protected void serverTick(LivingUpdateEvent event) {
 		if (this.stunTimeReduction > 0.0F) {
 			float stunArmor = this.getStunArmor();
-			this.stunTimeReduction = Math.max(0.0F, this.stunTimeReduction - 0.03F * (1 - stunArmor / (7.5F + stunArmor)));
+			this.stunTimeReduction -= 0.05F * (1.1F - this.stunTimeReduction * this.stunTimeReduction) * (1.0F - stunArmor / (7.5F + stunArmor));
+			this.stunTimeReduction = Math.max(0.0F, this.stunTimeReduction);
 		}
 	}
 	
@@ -185,9 +186,6 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 		return result;
 	}
 	
-	public void onBlockedByShield() {
-	}
-	
 	public void onHurtSomeone(Entity target, InteractionHand handIn, ExtendedDamageSource damagesource, float amount, boolean succeed) {
 		int j = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.FIRE_ASPECT, this.getValidItemInHand(handIn));
 		
@@ -207,7 +205,8 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends EntityPa
 	public void gatherDamageDealt(ExtendedDamageSource source, float amount) {}
 	
 	public void setStunReductionOnHit() {
-		this.stunTimeReduction += (1.0F - this.stunTimeReduction) * 0.8F;
+		this.stunTimeReduction += Math.max((1.0F - this.stunTimeReduction) * 0.8F, 0.5F);
+		this.stunTimeReduction = Math.min(1.0F, this.stunTimeReduction);
 	}
 	
 	public float getStunTimeTimeReduction() {

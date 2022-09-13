@@ -52,11 +52,11 @@ public class SkillBookItem extends Item {
 	@OnlyIn(Dist.CLIENT)
 	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
 		if (stack.getTag() != null && stack.getTag().contains("skill")) {
-			;
+			Skill skill = Skills.getSkill(stack.getTag().getString("skill"));
 			
-			
-			
-			tooltip.add(new TranslatableComponent(Skills.getSkill(stack.getTag().getString("skill")).getTranslatableText()).withStyle(ChatFormatting.DARK_GRAY));
+			if (skill != null) {
+				tooltip.add(new TranslatableComponent(skill.getTranslatableText()).withStyle(ChatFormatting.DARK_GRAY));
+			}
 		}
 	}
 	

@@ -421,7 +421,8 @@ public class Animations {
 		
 		BIPED_HOLD_LONGSWORD = new StaticAnimation(true, "biped/living/hold_longsword", biped);
 		BIPED_HOLD_SPEAR = new StaticAnimation(true, "biped/living/hold_spear", biped);
-		BIPED_CLIMBING = new MovementAnimation(0.16F, true, "biped/living/climb", biped);
+		BIPED_CLIMBING = new MovementAnimation(0.16F, true, "biped/living/climb", biped)
+				.addProperty(StaticAnimationProperty.PLAY_SPEED, 1.0F);
 		BIPED_SLEEPING = new StaticAnimation(0.16F, true, "biped/living/sleep", biped);
 		
 		BIPED_JAVELIN_AIM = new AimAnimation(false, "biped/combat/javelin_aim_mid", "biped/combat/javelin_aim_up", "biped/combat/javelin_aim_down", "biped/combat/javelin_aim_lying", biped);
@@ -506,7 +507,7 @@ public class Animations {
 		FIST_DASH = new DashAttackAnimation(0.06F, 0.05F, 0.15F, 0.3F, 0.7F, null, "Shoulder_R", "biped/combat/fist_dash", biped)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
-				.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.0F);
+				.addProperty(StaticAnimationProperty.PLAY_SPEED, 1.0F);
 		SWORD_AUTO1 = new BasicAttackAnimation(0.13F, 0.0F, 0.11F, 0.3F, null, "Tool_R", "biped/combat/sword_auto1", biped);
 		SWORD_AUTO2 = new BasicAttackAnimation(0.13F, 0.0F, 0.11F, 0.3F, null, "Tool_R", "biped/combat/sword_auto2", biped);
 		SWORD_AUTO3 = new BasicAttackAnimation(0.13F, 0.0F, 0.11F, 0.6F, null, "Tool_R", "biped/combat/sword_auto3", biped);
@@ -1243,8 +1244,8 @@ public class Animations {
 		
 		GUILLOTINE_AXE = new SpecialAttackAnimation(0.08F, 0.2F, 0.5F, 0.65F, 1.0F, null, "Tool_R", "biped/skill/guillotine_axe", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
-				.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.0F)
-				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true);
+				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true)
+				.addProperty(StaticAnimationProperty.PLAY_SPEED, 1.0F);
 		
 		SPEAR_THRUST = new SpecialAttackAnimation(0.11F, "biped/skill/spear_thrust", biped,
 				new Phase(0.0F, 0.3F, 0.36F, 0.5F, 0.5F, "Tool_R", null), new Phase(0.5F, 0.5F, 0.56F, 0.75F, 0.75F, "Tool_R", null),
@@ -1269,14 +1270,14 @@ public class Animations {
 		FATAL_DRAW = new SpecialAttackAnimation(0.15F, 0.0F, 0.7F, 0.81F, 1.0F, ColliderPreset.FATAL_DRAW, "Root", "biped/skill/fatal_draw", biped)
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
-				.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.0F)
+				.addProperty(StaticAnimationProperty.PLAY_SPEED, 1.0F)
 				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.05F, ReuseableEvents.KATANA_IN, Event.Side.SERVER)});
 		
 		FATAL_DRAW_DASH = new SpecialAttackAnimation(0.15F, 0.43F, 0.85F, 0.851F, 1.4F, ColliderPreset.FATAL_DRAW_DASH, "Root", "biped/skill/fatal_draw_dash", biped)
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
 				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
-				.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.0F)
+				.addProperty(StaticAnimationProperty.PLAY_SPEED, 1.0F)
 				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.05F, ReuseableEvents.KATANA_IN, Event.Side.SERVER)})
 				.addProperty(StaticAnimationProperty.EVENTS, new Event[] {Event.create(0.85F, (entitypatch) -> {
 					Entity entity = entitypatch.getOriginal();
@@ -1285,7 +1286,7 @@ public class Animations {
 		
 		LETHAL_SLICING = new SpecialAttackAnimation(0.15F, 0.0F, 0.0F, 0.11F, 0.38F, ColliderPreset.FIST_FIXED, "Root", "biped/skill/lethal_slicing_start", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
-				.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.0F);
+				.addProperty(StaticAnimationProperty.PLAY_SPEED, 1.0F);
 		
 		LETHAL_SLICING_ONCE = new SpecialAttackAnimation(0.016F, 0.0F, 0.0F, 0.1F, 0.6F, ColliderPreset.FATAL_DRAW, "Root", "biped/skill/lethal_slicing_once", biped)
 				.addProperty(AttackAnimationProperty.LOCK_ROTATION, true)
@@ -1316,19 +1317,19 @@ public class Animations {
 		BLADE_RUSH_FIRST = new SpecialAttackAnimation(0.1F, 0.0F, 0.0F, 0.06F, 0.3F, ColliderPreset.BLADE_RUSH, "Root", "biped/skill/blade_rush_first", biped)
 				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
 				.addProperty(AttackPhaseProperty.HIT_PRIORITY, Priority.TARGET)
-				.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.0F);
+				.addProperty(StaticAnimationProperty.PLAY_SPEED, 1.0F);
 		BLADE_RUSH_SECOND = new SpecialAttackAnimation(0.1F, 0.0F, 0.0F, 0.06F, 0.3F, ColliderPreset.BLADE_RUSH, "Root", "biped/skill/blade_rush_second", biped)
 				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
 				.addProperty(AttackPhaseProperty.HIT_PRIORITY, Priority.TARGET)
-				.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.0F);
+				.addProperty(StaticAnimationProperty.PLAY_SPEED, 1.0F);
 		BLADE_RUSH_THIRD = new SpecialAttackAnimation(0.1F, 0.0F, 0.0F, 0.06F, 0.3F, ColliderPreset.BLADE_RUSH, "Root", "biped/skill/blade_rush_third", biped)
 				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
 				.addProperty(AttackPhaseProperty.HIT_PRIORITY, Priority.TARGET)
-				.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.0F);
+				.addProperty(StaticAnimationProperty.PLAY_SPEED, 1.0F);
 		BLADE_RUSH_FINISHER = new SpecialAttackAnimation(0.15F, 0.0F, 0.1F, 0.16F, 0.65F, ColliderPreset.BLADE_RUSH, "Root", "biped/skill/blade_rush_finisher", biped)
 				.addProperty(AttackAnimationProperty.FIXED_MOVE_DISTANCE, true)
 				.addProperty(AttackPhaseProperty.HIT_PRIORITY, Priority.TARGET)
-				.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.0F);
+				.addProperty(StaticAnimationProperty.PLAY_SPEED, 1.0F);
 	}
 	
 	private static class ReuseableEvents {

@@ -33,7 +33,7 @@ public class ProviderItem implements ICapabilityProvider, NonNullSupplier<Capabi
 	private static final Map<Item, CapabilityItem> CAPABILITIES = Maps.newHashMap();
 	
 	public static void registerWeaponTypesByClass() {
-		CAPABILITY_BY_CLASS.put(ArmorItem.class, ArmorCapability.builder()::item);
+		CAPABILITY_BY_CLASS.put(ArmorItem.class, (item) -> ArmorCapability.builder().item(item));
 		CAPABILITY_BY_CLASS.put(ShieldItem.class, WeaponCapabilityPresets.SHIELD);
 		CAPABILITY_BY_CLASS.put(SwordItem.class, WeaponCapabilityPresets.SWORD);
 		CAPABILITY_BY_CLASS.put(PickaxeItem.class, WeaponCapabilityPresets.PICKAXE);

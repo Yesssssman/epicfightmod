@@ -197,6 +197,11 @@ public class StaticAnimation extends DynamicAnimation {
 	}
 	
 	@Override
+	public float getPlaySpeed(LivingEntityPatch<?> entitypatch) {
+		return this.getProperty(StaticAnimationProperty.PLAY_SPEED).orElse(1.0F);
+	}
+	
+	@Override
 	public String toString() {
 		String classPath = this.getClass().toString();
 		return classPath.substring(classPath.lastIndexOf(".") + 1) + " " + this.getLocation();

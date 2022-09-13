@@ -11,7 +11,6 @@ import net.minecraft.world.entity.ai.behavior.RunIf;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.UseAnim;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -73,7 +72,9 @@ public class CustomHumanoidMobPatch<T extends PathfinderMob> extends HumanoidMob
 	
 	@Override
 	protected void setWeaponMotions() {
-		
+		if (this.weaponAttackMotions == null) {
+			super.setWeaponMotions();
+		}
 	}
 	
 	@Override
@@ -86,11 +87,6 @@ public class CustomHumanoidMobPatch<T extends PathfinderMob> extends HumanoidMob
 		if (this.provider.getAttributeValues().containsKey(Attributes.ATTACK_DAMAGE)) {
 			this.original.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(this.provider.getAttributeValues().get(Attributes.ATTACK_DAMAGE));
 		}
-	}
-	
-	@Override
-	public void tick(LivingUpdateEvent event) {
-		super.tick(event);
 	}
 	
 	@Override

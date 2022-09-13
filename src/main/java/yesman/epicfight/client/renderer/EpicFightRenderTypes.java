@@ -54,17 +54,25 @@ public class EpicFightRenderTypes extends RenderType {
 		RenderType.CompositeState rendertype$compositestate = RenderType.CompositeState.builder()
 				.setShaderState(RENDERTYPE_ARMOR_CUTOUT_NO_CULL_SHADER)
 				.setTextureState(new RenderStateShard.TextureStateShard(p_173206_, false, false))
-				.setTransparencyState(NO_TRANSPARENCY).setCullState(NO_CULL).setLightmapState(LIGHTMAP)
-				.setOverlayState(OVERLAY).setLayeringState(VIEW_OFFSET_Z_LAYERING).createCompositeState(true);
+				.setTransparencyState(NO_TRANSPARENCY)
+				.setCullState(NO_CULL)
+				.setLightmapState(LIGHTMAP)
+				.setOverlayState(OVERLAY)
+				.setLayeringState(VIEW_OFFSET_Z_LAYERING)
+			.createCompositeState(true);
 		return create(EpicFightMod.MODID + ":armor_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.TRIANGLES, 256, true, false, rendertype$compositestate);
 	});
 	
-	private static final Function<ResourceLocation, RenderType> ANIMATED_ARMOR_TRANSLUCENT_CUTOUT_NO_CULL = Util.memoize((p_173206_) -> {
+	private static final Function<ResourceLocation, RenderType> ANIMATED_ARMOR_TRANSPARENT_CUTOUT_NO_CULL = Util.memoize((p_173206_) -> {
 		RenderType.CompositeState rendertype$compositestate = RenderType.CompositeState.builder()
 				.setShaderState(RENDERTYPE_ARMOR_CUTOUT_NO_CULL_SHADER)
 				.setTextureState(new RenderStateShard.TextureStateShard(p_173206_, false, false))
-				.setTransparencyState(TRANSLUCENT_TRANSPARENCY).setCullState(NO_CULL).setLightmapState(LIGHTMAP)
-				.setOverlayState(OVERLAY).setLayeringState(VIEW_OFFSET_Z_LAYERING).createCompositeState(true);
+				.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+				.setCullState(NO_CULL)
+				.setLightmapState(LIGHTMAP)
+				.setOverlayState(OVERLAY)
+				.setLayeringState(VIEW_OFFSET_Z_LAYERING)
+			.createCompositeState(true);
 		return create(EpicFightMod.MODID + ":armor_cutout_no_cull", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.TRIANGLES, 256, true, true, rendertype$compositestate);
 	});
 	
@@ -113,12 +121,13 @@ public class EpicFightRenderTypes extends RenderType {
 		return create(EpicFightMod.MODID + ":dragon_explosion_triangles", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.TRIANGLES, 256, false, false, state);
 	});
 	
-	private static final RenderType DEBUG_COLLIDER = create(EpicFightMod.MODID + ":debug_collider", DefaultVertexFormat.POSITION_COLOR, VertexFormat.Mode.LINE_STRIP, 256, false, false,
+	private static final RenderType DEBUG_COLLIDER = create(EpicFightMod.MODID + ":debug_collider", DefaultVertexFormat.POSITION_COLOR_NORMAL, VertexFormat.Mode.LINE_STRIP, 256, false, false,
 			RenderType.CompositeState.builder()
-				.setShaderState(RENDERTYPE_LINES_SHADER)
+				.setShaderState(POSITION_COLOR_SHADER)
 				.setLineState(new RenderStateShard.LineStateShard(OptionalDouble.empty()))
 				.setLayeringState(VIEW_OFFSET_Z_LAYERING)
-				.setTransparencyState(NO_TRANSPARENCY)
+				.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+				.setOutputState(ITEM_ENTITY_TARGET)
 				.setWriteMaskState(COLOR_DEPTH_WRITE)
 				.setCullState(NO_CULL)
 				.createCompositeState(false)
@@ -134,6 +143,17 @@ public class EpicFightRenderTypes extends RenderType {
 				.createCompositeState(false)
 	);
 	
+	private static final Function<ResourceLocation, RenderType> ENTITY_TRANSLUCENT_TRIANGLES = (texture) -> create(EpicFightMod.MODID + ":entity_transparent", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.TRIANGLES, 256, false, true, RenderType.CompositeState.builder()
+			.setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
+			.setTextureState(new RenderStateShard.TextureStateShard(texture, false, false))
+			.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+			.setCullState(NO_CULL)
+			.setLightmapState(LIGHTMAP)
+			.setOverlayState(OVERLAY)
+			.setWriteMaskState(COLOR_DEPTH_WRITE)
+		.createCompositeState(false));
+	
+	
 	public static RenderType animatedModel(ResourceLocation locationIn) {
 		return ANIMATED_MODEL.apply(locationIn);
 	}
@@ -143,7 +163,7 @@ public class EpicFightRenderTypes extends RenderType {
 	}
 	
 	public static RenderType animatedArmor(ResourceLocation locationIn, boolean transparent) {
-		return transparent ? ANIMATED_ARMOR_TRANSLUCENT_CUTOUT_NO_CULL.apply(locationIn) : ANIMATED_ARMOR_CUTOUT_NO_CULL.apply(locationIn);
+		return transparent ? ANIMATED_ARMOR_TRANSPARENT_CUTOUT_NO_CULL.apply(locationIn) : ANIMATED_ARMOR_CUTOUT_NO_CULL.apply(locationIn);
 	}
 	
 	public static RenderType enchantedAnimatedArmor() {
@@ -171,7 +191,7 @@ public class EpicFightRenderTypes extends RenderType {
 	}
 	
 	public static RenderType energySwirlTrianlges(ResourceLocation texture, float u, float v) {
-		return create(EpicFightMod.MODID + ":energy_swirl_trianlges", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.TRIANGLES, 256, false, true, RenderType.CompositeState.builder()
+		return create(EpicFightMod.MODID + ":energy_swirl_triangles", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.TRIANGLES, 256, false, true, RenderType.CompositeState.builder()
 				.setShaderState(RENDERTYPE_ENERGY_SWIRL_SHADER)
 				.setTextureState(new RenderStateShard.TextureStateShard(texture, false, false))
 				.setTexturingState(new RenderStateShard.OffsetTexturingStateShard(u, v))
@@ -182,15 +202,7 @@ public class EpicFightRenderTypes extends RenderType {
 	}
 	
 	public static RenderType entityTranslucentTriangles(ResourceLocation texture) {
-		return create(EpicFightMod.MODID + ":entity_transparent", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.TRIANGLES, 256, false, true, RenderType.CompositeState.builder()
-				.setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
-				.setTextureState(new RenderStateShard.TextureStateShard(texture, false, false))
-				.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
-				.setCullState(NO_CULL)
-				.setLightmapState(LIGHTMAP)
-				.setOverlayState(OVERLAY)
-				.setWriteMaskState(COLOR_DEPTH_WRITE)
-			.createCompositeState(false));
+		return ENTITY_TRANSLUCENT_TRIANGLES.apply(texture);
 	}
 	
 	public static VertexConsumer getArmorVertexBuilder(MultiBufferSource buffer, RenderType renderType, boolean withGlint) {

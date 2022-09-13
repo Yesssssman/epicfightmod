@@ -13,6 +13,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.main.EpicFightMod;
@@ -25,6 +26,7 @@ import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 @OnlyIn(Dist.CLIENT)
 public class SkillEditScreen extends Screen {
 	private static final ResourceLocation SKILL_EDIT_UI = new ResourceLocation(EpicFightMod.MODID, "textures/gui/screen/skill_edit.png");
+	private static final TranslatableComponent NO_SKILLS = new TranslatableComponent("gui.epicfight.no_skills");
 	private CapabilitySkill skills;
 	private List<CategoryButton> categoryButtons = Lists.newArrayList();
 	private List<LearnSkillButton> learnedSkillButtons = Lists.newArrayList();
@@ -78,15 +80,25 @@ public class SkillEditScreen extends Screen {
 	}
 	
 	@Override
-	public void render(PoseStack PoseStack, int mouseX, int mouseY, float partialTicks) {
-		this.renderBackground(PoseStack);
+	public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+		this.renderBackground(poseStack);
 		
 		for (int i = 0; i < this.learnedSkillButtons.size(); ++i) {
-			this.learnedSkillButtons.get(i).render(PoseStack, mouseX, mouseY, partialTicks);
+			this.learnedSkillButtons.get(i).render(poseStack, mouseX, mouseY, partialTicks);
 		}
 		
 		for (int i = 0; i < this.categoryButtons.size(); ++i) {
-			this.categoryButtons.get(i).render(PoseStack, mouseX, mouseY, partialTicks);
+			this.categoryButtons.get(i).render(poseStack, mouseX, mouseY, partialTicks);
+		}
+		
+		if (this.categoryButtons.isEmpty()) {
+			int lineHeight = 0;
+			
+			for (FormattedCharSequence s : this.font.split(NO_SKILLS, 110)) {
+				this.font.draw(poseStack, s, this.width / 2 - 50, this.height / 2 - 72 + lineHeight, 3158064);
+				
+				lineHeight += 10;
+			}
 		}
 	}
 	
