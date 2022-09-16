@@ -247,7 +247,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			OpenMatrix4f mat = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0, partialTick, 1, 1, 1);
             float f1 = (float)this.original.getFallFlyingTicks() + partialTick;
             float f2 = Mth.clamp(f1 * f1 / 100.0F, 0.0F, 1.0F);
-            mat.rotateDeg(-this.original.getYRot(), Vec3f.Y_AXIS).rotateDeg(f2 * (-this.original.getXRot()), Vec3f.X_AXIS);
+            mat.rotateDeg(-Mth.rotLerp(partialTick, this.original.yBodyRotO, this.original.yBodyRot), Vec3f.Y_AXIS).rotateDeg(f2 * (-this.original.getXRot()), Vec3f.X_AXIS);
             
             Vec3 vec3d = this.original.getViewVector(partialTick);
             Vec3 vec3d1 = this.original.getDeltaMovement();
@@ -257,7 +257,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			if (d0 > 0.0D && d1 > 0.0D) {
                 double d2 = (vec3d1.x * vec3d.x + vec3d1.z * vec3d.z) / (Math.sqrt(d0) * Math.sqrt(d1));
                 double d3 = vec3d1.x * vec3d.z - vec3d1.z * vec3d.x;
-                mat.rotate((float)((Math.signum(d3) * Math.acos(d2))), Vec3f.Y_AXIS);
+                mat.rotate((float)-((Math.signum(d3) * Math.acos(d2))), Vec3f.Z_AXIS);
             }
 			
             return mat;

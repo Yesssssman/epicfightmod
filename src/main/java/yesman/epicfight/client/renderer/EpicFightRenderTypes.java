@@ -27,12 +27,12 @@ public class EpicFightRenderTypes extends RenderType {
 	
 	private static final Function<ResourceLocation, RenderType> ANIMATED_MODEL = Util.memoize((textureLocation) -> {
 		RenderType.CompositeState state = RenderType.CompositeState.builder()
-			.setShaderState(RENDERTYPE_ENTITY_CUTOUT_NO_CULL_SHADER)
-			.setTextureState(new RenderStateShard.TextureStateShard(textureLocation, false, false))
-			.setTransparencyState(NO_TRANSPARENCY)
-			.setCullState(NO_CULL)
-			.setLightmapState(LIGHTMAP)
-			.setOverlayState(OVERLAY)
+				.setShaderState(RENDERTYPE_ENTITY_TRANSLUCENT_SHADER)
+				.setTextureState(new RenderStateShard.TextureStateShard(textureLocation, false, false))
+				.setTransparencyState(TRANSLUCENT_TRANSPARENCY)
+				.setCullState(NO_CULL)
+				.setLightmapState(LIGHTMAP)
+				.setOverlayState(OVERLAY)
 			.createCompositeState(true);
 	    return create(EpicFightMod.MODID + ":animated_model", DefaultVertexFormat.NEW_ENTITY, VertexFormat.Mode.TRIANGLES, 256, true, false, state);
 	});
