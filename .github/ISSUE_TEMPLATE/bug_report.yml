@@ -1,0 +1,64 @@
+name: Bug Report
+description: Report all kinds of crashes and bugs here
+title: "[Bug|Crash]: "
+labels: []
+assignees:
+  - octocat
+body:
+  - type: checkboxes
+    id: checkbox1
+    attributes:
+      label: Have you checked if a similar issue is already reported by someone else?
+      description: Please check if this issue is duplicated with the previous one. It will really help to organize the current issues for the developers.
+      options:
+        - label: I checked there are no similar issues have been reported.
+          required: true
+  - type: checkboxes
+    id: checkbox2
+    attributes:
+      label: Have you read the support policy?
+      description: "https://github.com/Yesssssman/epicfightmod/issues/1166\nPlease take a look at it before you submit any report. the violation of the policy will result in the removal of the report without any notification."
+      options:
+        - label: I read it and I accept the policy.
+          required: true
+  - type: checkboxes
+    id: checkbox3
+    attributes:
+      label: Are you using the latest Epic Fight and recommended Forge version?
+      description: "Please check if you're using proper version of software. You can see the recommended forge version in the file description page at Curseforge"
+      options:
+        - label: "I checked I'm using latest Epic Fight and recommended Forge version."
+          required: true
+  - type: checkboxes
+    id: checkbox4
+    attributes:
+      label: Is this issue related to mod incompatibility?
+      description: Please note that most issues regarding mod incompatibility are barely fixed because the mod code is hard to access than the vanilla Minecraft code.
+      options:
+        - label: "This is a mod compatibility issue and I'm aware of the problem."
+          required: false
+  - type: input
+    id: specify-mod
+    attributes:
+      label: The mod
+      description: Please specify the mod causing this issue, if this is mod compatibility issue.
+      placeholder: Mod name or URL.
+    validations:
+      required: false
+  - type: dropdown
+    id: mc-version
+    attributes:
+      label: Minecraft Version
+      description: Minecraft Version
+      options:
+        - 1.16.5
+        - 1.18.2
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened?
+      description: "Please tell us as detailed as you can. If the issue is a crash, attach the log file and write the step to reproduce it. If it's visual glitches, attach the screenshots or footages so we can understand the problem easily."
+    validations:
+      required: true
