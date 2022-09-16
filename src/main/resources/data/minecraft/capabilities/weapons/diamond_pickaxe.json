@@ -1,0 +1,11 @@
+{
+	"attributes":
+	{
+		"common":
+		{
+			"armor_negation":18.0,
+			"impact":0.7
+		}
+	},
+	"type":"pickaxe"
+}

@@ -1,0 +1,53 @@
+{
+	"loader": "forge:separate-perspective",
+	"base":
+	{
+		"loader": "forge:obj",
+  		"model": "epicfight:models/item/obj/spear.obj",
+  		"flip-v": true,
+  		"materialLibraryOverride": "stone_spear.mtl",
+  		"display":
+  		{
+    		"thirdperson_righthand":
+    		{
+      			"translation": [6, -10.5, 6.8],
+      			"rotation": [86, 0, 0],
+      			"scale": [0.75, 0.75, 0.75]
+    		},
+    		"firstperson_righthand":
+    		{
+      			"translation": [10,-1,-5],
+      			"rotation": [75,0,0],
+      			"scale": [0.45, 0.45, 0.45]
+    		}
+  		}
+	},
+	"perspectives":
+	{
+		"ground":
+		{
+			"parent": "item/generated",
+			"textures":
+			{
+				"layer0": "epicfight:item/stone_spear"
+			}
+		},
+		"gui":
+		{
+			"parent": "item/generated",
+			"textures":
+			{
+				"layer0": "epicfight:item/stone_spear"
+			},
+			"gui_light": "front"
+		},
+		"fixed":
+		{
+			"parent": "item/generated",
+			"textures":
+			{
+				"layer0": "epicfight:item/stone_spear"
+			}
+		}
+	}
+}

@@ -1,0 +1,7 @@
+{
+    "parent": "epicfight:item/dagger",
+    "textures":
+    {
+        "layer0" : "epicfight:item/golden_dagger"
+    }
+}

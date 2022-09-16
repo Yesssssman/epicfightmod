@@ -1,0 +1,22 @@
+{
+    "parent": "item/generated",
+    "textures":
+    {
+        "layer0" : "epicfight:item/golden_longsword"
+    },
+    "display":
+  	{
+    	"thirdperson_righthand":
+    	{
+    		"scale": [1.5, 1.5, 0.8],
+    		"translation": [0.0, 10.0, 1.0],
+    		"rotation": [42.0, 90.0, 0.0]
+    	},
+    	"firstperson_righthand":
+    	{
+      		"translation": [2,7.5,0],
+      		"rotation": [30,90,0],
+      		"scale": [1.2, 1.2, 0.7]
+    	}
+  	}
+}

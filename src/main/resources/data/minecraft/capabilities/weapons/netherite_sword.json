@@ -1,0 +1,12 @@
+{
+	"attributes":
+	{
+		"common":
+		{
+			"armor_negation":10.0,
+			"impact":1.3,
+			"max_strikes":1
+		}
+	},
+	"type":"sword"
+}
