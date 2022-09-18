@@ -31,8 +31,11 @@ public class GroundSlamParticle extends MetaParticle {
 			Vec3f positionVec = OpenMatrix4f.transform3v(mat, Vec3f.Z_AXIS, null).scale((float)dx);
 			Vec3f moveVec = OpenMatrix4f.transform3v(mat, Vec3f.Z_AXIS, null).scale((float)dz);
 			
-			Particle blockParticle = new DiggingParticle(level, x + positionVec.x, y, z + positionVec.z, 
+			DiggingParticle blockParticle = new DiggingParticle(level, x + positionVec.x, y, z + positionVec.z, 
 					(moveVec.x + Math.random()) * 0.3D, Math.random() * 0.5D, (moveVec.z + Math.random()) * 0.3D, blockstate);
+			
+			blockParticle.init();
+			
 			blockParticle.setLifetime(60 + (new Random().nextInt(20)));
 			
 			Particle smokeParticle = mc.particleEngine.createParticle(ParticleTypes.CAMPFIRE_COSY_SMOKE, x + positionVec.x * 0.5D, y + 1.5D, z + positionVec.z * 0.5D, 
