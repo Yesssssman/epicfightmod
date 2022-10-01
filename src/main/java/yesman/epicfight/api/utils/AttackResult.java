@@ -13,11 +13,11 @@ public class AttackResult {
 		SUCCESS(true, true), FAILED(false, false), BLOCKED(false, true);
 		
 		boolean dealtDamage;
-		boolean countInMaxStrikes;
+		boolean countMaxStrikes;
 		
 		ResultType(boolean dealtDamage, boolean count) {
 			this.dealtDamage = dealtDamage;
-			this.countInMaxStrikes = count;
+			this.countMaxStrikes = count;
 		}
 		
 		public boolean dealtDamage() {
@@ -25,7 +25,7 @@ public class AttackResult {
 		}
 		
 		public boolean count() {
-			return this.countInMaxStrikes;
+			return this.countMaxStrikes;
 		}
 	}
 }

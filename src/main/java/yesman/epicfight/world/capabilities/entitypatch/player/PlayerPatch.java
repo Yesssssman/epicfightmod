@@ -176,10 +176,11 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	
 	@Override
 	public float getDamageTo(@Nullable Entity targetEntity, @Nullable ExtendedDamageSource source, InteractionHand hand) {
-		return this.getDamageToEntity(targetEntity, source, super.getDamageTo(targetEntity, source, hand));
+		return this.getModifiedDamage(targetEntity, source, super.getDamageTo(targetEntity, source, hand));
 	}
 	
-	public float getDamageToEntity(@Nullable Entity targetEntity, @Nullable ExtendedDamageSource source, float baseDamage) {
+	public float getModifiedDamage(@Nullable Entity targetEntity, @Nullable ExtendedDamageSource source, float baseDamage) {
+		
 		DealtDamageEvent<PlayerPatch<?>> event = new DealtDamageEvent<>(this, this.original, source, baseDamage);
 		this.getEventListener().triggerEvents(EventType.DEALT_DAMAGE_EVENT_PRE, event);
 		return event.getAttackDamage();
@@ -194,10 +195,10 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 			baseSpeed = (float) (this.isOffhandItemValid() ? this.original.getAttributeValue(Attributes.ATTACK_SPEED) : this.original.getAttributeBaseValue(Attributes.ATTACK_SPEED));
 		}
 		
-		return this.getAttackSpeed(this.getAdvancedHoldingItemCapability(hand), baseSpeed);
+		return this.getModifiedAttackSpeed(this.getAdvancedHoldingItemCapability(hand), baseSpeed);
 	}
 	
-	public float getAttackSpeed(CapabilityItem itemCapability, float baseSpeed) {
+	public float getModifiedAttackSpeed(CapabilityItem itemCapability, float baseSpeed) {
 		AttackSpeedModifyEvent event = new AttackSpeedModifyEvent(this, itemCapability, baseSpeed);
 		this.eventListeners.triggerEvents(EventType.ATTACK_SPEED_MODIFY_EVENT, event);
 		

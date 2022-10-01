@@ -96,7 +96,7 @@ public abstract class SpecialAttackSkill extends Skill {
 		
 		impactCorrector.merge(ValueCorrector.multiplier(1.0F + EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, itemStack) * 0.12F));
 		
-		damage = damageCorrector.getTotalValue(playerpatch.getDamageToEntity(null, null, (float)damage));
+		damage = damageCorrector.getTotalValue(playerpatch.getModifiedDamage(null, null, (float)damage));
 		armorNegation = armorNegationCorrector.getTotalValue((float)armorNegation);
 		impact = impactCorrector.getTotalValue((float)impact);
 		maxStrikes = maxStrikesCorrector.getTotalValue((float)maxStrikes);

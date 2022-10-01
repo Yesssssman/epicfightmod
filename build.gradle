@@ -18,7 +18,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin'
 
 
-version = '18.3.6'
+version = '18.3.7'
 group = 'yesman.epicfight'
 archivesBaseName = 'epicfight'
 
@@ -116,7 +116,10 @@ mixin {
 
 dependencies {
     minecraft 'net.minecraftforge:forge:1.18.2-40.1.80'
-    //implementation fg.deobf("curse.maven:hunterillager-318857:3752127")
+    
+    implementation fg.deobf("curse.maven:tcon-74072:3998764")
+    implementation fg.deobf("curse.maven:mantle-74924:3829975")
+    
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 
