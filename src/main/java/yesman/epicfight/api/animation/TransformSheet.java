@@ -125,14 +125,21 @@ public class TransformSheet {
 		return new InterpolationInfo(prev, next, progression);
 	}
 	
+	//Blender bezier f-curve code
 	private static float bezierCurve(float t) {
-		float start = 0.0F;
-		float end = 1.0F;
-		float p0 = -t*t*t + 3.0F*t*t - 3.0F*t + 1.0F;
-		float p1 = 3.0F*t*t*t - 6.0F*t*t + 3.0F*t;
-		float p2 = -3.0F*t*t*t + 3.0F*t*t;
-		float p3 = t*t*t;
-		return (start * p0) + (start * p1) + (end * p2) + (end * p3);
+		
+		float p1 = 0.0F;
+		float p2 = 0.0F;
+		float p3 = 1.0F;
+		float p4 = 1.0F;
+		float v1, v2, v3, v4;
+		
+		v1 = p1;
+		v2 = 3.0f * (p2 - p1);
+		v3 = 3.0f * (p1 - 2.0f * p2 + p3);
+		v4 = p4 - p1 + 3.0f * (p2 - p3);
+		
+		return v1 + t * v2 + t * t * v3 + t * t * t * v4;
 	}
 	
 	@Override

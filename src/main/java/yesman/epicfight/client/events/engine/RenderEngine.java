@@ -481,7 +481,7 @@ public class RenderEngine {
 											}
 											
 											tooltip.remove(i);
-											tooltip.add(i, new TextComponent(String.format(" %.2f ", playerpatch.getAttackSpeed(cap, weaponSpeed))).append(new TranslatableComponent(Attributes.ATTACK_SPEED.getDescriptionId())));
+											tooltip.add(i, new TextComponent(String.format(" %.2f ", playerpatch.getModifiedAttackSpeed(cap, weaponSpeed))).append(new TranslatableComponent(Attributes.ATTACK_SPEED.getDescriptionId())));
 										} else if (((TranslatableComponent)translationComponent.getArgs()[1]).getKey().equals(Attributes.ATTACK_DAMAGE.getDescriptionId())) {
 											float weaponDamage = (float)playerpatch.getOriginal().getAttribute(Attributes.ATTACK_DAMAGE).getBaseValue();
 											weaponDamage += EnchantmentHelper.getDamageBonus(event.getItemStack(), MobType.UNDEFINED);
@@ -498,7 +498,7 @@ public class RenderEngine {
 											}
 											
 											tooltip.remove(i);
-											tooltip.add(i, new TextComponent(String.format(" %.0f ", playerpatch.getDamageToEntity(null, null, weaponDamage))).append(new TranslatableComponent(Attributes.ATTACK_DAMAGE.getDescriptionId())).withStyle(ChatFormatting.DARK_GREEN));
+											tooltip.add(i, new TextComponent(String.format(" %.0f ", playerpatch.getModifiedDamage(null, null, weaponDamage))).append(new TranslatableComponent(Attributes.ATTACK_DAMAGE.getDescriptionId())).withStyle(ChatFormatting.DARK_GREEN));
 										}
 									}
 								}
