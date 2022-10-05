@@ -59,7 +59,7 @@ public class ItemCapabilityReloadListener extends JsonReloadListener {
 			String path = rl.getPath();
 			
 			if (path.contains("/")) {
-				String[] str = path.split("/");
+				String[] str = path.split("/", 2);
 				ResourceLocation registryName = new ResourceLocation(rl.getNamespace(), str[1]);
 				Item item = ForgeRegistries.ITEMS.getValue(registryName);
 				

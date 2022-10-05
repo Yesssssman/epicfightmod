@@ -108,7 +108,8 @@ public interface ProceduralAnimation {
 		float xRoot = enderdragonpatch.xRootO + (enderdragonpatch.xRoot - enderdragonpatch.xRootO) * partialTicks;
 		float zRoot = enderdragonpatch.zRootO + (enderdragonpatch.zRoot - enderdragonpatch.zRootO) * partialTicks;
 		Quaternion quat = MathUtils.quaternionFromDegree(Vector3f.ZP, zRoot);
-		quat.mul(Vector3f.XP.rotationDegrees(-xRoot));
+		
+		quat.mul(MathUtils.quaternionFromDegree(Vector3f.XP, -xRoot));
 		rootTransform.frontResult(JointTransform.getRotation(quat), OpenMatrix4f::mulAsOriginFront);
 	}
 	

@@ -4,7 +4,7 @@ license="MIT License"
 #issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/" #optional
 [[mods]] #mandatory
 modId="epicfight" #mandatory
-version="16.6.2" #mandatory
+version="16.6.3" #mandatory
 displayName="Epic Fight" #mandatory
 #displayURL="https://change.me.to.your.mods.homepage.example.invalid/" #optional
 #logoFile="examplemod.png" #optional
