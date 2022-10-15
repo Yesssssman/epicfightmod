@@ -91,7 +91,7 @@ public class DragonGroundBattlePhase extends PatchedDragonPhase {
 							double dz = target.getZ() - this.dragon.getZ();
 							float yRot = 180.0F - (float) Math.toDegrees(MathHelper.atan2(dx, dz));
 							this.dragon.yRot = (MathUtils.rotlerp(this.dragon.yRot, yRot, 6.0F));
-							Vector3d forward = this.dragon.getForward().scale(-0.25F);
+							Vector3d forward = Vector3d.directionFromRotation(this.dragon.getRotationVector()).scale(-0.25F);
 							this.dragon.move(MoverType.SELF, forward);
 						}
 					} else {

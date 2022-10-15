@@ -48,6 +48,7 @@ public class DragonAirstrikePhase extends PatchedDragonPhase {
 	@Override
 	public void doClientTick() {
 		super.doClientTick();
+		
 		Vector3d dragonpos = this.dragon.position();
 		OpenMatrix4f mouthpos = Animator.getBindedJointTransformByName(this.dragonpatch.getAnimator().getPose(1.0F), this.dragonpatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature(), "Mouth_Upper");
 		
@@ -83,7 +84,6 @@ public class DragonAirstrikePhase extends PatchedDragonPhase {
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
 	@Override
 	public void doServerTick() {
 		LivingEntity target = this.dragon.getTarget();
@@ -94,7 +94,7 @@ public class DragonAirstrikePhase extends PatchedDragonPhase {
 			if (isValidTarget(target)) {
 				Vector3d startToDragon = this.dragon.position().subtract(this.startpos);
 				Vector3d startToTarget = target.position().subtract(this.startpos);
-				
+				//System.out.println(this.startpos);
 				if (MathUtils.horizontalDistanceSqr(startToDragon) < MathUtils.horizontalDistanceSqr(startToTarget)) {
 					Vector3d vec31 = target.position().add(0.0D, 12.0D, 0.0D);
 					
@@ -122,11 +122,12 @@ public class DragonAirstrikePhase extends PatchedDragonPhase {
 						double dx = target.getX() - this.dragon.getX();
 						double dz = target.getZ() - this.dragon.getZ();
 						float yRot = 180.0F - (float)Math.toDegrees(MathHelper.atan2(dx, dz));
-						this.dragon.yRot = (MathHelper.rotlerp(this.dragon.yRot, yRot, 6.0F));
+						this.dragon.yRot = (MathUtils.rotlerp(this.dragon.yRot, yRot, 6.0F));
 						double speed = (-0.5D - 1.0D / (1.0D + Math.pow(Math.E, -(d4 / 10.0D - 4.0F)))) * f6;
-						Vector3d forward = this.dragon.getForward().scale(speed);
+						Vector3d forward = Vector3d.directionFromRotation(this.dragon.getRotationVector()).scale(speed);
+						//System.out.println(forward);
 						this.dragon.move(MoverType.SELF, forward);
-					}
+					}	
 					
 					if (this.dragon.inWall) {
 						this.dragon.move(MoverType.SELF, this.dragon.getDeltaMovement().scale((double) 0.8F));
