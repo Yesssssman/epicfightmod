@@ -35,47 +35,47 @@ public class PEnderDragonRenderer extends PatchedEntityRenderer<EnderDragon, End
 	private static final ResourceLocation DRAGON_EXPLODING_LOCATION = new ResourceLocation("textures/entity/enderdragon/dragon_exploding.png");
 	
 	@Override
-	public void render(EnderDragon entityIn, EnderDragonPatch entitypatch, EnderDragonRenderer renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
+	public void render(EnderDragon entityIn, EnderDragonPatch entitypatch, EnderDragonRenderer renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTick) {
 		ClientModel model = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT);
 		Armature armature = model.getArmature();
 		poseStack.pushPose();
-        this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
-		OpenMatrix4f[] poses = this.getPoseMatrices(entitypatch, armature, partialTicks);
+        this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTick);
+		OpenMatrix4f[] poses = this.getPoseMatrices(entitypatch, armature, partialTick);
 		
 		if (entityIn.dragonDeathTime > 0) {
 			poseStack.translate(entityIn.getRandom().nextGaussian() * 0.08D, 0.0D, entityIn.getRandom().nextGaussian() * 0.08D);
-			float deathTimeProgression = ((float) entityIn.dragonDeathTime + partialTicks) / 200.0F;
+			float deathTimeProgression = ((float) entityIn.dragonDeathTime + partialTick) / 200.0F;
 			
 			VertexConsumer builder = buffer.getBuffer(EpicFightRenderTypes.dragonExplosionAlphaTriangles(DRAGON_EXPLODING_LOCATION));
 			model.drawAnimatedModel(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, deathTimeProgression, OverlayTexture.NO_OVERLAY, poses);
 			VertexConsumer builder2 = buffer.getBuffer(EpicFightRenderTypes.entityDecalTriangles(DRAGON_LOCATION));
-			model.drawAnimatedModel(poseStack, builder2, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), poses);
+			model.drawAnimatedModel(poseStack, builder2, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTick), poses);
 		} else {
 			VertexConsumer builder = buffer.getBuffer(EpicFightRenderTypes.animatedModel(DRAGON_LOCATION));
-			model.drawAnimatedModel(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), poses);
+			model.drawAnimatedModel(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTick), poses);
 		}
 		
 		if (Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
 			for (Layer.Priority priority : Layer.Priority.values()) {
 				AnimationPlayer animPlayer = entitypatch.getClientAnimator().getCompositeLayer(priority).animationPlayer;
-				float playTime = animPlayer.getPrevElapsedTime() + (animPlayer.getElapsedTime() - animPlayer.getPrevElapsedTime()) * partialTicks;
-				animPlayer.getAnimation().renderDebugging(poseStack, buffer, entitypatch, playTime, partialTicks);
+				float playTime = animPlayer.getPrevElapsedTime() + (animPlayer.getElapsedTime() - animPlayer.getPrevElapsedTime()) * partialTick;
+				animPlayer.getAnimation().renderDebugging(poseStack, buffer, entitypatch, playTime, partialTick);
 			}
 		}
 		
 		poseStack.popPose();
 		
 		if (entityIn.nearestCrystal != null) {
-			float x = (float)(entityIn.nearestCrystal.getX() - Mth.lerp(partialTicks, entityIn.xo, entityIn.getX()));
-	        float y = (float)(entityIn.nearestCrystal.getY() - Mth.lerp(partialTicks, entityIn.yo, entityIn.getY()));
-	        float z = (float)(entityIn.nearestCrystal.getZ() - Mth.lerp(partialTicks, entityIn.zo, entityIn.getZ()));
+			float x = (float)(entityIn.nearestCrystal.getX() - Mth.lerp(partialTick, entityIn.xo, entityIn.getX()));
+	        float y = (float)(entityIn.nearestCrystal.getY() - Mth.lerp(partialTick, entityIn.yo, entityIn.getY()));
+	        float z = (float)(entityIn.nearestCrystal.getZ() - Mth.lerp(partialTick, entityIn.zo, entityIn.getZ()));
 	        poseStack.pushPose();
-			EnderDragonRenderer.renderCrystalBeams(x, y + EndCrystalRenderer.getY(entityIn.nearestCrystal, partialTicks), z, partialTicks, entityIn.tickCount, poseStack, buffer, packedLight);
+			EnderDragonRenderer.renderCrystalBeams(x, y + EndCrystalRenderer.getY(entityIn.nearestCrystal, partialTick), z, partialTick, entityIn.tickCount, poseStack, buffer, packedLight);
 			poseStack.popPose();
 		}
 		
 		if (entityIn.dragonDeathTime > 0) {
-			float deathTimeProgression = ((float) entityIn.dragonDeathTime + partialTicks) / 200.0F;
+			float deathTimeProgression = ((float) entityIn.dragonDeathTime + partialTick) / 200.0F;
 			VertexConsumer lightningBuffer = buffer.getBuffer(RenderType.lightning());
 			int density = (int)((deathTimeProgression + deathTimeProgression * deathTimeProgression) / 2.0F * 60.0F);
 			float f7 = Math.min(deathTimeProgression > 0.8F ? (deathTimeProgression - 0.8F) / 0.2F : 0.0F, 1.0F);

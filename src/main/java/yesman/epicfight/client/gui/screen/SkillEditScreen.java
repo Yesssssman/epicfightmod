@@ -10,8 +10,6 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraftforge.api.distmarker.Dist;
@@ -23,16 +21,19 @@ import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 
+import net.minecraft.client.gui.components.Button.OnPress;
+import net.minecraft.client.gui.components.Button.OnTooltip;
+
 @OnlyIn(Dist.CLIENT)
 public class SkillEditScreen extends Screen {
 	private static final ResourceLocation SKILL_EDIT_UI = new ResourceLocation(EpicFightMod.MODID, "textures/gui/screen/skill_edit.png");
-	private static final TranslatableComponent NO_SKILLS = new TranslatableComponent("gui.epicfight.no_skills");
+	private static final Component NO_SKILLS = Component.translatable("gui.epicfight.no_skills");
 	private CapabilitySkill skills;
 	private List<CategoryButton> categoryButtons = Lists.newArrayList();
 	private List<LearnSkillButton> learnedSkillButtons = Lists.newArrayList();
 	
 	public SkillEditScreen(CapabilitySkill skills) {
-		super(new TranslatableComponent("gui.epicfight.skill_edit"));
+		super(Component.translatable("gui.epicfight.skill_edit"));
 		this.skills = skills;
 	}
 	
@@ -55,7 +56,7 @@ public class SkillEditScreen extends Screen {
 					int l = this.height / 2 - 78;
 					
 					for (Skill learnedSkill : this.skills.getLearnedSkills(skillCategory)) {
-						this.learnedSkillButtons.add(new LearnSkillButton(k, l, 117, 24, learnedSkill, new TranslatableComponent(learnedSkill.getTranslatableText()), (pressedButton) -> {
+						this.learnedSkillButtons.add(new LearnSkillButton(k, l, 117, 24, learnedSkill, Component.translatable(learnedSkill.getTranslatableText()), (pressedButton) -> {
 							if (this.minecraft.player.experienceLevel >= learnedSkill.getRequiredXp() || this.minecraft.player.isCreative()) {
 								this.skills.skillContainers[learnedSkill.getCategory().universalOrdinal()].setSkill(learnedSkill);
 								EpicFightNetworkManager.sendToServer(new CPChangeSkill(learnedSkill.getCategory().universalOrdinal(), -1, learnedSkill.toString(), !this.minecraft.player.isCreative()));
@@ -69,7 +70,7 @@ public class SkillEditScreen extends Screen {
 						this.addWidget(shownButton);
 					}
 				}, (button, PoseStack, x, y) -> {
-					this.renderTooltip(PoseStack, this.minecraft.font.split(new TextComponent(skillCategory.toString()), Math.max(this.width / 2 - 43, 170)), x, y);
+					this.renderTooltip(PoseStack, this.minecraft.font.split(Component.literal(skillCategory.toString()), Math.max(this.width / 2 - 43, 170)), x, y);
 				});
 				
 				this.categoryButtons.add(categoryButton);
@@ -113,7 +114,7 @@ public class SkillEditScreen extends Screen {
 		private Skill skill;
 		
 		public CategoryButton(int x, int y, int width, int height, Skill skill, OnPress pressedAction, OnTooltip onTooltip) {
-			super(x, y, width, height, TextComponent.EMPTY, pressedAction, onTooltip);
+			super(x, y, width, height, Component.literal(""), pressedAction, onTooltip);
 			this.skill = skill;
 		}
 		
@@ -158,7 +159,7 @@ public class SkillEditScreen extends Screen {
 			
 			if (this.active) {
 				int color = (SkillEditScreen.this.minecraft.player.experienceLevel >= this.skill.getRequiredXp() || SkillEditScreen.this.minecraft.player.isCreative()) ? 8453920 : 16736352;
-				drawString(PoseStack, SkillEditScreen.this.font, new TranslatableComponent("gui.epicfight.changing_cost", this.skill.getRequiredXp()), this.x+70, this.y+12, color);
+				drawString(PoseStack, SkillEditScreen.this.font, Component.translatable("gui.epicfight.changing_cost", this.skill.getRequiredXp()), this.x+70, this.y+12, color);
 			}
 		}
 		

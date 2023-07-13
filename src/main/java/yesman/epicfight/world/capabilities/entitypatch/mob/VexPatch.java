@@ -23,6 +23,8 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 
+import net.minecraft.world.entity.ai.goal.Goal.Flag;
+
 public class VexPatch extends MobPatch<Vex> {
 	public VexPatch() {
 		super(Faction.ILLAGER);

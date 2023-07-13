@@ -126,7 +126,7 @@ public class ProviderEntity implements ICapabilityProvider, NonNullSupplier<Enti
 	
 	public static Function<Entity, Supplier<EntityPatch<?>>> get(String registryName) {
 		ResourceLocation rl = new ResourceLocation(registryName);
-		EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(rl);
+		EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(rl);
 		return CAPABILITIES.get(entityType);
 	}
 	

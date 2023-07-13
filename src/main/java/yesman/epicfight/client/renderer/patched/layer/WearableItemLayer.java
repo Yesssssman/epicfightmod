@@ -26,6 +26,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.client.model.ClientModel;
 import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.client.model.CustomModelBakery;
@@ -112,17 +113,17 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 	}
 	
 	private ClientModel getArmorModel(HumanoidArmorLayer<E, M, M> originalRenderer, E entityliving, ArmorItem armorItem, ItemStack stack, EquipmentSlot slot) {
-		ResourceLocation registryName = armorItem.getRegistryName();
+		ResourceLocation registryName = ForgeRegistries.ITEMS.getKey(armorItem);
 		boolean debuggingMode = ClientEngine.instance.isArmorModelDebuggingMode();
 		
 		if (ARMOR_MODELS.containsKey(registryName) && !debuggingMode) {
 			return ARMOR_MODELS.get(registryName);
 		} else {
 			ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
-			ResourceLocation rl = new ResourceLocation(armorItem.getRegistryName().getNamespace(), "armor/" + armorItem.getRegistryName().getPath());
+			ResourceLocation rl = new ResourceLocation(ForgeRegistries.ITEMS.getKey(armorItem).getNamespace(), "armor/" + ForgeRegistries.ITEMS.getKey(armorItem).getPath());
 			ClientModel model = new ClientModel(rl);
 			
-			if (resourceManager.hasResource(model.getLocation())) {
+			if (resourceManager.getResource(model.getLocation()).isPresent()) {
 				model.loadMeshAndProperties(resourceManager);
 			} else {
 				HumanoidModel<?> defaultModel = originalRenderer.getArmorModel(slot);
@@ -164,7 +165,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 			resourcelocation2 = new ResourceLocation(s2);
 			ResourceManager rm = Minecraft.getInstance().getResourceManager();
 			
-			if (rm.hasResource(resourcelocation2)) {
+			if (rm.getResource(resourcelocation2).isPresent()) {
 				EPICFIGHT_OVERRIDING_TEXTURES.put(s2, resourcelocation2);
 				return resourcelocation2;
 			} else {

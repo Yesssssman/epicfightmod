@@ -36,7 +36,7 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 	}
 	
 	@Override
-	public void render(WitherBoss entityIn, WitherPatch entitypatch, LivingEntityRenderer<WitherBoss, WitherBossModel<WitherBoss>> renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
+	public void render(WitherBoss entityIn, WitherPatch entitypatch, LivingEntityRenderer<WitherBoss, WitherBossModel<WitherBoss>> renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTick) {
 		Minecraft mc = Minecraft.getInstance();
 		boolean isVisible = this.isVisible(entityIn, entitypatch);
 		boolean isVisibleToPlayer = !isVisible && !entityIn.isInvisibleTo(mc.player);
@@ -45,8 +45,8 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 		ClientModel model = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT);
 		Armature armature = model.getArmature();
 		poseStack.pushPose();
-		this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
-		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks);
+		this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTick);
+		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTick);
 		
 		if (renderType != null) {
 			int transparencyCount = entitypatch.getTransparency();
@@ -54,10 +54,10 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 			if (transparencyCount == 0) {
 				if (!entitypatch.isGhost()) {
 					VertexConsumer builder = buffer.getBuffer(renderType);
-					model.drawAnimatedModel(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), poseMatrices);
+					model.drawAnimatedModel(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTick), poseMatrices);
 				}
 			} else {
-				float transparency = (Math.abs(transparencyCount) + partialTicks) / 41.0F;
+				float transparency = (Math.abs(transparencyCount) + partialTick) / 41.0F;
 				
 				if (transparencyCount < 0) {
 					transparency = 1.0F - transparency;
@@ -72,15 +72,15 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 				model.drawAnimatedModel(poseStack, builder2, packedLight, 1.0F, 1.0F, 1.0F, Mth.sin(transparency * 3.1415F), OverlayTexture.NO_OVERLAY, poseMatrices);
 			}
 			
-			this.renderLayer(renderer, entitypatch, entityIn, poseMatrices, buffer, poseStack, packedLight, partialTicks);
+			this.renderLayer(renderer, entitypatch, entityIn, poseMatrices, buffer, poseStack, packedLight, partialTick);
 		}
 		
 		if (renderType != null) {
 			if (Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
 				for (Layer.Priority priority : Layer.Priority.values()) {
 					AnimationPlayer animPlayer = entitypatch.getClientAnimator().getCompositeLayer(priority).animationPlayer;
-					float playTime = animPlayer.getPrevElapsedTime() + (animPlayer.getElapsedTime() - animPlayer.getPrevElapsedTime()) * partialTicks;
-					animPlayer.getAnimation().renderDebugging(poseStack, buffer, entitypatch, playTime, partialTicks);
+					float playTime = animPlayer.getPrevElapsedTime() + (animPlayer.getElapsedTime() - animPlayer.getPrevElapsedTime()) * partialTick;
+					animPlayer.getAnimation().renderDebugging(poseStack, buffer, entitypatch, playTime, partialTick);
 				}
 			}
 		}

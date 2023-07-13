@@ -11,9 +11,9 @@ import net.minecraft.world.item.UseAnim;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.ScreenEvent.KeyboardKeyPressedEvent;
-import net.minecraftforge.client.event.ScreenEvent.MouseClickedEvent;
-import net.minecraftforge.client.event.ScreenEvent.MouseReleasedEvent;
+import net.minecraftforge.client.event.ScreenEvent.KeyPressed;
+import net.minecraftforge.client.event.ScreenEvent.MouseButtonPressed;
+import net.minecraftforge.client.event.ScreenEvent.MouseButtonReleased;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickItem;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
@@ -36,7 +36,7 @@ public class ClientEvents {
 	private static Minecraft minecraft = Minecraft.getInstance();
 	
 	@SubscribeEvent
-	public static void mouseClickEvent(MouseClickedEvent.Pre event) {
+	public static void mouseClickEvent(MouseButtonPressed.Pre event) {
 		if (event.getScreen() instanceof AbstractContainerScreen) {
 			Slot slot = ((AbstractContainerScreen<?>)event.getScreen()).getSlotUnderMouse();
 			
@@ -53,7 +53,7 @@ public class ClientEvents {
 	}
 	
 	@SubscribeEvent
-	public static void mouseReleaseEvent(MouseReleasedEvent.Pre event) {
+	public static void mouseReleaseEvent(MouseButtonReleased.Pre event) {
 		if (event.getScreen() instanceof AbstractContainerScreen) {
 			Slot slot = ((AbstractContainerScreen<?>)event.getScreen()).getSlotUnderMouse();
 			
@@ -70,7 +70,7 @@ public class ClientEvents {
 	}
 	
 	@SubscribeEvent
-	public static void presssKeyInGui(KeyboardKeyPressedEvent.Pre event) {
+	public static void presssKeyInGui(KeyPressed.Pre event) {
 		CapabilityItem itemCapability = CapabilityItem.EMPTY;
 		
 		if (event.getKeyCode() == minecraft.options.keySwapOffhand.getKey().getValue()) {
@@ -103,7 +103,7 @@ public class ClientEvents {
 	@SubscribeEvent
 	public static void rightClickItemClient(RightClickItem event) {
 		if (event.getSide() == LogicalSide.CLIENT) {
-			LocalPlayerPatch playerpatch = (LocalPlayerPatch) event.getPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+			LocalPlayerPatch playerpatch = (LocalPlayerPatch) event.getEntity().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
 			
 			if (playerpatch != null && playerpatch.getOriginal().getOffhandItem().getUseAnimation() == UseAnim.NONE) {
 				boolean canceled = playerpatch.getEventListener().triggerEvents(EventType.CLIENT_ITEM_USE_EVENT, new RightClickItemEvent<>(playerpatch));
@@ -118,7 +118,7 @@ public class ClientEvents {
 	}
 	
 	@SubscribeEvent
-	public static void clientRespawnEvent(ClientPlayerNetworkEvent.RespawnEvent event) {
+	public static void clientRespawnEvent(ClientPlayerNetworkEvent.Clone event) {
 		LocalPlayerPatch oldCap = (LocalPlayerPatch)event.getOldPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
 		
 		if (oldCap != null) {
@@ -131,7 +131,7 @@ public class ClientEvents {
 	}
 	
 	@SubscribeEvent
-	public static void clientLogoutEvent(ClientPlayerNetworkEvent.LoggedOutEvent event) {
+	public static void clientLogoutEvent(ClientPlayerNetworkEvent.LoggingOut event) {
 		if (event.getPlayer() != null) {
 			ItemCapabilityReloadListener.reset();
 			ProviderItem.clear();

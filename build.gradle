@@ -25,7 +25,7 @@ archivesBaseName = 'epicfight'
 java.toolchain.languageVersion = JavaLanguageVersion.of(17)
 
 minecraft {
-    mappings channel: 'official', version: '1.18.2'
+    mappings channel: 'official', version: '1.19.2'
     accessTransformer = file('src/main/resources/META-INF/accesstransformer.cfg')
 
     runs {
@@ -102,6 +102,7 @@ repositories {
     // flatDir {
     //     dir 'libs'
     // }
+    maven { url = 'https://maven.minecraftforge.net' }
     maven {
         url "https://cursemaven.com"
         content {
@@ -115,10 +116,10 @@ mixin {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.18.2-40.1.80'
+    minecraft 'net.minecraftforge:forge:1.19.2-43.2.0'
     
-    implementation fg.deobf("curse.maven:tcon-74072:3998764")
-    implementation fg.deobf("curse.maven:mantle-74924:3829975")
+//    implementation fg.deobf("curse.maven:tcon-74072:3998764")
+//    implementation fg.deobf("curse.maven:mantle-74924:3829975")
     
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }

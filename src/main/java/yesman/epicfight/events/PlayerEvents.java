@@ -43,14 +43,14 @@ public class PlayerEvents {
 		LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>)trackingTarget.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
 		
 		if (entitypatch != null) {
-			entitypatch.onStartTracking((ServerPlayer)event.getPlayer());
+			entitypatch.onStartTracking((ServerPlayer)event.getEntity());
 		}
 	}
 	
 	@SubscribeEvent
 	public static void rightClickItemServerEvent(RightClickItem event) {
 		if (event.getSide() == LogicalSide.SERVER) {
-			ServerPlayerPatch playerpatch = (ServerPlayerPatch) event.getPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+			ServerPlayerPatch playerpatch = (ServerPlayerPatch) event.getEntity().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
 			
 			if (playerpatch != null && (playerpatch.getOriginal().getOffhandItem().getUseAnimation() == UseAnim.NONE || !playerpatch.getHoldingItemCapability(InteractionHand.MAIN_HAND).getStyle(playerpatch).canUseOffhand())) {
 				boolean canceled = playerpatch.getEventListener().triggerEvents(EventType.SERVER_ITEM_USE_EVENT, new RightClickItemEvent<>(playerpatch));
@@ -90,7 +90,7 @@ public class PlayerEvents {
 		ServerPlayerPatch oldCap = (ServerPlayerPatch)event.getOriginal().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
 		
 		if (oldCap != null) {
-			ServerPlayerPatch newCap = (ServerPlayerPatch)event.getPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+			ServerPlayerPatch newCap = (ServerPlayerPatch)event.getEntity().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
 			
 			if ((!event.isWasDeath() || event.getOriginal().level.getGameRules().getBoolean(EpicFightGamerules.KEEP_SKILLS))) {
 				newCap.copySkillsFrom(oldCap);
@@ -104,7 +104,7 @@ public class PlayerEvents {
 	
 	@SubscribeEvent
 	public static void changeDimensionEvent(PlayerEvent.PlayerChangedDimensionEvent event) {
-		Player player = event.getPlayer();
+		Player player = event.getEntity();
 		ServerPlayerPatch playerpatch = (ServerPlayerPatch)player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
 		playerpatch.modifyLivingMotionByCurrentItem();
 		

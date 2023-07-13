@@ -13,8 +13,6 @@ import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
@@ -31,7 +29,7 @@ public class EditSwitchingItemScreen extends Screen {
 	private Runnable deferredTooltip;
 	
 	public EditSwitchingItemScreen(Screen parentScreen) {
-		super(new TranslatableComponent(EpicFightMod.MODID + ".gui.configuration.autoswitching"));
+		super(Component.translatable(EpicFightMod.MODID + ".gui.configuration.autoswitching"));
 		this.parentScreen = parentScreen;
 	}
 	
@@ -39,14 +37,14 @@ public class EditSwitchingItemScreen extends Screen {
 	protected void init() {
 		if (this.battleAutoSwitchItems == null) {
 			this.battleAutoSwitchItems = new EditSwitchingItemScreen.RegisteredItemList(this.minecraft, 200, this.height,
-				new TranslatableComponent(EpicFightMod.MODID+".gui.to_battle_mode"), EpicFightMod.CLIENT_INGAME_CONFIG.battleAutoSwitchItems);
+				Component.translatable(EpicFightMod.MODID+".gui.to_battle_mode"), EpicFightMod.CLIENT_INGAME_CONFIG.battleAutoSwitchItems);
 		} else {
 			this.battleAutoSwitchItems.resize(200, this.height);
 		}
 		
 		if (this.miningAutoSwitchItems == null) {
 			this.miningAutoSwitchItems = new EditSwitchingItemScreen.RegisteredItemList(this.minecraft, 200, this.height,
-				new TranslatableComponent(EpicFightMod.MODID+".gui.to_mining_mode"), EpicFightMod.CLIENT_INGAME_CONFIG.miningAutoSwitchItems);
+				Component.translatable(EpicFightMod.MODID+".gui.to_mining_mode"), EpicFightMod.CLIENT_INGAME_CONFIG.miningAutoSwitchItems);
 		} else {
 			this.miningAutoSwitchItems.resize(200, this.height);
 		}
@@ -119,8 +117,8 @@ public class EditSwitchingItemScreen extends Screen {
 		
 		@Override
 		protected void renderHeader(PoseStack matrixStack, int x, int y, Tesselator tessellator) {
-			Component Component = (new TextComponent("")).append(this.title).withStyle(ChatFormatting.UNDERLINE, ChatFormatting.BOLD);
-			this.minecraft.font.draw(matrixStack, Component, (float) (x + this.width / 2 - this.minecraft.font.width(Component) / 2), (float) Math.min(this.y0 + 3, y), 16777215);
+			Component component = Component.literal("").append(this.title).withStyle(ChatFormatting.UNDERLINE, ChatFormatting.BOLD);
+			this.minecraft.font.draw(matrixStack, component, (float) (x + this.width / 2 - this.minecraft.font.width(component) / 2), (float) Math.min(this.y0 + 3, y), 16777215);
 		}
 		
 		@Override
@@ -195,7 +193,7 @@ public class EditSwitchingItemScreen extends Screen {
 
 			@Override
 			public Component getNarration() {
-				return new TranslatableComponent("narrator.select", this.item != null ? this.item.getName(ItemStack.EMPTY) : "");
+				return Component.translatable("narrator.select", this.item != null ? this.item.getName(ItemStack.EMPTY) : "");
 			}
 		}
 		
@@ -207,18 +205,18 @@ public class EditSwitchingItemScreen extends Screen {
 			
 			public ButtonInEntry() {
 				super(null);
-				this.addItemButton = new Button(0, 0, 20, 20, new TextComponent("+"), (button) -> {
+				this.addItemButton = new Button(0, 0, 20, 20, Component.literal("+"), (button) -> {
 					EditSwitchingItemScreen.RegisteredItemList thisList = EditSwitchingItemScreen.RegisteredItemList.this == EditSwitchingItemScreen.this.battleAutoSwitchItems ? EditSwitchingItemScreen.this.battleAutoSwitchItems : EditSwitchingItemScreen.this.miningAutoSwitchItems;
 					EditSwitchingItemScreen.RegisteredItemList opponentList = EditSwitchingItemScreen.RegisteredItemList.this == EditSwitchingItemScreen.this.battleAutoSwitchItems ? EditSwitchingItemScreen.this.miningAutoSwitchItems : EditSwitchingItemScreen.this.battleAutoSwitchItems;
 					RegisteredItemList.this.minecraft.setScreen(new EditItemListScreen(EditSwitchingItemScreen.this, thisList, opponentList));
 				}, Button.NO_TOOLTIP);
 				
-				this.removeAllButton = new Button(0, 0, 60, 20, new TranslatableComponent("epicfight.gui.delete_all"), (button) -> {
+				this.removeAllButton = new Button(0, 0, 60, 20, Component.translatable("epicfight.gui.delete_all"), (button) -> {
 					RegisteredItemList.this.clearEntries();
 					RegisteredItemList.this.addEntry(this);
 				}, Button.NO_TOOLTIP);
 				
-				this.automaticRegisterButton = new Button(0, 0, 60, 20, new TranslatableComponent("epicfight.gui.auto_add"), (button) -> {
+				this.automaticRegisterButton = new Button(0, 0, 60, 20, Component.translatable("epicfight.gui.auto_add"), (button) -> {
 					boolean isBattleTab = EditSwitchingItemScreen.RegisteredItemList.this == EditSwitchingItemScreen.this.battleAutoSwitchItems;
 					if (isBattleTab) {
 						for (Item item : ForgeRegistries.ITEMS.getValues()) {
@@ -246,11 +244,11 @@ public class EditSwitchingItemScreen extends Screen {
 					if (isBattleTab) {
 						EditSwitchingItemScreen.this.deferredTooltip = () -> {
 							EditSwitchingItemScreen.this.renderTooltip(matrixStack, EditSwitchingItemScreen.this.minecraft.font.split(
-									new TranslatableComponent(tooltip), Math.max(EditSwitchingItemScreen.this.width / 2 - 43, 170)), mouseX, mouseY);
+									Component.translatable(tooltip), Math.max(EditSwitchingItemScreen.this.width / 2 - 43, 170)), mouseX, mouseY);
 						};
 					} else {
 						EditSwitchingItemScreen.this.renderTooltip(matrixStack, EditSwitchingItemScreen.this.minecraft.font.split(
-								new TranslatableComponent(tooltip), Math.max(EditSwitchingItemScreen.this.width / 2 - 43, 170)), mouseX, mouseY);
+								Component.translatable(tooltip), Math.max(EditSwitchingItemScreen.this.width / 2 - 43, 170)), mouseX, mouseY);
 					}
 				});
 			}

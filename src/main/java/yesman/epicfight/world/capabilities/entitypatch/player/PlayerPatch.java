@@ -12,8 +12,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
@@ -58,7 +58,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	@Override
-	public void onJoinWorld(T entityIn, EntityJoinWorldEvent event) {
+	public void onJoinWorld(T entityIn, EntityJoinLevelEvent event) {
 		super.onJoinWorld(entityIn, event);
 		
 		CapabilitySkill skillCapability = this.getSkillCapability();
@@ -129,7 +129,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	@Override
-	public void serverTick(LivingUpdateEvent event) {
+	public void serverTick(LivingTickEvent event) {
 		super.serverTick(event);
 		
 		if (!this.state.inaction()) {
@@ -150,7 +150,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	@Override
-	public void tick(LivingUpdateEvent event) {
+	public void tick(LivingTickEvent event) {
 		if (this.original.getVehicle() == null) {
 			for (SkillContainer container : this.getSkillCapability().skillContainers) {
 				if (container != null) {

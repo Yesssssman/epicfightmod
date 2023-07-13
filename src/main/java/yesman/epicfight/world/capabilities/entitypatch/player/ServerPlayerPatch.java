@@ -15,8 +15,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.AttackResult;
@@ -37,12 +37,14 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch.AnimationPacketProvider;
+
 public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	private LivingEntity attackTarget;
 	private boolean updatedMotionCurrentTick;
 	
 	@Override
-	public void onJoinWorld(ServerPlayer entityIn, EntityJoinWorldEvent event) {
+	public void onJoinWorld(ServerPlayer entityIn, EntityJoinLevelEvent event) {
 		super.onJoinWorld(entityIn, event);
 		CapabilitySkill skillCapability = this.getSkillCapability();
 		
@@ -88,7 +90,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	}
 	
 	@Override
-	public void tick(LivingUpdateEvent event) {
+	public void tick(LivingTickEvent event) {
 		super.tick(event);
 		this.updatedMotionCurrentTick = false;
 	}

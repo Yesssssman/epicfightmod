@@ -50,17 +50,17 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 	}
 	
 	@Override
-	public void render(LocalPlayer entityIn, LocalPlayerPatch entitypatch, LivingEntityRenderer<LocalPlayer, PlayerModel<LocalPlayer>> renderer, MultiBufferSource buffer, PoseStack matStackIn, int packedLightIn, float partialTicks) {
+	public void render(LocalPlayer entityIn, LocalPlayerPatch entitypatch, LivingEntityRenderer<LocalPlayer, PlayerModel<LocalPlayer>> renderer, MultiBufferSource buffer, PoseStack matStackIn, int packedLightIn, float partialTick) {
 		Minecraft mc = Minecraft.getInstance();
 		Camera renderInfo = mc.gameRenderer.getMainCamera();
 		Vec3 projView = renderInfo.getPosition();
-		double x = Mth.lerp(partialTicks, entityIn.xo, entityIn.getX()) - projView.x();
-		double y = Mth.lerp(partialTicks, entityIn.yo, entityIn.getY()) - projView.y();
-		double z = Mth.lerp(partialTicks, entityIn.zo, entityIn.getZ()) - projView.z();
+		double x = Mth.lerp(partialTick, entityIn.xo, entityIn.getX()) - projView.x();
+		double y = Mth.lerp(partialTick, entityIn.yo, entityIn.getY()) - projView.y();
+		double z = Mth.lerp(partialTick, entityIn.zo, entityIn.getZ()) - projView.z();
 		ClientModel model = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT);
 		Armature armature = model.getArmature();
 		armature.initializeTransform();
-		entitypatch.getClientAnimator().setPoseToModel(partialTicks);
+		entitypatch.getClientAnimator().setPoseToModel(partialTick);
 		OpenMatrix4f[] poses = armature.getJointTransforms();
 		
 		matStackIn.pushPose();
@@ -93,7 +93,7 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 		firstModel.drawAnimatedModel(matStackIn, buffer.getBuffer(EpicFightRenderTypes.animatedModel(entitypatch.getOriginal().getSkinTextureLocation())), packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, poses);
 		
 		if(!entityIn.isSpectator()) {
-			renderLayer(renderer, entitypatch, entityIn, poses, buffer, matStackIn, packedLightIn, partialTicks);
+			renderLayer(renderer, entitypatch, entityIn, poses, buffer, matStackIn, packedLightIn, partialTick);
 		}
 		
 		matStackIn.popPose();

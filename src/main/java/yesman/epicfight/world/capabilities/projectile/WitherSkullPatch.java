@@ -13,7 +13,7 @@ import net.minecraft.world.entity.projectile.WitherSkull;
 import net.minecraft.world.level.NaturalSpawner;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.network.server.SPPlayAnimationInstant;
@@ -24,7 +24,7 @@ import yesman.epicfight.world.entity.WitherSkeletonMinion;
 
 public class WitherSkullPatch extends ProjectilePatch<WitherSkull> {
 	@Override
-	public void onJoinWorld(WitherSkull projectileEntity, EntityJoinWorldEvent event) {
+	public void onJoinWorld(WitherSkull projectileEntity, EntityJoinLevelEvent event) {
 		super.onJoinWorld(projectileEntity, event);
 		this.impact = 1.0F;
 	}

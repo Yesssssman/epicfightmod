@@ -4,6 +4,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.BiConsumer;
 
+import net.minecraftforge.client.event.InputEvent;
 import org.lwjgl.glfw.GLFW;
 
 import com.google.common.collect.Maps;
@@ -18,11 +19,10 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.UseAnim;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
-import net.minecraftforge.client.event.InputEvent.MouseInputEvent;
-import net.minecraftforge.client.event.InputEvent.MouseScrollEvent;
+import net.minecraftforge.client.event.InputEvent.Key;
+import net.minecraftforge.client.event.InputEvent.MouseScrollingEvent;
 import net.minecraftforge.client.event.MovementInputUpdateEvent;
-import net.minecraftforge.client.settings.KeyBindingMap;
+import net.minecraftforge.client.settings.KeyMappingLookup;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -46,7 +46,7 @@ public class ControllEngine {
 	private Minecraft minecraft;
 	private LocalPlayer player;
 	private LocalPlayerPatch playerpatch;
-	private KeyBindingMap keyHash;
+	private KeyMappingLookup keyHash;
 	private int mouseLeftPressCounter = 0;
 	private int sneakPressCounter = 0;
 	private int reservedKey;
@@ -70,7 +70,7 @@ public class ControllEngine {
 		this.keyFunctions.put(EpicFightKeyMappings.SPECIAL_SKILL, this::specialSkillKeyPressed);
 		
 		try {
-			this.keyHash = (KeyBindingMap) ObfuscationReflectionHelper.findField(KeyMapping.class, "f_90810_").get(null);
+			this.keyHash = (KeyMappingLookup) ObfuscationReflectionHelper.findField(KeyMapping.class, "f_90810_").get(null);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
@@ -316,11 +316,11 @@ public class ControllEngine {
 		static ControllEngine controllEngine;
 		
 		@SubscribeEvent
-		public static void mouseEvent(MouseInputEvent event) {
+		public static void mouseEvent(InputEvent.MouseButton event) {
 			if (controllEngine.minecraft.player != null && Minecraft.getInstance().screen == null) {
 				InputConstants.Key input = InputConstants.Type.MOUSE.getOrCreate(event.getButton());
 				
-				for (KeyMapping keybinding : controllEngine.keyHash.lookupAll(input)) {
+				for (KeyMapping keybinding : controllEngine.keyHash.getAll(input)) {
 					if (controllEngine.keyFunctions.containsKey(keybinding)) {
 						controllEngine.keyFunctions.get(keybinding).accept(keybinding, event.getAction());
 					}
@@ -329,7 +329,7 @@ public class ControllEngine {
 		}
 		
 		@SubscribeEvent
-		public static void mouseScrollEvent(MouseScrollEvent event) {
+		public static void mouseScrollEvent(MouseScrollingEvent event) {
 			if (controllEngine.minecraft.player != null && controllEngine.playerpatch != null && controllEngine.playerpatch.getEntityState().inaction()) {
 				if (controllEngine.minecraft.screen == null) {
 					event.setCanceled(true);
@@ -338,11 +338,11 @@ public class ControllEngine {
 		}
 		
 		@SubscribeEvent
-		public static void keyboardEvent(KeyInputEvent event) {
+		public static void keyboardEvent(Key event) {
 			if (controllEngine.minecraft.player != null && Minecraft.getInstance().screen == null) {
 				InputConstants.Key input = InputConstants.Type.KEYSYM.getOrCreate(event.getKey());
 				
-				for (KeyMapping keybinding : controllEngine.keyHash.lookupAll(input)) {
+				for (KeyMapping keybinding : controllEngine.keyHash.getAll(input)) {
 					if (controllEngine.keyFunctions.containsKey(keybinding)) {
 						controllEngine.keyFunctions.get(keybinding).accept(keybinding, event.getAction());
 					}
@@ -368,14 +368,14 @@ public class ControllEngine {
 				event.getInput().jumping = false;
 				event.getInput().shiftKeyDown = false;
 				
-				LocalPlayer clientPlayer = ((LocalPlayer)event.getPlayer());
+				LocalPlayer clientPlayer = ((LocalPlayer)event.getEntity());
 				
 				clientPlayer.setSprinting(false);
 				clientPlayer.sprintTriggerTime = -1;
 				controllEngine.setKeyBind(controllEngine.options.keySprint, false);
 			}
 			
-			if (event.getPlayer().isAlive()) {
+			if (event.getEntity().isAlive()) {
 				controllEngine.playerpatch.getEventListener().triggerEvents(EventType.MOVEMENT_INPUT_EVENT, new MovementInputEvent(controllEngine.playerpatch, event.getInput()));
 			}
 		}

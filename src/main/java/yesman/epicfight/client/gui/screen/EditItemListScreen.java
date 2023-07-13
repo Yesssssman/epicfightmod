@@ -20,14 +20,14 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
+
+import net.minecraft.client.gui.components.Button.OnTooltip;
 
 @OnlyIn(Dist.CLIENT)
 public class EditItemListScreen extends Screen {
@@ -40,7 +40,7 @@ public class EditItemListScreen extends Screen {
 	private EditItemListScreen.ButtonList selectedItemList;
 	
 	protected EditItemListScreen(Screen parentScreen, EditSwitchingItemScreen.RegisteredItemList targetList, EditSwitchingItemScreen.RegisteredItemList opponentList) {
-		super(TextComponent.EMPTY);
+		super(Component.literal(""));
 		this.parentScreen = parentScreen;
 		this.targetList = targetList;
 		this.opponentList = opponentList;
@@ -72,8 +72,8 @@ public class EditItemListScreen extends Screen {
 		this.renderDirtBackground(0);
 		this.itemButtonList.render(matrixStack, mouseX, mouseY, partialTicks);
 		this.selectedItemList.render(matrixStack, mouseX, mouseY, partialTicks);
-		drawString(matrixStack, this.font, new TextComponent("Item List").withStyle(ChatFormatting.UNDERLINE), 28, 10, 16777215);
-		drawString(matrixStack, this.font, new TextComponent("Seleted Items").withStyle(ChatFormatting.UNDERLINE), 28, this.height-114, 16777215);
+		drawString(matrixStack, this.font, Component.literal("Item List").withStyle(ChatFormatting.UNDERLINE), 28, 10, 16777215);
+		drawString(matrixStack, this.font, Component.literal("Seleted Items").withStyle(ChatFormatting.UNDERLINE), 28, this.height-114, 16777215);
 		super.render(matrixStack, mouseX, mouseY, partialTicks);
 	}
 	
@@ -139,16 +139,16 @@ public class EditItemListScreen extends Screen {
 			if (EditItemListScreen.this.opponentRegistered.contains(item)) {
 				onTooltip = (button, matrixStack, mouseX, mouseY) -> {
 					Component displayName = ((ItemButton)button).item.getName(ItemStack.EMPTY);
-					EditItemListScreen.this.renderTooltip(matrixStack, new TranslatableComponent("epicfight.gui.warn_already_registered",
-						displayName.equals(TextComponent.EMPTY) ? new TextComponent(((ItemButton)button).item.getRegistryName().toString())
+					EditItemListScreen.this.renderTooltip(matrixStack, Component.translatable("epicfight.gui.warn_already_registered",
+						displayName.equals(Component.literal("")) ? Component.literal(ForgeRegistries.ITEMS.getKey(((ItemButton)button).item).toString())
 							: displayName), mouseX, mouseY
 					);
 				};
 			} else {
 				onTooltip = (button, matrixStack, mouseX, mouseY) -> {
 					Component displayName = ((ItemButton)button).item.getName(ItemStack.EMPTY);
-					EditItemListScreen.this.renderTooltip(matrixStack, displayName.equals(TextComponent.EMPTY) ?
-						new TextComponent(((ItemButton)button).item.getRegistryName().toString()) : displayName, mouseX, mouseY);
+					EditItemListScreen.this.renderTooltip(matrixStack, displayName.equals(Component.literal("")) ?
+						Component.literal(ForgeRegistries.ITEMS.getKey(((ItemButton)button).item).toString()) : displayName, mouseX, mouseY);
 				};
 			}
 			
@@ -192,8 +192,8 @@ public class EditItemListScreen extends Screen {
 		}
 		
 		@Override
-		public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-			this.renderBackground(matrixStack);
+		public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+			this.renderBackground(poseStack);
 			int i = this.getScrollbarPosition();
 			int j = i + 6;
 			
@@ -211,9 +211,10 @@ public class EditItemListScreen extends Screen {
 			
 			int j1 = this.getRowLeft();
 			int k = this.y0 + 4 - (int) this.getScrollAmount();
-			this.renderHeader(matrixStack, j1, k, tessellator);
-			this.renderList(matrixStack, j1, k, mouseX, mouseY, partialTicks);
-			
+			this.renderHeader(poseStack, j1, k, tessellator);
+//			this.renderList(poseStack, j1, k, mouseX, mouseY, partialTicks);// FIXME: 2023/7/13 Check if this work
+			this.renderList(poseStack, j1, k, partialTicks);
+
 			RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 			RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
 		    RenderSystem.enableDepthTest();
@@ -272,7 +273,7 @@ public class EditItemListScreen extends Screen {
 				tessellator.end();
 			}
 			
-			this.renderDecorations(matrixStack, mouseX, mouseY);
+			this.renderDecorations(poseStack, mouseX, mouseY);
 			RenderSystem.enableTexture();
 			RenderSystem.disableBlend();
 		}
@@ -329,7 +330,7 @@ public class EditItemListScreen extends Screen {
 
 			@Override
 			public Component getNarration() {
-				return TextComponent.EMPTY;
+				return Component.literal("");
 			}
 		}
 	}
@@ -339,7 +340,7 @@ public class EditItemListScreen extends Screen {
 		private final IPressableExtended pressedAction;
 		
 		public ItemButton(int x, int y, int width, int height, IPressableExtended pressedAction, OnTooltip onTooltip, EditItemListScreen screen, Item item) {
-			super(x, y, width, height, TextComponent.EMPTY, (button)->{}, onTooltip);
+			super(x, y, width, height, Component.literal(""), (button)->{}, onTooltip);
 			this.item = item;
 			this.pressedAction = pressedAction;
 		}

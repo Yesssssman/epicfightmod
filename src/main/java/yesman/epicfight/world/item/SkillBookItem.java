@@ -8,7 +8,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResultHolder;
@@ -24,6 +23,8 @@ import yesman.epicfight.gameasset.Skills;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
+
+import net.minecraft.world.item.Item.Properties;
 
 public class SkillBookItem extends Item {
 	public static void setContainingSkill(String name, ItemStack stack) {
@@ -55,7 +56,7 @@ public class SkillBookItem extends Item {
 			Skill skill = Skills.getSkill(stack.getTag().getString("skill"));
 			
 			if (skill != null) {
-				tooltip.add(new TranslatableComponent(skill.getTranslatableText()).withStyle(ChatFormatting.DARK_GRAY));
+				tooltip.add(Component.translatable(skill.getTranslatableText()).withStyle(ChatFormatting.DARK_GRAY));
 			}
 		}
 	}

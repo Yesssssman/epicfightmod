@@ -1,5 +1,6 @@
 package yesman.epicfight.api.client.animation;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -30,15 +31,14 @@ public class AnimationDataReader {
 	static final TypeToken<AnimationDataReader> TYPE = new TypeToken<AnimationDataReader>() {
 	};
 	
-	public static void readAndApply(StaticAnimation animation, Resource iresource) {
-		InputStream inputstream = iresource.getInputStream();
-        Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
+	public static void readAndApply(StaticAnimation animation, Resource iresource) throws IOException {
+        Reader reader = iresource.openAsReader();
         AnimationDataReader propertySetter = GsonHelper.fromJson(GSON, reader, TYPE);
-        
+
         if (propertySetter.jointMaskEntry.isValid()) {
         	animation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.jointMaskEntry);
         }
-        
+
         animation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.priority);
         animation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.layerType);
 	}

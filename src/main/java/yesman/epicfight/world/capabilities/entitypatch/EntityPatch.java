@@ -4,8 +4,8 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 
@@ -13,9 +13,9 @@ public abstract class EntityPatch<T extends Entity> {
 	protected T original;
 	protected boolean initialized = false;
 	
-	public abstract void tick(LivingUpdateEvent event);
-	protected abstract void clientTick(LivingUpdateEvent event);
-	protected abstract void serverTick(LivingUpdateEvent event);
+	public abstract void tick(LivingTickEvent event);
+	protected abstract void clientTick(LivingTickEvent event);
+	protected abstract void serverTick(LivingTickEvent event);
 	
 	public void onStartTracking(ServerPlayer trackingPlayer) {
 	}
@@ -27,7 +27,7 @@ public abstract class EntityPatch<T extends Entity> {
 		this.original = entityIn;
 	}
 	
-	public void onJoinWorld(T entityIn, EntityJoinWorldEvent event) {
+	public void onJoinWorld(T entityIn, EntityJoinLevelEvent event) {
 		this.initialized = true;
 	}
 

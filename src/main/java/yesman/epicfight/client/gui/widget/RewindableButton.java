@@ -6,6 +6,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
+import net.minecraft.client.gui.components.Button.OnPress;
+import net.minecraft.client.gui.components.Button.OnTooltip;
+
 @OnlyIn(Dist.CLIENT)
 public class RewindableButton extends Button {
 	protected final Button.OnPress onRewindPress;

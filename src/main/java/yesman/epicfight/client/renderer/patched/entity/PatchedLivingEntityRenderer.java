@@ -36,8 +36,8 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 	private Map<Class<?>, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>>> patchedLayers = Maps.newHashMap();
 	
 	@Override
-	public void render(E entityIn, T entitypatch, LivingEntityRenderer<E, M> renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
-		super.render(entityIn, entitypatch, renderer, buffer, poseStack, packedLight, partialTicks);
+	public void render(E entityIn, T entitypatch, LivingEntityRenderer<E, M> renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTick) {
+		super.render(entityIn, entitypatch, renderer, buffer, poseStack, packedLight, partialTick);
 		
 		Minecraft mc = Minecraft.getInstance();
 		boolean isVisible = this.isVisible(entityIn, entitypatch);
@@ -47,24 +47,24 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		ClientModel model = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT);
 		Armature armature = model.getArmature();
 		poseStack.pushPose();
-		this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
-		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks);
+		this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTick);
+		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTick);
 		
 		if (renderType != null) {
 			VertexConsumer builder = buffer.getBuffer(renderType);
-			model.drawAnimatedModel(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, isVisibleToPlayer ? 0.15F : 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), poseMatrices);
+			model.drawAnimatedModel(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, isVisibleToPlayer ? 0.15F : 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTick), poseMatrices);
 		}
 		
 		if (!entityIn.isSpectator()) {
-			this.renderLayer(renderer, entitypatch, entityIn, poseMatrices, buffer, poseStack, packedLight, partialTicks);
+			this.renderLayer(renderer, entitypatch, entityIn, poseMatrices, buffer, poseStack, packedLight, partialTick);
 		}
 		
 		if (renderType != null) {
 			if (Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
 				for (Layer.Priority priority : Layer.Priority.values()) {
 					AnimationPlayer animPlayer = entitypatch.getClientAnimator().getCompositeLayer(priority).animationPlayer;
-					float playTime = animPlayer.getPrevElapsedTime() + (animPlayer.getElapsedTime() - animPlayer.getPrevElapsedTime()) * partialTicks;
-					animPlayer.getAnimation().renderDebugging(poseStack, buffer, entitypatch, playTime, partialTicks);
+					float playTime = animPlayer.getPrevElapsedTime() + (animPlayer.getElapsedTime() - animPlayer.getPrevElapsedTime()) * partialTick;
+					animPlayer.getAnimation().renderDebugging(poseStack, buffer, entitypatch, playTime, partialTick);
 				}
 			}
 		}

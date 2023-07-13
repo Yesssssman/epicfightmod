@@ -73,7 +73,7 @@ public class ConfigurationIngame {
 		config.autoPreparation.set(this.autoPreparation.getValue());
 		config.offBloodEffects.set(this.offBloodEffects.getValue());
 		this.aimHelperRealColor = ColorSlider.toColorInteger(this.aimHelperColor.getValue());
-		config.battleAutoSwitchItems.set(Lists.newArrayList(this.battleAutoSwitchItems.stream().map((item) -> item.getRegistryName().toString()).iterator()));
-		config.miningAutoSwitchItems.set(Lists.newArrayList(this.miningAutoSwitchItems.stream().map((item) -> item.getRegistryName().toString()).iterator()));
+		config.battleAutoSwitchItems.set(Lists.newArrayList(this.battleAutoSwitchItems.stream().map((item) -> ForgeRegistries.ITEMS.getKey(item).toString()).iterator()));
+		config.miningAutoSwitchItems.set(Lists.newArrayList(this.miningAutoSwitchItems.stream().map((item) -> ForgeRegistries.ITEMS.getKey(item).toString()).iterator()));
 	}
 }

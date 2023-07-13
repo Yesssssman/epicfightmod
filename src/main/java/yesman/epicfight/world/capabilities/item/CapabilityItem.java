@@ -15,8 +15,6 @@ import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
@@ -73,7 +71,7 @@ public class CapabilityItem {
 	
 	public void modifyItemTooltip(ItemStack itemstack, List<Component> itemTooltip, LivingEntityPatch<?> entitypatch) {
 		if (!this.getStyle(entitypatch).canUseOffhand()) {
-			itemTooltip.add(1, new TextComponent(" ").append(new TranslatableComponent("attribute.name." + EpicFightMod.MODID + ".twohanded").withStyle(ChatFormatting.DARK_GRAY)));
+			itemTooltip.add(1, Component.literal(" ").append(Component.translatable("attribute.name." + EpicFightMod.MODID + ".twohanded").withStyle(ChatFormatting.DARK_GRAY)));
 		}
 		
 		Map<Attribute, AttributeModifier> attribute = this.getDamageAttributesInCondition(this.getStyle(entitypatch));
@@ -86,7 +84,7 @@ public class CapabilityItem {
 			if (attribute.containsKey(armorNegation)) {
 				double value = attribute.get(armorNegation).getAmount() + entitypatch.getOriginal().getAttribute(armorNegation).getBaseValue();
 				if (value > 0.0D) {
-					itemTooltip.add(new TextComponent(" ").append(new TranslatableComponent(armorNegation.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
+					itemTooltip.add(Component.literal(" ").append(Component.translatable(armorNegation.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
 				}
 			}
 			
@@ -95,17 +93,17 @@ public class CapabilityItem {
 				if (value > 0.0D) {
 					int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, itemstack);
 					value *= (1.0F + i * 0.12F);
-					itemTooltip.add(new TextComponent(" ").append(new TranslatableComponent(impact.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
+					itemTooltip.add(Component.literal(" ").append(Component.translatable(impact.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
 				}
 			}
 			
 			if (attribute.containsKey(maxStrikes)) {
 				double value = attribute.get(maxStrikes).getAmount() + entitypatch.getOriginal().getAttribute(maxStrikes).getBaseValue();
 				if (value > 0.0D) {
-					itemTooltip.add(new TextComponent(" ").append(new TranslatableComponent(maxStrikes.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
+					itemTooltip.add(Component.literal(" ").append(Component.translatable(maxStrikes.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
 				}
 			} else {
-				itemTooltip.add(new TextComponent(" ").append(new TranslatableComponent(maxStrikes.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(maxStrikes.getDefaultValue()))));
+				itemTooltip.add(Component.literal(" ").append(Component.translatable(maxStrikes.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(maxStrikes.getDefaultValue()))));
 			}
 		}
 	}

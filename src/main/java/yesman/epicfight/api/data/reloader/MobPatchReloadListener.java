@@ -70,12 +70,12 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			String pathString = rl.getPath();
 			ResourceLocation registryName = new ResourceLocation(rl.getNamespace(), pathString);
 			
-			if (!ForgeRegistries.ENTITIES.containsKey(registryName)) {
+			if (!ForgeRegistries.ENTITY_TYPES.containsKey(registryName)) {
 				EpicFightMod.LOGGER.warn("[Custom Entity] Entity named " + registryName + " does not exist");
 				continue;
 			}
 			
-			EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(registryName);
+			EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(registryName);
 			
 			CompoundTag tag = null;
 			
@@ -514,7 +514,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 	
 	public static Stream<CompoundTag> getDataStream() {
 		Stream<CompoundTag> tagStream = TAGMAP.entrySet().stream().map((entry) -> {
-			entry.getValue().putString("id", entry.getKey().getRegistryName().toString());
+			entry.getValue().putString("id", ForgeRegistries.ENTITY_TYPES.getKey(entry.getKey()).toString());
 			return entry.getValue();
 		});
 		
@@ -534,7 +534,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 				disabled = tag.getBoolean("disabled");
 			}
 			
-			EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(tag.getString("id")));
+			EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(tag.getString("id")));
 			MOB_PATCH_PROVIDERS.put(entityType, deserialize(tag, true));
 			ProviderEntity.putCustomEntityPatch(entityType, (entity) -> () -> MOB_PATCH_PROVIDERS.get(entity.getType()).get(entity));
 			

@@ -22,8 +22,8 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.TransformSheet;
@@ -70,7 +70,7 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	
 	@SuppressWarnings("deprecation")
 	@Override
-	public void onJoinWorld(EnderDragon entityIn, EntityJoinWorldEvent event) {
+	public void onJoinWorld(EnderDragon entityIn, EntityJoinLevelEvent event) {
 		super.onJoinWorld(entityIn, event);
 		
 		DragonPhaseInstance currentPhase = this.original.phaseManager.getCurrentPhase();
@@ -133,7 +133,7 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	}
 	
 	@Override
-	public void tick(LivingUpdateEvent event) {
+	public void tick(LivingTickEvent event) {
 		super.tick(event);
 		
 		if (this.original.getPhaseManager().getCurrentPhase().isSitting()) {
@@ -142,7 +142,7 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	}
 	
 	@Override
-	public void serverTick(LivingUpdateEvent event) {
+	public void serverTick(LivingTickEvent event) {
 		super.serverTick(event);
 		this.original.hurtTime = 2;
 		this.original.getSensing().tick();
@@ -191,7 +191,7 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	}
 	
 	@Override
-	public void clientTick(LivingUpdateEvent event) {
+	public void clientTick(LivingTickEvent event) {
 		this.xRootO = this.xRoot;
 		this.zRootO = this.zRoot;
 		super.clientTick(event);

@@ -30,7 +30,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
@@ -122,7 +122,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	}
 	
 	@Override
-	public void tick(LivingUpdateEvent event) {
+	public void tick(LivingTickEvent event) {
 		if (this.original.getHealth() <= 0.0F) {
 			if (this.original.deathTime > 1 && this.deathTimerExt < 17) {
 				this.deathTimerExt++;
@@ -145,7 +145,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	}
 	
 	@Override
-	public void clientTick(LivingUpdateEvent event) {
+	public void clientTick(LivingTickEvent event) {
 		super.clientTick(event);
 		this.original.setDeltaMovement(0.0D, 0.0D, 0.0D);
 		int transparencyCount = this.getTransparency();
@@ -156,7 +156,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	}
 	
 	@Override
-	public void serverTick(LivingUpdateEvent event) {
+	public void serverTick(LivingTickEvent event) {
 		super.serverTick(event);
 		
 		if (this.original.getHealth() <= this.original.getMaxHealth() * 0.5F) {

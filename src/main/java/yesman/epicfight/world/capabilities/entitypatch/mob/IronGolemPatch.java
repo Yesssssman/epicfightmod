@@ -11,7 +11,7 @@ import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
@@ -77,7 +77,7 @@ public class IronGolemPatch extends MobPatch<IronGolem> {
 	}
 
 	@Override
-	public void tick(LivingUpdateEvent event) {
+	public void tick(LivingTickEvent event) {
 		if (this.original.getHealth() <= 0.0F) {
 			this.original.setXRot(0);
 			if (this.original.deathTime > 1 && this.deathTimerExt < 20) {

@@ -14,6 +14,8 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
+import net.minecraft.world.entity.Entity.RemovalReason;
+
 public class WitherGhostClone extends FlyingMob {
 	public WitherGhostClone(EntityType<? extends FlyingMob> entityType, Level level) {
 		super(entityType, level);

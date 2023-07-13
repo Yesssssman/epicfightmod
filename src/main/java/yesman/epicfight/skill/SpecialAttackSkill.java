@@ -11,8 +11,7 @@ import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -59,8 +58,8 @@ public abstract class SpecialAttackSkill extends Skill {
 		List<Component> list = Lists.<Component>newArrayList();
 		String traslatableText = this.getTranslatableText();
 		
-		list.add(new TranslatableComponent(traslatableText).withStyle(ChatFormatting.WHITE).append(new TextComponent(String.format("[%.0f]", this.consumption)).withStyle(ChatFormatting.AQUA)));
-		list.add(new TranslatableComponent(traslatableText + ".tooltip").withStyle(ChatFormatting.DARK_GRAY));
+		list.add(Component.translatable(traslatableText).withStyle(ChatFormatting.WHITE).append(Component.literal(String.format("[%.0f]", this.consumption)).withStyle(ChatFormatting.AQUA)));
+		list.add(Component.translatable(traslatableText + ".tooltip").withStyle(ChatFormatting.DARK_GRAY));
 		return list;
 	}
 	
@@ -101,43 +100,43 @@ public abstract class SpecialAttackSkill extends Skill {
 		impact = impactCorrector.getTotalValue((float)impact);
 		maxStrikes = maxStrikesCorrector.getTotalValue((float)maxStrikes);
 		
-		list.add(new TextComponent(title).withStyle(ChatFormatting.UNDERLINE).withStyle(ChatFormatting.GRAY));
+		list.add(Component.literal(title).withStyle(ChatFormatting.UNDERLINE).withStyle(ChatFormatting.GRAY));
 		
-		MutableComponent damageComponent = new TranslatableComponent("skill.epicfight.damage",
-				new TextComponent(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(damage)).withStyle(ChatFormatting.RED)
+		MutableComponent damageComponent = Component.translatable("skill.epicfight.damage",
+				Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(damage)).withStyle(ChatFormatting.RED)
 		).withStyle(ChatFormatting.DARK_GRAY);
 		
 		this.getProperty(AttackPhaseProperty.EXTRA_DAMAGE, propertyMap).ifPresent((extraDamage) -> {
-			damageComponent.append(new TranslatableComponent(extraDamage.toString(),
-					new TextComponent(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(extraDamage.getArgument() * 100F) + "%").withStyle(ChatFormatting.RED)))
+			damageComponent.append(Component.translatable(extraDamage.toString(),
+					Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(extraDamage.getArgument() * 100F) + "%").withStyle(ChatFormatting.RED)))
 				.withStyle(ChatFormatting.DARK_GRAY);
 		});
 		
 		list.add(damageComponent);
 		
 		if (armorNegation != 0.0D) {
-			list.add(new TranslatableComponent(EpicFightAttributes.ARMOR_NEGATION.get().getDescriptionId(),
-					new TextComponent(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(armorNegation)).withStyle(ChatFormatting.GOLD)
+			list.add(Component.translatable(EpicFightAttributes.ARMOR_NEGATION.get().getDescriptionId(),
+					Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(armorNegation)).withStyle(ChatFormatting.GOLD)
 			).withStyle(ChatFormatting.DARK_GRAY));
 		}
 		
 		if (impact != 0.0D) {
-			list.add(new TranslatableComponent(EpicFightAttributes.IMPACT.get().getDescriptionId(),
-					new TextComponent(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(impact)).withStyle(ChatFormatting.AQUA)
+			list.add(Component.translatable(EpicFightAttributes.IMPACT.get().getDescriptionId(),
+					Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(impact)).withStyle(ChatFormatting.AQUA)
 			).withStyle(ChatFormatting.DARK_GRAY));
 		}
 		
-		list.add(new TranslatableComponent(EpicFightAttributes.MAX_STRIKES.get().getDescriptionId(),
-				new TextComponent(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(maxStrikes)).withStyle(ChatFormatting.WHITE)
+		list.add(Component.translatable(EpicFightAttributes.MAX_STRIKES.get().getDescriptionId(),
+				Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(maxStrikes)).withStyle(ChatFormatting.WHITE)
 		).withStyle(ChatFormatting.DARK_GRAY));
 		
 		Optional<StunType> stunOption = this.getProperty(AttackPhaseProperty.STUN_TYPE, propertyMap);
 		
 		stunOption.ifPresent((stunType) -> {
-			list.add(new TextComponent(ChatFormatting.DARK_GRAY + "Apply " + stunType.toString()));
+			list.add(Component.literal(ChatFormatting.DARK_GRAY + "Apply " + stunType.toString()));
 		});
 		if (!stunOption.isPresent()) {
-			list.add(new TextComponent(ChatFormatting.DARK_GRAY + "Apply " + StunType.SHORT.toString()));
+			list.add(Component.literal(ChatFormatting.DARK_GRAY + "Apply " + StunType.SHORT.toString()));
 		}	
 	}
 	

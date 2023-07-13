@@ -8,6 +8,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -22,8 +23,8 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -49,6 +50,8 @@ import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 
+import net.minecraft.world.entity.ai.goal.Goal.Flag;
+
 public class EndermanPatch extends MobPatch<EnderMan> {
 	private static final UUID SPEED_MODIFIER_RAGE_UUID = UUID.fromString("dc362d1a-8424-11ec-a8a3-0242ac120002");
 	private static final AttributeModifier SPEED_MODIFIER_RAGE = new AttributeModifier(SPEED_MODIFIER_RAGE_UUID, "Rage speed bonus", 0.1D, AttributeModifier.Operation.ADDITION);
@@ -65,7 +68,7 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 	}
 	
 	@Override
-	public void onJoinWorld(EnderMan enderman, EntityJoinWorldEvent event) {
+	public void onJoinWorld(EnderMan enderman, EntityJoinLevelEvent event) {
 		if (enderman.level.dimension() == Level.END) {
 			if (enderman.position().horizontalDistanceSqr() < 40000) {
 				event.setCanceled(true);
@@ -131,7 +134,7 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 	}
 	
 	@Override
-	public void serverTick(LivingUpdateEvent event) {
+	public void serverTick(LivingTickEvent event) {
 		super.serverTick(event);
 		
 		if (this.isRaging() && !this.onRage && this.original.tickCount > 5) {
@@ -142,7 +145,7 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 	}
 	
 	@Override
-	public void tick(LivingUpdateEvent event) {
+	public void tick(LivingTickEvent event) {
 		if (this.original.getHealth() <= 0.0F) {
 			this.original.setXRot(0);
 			
@@ -242,7 +245,7 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 		
 		if (this.isLogicalClient()) {
 			for (int i = 0; i < 100; i++) {
-				Random rand = original.getRandom();
+				RandomSource rand = original.getRandom();
 				Vec3f vec = new Vec3f(rand.nextInt(), rand.nextInt(), rand.nextInt());
 				vec.normalise().scale(0.5F);
 				Minecraft minecraft = Minecraft.getInstance();

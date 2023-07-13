@@ -60,7 +60,7 @@ public class BattleModeGui extends ModIngameGui {
 		new Vec2f(1.0F, 0.0F)
 	};
 	
-	public void renderGui(LocalPlayerPatch playerpatch, float partialTicks) {
+	public void renderGui(LocalPlayerPatch playerpatch, float partialTick) {
 		if (!playerpatch.getOriginal().isAlive() || playerpatch.getOriginal().getVehicle() != null) {
 			return;
 		}
@@ -96,7 +96,7 @@ public class BattleModeGui extends ModIngameGui {
 		float prevStamina = playerpatch.getPrevStamina();
 		
 		if (maxStamina > 0.0F && stamina < maxStamina) {
-			float ratio = (prevStamina + (stamina - prevStamina) * partialTicks) / maxStamina;
+			float ratio = (prevStamina + (stamina - prevStamina) * partialTick) / maxStamina;
 			matStack.pushPose();
 			matStack.translate(0, (float)this.sliding * 0.5F, 0);
 			matStack.scale(0.5F, 0.5F, 1.0F);
@@ -111,7 +111,7 @@ public class BattleModeGui extends ModIngameGui {
 			if (container != null && !container.isEmpty()) {
 				SkillCategory slot = container.getSkill().getCategory();
 				if (slot == SkillCategories.WEAPON_SPECIAL_ATTACK) {
-					this.drawSpecialAttack(playerpatch, container, matStack, partialTicks);
+					this.drawSpecialAttack(playerpatch, container, matStack, partialTick);
 				} else {
 					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 					Skill skill = container.getSkill();

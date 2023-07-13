@@ -19,6 +19,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.main.EpicFightMod;
 
+import net.minecraft.client.renderer.RenderStateShard.TextureStateShard;
+
 @OnlyIn(Dist.CLIENT)
 public class EpicFightRenderTypes extends RenderType {
 	private EpicFightRenderTypes(String p_173178_, VertexFormat p_173179_, Mode p_173180_, int p_173181_, boolean p_173182_, boolean p_173183_, Runnable p_173184_, Runnable p_173185_) {

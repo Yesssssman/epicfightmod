@@ -21,8 +21,7 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -46,12 +45,9 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.EntityViewRenderEvent.CameraSetup;
-import net.minecraftforge.client.event.EntityViewRenderEvent.RenderFogEvent;
-import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderHandEvent;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.client.event.*;
+import net.minecraftforge.client.event.ViewportEvent.ComputeCameraAngles;
+import net.minecraftforge.client.event.ViewportEvent.RenderFog;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoader;
@@ -206,7 +202,7 @@ public class RenderEngine {
 			return;
 		}
 		
-		EntityType<?> presetEntityType = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(renderer));
+		EntityType<?> presetEntityType = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(renderer));
 		
 		if (this.entityRendererProvider.containsKey(presetEntityType)) {
 			this.entityRendererCache.put(entityType, this.entityRendererProvider.get(presetEntityType).get());
@@ -243,8 +239,8 @@ public class RenderEngine {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void renderEntityArmatureModel(LivingEntity livingEntity, LivingEntityPatch<?> entitypatch, LivingEntityRenderer<? extends Entity, ?> renderer, MultiBufferSource buffer, PoseStack matStack, int packedLightIn, float partialTicks) {
-		this.getEntityRenderer(livingEntity).render(livingEntity, entitypatch, renderer, buffer, matStack, packedLightIn, partialTicks);
+	public void renderEntityArmatureModel(LivingEntity livingEntity, LivingEntityPatch<?> entitypatch, LivingEntityRenderer<? extends Entity, ?> renderer, MultiBufferSource buffer, PoseStack matStack, int packedLightIn, float partialTick) {
+		this.getEntityRenderer(livingEntity).render(livingEntity, entitypatch, renderer, buffer, matStack, packedLightIn, partialTick);
 	}
 	
 	public PatchedEntityRenderer getEntityRenderer(Entity entity) {
@@ -270,7 +266,7 @@ public class RenderEngine {
 		this.zoomOutTimer = timer;
 	}
 	
-	private void setRangedWeaponThirdPerson(CameraSetup event, CameraType pov, double partialTicks) {
+	private void setRangedWeaponThirdPerson(ComputeCameraAngles event, CameraType pov, double partialTicks) {
 		if (ClientEngine.instance.getPlayerPatch() == null) {
 			return;
 		}
@@ -360,7 +356,7 @@ public class RenderEngine {
 		this.isPlayerRotationLocked = false;
 	}
 	
-	public void correctCamera(CameraSetup event, float partialTicks) {
+	public void correctCamera(ComputeCameraAngles event, float partialTicks) {
 		if (this.isPlayerRotationLocked) {
 			Camera camera = event.getCamera();
 			CameraType cameraType = this.minecraft.options.getCameraType();
@@ -437,9 +433,9 @@ public class RenderEngine {
 
 		@SubscribeEvent
 		public static void itemTooltip(ItemTooltipEvent event) {
-			if (event.getPlayer() != null) {
+			if (event.getEntity() != null) {
 				CapabilityItem cap = EpicFightCapabilities.getItemStackCapability(event.getItemStack());
-				LocalPlayerPatch playerpatch = (LocalPlayerPatch) event.getPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+				LocalPlayerPatch playerpatch = (LocalPlayerPatch) event.getEntity().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
 				
 				if (cap != null && playerpatch != null) {
 					if (ClientEngine.instance.controllEngine.isKeyDown(EpicFightKeyMappings.SPECIAL_SKILL_TOOLTIP)) {
@@ -461,13 +457,13 @@ public class RenderEngine {
 							if (textComp.getSiblings().size() > 0) {
 								Component sibling = textComp.getSiblings().get(0);
 								
-								if (sibling instanceof TranslatableComponent) {
-									TranslatableComponent translationComponent = (TranslatableComponent)sibling;
-									
-									if (translationComponent.getArgs().length > 1 && translationComponent.getArgs()[1] instanceof TranslatableComponent) {
+								if (sibling.getContents() instanceof TranslatableContents translatableContents) {
+
+									if (translatableContents.getArgs().length > 1 && translatableContents.getArgs()[1] instanceof Component comp&&
+											comp.getContents() instanceof TranslatableContents contents) {
 										CapabilityItem itemCapability = EpicFightCapabilities.getItemStackCapability(event.getItemStack());
 										
-										if (((TranslatableComponent)translationComponent.getArgs()[1]).getKey().equals(Attributes.ATTACK_SPEED.getDescriptionId())) {
+										if (contents.getKey().equals(Attributes.ATTACK_SPEED.getDescriptionId())) {
 											float weaponSpeed = (float)playerpatch.getOriginal().getAttribute(Attributes.ATTACK_SPEED).getBaseValue();
 											
 											for (AttributeModifier modifier : event.getItemStack().getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_SPEED)) {
@@ -481,8 +477,8 @@ public class RenderEngine {
 											}
 											
 											tooltip.remove(i);
-											tooltip.add(i, new TextComponent(String.format(" %.2f ", playerpatch.getModifiedAttackSpeed(cap, weaponSpeed))).append(new TranslatableComponent(Attributes.ATTACK_SPEED.getDescriptionId())));
-										} else if (((TranslatableComponent)translationComponent.getArgs()[1]).getKey().equals(Attributes.ATTACK_DAMAGE.getDescriptionId())) {
+											tooltip.add(i, Component.literal(String.format(" %.2f ", playerpatch.getModifiedAttackSpeed(cap, weaponSpeed))).append(Component.translatable(Attributes.ATTACK_SPEED.getDescriptionId())));
+										} else if (contents.getKey().equals(Attributes.ATTACK_DAMAGE.getDescriptionId())) {
 											float weaponDamage = (float)playerpatch.getOriginal().getAttribute(Attributes.ATTACK_DAMAGE).getBaseValue();
 											weaponDamage += EnchantmentHelper.getDamageBonus(event.getItemStack(), MobType.UNDEFINED);
 											
@@ -498,7 +494,7 @@ public class RenderEngine {
 											}
 											
 											tooltip.remove(i);
-											tooltip.add(i, new TextComponent(String.format(" %.0f ", playerpatch.getModifiedDamage(null, null, weaponDamage))).append(new TranslatableComponent(Attributes.ATTACK_DAMAGE.getDescriptionId())).withStyle(ChatFormatting.DARK_GREEN));
+											tooltip.add(i, Component.literal(String.format(" %.0f ", playerpatch.getModifiedDamage(null, null, weaponDamage))).append(Component.translatable(Attributes.ATTACK_DAMAGE.getDescriptionId())).withStyle(ChatFormatting.DARK_GREEN));
 										}
 									}
 								}
@@ -510,9 +506,9 @@ public class RenderEngine {
 		}
 		
 		@SubscribeEvent
-		public static void cameraSetupEvent(CameraSetup event) {
+		public static void cameraSetupEvent(ComputeCameraAngles event) {
 			if (renderEngine.zoomCount > 0) {
-				renderEngine.setRangedWeaponThirdPerson(event, renderEngine.minecraft.options.getCameraType(), event.getPartialTicks());
+				renderEngine.setRangedWeaponThirdPerson(event, renderEngine.minecraft.options.getCameraType(), event.getPartialTick());
 				
 				if (renderEngine.zoomOutTimer > 0) {
 					renderEngine.zoomOutTimer--;
@@ -523,16 +519,16 @@ public class RenderEngine {
 				renderEngine.zoomCount = Math.min(renderEngine.zoomMaxCount, renderEngine.zoomCount);
 			}
 			
-			renderEngine.correctCamera(event, (float)event.getPartialTicks());
+			renderEngine.correctCamera(event, (float)event.getPartialTick());
 		}
 		
 		@SubscribeEvent
-		public static void fogEvent(RenderFogEvent event) {
+		public static void fogEvent(RenderFog event) {
 		}
 		
 		@SubscribeEvent
-		public static void renderGameOverlayPre(RenderGameOverlayEvent.Pre event) {
-			if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
+		public static void renderGameOverlayPre(RenderGuiOverlayEvent.Pre event) {
+//			if (event.getType() == RenderGuiOverlayEvent.ElementType.ALL) {// FIXME: 2023/7/13 Is this a good idea?
 				Window window = Minecraft.getInstance().getWindow();
 				LocalPlayerPatch playerpatch = ClientEngine.instance.getPlayerPatch();
 				
@@ -546,14 +542,14 @@ public class RenderEngine {
 					renderEngine.overlayManager.renderTick(window.getGuiScaledWidth(), window.getGuiScaledHeight());
 					
 					if (Minecraft.renderNames()) {
-						renderEngine.guiSkillBar.renderGui(playerpatch, event.getPartialTicks());
+						renderEngine.guiSkillBar.renderGui(playerpatch, event.getPartialTick());
 					}
 				}
-			}
+//			}
 		}
 		
 		@SubscribeEvent
-		public static void renderGameOverlayPost(RenderGameOverlayEvent.BossInfo event) {
+		public static void renderGameOverlayPost(CustomizeGuiOverlayEvent.BossEventProgress event) {
 			if (event.getBossEvent().getName().getString().equals("Ender Dragon")) {
 				if (EnderDragonPatch.INSTANCE_CLIENT != null) {
 					EnderDragonPatch dragonpatch = EnderDragonPatch.INSTANCE_CLIENT;
@@ -566,8 +562,8 @@ public class RenderEngine {
 						
 						RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			            RenderSystem.setShaderTexture(0, BossHealthOverlay.GUI_BARS_LOCATION);
-						GuiComponent.blit(event.getMatrixStack(), x, y + 6, 183, 2, 0, 45.0F, 182, 6, 255, 255);
-						GuiComponent.blit(event.getMatrixStack(), x + (int)(183 * progression), y + 6, (int)(183 * (1.0F - progression)), 2, 0, 39.0F, 182, 6, 255, 255);
+						GuiComponent.blit(event.getPoseStack(), x, y + 6, 183, 2, 0, 45.0F, 182, 6, 255, 255);
+						GuiComponent.blit(event.getPoseStack(), x + (int)(183 * progression), y + 6, (int)(183 * (1.0F - progression)), 2, 0, 39.0F, 182, 6, 255, 255);
 					}
 				}
 			}
@@ -584,7 +580,7 @@ public class RenderEngine {
 				if (isBattleMode || !EpicFightMod.CLIENT_INGAME_CONFIG.filterAnimation.getValue()) {
 					if (event.getHand() == InteractionHand.MAIN_HAND) {
 						renderEngine.firstPersonRenderer.render(playerpatch.getOriginal(), playerpatch, (LivingEntityRenderer)renderEngine.minecraft.getEntityRenderDispatcher().getRenderer(playerpatch.getOriginal()),
-								event.getMultiBufferSource(), event.getPoseStack(), event.getPackedLight(), event.getPartialTicks());
+								event.getMultiBufferSource(), event.getPoseStack(), event.getPackedLight(), event.getPartialTick());
 					}
 					
 					event.setCanceled(true);

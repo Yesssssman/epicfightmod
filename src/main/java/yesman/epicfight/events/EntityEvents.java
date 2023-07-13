@@ -24,7 +24,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.event.entity.EntityEvent;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
@@ -34,13 +34,13 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEquipmentChangeEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
-import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
-import net.minecraftforge.event.entity.living.PotionEvent.PotionExpiryEvent;
-import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
+import net.minecraftforge.event.entity.living.MobEffectEvent.Added;
+import net.minecraftforge.event.entity.living.MobEffectEvent.Expired;
+import net.minecraftforge.event.entity.living.MobEffectEvent.Remove;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -70,7 +70,7 @@ import yesman.epicfight.world.gamerule.EpicFightGamerules;
 public class EntityEvents {
 	@SuppressWarnings("unchecked")
 	@SubscribeEvent
-	public static void spawnEvent(EntityJoinWorldEvent event) {
+	public static void spawnEvent(EntityJoinLevelEvent event) {
 		EntityPatch<Entity> entitypatch = event.getEntity().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
 		
 		if (entitypatch != null && !entitypatch.isInitialized()) {
@@ -88,8 +88,8 @@ public class EntityEvents {
 	}
 	
 	@SubscribeEvent
-	public static void updateEvent(LivingUpdateEvent event) {
-		LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>) event.getEntityLiving().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+	public static void updateEvent(LivingTickEvent event) {
+		LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>) event.getEntity().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
 		
 		if (entitypatch != null && entitypatch.getOriginal() != null) {
 			entitypatch.tick(event);
@@ -98,7 +98,7 @@ public class EntityEvents {
 	
 	@SubscribeEvent
 	public static void knockBackEvent(LivingKnockBackEvent event) {
-		EntityPatch<?> cap = event.getEntityLiving().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+		EntityPatch<?> cap = event.getEntity().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
 		
 		if (cap != null) {
 			event.setCanceled(true);
@@ -122,7 +122,7 @@ public class EntityEvents {
 			}
 			
 			if (extendedDamageSource != null) {
-				LivingEntity hitEntity = event.getEntityLiving();
+				LivingEntity hitEntity = event.getEntity();
 				float totalDamage = event.getAmount();
 				
 				if (hitEntity instanceof ServerPlayer) {
@@ -246,9 +246,9 @@ public class EntityEvents {
 			}
 		}
 		
-		if (event.getEntityLiving().isUsingItem() && event.getEntityLiving().getUseItem().getItem() == Items.SHIELD) {
-			if (event.getEntityLiving() instanceof Player) {
-				event.getEntityLiving().level.playSound((Player)event.getEntityLiving(), event.getEntityLiving().blockPosition(), SoundEvents.SHIELD_BLOCK, event.getEntityLiving().getSoundSource(), 1.0F, 0.8F + event.getEntityLiving().getRandom().nextFloat() * 0.4F);
+		if (event.getEntity().isUsingItem() && event.getEntity().getUseItem().getItem() == Items.SHIELD) {
+			if (event.getEntity() instanceof Player) {
+				event.getEntity().level.playSound((Player)event.getEntity(), event.getEntity().blockPosition(), SoundEvents.SHIELD_BLOCK, event.getEntity().getSoundSource(), 1.0F, 0.8F + event.getEntity().getRandom().nextFloat() * 0.4F);
 			}
 		}
 	}
@@ -277,7 +277,7 @@ public class EntityEvents {
 		LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>) event.getEntity().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
 		DamageSource damageSource = null;
 		
-		if (entitypatch != null && event.getEntityLiving().getHealth() > 0.0F) {
+		if (entitypatch != null && event.getEntity().getHealth() > 0.0F) {
 			if (event.getSource() instanceof IndirectEntityDamageSource && event.getSource().getDirectEntity() != null) {
 				ProjectilePatch<?> projectilepatch = event.getSource().getDirectEntity().getCapability(EpicFightCapabilities.CAPABILITY_PROJECTILE).orElse(null);
 				
@@ -307,7 +307,7 @@ public class EntityEvents {
 	
 	@SubscribeEvent
 	public static void dropEvent(LivingDropsEvent event) {
-		LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>)event.getEntityLiving().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+		LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>)event.getEntity().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
 		
 		if (entitypatch != null) {
 			if (entitypatch.onDrop(event)) {
@@ -369,11 +369,11 @@ public class EntityEvents {
 		
 		if (event.getSlot() != EquipmentSlot.OFFHAND) {
 			if (fromCap != null) {
-				event.getEntityLiving().getAttributes().removeAttributeModifiers(fromCap.getAttributeModifiers(event.getSlot(), entitypatch));
+				event.getEntity().getAttributes().removeAttributeModifiers(fromCap.getAttributeModifiers(event.getSlot(), entitypatch));
 			}
 			
 			if (toCap != null) {
-				event.getEntityLiving().getAttributes().addTransientAttributeModifiers(toCap.getAttributeModifiers(event.getSlot(), entitypatch));
+				event.getEntity().getAttributes().addTransientAttributeModifiers(toCap.getAttributeModifiers(event.getSlot(), entitypatch));
 			}
 		}
 		
@@ -396,23 +396,23 @@ public class EntityEvents {
 	
 	
 	@SubscribeEvent
-	public static void effectAddEvent(PotionAddedEvent event) {
+	public static void effectAddEvent(Added event) {
 		if (!event.getEntity().level.isClientSide()) {
-			EpicFightNetworkManager.sendToAll(new SPPotion(event.getPotionEffect().getEffect(), Action.ACTIVATE, event.getEntity().getId()));
+			EpicFightNetworkManager.sendToAll(new SPPotion(event.getEffectInstance().getEffect(), Action.ACTIVATE, event.getEntity().getId()));
 		}
 	}
 	
 	@SubscribeEvent
-	public static void effectRemoveEvent(PotionRemoveEvent event) {
-		if (!event.getEntity().level.isClientSide() && event.getPotionEffect() != null) {
-			EpicFightNetworkManager.sendToAll(new SPPotion(event.getPotionEffect().getEffect(), Action.REMOVE, event.getEntity().getId()));
+	public static void effectRemoveEvent(Remove event) {
+		if (!event.getEntity().level.isClientSide() && event.getEffectInstance() != null) {
+			EpicFightNetworkManager.sendToAll(new SPPotion(event.getEffectInstance().getEffect(), Action.REMOVE, event.getEntity().getId()));
 		}
 	}
 	
 	@SubscribeEvent
-	public static void effectExpiryEvent(PotionExpiryEvent event) {
+	public static void effectExpiryEvent(Expired event) {
 		if (!event.getEntity().level.isClientSide()) {
-			EpicFightNetworkManager.sendToAll(new SPPotion(event.getPotionEffect().getEffect(), Action.REMOVE, event.getEntity().getId()));
+			EpicFightNetworkManager.sendToAll(new SPPotion(event.getEffectInstance().getEffect(), Action.REMOVE, event.getEntity().getId()));
 		}
 	}
 	
@@ -420,7 +420,7 @@ public class EntityEvents {
 	public static void mountEvent(EntityMountEvent event) {
 		EntityPatch<?> mountEntity = event.getEntityMounting().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
 		
-		if (!event.getWorldObj().isClientSide() && mountEntity instanceof HumanoidMobPatch && mountEntity.getOriginal() != null) {
+		if (!event.getLevel().isClientSide() && mountEntity instanceof HumanoidMobPatch && mountEntity.getOriginal() != null) {
 			if (event.getEntityBeingMounted() instanceof Mob) {
 				((HumanoidMobPatch<?>)mountEntity).onMount(event.isMounting(), event.getEntityBeingMounted());
 			}
@@ -466,7 +466,7 @@ public class EntityEvents {
 	
 	@SubscribeEvent
 	public static void deathEvent(LivingDeathEvent event) {
-		LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>)event.getEntityLiving().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+		LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>)event.getEntity().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
 		
 		if (entitypatch != null) {
 			entitypatch.onDeath();

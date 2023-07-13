@@ -17,8 +17,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.entity.PartEntity;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingTickEvent;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.AttackResult;
@@ -31,6 +31,9 @@ import yesman.epicfight.network.client.CPSetPlayerTarget;
 import yesman.epicfight.network.client.CPChangePlayerMode;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
+
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch.AnimationPacketProvider;
+import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch.PlayerMode;
 
 @OnlyIn(Dist.CLIENT)
 public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
@@ -47,15 +50,15 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	}
 	
 	@Override
-	public void onJoinWorld(LocalPlayer entityIn, EntityJoinWorldEvent event) {
+	public void onJoinWorld(LocalPlayer entityIn, EntityJoinLevelEvent event) {
 		super.onJoinWorld(entityIn, event);
 		this.eventListeners.addEventListener(EventType.ACTION_EVENT_CLIENT, ACTION_EVENT_UUID, (playerEvent) -> {
 			ClientEngine.instance.controllEngine.unlockHotkeys();
 		});
 	}
 	
-	public void onRespawnLocalPlayer(ClientPlayerNetworkEvent.RespawnEvent event) {
-		this.onJoinWorld(event.getNewPlayer(), new EntityJoinWorldEvent(event.getNewPlayer(), event.getNewPlayer().level));
+	public void onRespawnLocalPlayer(ClientPlayerNetworkEvent.Clone event) {
+		this.onJoinWorld(event.getNewPlayer(), new EntityJoinLevelEvent(event.getNewPlayer(), event.getNewPlayer().level));
 	}
 	
 	@Override
@@ -71,7 +74,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	}
 	
 	@Override
-	public void clientTick(LivingUpdateEvent event) {
+	public void clientTick(LivingTickEvent event) {
 		this.prevStamina = this.getStamina();
 		super.clientTick(event);
 		HitResult rayResult = this.minecraft.hitResult;

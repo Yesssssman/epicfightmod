@@ -15,25 +15,38 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.synchronization.ArgumentTypes;
-import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.commands.synchronization.ArgumentTypeInfo;
+import net.minecraft.commands.synchronization.ArgumentTypeInfos;
+import net.minecraft.commands.synchronization.SingletonArgumentInfo;
+import net.minecraft.core.Registry;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import net.minecraftforge.registries.DeferredRegister;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegistryObject;
 import yesman.epicfight.gameasset.Skills;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.Skill;
 
 public class SkillArgument implements ArgumentType<Skill> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("spooky", "effect");
 	public static final DynamicCommandExceptionType ERROR_UNKNOWN_SKILL = new DynamicCommandExceptionType((obj) -> {
-		return new TranslatableComponent("epicfight.skillNotFound", obj);
+		return Component.translatable("epicfight.skillNotFound", obj);
 	});
+
+
+	public static final DeferredRegister<ArgumentTypeInfo<?, ?>> COMMAND_ARGUMENT_TYPES = DeferredRegister.create(Registry.COMMAND_ARGUMENT_TYPE_REGISTRY, EpicFightMod.MODID);
+	public static final RegistryObject<ArgumentTypeInfo<?, ?>> SKILL = COMMAND_ARGUMENT_TYPES.register("skill",
+				() -> ArgumentTypeInfos.registerByClass(SkillArgument.class, SingletonArgumentInfo.contextFree(SkillArgument::skill)));
 	
 	public static SkillArgument skill() {
 		return new SkillArgument();
 	}
 	
-	public static void registerArgumentTypes() {
-		ArgumentTypes.register("epicfight:skill", SkillArgument.class, new EmptyArgumentSerializer<>(SkillArgument::skill));
+	public static void registerArgumentTypes(IEventBus bus) {
+		COMMAND_ARGUMENT_TYPES.register(bus);
 	}
 	
 	public static Skill getSkill(CommandContext<CommandSourceStack> commandContext, String name) {

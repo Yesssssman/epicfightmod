@@ -10,7 +10,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import yesman.epicfight.api.utils.IndirectEpicFightDamageSource;
 import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
@@ -25,7 +25,7 @@ public abstract class ProjectilePatch<T extends Projectile> {
 	protected float armorNegation;
 	protected Vec3 initialFirePosition;
 	
-	public void onJoinWorld(T projectileEntity, EntityJoinWorldEvent event) {
+	public void onJoinWorld(T projectileEntity, EntityJoinLevelEvent event) {
 		Entity shooter = projectileEntity.getOwner();
 		boolean flag = true;
 		

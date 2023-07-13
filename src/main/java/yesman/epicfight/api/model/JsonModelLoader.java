@@ -1,6 +1,7 @@
 package yesman.epicfight.api.model;
 
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.FloatBuffer;
@@ -36,6 +37,7 @@ import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
 import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.api.client.animation.AnimationDataReader;
 import yesman.epicfight.api.client.model.ClientModel;
 import yesman.epicfight.api.client.model.Mesh;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -76,10 +78,16 @@ public class JsonModelLoader {
 				in.setLenient(true);
 				this.rootJson = Streams.parse(in).getAsJsonObject();	
 			} else {
-				Resource resource = resourceManager.getResource(resourceLocation);
-				JsonReader in = new JsonReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
-				in.setLenient(true);
-				this.rootJson = Streams.parse(in).getAsJsonObject();
+				resourceManager.getResource(resourceLocation)
+					.ifPresent(resource -> {
+						try {
+							JsonReader in = new JsonReader(resource.openAsReader());
+							in.setLenient(true);
+							this.rootJson = Streams.parse(in).getAsJsonObject();
+						} catch (IOException e) {
+							throw new RuntimeException(e);
+						}
+					});
 			}
 		} catch (Exception e) {
 			EpicFightMod.LOGGER.info("Can't read " + resourceLocation.toString() + " because " + e);

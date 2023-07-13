@@ -9,8 +9,7 @@ import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.InteractionHand;
@@ -34,7 +33,7 @@ public class SkillBookScreen extends Screen {
 	private final InteractionHand hand;
 	
 	public SkillBookScreen(Player opener, ItemStack stack, InteractionHand hand) {
-		super(TextComponent.EMPTY);
+		super(Component.literal(""));
 		this.opener = opener;
 		this.skill = SkillBookItem.getContainSkill(stack);
 		this.hand = hand;
@@ -52,20 +51,20 @@ public class SkillBookScreen extends Screen {
 			if (condition) {
 				if (playerpatch.getSkill(this.skill.getCategory()).getSkill() != null) {
 					tooltip = (button, matrixStack, mouseX, mouseY) -> {
-						this.renderTooltip(matrixStack, this.minecraft.font.split(new TranslatableComponent("gui." + EpicFightMod.MODID + ".replace",
-								new TranslatableComponent(skill.getTranslatableText()).getString()), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+						this.renderTooltip(matrixStack, this.minecraft.font.split(Component.translatable("gui." + EpicFightMod.MODID + ".replace",
+								Component.translatable(skill.getTranslatableText()).getString()), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 					};
 				}
 			} else {
 				tooltip = (button, matrixStack, mouseX, mouseY) -> {
-					this.renderTooltip(matrixStack, this.minecraft.font.split(new TranslatableComponent("gui." + EpicFightMod.MODID + ".require_learning",
-							new TranslatableComponent(priorSkill.getTranslatableText()).getString()), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+					this.renderTooltip(matrixStack, this.minecraft.font.split(Component.translatable("gui." + EpicFightMod.MODID + ".require_learning",
+							Component.translatable(priorSkill.getTranslatableText()).getString()), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 				};
 			}
 		}
 		
 		Button changeButton = new Button((this.width + 130) / 2, (this.height + 90) / 2, 46, 20,
-			new TranslatableComponent("gui." + EpicFightMod.MODID + (isUsing ? ".applied" : condition ? ".learn" : ".unusable")), (p_onPress_1_) -> {
+			Component.translatable("gui." + EpicFightMod.MODID + (isUsing ? ".applied" : condition ? ".learn" : ".unusable")), (p_onPress_1_) -> {
 				if (playerpatch != null) {
 					playerpatch.getSkill(this.skill.getCategory()).setSkill(this.skill);
 					this.minecraft.setScreen((Screen) null);
@@ -99,15 +98,15 @@ public class SkillBookScreen extends Screen {
 		
 		String translationName = this.skill.getTranslatableText();
 		
-		String skillName = new TranslatableComponent(translationName).getString();
+		String skillName = Component.translatable(translationName).getString();
 		int width = this.font.width(skillName);
 		this.font.draw(matrixStack, skillName, posX + 50 - width / 2, posY + 115, 0);
 		
-		String skillCategory = String.format("(%s)", new TranslatableComponent("skill." + EpicFightMod.MODID + "." + this.skill.getCategory().toString().toLowerCase() + ".category").getString());
+		String skillCategory = String.format("(%s)", Component.translatable("skill." + EpicFightMod.MODID + "." + this.skill.getCategory().toString().toLowerCase() + ".category").getString());
 		width = this.font.width(skillCategory);
 		this.font.draw(matrixStack, skillCategory, posX + 50 - width / 2, posY + 130, 0);
 		
-		List<FormattedCharSequence> list = this.font.split(new TranslatableComponent(translationName + ".tooltip", this.skill.getTooltipArgs().toArray(new Object[0])), 140);
+		List<FormattedCharSequence> list = this.font.split(Component.translatable(translationName + ".tooltip", this.skill.getTooltipArgs().toArray(new Object[0])), 140);
 		int height = posY + 20;
 		
 		for (int l1 = 0; l1 < list.size(); ++l1) {

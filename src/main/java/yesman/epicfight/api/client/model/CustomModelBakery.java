@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import net.minecraftforge.registries.ForgeRegistries;
 import org.apache.commons.lang3.ArrayUtils;
 
 import com.google.common.collect.Lists;
@@ -115,10 +116,10 @@ public class CustomModelBakery {
 			return null;
 		}
 		
-		ResourceLocation rl = new ResourceLocation(armorItem.getRegistryName().getNamespace(), "armor/" + armorItem.getRegistryName().getPath());
+		ResourceLocation rl = new ResourceLocation(ForgeRegistries.ITEMS.getKey(armorItem).getNamespace(), "armor/" +ForgeRegistries.ITEMS.getKey(armorItem).getPath());
 		ClientModel customModel = new ClientModel(rl, bakeMeshFromCubes(boxes, debuggingMode));
 		ClientModels.LOGICAL_CLIENT.register(rl, customModel);
-		BAKED_MODELS.put(armorItem.getRegistryName(), customModel);
+		BAKED_MODELS.put(ForgeRegistries.ITEMS.getKey(armorItem), customModel);
 		return customModel;
 	}
 	

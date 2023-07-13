@@ -4,8 +4,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.syncher.EntityDataSerializer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.registries.DataSerializerEntry;
+import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.RegisterEvent;
 import yesman.epicfight.main.EpicFightMod;
 
 public class EpicFightDataSerializers {
@@ -25,9 +25,8 @@ public class EpicFightDataSerializers {
 		}
 	};
 	
-	public static void register(RegistryEvent.Register<DataSerializerEntry> event) {
-		event.getRegistry().registerAll(
-				new DataSerializerEntry(VEC3).setRegistryName(new ResourceLocation(EpicFightMod.MODID, "vector_3_double"))
-		);
+	public static void register(RegisterEvent event) {
+		event.register(ForgeRegistries.Keys.ENTITY_DATA_SERIALIZERS,
+				new ResourceLocation(EpicFightMod.MODID, "vector_3_double"), () -> VEC3);
 	}
 }

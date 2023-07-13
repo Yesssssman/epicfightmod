@@ -36,7 +36,7 @@ public abstract class MixinMouseHandler {
 		MouseHandler self = (MouseHandler)((Object)this);
 		
 		if (self.isMouseGrabbed() && this.minecraft.isWindowActive()) {
-			double d4 = this.minecraft.options.sensitivity * (double) 0.6F + (double) 0.2F;
+			double d4 = this.minecraft.options.sensitivity().get() * (double) 0.6F + (double) 0.2F;
 			double d5 = d4 * d4 * d4;
 			double d6 = d5 * 8.0D;
 			double d2;
@@ -63,7 +63,7 @@ public abstract class MixinMouseHandler {
 			this.accumulatedDY = 0.0D;
 			int i = 1;
 			
-			if (this.minecraft.options.invertYMouse) {
+			if (this.minecraft.options.invertYMouse().get()) {
 				i = -1;
 			}
 			
