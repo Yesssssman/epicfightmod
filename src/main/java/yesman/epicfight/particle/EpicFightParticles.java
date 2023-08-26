@@ -28,4 +28,9 @@ public class EpicFightParticles {
 	public static final RegistryObject<SimpleParticleType> LASER = PARTICLES.register("laser", () -> new SimpleParticleType(true));
 	public static final RegistryObject<SimpleParticleType> NEUTRALIZE = PARTICLES.register("neutralize", () -> new SimpleParticleType(true));
 	public static final RegistryObject<SimpleParticleType> BOSS_CASTING = PARTICLES.register("boss_casting", () -> new SimpleParticleType(true));
+	public static final RegistryObject<SimpleParticleType> TSUNAMI_SPLASH = PARTICLES.register("tsunami_splash", () -> new SimpleParticleType(true));
+	public static final RegistryObject<SimpleParticleType> FEATHER = PARTICLES.register("feather", () -> new SimpleParticleType(true));
+	
+	public static final RegistryObject<HitParticleType> AIR_BURST = PARTICLES.register("air_burst", () -> new HitParticleType(true, HitParticleType.MIDDLE_OF_ENTITIES, HitParticleType.ATTACKER_Y_ROTATION));
+	public static final RegistryObject<SimpleParticleType> SWING_TRAIL = PARTICLES.register("swing_trail", () -> new SimpleParticleType(true));
 }

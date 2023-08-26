@@ -17,7 +17,7 @@ import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.model.Model;
+import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.FABRIK;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -30,8 +30,8 @@ public class EnderDraonWalkAnimation extends StaticAnimation implements Procedur
 	private final IKInfo[] ikInfos;
 	private Map<String, TransformSheet> tipPointTransform;
 	
-	public EnderDraonWalkAnimation(float convertTime, String path, Model model, IKInfo[] ikInfos) {
-		super(convertTime, true, path, model);
+	public EnderDraonWalkAnimation(float convertTime, String path, Armature armature, IKInfo[] ikInfos) {
+		super(convertTime, true, path, armature);
 		this.ikInfos = ikInfos;
 	}
 	
@@ -39,7 +39,7 @@ public class EnderDraonWalkAnimation extends StaticAnimation implements Procedur
 	public void loadAnimation(ResourceManager resourceManager) {
 		loadBothSide(resourceManager, this);
 		this.tipPointTransform = Maps.newHashMap();
-		this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransform, this.getModel().getArmature(), false, false);
+		this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransform, this.getArmature(), false, false);
 		this.onLoaded();
 	}
 	
@@ -63,10 +63,10 @@ public class EnderDraonWalkAnimation extends StaticAnimation implements Procedur
 					pose.putJointData(jointName, this.jointTransforms.get(jointName).getKeyframes()[ikInfo.ikPose].transform().copy());
 				}
 	    		
-	    		TipPointAnimation tipAnim = enderdragonpatch.getTipPointAnimation(ikInfo.endJoint);
+	    		TipPointAnimation tipAnim = enderdragonpatch.getTipPointAnimation(ikInfo.endJoint.getName());
 	    		JointTransform jt = tipAnim.getTipTransform(partialTicks);
 			    Vec3f jointModelpos = OpenMatrix4f.transform3v(toModelPos, jt.translation(), null);
-			    this.applyFabrikToJoint(jointModelpos.multiply(-1.0F, 1.0F, -1.0F), pose, this.getModel().getArmature(), ikInfo.startJoint, ikInfo.endJoint, jt.rotation());
+			    this.applyFabrikToJoint(jointModelpos.multiply(-1.0F, 1.0F, -1.0F), pose, entitypatch.getArmature(), ikInfo.startJoint, ikInfo.endJoint, jt.rotation());
 	    	}
 		}
 		
@@ -77,13 +77,12 @@ public class EnderDraonWalkAnimation extends StaticAnimation implements Procedur
 	public void begin(LivingEntityPatch<?> entitypatch) {
 		super.begin(entitypatch);
 		
-		if (entitypatch instanceof EnderDragonPatch) {
-			EnderDragonPatch enderdragonpatch = (EnderDragonPatch)entitypatch;
+		if (entitypatch instanceof EnderDragonPatch enderdragonpatch) {
 			Vec3 entitypos = enderdragonpatch.getOriginal().position();
 			OpenMatrix4f toWorld = OpenMatrix4f.mul(OpenMatrix4f.createTranslation((float)entitypos.x, (float)entitypos.y, (float)entitypos.z), enderdragonpatch.getModelMatrix(1.0F), null);
 			
 			for (IKInfo ikInfo : this.ikInfos) {
-				TransformSheet tipAnim = this.getFirstPart(this.tipPointTransform.get(ikInfo.endJoint));
+				TransformSheet tipAnim = this.getFirstPart(this.tipPointTransform.get(ikInfo.endJoint.getName()));
 				Keyframe[] keyframes = tipAnim.getKeyframes();
 				JointTransform firstposeTransform = keyframes[0].transform();
 				firstposeTransform.translation().multiply(-1.0F, 1.0F, -1.0F);
@@ -99,7 +98,7 @@ public class EnderDraonWalkAnimation extends StaticAnimation implements Procedur
 					keyframe.transform().translation().set(firstposeTransform.translation());
 				}
 				
-				enderdragonpatch.addTipPointAnimation(ikInfo.endJoint, firstposeTransform.translation(), tipAnim, ikInfo);
+				enderdragonpatch.addTipPointAnimation(ikInfo.endJoint.getName(), firstposeTransform.translation(), tipAnim, ikInfo);
 			}
 		}
 	}
@@ -108,9 +107,7 @@ public class EnderDraonWalkAnimation extends StaticAnimation implements Procedur
 	public void tick(LivingEntityPatch<?> entitypatch) {
 		super.tick(entitypatch);
 		
-		if (entitypatch instanceof EnderDragonPatch) {
-			EnderDragonPatch enderdragonpatch = (EnderDragonPatch)entitypatch;
-			
+		if (entitypatch instanceof EnderDragonPatch enderdragonpatch) {
 			if (!(enderdragonpatch.getAnimator().getPlayerFor(null).getAnimation() == this)) {
 				return;
 			}
@@ -119,10 +116,10 @@ public class EnderDraonWalkAnimation extends StaticAnimation implements Procedur
 			OpenMatrix4f toWorld = OpenMatrix4f.mul(OpenMatrix4f.createTranslation((float)entitypos.x, (float)entitypos.y, (float)entitypos.z), enderdragonpatch.getModelMatrix(1.0F), null);
 			
 			for (IKInfo ikInfo : this.ikInfos) {
-				TipPointAnimation tipAnim = enderdragonpatch.getTipPointAnimation(ikInfo.endJoint);
+				TipPointAnimation tipAnim = enderdragonpatch.getTipPointAnimation(ikInfo.endJoint.getName());
 				Vec3f clipStart = ikInfo.endpos.copy().add(0.0F, 2.5F, 0.0F).multiply(-1.0F, 1.0F, -1.0F);
 				Vec3f finalTargetpos = this.getRayCastedTipPosition(clipStart, toWorld, enderdragonpatch, 8.0F, ikInfo.rayLeastHeight);
-				TipPointAnimation opponentTipAnim = enderdragonpatch.getTipPointAnimation(ikInfo.opponentJoint);
+				TipPointAnimation opponentTipAnim = enderdragonpatch.getTipPointAnimation(ikInfo.opponentJoint.getName());
 				
 				if (tipAnim.isOnWorking()) {
 					tipAnim.newTargetPosition(finalTargetpos);
@@ -131,7 +128,7 @@ public class EnderDraonWalkAnimation extends StaticAnimation implements Procedur
 						Vec3f footpos = tipAnim.getTipPosition(1.0F);
 						
 						if (footpos.distanceSqr(finalTargetpos) > 15.0D) {
-							this.startPartAnimation(ikInfo, tipAnim, this.clipAnimation(this.tipPointTransform.get(ikInfo.endJoint), ikInfo), finalTargetpos);
+							this.startPartAnimation(ikInfo, tipAnim, this.clipAnimation(this.tipPointTransform.get(ikInfo.endJoint.getName()), ikInfo), finalTargetpos);
 						}
 					}
 				}
@@ -142,8 +139,7 @@ public class EnderDraonWalkAnimation extends StaticAnimation implements Procedur
 	@Override
 	@OnlyIn(Dist.CLIENT)
 	public void renderDebugging(PoseStack poseStack, MultiBufferSource buffer, LivingEntityPatch<?> entitypatch, float playTime, float partialTicks) {
-		if (entitypatch instanceof EnderDragonPatch) {
-			EnderDragonPatch enderdragonpatch = ((EnderDragonPatch)entitypatch);
+		if (entitypatch instanceof EnderDragonPatch enderdragonpatch) {
 			OpenMatrix4f modelmat = enderdragonpatch.getModelMatrix(partialTicks);
 			LivingEntity originalEntity = entitypatch.getOriginal();
 			Vec3 entitypos = originalEntity.position();
@@ -157,10 +153,10 @@ public class EnderDraonWalkAnimation extends StaticAnimation implements Procedur
 	       	
 			for (IKInfo ikInfo : this.ikInfos) {
 				VertexConsumer vertexBuilder = buffer.getBuffer(EpicFightRenderTypes.debugQuads());
-				Vec3f worldtargetpos = enderdragonpatch.getTipPointAnimation(ikInfo.endJoint).getTargetPosition();
+				Vec3f worldtargetpos = enderdragonpatch.getTipPointAnimation(ikInfo.endJoint.getName()).getTargetPosition();
 				Vec3f modeltargetpos = OpenMatrix4f.transform3v(toModelPos, worldtargetpos, null).multiply(-1.0F, 1.0F, -1.0F);
 				RenderingTool.drawQuad(poseStack, vertexBuilder, modeltargetpos, 0.5F, 1.0F, 0.0F, 0.0F);
-		       	Vec3f jointWorldPos = enderdragonpatch.getTipPointAnimation(ikInfo.endJoint).getTipPosition(partialTicks);
+		       	Vec3f jointWorldPos = enderdragonpatch.getTipPointAnimation(ikInfo.endJoint.getName()).getTipPosition(partialTicks);
 		       	Vec3f jointModelpos = OpenMatrix4f.transform3v(toModelPos, jointWorldPos, null).multiply(-1.0F, 1.0F, -1.0F);
 		       	RenderingTool.drawQuad(poseStack, vertexBuilder, jointModelpos, 0.4F, 0.0F, 0.0F, 1.0F);
 		       	
@@ -174,7 +170,7 @@ public class EnderDraonWalkAnimation extends StaticAnimation implements Procedur
 					pose.putJointData(jointName, this.jointTransforms.get(jointName).getKeyframes()[ikInfo.ikPose].transform().copy());
 				}
 				
-				FABRIK fabrik = new FABRIK(pose, this.getModel().getArmature(), ikInfo.startJoint, ikInfo.endJoint);
+				FABRIK fabrik = new FABRIK(pose, entitypatch.getArmature(), ikInfo.startJoint, ikInfo.endJoint);
 			   	fabrik.run(jointModelpos, 10);
 		       	for (Vec3f vec : fabrik.getChainingPosition()) {
 		       		RenderingTool.drawCube(poseStack, vertexBuilder, vec, 0.3F, 0.0F, 1.0F, 0.0F);

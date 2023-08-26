@@ -13,8 +13,6 @@ import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class ShieldCapability extends CapabilityItem {
-	protected StaticAnimation blockingMotion;
-	
 	protected ShieldCapability(CapabilityItem.Builder builder) {
 		super(builder);
 	}

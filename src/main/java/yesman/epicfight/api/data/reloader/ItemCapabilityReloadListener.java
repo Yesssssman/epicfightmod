@@ -40,7 +40,7 @@ import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.capabilities.item.TagBasedSeparativeCapability;
 import yesman.epicfight.world.capabilities.item.WeaponCapability;
 import yesman.epicfight.world.capabilities.item.WeaponCapabilityPresets;
-import yesman.epicfight.world.capabilities.provider.ProviderItem;
+import yesman.epicfight.world.capabilities.provider.ItemCapabilityProvider;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
 public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListener {
@@ -78,17 +78,17 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 				
 				if (str[0].equals("armors")) {
 					CapabilityItem capability = deserializeArmor(item, nbt);
-					ProviderItem.put(item, capability);
+					ItemCapabilityProvider.put(item, capability);
 					CAPABILITY_ARMOR_DATA_MAP.put(item, nbt);
 				} else if (str[0].equals("weapons")) {
 					CapabilityItem capability = deserializeWeapon(item, nbt, null);
-					ProviderItem.put(item, capability);
+					ItemCapabilityProvider.put(item, capability);
 					CAPABILITY_WEAPON_DATA_MAP.put(item, nbt);
 				}
 			}
 		}
 		
-		ProviderItem.addDefaultItems();
+		ItemCapabilityProvider.addDefaultItems();
 	}
 	
 	public static CapabilityItem deserializeArmor(Item item, CompoundTag tag) {
@@ -272,20 +272,20 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 			}
 			weaponReceived = true;
 			break;
-		case MOB:
+		default:
 			break;
 		}
 		
 		if (armorReceived && weaponReceived) {
 			CAPABILITY_ARMOR_DATA_MAP.forEach((item, tag) -> {
-				ProviderItem.put(item, deserializeArmor(item, tag));
+				ItemCapabilityProvider.put(item, deserializeArmor(item, tag));
 			});
 			
 			CAPABILITY_WEAPON_DATA_MAP.forEach((item, tag) -> {
-				ProviderItem.put(item, deserializeWeapon(item, tag, null));
+				ItemCapabilityProvider.put(item, deserializeWeapon(item, tag, null));
 			});
 			
-			ProviderItem.addDefaultItems();
+			ItemCapabilityProvider.addDefaultItems();
 		}
 	}
 	

@@ -19,8 +19,10 @@ import net.minecraft.commands.synchronization.ArgumentTypes;
 import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
-import yesman.epicfight.gameasset.Skills;
+import yesman.epicfight.api.data.reloader.SkillManager;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.Skill;
+import yesman.epicfight.skill.SkillCategory;
 
 public class SkillArgument implements ArgumentType<Skill> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("spooky", "effect");
@@ -29,11 +31,25 @@ public class SkillArgument implements ArgumentType<Skill> {
 	});
 	
 	public static SkillArgument skill() {
-		return new SkillArgument();
+		return new SkillArgument(null);
+	}
+	
+	public static SkillArgument skill(SkillCategory skillCategory) {
+		return new SkillArgument(skillCategory);
+	}
+	
+	private final SkillCategory skillCategory;
+	
+	public SkillArgument() {
+		this.skillCategory = null;
+	}
+	
+	public SkillArgument(SkillCategory skillCategory) {
+		this.skillCategory = skillCategory;
 	}
 	
 	public static void registerArgumentTypes() {
-		ArgumentTypes.register("epicfight:skill", SkillArgument.class, new EmptyArgumentSerializer<>(SkillArgument::skill));
+		ArgumentTypes.register(EpicFightMod.MODID + ":skill", SkillArgument.class, new EmptyArgumentSerializer<>(SkillArgument::skill));
 	}
 	
 	public static Skill getSkill(CommandContext<CommandSourceStack> commandContext, String name) {
@@ -42,7 +58,7 @@ public class SkillArgument implements ArgumentType<Skill> {
 	
 	public Skill parse(StringReader p_98428_) throws CommandSyntaxException {
 		ResourceLocation resourcelocation = ResourceLocation.read(p_98428_);
-		Skill skill = Skills.getSkill(resourcelocation.toString());
+		Skill skill = SkillManager.getSkill(resourcelocation.toString());
 		
 		if (skill != null && !skill.getCategory().learnable()) {
 			skill = null;
@@ -54,7 +70,7 @@ public class SkillArgument implements ArgumentType<Skill> {
 	}
 
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> p_98438_, SuggestionsBuilder p_98439_) {
-		return SharedSuggestionProvider.suggestResource(Skills.getLearnableSkillNames(), p_98439_);
+		return SharedSuggestionProvider.suggestResource(SkillManager.getLearnableSkillNames((skillBuilder) -> skillBuilder.isLearnable() && (this.skillCategory == null || skillBuilder.hasCategory(this.skillCategory))), p_98439_);
 	}
 
 	public Collection<String> getExamples() {

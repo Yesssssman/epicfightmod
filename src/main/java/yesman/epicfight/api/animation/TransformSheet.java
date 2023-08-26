@@ -1,14 +1,17 @@
 package yesman.epicfight.api.animation;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 import com.mojang.math.Quaternion;
 
 import net.minecraft.util.Mth;
+import net.minecraft.world.phys.Vec3;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class TransformSheet {
 	private Keyframe[] keyframes;
@@ -65,6 +68,18 @@ public class TransformSheet {
 		return this;
 	}
 	
+	public void transform(Consumer<JointTransform> transformFunc) {
+		this.transform(transformFunc, 0, this.keyframes.length);
+	}
+	
+	public void transform(Consumer<JointTransform> transformFunc, int start, int end) {
+		end = Math.min(end, this.keyframes.length);
+		
+		for (int i = start; i < end; i++) {
+			transformFunc.accept(this.keyframes[i].transform());
+		}
+	}
+	
 	public Vec3f getInterpolatedTranslation(float currentTime) {
 		InterpolationInfo interpolInfo = this.getInterpolationInfo(currentTime);
 		Vec3f vec3f = MathUtils.lerpVector(this.keyframes[interpolInfo.prev].transform().translation(), this.keyframes[interpolInfo.next].transform().translation(), interpolInfo.zero2One);
@@ -103,6 +118,74 @@ public class TransformSheet {
 		}
 	}
 	
+	public TransformSheet getCorrectedModelCoord(LivingEntityPatch<?> entitypatch, Vec3 start, Vec3 dest, int startFrame, int endFrame) {
+		TransformSheet transform = this.copyAll();
+		float horizontalDistance = (float) dest.subtract(start).horizontalDistance();
+		float verticalDistance = (float) Math.abs(dest.y - start.y);
+		JointTransform startJt = transform.getKeyframes()[startFrame].transform();
+		JointTransform endJt = transform.getKeyframes()[endFrame].transform();
+		Vec3f jointCoord = new Vec3f(startJt.translation().x, verticalDistance, horizontalDistance);
+		
+		startJt.translation().set(jointCoord);
+		
+		for (int i = startFrame + 1; i < endFrame; i++) {
+			JointTransform middleJt = transform.getKeyframes()[i].transform();
+			middleJt.translation().set(MathUtils.lerpVector(startJt.translation(), endJt.translation(), transform.getKeyframes()[i].time() / transform.getKeyframes()[endFrame].time()));
+		}
+		
+		return transform;
+	}
+	
+	public TransformSheet extendsZCoord(float multiplier, int startFrame, int endFrame) {
+		TransformSheet transform = this.copyAll();
+		float extend = 0.0F;
+		
+		for (int i = 0; i < endFrame + 1; i++) {
+			Keyframe kf = transform.getKeyframes()[i];
+			float prevZ = kf.transform().translation().z;
+			kf.transform().translation().multiply(1.0F, 1.0F, multiplier);
+			float extendedZ = kf.transform().translation().z;
+			extend = extendedZ - prevZ;
+		}
+		
+		for (int i = endFrame + 1; i < transform.getKeyframes().length; i++) {
+			Keyframe kf = transform.getKeyframes()[i];
+			kf.transform().translation().add(0.0F, 0.0F, extend);
+		}
+		
+		return transform;
+	}
+	
+	public TransformSheet getCorrectedWorldCoord(LivingEntityPatch<?> entitypatch, Vec3 start, Vec3 dest, float xRot, float yRot, int startFrame, int endFrame) {
+		TransformSheet newTransformSheet = this.copyAll();
+		Vec3f firstPos = newTransformSheet.keyframes[0].transform().translation().copy();
+		
+		newTransformSheet.transform((jt) -> {
+			jt.translation().sub(firstPos);
+		});
+		
+		Vec3f fromCoord = newTransformSheet.keyframes[startFrame].transform().translation();
+		Vec3f toCoord = newTransformSheet.keyframes[endFrame - 1].transform().translation();
+		float originalDistance = (float)Math.sqrt(fromCoord.distanceSqr(toCoord));
+		float worldDistance = (float)Math.sqrt(dest.distanceToSqr(start));
+		float ratio = worldDistance / originalDistance;
+		
+		newTransformSheet.transform((jt) -> {
+			Vec3f kfTranslation = jt.translation();
+			kfTranslation.set(-kfTranslation.x, kfTranslation.y, kfTranslation.z > 0.0F ? kfTranslation.z : kfTranslation.z * ratio);
+			Vec3f relativeCoord = Vec3f.rotate(xRot, Vec3f.X_AXIS, Vec3f.sub(kfTranslation, fromCoord, null), null);
+			kfTranslation.set(Vec3f.add(fromCoord, relativeCoord, null));
+		}, startFrame, endFrame);
+		
+		newTransformSheet.transform((jt) -> {
+			jt.translation().rotate(yRot, Vec3f.Y_AXIS);
+			jt.translation().multiply(1.0F, 1.0F, -1.0F);
+			jt.translation().add((float)start.x, (float)start.y, (float)start.z);
+		});
+		
+		return newTransformSheet;
+	}
+	
 	private InterpolationInfo getInterpolationInfo(float currentTime) {
 		int prev = 0, next = 1;
 		
@@ -120,26 +203,9 @@ public class TransformSheet {
 			}
 		}
 		
-		float progression = bezierCurve((currentTime - this.keyframes[prev].time()) / (this.keyframes[next].time() - this.keyframes[prev].time()));
+		float progression = (currentTime - this.keyframes[prev].time()) / (this.keyframes[next].time() - this.keyframes[prev].time());
 		
 		return new InterpolationInfo(prev, next, progression);
-	}
-	
-	//Blender bezier f-curve code
-	private static float bezierCurve(float t) {
-		
-		float p1 = 0.0F;
-		float p2 = 0.0F;
-		float p3 = 1.0F;
-		float p4 = 1.0F;
-		float v1, v2, v3, v4;
-		
-		v1 = p1;
-		v2 = 3.0f * (p2 - p1);
-		v3 = 3.0f * (p1 - 2.0f * p2 + p3);
-		v4 = p4 - p1 + 3.0f * (p2 - p3);
-		
-		return v1 + t * v2 + t * t * v3 + t * t * t * v4;
 	}
 	
 	@Override

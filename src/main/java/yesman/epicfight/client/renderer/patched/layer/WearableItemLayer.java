@@ -10,8 +10,8 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
-import net.minecraft.client.model.geom.ModelPart.Cube;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
@@ -26,17 +26,19 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.ForgeHooksClient;
-import yesman.epicfight.api.client.model.ClientModel;
-import yesman.epicfight.api.client.model.ClientModels;
+import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.CustomModelBakery;
+import yesman.epicfight.api.model.Armature;
+import yesman.epicfight.api.model.JsonModelLoader;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.ClientEngine;
+import yesman.epicfight.client.mesh.HumanoidMesh;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends HumanoidModel<E>> extends PatchedLayer<E, T, M, HumanoidArmorLayer<E, M, M>> {
-	private static final Map<ResourceLocation, ClientModel> ARMOR_MODELS = new HashMap<ResourceLocation, ClientModel>();
+public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends HumanoidModel<E>, AM extends HumanoidMesh> extends PatchedLayer<E, T, M, HumanoidArmorLayer<E, M, M>, AM> {
+	private static final Map<ResourceLocation, AnimatedMesh> ARMOR_MODELS = new HashMap<ResourceLocation, AnimatedMesh>();
 	private static final Map<String, ResourceLocation> EPICFIGHT_OVERRIDING_TEXTURES = Maps.newHashMap();
 	
 	public static void clear() {
@@ -44,19 +46,17 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		EPICFIGHT_OVERRIDING_TEXTURES.clear();
 	}
 	
-	final boolean doNotRenderHelment;
+	private final boolean doNotRenderHelmet;
 	
-	public WearableItemLayer() {
-		this(false);
-	} 
-	
-	public WearableItemLayer(boolean doNotRenderHelment) {
-		this.doNotRenderHelment = doNotRenderHelment;
+	public WearableItemLayer(AM mesh, boolean doNotRenderHelmet) {
+		super(mesh);
+		
+		this.doNotRenderHelmet = doNotRenderHelmet;
 	}
 	
-	private void renderArmor(PoseStack matStack, MultiBufferSource multiBufferSource, int packedLightIn, boolean hasEffect, ClientModel model, float r, float g, float b, ResourceLocation armorTexture, OpenMatrix4f[] poses) {
-		VertexConsumer vertexConsumer = EpicFightRenderTypes.getArmorVertexBuilder(multiBufferSource, EpicFightRenderTypes.animatedArmor(armorTexture, model.getProperties().isTransparent()), hasEffect);
-		model.drawAnimatedModel(matStack, vertexConsumer, packedLightIn, r, g, b, 1.0F, OverlayTexture.NO_OVERLAY, poses);
+	private void renderArmor(PoseStack matStack, MultiBufferSource multiBufferSource, int packedLightIn, boolean hasEffect, AnimatedMesh model, Armature armature, float r, float g, float b, ResourceLocation armorTexture, OpenMatrix4f[] poses) {
+		VertexConsumer vertexConsumer = EpicFightRenderTypes.getArmorFoilBufferTriangles(multiBufferSource, RenderType.armorCutoutNoCull(armorTexture), false, hasEffect);
+		model.drawModelWithPose(matStack, vertexConsumer, packedLightIn, r, g, b, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
 	}
 	
 	@Override
@@ -66,7 +66,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				continue;
 			}
 			
-			if (slot == EquipmentSlot.HEAD && this.doNotRenderHelment) {
+			if (slot == EquipmentSlot.HEAD && this.doNotRenderHelmet) {
 				continue;
 			}
 			
@@ -83,16 +83,11 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				poseStack.pushPose();
 				float head = 0.0F;
 				
-				if (originalRenderer.getParentModel().getHead() != null && originalRenderer.getParentModel().getHead().cubes.size() > 0) {
-					Cube headCube = originalRenderer.getParentModel().getHead().cubes.get(0);
-					head = headCube.maxX - headCube.minY - 12.0F;
-				}
-				
 				if (slot == EquipmentSlot.HEAD) {
 					poseStack.translate(0.0D, head * 0.055D, 0.0D);
 				}
 				
-				ClientModel model = this.getArmorModel(originalRenderer, entityliving, armorItem, stack, slot);
+				AnimatedMesh model = this.getArmorModel(originalRenderer, entityliving, armorItem, stack, slot);
 				boolean hasEffect = stack.hasFoil();
 				
 				if (armorItem instanceof DyeableLeatherItem) {
@@ -100,10 +95,10 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 					float r = (float) (i >> 16 & 255) / 255.0F;
 					float g = (float) (i >> 8 & 255) / 255.0F;
 					float b = (float) (i & 255) / 255.0F;
-					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, model, r, g, b, this.getArmorTexture(stack, entityliving, slot, null), poses);
-					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, model, 1.0F, 1.0F, 1.0F, this.getArmorTexture(stack, entityliving, slot, "overlay"), poses);
+					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, model, entitypatch.getArmature(), r, g, b, this.getArmorTexture(stack, entityliving, slot, null), poses);
+					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, model, entitypatch.getArmature(), 1.0F, 1.0F, 1.0F, this.getArmorTexture(stack, entityliving, slot, "overlay"), poses);
 				} else {
-					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, model, 1.0F, 1.0F, 1.0F, this.getArmorTexture(stack, entityliving, slot, null), poses);
+					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, model, entitypatch.getArmature(), 1.0F, 1.0F, 1.0F, this.getArmorTexture(stack, entityliving, slot, null), poses);
 				}
 				
 				poseStack.popPose();
@@ -111,25 +106,26 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		}
 	}
 	
-	private ClientModel getArmorModel(HumanoidArmorLayer<E, M, M> originalRenderer, E entityliving, ArmorItem armorItem, ItemStack stack, EquipmentSlot slot) {
+	private AnimatedMesh getArmorModel(HumanoidArmorLayer<E, M, M> originalRenderer, E entityliving, ArmorItem armorItem, ItemStack stack, EquipmentSlot slot) {
 		ResourceLocation registryName = armorItem.getRegistryName();
-		boolean debuggingMode = ClientEngine.instance.isArmorModelDebuggingMode();
+		boolean debuggingMode = ClientEngine.getInstance().isArmorModelDebuggingMode();
 		
 		if (ARMOR_MODELS.containsKey(registryName) && !debuggingMode) {
 			return ARMOR_MODELS.get(registryName);
 		} else {
 			ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
-			ResourceLocation rl = new ResourceLocation(armorItem.getRegistryName().getNamespace(), "armor/" + armorItem.getRegistryName().getPath());
-			ClientModel model = new ClientModel(rl);
+			ResourceLocation rl = new ResourceLocation(armorItem.getRegistryName().getNamespace(), "animmodels/armor/" + armorItem.getRegistryName().getPath() + ".json");
+			AnimatedMesh model = null;
 			
-			if (resourceManager.hasResource(model.getLocation())) {
-				model.loadMeshAndProperties(resourceManager);
+			if (resourceManager.hasResource(rl)) {
+				JsonModelLoader modelLoader = new JsonModelLoader(resourceManager, rl);
+				model = modelLoader.loadAnimatedMesh(AnimatedMesh::new);
 			} else {
 				HumanoidModel<?> defaultModel = originalRenderer.getArmorModel(slot);
 				Model customModel = ForgeHooksClient.getArmorModel(entityliving, stack, slot, defaultModel);
 				
 				if (customModel == defaultModel || !(customModel instanceof HumanoidModel)) {
-					model = getDefaultArmorModel(slot);
+					model = this.mesh.getArmorModel(slot);
 				} else {
 					model = CustomModelBakery.bakeBipedCustomArmorModel((HumanoidModel<?>)customModel, armorItem, slot, debuggingMode);
 				}
@@ -180,22 +176,5 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		}
 		
 		return resourcelocation;
-	}
-	
-	public static ClientModel getDefaultArmorModel(EquipmentSlot slot) {
-		ClientModels modelDB = ClientModels.LOGICAL_CLIENT;
-		
-		switch (slot) {
-		case HEAD:
-			return modelDB.helmet;
-		case CHEST:
-			return modelDB.chestplate;
-		case LEGS:
-			return modelDB.leggins;
-		case FEET:
-			return modelDB.boots;
-		default:
-			return null;
-		}
 	}
 }

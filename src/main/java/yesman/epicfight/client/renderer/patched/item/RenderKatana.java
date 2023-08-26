@@ -10,19 +10,19 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.model.armature.HumanoidArmature;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.item.EpicFightItems;
 
 @OnlyIn(Dist.CLIENT)
 public class RenderKatana extends RenderItemBase {
-	private final ItemStack sheathStack = new ItemStack(EpicFightItems.KATANA_SHEATH.get());
+	private final ItemStack sheathStack = new ItemStack(EpicFightItems.UCHIGATANA_SHEATH.get());
 	
 	@Override
-	public void renderItemInHand(ItemStack stack, LivingEntityPatch<?> entitypatch, InteractionHand hand, MultiBufferSource buffer, PoseStack poseStack, int packedLight) {
+	public void renderItemInHand(ItemStack stack, LivingEntityPatch<?> entitypatch, InteractionHand hand, HumanoidArmature armature, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLight) {
 		OpenMatrix4f modelMatrix = new OpenMatrix4f(this.mainhandcorrectionMatrix);
-		modelMatrix.mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointByName("Tool_R").getAnimatedTransform());
+		modelMatrix.mulFront(poses[armature.toolR.getId()]);
 		
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, modelMatrix);
@@ -30,7 +30,7 @@ public class RenderKatana extends RenderItemBase {
         poseStack.popPose();
         
 		modelMatrix = new OpenMatrix4f(this.mainhandcorrectionMatrix);
-		modelMatrix.mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointByName("Tool_L").getAnimatedTransform());
+		modelMatrix.mulFront(poses[armature.toolL.getId()]);
 		
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, modelMatrix);

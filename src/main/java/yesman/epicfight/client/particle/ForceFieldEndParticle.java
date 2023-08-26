@@ -47,7 +47,7 @@ public class ForceFieldEndParticle extends Particle {
 		}
 		
 		if (!this.init) {
-			ClientEngine.instance.renderEngine.getOverlayManager().flickering("flickering", 0.05F, 1.2F);
+			ClientEngine.getInstance().renderEngine.getOverlayManager().flickering("flickering", 0.05F, 1.2F);
 			this.init = true;
 		}
 	}

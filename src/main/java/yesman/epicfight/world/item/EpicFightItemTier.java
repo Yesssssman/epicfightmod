@@ -9,7 +9,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 
 @SuppressWarnings("deprecation")
 public enum EpicFightItemTier implements Tier {
-	KATANA(4, 1625, 9.0F, 6.0F, 22, () -> {
+	UCHIGATANA(4, 1625, 9.0F, 6.0F, 22, () -> {
 	      return Ingredient.of(Items.NETHERITE_INGOT);
 	}), KNUCKLE(4, 255, 9.0F, 0.0F, 16, () -> {
 	      return Ingredient.of(Items.IRON_INGOT);

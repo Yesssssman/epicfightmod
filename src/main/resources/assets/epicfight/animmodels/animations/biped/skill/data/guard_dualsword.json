@@ -1,6 +1,6 @@
 {
 	"layer":"COMPOSITE_LAYER",
-	"priority":"MIDDLE",
+	"priority":"HIGHEST",
 	"masks":
 	[
 		{

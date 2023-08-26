@@ -1,48 +1,76 @@
 package yesman.epicfight.api.animation.types;
 
+import java.util.List;
 import java.util.Locale;
 
 import javax.annotation.Nullable;
 
 import net.minecraft.world.InteractionHand;
-import yesman.epicfight.api.animation.Pose;
+import net.minecraft.world.phys.Vec3;
+import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
+import yesman.epicfight.api.animation.types.EntityState.StateFactor;
+import yesman.epicfight.api.client.animation.Layer;
+import yesman.epicfight.api.client.animation.property.JointMask;
+import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
+import yesman.epicfight.api.client.animation.property.JointMaskEntry;
 import yesman.epicfight.api.collider.Collider;
-import yesman.epicfight.api.model.Model;
-import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.api.model.Armature;
+import yesman.epicfight.api.utils.TypeFlexibleHashMap;
+import yesman.epicfight.config.ConfigurationIngame;
+import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
-import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
+import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 public class BasicAttackAnimation extends AttackAnimation {
-	public BasicAttackAnimation(float convertTime, float antic, float contact, float recovery, @Nullable Collider collider, String index, String path, Model model) {
-		this(convertTime, antic, antic, contact, recovery, collider, index, path, model);
+	public BasicAttackAnimation(float convertTime, float antic, float contact, float recovery, @Nullable Collider collider, Joint colliderJoint, String path, Armature armature) {
+		this(convertTime, antic, antic, contact, recovery, collider, colliderJoint, path, armature);
 	}
 	
-	public BasicAttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, @Nullable Collider collider, String index, String path, Model model) {
-		super(convertTime, antic, preDelay, contact, recovery, collider, index, path, model);
-		this.addProperty(AttackAnimationProperty.ROTATE_X, true);
+	public BasicAttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, @Nullable Collider collider, Joint colliderJoint, String path, Armature armature) {
+		super(convertTime, antic, preDelay, contact, recovery, collider, colliderJoint, path, armature);
 		this.addProperty(ActionAnimationProperty.CANCELABLE_MOVE, true);
+		this.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 	}
 	
-	public BasicAttackAnimation(float convertTime, float antic, float contact, float recovery, InteractionHand hand, @Nullable Collider collider, String index, String path, Model model) {
-		super(convertTime, antic, antic, contact, recovery, hand, collider, index, path, model);
-		this.addProperty(AttackAnimationProperty.ROTATE_X, true);
+	public BasicAttackAnimation(float convertTime, float antic, float contact, float recovery, InteractionHand hand, @Nullable Collider collider, Joint colliderJoint, String path, Armature armature) {
+		super(convertTime, antic, antic, contact, recovery, hand, collider, colliderJoint, path, armature);
 		this.addProperty(ActionAnimationProperty.CANCELABLE_MOVE, true);
+		this.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
+	}
+	
+	public BasicAttackAnimation(float convertTime, String path, Armature armature, Phase... phases) {
+		super(convertTime, path, armature, phases);
+		this.addProperty(ActionAnimationProperty.CANCELABLE_MOVE, true);
+		this.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 	}
 	
 	@Override
-	public void setLinkAnimation(Pose pose1, float timeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
-		float extTime = Math.max(this.convertTime + timeModifier, 0);
+	protected void bindPhaseState(Phase phase) {
+		float preDelay = phase.preDelay;
 		
-		if (entitypatch instanceof PlayerPatch<?>) {
-			PlayerPatch<?> playerpatch = (PlayerPatch<?>)entitypatch;
-			Phase phase = this.getPhaseByTime(playerpatch.getAnimator().getPlayerFor(this).getElapsedTime());
-			extTime *= (float)(this.totalTime * playerpatch.getAttackSpeed(phase.hand));
+		if (preDelay == 0.0F) {
+			preDelay += 0.01F;
 		}
 		
-		extTime = Math.max(extTime - this.convertTime, 0);
-		super.setLinkAnimation(pose1, extTime, entitypatch, dest);
+		this.stateSpectrumBlueprint
+			.newTimePair(phase.start, preDelay)
+			.addState(EntityState.PHASE_LEVEL, 1)
+			.newTimePair(phase.start, phase.contact + 0.01F)
+			.addState(EntityState.CAN_SKILL_EXECUTION, false)
+			.newTimePair(phase.start, phase.recovery)
+			.addState(EntityState.MOVEMENT_LOCKED, true)
+			.addState(EntityState.CAN_BASIC_ATTACK, false)
+			.newTimePair(phase.start, phase.end)
+			.addState(EntityState.INACTION, true)
+			.newTimePair(preDelay, phase.contact + 0.01F)
+			.addState(EntityState.ATTACKING, true)
+			.addState(EntityState.PHASE_LEVEL, 2)
+			.newTimePair(phase.contact + 0.01F, phase.end)
+			.addState(EntityState.PHASE_LEVEL, 3)
+			.addState(EntityState.TURNING_LOCKED, true);
 	}
 	
 	@Override
@@ -53,18 +81,74 @@ public class BasicAttackAnimation extends AttackAnimation {
 			float basisSpeed = Float.parseFloat(String.format(Locale.US, "%.2f", (1.0F / this.totalTime)));
 			this.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, basisSpeed);
 		}
-		
 	}
 	
 	@Override
-	protected Vec3f getCoordVector(LivingEntityPatch<?> entitypatch, DynamicAnimation dynamicAnimation) {
-		Vec3f vec3 = super.getCoordVector(entitypatch, dynamicAnimation);
+	public void end(LivingEntityPatch<?> entitypatch, DynamicAnimation nextAnimation, boolean isEnd) {
+		super.end(entitypatch, nextAnimation, isEnd);
+		
+		if (!isEnd && !nextAnimation.isMainFrameAnimation() && entitypatch.isLogicalClient()) {
+			float playbackSpeed = ConfigurationIngame.A_TICK * this.getPlaySpeed(entitypatch);
+			entitypatch.getClientAnimator().baseLayer.copyLayerTo(entitypatch.getClientAnimator().baseLayer.getLayer(Layer.Priority.HIGHEST), playbackSpeed);
+		}
+	}
+	/**
+	@Override
+	public EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
+		EntityState state = super.getState(entitypatch, time);
+		
+		if (!entitypatch.getOriginal().level.getGameRules().getRule(EpicFightGamerules.STIFF_COMBO_ATTACKS).get()) {
+			state.setState(EntityState.MOVEMENT_LOCKED, false);
+		}
+		
+		return state;
+	}
+	**/
+	@Override
+	public TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
+		TypeFlexibleHashMap<StateFactor<?>> stateMap = super.getStatesMap(entitypatch, time);
+		
+		if (!entitypatch.getOriginal().level.getGameRules().getRule(EpicFightGamerules.STIFF_COMBO_ATTACKS).get()) {
+			stateMap.put(EntityState.MOVEMENT_LOCKED, (Object)false);
+		}
+		
+		return stateMap;
+	}
+	
+	@Override
+	protected Vec3 getCoordVector(LivingEntityPatch<?> entitypatch, DynamicAnimation dynamicAnimation) {
+		Vec3 vec3 = super.getCoordVector(entitypatch, dynamicAnimation);
 		
 		if (entitypatch.shouldBlockMoving() && this.getProperty(ActionAnimationProperty.CANCELABLE_MOVE).orElse(false)) {
-			vec3.scale(0.0F);
+			vec3 = vec3.scale(0.0F);
 		}
 		
 		return vec3;
+	}
+	
+	@Override
+	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
+		if (layer == Layer.Priority.HIGHEST) {
+			return !JointMaskEntry.BASIC_ATTACK_MASK.isMasked(entitypatch.getCurrentLivingMotion(), joint);
+		} else {
+			return super.isJointEnabled(entitypatch, layer, joint);
+		}
+	}
+	
+	@Override
+	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
+		if (layer == Layer.Priority.HIGHEST) {
+			List<JointMask> list = JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT;
+			int position = list.indexOf(JointMask.of(joint));
+			
+			if (position >= 0) {
+				return list.get(position).getBindModifier();
+			} else {
+				return null;
+			}
+		} else {
+			return super.getBindModifier(entitypatch, layer, joint);
+		}
 	}
 	
 	@Override

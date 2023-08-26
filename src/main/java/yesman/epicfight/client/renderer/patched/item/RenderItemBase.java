@@ -11,11 +11,12 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.client.model.ClientModels;
+import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.events.engine.RenderEngine;
+import yesman.epicfight.model.armature.HumanoidArmature;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
@@ -34,23 +35,24 @@ public class RenderItemBase {
 		this.offhandCorrectionMatrix = offhandCorrectionMatrix;
 	}
 	
-	public void renderItemInHand(ItemStack stack, LivingEntityPatch<?> entitypatch, InteractionHand hand, MultiBufferSource buffer, PoseStack poseStack, int packedLight) {
+	public void renderItemInHand(ItemStack stack, LivingEntityPatch<?> entitypatch, InteractionHand hand, HumanoidArmature armature, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLight) {
 		OpenMatrix4f modelMatrix = this.getCorrectionMatrix(stack, entitypatch, hand);
 		boolean isInMainhand = (hand == InteractionHand.MAIN_HAND);
-		String holdingHand = isInMainhand ? "Tool_R" : "Tool_L";
-		OpenMatrix4f jointTransform = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointByName(holdingHand).getAnimatedTransform();
+		Joint holdingHand = isInMainhand ? armature.toolR : armature.toolL;
+		OpenMatrix4f jointTransform = poses[holdingHand.getId()];
 		modelMatrix.mulFront(jointTransform);
 		
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, modelMatrix);
 		TransformType transformType = isInMainhand ? TransformType.THIRD_PERSON_RIGHT_HAND : TransformType.THIRD_PERSON_LEFT_HAND;
 		Minecraft.getInstance().getItemInHandRenderer().renderItem(entitypatch.getOriginal(), stack, transformType, !isInMainhand, poseStack, buffer, packedLight);
+		
 		poseStack.popPose();
 	}
 	
-	public void renderUnusableItemMount(ItemStack stack, LivingEntityPatch<?> entitypatch, MultiBufferSource buffer, PoseStack poseStack, int packedLight) {
+	public void renderUnusableItemMount(ItemStack stack, LivingEntityPatch<?> entitypatch, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLight) {
 		OpenMatrix4f modelMatrix = new OpenMatrix4f(BACK_COORECTION);
-		modelMatrix.mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointById(0).getAnimatedTransform());
+		modelMatrix.mulFront(poses[0]);
 		
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, modelMatrix);

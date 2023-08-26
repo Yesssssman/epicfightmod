@@ -46,8 +46,8 @@ public abstract class MixinWitherBoss extends Monster implements PowerableMob, R
 	}
 	
 	@Inject(at = @At(value = "RETURN"), method = "<init>")
-	private void epixfight_witherBossInit(CallbackInfo info) {
-		this.epicfightPatch = (WitherPatch)((WitherBoss)((Object)this)).getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+	private void epicfight_witherBossInit(CallbackInfo info) {
+		this.epicfightPatch = EpicFightCapabilities.getEntityPatch(((WitherBoss)((Object)this)), WitherPatch.class);
 	}
 	
 	@Inject(at = @At(value = "HEAD"), method = "aiStep()V", cancellable = true)
@@ -263,7 +263,7 @@ public abstract class MixinWitherBoss extends Monster implements PowerableMob, R
 	}
 	
 	@Shadow
-	public abstract float rotlerp(float p_31443_, float p_31444_, float p_31445_);
+	private float rotlerp(float p_31443_, float p_31444_, float p_31445_) {throw new AbstractMethodError("Shadow");}
 	
 	private static boolean isValid(Vec3 vec) {
 		return !(Double.isNaN(vec.x)|| Double.isNaN(vec.y) || Double.isNaN(vec.z));

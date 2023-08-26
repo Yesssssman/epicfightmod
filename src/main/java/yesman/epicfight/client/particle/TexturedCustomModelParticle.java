@@ -7,13 +7,13 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.client.model.ClientModel;
+import yesman.epicfight.api.client.model.Mesh.RawMesh;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class TexturedCustomModelParticle extends CustomModelParticle {
+public abstract class TexturedCustomModelParticle extends CustomModelParticle<RawMesh> {
 	protected final ResourceLocation texture;
 	
-	public TexturedCustomModelParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, ClientModel particleMesh, ResourceLocation texture) {
+	public TexturedCustomModelParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, RawMesh particleMesh, ResourceLocation texture) {
 		super(level, x, y, z, xd, yd, zd, particleMesh);
 		this.texture = texture;
 	}

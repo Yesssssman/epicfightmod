@@ -8,9 +8,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.client.animation.ClientAnimator;
-import yesman.epicfight.api.model.Model;
 import yesman.epicfight.gameasset.Animations;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPSpawnData;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
@@ -62,10 +60,5 @@ public class ZombiePatch<T extends PathfinderMob> extends HumanoidMobPatch<T> {
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		super.commonAggressiveMobUpdateMotion(considerInaction);
-	}
-	
-	@Override
-	public <M extends Model> M getEntityModel(Models<M> modelDB) {
-		return modelDB.bipedOldTexture;
 	}
 }

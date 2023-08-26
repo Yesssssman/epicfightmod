@@ -321,7 +321,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 			}
 			
 			public Behavior.Builder<T> withinDistance(double minDistance, double maxDistance) {
-				this.predicate(new TargetWithinDistance<T>(minDistance * minDistance, maxDistance * maxDistance));
+				this.predicate(new TargetWithinDistance<T>(minDistance, maxDistance));
 				return this;
 			}
 			
@@ -401,12 +401,13 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 		private final double maxDistance;
 		
 		public TargetWithinDistance(double minDistance, double maxDistance) {
-			this.minDistance = minDistance;
-			this.maxDistance = maxDistance;
+			this.minDistance = minDistance * minDistance;
+			this.maxDistance = maxDistance * maxDistance;
 		}
 		
 		public boolean test(T mobpatch) {
 			double distanceSqr = mobpatch.getOriginal().distanceToSqr(mobpatch.getTarget());
+			
 			return this.minDistance < distanceSqr && distanceSqr < this.maxDistance;
 		}
 	}

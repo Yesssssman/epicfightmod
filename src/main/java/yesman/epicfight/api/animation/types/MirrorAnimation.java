@@ -5,26 +5,29 @@ import net.minecraft.world.InteractionHand;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
-import yesman.epicfight.api.client.animation.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.Layer;
-import yesman.epicfight.api.model.Model;
+import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
+import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class MirrorAnimation extends StaticAnimation {
 	public StaticAnimation original;
 	public StaticAnimation mirror;
 	
-	public MirrorAnimation(float convertTime, boolean repeatPlay, String path1, String path2, Model model) {
-		super(0.0F, false, path1, model);
-		this.original = new StaticAnimation(convertTime, repeatPlay, path1, model, true);
-		this.mirror = new StaticAnimation(convertTime, repeatPlay, path2, model, true);
+	public MirrorAnimation(float convertTime, boolean repeatPlay, String path1, String path2, Armature armature) {
+		super(0.0F, false, path1, armature);
+		this.original = new StaticAnimation(convertTime, repeatPlay, path1, armature, true);
+		this.mirror = new StaticAnimation(convertTime, repeatPlay, path2, armature, true);
 	}
 	
 	@Override
 	public void begin(LivingEntityPatch<?> entitypatch) {
 		super.begin(entitypatch);
-		StaticAnimation animation = this.checkHandAndReturnAnimation(entitypatch.getOriginal().getUsedItemHand());
-		entitypatch.getClientAnimator().playAnimation(animation, 0.0F);
+		
+		if (entitypatch.isLogicalClient()) {
+			StaticAnimation animation = this.checkHandAndReturnAnimation(entitypatch.getOriginal().getUsedItemHand());
+			entitypatch.getClientAnimator().playAnimation(animation, 0.0F);
+		}
 	}
 	
 	@Override
@@ -35,6 +38,11 @@ public class MirrorAnimation extends StaticAnimation {
 	
 	@Override
 	public boolean isMetaAnimation() {
+		return true;
+	}
+	
+	@Override
+	public boolean isClientAnimation() {
 		return true;
 	}
 	
@@ -61,6 +69,7 @@ public class MirrorAnimation extends StaticAnimation {
 		if (hand == InteractionHand.OFF_HAND) {
 			return this.mirror;
 		}
+		
 		return this.original;
 	}
 }

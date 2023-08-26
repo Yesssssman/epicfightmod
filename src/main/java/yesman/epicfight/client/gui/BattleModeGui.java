@@ -1,12 +1,10 @@
 package yesman.epicfight.client.gui;
 
 import java.util.List;
-import java.util.Map;
 
 import org.lwjgl.opengl.GL11;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -17,40 +15,25 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.math.Vec2f;
-import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.api.utils.math.Vec2i;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
+import yesman.epicfight.config.ClientConfig;
+import yesman.epicfight.config.ConfigurationIngame;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.Skill.ActivateType;
-import yesman.epicfight.skill.SkillCategories;
-import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillContainer;
+import yesman.epicfight.skill.SkillSlots;
 
 @OnlyIn(Dist.CLIENT)
-public class BattleModeGui extends ModIngameGui {
-	private static final Map<Integer, Vec3f> POSITION_MAP = Maps.<Integer, Vec3f>newHashMap();
-	private int sliding;
-	private boolean slidingToggle;
-	private List<SkillContainer> skillIcons = Lists.newLinkedList();
-	
-	public Font font;
-	
-	static {
-		POSITION_MAP.put(-1, new Vec3f(42F, 48F, 0.117F));
-		POSITION_MAP.put(0, new Vec3f(70F, 36F, 0.078F));
-		POSITION_MAP.put(1, new Vec3f(94F, 36F, 0.078F));
-		POSITION_MAP.put(2, new Vec3f(116F, 36F, 0.078F));
-	}
-	
-	public BattleModeGui(Minecraft minecraft) {
-		this.sliding = 29;
-		this.slidingToggle = false;
-		this.font = minecraft.font;
-	}
-	
+public class BattleModeGui extends GuiComponent {
 	private static final Vec2f[] CLOCK_POS = {
 		new Vec2f(0.5F, 0.5F),
 		new Vec2f(0.5F, 0.0F),
@@ -60,7 +43,20 @@ public class BattleModeGui extends ModIngameGui {
 		new Vec2f(1.0F, 0.0F)
 	};
 	
-	public void renderGui(LocalPlayerPatch playerpatch, float partialTicks) {
+	public Font font;
+	private int sliding;
+	private boolean slidingToggle;
+	private final List<SkillContainer> skillIcons = Lists.newLinkedList();
+	private final ConfigurationIngame config;
+	
+	public BattleModeGui(Minecraft minecraft) {
+		this.sliding = 29;
+		this.slidingToggle = false;
+		this.font = minecraft.font;
+		this.config = EpicFightMod.CLIENT_INGAME_CONFIG;
+	}
+	
+	public void renderGui(PoseStack poseStack, LocalPlayerPatch playerpatch, float partialTicks) {
 		if (!playerpatch.getOriginal().isAlive() || playerpatch.getOriginal().getVehicle() != null) {
 			return;
 		}
@@ -82,87 +78,124 @@ public class BattleModeGui extends ModIngameGui {
 		boolean depthTestEnabled = GL11.glGetBoolean(GL11.GL_DEPTH_TEST);
 		boolean blendEnabled = GL11.glGetBoolean(GL11.GL_BLEND);
 		
-		if (depthTestEnabled)
+		if (depthTestEnabled) {
 			RenderSystem.disableDepthTest();
-		if (!blendEnabled)
-			RenderSystem.enableBlend();
+		}
 		
-		PoseStack matStack = new PoseStack();
+		if (!blendEnabled) {
+			RenderSystem.enableBlend();
+		}
+		
+		poseStack.pushPose();
+		poseStack.setIdentity();
+		
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 	    RenderSystem.setShaderTexture(0, EntityIndicator.BATTLE_ICON);
 		
 		float maxStamina = playerpatch.getMaxStamina();
 		float stamina = playerpatch.getStamina();
-		float prevStamina = playerpatch.getPrevStamina();
 		
 		if (maxStamina > 0.0F && stamina < maxStamina) {
+			Vec2i pos = this.config.getStaminaPosition(width, height);
+			float prevStamina = playerpatch.getPrevStamina();
 			float ratio = (prevStamina + (stamina - prevStamina) * partialTicks) / maxStamina;
-			matStack.pushPose();
-			matStack.translate(0, (float)this.sliding * 0.5F, 0);
-			matStack.scale(0.5F, 0.5F, 1.0F);
+			
+			poseStack.pushPose();
+			poseStack.translate(0, this.sliding, 0);
 			RenderSystem.setShaderColor(1.0F, ratio, 0.25F, 1.0F);
-			ModIngameGui.blit(matStack, (int)((width - 120) * 2.0F), (int)((height - 10) * 2.0F), 2.0F, 38.0F, 237, 9, 255, 255);
-			ModIngameGui.blit(matStack, (int)((width - 120) * 2.0F), (int)((height - 10) * 2.0F), 2.0F, 47.0F, (int)(237*ratio), 9, 255, 255);
-			matStack.popPose();
+			GuiComponent.blit(poseStack, pos.x, pos.y, 118, 4, 2, 38, 237, 9, 255, 255);
+			GuiComponent.blit(poseStack, pos.x, pos.y, (int)(118*ratio), 4, 2, 47, (int)(237*ratio), 9, 255, 255);
+			poseStack.popPose();
 		}
 		
-		for (int i = 0; i < SkillCategory.ENUM_MANAGER.universalValues().size(); i++) {
+		if (playerpatch.isChargingSkill()) {
+			int chargeAmount = playerpatch.getChargingSkill().getChargingAmount(playerpatch);
+			int prevChargingAmount = playerpatch.getPrevChargingAmount();
+			float ratio = Math.min((prevChargingAmount + (chargeAmount - prevChargingAmount) * partialTicks) / playerpatch.getChargingSkill().getMaxChargingTicks(), 1.0F);
+			Vec2i pos = this.config.getChargingBarPosition(width, height);
+			
+			poseStack.pushPose();
+			poseStack.translate(0, this.sliding, 0);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+			GuiComponent.blit(poseStack, pos.x, pos.y, 1, 71, 238, 13, 255, 255);
+			GuiComponent.blit(poseStack, pos.x, pos.y, 1, 57, (int)(238 * ratio), 13, 255, 255);
+			
+			ResourceLocation rl = new ResourceLocation(playerpatch.getChargingSkill().toString());
+			String skillName = new TranslatableComponent(String.format("skill.%s.%s", rl.getNamespace(), rl.getPath())).getString();
+			
+			int stringWidth = this.font.width(skillName);
+			this.font.drawShadow(poseStack, skillName, (pos.x + 120 - stringWidth * 0.5F), pos.y - 12, 16777215);
+			
+			poseStack.popPose();
+		}
+		
+		for (int i = 0; i < SkillSlots.ENUM_MANAGER.universalValues().size(); i++) {
 			SkillContainer container = playerpatch.getSkill(i);
-			if (container != null && !container.isEmpty()) {
-				SkillCategory slot = container.getSkill().getCategory();
-				if (slot == SkillCategories.WEAPON_SPECIAL_ATTACK) {
-					this.drawSpecialAttack(playerpatch, container, matStack, partialTicks);
-				} else {
-					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-					Skill skill = container.getSkill();
-					if (skill != null && skill.shouldDraw(container)) {
-						if (!this.skillIcons.contains(container)) {
-							this.skillIcons.removeIf((showingContainer) -> showingContainer.getSkill().getCategory() == skill.getCategory());
-							this.skillIcons.add(container);
-						}
-						Vec3f pos = POSITION_MAP.get(this.skillIcons.indexOf(container));
-						RenderSystem.enableBlend();
-						skill.drawOnGui(this, container, matStack, pos.x, pos.y, pos.z, width, height);
-					} else {
-						if (this.skillIcons.contains(container)) {
-							this.skillIcons.removeIf((shownContainer) -> container == shownContainer);
-						}
-					}
+			
+			if (!container.isEmpty()) {
+				if (!this.skillIcons.contains(container) && container.getSkill().shouldDraw(container)) {
+					this.skillIcons.add(container);
 				}
 			}
 		}
 		
-		if (depthTestEnabled)
+		this.skillIcons.removeIf((skillContainer) -> skillContainer.isEmpty() || !skillContainer.getSkill().shouldDraw(skillContainer));
+		SkillContainer innateSkillContainer = playerpatch.getSkill(SkillSlots.WEAPON_INNATE);
+		
+		if (!innateSkillContainer.isEmpty()) {
+			this.drawWeaponInnateIcon(playerpatch, playerpatch.getSkill(SkillSlots.WEAPON_INNATE), poseStack, partialTicks);
+		}
+		
+		ClientConfig.AlignDirection alignDirection = this.config.passivesAlignDirection.getValue();
+		ClientConfig.HorizontalBasis horBasis = this.config.passivesXBase.getValue();
+		ClientConfig.VerticalBasis verBasis = this.config.passivesYBase.getValue();
+		int passiveX = horBasis.positionGetter.apply(width, this.config.passivesX.getValue());
+		int passiveY = verBasis.positionGetter.apply(height, this.config.passivesY.getValue());
+		int icons = this.skillIcons.size();
+		Vec2i slotCoord = alignDirection.startCoordGetter.get(passiveX, passiveY, 24, 24, icons, horBasis, verBasis);
+		
+		for (SkillContainer container : this.skillIcons) {
+			if (!container.isEmpty()) {
+				Skill skill = container.getSkill();
+				
+				if (skill.shouldDraw(container)) {
+					RenderSystem.enableBlend();
+					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+					skill.drawOnGui(this, container, poseStack, slotCoord.x, slotCoord.y);
+					slotCoord = alignDirection.nextPositionGetter.getNext(horBasis, verBasis, slotCoord, 24, 24);
+				}
+			}
+		}
+		
+		poseStack.popPose();
+		
+		if (depthTestEnabled) {
 			RenderSystem.enableDepthTest();
-		if (!blendEnabled)
+		}
+		
+		if (!blendEnabled) {
 			RenderSystem.disableBlend();
+		}
 	}
 	
-	private void drawSpecialAttack(LocalPlayerPatch playerpatch, SkillContainer container, PoseStack matStack, float partialTicks) {
+	private void drawWeaponInnateIcon(LocalPlayerPatch playerpatch, SkillContainer container, PoseStack matStack, float partialTicks) {
 		Window sr = Minecraft.getInstance().getWindow();
 		int width = sr.getGuiScaledWidth();
 		int height = sr.getGuiScaledHeight();
+		Vec2i pos = this.config.getWeaponInnatePosition(width, height);
 		
-		Vec3f pos = POSITION_MAP.get(-1);	
-		int x = (int) pos.x;
-		int y = (int) pos.y;
-		float scale = 1.0F / pos.z;
 		matStack.pushPose();
-		matStack.scale(pos.z, pos.z, 1.0F);
-		matStack.translate(0, (float)sliding * scale, 0);
+		matStack.translate(0, (float)this.sliding, 0);
 		
 		boolean creative = playerpatch.getOriginal().isCreative();
 		boolean fullstack = creative || container.isFull();
-		float cooldownRatio = fullstack ? 1.0F : container.getResource(partialTicks);
-		boolean isCompatibleWeapon = !container.isDisabled();
+		boolean canUse = !container.isDisabled() && container.getSkill().checkExecuteCondition(playerpatch);
+		float cooldownRatio = (fullstack || container.isActivated()) ? 1.0F : container.getResource(partialTicks);
 		int vertexNum = 0;
 		float iconSize = 32.0F;
-		float iconSizeDiv = iconSize * 0.5F;
-		float top = y;
-		float bottom = y - iconSize;
-		float left = x;
-		float right = x - iconSize;
-		float middle = x - iconSizeDiv;
+		float bottom = pos.y + iconSize;
+		float right = pos.x + iconSize;
+		float middle = pos.x + iconSize * 0.5F;
 		float lastVertexX = 0;
 		float lastVertexY = 0;
 		float lastTexX = 0;
@@ -172,43 +205,42 @@ public class BattleModeGui extends ModIngameGui {
 			vertexNum = 6;
 			lastTexX = cooldownRatio / 0.25F;
 			lastTexY = 0.0F;
-			lastVertexX = middle - iconSize * lastTexX;
-			lastVertexY = top;
-			lastTexX+=0.5F;
+			lastVertexX = middle + iconSize * lastTexX;
+			lastVertexY = pos.y;
+			lastTexX += 0.5F;
 		} else if (cooldownRatio < 0.375F) {
 			vertexNum = 5;
 			lastTexX = 1.0F;
 			lastTexY = (cooldownRatio - 0.125F) / 0.25F;
 			lastVertexX = right;
-			lastVertexY = top - iconSize * lastTexY;
+			lastVertexY = pos.y + iconSize * lastTexY;
 		} else if (cooldownRatio < 0.625F) {
 			vertexNum = 4;
 			lastTexX = (cooldownRatio - 0.375F) / 0.25F;
 			lastTexY = 1.0F;
-			lastVertexX = right + iconSize * lastTexX;
+			lastVertexX = right - iconSize * lastTexX;
 			lastVertexY = bottom;
 			lastTexX = 1.0F - lastTexX;
 		} else if (cooldownRatio < 0.875F) {
 			vertexNum = 3;
 			lastTexX = 0.0F;
 			lastTexY = (cooldownRatio - 0.625F) / 0.25F;
-			lastVertexX = left;
-			lastVertexY = bottom + iconSize * lastTexY;
+			lastVertexX = pos.x;
+			lastVertexY = bottom - iconSize * lastTexY;
 			lastTexY = 1.0F - lastTexY;
 		} else {
 			vertexNum = 2;
 			lastTexX = (cooldownRatio - 0.875F) / 0.25F;
 			lastTexY = 0.0F;
-			lastVertexX = left - iconSize * lastTexX;
-			lastVertexY = top;
+			lastVertexX = pos.x + iconSize * lastTexX;
+			lastVertexY = pos.y;
 		}
 		
 		RenderSystem.enableBlend();
 		RenderSystem.setShaderTexture(0, container.getSkill().getSkillTexture());
-		RenderSystem.setShaderColor(lastVertexX, lastVertexY, lastTexX, lastTexY);
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		
-		if (isCompatibleWeapon) {
+		if (canUse) {
 			if (container.getStack() > 0) {
 				RenderSystem.setShaderColor(0.0F, 0.64F, 0.72F, 0.8F);
 			} else {
@@ -223,15 +255,14 @@ public class BattleModeGui extends ModIngameGui {
         bufferbuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_TEX);
         
         for (int j = 0; j < vertexNum; j++) {
-        	bufferbuilder.vertex(matStack.last().pose(), (width - (left-iconSize*CLOCK_POS[j].x)) * scale, (height - (top-iconSize*CLOCK_POS[j].y)) * scale, 0.0F)
-        		.uv(CLOCK_POS[j].x, CLOCK_POS[j].y).endVertex();
+        	bufferbuilder.vertex(matStack.last().pose(), pos.x + iconSize * CLOCK_POS[j].x, pos.y + iconSize * CLOCK_POS[j].y, 0.0F).uv(CLOCK_POS[j].x, CLOCK_POS[j].y).endVertex();
 		}
-        bufferbuilder.vertex(matStack.last().pose(), (width - lastVertexX) * scale, (height - lastVertexY) * scale, 0.0F)
-			.uv(lastTexX, lastTexY).endVertex();
+        
+        bufferbuilder.vertex(matStack.last().pose(), lastVertexX, lastVertexY, 0.0F).uv(lastTexX, lastTexY).endVertex();
         
         tessellator.end();
         
-        if (isCompatibleWeapon) {
+        if (canUse) {
 			RenderSystem.setShaderColor(0.08F, 0.79F, 0.95F, 1.0F);
 		} else {
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
@@ -241,33 +272,32 @@ public class BattleModeGui extends ModIngameGui {
         bufferbuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_TEX);
         
         for (int j = 0; j < 2; j++) {
-        	bufferbuilder.vertex(matStack.last().pose(), (width - (left - iconSize * CLOCK_POS[j].x)) * scale, (height - (top - iconSize * CLOCK_POS[j].y)) * scale, 0.0F)
+        	bufferbuilder.vertex(matStack.last().pose(), pos.x + iconSize * CLOCK_POS[j].x, pos.y + iconSize * CLOCK_POS[j].y, 0.0F)
         		.uv(CLOCK_POS[j].x, CLOCK_POS[j].y).endVertex();
 		}
 		
 		for (int j = CLOCK_POS.length - 1; j >= vertexNum; j--) {
-        	bufferbuilder.vertex(matStack.last().pose(), (width - (left - iconSize * CLOCK_POS[j].x)) * scale, (height - (top - iconSize * CLOCK_POS[j].y)) * scale, 0.0F)
+        	bufferbuilder.vertex(matStack.last().pose(), pos.x + iconSize * CLOCK_POS[j].x, pos.y + iconSize * CLOCK_POS[j].y, 0.0F)
         		.uv(CLOCK_POS[j].x, CLOCK_POS[j].y).endVertex();
 		}
         
-        bufferbuilder.vertex(matStack.last().pose(), (width - lastVertexX) * scale, (height - lastVertexY) * scale, 0.0F).uv(lastTexX, lastTexY).endVertex();
+        bufferbuilder.vertex(matStack.last().pose(), lastVertexX, lastVertexY, 0.0F).uv(lastTexX, lastTexY).endVertex();
         tessellator.end();
-        matStack.scale(scale, scale, 1.0F);
         
-        if (!fullstack) {
+        if (container.isActivated() && (container.getSkill().getActivateType() == ActivateType.DURATION || container.getSkill().getActivateType() == ActivateType.DURATION_INFINITE)) {
+			String s = String.format("%.0f", container.getRemainDuration() / 20.0F);
+			int stringWidth = (this.font.width(s) - 6) / 3;
+			this.font.drawShadow(matStack, s, pos.x + 13 - stringWidth, pos.y + 13, 16777215);
+		} else if (!fullstack) {
 			String s = String.valueOf((int)(cooldownRatio * 100.0F));
 			int stringWidth = (this.font.width(s) - 6) / 3;
-			this.font.drawShadow(matStack, s, ((float)width - x+13-stringWidth), ((float)height - y+13), 16777215);
-		} else if (container.getRemainDuration() > 0 && container.getSkill().getActivateType() != ActivateType.TOGGLE) {
-			String s = String.valueOf(container.getRemainDuration());
-			int stringWidth = (this.font.width(s) - 6) / 3;
-			this.font.drawShadow(matStack, s, ((float)width - x+13-stringWidth), ((float)height - y+13), 16777215);
+			this.font.drawShadow(matStack, s, pos.x + 13 - stringWidth, pos.y + 13, 16777215);
 		}
 		
 		if (container.getSkill().getMaxStack() > 1) {
 			String s = String.valueOf(container.getStack());
 			int stringWidth = (this.font.width(s) - 6) / 3;
-			this.font.drawShadow(matStack, s, ((float)width - x+25-stringWidth), ((float)height - y+22), 16777215);
+			this.font.drawShadow(matStack, s, pos.x + 25 - stringWidth, pos.y + 22, 16777215);
 		}
 		
 		matStack.popPose();
@@ -281,6 +311,10 @@ public class BattleModeGui extends ModIngameGui {
 	public void slideDown() {
 		this.sliding = 1;
 		this.slidingToggle = false;
+	}
+	
+	public void reset() {
+		this.skillIcons.clear();
 	}
 	
 	public int getSlidingProgression() {

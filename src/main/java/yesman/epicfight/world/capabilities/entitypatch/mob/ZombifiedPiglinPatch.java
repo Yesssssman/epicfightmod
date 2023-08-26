@@ -6,10 +6,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.client.animation.ClientAnimator;
-import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.gameasset.Animations;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
@@ -51,14 +49,9 @@ public class ZombifiedPiglinPatch extends HumanoidMobPatch<ZombifiedPiglin> {
 	@Override
 	public AttackResult tryHurt(DamageSource damageSource, float amount) {
 		if (damageSource.getEntity() instanceof ZombifiedPiglin) {
-			return new AttackResult(AttackResult.ResultType.FAILED, amount);
+			return AttackResult.blocked(amount);
 		}
 		
 		return super.tryHurt(damageSource, amount);
-	}
-	
-	@Override
-	public <M extends Model> M getEntityModel(Models<M> modelDB) {
-		return modelDB.piglin;
 	}
 }

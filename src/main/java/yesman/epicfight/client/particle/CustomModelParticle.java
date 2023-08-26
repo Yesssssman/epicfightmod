@@ -13,11 +13,11 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.client.model.ClientModel;
+import yesman.epicfight.api.client.model.Mesh;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class CustomModelParticle extends Particle {
-	protected final ClientModel particleMesh;
+public abstract class CustomModelParticle<M extends Mesh<?>> extends Particle {
+	protected final M particleMesh;
 	protected float pitch;
 	protected float pitchO;
 	protected float yaw;
@@ -25,7 +25,7 @@ public abstract class CustomModelParticle extends Particle {
 	protected float scale = 1.0F;
 	protected float scaleO = 1.0F;
 	
-	public CustomModelParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, ClientModel particleMesh) {
+	public CustomModelParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, M particleMesh) {
 		super(level, x, y, z, xd, yd, zd);
 		this.particleMesh = particleMesh;
 	}
@@ -35,7 +35,7 @@ public abstract class CustomModelParticle extends Particle {
 		PoseStack poseStack = new PoseStack();
 		this.setupPoseStack(poseStack, camera, partialTicks);
 		this.prepareDraw(poseStack, partialTicks);
-		this.particleMesh.drawRawModel(poseStack, vertexConsumer, this.getLightColor(partialTicks), this.rCol, this.gCol, this.bCol, this.alpha, OverlayTexture.NO_OVERLAY);
+		this.particleMesh.drawRawModelNormal(poseStack, vertexConsumer, this.getLightColor(partialTicks), this.rCol, this.gCol, this.bCol, this.alpha, OverlayTexture.NO_OVERLAY);
 	}
 	
 	@Override
@@ -57,9 +57,9 @@ public abstract class CustomModelParticle extends Particle {
 		float roll = Mth.lerp(partialTicks, this.oRoll, this.roll);
 		float pitch = Mth.lerp(partialTicks, this.pitchO, this.pitch);
 		float yaw = Mth.lerp(partialTicks, this.yawO, this.yaw);
-		rotation.mul(Vector3f.YP.rotation(yaw));
-		rotation.mul(Vector3f.XP.rotation(pitch));
-		rotation.mul(Vector3f.ZP.rotation(roll));
+		rotation.mul(Vector3f.YP.rotationDegrees(yaw));
+		rotation.mul(Vector3f.XP.rotationDegrees(pitch));
+		rotation.mul(Vector3f.ZP.rotationDegrees(roll));
 		
 		Vec3 vec3 = camera.getPosition();
 		float x = (float)(Mth.lerp((double)partialTicks, this.xo, this.x) - vec3.x());

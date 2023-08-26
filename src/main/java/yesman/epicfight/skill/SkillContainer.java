@@ -1,31 +1,38 @@
 package yesman.epicfight.skill;
 
-import java.util.Set;
-
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.client.ClientEngine;
+import yesman.epicfight.client.events.engine.ControllEngine;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
+import yesman.epicfight.network.client.CPExecuteSkill;
+import yesman.epicfight.skill.Skill.ActivateType;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
+import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
+import yesman.epicfight.world.entity.eventlistener.SkillConsumeEvent;
+import yesman.epicfight.world.entity.eventlistener.SkillExecuteEvent;
 
 public class SkillContainer {
 	protected Skill containingSkill;
 	private PlayerPatch<?> executer;
-	protected int prevDuration = 0;
-	protected int duration = 0;
-	protected int maxDuration = 0;
-	protected float resource = 0;
-	protected float prevResource = 0;
-	protected boolean isActivated = false;
+	protected int prevDuration;
+	protected int duration;
+	protected int maxDuration;
+	protected float resource;
+	protected float prevResource;
+	protected float maxResource;
+	protected boolean isActivated;
 	protected int stack;
+	protected SkillSlot slot;
 	protected SkillDataManager skillDataManager;
 	protected boolean disabled;
 	
-	public SkillContainer(PlayerPatch<?> executer, int slotIndex) {
+	public SkillContainer(PlayerPatch<?> executer, SkillSlot skillSlot) {
 		this.executer = executer;
-		this.skillDataManager = new SkillDataManager(slotIndex);
+		this.slot = skillSlot;
+		this.skillDataManager = new SkillDataManager(skillSlot.universalOrdinal(), this);
 	}
 	
 	public void setExecuter(PlayerPatch<?> executer) {
@@ -41,15 +48,22 @@ public class SkillContainer {
 			return false;
 		}
 		
+		if (skill != null && skill.category != this.slot.category()) {
+			return false;
+		}
+		
 		if (this.containingSkill != null) {
 			this.containingSkill.onRemoved(this);
 		}
+		
 		this.containingSkill = skill;
 		this.resetValues();
 		this.skillDataManager.reset();
 		
 		if (skill != null) {
 			skill.onInitiate(this);
+			this.setMaxResource(skill.consumption);
+			this.setMaxDuration(skill.maxDuration);
 		}
 		
 		this.stack = 0;
@@ -78,7 +92,7 @@ public class SkillContainer {
 	}
 	
 	public void setResource(float value) {
-		if(this.containingSkill != null) {
+		if (this.containingSkill != null) {
 			this.containingSkill.setConsumption(this, value);
 		} else {
 			this.prevResource = 0;
@@ -114,27 +128,83 @@ public class SkillContainer {
 		}
 	}
 	
+	public void setMaxResource(float maxResource) {
+		this.maxResource = maxResource;
+	}
+	
 	@OnlyIn(Dist.CLIENT)
-	public boolean sendExecuteRequest(LocalPlayerPatch executer, Set<Object> packetStorage) {
-		if (this.canExecute(executer)) {
-			ClientEngine.instance.renderEngine.unlockRotation(executer.getOriginal());
-			Object packet = this.containingSkill.getExecutionPacket(executer, this.containingSkill.gatherArguments(executer, ClientEngine.instance.controllEngine));
-			
-			if (packet != null) {
-				packetStorage.add(packet);
+	public SkillExecuteEvent sendExecuteRequest(LocalPlayerPatch executer, ControllEngine controllEngine) {
+		SkillExecuteEvent event = new SkillExecuteEvent(executer, this);
+		Object packet = null;
+		
+		if (this.containingSkill instanceof ChargeableSkill chargeableSkill && this.containingSkill.getActivateType() == Skill.ActivateType.CHARGING) {
+			if (executer.isChargingSkill(this.containingSkill)) {
+				ClientEngine.getInstance().renderEngine.unlockRotation(executer.getOriginal());
+				packet = this.containingSkill.getExecutionPacket(executer, this.containingSkill.gatherArguments(executer, controllEngine));
+				executer.resetSkillCharging();
+			} else {
+				if (!this.canExecute(executer, event)) {
+					return event;
+				}
+				
+				CPExecuteSkill exeSkillPacket = new CPExecuteSkill(this.getSlotId(), CPExecuteSkill.WorkType.CHARGING_START);
+				chargeableSkill.gatherChargingArguemtns(executer, controllEngine, exeSkillPacket.getBuffer());
+				packet = exeSkillPacket;
+			}
+		} else {
+			if (!this.canExecute(executer, event)) {
+				return event;
 			}
 			
+			ClientEngine.getInstance().renderEngine.unlockRotation(executer.getOriginal());
+			packet = this.containingSkill.getExecutionPacket(executer, this.containingSkill.gatherArguments(executer, controllEngine));
+		}
+		
+		if (packet != null) {
+			controllEngine.addPacketToSend(packet);
+		}
+		
+		return event;
+	}
+	
+	public boolean requestExecute(ServerPlayerPatch executer, FriendlyByteBuf buf) {
+		SkillExecuteEvent event = new SkillExecuteEvent(executer, this);
+		
+		if (this.canExecute(executer, event)) {
+			this.containingSkill.executeOnServer(executer, buf);
 			return true;
 		}
 		
 		return false;
 	}
 	
-	public boolean requestExecute(ServerPlayerPatch executer, FriendlyByteBuf buf) {
-		if (this.canExecute(executer)) {
-			this.containingSkill.executeOnServer(executer, buf);
+	public boolean requestCancel(ServerPlayerPatch executer, FriendlyByteBuf buf) {
+		if (this.containingSkill != null) {
+			this.containingSkill.cancelOnServer(executer, buf);
 			return true;
 		}
+		
+		return false;
+	}
+	
+	public boolean requestCharging(ServerPlayerPatch executer, FriendlyByteBuf buf) {
+		if (this.containingSkill instanceof ChargeableSkill chargeableSkill) {
+			SkillExecuteEvent event = new SkillExecuteEvent(executer, this);
+			
+			if (this.canExecute(executer, event)) {
+				SkillConsumeEvent consumeEvent = new SkillConsumeEvent(executer, this.containingSkill, this.containingSkill.resource, true);
+				executer.getEventListener().triggerEvents(EventType.SKILL_CONSUME_EVENT, consumeEvent);
+				
+				if (!consumeEvent.isCanceled()) {
+					consumeEvent.getResourceType().consumer.consume(this.containingSkill, executer, consumeEvent.getAmount());
+				}
+				
+				executer.startSkillCharging(chargeableSkill);
+				
+				return true;
+			}
+		}
+		
 		return false;
 	}
 	
@@ -150,11 +220,26 @@ public class SkillContainer {
 		return this.duration;
 	}
 	
-	public boolean canExecute(PlayerPatch<?> executer) {
+	public boolean canExecute(PlayerPatch<?> executer, SkillExecuteEvent event) {
 		if (this.containingSkill == null) {
 			return false;
 		} else {
-			return (this.containingSkill.resourcePredicate(executer) || executer.getOriginal().isCreative()) && this.containingSkill.canExecute(executer) && this.containingSkill.isExecutableState(executer);
+			if (executer.isChargingSkill(this.containingSkill) && this.containingSkill instanceof ChargeableSkill chargingSkill) {
+				if (executer.isLogicalClient()) {
+					return true;
+				} else if (executer.getSkillChargingTicks() < chargingSkill.getMinChargingTicks()) {
+					return false;
+				} else {
+					return true;
+				}
+			}
+			
+			event.setResourcePredicate(this.containingSkill.resourcePredicate(executer) || (this.isActivated() && this.containingSkill.activateType == ActivateType.DURATION));
+			event.setSkillExecutable(this.containingSkill.canExecute(executer));
+			event.setStateExecutable(this.containingSkill.isExecutableState(executer));
+			executer.getEventListener().triggerEvents(EventType.SKILL_EXECUTE_EVENT, event);
+			
+			return !event.isCanceled() && event.isExecutable();
 		}
 	}
 	
@@ -167,9 +252,21 @@ public class SkillContainer {
 	public int getStack() {
 		return this.stack;
 	}
-
+	
+	public SkillSlot getSlot() {
+		return this.slot;
+	}
+	
+	public int getSlotId() {
+		return this.slot.universalOrdinal();
+	}
+	
 	public Skill getSkill() {
 		return this.containingSkill;
+	}
+	
+	public float getMaxResource() {
+		return this.maxResource;
 	}
 	
 	public void activate() {
@@ -200,21 +297,24 @@ public class SkillContainer {
 		return this.containingSkill != null ? this.stack >= this.containingSkill.maxStackSize : true;
 	}
 	
-	public boolean isReady() {
-		return this.containingSkill != null ? this.stack > 0 : true;
-	}
-	
 	public float getResource(float partialTicks) {
-		return this.containingSkill != null && this.containingSkill.consumption > 0 ? (this.prevResource + ((this.resource - this.prevResource)
-				* partialTicks)) / this.containingSkill.consumption : 0;
+		return this.containingSkill != null && this.maxResource > 0 ? (this.prevResource + ((this.resource - this.prevResource) * partialTicks)) / this.maxResource : 0;
 	}
 	
 	public float getNeededResource() {
-		return this.containingSkill != null ? this.containingSkill.consumption - this.resource : 0;
+		return this.containingSkill != null ? this.maxResource - this.resource : 0;
 	}
 
 	public float getDurationRatio(float partialTicks) {
-		return this.containingSkill != null && this.maxDuration > 0 ? (this.prevDuration + ((this.duration - this.prevDuration) * partialTicks))
-				/ this.maxDuration : 0;
+		return this.containingSkill != null && this.maxDuration > 0 ? (this.prevDuration + ((this.duration - this.prevDuration) * partialTicks)) / this.maxDuration : 0;
+	}
+	
+	@Override
+	public boolean equals(Object object) {
+		if (object instanceof SkillContainer skillContainer) {
+			return this.slot.equals(skillContainer.slot);
+		}
+		
+		return false;
 	}
 }

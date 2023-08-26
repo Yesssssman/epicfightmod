@@ -54,11 +54,11 @@ public class AimHelperRenderer {
 		RenderSystem.disableTexture();
 		RenderSystem.enableBlend();
         RenderSystem.disableCull();
-		RenderSystem.lineWidth(10.0F);
+		RenderSystem.lineWidth(2.0F);
 		
 		bufferBuilder.begin(VertexFormat.Mode.LINES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
-		bufferBuilder.vertex(matrix, pos2.x, pos2.y, pos2.z).color(f1, f2, f3, 0.5F).normal(0.0F, 1.0F, 0.0F).endVertex();
-		bufferBuilder.vertex(matrix, pos1.x, pos1.y, pos1.z).color(f1, f2, f3, 0.5F).normal(0.0F, 1.0F, 0.0F).endVertex();
+		bufferBuilder.vertex(matrix, pos2.x, pos2.y, pos2.z).color(f1, f2, f3, 0.5F).normal(pos2.x - pos1.x, pos2.y - pos1.y, pos2.z - pos1.z).endVertex();
+		bufferBuilder.vertex(matrix, pos1.x, pos1.y, pos1.z).color(f1, f2, f3, 0.5F).normal(pos2.x - pos1.x, pos2.y - pos1.y, pos2.z - pos1.z).endVertex();
 		tesselator.end();
 		
 		matStackIn.popPose();

@@ -1,0 +1,28 @@
+{
+	"xp_requirement": 15,
+	"max_duration": 20,
+	"block_stacks": 3,
+	"parry_stacks": 6,
+	"dodge_stacks": 8,
+	"default_revelation_stacks": 20,
+	"max_revelations": {
+		"minecraft:cave_spider": 10,
+		"minecraft:drowned": 10,
+		"minecraft:enderman": 30,
+		"minecraft:husk": 10,
+		"minecraft:iron_golem": 30,
+		"minecraft:piglin": 10,
+		"minecraft:piglin_brute": 20,
+		"minecraft:zombified_piglin": 10,
+		"minecraft:pillager": 10,
+		"minecraft:player": 30,
+		"minecraft:skeleton": 10,
+		"minecraft:spider": 10,
+		"minecraft:stray": 10,
+		"minecraft:vindicator": 10,
+		"minecraft:wither_skeleton": 20,
+		"minecraft:zombie": 10,
+		"minecraft:zombie_villager": 10,
+		"epicfight:wither_skeleton_minion": 10
+	}
+}

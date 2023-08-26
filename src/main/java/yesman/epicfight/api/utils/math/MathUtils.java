@@ -16,7 +16,27 @@ public class MathUtils {
 		modelMatrix.translate(entityPosition).rotateDeg(-yawDegree, Vec3f.Y_AXIS).rotateDeg(-pitchDegree, Vec3f.X_AXIS).scale(scaleX, scaleY, scaleZ);
 		return modelMatrix;
 	}
-
+	
+	/**
+	 * Blender 2.79 bezier curve
+	 * @param t: 0 ~ 1
+	 * @retur
+	 */
+	public static double bezierCurve(double t) {
+		double p1 = 0.0D;
+		double p2 = 0.0D;
+		double p3 = 1.0D;
+		double p4 = 1.0D;
+		double v1, v2, v3, v4;
+		
+		v1 = p1;
+		v2 = 3.0D * (p2 - p1);
+		v3 = 3.0D * (p1 - 2.0D * p2 + p3);
+		v4 = p4 - p1 + 3.0D * (p2 - p3);
+		
+		return v1 + t * v2 + t * t * v3 + t * t * t * v4;
+	}
+	
 	public static Vec3 getVectorForRotation(float pitch, float yaw) {
 		float f = pitch * ((float) Math.PI / 180F);
 		float f1 = -yaw * ((float) Math.PI / 180F);
@@ -85,6 +105,21 @@ public class MathUtils {
 		return Math.acos(cos);
 	}
 	
+	public static double getAngleBetween(Vec3 a, Vec3 b) {
+		double cos = (a.x * b.x + a.y * b.y + a.z * b.z);
+		return Math.acos(cos);
+	}
+	
+	public static double getXRotOfVector(Vec3 vec) {
+		Vec3 normalized = vec.normalize();
+		return -(Math.atan2(normalized.y, (float)Math.sqrt(normalized.x * normalized.x + normalized.z * normalized.z)) * (180D / Math.PI));
+	}
+	
+	public static double getYRotOfVector(Vec3 vec) {
+		Vec3 normalized = vec.normalize();
+		return Math.atan2(normalized.z, normalized.x) * (180D / Math.PI) - 90.0F;
+	}
+	
 	private static Quaternion getQuaternionFromMatrix(OpenMatrix4f mat) {
 		float w, x, y, z;
 		float diagonal = mat.m00 + mat.m11 + mat.m22;
@@ -127,6 +162,13 @@ public class MathUtils {
 		return new Vec3f(x, y, z);
 	}
 	
+	public static Vector3f lerpMojangVector(Vector3f start, Vector3f end, float weight) {
+		float x = start.x() + (end.x() - start.x()) * weight;
+		float y = start.y() + (end.y() - start.y()) * weight;
+		float z = start.z() + (end.z() - start.z()) * weight;
+		return new Vector3f(x, y, z);
+	}
+	
 	public static Vec3 projectVector(Vec3 from, Vec3 to) {
 		double dot = to.dot(from);
 		double normalScale = 1.0D / ((to.x * to.x) + (to.y * to.y) + (to.z * to.z));
@@ -163,7 +205,7 @@ public class MathUtils {
 	    return dest;
 	}
 	
-	public static Quaternion lerpQuaternion(Quaternion from, Quaternion to, float weight) {
+	public static Quaternion lerpQuaternion(Quaternion from, Quaternion to, float lerpAmount) {
 		float fromX = from.i();
 		float fromY = from.j();
 		float fromZ = from.k();
@@ -177,18 +219,18 @@ public class MathUtils {
 		float resultZ;
 		float resultW;
 		float dot = fromW * toW + fromX * toX + fromY * toY + fromZ * toZ;
-		float blendI = 1f - weight;
+		float blendI = 1.0F - lerpAmount;
 		
-		if (dot < 0) {
-			resultW = blendI * fromW + weight * -toW;
-			resultX = blendI * fromX + weight * -toX;
-			resultY = blendI * fromY + weight * -toY;
-			resultZ = blendI * fromZ + weight * -toZ;
+		if (dot < 0.0F) {
+			resultW = blendI * fromW + lerpAmount * -toW;
+			resultX = blendI * fromX + lerpAmount * -toX;
+			resultY = blendI * fromY + lerpAmount * -toY;
+			resultZ = blendI * fromZ + lerpAmount * -toZ;
 		} else {
-			resultW = blendI * fromW + weight * toW;
-			resultX = blendI * fromX + weight * toX;
-			resultY = blendI * fromY + weight * toY;
-			resultZ = blendI * fromZ + weight * toZ;
+			resultW = blendI * fromW + lerpAmount * toW;
+			resultX = blendI * fromX + lerpAmount * toX;
+			resultY = blendI * fromY + lerpAmount * toY;
+			resultZ = blendI * fromZ + lerpAmount * toZ;
 		}
 		
 		Quaternion result = new Quaternion(resultX, resultY, resultZ, resultW);

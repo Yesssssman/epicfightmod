@@ -5,8 +5,8 @@ import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
-import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
+import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class SPSetSkillValue {
 	private float floatType;
@@ -40,7 +40,8 @@ public class SPSetSkillValue {
 	public static void handle(SPSetSkillValue msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
 			Minecraft mc = Minecraft.getInstance();
-			LocalPlayerPatch playerpatch = (LocalPlayerPatch) mc.player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+			PlayerPatch<?> playerpatch = (PlayerPatch<?>)mc.player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+			
 			if (playerpatch != null) {
 				switch (msg.target) {
 				case COOLDOWN:
@@ -55,13 +56,17 @@ public class SPSetSkillValue {
 				case STACK:
 					playerpatch.getSkill(msg.index).setStack((int) msg.floatType);
 					break;
+				case MAX_RESOURCE:
+					playerpatch.getSkill(msg.index).setMaxResource(msg.floatType);
+					break;
 				}
 			}
 		});
+		
 		ctx.get().setPacketHandled(true);
 	}
 	
 	public static enum Target {
-		COOLDOWN, DURATION, MAX_DURATION, STACK;
+		COOLDOWN, DURATION, MAX_DURATION, STACK, MAX_RESOURCE;
 	}
 }

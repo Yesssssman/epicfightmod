@@ -12,14 +12,19 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.client.model.ClientModels;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.client.mesh.HumanoidMesh;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PatchedHeadLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E> & HeadedModel> extends PatchedLayer<E, T, M, CustomHeadLayer<E, M>> {
+public class PatchedHeadLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E> & HeadedModel, AM extends HumanoidMesh> extends PatchedLayer<E, T, M, CustomHeadLayer<E, M>, AM> {
+	
+	public PatchedHeadLayer() {
+		super(null);
+	}
+
 	@Override
 	public void renderLayer(T entitypatch, E entityliving, CustomHeadLayer<E, M> originalRenderer, PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn, OpenMatrix4f[] poses, float netYawHead, float pitchHead, float partialTicks) {
 		ItemStack itemstack = entityliving.getItemBySlot(EquipmentSlot.HEAD);
@@ -27,7 +32,7 @@ public class PatchedHeadLayer<E extends LivingEntity, T extends LivingEntityPatc
 			ModelPart model = originalRenderer.getParentModel().getHead();
 			E entity = entitypatch.getOriginal();
 			OpenMatrix4f modelMatrix = new OpenMatrix4f();
-			modelMatrix.scale(new Vec3f(-1.0F, -1.0F, 1.0F)).mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointById(9).getAnimatedTransform());
+			modelMatrix.scale(new Vec3f(-1.0F, -1.0F, 1.0F)).mulFront(poses[9]);
 			model.x = 0;
 			model.y = 0;
 			model.z = 0;

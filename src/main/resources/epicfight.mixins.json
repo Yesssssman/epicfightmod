@@ -5,13 +5,19 @@
 	"package": "yesman.epicfight.mixin",
 	"client": [
 		"MixinEnderDragonRenderer",
+		"MixinThrownTridentRenderer",
 		"MixinBufferBuilder",
 		"MixinKeyboardHandler",
-		"MixinMouseHandler"
+		"MixinMouseHandler",
+		"MixinLocalPlayer"
 	],
 	"mixins": [
 		"MixinEndCrystal",
-		"MixinWitherBoss"
+		"MixinWitherBoss",
+		"MixinLivingEntity",
+		"MixinMob",
+		"MixinServerPlayer",
+		"MixinThrownTrident"
 	],
 	"injector": {
 		"defaultRequire": 1

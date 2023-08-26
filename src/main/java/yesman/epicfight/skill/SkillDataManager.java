@@ -1,37 +1,67 @@
 package yesman.epicfight.skill;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import com.google.common.collect.Maps;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 import yesman.epicfight.network.EpicFightNetworkManager;
+import yesman.epicfight.network.server.SPAddOrRemoveSkillData;
 import yesman.epicfight.network.server.SPModifySkillData;
 import yesman.epicfight.skill.SkillDataManager.Data.BooleanData;
 import yesman.epicfight.skill.SkillDataManager.Data.FloatData;
 import yesman.epicfight.skill.SkillDataManager.Data.IntegerData;
 
 public class SkillDataManager {
-	private final Map<Integer, Data> data = Maps.newHashMap();
+	private final Map<SkillDataKey<?>, Data> data = Maps.newHashMap();
 	private final int slotIndex;
+	private final SkillContainer container;
 	
-	public SkillDataManager(int slotIndex) {
+	public SkillDataManager(int slotIndex, SkillContainer container) {
 		this.slotIndex = slotIndex;
+		this.container = container;
 	}
 	
 	public <T> void registerData(SkillDataKey<T> key) {
-		this.data.put(key.getId(), key.valueType.create());
+		this.data.put(key, key.valueType.create());
+		
+		if (key.shouldSyncAllClients() && !this.container.getExecuter().isLogicalClient()) {
+			Player owner = this.container.getExecuter().getOriginal();
+			Object initialValue =  key.valueType.get(this.data.get(key));
+			
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(
+					new SPAddOrRemoveSkillData(key, container.getSlot().universalOrdinal(), initialValue, SPAddOrRemoveSkillData.AddRemove.ADD, owner.getId()),
+					owner);
+		}
+	}
+	
+	public <T> void removeData(SkillDataKey<T> key) {
+		this.data.remove(key);
+		
+		if (key.shouldSyncAllClients() && !this.container.getExecuter().isLogicalClient()) {
+			Player owner = this.container.getExecuter().getOriginal();
+			
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(
+					new SPAddOrRemoveSkillData(key, container.getSlot().universalOrdinal(), null, SPAddOrRemoveSkillData.AddRemove.REMOVE, owner.getId()),
+					owner);
+		}
+	}
+	
+	public Set<SkillDataKey<?>> keySet() {
+		return this.data.keySet();
 	}
 	
 	/**
-	 * Use setData() or setDataSync() which is type-safe method
+	 * Use setData() or setDataSync() that is type-safe
 	 */
 	@Deprecated
 	public void setDataRawtype(SkillDataKey<?> key, Object data) {
 		if (this.hasData(key)) {
-			key.valueType.set(this.data.get(key.getId()), data);
+			key.valueType.set(this.data.get(key), data);
 		}
 	}
 	
@@ -45,26 +75,34 @@ public class SkillDataManager {
 	
 	public <T> void setDataSync(SkillDataKey<T> key, T data, ServerPlayer player) {
 		this.setData(key, data);
-		SPModifySkillData msg2 = new SPModifySkillData(key, this.slotIndex, data);
+		SPModifySkillData msg2 = new SPModifySkillData(key, this.slotIndex, data, player.getId());
 		EpicFightNetworkManager.sendToPlayer(msg2, player);
+		
+		if (key.shouldSyncAllClients()) {
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(msg2, player);
+		}
 	}
 	
 	public <T> void setDataSyncF(SkillDataKey<T> key, Function<T, T> dataManipulator, ServerPlayer player) {
 		this.setDataF(key, dataManipulator);
-		SPModifySkillData msg2 = new SPModifySkillData(key, this.slotIndex, this.data.get(key.getId()));
+		SPModifySkillData msg2 = new SPModifySkillData(key, this.slotIndex, this.getDataValue(key), player.getId());
 		EpicFightNetworkManager.sendToPlayer(msg2, player);
+		
+		if (key.shouldSyncAllClients()) {
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(msg2, player);
+		}
 	}
 	
 	public <T> T getDataValue(SkillDataKey<T> key) {
 		if (this.hasData(key)) {
-			return key.valueType.get(this.data.get(key.getId()));
+			return key.valueType.get(this.data.get(key));
 		}
 		
 		return null;
 	}
 	
 	public boolean hasData(SkillDataKey<?> key) {
-		return this.data.containsKey(key.getId());
+		return this.data.containsKey(key);
 	}
 	
 	public void reset() {
@@ -183,9 +221,14 @@ public class SkillDataManager {
 		private static final Map<Integer, SkillDataKey<?>> KEYS = Maps.<Integer, SkillDataKey<?>>newHashMap();
 		
 		public static <V> SkillDataKey<V> createDataKey(ValueType<V> valueType) {
+			return createDataKey(valueType, false);
+		}
+		
+		public static <V> SkillDataKey<V> createDataKey(ValueType<V> valueType, boolean syncAllClients) {
 			int id = NEXT_ID++;
-			SkillDataKey<V> key = new SkillDataKey<>(valueType, id);
+			SkillDataKey<V> key = new SkillDataKey<>(valueType, id, syncAllClients);
 			KEYS.put(id, key);
+			
 			return key;
 		}
 		
@@ -195,10 +238,12 @@ public class SkillDataManager {
 		
 		private final ValueType<T> valueType;
 		private final int id;
+		private final boolean syncAllClients;
 		
-		private SkillDataKey(ValueType<T> valueType, int id) {
+		private SkillDataKey(ValueType<T> valueType, int id, boolean syncAllClients) {
 			this.valueType = valueType;
 			this.id = id;
+			this.syncAllClients = syncAllClients;
 		}
 		
 		public int getId() {
@@ -207,6 +252,10 @@ public class SkillDataManager {
 		
 		public ValueType<T> getValueType() {
 			return this.valueType;
+		}
+		
+		public boolean shouldSyncAllClients() {
+			return this.syncAllClients;
 		}
 	}
 }

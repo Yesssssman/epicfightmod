@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.google.common.primitives.Floats;
@@ -39,6 +40,12 @@ public abstract class MixinBufferBuilder {
 	@Shadow private float sortZ;
 	@Shadow private boolean indexOnly;
 	
+	@Shadow
+	private IntConsumer intConsumer(VertexFormat.IndexType indexType) {throw new AbstractMethodError("Shadow");}
+	
+	@Shadow
+	private void putSortedQuadIndices(VertexFormat.IndexType indexType) {};
+	
 	@Inject(at = @At(value = "HEAD"), method = "setQuadSortOrigin(FFF)V")
 	public void epicfight_setQuadSortOrigin(float x, float y, float z, CallbackInfo callbackInfo) {
 		if (this.mode == VertexFormat.Mode.TRIANGLES) {
@@ -54,46 +61,15 @@ public abstract class MixinBufferBuilder {
 		}
 	}
 	
-	@Inject(at = @At(value = "HEAD"), method = "end()V", cancellable = true)
-	public void epicfight_end(CallbackInfo callbackInfo) {
-		if (!this.building) {
-			throw new IllegalStateException("Not building!");
-		} else {
-			int i = this.mode.indexCount(this.vertices);
-			VertexFormat.IndexType vertexformat$indextype = VertexFormat.IndexType.least(i);
-			boolean flag;
-			
-			if (this.sortingPoints != null) {
-				int j = Mth.roundToward(i * vertexformat$indextype.bytes, 4);
-				this.ensureCapacity(j);
-				
-				if (this.mode == VertexFormat.Mode.QUADS) {
-					this.putSortedQuadIndices(vertexformat$indextype);
-				} else if (this.mode == VertexFormat.Mode.TRIANGLES) {
-					this.putSortedTriangleIndices(vertexformat$indextype);
-				}
-				
-				flag = false;
-				this.nextElementByte += j;
-				this.totalRenderedBytes += this.vertices * this.format.getVertexSize() + j;
-			} else {
-				flag = true;
-				this.totalRenderedBytes += this.vertices * this.format.getVertexSize();
-			}
-			
-			this.building = false;
-			this.drawStates.add(new BufferBuilder.DrawState(this.format, this.vertices, i, this.mode, vertexformat$indextype, this.indexOnly, flag));
-			this.vertices = 0;
-			this.currentElement = null;
-			this.elementIndex = 0;
-			this.sortingPoints = null;
-			this.sortX = Float.NaN;
-			this.sortY = Float.NaN;
-			this.sortZ = Float.NaN;
-			this.indexOnly = false;
+	@Redirect(     at = @At(   value = "INVOKE"
+			                , target = "Lcom/mojang/blaze3d/vertex/BufferBuilder;putSortedQuadIndices(Lcom/mojang/blaze3d/vertex/VertexFormat$IndexType;)V")
+	         , method = "end()V")
+	public void epicfight_end(BufferBuilder bufferBuilder, VertexFormat.IndexType vertexformat$indextype) {
+		if (this.mode == VertexFormat.Mode.QUADS) {
+			this.putSortedQuadIndices(vertexformat$indextype);
+		} else if (this.mode == VertexFormat.Mode.TRIANGLES) {
+			this.putSortedTriangleIndices(vertexformat$indextype);
 		}
-		
-		callbackInfo.cancel();
 	}
 	
 	private void putSortedTriangleIndices(VertexFormat.IndexType indexType) {
@@ -120,13 +96,6 @@ public abstract class MixinBufferBuilder {
 			intconsumer.accept(j * this.mode.primitiveStride + 2);
 		}
 	}
-	
-	@Shadow
-	public abstract void ensureCapacity(int size);
-	@Shadow
-	public abstract void putSortedQuadIndices(VertexFormat.IndexType indexType);
-	@Shadow
-	public abstract IntConsumer intConsumer(VertexFormat.IndexType indexType);
 	
 	public Vector3f[] makeTrianglesSortingPoints() {
 		FloatBuffer floatbuffer = this.buffer.asFloatBuffer();

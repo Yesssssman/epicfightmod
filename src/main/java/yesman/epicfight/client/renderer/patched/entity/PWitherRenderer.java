@@ -17,17 +17,17 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.client.animation.Layer;
-import yesman.epicfight.api.client.model.ClientModel;
-import yesman.epicfight.api.client.model.ClientModels;
+import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.client.mesh.WitherMesh;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.patched.layer.PatchedWitherArmorLayer;
 import yesman.epicfight.world.capabilities.entitypatch.boss.WitherPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, WitherPatch, WitherBossModel<WitherBoss>> {
+public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, WitherPatch, WitherBossModel<WitherBoss>, WitherMesh> {
 	public static final ResourceLocation WITHER_INVULNERABLE_LOCATION = new ResourceLocation("textures/entity/wither/wither_invulnerable.png");
 	private static final ResourceLocation WITHER_LOCATION = new ResourceLocation("textures/entity/wither/wither.png");
 	
@@ -42,8 +42,8 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 		boolean isVisibleToPlayer = !isVisible && !entityIn.isInvisibleTo(mc.player);
 		boolean isGlowing = mc.shouldEntityAppearGlowing(entityIn);
 		RenderType renderType = this.getRenderType(entityIn, entitypatch, renderer, isVisible, isVisibleToPlayer, isGlowing);
-		ClientModel model = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT);
-		Armature armature = model.getArmature();
+		WitherMesh mesh = this.getMesh(entitypatch);
+		Armature armature = entitypatch.getArmature();
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
 		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks);
@@ -54,7 +54,7 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 			if (transparencyCount == 0) {
 				if (!entitypatch.isGhost()) {
 					VertexConsumer builder = buffer.getBuffer(renderType);
-					model.drawAnimatedModel(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), poseMatrices);
+					mesh.drawModelWithPose(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), armature, poseMatrices);
 				}
 			} else {
 				float transparency = (Math.abs(transparencyCount) + partialTicks) / 41.0F;
@@ -63,13 +63,13 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 					transparency = 1.0F - transparency;
 				}
 				
-				renderType = EpicFightRenderTypes.entityTranslucentTriangles(WITHER_LOCATION);
+				renderType = EpicFightRenderTypes.triangles(RenderType.entityTranslucent(WITHER_LOCATION));
 				VertexConsumer builder1 = buffer.getBuffer(renderType);
-				model.drawAnimatedModel(poseStack, builder1, packedLight, 1.0F, 1.0F, 1.0F, transparency, OverlayTexture.NO_OVERLAY, poseMatrices);
+				mesh.drawModelWithPose(poseStack, builder1, packedLight, 1.0F, 1.0F, 1.0F, transparency, OverlayTexture.NO_OVERLAY, armature, poseMatrices);
 				
-				renderType = EpicFightRenderTypes.entityTranslucentTriangles(WITHER_INVULNERABLE_LOCATION);
+				renderType = EpicFightRenderTypes.triangles(RenderType.entityTranslucent(WITHER_INVULNERABLE_LOCATION));
 				VertexConsumer builder2 = buffer.getBuffer(renderType);
-				model.drawAnimatedModel(poseStack, builder2, packedLight, 1.0F, 1.0F, 1.0F, Mth.sin(transparency * 3.1415F), OverlayTexture.NO_OVERLAY, poseMatrices);
+				mesh.drawModelWithPose(poseStack, builder2, packedLight, 1.0F, 1.0F, 1.0F, Mth.sin(transparency * 3.1415F), OverlayTexture.NO_OVERLAY, armature, poseMatrices);
 			}
 			
 			this.renderLayer(renderer, entitypatch, entityIn, poseMatrices, buffer, poseStack, packedLight, partialTicks);
@@ -77,7 +77,7 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 		
 		if (renderType != null) {
 			if (Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
-				for (Layer.Priority priority : Layer.Priority.values()) {
+				for (Layer.Priority priority : Layer.Priority.HIGHEST.lowers()) {
 					AnimationPlayer animPlayer = entitypatch.getClientAnimator().getCompositeLayer(priority).animationPlayer;
 					float playTime = animPlayer.getPrevElapsedTime() + (animPlayer.getElapsedTime() - animPlayer.getPrevElapsedTime()) * partialTicks;
 					animPlayer.getAnimation().renderDebugging(poseStack, buffer, entitypatch, playTime, partialTicks);
@@ -88,7 +88,6 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 		poseStack.popPose();
 	}
 	
-	@Override
 	protected boolean isVisible(WitherBoss witherboss, WitherPatch witherpatch) {
 		return !witherpatch.isGhost() || witherpatch.getTransparency() != 0;
 	}
@@ -109,7 +108,7 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 	
 	@Override
 	protected void setJointTransforms(WitherPatch entitypatch, Armature armature, float partialTicks) {
-		this.setJointTransform(1, armature, entitypatch.getHeadMatrix(partialTicks));
+		this.setJointTransform("Head_M", armature, entitypatch.getHeadMatrix(partialTicks));
 		WitherBoss witherBoss = entitypatch.getOriginal();
 		
 		float leftHeadYRot = witherBoss.yRotOHeads[0] + (witherBoss.yRotHeads[0] - witherBoss.yRotOHeads[0]) * partialTicks;
@@ -117,7 +116,12 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 		float leftHeadXRot = witherBoss.xRotOHeads[0] + (witherBoss.xRotHeads[0] - witherBoss.xRotOHeads[0]) * partialTicks;
 		float rightHeadXRot = witherBoss.xRotOHeads[1] + (witherBoss.xRotHeads[1] - witherBoss.xRotOHeads[1]) * partialTicks;
 		
-		this.setJointTransform(2, armature, OpenMatrix4f.createRotatorDeg(witherBoss.yBodyRot - rightHeadYRot, Vec3f.Y_AXIS).rotateDeg(-rightHeadXRot, Vec3f.X_AXIS));
-		this.setJointTransform(3, armature, OpenMatrix4f.createRotatorDeg(witherBoss.yBodyRot - leftHeadYRot, Vec3f.Y_AXIS).rotateDeg(-leftHeadXRot, Vec3f.X_AXIS));
+		this.setJointTransform("Head_R", armature, OpenMatrix4f.createRotatorDeg(witherBoss.yBodyRot - rightHeadYRot, Vec3f.Y_AXIS).rotateDeg(-rightHeadXRot, Vec3f.X_AXIS));
+		this.setJointTransform("Head_L", armature, OpenMatrix4f.createRotatorDeg(witherBoss.yBodyRot - leftHeadYRot, Vec3f.Y_AXIS).rotateDeg(-leftHeadXRot, Vec3f.X_AXIS));
+	}
+
+	@Override
+	public WitherMesh getMesh(WitherPatch entitypatch) {
+		return Meshes.WITHER;
 	}
 }

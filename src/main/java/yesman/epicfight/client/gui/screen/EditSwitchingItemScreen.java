@@ -21,7 +21,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.main.EpicFightMod;
-import yesman.epicfight.world.capabilities.provider.ProviderItem;
+import yesman.epicfight.world.capabilities.provider.ItemCapabilityProvider;
 
 @OnlyIn(Dist.CLIENT)
 public class EditSwitchingItemScreen extends Screen {
@@ -222,7 +222,7 @@ public class EditSwitchingItemScreen extends Screen {
 					boolean isBattleTab = EditSwitchingItemScreen.RegisteredItemList.this == EditSwitchingItemScreen.this.battleAutoSwitchItems;
 					if (isBattleTab) {
 						for (Item item : ForgeRegistries.ITEMS.getValues()) {
-							if (ProviderItem.has(item)) {
+							if (ItemCapabilityProvider.has(item)) {
 								ItemEntry itemEntry = new ItemEntry(item);
 								if (!EditSwitchingItemScreen.this.battleAutoSwitchItems.children().contains(itemEntry)) {
 									EditSwitchingItemScreen.this.battleAutoSwitchItems.addEntry(itemEntry);

@@ -1,0 +1,20 @@
+{
+	"xp_requirement": 5,
+	"regen_rate": 30,
+	"attribute_modifiers": [
+		{
+			"attribute": "minecraft:generic.attack_damage",
+			"name": "stamina_pillager_skill_stat",
+			"uuid": "20807880-fd30-11eb-9a03-0242ac130003",
+			"operation": "addition",
+			"amount": 1.0
+		},
+		{
+			"attribute": "epicfight:staminar",
+			"name": "stamina_pillager_skill_stat",
+			"uuid": "20807880-fd30-11eb-9a03-0242ac130003",
+			"operation": "addition",
+			"amount": 3.0
+		}
+	]
+}

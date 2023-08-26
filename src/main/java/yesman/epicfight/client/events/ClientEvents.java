@@ -24,10 +24,11 @@ import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerP
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.capabilities.provider.ProviderEntity;
-import yesman.epicfight.world.capabilities.provider.ProviderItem;
+import yesman.epicfight.world.capabilities.provider.EntityPatchProvider;
+import yesman.epicfight.world.capabilities.provider.ItemCapabilityProvider;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.RightClickItemEvent;
+import yesman.epicfight.world.level.block.FractureBlockState;
 
 @OnlyIn(Dist.CLIENT)
 @Mod.EventBusSubscriber(modid = EpicFightMod.MODID, value = Dist.CLIENT)
@@ -103,7 +104,7 @@ public class ClientEvents {
 	@SubscribeEvent
 	public static void rightClickItemClient(RightClickItem event) {
 		if (event.getSide() == LogicalSide.CLIENT) {
-			LocalPlayerPatch playerpatch = (LocalPlayerPatch) event.getPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+			LocalPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(event.getPlayer(), LocalPlayerPatch.class);
 			
 			if (playerpatch != null && playerpatch.getOriginal().getOffhandItem().getUseAnimation() == UseAnim.NONE) {
 				boolean canceled = playerpatch.getEventListener().triggerEvents(EventType.CLIENT_ITEM_USE_EVENT, new RightClickItemEvent<>(playerpatch));
@@ -119,24 +120,28 @@ public class ClientEvents {
 	
 	@SubscribeEvent
 	public static void clientRespawnEvent(ClientPlayerNetworkEvent.RespawnEvent event) {
-		LocalPlayerPatch oldCap = (LocalPlayerPatch)event.getOldPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+		LocalPlayerPatch oldCap = EpicFightCapabilities.getEntityPatch(event.getOldPlayer(), LocalPlayerPatch.class);
 		
 		if (oldCap != null) {
-			LocalPlayerPatch newCap = (LocalPlayerPatch)event.getNewPlayer().getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
-			
+			LocalPlayerPatch newCap = EpicFightCapabilities.getEntityPatch(event.getNewPlayer(), LocalPlayerPatch.class);
 			newCap.onRespawnLocalPlayer(event);
 			newCap.copySkillsFrom(oldCap);
 			newCap.toMode(oldCap.getPlayerMode(), false);
 		}
+		
+		ClientEngine.getInstance().renderEngine.battleModeUI.reset();
 	}
 	
 	@SubscribeEvent
 	public static void clientLogoutEvent(ClientPlayerNetworkEvent.LoggedOutEvent event) {
 		if (event.getPlayer() != null) {
 			ItemCapabilityReloadListener.reset();
-			ProviderItem.clear();
-			ProviderEntity.clear();
-			ClientEngine.instance.renderEngine.clearCustomEntityRenerer();
+			ItemCapabilityProvider.clear();
+			EntityPatchProvider.clear();
+			ClientEngine.getInstance().renderEngine.battleModeUI.reset();
+			ClientEngine.getInstance().renderEngine.clearCustomEntityRenerer();
 		}
+		
+		FractureBlockState.reset();
 	}
 }

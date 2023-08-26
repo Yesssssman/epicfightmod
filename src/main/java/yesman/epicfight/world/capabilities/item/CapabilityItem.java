@@ -23,6 +23,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -39,8 +40,9 @@ import yesman.epicfight.network.server.SPChangeSkill;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.skill.Skill;
-import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillContainer;
+import yesman.epicfight.skill.SkillSlots;
+import yesman.epicfight.skill.guard.GuardSkill;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
@@ -78,6 +80,24 @@ public class CapabilityItem {
 		
 		Map<Attribute, AttributeModifier> attribute = this.getDamageAttributesInCondition(this.getStyle(entitypatch));
 		
+		int index = 0;
+		
+		for (int i = 0; i < itemTooltip.size(); i++) {
+			Component textComp = itemTooltip.get(i);
+			
+			if (textComp.getSiblings().size() > 0) {
+				Component sibling = textComp.getSiblings().get(0);
+				
+				if (sibling instanceof TranslatableComponent translationComponent) {
+					if (translationComponent.getArgs().length > 1 && translationComponent.getArgs()[1] instanceof TranslatableComponent translatableArg) {
+						if (translatableArg.getKey().equals(Attributes.ATTACK_SPEED.getDescriptionId())) {
+							index = i;
+						}
+					}
+				}
+			}
+		}
+		
 		if (attribute != null) {
 			Attribute armorNegation = EpicFightAttributes.ARMOR_NEGATION.get();
 			Attribute impact = EpicFightAttributes.IMPACT.get();
@@ -85,27 +105,30 @@ public class CapabilityItem {
 			
 			if (attribute.containsKey(armorNegation)) {
 				double value = attribute.get(armorNegation).getAmount() + entitypatch.getOriginal().getAttribute(armorNegation).getBaseValue();
+				
 				if (value > 0.0D) {
-					itemTooltip.add(new TextComponent(" ").append(new TranslatableComponent(armorNegation.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
+					itemTooltip.add(index, new TextComponent(" ").append(new TranslatableComponent(armorNegation.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
 				}
 			}
 			
 			if (attribute.containsKey(impact)) {
 				double value = attribute.get(impact).getAmount() + entitypatch.getOriginal().getAttribute(impact).getBaseValue();
+				
 				if (value > 0.0D) {
 					int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, itemstack);
 					value *= (1.0F + i * 0.12F);
-					itemTooltip.add(new TextComponent(" ").append(new TranslatableComponent(impact.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
+					itemTooltip.add(index++, new TextComponent(" ").append(new TranslatableComponent(impact.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
 				}
 			}
 			
 			if (attribute.containsKey(maxStrikes)) {
 				double value = attribute.get(maxStrikes).getAmount() + entitypatch.getOriginal().getAttribute(maxStrikes).getBaseValue();
+				
 				if (value > 0.0D) {
-					itemTooltip.add(new TextComponent(" ").append(new TranslatableComponent(maxStrikes.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
+					itemTooltip.add(index, new TextComponent(" ").append(new TranslatableComponent(maxStrikes.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
 				}
 			} else {
-				itemTooltip.add(new TextComponent(" ").append(new TranslatableComponent(maxStrikes.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(maxStrikes.getDefaultValue()))));
+				itemTooltip.add(index, new TextComponent(" ").append(new TranslatableComponent(maxStrikes.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(maxStrikes.getDefaultValue()))));
 			}
 		}
 	}
@@ -119,7 +142,7 @@ public class CapabilityItem {
 	}
 	
 	@Nullable
-	public Skill getSpecialAttack(PlayerPatch<?> playerpatch) {
+	public Skill getInnateSkill(PlayerPatch<?> playerpatch, ItemStack itemstack) {
 		return null;
 	}
 	
@@ -132,36 +155,37 @@ public class CapabilityItem {
 		return this.weaponCategory;
 	}
 	
-	public void changeWeaponSpecialSkill(PlayerPatch<?> playerpatch) {
-		Skill specialSkill = this.getSpecialAttack(playerpatch);
+	public void changeWeaponInnateSkill(PlayerPatch<?> playerpatch, ItemStack itemstack) {
+		Skill weaponInnateSkill = this.getInnateSkill(playerpatch, itemstack);
 		String skillName = "";
 		SPChangeSkill.State state = SPChangeSkill.State.ENABLE;
-		SkillContainer specialSkillContainer = playerpatch.getSkill(SkillCategories.WEAPON_SPECIAL_ATTACK);
+		SkillContainer weaponInnateSkillContainer = playerpatch.getSkill(SkillSlots.WEAPON_INNATE);
 		
-		if (specialSkill != null) {
-			if (specialSkillContainer.getSkill() != specialSkill) {
-				specialSkillContainer.setSkill(specialSkill);
+		if (weaponInnateSkill != null) {
+			if (weaponInnateSkillContainer.getSkill() != weaponInnateSkill) {
+				weaponInnateSkillContainer.setSkill(weaponInnateSkill);
 			}
 			
-			skillName = specialSkill.toString();
+			skillName = weaponInnateSkill.toString();
 		} else {
 			state = SPChangeSkill.State.DISABLE;
 		}
 		
-		specialSkillContainer.setDisabled(specialSkill == null);
-		EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillCategories.WEAPON_SPECIAL_ATTACK.universalOrdinal(), skillName, state), (ServerPlayer)playerpatch.getOriginal());
+		weaponInnateSkillContainer.setDisabled(weaponInnateSkill == null);
+		
+		EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillSlots.WEAPON_INNATE, skillName, state), (ServerPlayer)playerpatch.getOriginal());
 		
 		Skill skill = this.getPassiveSkill();
-		SkillContainer passiveSkillContainer = playerpatch.getSkill(SkillCategories.WEAPON_PASSIVE);
+		SkillContainer passiveSkillContainer = playerpatch.getSkill(SkillSlots.WEAPON_PASSIVE);
 		
 		if (skill != null) {
 			if (passiveSkillContainer.getSkill() != skill) {
 				passiveSkillContainer.setSkill(skill);
-				EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(skill.getCategory().universalOrdinal(), skill.toString(), SPChangeSkill.State.ENABLE), (ServerPlayer)playerpatch.getOriginal());
+				EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillSlots.WEAPON_PASSIVE, skill.toString(), SPChangeSkill.State.ENABLE), (ServerPlayer)playerpatch.getOriginal());
 			}
 		} else {
 			passiveSkillContainer.setSkill(null);
-			EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillCategories.WEAPON_PASSIVE.universalOrdinal(), "empty", SPChangeSkill.State.ENABLE), (ServerPlayer)playerpatch.getOriginal());
+			EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(SkillSlots.WEAPON_PASSIVE, "empty", SPChangeSkill.State.ENABLE), (ServerPlayer)playerpatch.getOriginal());
 		}
 	}
 	
@@ -199,7 +223,10 @@ public class CapabilityItem {
 	}
 	
 	public final Map<Attribute, AttributeModifier> getDamageAttributesInCondition(Style style) {
-		return this.attributeMap.getOrDefault(style, this.attributeMap.get(Styles.COMMON));
+		Map<Attribute, AttributeModifier> attributes = this.attributeMap.getOrDefault(style, Maps.newHashMap());
+		this.attributeMap.getOrDefault(Styles.COMMON, Maps.newHashMap()).forEach(attributes::putIfAbsent);
+		
+		return attributes;
 	}
 	
 	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot equipmentSlot, LivingEntityPatch<?> entitypatch) {
@@ -218,6 +245,18 @@ public class CapabilityItem {
 		return map;
     }
 	
+	public Multimap<Attribute, AttributeModifier> getAllAttributeModifiers(EquipmentSlot equipmentSlot) {
+		Multimap<Attribute, AttributeModifier> map = HashMultimap.<Attribute, AttributeModifier>create();
+		
+		for (Map<Attribute, AttributeModifier> attrMap : this.attributeMap.values()) {
+			for (Entry<Attribute, AttributeModifier> entry : attrMap.entrySet()) {
+				map.put(entry.getKey(), entry.getValue());
+			}
+		}
+		
+		return map;
+    }
+	
 	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(LivingEntityPatch<?> playerpatch, InteractionHand hand) {
 		return Maps.<LivingMotion, StaticAnimation>newHashMap();
 	}
@@ -226,7 +265,15 @@ public class CapabilityItem {
 		return this.canBePlacedOffhand() ? Styles.ONE_HAND : Styles.TWO_HAND;
 	}
 	
+	public StaticAnimation getGuardMotion(GuardSkill skill, GuardSkill.BlockType blockType, PlayerPatch<?> playerpatch) {
+		return null;
+	}
+	
 	public boolean canBePlacedOffhand() {
+		return true;
+	}
+	
+	public boolean shouldCancelCombo(LivingEntityPatch<?> entitypatch) {
 		return true;
 	}
 	
@@ -260,7 +307,7 @@ public class CapabilityItem {
 	}
 	
 	public enum WeaponCategories implements WeaponCategory {
-		NOT_WEAON, AXE, FIST, GREATSWORD, HOE, PICKAXE, SHOVEL, SWORD, KATANA, SPEAR, TACHI, TRIDENT, LONGSWORD, DAGGER, SHIELD, RANGED;
+		NOT_WEAON, AXE, FIST, GREATSWORD, HOE, PICKAXE, SHOVEL, SWORD, UCHIGATANA, SPEAR, TACHI, TRIDENT, LONGSWORD, DAGGER, SHIELD, RANGED;
 		
 		final int id;
 		
@@ -279,7 +326,7 @@ public class CapabilityItem {
 	}
 	
 	public enum Styles implements Style {
-		COMMON(true), ONE_HAND(true), TWO_HAND(false), MOUNT(true), RANGED(false), SHEATH(false), LIECHTENAUER(false);
+		COMMON(true), ONE_HAND(true), TWO_HAND(false), MOUNT(true), RANGED(false), SHEATH(false), OCHS(false);
 		
 		final boolean canUseOffhand;
 		final int id;

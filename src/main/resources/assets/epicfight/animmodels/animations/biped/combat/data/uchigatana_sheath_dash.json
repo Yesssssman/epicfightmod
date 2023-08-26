@@ -1,0 +1,16 @@
+{
+	"trail_effects": [
+		{
+			"color": [255, 255, 255],
+			"begin_pos": [0.0, 0.0, -0.2],
+    		"end_pos": [0.0, -0.2, -1.7],
+			"start_time": 0.1666,
+			"end_time": 0.35,
+			"interpolations": 10,
+			"lifetime": 6,
+			"joint": "Tool_R",
+			"item_skin_hand": "main_hand",
+			"texture_path": "epicfight:textures/particle/katana_trail.png"
+		}
+	]
+}

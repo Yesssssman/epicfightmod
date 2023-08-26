@@ -18,37 +18,43 @@ import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.enderdragon.phases.DragonPhaseInstance;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.TransformSheet;
+import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.animation.types.procedural.IKInfo;
 import yesman.epicfight.api.animation.types.procedural.TipPointAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
-import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.AttackResult;
-import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.gameasset.Animations;
+import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.gameasset.EpicFightSounds;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
+import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+import yesman.epicfight.world.item.EpicFightItems;
+import yesman.epicfight.world.item.SkillBookItem;
 
 public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	public static final TargetingConditions DRAGON_TARGETING = TargetingConditions.forCombat().ignoreLineOfSight();
 	public static EnderDragonPatch INSTANCE_CLIENT;
 	public static EnderDragonPatch INSTANCE_SERVER;
-	private Map<String, TipPointAnimation> tipPointAnimations = Maps.newHashMap();
-	private Map<LivingMotions, StaticAnimation> livingMotions = Maps.newHashMap();
+	private final Map<String, TipPointAnimation> tipPointAnimations = Maps.newHashMap();
+	private final Map<LivingMotions, StaticAnimation> livingMotions = Maps.newHashMap();
+	private final Map<Player, Integer> contributors = Maps.newHashMap();
 	private boolean groundPhase;
 	public float xRoot;
 	public float xRootO;
@@ -70,16 +76,16 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	
 	@SuppressWarnings("deprecation")
 	@Override
-	public void onJoinWorld(EnderDragon entityIn, EntityJoinWorldEvent event) {
-		super.onJoinWorld(entityIn, event);
+	public void onJoinWorld(EnderDragon enderdragon, EntityJoinWorldEvent event) {
+		super.onJoinWorld(enderdragon, event);
 		
 		DragonPhaseInstance currentPhase = this.original.phaseManager.getCurrentPhase();
 		EnderDragonPhase<?> startPhase = (currentPhase == null || !(currentPhase instanceof PatchedDragonPhase)) ? PatchedPhases.FLYING : this.original.phaseManager.getCurrentPhase().getPhase();
 		this.original.phaseManager = new PhaseManagerPatch(this.original, this);
 		this.original.phaseManager.setPhase(startPhase);
-		entityIn.maxUpStep = 1.0F;
+		enderdragon.maxUpStep = 1.0F;
 		
-		if (entityIn.level.isClientSide()) {
+		if (enderdragon.level.isClientSide()) {
 			INSTANCE_CLIENT = this;
 		} else {
 			INSTANCE_SERVER = this;
@@ -108,7 +114,7 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 		if (this.original.getHealth() <= 0.0F) {
 			currentLivingMotion = LivingMotions.DEATH;
 		} else if (this.state.inaction() && considerInaction) {
-			this.currentLivingMotion = LivingMotions.IDLE;
+			this.currentLivingMotion = LivingMotions.INACTION;
 		} else {
 			DragonPhaseInstance phase = this.original.getPhaseManager().getCurrentPhase();
 			
@@ -188,6 +194,8 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 				}
 			}
 		}
+		
+		this.contributors.entrySet().removeIf((entry) -> this.original.tickCount - entry.getValue() > 600 || !entry.getKey().isAlive());
 	}
 	
 	@Override
@@ -214,7 +222,13 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	
 	@Override
 	public AttackResult tryHurt(DamageSource damageSource, float amount) {
-		return super.tryHurt(damageSource, this.original.getPhaseManager().getCurrentPhase().getPhase() == PatchedPhases.CRYSTAL_LINK ? 0.0F : amount);
+		boolean isConsumingCrystal = this.original.getPhaseManager().getCurrentPhase().getPhase() == PatchedPhases.CRYSTAL_LINK;
+		
+		if (!isConsumingCrystal && amount > 0.0F && damageSource.getEntity() instanceof Player player) {
+			this.contributors.put(player, this.original.tickCount);
+		}
+		
+		return super.tryHurt(damageSource, isConsumingCrystal ? 0.0F : amount);
 	}
 	
 	@Override
@@ -223,6 +237,17 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
         double d1 = target.getZ() - this.original.getZ();
         float degree = 180.0F - (float)Math.toDegrees(Mth.atan2(d0, d1));
     	this.rotateTo(degree, limit, partialSync);
+	}
+	
+	@Override
+	public void onDeath(LivingDeathEvent event) {
+		super.onDeath(event);
+		
+		for (Player player : this.contributors.keySet()) {
+			ItemStack skillbook = new ItemStack(EpicFightItems.SKILLBOOK.get());
+			SkillBookItem.setContainingSkill(EpicFightSkills.DEMOLITION_LEAP, skillbook);
+			player.addItem(skillbook);
+		}
 	}
 	
 	public void updateTipPoints() {
@@ -276,13 +301,13 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	}
 	
 	@Override
-	public SoundEvent getSwingSound(InteractionHand hand) {
-		return EpicFightSounds.WHOOSH_BIG;
+	public boolean shouldMoveOnCurrentSide(ActionAnimation actionAnimation) {
+		return true;
 	}
 	
 	@Override
-	public <M extends Model> M getEntityModel(Models<M> modelDB) {
-		return modelDB.dragon;
+	public SoundEvent getSwingSound(InteractionHand hand) {
+		return EpicFightSounds.WHOOSH_BIG;
 	}
 	
 	@Override

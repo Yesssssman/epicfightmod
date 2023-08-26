@@ -13,7 +13,6 @@ import net.minecraftforge.fml.ModLoader;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.AnimationDataReader;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
-import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.main.EpicFightMod;
 
 public class AnimationManager extends SimplePreparableReloadListener<Map<Integer, Map<Integer, StaticAnimation>>> {
@@ -26,10 +25,12 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 	public StaticAnimation findAnimationById(int namespaceId, int animationId) {
 		if (this.animationById.containsKey(namespaceId)) {
 			Map<Integer, StaticAnimation> map = this.animationById.get(namespaceId);
+			
 			if (map.containsKey(animationId)) {
 				return map.get(animationId);
 			}
 		}
+		
 		throw new IllegalArgumentException("Unable to find animation. id: " + animationId + ", namespcae hash: " + namespaceId);
 	}
 	
@@ -44,6 +45,9 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 	}
 	
 	public void registerAnimations() {
+		this.animationById.clear();
+		this.animationByName.clear();
+		
 		Map<String, Runnable> registryMap = Maps.newHashMap();
 		ModLoader.get().postEvent(new AnimationRegistryEvent(registryMap));
 		
@@ -56,11 +60,13 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 		});
 	}
 	
-	public void loadAnimationsInit(ResourceManager resourceManager) {
+	public void loadAnimationsOnServer() {
+		this.registerAnimations();
+		
 		this.animationById.values().forEach((map) -> {
 			map.values().forEach((animation) -> {
-				animation.loadAnimation(resourceManager);
-				this.setAnimationProperties(resourceManager, animation);
+				animation.loadAnimation(null);
+				this.setAnimationProperties(null, animation);
 			});
 		});
 	}
@@ -68,13 +74,14 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 	@Override
 	protected Map<Integer, Map<Integer, StaticAnimation>> prepare(ResourceManager resourceManager, ProfilerFiller profilerIn) {
 		if (EpicFightMod.isPhysicalClient()) {
+			this.registerAnimations();
+			
 			this.animationById.values().forEach((map) -> {
 				map.values().forEach((animation) -> {
 					this.setAnimationProperties(resourceManager, animation);
 				});
 			});
 		}
-		Animations.buildClient();
 		
 		return this.animationById;
 	}
@@ -92,11 +99,14 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 		if (resourceManager == null) {
 			return;
 		}
+		
 		ResourceLocation location = animation.getLocation();
 		String path = location.getPath();
 		int last = location.getPath().lastIndexOf('/');
+		
 		if (last > 0) {
 			ResourceLocation dataLocation = new ResourceLocation(location.getNamespace(), String.format("%s/data%s.json", path.substring(0, last), path.substring(last)));
+			
 			if (resourceManager.hasResource(dataLocation)) {
 				try {
 					AnimationDataReader.readAndApply(animation, resourceManager.getResource(dataLocation));

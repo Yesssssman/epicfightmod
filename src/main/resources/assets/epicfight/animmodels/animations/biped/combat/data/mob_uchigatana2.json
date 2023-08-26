@@ -1,0 +1,10 @@
+{
+	"trail_effects": [
+		{
+			"start_time": 0.0,
+			"end_time": 0.15,
+			"joint": "Tool_R",
+			"item_skin_hand": "main_hand"
+		}
+	]
+}

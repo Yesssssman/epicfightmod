@@ -1,9 +1,9 @@
 package yesman.epicfight.api.utils.math;
 
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.Map;
-
-import org.lwjgl.BufferUtils;
 
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
@@ -45,6 +45,8 @@ public class OpenMatrix4f {
 			return result;
 		}
 	}
+	
+	private static final FloatBuffer MATRIX_TRANSFORMER = ByteBuffer.allocateDirect(16 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
 	
 	/*
 	 * m00 m01 m02 m03
@@ -118,6 +120,29 @@ public class OpenMatrix4f {
 		return dest;
 	}
 	
+	public static OpenMatrix4f load(OpenMatrix4f mat, float[] elements) {
+		if (mat == null) mat = new OpenMatrix4f();
+		
+		mat.m00 = elements[0];
+		mat.m01 = elements[1];
+		mat.m02 = elements[2];
+		mat.m03 = elements[3];
+		mat.m10 = elements[4];
+		mat.m11 = elements[5];
+		mat.m12 = elements[6];
+		mat.m13 = elements[7];
+		mat.m20 = elements[8];
+		mat.m21 = elements[9];
+		mat.m22 = elements[10];
+		mat.m23 = elements[11];
+		mat.m30 = elements[12];
+		mat.m31 = elements[13];
+		mat.m32 = elements[14];
+		mat.m33 = elements[15];
+		
+		return mat;
+	}
+	
 	public static OpenMatrix4f load(OpenMatrix4f mat, FloatBuffer buf) {
 		if (mat == null) mat = new OpenMatrix4f();
 		buf.position(0);
@@ -137,30 +162,30 @@ public class OpenMatrix4f {
 		mat.m31 = buf.get();
 		mat.m32 = buf.get();
 		mat.m33 = buf.get();
+		
 		return mat;
 	}
 	
-	public OpenMatrix4f load(FloatBuffer buf) {
-		return OpenMatrix4f.load(this, buf);
-	}
-	
-	public OpenMatrix4f store(FloatBuffer buf) {
-		buf.put(m00);
-		buf.put(m01);
-		buf.put(m02);
-		buf.put(m03);
-		buf.put(m10);
-		buf.put(m11);
-		buf.put(m12);
-		buf.put(m13);
-		buf.put(m20);
-		buf.put(m21);
-		buf.put(m22);
-		buf.put(m23);
-		buf.put(m30);
-		buf.put(m31);
-		buf.put(m32);
-		buf.put(m33);
+	public OpenMatrix4f toFloat() {
+		float[] elements = new float[16];
+		
+		elements[0] = m00;
+		elements[1] = m01;
+		elements[2] = m02;
+		elements[3] = m03;
+		elements[4] = m10;
+		elements[5] = m11;
+		elements[6] = m12;
+		elements[7] = m13;
+		elements[8] = m20;
+		elements[9] = m21;
+		elements[10] = m22;
+		elements[11] = m23;
+		elements[12] = m30;
+		elements[13] = m31;
+		elements[14] = m32;
+		elements[15] = m33;
+		
 		return this;
 	}
 	
@@ -671,9 +696,9 @@ public class OpenMatrix4f {
 	}
 	
 	public static OpenMatrix4f importFromMojangMatrix(Matrix4f mat4f) {
-		FloatBuffer buf = BufferUtils.createFloatBuffer(16);
-		buf.position(0);
-		mat4f.store(buf);
-		return OpenMatrix4f.load(null, buf);
+		MATRIX_TRANSFORMER.position(0);
+		mat4f.store(MATRIX_TRANSFORMER);
+		
+		return OpenMatrix4f.load(null, MATRIX_TRANSFORMER);
 	}
 }

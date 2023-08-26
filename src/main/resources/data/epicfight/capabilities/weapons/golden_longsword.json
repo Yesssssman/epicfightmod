@@ -1,12 +1,7 @@
 {
 	"attributes":
 	{
-		"two_hand":
-		{
-			"impact":1.0,
-			"max_strikes":2
-		},
-		"liechtenauer":
+		"common":
 		{
 			"impact":1.0,
 			"max_strikes":2

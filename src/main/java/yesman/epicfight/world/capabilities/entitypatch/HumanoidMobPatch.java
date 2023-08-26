@@ -27,15 +27,16 @@ import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
-import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
+import yesman.epicfight.model.armature.HumanoidArmature;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPChangeLivingMotion;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
+import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
@@ -48,6 +49,11 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 	public HumanoidMobPatch(Faction faction) {
 		super(faction);
 		this.setWeaponMotions();
+	}
+	
+	@Override
+	public HumanoidArmature getArmature() {
+		return (HumanoidArmature)this.armature;
 	}
 	
 	@Override
@@ -82,7 +88,7 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 		this.weaponAttackMotions.put(WeaponCategories.SHOVEL, ImmutableMap.of(CapabilityItem.Styles.COMMON, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS));
 		this.weaponAttackMotions.put(WeaponCategories.SWORD, ImmutableMap.of(CapabilityItem.Styles.ONE_HAND, MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS, CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_DUAL_SWORD));
 		this.weaponAttackMotions.put(WeaponCategories.GREATSWORD, ImmutableMap.of(CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_GREATSWORD));
-		this.weaponAttackMotions.put(WeaponCategories.KATANA, ImmutableMap.of(CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_KATANA));
+		this.weaponAttackMotions.put(WeaponCategories.UCHIGATANA, ImmutableMap.of(CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_KATANA));
 		this.weaponAttackMotions.put(WeaponCategories.LONGSWORD, ImmutableMap.of(CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_LONGSWORD));
 		this.weaponAttackMotions.put(WeaponCategories.TACHI, ImmutableMap.of(CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_TACHI));
 		this.weaponAttackMotions.put(WeaponCategories.SPEAR, ImmutableMap.of(CapabilityItem.Styles.ONE_HAND, MobCombatBehaviors.HUMANOID_SPEAR_ONEHAND, CapabilityItem.Styles.TWO_HAND, MobCombatBehaviors.HUMANOID_SPEAR_TWOHAND));
@@ -174,7 +180,7 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 	}
 	
 	public void modifyLivingMotionByCurrentItem() {
-		this.getAnimator().resetMotions();
+		this.getAnimator().resetLivingAnimations();
 		
 		CapabilityItem mainhandCap = this.getHoldingItemCapability(InteractionHand.MAIN_HAND);
 		CapabilityItem offhandCap = this.getAdvancedHoldingItemCapability(InteractionHand.OFF_HAND);
@@ -243,6 +249,8 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 				return Animations.BIPED_HIT_SHORT;
 			case KNOCKDOWN:
 				return Animations.BIPED_KNOCKDOWN;
+			case NEUTRALIZE:
+				return Animations.BIPED_COMMON_NEUTRALIZED;
 			case FALL:
 				return Animations.BIPED_LANDING;
 			case NONE:

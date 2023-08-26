@@ -58,7 +58,7 @@ public class VindicatorPatch<T extends PathfinderMob> extends AbstractIllagerPat
 		if (this.original.getHealth() <= 0.0F) {
 			currentLivingMotion = LivingMotions.DEATH;
 		} else if (this.state.inaction() && considerInaction) {
-			currentLivingMotion = LivingMotions.IDLE;
+			currentLivingMotion = LivingMotions.INACTION;
 		} else {
 			boolean isAngry = this.original.isAggressive();
 			

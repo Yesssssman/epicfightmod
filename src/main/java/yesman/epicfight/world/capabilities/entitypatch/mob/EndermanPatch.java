@@ -28,20 +28,18 @@ import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
-import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.AttackResult;
-import yesman.epicfight.api.utils.ExtendedDamageSource;
-import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPChangeLivingMotion;
 import yesman.epicfight.network.server.SPSpawnData;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
+import yesman.epicfight.world.damagesource.EpicFightDamageSource;
+import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.effect.EpicFightMobEffects;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
@@ -159,10 +157,10 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 	public AttackResult tryHurt(DamageSource damageSource, float amount) {
 		if (!this.original.level.isClientSide()) {
 			if (damageSource instanceof EntityDamageSource && !this.isRaging()) {
-				ExtendedDamageSource extDamageSource = null;
+				EpicFightDamageSource extDamageSource = null;
 				
-				if (damageSource instanceof ExtendedDamageSource) {
-					extDamageSource = ((ExtendedDamageSource)damageSource);
+				if (damageSource instanceof EpicFightDamageSource) {
+					extDamageSource = ((EpicFightDamageSource)damageSource);
 				}
 				
 				if (extDamageSource == null || extDamageSource.getStunType() != StunType.HOLD) {
@@ -178,7 +176,7 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 									this.playAnimationSynchronized(Animations.ENDERMAN_TP_EMERGENCE, 0.0F);
 								}
 								
-								return new AttackResult(AttackResult.ResultType.FAILED, amount);
+								return AttackResult.blocked(amount);
 							}
 						}
 					}
@@ -255,16 +253,20 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 	
 	@Override
 	public StaticAnimation getHitAnimation(StunType stunType) {
-		if (stunType == StunType.LONG) {
-			return Animations.ENDERMAN_HIT_LONG;
-		} else {
+		switch(stunType) {
+		case SHORT:
 			return Animations.ENDERMAN_HIT_SHORT;
+		case LONG:
+			return Animations.ENDERMAN_HIT_LONG;
+		case HOLD:
+			return Animations.ENDERMAN_HIT_SHORT;
+		case KNOCKDOWN:
+			return Animations.ENDERMAN_NEUTRALIZED;
+		case NEUTRALIZE:
+			return Animations.ENDERMAN_NEUTRALIZED;
+		default:
+			return null;
 		}
-	}
-	
-	@Override
-	public <M extends Model> M getEntityModel(Models<M> modelDB) {
-		return modelDB.enderman;
 	}
 	
 	static class EndermanTeleportMove extends CombatBehaviorGoal<EndermanPatch> {

@@ -2,6 +2,8 @@ package yesman.epicfight.client;
 
 import javax.annotation.Nullable;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -12,11 +14,17 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientEngine {
-	public static ClientEngine instance;
+	private static ClientEngine instance;
+	
+	public static ClientEngine getInstance() {
+		return instance;
+	}
+	
 	public Minecraft minecraft;
 	public RenderEngine renderEngine;
 	public ControllEngine controllEngine;
 	private boolean armorModelDebuggingMode;
+	private boolean triangleDrawingMode;
 	
 	public ClientEngine() {
 		instance = this;
@@ -36,6 +44,20 @@ public class ClientEngine {
 	
 	@Nullable
 	public LocalPlayerPatch getPlayerPatch() {
-		return (LocalPlayerPatch) this.minecraft.player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+		return EpicFightCapabilities.getEntityPatch(this.minecraft.player, LocalPlayerPatch.class);
+	}
+	
+	public void turnOnTriangleDrawingMode(PoseStack stack) {
+		this.triangleDrawingMode = true;
+		stack.pushPose();
+	}
+	
+	public void turnOffTriangleDrawingMode(PoseStack stack) {
+		this.triangleDrawingMode = false;
+		stack.popPose();
+	}
+	
+	public boolean isTriangleDrawingMode() {
+		return this.triangleDrawingMode;
 	}
 }

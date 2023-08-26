@@ -1,15 +1,18 @@
 package yesman.epicfight.server.commands;
 
 import java.util.Collection;
+import java.util.Locale;
 
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
+import net.minecraft.commands.arguments.selector.EntitySelector;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import yesman.epicfight.network.EpicFightNetworkManager;
@@ -19,6 +22,7 @@ import yesman.epicfight.network.server.SPRemoveSkill;
 import yesman.epicfight.server.commands.arguments.SkillArgument;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillContainer;
+import yesman.epicfight.skill.SkillSlot;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
@@ -28,14 +32,37 @@ public class PlayerSkillCommand {
 	private static final SimpleCommandExceptionType ERROR_CLEAR_FAILED = new SimpleCommandExceptionType(new TranslatableComponent("commands.epicfight.skill.clear.failed"));
 	
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+		RequiredArgumentBuilder<CommandSourceStack, EntitySelector> addCommandBuilder = Commands.argument("targets", EntityArgument.players());
+		RequiredArgumentBuilder<CommandSourceStack, EntitySelector> removeCommandBuilder = Commands.argument("targets", EntityArgument.players());
+		
+		for (SkillSlot skillSlot : SkillSlot.ENUM_MANAGER.universalValues()) {
+			if (skillSlot.category().learnable()) {
+				addCommandBuilder
+					.then(Commands.literal(skillSlot.toString().toLowerCase(Locale.ROOT))
+					.then(Commands.argument("skill", SkillArgument.skill(skillSlot.category()))
+					.executes((commandContext) -> {
+						return addSkill(commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), skillSlot, SkillArgument.getSkill(commandContext, "skill"));
+					})));
+				
+				removeCommandBuilder
+					.then(Commands.literal(skillSlot.toString().toLowerCase(Locale.ROOT))
+					.executes((commandContext) -> {
+						return removeSkill(commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), skillSlot, null);
+					})
+					.then(Commands.argument("skill", SkillArgument.skill(skillSlot.category()))
+					.executes((commandContext) -> {
+						return removeSkill(commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), skillSlot, SkillArgument.getSkill(commandContext, "skill"));
+					})));
+			}
+		}
+		
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("skill").requires((commandSourceStack) -> commandSourceStack.hasPermission(2))
-			.then(Commands.literal("clear").then(Commands.argument("targets", EntityArgument.players()).executes((commandContext) -> {
-				return clearSkill(commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"));
-			}))).then(Commands.literal("add").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("skill", SkillArgument.skill()).executes((commandContext) -> {
-				return addSkill(commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), SkillArgument.getSkill(commandContext, "skill"));
-			})))).then(Commands.literal("remove").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("skill", SkillArgument.skill()).executes((commandContext) -> {
-				return removeSkill(commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), SkillArgument.getSkill(commandContext, "skill"));
-			}))));
+			.then(Commands.literal("clear")
+			.then(Commands.argument("targets", EntityArgument.players())))
+			.then(Commands.literal("add")
+			.then(addCommandBuilder))
+			.then(Commands.literal("remove")
+			.then(removeCommandBuilder));
 		
 		dispatcher.register(Commands.literal("epicfight").then(builder));
 	}
@@ -44,7 +71,7 @@ public class PlayerSkillCommand {
 		int i = 0;
 		
 		for (ServerPlayer player : targets) {
-			ServerPlayerPatch playerpatch = (ServerPlayerPatch)player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+			ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(player, ServerPlayerPatch.class);
 			playerpatch.getSkillCapability().clear();
 			EpicFightNetworkManager.sendToPlayer(new SPClearSkills(), player);
 			i++;
@@ -63,18 +90,18 @@ public class PlayerSkillCommand {
 		return i;
 	}
 	
-	public static int addSkill(CommandSourceStack commandSourceStack, Collection<? extends ServerPlayer> targets, Skill skill) throws CommandSyntaxException {
+	public static int addSkill(CommandSourceStack commandSourceStack, Collection<? extends ServerPlayer> targets, SkillSlot slot, Skill skill) throws CommandSyntaxException {
 		int i = 0;
 		
 		for (ServerPlayer player : targets) {
-			ServerPlayerPatch playerpatch = (ServerPlayerPatch)player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+			ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(player, ServerPlayerPatch.class);
 			
-			if (playerpatch.getSkillCapability().skillContainers[skill.getCategory().universalOrdinal()].setSkill(skill)) {
+			if (playerpatch.getSkillCapability().skillContainers[slot.universalOrdinal()].setSkill(skill)) {
 				if (skill.getCategory().learnable()) {
 					playerpatch.getSkillCapability().addLearnedSkill(skill);
 				}
 				
-				EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(skill.getCategory().universalOrdinal(), skill.toString(), SPChangeSkill.State.ENABLE), player);
+				EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(slot, skill.toString(), SPChangeSkill.State.ENABLE), player);
 				i++;
 			}
 		}
@@ -92,24 +119,33 @@ public class PlayerSkillCommand {
 		return i;
 	}
 	
-	public static int removeSkill(CommandSourceStack commandSourceStack, Collection<? extends ServerPlayer> targets, Skill skill) throws CommandSyntaxException {
+	public static int removeSkill(CommandSourceStack commandSourceStack, Collection<? extends ServerPlayer> targets, SkillSlot slot, Skill skill) throws CommandSyntaxException {
 		int i = 0;
 		
 		for (ServerPlayer player : targets) {
-			ServerPlayerPatch playerpatch = (ServerPlayerPatch)player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+			ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(player, ServerPlayerPatch.class);
 			
 			if (playerpatch != null) {
-				if (playerpatch.getSkillCapability().removeLearnedSkill(skill)) {
-					SkillContainer skillContainer = playerpatch.getSkillCapability().skillContainers[skill.getCategory().universalOrdinal()];
+				if (skill == null) {
+					SkillContainer skillContainer = playerpatch.getSkill(slot);
+					skill = skillContainer.getSkill();
 					
-					if (skillContainer.getSkill() == skill) {
+					if (skill != null) {
 						skillContainer.setSkill(null);
+						EpicFightNetworkManager.sendToPlayer(new SPRemoveSkill(skill.toString(), slot), player);
+						i++;
 					}
-					
-					EpicFightNetworkManager.sendToPlayer(new SPRemoveSkill(skill.toString()), player);
-					i++;
+				} else {
+					if (playerpatch.getSkillCapability().removeLearnedSkill(skill)) {
+						SkillContainer skillContainer = playerpatch.getSkill(slot);
+						
+						if (skillContainer.getSkill() == skill) {
+							skillContainer.setSkill(null);
+							EpicFightNetworkManager.sendToPlayer(new SPRemoveSkill(skill.toString(), slot), player);
+							i++;
+						}
+					}
 				}
-				
 			}
 		}
 		

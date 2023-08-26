@@ -17,6 +17,8 @@ import com.google.gson.JsonElement;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
 
+import io.netty.util.internal.StringUtil;
+import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.StringTag;
@@ -35,9 +37,14 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
+import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.Meshes;
+import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.client.ClientEngine;
+import yesman.epicfight.client.mesh.HumanoidMesh;
+import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.model.armature.HumanoidArmature;
 import yesman.epicfight.network.server.SPDatapackSync;
 import yesman.epicfight.world.capabilities.entitypatch.CustomHumanoidMobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.CustomMobPatch;
@@ -47,7 +54,8 @@ import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
-import yesman.epicfight.world.capabilities.provider.ProviderEntity;
+import yesman.epicfight.world.capabilities.provider.EntityPatchProvider;
+import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors.Behavior;
@@ -76,7 +84,6 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			}
 			
 			EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(registryName);
-			
 			CompoundTag tag = null;
 			
 			try {
@@ -85,12 +92,13 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 				e.printStackTrace();
 			}
 			
-			MOB_PATCH_PROVIDERS.put(entityType, deserialize(tag, false));
-			ProviderEntity.putCustomEntityPatch(entityType, (entity) -> () -> MOB_PATCH_PROVIDERS.get(entity.getType()).get(entity));
+			MOB_PATCH_PROVIDERS.put(entityType, deserialize(entityType, tag, false));
+			
+			EntityPatchProvider.putCustomEntityPatch(entityType, (entity) -> () -> MOB_PATCH_PROVIDERS.get(entity.getType()).get(entity));
 			TAGMAP.put(entityType, filterClientData(tag));
 			
 			if (EpicFightMod.isPhysicalClient()) {
-				ClientEngine.instance.renderEngine.registerCustomEntityRenderer(entityType, tag.contains("preset") ? tag.getString("preset") : tag.getString("renderer"));
+				ClientEngine.getInstance().renderEngine.registerCustomEntityRenderer(entityType, tag.contains("preset") ? tag.getString("preset") : tag.getString("renderer"));
 			}
 		}
 	}
@@ -151,7 +159,6 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 	}
 	
 	public static class CustomMobPatchProvider extends AbstractMobPatchProvider {
-		protected ResourceLocation modelLocation;
 		protected CombatBehaviors.Builder<?> combatBehaviorsBuilder;
 		protected List<Pair<LivingMotion, StaticAnimation>> defaultAnimations;
 		protected Map<StunType, StaticAnimation> stunAnimations;
@@ -164,10 +171,6 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		@SuppressWarnings("rawtypes")
 		public EntityPatch<?> get(Entity entity) {
 			return new CustomMobPatch(this.faction, this);
-		}
-		
-		public ResourceLocation getModelLocation() {
-			return this.modelLocation;
 		}
 
 		public CombatBehaviors.Builder<?> getCombatBehaviorsBuilder() {
@@ -195,21 +198,21 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		}
 	}
 	
-	public static AbstractMobPatchProvider deserialize(CompoundTag tag, boolean clientSide) {
+	public static AbstractMobPatchProvider deserialize(EntityType<?> entityType, CompoundTag tag, boolean clientSide) {
 		AbstractMobPatchProvider provider = null;
 		int i = 0;
 		boolean hasBranch = tag.contains(String.format("branch_%d", i));
 		
 		if (hasBranch) {
 			provider = new BranchProvider();
-			((BranchProvider)provider).defaultProvider = deserializeMobPatchProvider(tag, clientSide);
+			((BranchProvider)provider).defaultProvider = deserializeMobPatchProvider(entityType, tag, clientSide);
 		} else {
-			provider = deserializeMobPatchProvider(tag, clientSide);
+			provider = deserializeMobPatchProvider(entityType, tag, clientSide);
 		}
 		
 		while (hasBranch) {
 			CompoundTag branchTag = tag.getCompound(String.format("branch_%d", i));
-			((BranchProvider)provider).providers.add(Pair.of(deserializePredicate(branchTag.getCompound("condition")), deserialize(branchTag, clientSide)));
+			((BranchProvider)provider).providers.add(Pair.of(deserializePredicate(branchTag.getCompound("condition")), deserialize(entityType, branchTag, clientSide)));
 			hasBranch = tag.contains(String.format("branch_%d", ++i));
 		}
 		
@@ -241,14 +244,14 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		return predicate;
 	}
 	
-	public static AbstractMobPatchProvider deserializeMobPatchProvider(CompoundTag tag, boolean clientSide) {
+	public static AbstractMobPatchProvider deserializeMobPatchProvider(EntityType<?> entityType, CompoundTag tag, boolean clientSide) {
 		boolean disabled = tag.contains("disabled") ? tag.getBoolean("disabled") : false;
 		
 		if (disabled) {
 			return new NullPatchProvider();
 		} else {
 			if (tag.contains("preset")) {
-				Function<Entity, Supplier<EntityPatch<?>>> preset = ProviderEntity.get(tag.getString("preset"));
+				Function<Entity, Supplier<EntityPatch<?>>> preset = EntityPatchProvider.get(tag.getString("preset"));
 				MobPatchPresetProvider provider = new MobPatchPresetProvider();
 				provider.presetProvider = preset;
 				return provider;
@@ -256,7 +259,20 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 				boolean humanoid = tag.getBoolean("isHumanoid") ? tag.getBoolean("isHumanoid") : false;
 				CustomMobPatchProvider provider = humanoid ? new CustomHumanoidMobPatchProvider() : new CustomMobPatchProvider();
 				provider.attributeValues = deserializeAttributes(tag.getCompound("attributes"));
-				provider.modelLocation = new ResourceLocation(tag.getString("model"));
+				ResourceLocation modelLocation = new ResourceLocation(tag.getString("model"));
+				ResourceLocation armatureLocation = new ResourceLocation(tag.getString("armature"));
+				
+				modelLocation = new ResourceLocation(modelLocation.getNamespace(), "animmodels/" + modelLocation.getPath() + ".json");
+				armatureLocation = new ResourceLocation(armatureLocation.getNamespace(), "animmodels/" + armatureLocation.getPath() + ".json");
+				
+				if (EpicFightMod.isPhysicalClient()) {
+					Minecraft mc = Minecraft.getInstance();
+					Meshes.getOrCreateAnimatedMesh(mc.getResourceManager(), modelLocation, humanoid ? AnimatedMesh::new : HumanoidMesh::new);
+					Armatures.registerEntityTypeArmature(entityType, Armatures.getOrCreateArmature(mc.getResourceManager(), armatureLocation, humanoid ? Armature::new : HumanoidArmature::new));
+				} else {
+					Armatures.registerEntityTypeArmature(entityType, Armatures.getOrCreateArmature(null, armatureLocation, humanoid ? Armature::new : HumanoidArmature::new));
+				}
+				
 				provider.defaultAnimations = deserializeDefaultAnimations(tag.getCompound("default_livingmotions"));
 				provider.faction = Faction.valueOf(tag.getString("faction").toUpperCase(Locale.ROOT));
 				provider.scale = tag.getCompound("attributes").contains("scale") ? (float)tag.getCompound("attributes").getDouble("scale") : 1.0F;
@@ -311,11 +327,14 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 	
 	public static Map<StunType, StaticAnimation> deserializeStunAnimations(CompoundTag tag) {
 		Map<StunType, StaticAnimation> stunAnimations = Maps.newHashMap();
-		stunAnimations.put(StunType.SHORT, EpicFightMod.getInstance().animationManager.findAnimationByPath(tag.getString("short")));
-		stunAnimations.put(StunType.LONG, EpicFightMod.getInstance().animationManager.findAnimationByPath(tag.getString("long")));
-		stunAnimations.put(StunType.FALL, EpicFightMod.getInstance().animationManager.findAnimationByPath(tag.getString("fall")));
-		stunAnimations.put(StunType.KNOCKDOWN, EpicFightMod.getInstance().animationManager.findAnimationByPath(tag.getString("knockdown")));
-		stunAnimations.put(StunType.HOLD, EpicFightMod.getInstance().animationManager.findAnimationByPath(tag.getString("short")));
+		
+		for (StunType stunType : StunType.values()) {
+			String lowerCaseName = tag.getString(stunType.name().toLowerCase(Locale.ROOT));
+			
+			if (!StringUtil.isNullOrEmpty(lowerCaseName)) {
+				stunAnimations.put(stunType, EpicFightMod.getInstance().animationManager.findAnimationByPath(lowerCaseName));
+			}
+		}
 		
 		return stunAnimations;
 	}
@@ -325,6 +344,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		attributes.put(EpicFightAttributes.IMPACT.get(), tag.contains("impact", 6) ? tag.getDouble("impact") : 0.5D);
 		attributes.put(EpicFightAttributes.ARMOR_NEGATION.get(), tag.contains("armor_negation", 6) ? tag.getDouble("armor_negation") : 0.0D);
 		attributes.put(EpicFightAttributes.MAX_STRIKES.get(), (double)(tag.contains("max_strikes", 3) ? tag.getInt("max_strikes") : 1));
+		
 		if (tag.contains("attack_damage", 6)) {
 			attributes.put(Attributes.ATTACK_DAMAGE, tag.getDouble("attack_damage"));
 		}
@@ -521,7 +541,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		return tagStream;
 	}
 	
-	public static int getTagSize() {
+	public static int getTagCount() {
 		return TAGMAP.size();
 	}
 	
@@ -535,11 +555,11 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			}
 			
 			EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(tag.getString("id")));
-			MOB_PATCH_PROVIDERS.put(entityType, deserialize(tag, true));
-			ProviderEntity.putCustomEntityPatch(entityType, (entity) -> () -> MOB_PATCH_PROVIDERS.get(entity.getType()).get(entity));
+			MOB_PATCH_PROVIDERS.put(entityType, deserialize(entityType, tag, true));
+			EntityPatchProvider.putCustomEntityPatch(entityType, (entity) -> () -> MOB_PATCH_PROVIDERS.get(entity.getType()).get(entity));
 			
 			if (!disabled) {
-				ClientEngine.instance.renderEngine.registerCustomEntityRenderer(entityType, tag.contains("preset") ? tag.getString("preset") : tag.getString("renderer"));
+				ClientEngine.getInstance().renderEngine.registerCustomEntityRenderer(entityType, tag.contains("preset") ? tag.getString("preset") : tag.getString("renderer"));
 			}
 		}
 	}

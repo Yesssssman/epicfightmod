@@ -41,32 +41,46 @@
         "sounds":[{"name":"epicfight:entity/hit/blade_rush", "stream":true}]
     },
     
-    "entity.common.whoosh":
+    "entity.weapon.whoosh":
     {
         "category":"master",
-        "subtitle":"entity.common.whoosh",
-        "sounds":[{"name":"epicfight:entity/common/whoosh", "stream":true}]
+        "subtitle":"entity.weapon.whoosh",
+        "sounds":[{"name":"epicfight:entity/weapon/whoosh", "stream":true}]
     },
     
-    "entity.common.whoosh_hard":
+    "entity.weapon.whoosh_hard":
     {
         "category":"master",
-        "subtitle":"entity.common.whoosh_hard",
-        "sounds":[{"name":"epicfight:entity/common/whoosh_hard", "stream":true}]
+        "subtitle":"entity.weapon.whoosh_hard",
+        "sounds":[{"name":"epicfight:entity/weapon/whoosh_hard", "stream":true}]
     },
     
-    "entity.common.whoosh_sharp":
+    "entity.weapon.whoosh_small":
     {
         "category":"master",
-        "subtitle":"entity.common.whoosh_sharp",
-        "sounds":[{"name":"epicfight:entity/common/whoosh_sharp", "stream":true}]
+        "subtitle":"entity.weapon.whoosh_small",
+        "sounds":[{"name":"epicfight:entity/weapon/whoosh_small", "stream":true}]
     },
     
-    "entity.common.sword_in":
+    "entity.weapon.whoosh_sharp":
     {
         "category":"master",
-        "subtitle":"entity.common.sword_in",
-        "sounds":[{"name":"epicfight:entity/common/sword_in", "stream":true}]
+        "subtitle":"entity.weapon.whoosh_sharp",
+        "sounds":[{"name":"epicfight:entity/weapon/whoosh_sharp", "stream":true}]
+    },
+    
+    "entity.weapon.whoosh_rod":
+    {
+        "category":"master",
+        "subtitle":"entity.weapon.whoosh_rod",
+        "sounds":[{"name":"epicfight:entity/weapon/whoosh_rod", "stream":true}]
+    },
+    
+    "entity.weapon.sword_in":
+    {
+        "category":"master",
+        "subtitle":"entity.weapon.sword_in",
+        "sounds":[{"name":"epicfight:entity/weapon/sword_in", "stream":true}]
     },
     
     "entity.enderdragon.dragon_breath":
@@ -95,6 +109,13 @@
         "category":"master",
         "subtitle":"entity.wither.wither_spell_armor",
         "sounds":[{"name":"epicfight:entity/wither/wither_spell_armor", "stream":true, "attenuation_distance":50}]
+    },
+    
+    "sfx.ground_slam_small":
+    {
+        "category":"master",
+        "subtitle":"sfx.ground_slam_small",
+        "sounds":[{"name":"epicfight:sfx/ground_slam_small", "stream":true, "attenuation_distance":25}]
     },
     
     "sfx.ground_slam":
@@ -139,10 +160,45 @@
         "sounds":[{"name":"epicfight:sfx/nether_star_glitter", "stream":true, "attenuation_distance":12}]
     },
     
-    "sfx.fast_move":
+    "sfx.entity_move":
     {
         "category":"master",
-        "subtitle":"sfx.fast_move",
-        "sounds":[{"name":"epicfight:sfx/fast_move", "stream":true, "attenuation_distance":50}]
+        "subtitle":"sfx.entity_move",
+        "sounds":[{"name":"epicfight:sfx/entity_move", "stream":true, "attenuation_distance":50}]
+    },
+    
+    "sfx.big_entity_move":
+    {
+        "category":"master",
+        "subtitle":"sfx.big_entity_move",
+        "sounds":[{"name":"epicfight:sfx/big_entity_move", "stream":true, "attenuation_distance":50}]
+    },
+    
+    "sfx.no_sound":
+    {
+        "category":"master",
+        "subtitle":"sfx.no_sound",
+        "sounds":[{"name":"epicfight:sfx/no_sound", "stream":true, "attenuation_distance":50}]
+    },
+    
+    "skill.forbidden_strength":
+    {
+        "category":"master",
+        "subtitle":"skill.forbidden_strength",
+        "sounds":[{"name":"epicfight:entity/skill/forbidden_strength", "stream":true, "attenuation_distance":50}]
+    },
+    
+    "skill.roll":
+    {
+        "category":"master",
+        "subtitle":"skill.roll",
+        "sounds":[{"name":"epicfight:entity/skill/roll", "stream":true}]
+    },
+    
+    "skill.rocket_jump":
+    {
+        "category":"master",
+        "subtitle":"skill.rocket_jump",
+        "sounds":[{"name":"epicfight:entity/skill/rocket_jump", "stream":true, "attenuation_distance":50}]
     }
 }

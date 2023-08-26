@@ -1,6 +1,6 @@
 package yesman.epicfight.gameasset;
 
-import yesman.epicfight.network.server.SPPlayAnimationAndSyncTransform;
+import yesman.epicfight.network.server.SPMoveAndPlayAnimation;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.boss.WitherPatch;
@@ -62,9 +62,9 @@ public class MobCombatBehaviors {
 	public static final CombatBehaviors.Builder<HumanoidMobPatch<?>> HUMANOID_KATANA = CombatBehaviors.<HumanoidMobPatch<?>>builder()
 		.newBehaviorSeries(
 			BehaviorSeries.<HumanoidMobPatch<?>>builder().weight(100.0F).canBeInterrupted(true).looping(false)
-				.nextBehavior(Behavior.<HumanoidMobPatch<?>>builder().animationBehavior(Animations.BIPED_MOB_KATANA1).withinEyeHeight().withinDistance(0.0D, 2.5D))
-				.nextBehavior(Behavior.<HumanoidMobPatch<?>>builder().animationBehavior(Animations.BIPED_MOB_KATANA2).withinEyeHeight().withinDistance(0.0D, 2.5D))
-				.nextBehavior(Behavior.<HumanoidMobPatch<?>>builder().animationBehavior(Animations.BIPED_MOB_KATANA3).withinEyeHeight().withinDistance(0.0D, 2.5D))
+				.nextBehavior(Behavior.<HumanoidMobPatch<?>>builder().animationBehavior(Animations.BIPED_MOB_UCHIGATANA1).withinEyeHeight().withinDistance(0.0D, 2.5D))
+				.nextBehavior(Behavior.<HumanoidMobPatch<?>>builder().animationBehavior(Animations.BIPED_MOB_UCHIGATANA2).withinEyeHeight().withinDistance(0.0D, 2.5D))
+				.nextBehavior(Behavior.<HumanoidMobPatch<?>>builder().animationBehavior(Animations.BIPED_MOB_UCHIGATANA3).withinEyeHeight().withinDistance(0.0D, 2.5D))
 		);
 	
 	public static final CombatBehaviors.Builder<HumanoidMobPatch<?>> HUMANOID_LONGSWORD = CombatBehaviors.<HumanoidMobPatch<?>>builder()
@@ -190,20 +190,20 @@ public class MobCombatBehaviors {
 			BehaviorSeries.<EndermanPatch>builder().weight(40.0F).canBeInterrupted(false).looping(false)
 				.nextBehavior(Behavior.<EndermanPatch>builder().animationBehavior(Animations.ENDERMAN_KICK_COMBO).withinEyeHeight().withinDistance(0.0D, 2.0D))
 		).newBehaviorSeries(
-			BehaviorSeries.<EndermanPatch>builder().weight(10.0F).cooldown(60).canBeInterrupted(false).looping(false)
-				.nextBehavior(Behavior.<EndermanPatch>builder().animationBehavior(Animations.ENDERMAN_KICK1).randomChance(0.08F).withinEyeHeight().withinDistance(3.0D, 4.0D))
+			BehaviorSeries.<EndermanPatch>builder().weight(10.0F).cooldown(100).canBeInterrupted(false).looping(false)
+				.nextBehavior(Behavior.<EndermanPatch>builder().animationBehavior(Animations.ENDERMAN_KICK1).randomChance(0.16F).withinEyeHeight().withinDistance(1.6D, 5.0D))
 		).newBehaviorSeries(
-			BehaviorSeries.<EndermanPatch>builder().weight(10.0F).cooldown(30).canBeInterrupted(false).looping(false)
+			BehaviorSeries.<EndermanPatch>builder().weight(10.0F).cooldown(100).canBeInterrupted(false).looping(false)
 				.nextBehavior(Behavior.<EndermanPatch>builder().animationBehavior(Animations.ENDERMAN_KICK2).randomChance(0.16F).withinEyeHeight().withinDistance(0.0D, 4.0D))
 		);
 	
 	public static final CombatBehaviors.Builder<EndermanPatch> ENDERMAN_TELEPORT = CombatBehaviors.<EndermanPatch>builder()
 		.newBehaviorSeries(
 			BehaviorSeries.<EndermanPatch>builder().weight(50.0F).canBeInterrupted(false).looping(false)
-				.nextBehavior(Behavior.<EndermanPatch>builder().animationBehavior(Animations.ENDERMAN_TP_KICK1).randomChance(0.1F).withinEyeHeight().withinDistance(8.0F, 100.0F).packetProvider(SPPlayAnimationAndSyncTransform::new))
+				.nextBehavior(Behavior.<EndermanPatch>builder().animationBehavior(Animations.ENDERMAN_TP_KICK1).randomChance(0.1F).withinEyeHeight().withinDistance(8.0F, 100.0F).packetProvider(SPMoveAndPlayAnimation::new))
 		).newBehaviorSeries(
 			BehaviorSeries.<EndermanPatch>builder().weight(50.0F).canBeInterrupted(false).looping(false)
-				.nextBehavior(Behavior.<EndermanPatch>builder().animationBehavior(Animations.ENDERMAN_TP_KICK2).randomChance(0.1F).withinEyeHeight().withinDistance(8.0F, 100.0F).packetProvider(SPPlayAnimationAndSyncTransform::new))
+				.nextBehavior(Behavior.<EndermanPatch>builder().animationBehavior(Animations.ENDERMAN_TP_KICK2).randomChance(0.1F).withinEyeHeight().withinDistance(8.0F, 100.0F).packetProvider(SPMoveAndPlayAnimation::new))
 		);
 	
 	public static final CombatBehaviors.Builder<EndermanPatch> ENDERMAN_RAGE = CombatBehaviors.<EndermanPatch>builder()

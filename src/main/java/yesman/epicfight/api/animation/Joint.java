@@ -3,15 +3,19 @@ package yesman.epicfight.api.animation;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.google.common.collect.Lists;
+
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 
 public class Joint {
+	public static final Joint EMPTY = new Joint("empty", -1, new OpenMatrix4f());
+	
 	private final List<Joint> subJoints = new ArrayList<Joint> ();
 	private final int jointId;
 	private final String jointName;
 	private final OpenMatrix4f localTransform;
-	private OpenMatrix4f inversedTransform = new OpenMatrix4f();
-	private OpenMatrix4f animatedTransform = new OpenMatrix4f();
+	private OpenMatrix4f toOrigin = new OpenMatrix4f();
+	private OpenMatrix4f poseTransform = new OpenMatrix4f();
 	
 	public Joint(String name, int jointID, OpenMatrix4f localTransform) {
 		this.jointId = jointID;
@@ -24,24 +28,36 @@ public class Joint {
 			this.subJoints.add(joint);
 		}
 	}
-	
-	public void setAnimatedTransform(OpenMatrix4f animatedTransform) {
-		this.animatedTransform.load(animatedTransform);
-	}
 
-	public void initializeAnimationTransform() {
-		this.animatedTransform.setIdentity();
+	public void resetPoseTransforms() {
+		this.poseTransform.setIdentity();
+		
 		for (Joint joint : this.subJoints) {
-			joint.initializeAnimationTransform();
+			joint.resetPoseTransforms();
 		}
 	}
 	
-	public void setInversedModelTransform(OpenMatrix4f parentTransform) {
-		OpenMatrix4f modelTransform = OpenMatrix4f.mul(parentTransform, this.localTransform, null);
-		OpenMatrix4f.invert(modelTransform, this.inversedTransform);
+	public List<Joint> getAllJoints() {
+		List<Joint> list = Lists.newArrayList();
+		this.getAllJoints(list);
+		
+		return list;
+	}
+	
+	private void getAllJoints(List<Joint> list) {
+		list.add(this);
 		
 		for (Joint joint : this.subJoints) {
-			joint.setInversedModelTransform(modelTransform);
+			joint.getAllJoints(list);
+		}
+	}
+	
+	public void initOriginTransform(OpenMatrix4f parentTransform) {
+		OpenMatrix4f modelTransform = OpenMatrix4f.mul(parentTransform, this.localTransform, null);
+		OpenMatrix4f.invert(modelTransform, this.toOrigin);
+		
+		for (Joint joint : this.subJoints) {
+			joint.initOriginTransform(modelTransform);
 		}
 	}
 	
@@ -49,12 +65,12 @@ public class Joint {
 		return this.localTransform;
 	}
 
-	public OpenMatrix4f getAnimatedTransform() {
-		return this.animatedTransform;
+	public OpenMatrix4f getPoseTransform() {
+		return this.poseTransform;
 	}
 
-	public OpenMatrix4f getInversedModelTransform() {
-		return this.inversedTransform;
+	public OpenMatrix4f getToOrigin() {
+		return this.toOrigin;
 	}
 	
 	public List<Joint> getSubJoints() {
@@ -98,5 +114,6 @@ public class Joint {
 		for (Joint joint : subJoints) {
 			joint.showInfo();
 		}
-	}**/
+	}
+	**/
 }

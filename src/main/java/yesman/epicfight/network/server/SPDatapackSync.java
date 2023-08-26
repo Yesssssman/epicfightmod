@@ -7,12 +7,13 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
+import yesman.epicfight.api.data.reloader.SkillManager;
 
 public class SPDatapackSync {
-	private int count;
-	private int index;
-	private SPDatapackSync.Type type;
-	private CompoundTag[] tags;
+	protected int count;
+	protected int index;
+	protected SPDatapackSync.Type type;
+	protected CompoundTag[] tags;
 	
 	public SPDatapackSync() {
 		this(0, SPDatapackSync.Type.WEAPON);
@@ -59,6 +60,8 @@ public class SPDatapackSync {
 		ctx.get().enqueueWork(() -> {
 			if (msg.getType() == Type.MOB) {
 				MobPatchReloadListener.processServerPacket(msg);
+			} else if (msg.getType() == Type.SKILL_PARAMS) {
+				SkillManager.processServerPacket((SPDatapackSyncSkill)msg);
 			} else {
 				ItemCapabilityReloadListener.processServerPacket(msg);
 			}
@@ -68,6 +71,6 @@ public class SPDatapackSync {
 	}
 	
 	public static enum Type {
-		ARMOR, WEAPON, MOB
+		ARMOR, WEAPON, MOB, SKILL_PARAMS
 	}
 }

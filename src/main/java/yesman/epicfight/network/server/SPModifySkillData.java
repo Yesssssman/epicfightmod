@@ -4,48 +4,56 @@ import java.util.function.Supplier;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkEvent;
-import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.skill.SkillDataManager;
 import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
+import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class SPModifySkillData {
 	private Object value;
 	private int slot;
-	private int id;
+	private int keyId;
+	private int entityId;
 	
 	public SPModifySkillData() {
 		this.value = null;
 	}
 	
-	public SPModifySkillData(SkillDataKey<?> key, int slot, Object value) {
-		this.id = key.getId();
+	public SPModifySkillData(SkillDataKey<?> key, int slot, Object value, int entityId) {
+		this.keyId = key.getId();
 		this.slot = slot;
 		this.value = value;
+		this.entityId = entityId;
 	}
 	
 	public static SPModifySkillData fromBytes(FriendlyByteBuf buf) {
 		int id = buf.readInt();
 		int slot = buf.readInt();
+		int entityId = buf.readInt();
 		Object value = SkillDataKey.findById(id).getValueType().readFromBuffer(buf);
-		return new SPModifySkillData(SkillDataKey.findById(id), slot, value);
+		
+		return new SPModifySkillData(SkillDataKey.findById(id), slot, value, entityId);
 	}
 	
 	public static void toBytes(SPModifySkillData msg, FriendlyByteBuf buf) {
-		buf.writeInt(msg.id);
+		buf.writeInt(msg.keyId);
 		buf.writeInt(msg.slot);
-		SkillDataKey.findById(msg.id).getValueType().writeToBuffer(buf, msg.value);
+		buf.writeInt(msg.entityId);
+		SkillDataKey.findById(msg.keyId).getValueType().writeToBuffer(buf, msg.value);
 	}
 	
 	@SuppressWarnings("deprecation")
 	public static void handle(SPModifySkillData msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
 			Minecraft mc = Minecraft.getInstance();
-			LocalPlayerPatch playerpatch = (LocalPlayerPatch) mc.player.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-			if (playerpatch != null) {
+			Entity entity = mc.level.getEntity(msg.entityId);
+			
+			if (entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null) instanceof PlayerPatch<?> playerpatch) {
 				SkillDataManager dataManager = playerpatch.getSkill(msg.slot).getDataManager();
-				dataManager.setDataRawtype(SkillDataKey.findById(msg.id), msg.value);
+				SkillDataKey<?> dataKey = SkillDataKey.findById(msg.keyId);
+				dataManager.setDataRawtype(dataKey, msg.value);
 			}
 		});
 		ctx.get().setPacketHandled(true);

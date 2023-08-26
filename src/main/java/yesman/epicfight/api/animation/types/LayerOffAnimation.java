@@ -5,8 +5,9 @@ import java.util.Optional;
 import net.minecraft.client.Minecraft;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.property.AnimationProperty;
+import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.animation.Layer.Priority;
-import yesman.epicfight.api.client.animation.JointMask.BindModifier;
+import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -24,7 +25,7 @@ public class LayerOffAnimation extends DynamicAnimation {
 	}
 	
 	@Override
-	public void end(LivingEntityPatch<?> entitypatch, boolean isEnd) {
+	public void end(LivingEntityPatch<?> entitypatch, DynamicAnimation nextAnimation, boolean isEnd) {
 		if (entitypatch.isLogicalClient()) {
 			entitypatch.getClientAnimator().baseLayer.disableLayer(this.layerPriority);
 		}
@@ -37,7 +38,7 @@ public class LayerOffAnimation extends DynamicAnimation {
 	}
 	
 	@Override
-	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, String joint) {
+	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
 		return this.lastPose.getJointTransformData().containsKey(joint);
 	}
 	
@@ -51,8 +52,8 @@ public class LayerOffAnimation extends DynamicAnimation {
 	}
 	
 	@Override
-	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, String joint) {
-		return this.lastAnimation.getBindModifier(entitypatch, joint);
+	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
+		return this.lastAnimation.getBindModifier(entitypatch, layer, joint);
 	}
 	
 	@Override

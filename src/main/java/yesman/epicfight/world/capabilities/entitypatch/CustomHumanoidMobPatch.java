@@ -17,12 +17,10 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
-import yesman.epicfight.api.model.Model;
-import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
+import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.brain.BrainRecomposer;
 import yesman.epicfight.world.entity.ai.brain.task.AnimatedCombatBehavior;
@@ -132,11 +130,6 @@ public class CustomHumanoidMobPatch<T extends PathfinderMob> extends HumanoidMob
 				this.playReboundAnimation();
 			}
 		}
-	}
-	
-	@Override
-	public <M extends Model> M getEntityModel(Models<M> modelDB) {
-		return modelDB.get(this.provider.getModelLocation());
 	}
 	
 	@Override

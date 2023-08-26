@@ -22,6 +22,7 @@ import yesman.epicfight.world.entity.WitherGhostClone;
 public class EpicFightAttributes {
 	public static final DeferredRegister<Attribute> ATTRIBUTES = DeferredRegister.create(ForgeRegistries.ATTRIBUTES, EpicFightMod.MODID);
     public static final RegistryObject<Attribute> MAX_STAMINA = ATTRIBUTES.register("staminar", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".staminar", 0.0D, 0.0D, 1024.0D).setSyncable(true));
+    public static final RegistryObject<Attribute> STAMINA_REGEN = ATTRIBUTES.register("stamina_regen", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".stamina_regen", 0.0D, 0.0D, 1024.0D).setSyncable(true));
     public static final RegistryObject<Attribute> STUN_ARMOR = ATTRIBUTES.register("stun_armor", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".stun_armor", 0.0D, 0.0D, 1024.0D).setSyncable(true));
     public static final RegistryObject<Attribute> WEIGHT = ATTRIBUTES.register("weight", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".weight", 0.0D, 0.0D, 1024.0).setSyncable(true));
     public static final RegistryObject<Attribute> MAX_STRIKES = ATTRIBUTES.register("max_strikes", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".max_strikes", 1.0D, 1.0D, 1024.0).setSyncable(true));
@@ -32,6 +33,7 @@ public class EpicFightAttributes {
 	public static final RegistryObject<Attribute> OFFHAND_MAX_STRIKES = ATTRIBUTES.register("offhand_max_strikes", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".offhand_max_strikes", 1.0D, 1.0D, 1024.0).setSyncable(true));
 	public static final RegistryObject<Attribute> OFFHAND_ARMOR_NEGATION = ATTRIBUTES.register("offhand_armor_negation", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".offhand_armor_negation", 0.0D, 0.0D, 100.0D).setSyncable(true));
 	public static final RegistryObject<Attribute> OFFHAND_IMPACT = ATTRIBUTES.register("offhand_impact", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".offhand_impact", 0.0D, 0.0D, 1024.0).setSyncable(true));
+	public static final RegistryObject<Attribute> MAX_EXECUTION_RESISTANCE = ATTRIBUTES.register("execution_resistance", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".execution_resistance", 0.0D, 0.0D, 10.0D).setSyncable(true));
 	public static final UUID ARMOR_NEGATION_MODIFIER = UUID.fromString("b0a7436e-5734-11eb-ae93-0242ac130002");
 	public static final UUID MAX_STRIKE_MODIFIER = UUID.fromString("b0a745b2-5734-11eb-ae93-0242ac130002");
 	public static final UUID IMPACT_MODIFIER = UUID.fromString("b0a746ac-5734-11eb-ae93-0242ac130002");
@@ -41,6 +43,7 @@ public class EpicFightAttributes {
 	public static void registerNewMobs(EntityAttributeCreationEvent event) {
 		event.put(EpicFightEntities.WITHER_SKELETON_MINION.get(), AbstractSkeleton.createAttributes().build());
 		event.put(EpicFightEntities.WITHER_GHOST_CLONE.get(), WitherGhostClone.createAttributes().build());
+		event.put(EpicFightEntities.DODGE_LEFT.get(), LivingEntity.createLivingAttributes().build());
 	}
 	
 	public static void modifyExistingMobs(EntityAttributeModificationEvent event) {
@@ -94,6 +97,7 @@ public class EpicFightAttributes {
     private static void player(EntityType<? extends LivingEntity> entityType, EntityAttributeModificationEvent event) {
     	humanoid(entityType, event);
 		event.add(entityType, EpicFightAttributes.MAX_STAMINA.get());
+		event.add(entityType, EpicFightAttributes.STAMINA_REGEN.get());
 	}
     
     private static void dragon(EntityType<? extends EnderDragon> entityType, EntityAttributeModificationEvent event) {

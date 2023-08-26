@@ -52,8 +52,11 @@ public class SPSpawnData {
 			Entity entity = mc.player.level.getEntity(msg.entityId);
 			
 			if (entity != null) {
-				EntityPatch<?> playerpatch = entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-				playerpatch.processSpawnData(msg.getBuffer());
+				EntityPatch<?> entitypatch = entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+				
+				if (entitypatch != null) {
+					entitypatch.processSpawnData(msg.getBuffer());
+				}
 			}
 		});
 		

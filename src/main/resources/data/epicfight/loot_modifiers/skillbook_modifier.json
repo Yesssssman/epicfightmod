@@ -5,5 +5,5 @@
 		}
 	],
 	"addition": "epicfight:skillbook",
-	"type": "epicfight:skillbook_modifier"
+	"type": "epicfight:skillbook_loot_table_modifier"
 }

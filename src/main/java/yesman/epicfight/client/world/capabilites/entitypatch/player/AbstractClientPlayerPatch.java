@@ -27,15 +27,14 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.LivingMotions;
+import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.forgeevent.UpdatePlayerMotionEvent;
-import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
@@ -46,7 +45,7 @@ import yesman.epicfight.world.capabilities.item.RangedWeaponCapability;
 public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends PlayerPatch<T> {
 	protected float prevYaw;
 	protected float bodyYaw;
-	protected float prevBodyYaw;
+	public float prevBodyYaw;
 	private Item prevHeldItem;
 	private Item prevHeldItemOffHand;
 	
@@ -62,7 +61,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 		if (this.original.getHealth() <= 0.0F) {
 			currentLivingMotion = LivingMotions.DEATH;
 		} else if (this.state.movementLocked() && considerInaction) {
-			currentLivingMotion = LivingMotions.IDLE;
+			currentLivingMotion = LivingMotions.INACTION;
 		} else {
 			ClientAnimator animator = this.getClientAnimator();
 			
@@ -88,13 +87,13 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 					else 
 						animator.baseLayer.animationPlayer.setReversed(false);
 				}
-			} else {
+			} else if (!original.getAbilities().flying) {
 				if (original.isUnderWater() && (original.yCloak - original.yCloakO) < -0.005)
 					currentLivingMotion = LivingMotions.FLOAT;
-				else if (original.yCloak - original.yCloakO < -0.25F)
+				else if (original.yCloak - original.yCloakO < -0.4F || this.isAirborneState())
 					currentLivingMotion = LivingMotions.FALL;
-				else if (original.animationSpeed > 0.01F) {
-					if (original.isShiftKeyDown())
+				else if (this.isMoving()) {
+					if (original.isCrouching())
 						currentLivingMotion = LivingMotions.SNEAK;
 					else if (original.isSprinting())
 						currentLivingMotion = LivingMotions.RUN;
@@ -109,11 +108,16 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 				} else {
 					animator.baseLayer.animationPlayer.setReversed(false);
 					
-					if (original.isShiftKeyDown())
+					if (original.isCrouching())
 						currentLivingMotion = LivingMotions.KNEEL;
 					else
 						currentLivingMotion = LivingMotions.IDLE;
 				}
+			} else {
+				if (this.isMoving())
+					currentLivingMotion = LivingMotions.CREATIVE_FLY;
+				else
+					currentLivingMotion = LivingMotions.CREATIVE_IDLE;
 			}
 		}
 		
@@ -121,7 +125,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 		CapabilityItem activeItem = this.getHoldingItemCapability(this.original.getUsedItemHand());
 		
 		if (this.original.isUsingItem()) {
-			UseAnim useAnim = this.original.getItemInHand(this.original.getUsedItemHand()).getUseAnimation();
+			UseAnim useAnim = this.original.getUseItem().getUseAnimation();
 			UseAnim secondUseAnim = activeItem.getUseAnimation(this);
 			
 			if (useAnim == UseAnim.BLOCK || secondUseAnim == UseAnim.BLOCK)
@@ -133,6 +137,12 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 				currentCompositeMotion = LivingMotions.AIM;
 			else if (useAnim == UseAnim.CROSSBOW)
 				currentCompositeMotion = LivingMotions.RELOAD;
+			else if (useAnim == UseAnim.DRINK)
+				currentCompositeMotion = LivingMotions.DRINK;
+			else if (useAnim == UseAnim.EAT)
+				currentCompositeMotion = LivingMotions.EAT;
+			else if (useAnim == UseAnim.SPYGLASS)
+				currentCompositeMotion = LivingMotions.SPECTATE;
 			else
 				currentCompositeMotion = currentLivingMotion;
 		} else {
@@ -155,7 +165,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	
 	@Override
 	protected void clientTick(LivingUpdateEvent event) {
-		this.prevYaw = this.yaw;
+		this.prevYaw = this.modelYRot;
 		this.prevBodyYaw = this.bodyYaw;
 		
 		if (this.getEntityState().inaction()) {
@@ -178,16 +188,18 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			}
 		}
 		
-		super.clientTick(event);
-		
 		/** {@link LivingDeathEvent} never fired for client players **/
 		if (this.original.deathTime == 1) {
 			this.getClientAnimator().playDeathAnimation();
 		}
 	}
 	
+	protected boolean isMoving() {
+		return Math.abs(this.original.xxa) > 0.01F || Math.abs(this.original.zza) > 0.01F;
+	}
+	
 	public void updateHeldItem(CapabilityItem mainHandCap, CapabilityItem offHandCap) {
-		this.cancelUsingItem();
+		this.cancelAnyAction();
 	}
 	
 	@Override
@@ -201,13 +213,18 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	}
 	
 	@Override
-	public <M extends Model> M getEntityModel(Models<M> modelDB) {
-		return this.original.getModelName().equals("slim") ? modelDB.bipedAlex : modelDB.biped;
+	public boolean overrideRender() {
+		return this.isBattleMode() || !EpicFightMod.CLIENT_INGAME_CONFIG.filterAnimation.getValue();
 	}
 	
 	@Override
-	public boolean shouldSkipRender() {
-		return !this.isBattleMode() && EpicFightMod.CLIENT_INGAME_CONFIG.filterAnimation.getValue();
+	public boolean consumeStamina(float amount) {
+		return true;
+	}
+	
+	@Override
+	public boolean shouldMoveOnCurrentSide(ActionAnimation actionAnimation) {
+		return false;
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -217,18 +234,24 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
         float pitch = 0;
         float prvePitch = 0;
         
-		if (this.getEntityState().inaction() || this.original.getVehicle() != null || (!original.isOnGround() && this.original.onClimbable())) {
-	        yaw = 0;
-		} else {
-			float f = MathUtils.lerpBetween(this.prevBodyYaw, this.bodyYaw, partialTick);
-			float f1 = MathUtils.lerpBetween(this.original.yHeadRotO, this.original.yHeadRot, partialTick);
-	        yaw = f1 - f;
-		}
+        UseAnim useAnim = this.original.getUseItem().getUseAnimation();
         
-		if (!(this.original.isFallFlying() || this.original.isVisuallySwimming())) {
-			prvePitch = this.original.xRotO;
-			pitch = this.original.getXRot();
-		}
+        if (this.getOriginal().isUsingItem() && (useAnim == UseAnim.DRINK || useAnim == UseAnim.EAT || useAnim == UseAnim.SPYGLASS)) {
+        	
+        } else {
+        	if (this.getEntityState().inaction() || this.original.getVehicle() != null || (!this.original.isOnGround() && this.original.onClimbable())) {
+    	        yaw = 0;
+    		} else {
+    			float f = MathUtils.lerpBetween(this.prevBodyYaw, this.bodyYaw, partialTick);
+    			float f1 = MathUtils.lerpBetween(this.original.yHeadRotO, this.original.yHeadRot, partialTick);
+    	        yaw = f1 - f;
+    		}
+            
+    		if (!(this.original.isFallFlying() || this.original.isVisuallySwimming())) {
+    			prvePitch = this.original.xRotO;
+    			pitch = this.original.getXRot();
+    		}
+        }
         
 		return MathUtils.getModelMatrixIntegral(0, 0, 0, 0, 0, 0, prvePitch, pitch, yaw, yaw, partialTick, 1, 1, 1);
 	}
@@ -236,17 +259,23 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	@Override
 	public OpenMatrix4f getModelMatrix(float partialTick) {
 		Direction direction;
+		
 		if (this.original.isAutoSpinAttack()) {
-			OpenMatrix4f mat = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0, partialTick, 1, 1, 1);
+			OpenMatrix4f mat = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0, partialTick, 0.9375F, 0.9375F, 0.9375F);
 			float yawDegree = MathUtils.lerpBetween(this.original.yRotO, this.original.getYRot(), partialTick);
 			float pitchDegree = MathUtils.lerpBetween(this.original.xRotO, this.original.getXRot(), partialTick);
-			mat.rotateDeg(-yawDegree, Vec3f.Y_AXIS).rotateDeg(-pitchDegree, Vec3f.X_AXIS).rotateDeg((this.original.tickCount + partialTick) * -55.0F, Vec3f.Z_AXIS).translate(0F, -0.39F, 0F);
 			
-            return mat;
+			mat.rotateDeg(-yawDegree, Vec3f.Y_AXIS)
+			   .rotateDeg(-pitchDegree, Vec3f.X_AXIS)
+			   .rotateDeg((this.original.tickCount + partialTick) * -55.0F, Vec3f.Z_AXIS)
+			   .translate(0F, -0.39F, 0F);
+			
+			return mat;
 		} else if (this.original.isFallFlying()) {
-			OpenMatrix4f mat = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0, partialTick, 1, 1, 1);
+			OpenMatrix4f mat = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0, partialTick, 0.9375F, 0.9375F, 0.9375F);
             float f1 = (float)this.original.getFallFlyingTicks() + partialTick;
             float f2 = Mth.clamp(f1 * f1 / 100.0F, 0.0F, 1.0F);
+            
             mat.rotateDeg(-Mth.rotLerp(partialTick, this.original.yBodyRotO, this.original.yBodyRot), Vec3f.Y_AXIS).rotateDeg(f2 * (-this.original.getXRot()), Vec3f.X_AXIS);
             
             Vec3 vec3d = this.original.getViewVector(partialTick);
@@ -260,7 +289,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
                 mat.rotate((float)-((Math.signum(d3) * Math.acos(d2))), Vec3f.Z_AXIS);
             }
 			
-            return mat;
+			return mat;
 		} else if (this.original.isSleeping()) {
 			BlockState blockstate = this.original.getFeetBlockState();
 			float yaw = 0.0F;
@@ -283,7 +312,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
             	}
 			}
 			
-			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yaw, yaw, 0, 1.0F, 1.0F, 1.0F);
+			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yaw, yaw, 0, 0.9375F, 0.9375F, 0.9375F);
 		} else if ((direction = this.getLadderDirection(this.original.getFeetBlockState(), this.original.level, this.original.blockPosition(), this.original)) != Direction.UP) {
 			float yaw = 0.0F;
 			
@@ -301,7 +330,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 				break;
 			}
 			
-			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yaw, yaw, 0.0F, 1.0F, 1.0F, 1.0F);
+			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yaw, yaw, 0.0F, 0.9375F, 0.9375F, 0.9375F);
 		} else {
 			float yaw;
 			float prevRotYaw;
@@ -314,7 +343,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 				prevRotYaw = ridingEntity.yBodyRotO;
 				rotyaw = ridingEntity.yBodyRot;
 			} else {
-				yaw = MathUtils.lerpBetween(this.prevYaw, this.yaw, partialTick);
+				yaw = MathUtils.lerpBetween(this.prevYaw, this.modelYRot, partialTick);
 				prevRotYaw = this.prevBodyYaw + yaw;
 				rotyaw = this.bodyYaw + yaw;
 			}
@@ -327,8 +356,16 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 		        pitch = f4;
 			}
 			
-			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, prevPitch, pitch, prevRotYaw, rotyaw, partialTick, 1.0F, 1.0F, 1.0F);
+			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, prevPitch, pitch, prevRotYaw, rotyaw, partialTick, 0.9375F, 0.9375F, 0.9375F);
 		}
+	}
+	
+	public void setYaw(float bodyYaw) {
+		this.bodyYaw = bodyYaw;
+	}
+	
+	public float getBodyYaw() {
+		return this.bodyYaw;
 	}
 	
 	public Direction getLadderDirection(@Nonnull BlockState state, @Nonnull Level world, @Nonnull BlockPos pos, @Nonnull LivingEntity entity) {
@@ -386,6 +423,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
                 }
             }
         }
+		
 		return Direction.UP;
 	}
 }

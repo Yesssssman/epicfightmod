@@ -21,7 +21,7 @@ public class LineCollider extends Collider {
 		this(getInitialAABB(posX, posY, posZ, vecX, vecY, vecZ), posX, posY, posZ, vecX, vecY, vecZ);
 	}
 	
-	public LineCollider(AABB outerAABB, double posX, double posY, double posZ, double vecX, double vecY, double vecZ) {
+	protected LineCollider(AABB outerAABB, double posX, double posY, double posZ, double vecX, double vecY, double vecZ) {
 		super(new Vec3(posX, posY, posZ), outerAABB);
 		this.modelVec = new Vec3(vecX, vecY, vecZ);
 		this.worldVec = new Vec3(0.0D, 0.0D, 0.0D);
@@ -119,6 +119,11 @@ public class LineCollider extends Collider {
 		}
 		
 		return true;
+	}
+	
+	@Override
+	public LineCollider deepCopy() {
+		return new LineCollider(this.modelCenter.x, this.modelCenter.y, this.modelCenter.z, this.modelVec.x, this.modelVec.y, this.modelVec.z);
 	}
 	
 	@Override

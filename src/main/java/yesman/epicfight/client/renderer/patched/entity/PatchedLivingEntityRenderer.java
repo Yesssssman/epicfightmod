@@ -1,5 +1,7 @@
 package yesman.epicfight.client.renderer.patched.entity;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -16,43 +18,59 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.client.animation.Layer;
-import yesman.epicfight.api.client.model.ClientModel;
-import yesman.epicfight.api.client.model.ClientModels;
+import yesman.epicfight.api.client.forgeevent.PrepareModelEvent;
+import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.patched.layer.PatchedLayer;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>> extends PatchedEntityRenderer<E, T, LivingEntityRenderer<E, M>> {
-	private Map<Class<?>, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>>> patchedLayers = Maps.newHashMap();
+public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, AM extends AnimatedMesh> extends PatchedEntityRenderer<E, T, LivingEntityRenderer<E, M>, AM> {
+	protected static Method isBodyVisible;
+	protected static Method getRenderType;
+	
+	static {
+		isBodyVisible = ObfuscationReflectionHelper.findMethod(LivingEntityRenderer.class, "m_5933_", LivingEntity.class);
+		getRenderType = ObfuscationReflectionHelper.findMethod(LivingEntityRenderer.class, "m_7225_", LivingEntity.class, boolean.class, boolean.class, boolean.class);
+	}
+	
+	private Map<Class<?>, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>, AM>> patchedLayers = Maps.newHashMap();
 	
 	@Override
 	public void render(E entityIn, T entitypatch, LivingEntityRenderer<E, M> renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
 		super.render(entityIn, entitypatch, renderer, buffer, poseStack, packedLight, partialTicks);
 		
 		Minecraft mc = Minecraft.getInstance();
-		boolean isVisible = this.isVisible(entityIn, entitypatch);
+		boolean isVisible = this.isVisible(renderer, entityIn);
 		boolean isVisibleToPlayer = !isVisible && !entityIn.isInvisibleTo(mc.player);
 		boolean isGlowing = mc.shouldEntityAppearGlowing(entityIn);
 		RenderType renderType = this.getRenderType(entityIn, entitypatch, renderer, isVisible, isVisibleToPlayer, isGlowing);
-		ClientModel model = entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT);
-		Armature armature = model.getArmature();
+		Armature armature = entitypatch.getArmature();
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
 		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks);
 		
 		if (renderType != null) {
-			VertexConsumer builder = buffer.getBuffer(renderType);
-			model.drawAnimatedModel(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, isVisibleToPlayer ? 0.15F : 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), poseMatrices);
+			AM mesh = this.getMesh(entitypatch);
+			this.prepareModel(mesh, entityIn, entitypatch);
+			
+			PrepareModelEvent prepareModelEvent = new PrepareModelEvent(this, mesh, entitypatch, buffer, poseStack, packedLight, partialTicks);
+			
+			if (!MinecraftForge.EVENT_BUS.post(prepareModelEvent)) {
+				VertexConsumer builder = buffer.getBuffer(renderType);
+				mesh.drawModelWithPose(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, isVisibleToPlayer ? 0.15F : 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), armature, poseMatrices);
+			}
 		}
 		
 		if (!entityIn.isSpectator()) {
@@ -61,8 +79,8 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		
 		if (renderType != null) {
 			if (Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
-				for (Layer.Priority priority : Layer.Priority.values()) {
-					AnimationPlayer animPlayer = entitypatch.getClientAnimator().getCompositeLayer(priority).animationPlayer;
+				for (Layer layer : entitypatch.getClientAnimator().getAllLayers()) {
+					AnimationPlayer animPlayer = layer.animationPlayer;
 					float playTime = animPlayer.getPrevElapsedTime() + (animPlayer.getElapsedTime() - animPlayer.getPrevElapsedTime()) * partialTicks;
 					animPlayer.getAnimation().renderDebugging(poseStack, buffer, entitypatch, playTime, partialTicks);
 				}
@@ -70,6 +88,10 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		}
 		
 		poseStack.popPose();
+	}
+	
+	protected void prepareModel(AM mesh, E entity, T entitypatch) {
+		mesh.initialize();
 	}
 	
 	protected void renderLayer(LivingEntityRenderer<E, M> renderer, T entitypatch, E entityIn, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLightIn, float partialTicks) {
@@ -96,8 +118,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 			});
 		}
 		
-		OpenMatrix4f modelMatrix = new OpenMatrix4f();
-		modelMatrix.mulFront(entitypatch.getEntityModel(ClientModels.LOGICAL_CLIENT).getArmature().searchJointById(this.getRootJointIndex()).getAnimatedTransform());
+		OpenMatrix4f modelMatrix = new OpenMatrix4f().mulFront(poses[this.getRootJointIndex()]);
 		OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);
 		
 		poseStack.pushPose();
@@ -114,14 +135,29 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 	}
 	
 	public RenderType getRenderType(E entityIn, T entitypatch, LivingEntityRenderer<E, M> renderer, boolean isVisible, boolean isVisibleToPlayer, boolean isGlowing) {
-		ResourceLocation resourcelocation = this.getEntityTexture(entitypatch, renderer);
-		
-		if (isVisibleToPlayer) {
-			return EpicFightRenderTypes.itemEntityTranslucentCull(resourcelocation);
-		} else if (isVisible) {
-			return EpicFightRenderTypes.animatedModel(resourcelocation);
-		} else {
-			return isGlowing ? RenderType.outline(resourcelocation) : null;
+		try {
+			RenderType renderType = (RenderType)getRenderType.invoke(renderer, entityIn, isVisible, isVisibleToPlayer, isGlowing);
+			
+			if (renderType != null) {
+				renderType = EpicFightRenderTypes.triangles(renderType);
+			}
+			
+			return renderType;
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			EpicFightMod.LOGGER.error("Reflection Exception");
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	protected boolean isVisible(LivingEntityRenderer<E, M> renderer, E entityIn) {
+		try {
+			return (boolean) isBodyVisible.invoke(renderer, entityIn);
+		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+			EpicFightMod.LOGGER.error("Reflection Exception");
+			e.printStackTrace();
+			
+			return true;
 		}
 	}
 	
@@ -133,17 +169,13 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 	public void mulPoseStack(PoseStack poseStack, Armature armature, E entityIn, T entitypatch, float partialTicks) {
 		super.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
         
-        if (entityIn.isShiftKeyDown()) {
+        if (entityIn.isCrouching()) {
 			poseStack.translate(0.0D, 0.15D, 0.0D);
 		}
 	}
 	
-	public void addPatchedLayer(Class<?> originalLayerClass, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>> patchedLayer) {
+	public void addPatchedLayer(Class<?> originalLayerClass, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>, AM> patchedLayer) {
 		this.patchedLayers.put(originalLayerClass, patchedLayer);
-	}
-	
-	protected boolean isVisible(E entityIn, T entitypatch) {
-		return !entityIn.isInvisible();
 	}
 	
 	protected int getRootJointIndex() {

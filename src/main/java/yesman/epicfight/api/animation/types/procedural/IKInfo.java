@@ -2,14 +2,15 @@ package yesman.epicfight.api.animation.types.procedural;
 
 import java.util.List;
 
-import org.apache.commons.lang3.tuple.Pair;
+import com.mojang.datafixers.util.Pair;
 
+import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.utils.math.Vec3f;
 
 public class IKInfo {
-	public final String startJoint;
-	public final String endJoint;
-	final String opponentJoint;
+	public final Joint startJoint;
+	public final Joint endJoint;
+	final Joint opponentJoint;
 	final boolean clipAnimation;
 	final int startFrame;
 	final int endFrame;
@@ -21,19 +22,19 @@ public class IKInfo {
 	Vec3f endpos;
 	Vec3f startToEnd;
 	
-	private IKInfo(String startJoint, String endJoint, String opponentJoint, Pair<Integer, Integer> clipFrame, float rayLeastHeight, int ikFrame, boolean[] touchGround) {
+	private IKInfo(Joint startJoint, Joint endJoint, Joint opponentJoint, Pair<Integer, Integer> clipFrame, float rayLeastHeight, int ikFrame, boolean[] touchGround) {
 		this.startJoint = startJoint;
 		this.endJoint = endJoint;
 		this.opponentJoint = opponentJoint;
 		this.clipAnimation = clipFrame != null;
-		this.startFrame = this.clipAnimation ? clipFrame.getLeft() : -1;
-		this.endFrame = this.clipAnimation ? clipFrame.getRight() : -1;
+		this.startFrame = this.clipAnimation ? clipFrame.getFirst() : -1;
+		this.endFrame = this.clipAnimation ? clipFrame.getSecond() : -1;
 		this.ikPose = ikFrame;
 		this.rayLeastHeight = rayLeastHeight;
 		this.touchingGround = touchGround;
 	}
 	
-	public static IKInfo make(String startJoint, String endJoint, String opponentJoint, Pair<Integer, Integer> clipFrame, float rayLeastHeight, int ikFrame, boolean[] touchGround) {
+	public static IKInfo make(Joint startJoint, Joint endJoint, Joint opponentJoint, Pair<Integer, Integer> clipFrame, float rayLeastHeight, int ikFrame, boolean[] touchGround) {
 		return new IKInfo(startJoint, endJoint, opponentJoint, clipFrame, rayLeastHeight, ikFrame, touchGround);
 	}
 }

@@ -1,9 +1,16 @@
 {
 	"attributes":
 	{
-		"common":
+		"one_hand":
 		{
 			"armor_negation":10.0,
+			"max_strikes":0,
+			"impact":0.9
+		},
+		"two_hand":
+		{
+			"armor_negation":10.0,
+			"max_strikes":1,
 			"impact":0.9
 		}
 	},

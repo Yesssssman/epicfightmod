@@ -6,12 +6,12 @@ import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
-import yesman.epicfight.api.model.Model;
+import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class HitAnimation extends MainFrameAnimation {
-	public HitAnimation(float convertTime, String path, Model model) {
-		super(convertTime, path, model);
+	public HitAnimation(float convertTime, String path, Armature armature) {
+		super(convertTime, path, armature);
 		
 		this.stateSpectrumBlueprint.clear()
 			.newTimePair(0.0F, Float.MAX_VALUE)
@@ -20,13 +20,13 @@ public class HitAnimation extends MainFrameAnimation {
 			.addState(EntityState.CAN_BASIC_ATTACK, false)
 			.addState(EntityState.CAN_SKILL_EXECUTION, false)
 			.addState(EntityState.INACTION, true)
-			.addState(EntityState.HURT,	true);
+			.addState(EntityState.HURT_LEVEL, 1);
 	}
 	
 	@Override
 	public void begin(LivingEntityPatch<?> entitypatch) {
 		super.begin(entitypatch);
-		entitypatch.cancelUsingItem();
+		entitypatch.cancelAnyAction();
 	}
 	
 	@Override

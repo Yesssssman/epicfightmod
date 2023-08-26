@@ -6,6 +6,14 @@
 		{
 			"livingmotion":"ALL",
 			"type":"root_upper_joints"
+		},
+		{
+			"livingmotion":"SWIM",
+			"type":"arms"
+		},
+		{
+			"livingmotion":"FLY",
+			"type":"arms"
 		}
 	]
 }

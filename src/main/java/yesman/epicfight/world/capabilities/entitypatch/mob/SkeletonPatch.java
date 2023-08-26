@@ -10,10 +10,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.client.animation.ClientAnimator;
-import yesman.epicfight.api.model.Model;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
@@ -64,10 +62,5 @@ public class SkeletonPatch<T extends PathfinderMob> extends HumanoidMobPatch<T> 
 				this.original.goalSelector.addGoal(1, new TargetChasingGoal(this, this.original, 1.2D, true));
 			}
 		}
-	}
-	
-	@Override
-	public <M extends Model> M getEntityModel(Models<M> modelDB) {
-		return modelDB.skeleton;
 	}
 }

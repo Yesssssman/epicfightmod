@@ -13,6 +13,12 @@ public class SPChangeGamerule {
 	private int gameruleId;
 	private Object object;
 	
+	public SPChangeGamerule() {
+		this.gamerule = null;
+		this.gameruleId = -1;
+		this.object = 0;
+	}
+	
 	public SPChangeGamerule(SynchronizedGameRules gamerule, Object object) {
 		this.gamerule = gamerule;
 		this.gameruleId = gamerule.ordinal();
@@ -66,7 +72,9 @@ public class SPChangeGamerule {
 	public static enum SynchronizedGameRules {
 		HAS_FALL_ANIMATION(ValueType.BOOLEAN, EpicFightGamerules.HAS_FALL_ANIMATION), 
 		WEIGHT_PENALTY(ValueType.INTEGER, EpicFightGamerules.WEIGHT_PENALTY),
-		DIABLE_ENTITY_UI(ValueType.BOOLEAN, EpicFightGamerules.DISABLE_ENTITY_UI);
+		DIABLE_ENTITY_UI(ValueType.BOOLEAN, EpicFightGamerules.DISABLE_ENTITY_UI),
+		CAN_SWITCH_COMBAT(ValueType.BOOLEAN, EpicFightGamerules.CAN_SWITCH_COMBAT),
+		STIFF_COMBO_ATTACKS(ValueType.BOOLEAN, EpicFightGamerules.STIFF_COMBO_ATTACKS);
 		
 		ValueType valueType;
 		GameRules.Key<?> key;

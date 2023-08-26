@@ -46,7 +46,7 @@ public class SPPlayAnimation {
 			return;
 		}
 		
-		LivingEntityPatch<?> entitypatch = (LivingEntityPatch<?>)entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+		LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(entity, LivingEntityPatch.class);
 		
 		if (entitypatch != null) {
 			entitypatch.getAnimator().playAnimation(this.namespaceId, this.animationId, this.convertTimeModifier);

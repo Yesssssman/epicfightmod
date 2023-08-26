@@ -34,7 +34,7 @@ public class OBBCollider extends Collider {
 		this(getInitialAABB(posX, posY, posZ, center_x, center_y, center_z), posX, posY, posZ, center_x, center_y, center_z);
 	}
 	
-	public OBBCollider(AABB outerAABB, double posX, double posY, double posZ, double center_x, double center_y, double center_z) {
+	protected OBBCollider(AABB outerAABB, double posX, double posY, double posZ, double center_x, double center_y, double center_z) {
 		super(new Vec3(center_x, center_y, center_z), outerAABB);
 		this.modelVertex = new Vec3[4];
 		this.modelNormal = new Vec3[3];
@@ -152,7 +152,7 @@ public class OBBCollider extends Collider {
 			}
 		}
 		
-		/** Below code detects whether the each line of obb is collide but it is disabled for better performance
+		/** Below codes detect if the line of each obb collides but it has disabled for better performance
 		for(Vector3f norm1 : this.rotatedNormal)
 		{
 			for(Vector3f norm2 : opponent.rotatedNormal)
@@ -178,6 +178,12 @@ public class OBBCollider extends Collider {
 	public boolean isCollide(Entity entity) {
 		OBBCollider obb = new OBBCollider(entity.getBoundingBox());
 		return isCollide(obb);
+	}
+	
+	@Override
+	public OBBCollider deepCopy() {
+		Vec3 xyzVec = this.modelVertex[1];
+		return new OBBCollider(xyzVec.x, xyzVec.y, xyzVec.z, this.modelCenter.x, this.modelCenter.y, this.modelCenter.z);
 	}
 	
 	private static boolean collisionDetection(Vec3 seperateAxis, Vec3 toOpponent, OBBCollider box1, OBBCollider box2) {
@@ -214,7 +220,7 @@ public class OBBCollider extends Collider {
 	
 	@Override
 	public String toString() {
-		return super.toString() + " direction : " + this.worldCenter;
+		return super.toString() + " worldCenter : " + this.worldCenter + " direction : " + this.rotatedVertex[0];
 	}
 	
 	@OnlyIn(Dist.CLIENT) @Override

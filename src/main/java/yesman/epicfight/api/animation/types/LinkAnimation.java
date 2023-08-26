@@ -5,6 +5,11 @@ import java.util.Map;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.animation.TransformSheet;
+import yesman.epicfight.api.animation.types.EntityState.StateFactor;
+import yesman.epicfight.api.client.animation.Layer;
+import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
+import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class LinkAnimation extends DynamicAnimation {
@@ -17,9 +22,9 @@ public class LinkAnimation extends DynamicAnimation {
 	}
 	
 	@Override
-	public void end(LivingEntityPatch<?> entitypatch, boolean isEnd) {
+	public void end(LivingEntityPatch<?> entitypatch, DynamicAnimation nextAnimation, boolean isEnd) {
 		if (!isEnd) {
-			this.nextAnimation.end(entitypatch, isEnd);
+			this.nextAnimation.end(entitypatch, nextAnimation, isEnd);
 		} else {
 			if (this.startsAt > 0.0F) {
 				entitypatch.getAnimator().getPlayerFor(this).setElapsedTime(this.startsAt);
@@ -30,8 +35,18 @@ public class LinkAnimation extends DynamicAnimation {
 	}
 	
 	@Override
-	public EntityState getState(float time) {
-		return this.nextAnimation.getState(0.0F);
+	public TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
+		return this.nextAnimation.getStatesMap(entitypatch, time);
+	}
+	
+	@Override
+	public EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
+		return this.nextAnimation.getState(entitypatch, 0.0F);
+	}
+	
+	@Override
+	public <T> T getState(StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
+		return this.nextAnimation.getState(stateFactor, entitypatch, 0.0F);
 	}
 	
 	@Override
@@ -52,8 +67,8 @@ public class LinkAnimation extends DynamicAnimation {
 	}
 	
 	@Override
-	protected void modifyPose(Pose pose, LivingEntityPatch<?> entitypatch, float time) {
-		this.nextAnimation.modifyPose(pose, entitypatch, time);
+	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
+		this.nextAnimation.modifyPose(this, pose, entitypatch, time, partialTicks);
 	}
 	
 	@Override
@@ -70,8 +85,13 @@ public class LinkAnimation extends DynamicAnimation {
 	}
 	
 	@Override
-	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, String joint) {
-		return this.nextAnimation.isJointEnabled(entitypatch, joint);
+	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
+		return this.nextAnimation.isJointEnabled(entitypatch, layer, joint);
+	}
+	
+	@Override
+	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
+		return this.nextAnimation.getBindModifier(entitypatch, layer, joint);
 	}
 	
 	@Override
@@ -87,6 +107,15 @@ public class LinkAnimation extends DynamicAnimation {
 	@Override
 	public DynamicAnimation getRealAnimation() {
 		return this.nextAnimation;
+	}
+	
+	public void copyTo(LinkAnimation linkAnimation) {
+		linkAnimation.setNextAnimation(this.nextAnimation);
+		linkAnimation.totalTime = this.totalTime;
+		
+		Map<String, TransformSheet> trnasforms = linkAnimation.getTransfroms();
+		trnasforms.clear();
+		trnasforms.putAll(this.getTransfroms());
 	}
 	
 	@Override

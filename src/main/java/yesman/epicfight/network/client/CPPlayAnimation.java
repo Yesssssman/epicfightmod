@@ -51,7 +51,8 @@ public class CPPlayAnimation {
 	public static void handle(CPPlayAnimation msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(()-> {
 			ServerPlayer serverPlayer = ctx.get().getSender();
-			ServerPlayerPatch playerpatch = (ServerPlayerPatch) serverPlayer.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
+			ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(serverPlayer, ServerPlayerPatch.class);
+			
 			if (!msg.isClientSideAnimation) {
 				playerpatch.getAnimator().playAnimation(msg.namespaceId, msg.animationId, msg.modifyTime);
 			}

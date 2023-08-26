@@ -9,23 +9,39 @@ public class AttackResult {
 		this.damage = damage;
 	}
 	
+	public static AttackResult success(float damage) {
+		return new AttackResult(ResultType.SUCCESS, damage);
+	}
+	
+	public static AttackResult blocked(float damage) {
+		return new AttackResult(ResultType.BLOCKED, damage);
+	}
+	
+	public static AttackResult missed(float damage) {
+		return new AttackResult(ResultType.MISSED, damage);
+	}
+	
+	public static AttackResult of(AttackResult.ResultType resultType, float damage) {
+		return new AttackResult(resultType, damage);
+	}
+	
 	public static enum ResultType {
-		SUCCESS(true, true), FAILED(false, false), BLOCKED(false, true);
+		SUCCESS(true, true), MISSED(false, true), BLOCKED(false, true);
 		
 		boolean dealtDamage;
-		boolean countMaxStrikes;
+		boolean shouldCount;
 		
-		ResultType(boolean dealtDamage, boolean count) {
+		ResultType(boolean dealtDamage, boolean countAsHitEntity) {
 			this.dealtDamage = dealtDamage;
-			this.countMaxStrikes = count;
+			this.shouldCount = countAsHitEntity;
 		}
 		
 		public boolean dealtDamage() {
 			return this.dealtDamage;
 		}
 		
-		public boolean count() {
-			return this.countMaxStrikes;
+		public boolean shouldCount() {
+			return this.shouldCount;
 		}
 	}
 }

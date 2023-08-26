@@ -35,25 +35,26 @@ public class EpicFightParticleRenderTypes {
 		
 		@Override
 		public String toString() {
-			return "HIT_PARTICLE";
+			return "BLEND_LIGHTMAP_PARTICLE";
 		}
 	};
 	
-	public static final ParticleRenderType PARTICLE_MODELED = new ParticleRenderType() {
+	public static final ParticleRenderType PARTICLE_MODEL_NO_NORMAL = new ParticleRenderType() {
 		public void begin(BufferBuilder bufferBuilder, TextureManager textureManager) {
 			RenderSystem.disableCull();
-			RenderSystem.blendFunc(GL11.GL_SRC_ALPHA, GL11.GL_ONE_MINUS_SRC_ALPHA);
+			RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 			RenderSystem.enableBlend();
 			RenderSystem.depthMask(true);
-			RenderSystem.setShader(GameRenderer::getRendertypeEntityCutoutNoCullShader);
+			RenderSystem.setShader(GameRenderer::getPositionColorTexLightmapShader);
 			
 			Minecraft mc = Minecraft.getInstance();
 			mc.gameRenderer.overlayTexture().setupOverlayColor();
 			
-			bufferBuilder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.NEW_ENTITY);
+			bufferBuilder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
 		}
 		
 		public void end(Tesselator tesselator) {
+			tesselator.getBuilder().setQuadSortOrigin(0.0F, 0.0F, 0.0F);
 			tesselator.end();
 			
 			Minecraft mc = Minecraft.getInstance();
@@ -61,7 +62,7 @@ public class EpicFightParticleRenderTypes {
 		}
 
 		public String toString() {
-			return "PARTICLE_ANIMATED_MODEL";
+			return "PARTICLE_MODEL_NO_NORMAL";
 		}
 	};
 	
@@ -89,6 +90,32 @@ public class EpicFightParticleRenderTypes {
 		}
 	};
 	
+	public static final ParticleRenderType TRAIL = new ParticleRenderType() {
+		public void begin(BufferBuilder bufferBuilder, TextureManager textureManager) {
+			RenderSystem.enableBlend();
+			RenderSystem.disableCull();
+		    RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+			RenderSystem.enableDepthTest();
+			RenderSystem.depthMask(true);
+	        RenderSystem.setShader(GameRenderer::getParticleShader);
+	        
+			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
+		}
+		
+		public void end(Tesselator tesselator) {
+			tesselator.getBuilder().setQuadSortOrigin(0.0F, 0.0F, 0.0F);
+			tesselator.end();
+			RenderSystem.disableBlend();
+			RenderSystem.defaultBlendFunc();
+			RenderSystem.enableCull();
+		}
+		
+		@Override
+		public String toString() {
+			return "EPICFIGHT:TRAIL";
+		}
+	};
+	
 	public static final ParticleRenderType TRANSLUCENT_GLOWING = new ParticleRenderType() {
 		public void begin(BufferBuilder bufferBuilder, TextureManager textureManager) {
 			RenderSystem.enableBlend();
@@ -112,7 +139,7 @@ public class EpicFightParticleRenderTypes {
 		
 		@Override
 		public String toString() {
-			return "AFTER_IMAGE";
+			return "EPICFIGHT:TRANSLUCENT_GLOWING";
 		}
 	};
 	
@@ -138,7 +165,7 @@ public class EpicFightParticleRenderTypes {
 		
 		@Override
 		public String toString() {
-			return "AFTER_IMAGE";
+			return "EPICFIGHT:TRANSLUCENT";
 		}
 	};
 }

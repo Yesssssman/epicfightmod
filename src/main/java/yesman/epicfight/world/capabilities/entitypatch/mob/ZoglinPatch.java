@@ -15,13 +15,11 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
-import yesman.epicfight.api.model.Model;
-import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
+import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.brain.BrainRecomposer;
 import yesman.epicfight.world.entity.ai.brain.task.AnimatedCombatBehavior;
@@ -56,12 +54,7 @@ public class ZoglinPatch extends MobPatch<Zoglin> {
 	public void updateMotion(boolean considerInaction) {
 		super.commonMobUpdateMotion(considerInaction);
 	}
-
-	@Override
-	public <M extends Model> M getEntityModel(Models<M> modelDB) {
-		return modelDB.hoglin;
-	}
-
+	
 	@Override
 	public StaticAnimation getHitAnimation(StunType stunType) {
 		return null;

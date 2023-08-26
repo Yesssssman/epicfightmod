@@ -11,11 +11,19 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class PlaneCollider extends Collider {
+	static AABB getInitialAABB(double center_x, double center_y, double center_z, double aX, double aY, double aZ, double bX, double bY, double bZ) {
+		double xLength = Math.max(Math.abs(aX), Math.abs(bX)) + Math.abs(center_x);
+		double yLength = Math.max(Math.abs(aY), Math.abs(bY)) + Math.abs(center_y);
+		double zLength = Math.max(Math.abs(aZ), Math.abs(bZ)) + Math.abs(center_z);
+		double maxLength = Math.max(xLength, Math.max(yLength, zLength));
+		return new AABB(maxLength, maxLength, maxLength, -maxLength, -maxLength, -maxLength);
+	}
+	
 	private Vec3[] modelPos;
 	private Vec3[] worldPos;
 	
-	public PlaneCollider(Vec3 center, AABB entityCallAABB) {
-		super(center, entityCallAABB);
+	public PlaneCollider(double x, double y, double z, double aX, double aY, double aZ, double bX, double bY, double bZ) {
+		this(getInitialAABB(x, y, z, aX, aY, aZ, bX, bY, bZ), x, y, z, aX, aY, aZ, bX, bY, bZ);
 	}
 	
 	public PlaneCollider(AABB entityCallAABB, double centerX, double centerY, double centerZ, double pos1X, double pos1Y, double pos1Z, double pos2X, double pos2Y, double pos2Z) {
@@ -61,12 +69,18 @@ public class PlaneCollider extends Collider {
 	}
 	
 	@Override
-	public void drawInternal(PoseStack matrixStackIn, MultiBufferSource buffer, OpenMatrix4f pose, boolean red) {
+	public PlaneCollider deepCopy() {
+		Vec3 aVec = this.modelPos[0];
+		Vec3 bVec = this.modelPos[1];
 		
+		return new PlaneCollider(this.modelCenter.x, this.modelCenter.y, this.modelCenter.z, aVec.x, aVec.y, aVec.z, bVec.x, bVec.y, bVec.z);
+	}
+	
+	@Override
+	public void drawInternal(PoseStack matrixStackIn, MultiBufferSource buffer, OpenMatrix4f pose, boolean red) {
 	}
 	
 	@Override
 	public void draw(PoseStack matrixStackIn, MultiBufferSource buffer, LivingEntityPatch<?> entitypatch, AttackAnimation animation, float prevElapsedTime, float elapsedTime, float partialTicks, float attackSpeed) {
-		
 	}
 }

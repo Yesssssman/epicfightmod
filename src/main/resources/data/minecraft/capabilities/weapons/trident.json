@@ -3,7 +3,8 @@
 	{
 		"common":
 		{
-			"impact":2.3
+			"impact":1.3,
+			"max_strikes":3
 		}
 	},
 	"type":"trident"

@@ -1,11 +1,11 @@
 package yesman.epicfight.api.animation.types;
 
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
-import yesman.epicfight.api.model.Model;
+import yesman.epicfight.api.model.Armature;
 
 public class LongHitAnimation extends ActionAnimation {
-	public LongHitAnimation(float convertTime, String path, Model model) {
-		super(convertTime, path, model);
+	public LongHitAnimation(float convertTime, String path, Armature armature) {
+		super(convertTime, path, armature);
 		this.addProperty(ActionAnimationProperty.STOP_MOVEMENT, true);
 		
 		this.stateSpectrumBlueprint.clear()
@@ -15,6 +15,6 @@ public class LongHitAnimation extends ActionAnimation {
 			.addState(EntityState.CAN_BASIC_ATTACK, false)
 			.addState(EntityState.CAN_SKILL_EXECUTION, false)
 			.addState(EntityState.INACTION, true)
-			.addState(EntityState.HURT,	true);
+			.addState(EntityState.HURT_LEVEL, 2);
 	}
 }

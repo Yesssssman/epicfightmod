@@ -17,7 +17,7 @@ public abstract class PatchedDragonPhase extends AbstractDragonPhaseInstance {
 	
 	public PatchedDragonPhase(EnderDragon dragon) {
 		super(dragon);
-		this.dragonpatch = (EnderDragonPatch)dragon.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+		this.dragonpatch = EpicFightCapabilities.getEntityPatch(dragon, EnderDragonPatch.class);
 	}
 	
 	@Override

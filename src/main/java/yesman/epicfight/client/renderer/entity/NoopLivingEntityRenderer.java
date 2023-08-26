@@ -23,9 +23,9 @@ public class NoopLivingEntityRenderer<T extends LivingEntity> extends LivingEnti
 	public void render(LivingEntity livingEntity, float yRot, float partialTicks, PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight) {
 		MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Pre<T, EntityModel<T>>(livingEntity, this, partialTicks, poseStack, multiBufferSource, packedLight));
 	}
-	
+
 	@Override
-	public ResourceLocation getTextureLocation(LivingEntity p_114482_) {
+	public ResourceLocation getTextureLocation(T entity) {
 		return null;
 	}
 }

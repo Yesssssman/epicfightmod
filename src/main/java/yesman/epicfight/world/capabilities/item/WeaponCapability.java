@@ -12,6 +12,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
@@ -32,26 +33,29 @@ public class WeaponCapability extends CapabilityItem {
 	protected final SoundEvent smashingSound;
 	protected final SoundEvent hitSound;
 	protected final Collider weaponCollider;
+	protected final HitParticleType hitParticle;
 	protected final Map<Style, List<StaticAnimation>> autoAttackMotions;
-	protected final Map<Style, Skill> specialAttacks;
+	protected final Map<Style, Function<ItemStack, Skill>> innateSkill;
 	protected final Map<Style, Map<LivingMotion, StaticAnimation>> livingMotionModifiers;
 	protected final boolean canBePlacedOffhand;
+	protected final Function<Style, Boolean> comboCancel;
 	
 	protected WeaponCapability(CapabilityItem.Builder builder) {
 		super(builder);
 		
 		WeaponCapability.Builder weaponBuilder = (WeaponCapability.Builder)builder;
-		
 		this.autoAttackMotions = weaponBuilder.autoAttackMotionMap;
-		this.specialAttacks = weaponBuilder.specialAttackMap;
+		this.innateSkill = weaponBuilder.innateSkillByStyle;
 		this.livingMotionModifiers = weaponBuilder.livingMotionModifiers;
 		this.stylegetter = weaponBuilder.styleProvider;
 		this.weaponCombinationPredicator = weaponBuilder.weaponCombinationPredicator;
 		this.passiveSkill = weaponBuilder.passiveSkill;
 		this.smashingSound = weaponBuilder.swingSound;
+		this.hitParticle = weaponBuilder.hitParticle;
 		this.hitSound = weaponBuilder.hitSound;
 		this.weaponCollider = weaponBuilder.collider;
 		this.canBePlacedOffhand = weaponBuilder.canBePlacedOffhand;
+		this.comboCancel = weaponBuilder.comboCancel;
 		this.attributeMap.putAll(weaponBuilder.attributeMap);
 	}
 	
@@ -61,8 +65,8 @@ public class WeaponCapability extends CapabilityItem {
 	}
 	
 	@Override
-	public final Skill getSpecialAttack(PlayerPatch<?> playerpatch) {
-		return this.specialAttacks.get(this.getStyle(playerpatch));
+	public final Skill getInnateSkill(PlayerPatch<?> playerpatch, ItemStack itemstack) {
+		return this.innateSkill.getOrDefault(this.getStyle(playerpatch), (s) -> null).apply(itemstack);
 	}
 	
 	@Override
@@ -92,7 +96,7 @@ public class WeaponCapability extends CapabilityItem {
 	
 	@Override
 	public HitParticleType getHitParticle() {
-		return EpicFightParticles.HIT_BLADE.get();
+		return this.hitParticle;
 	}
 	
 	@Override
@@ -106,8 +110,20 @@ public class WeaponCapability extends CapabilityItem {
 	}
 	
 	@Override
+	public boolean shouldCancelCombo(LivingEntityPatch<?> entitypatch) {
+		return this.comboCancel.apply(this.getStyle(entitypatch));
+	}
+	
+	@Override
 	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(LivingEntityPatch<?> player, InteractionHand hand) {
-		return (this.livingMotionModifiers == null || hand == InteractionHand.OFF_HAND) ? super.getLivingMotionModifier(player, hand) : this.livingMotionModifiers.get(this.getStyle(player));
+		if (this.livingMotionModifiers == null || hand == InteractionHand.OFF_HAND) {
+			return super.getLivingMotionModifier(player, hand);
+		}
+		
+		Map<LivingMotion, StaticAnimation> motions = this.livingMotionModifiers.getOrDefault(this.getStyle(player), Maps.newHashMap());
+		this.livingMotionModifiers.getOrDefault(Styles.COMMON, Maps.newHashMap()).forEach(motions::putIfAbsent);
+		
+		return motions;
 	}
 	
 	@Override
@@ -145,10 +161,12 @@ public class WeaponCapability extends CapabilityItem {
 		Skill passiveSkill;
 		SoundEvent swingSound;
 		SoundEvent hitSound;
+		HitParticleType hitParticle;
 		Collider collider;
 		Map<Style, List<StaticAnimation>> autoAttackMotionMap;
-		Map<Style, Skill> specialAttackMap;
+		Map<Style, Function<ItemStack, Skill>> innateSkillByStyle;
 		Map<Style, Map<LivingMotion, StaticAnimation>> livingMotionModifiers;
+		Function<Style, Boolean> comboCancel;
 		boolean canBePlacedOffhand;
 		
 		protected Builder() {
@@ -158,11 +176,13 @@ public class WeaponCapability extends CapabilityItem {
 			this.passiveSkill = null;
 			this.swingSound = EpicFightSounds.WHOOSH;
 			this.hitSound = EpicFightSounds.BLUNT_HIT;
+			this.hitParticle = EpicFightParticles.HIT_BLADE.get();
 			this.collider = ColliderPreset.FIST;
 			this.autoAttackMotionMap = Maps.newHashMap();
-			this.specialAttackMap = Maps.newHashMap();
+			this.innateSkillByStyle = Maps.newHashMap();
 			this.livingMotionModifiers = null;
 			this.canBePlacedOffhand = true;
+			this.comboCancel = (style) -> true;
 		}
 		
 		@Override
@@ -188,6 +208,11 @@ public class WeaponCapability extends CapabilityItem {
 		
 		public Builder hitSound(SoundEvent hitSound) {
 			this.hitSound = hitSound;
+			return this;
+		}
+		
+		public Builder hitParticle(HitParticleType hitParticle) {
+			this.hitParticle = hitParticle;
 			return this;
 		}
 		
@@ -230,8 +255,13 @@ public class WeaponCapability extends CapabilityItem {
 			return this;
 		}
 		
-		public Builder specialAttack(Style style, Skill specialAttack) {
-			this.specialAttackMap.put(style, specialAttack);
+		public Builder innateSkill(Style style, Function<ItemStack, Skill> innateSkill) {
+			this.innateSkillByStyle.put(style, innateSkill);
+			return this;
+		}
+		
+		public Builder comboCancel(Function<Style, Boolean> comboCancel) {
+			this.comboCancel = comboCancel;
 			return this;
 		}
 	}

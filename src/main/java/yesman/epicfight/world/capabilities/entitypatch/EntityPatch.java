@@ -4,7 +4,10 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -13,13 +16,22 @@ public abstract class EntityPatch<T extends Entity> {
 	protected T original;
 	protected boolean initialized = false;
 	
-	public abstract void tick(LivingUpdateEvent event);
-	protected abstract void clientTick(LivingUpdateEvent event);
-	protected abstract void serverTick(LivingUpdateEvent event);
+	public void tick(LivingUpdateEvent event) {
+		if (this.isLogicalClient()) {
+			this.clientTick(event);
+		} else {
+			this.serverTick(event);
+		}
+	}
+	
+	protected void clientTick(LivingUpdateEvent event) {}
+	protected void serverTick(LivingUpdateEvent event) {}
+	public abstract boolean overrideRender();
 	
 	public void onStartTracking(ServerPlayer trackingPlayer) {
 	}
 	
+	@OnlyIn(Dist.CLIENT)
 	public void processSpawnData(ByteBuf buf) {
 	}
 	
@@ -30,7 +42,10 @@ public abstract class EntityPatch<T extends Entity> {
 	public void onJoinWorld(T entityIn, EntityJoinWorldEvent event) {
 		this.initialized = true;
 	}
-
+	
+	public void onDeath(LivingDeathEvent event) {
+	}
+	
 	public final T getOriginal() {
 		return this.original;
 	}

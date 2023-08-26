@@ -6,13 +6,13 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.network.NetworkEvent;
-import yesman.epicfight.skill.Skill;
+import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 public class CPExecuteSkill {
 	private int skillSlot;
-	private boolean active;
+	private WorkType workType;
 	private FriendlyByteBuf buffer;
 
 	public CPExecuteSkill() {
@@ -20,20 +20,21 @@ public class CPExecuteSkill {
 	}
 
 	public CPExecuteSkill(int slotIndex) {
-		this(slotIndex, true);
+		this(slotIndex, WorkType.ACTIVATE);
 	}
 	
-	public CPExecuteSkill(int slotIndex, boolean active) {
+	public CPExecuteSkill(int slotIndex, WorkType active) {
 		this.skillSlot = slotIndex;
-		this.active = active;
+		this.workType = active;
 		this.buffer = new FriendlyByteBuf(Unpooled.buffer());
 	}
 	
-	public CPExecuteSkill(int slotIndex, boolean active, FriendlyByteBuf pb) {
+	public CPExecuteSkill(int slotIndex, WorkType active, FriendlyByteBuf pb) {
 		this.skillSlot = slotIndex;
-		this.active = active;
+		this.workType = active;
 		this.buffer = new FriendlyByteBuf(Unpooled.buffer());
-		if(pb != null) {
+		
+		if (pb != null) {
 			this.buffer.writeBytes(pb);
 		}
 	}
@@ -43,7 +44,7 @@ public class CPExecuteSkill {
 	}
 
 	public static CPExecuteSkill fromBytes(FriendlyByteBuf buf) {
-		CPExecuteSkill msg = new CPExecuteSkill(buf.readInt(), buf.readBoolean());
+		CPExecuteSkill msg = new CPExecuteSkill(buf.readInt(), WorkType.values()[buf.readInt()]);
 
 		while (buf.isReadable()) {
 			msg.buffer.writeByte(buf.readByte());
@@ -54,7 +55,7 @@ public class CPExecuteSkill {
 
 	public static void toBytes(CPExecuteSkill msg, FriendlyByteBuf buf) {
 		buf.writeInt(msg.skillSlot);
-		buf.writeBoolean(msg.active);
+		buf.writeInt(msg.workType.ordinal());
 		
 		while (msg.buffer.isReadable()) {
 			buf.writeByte(msg.buffer.readByte());
@@ -64,17 +65,26 @@ public class CPExecuteSkill {
 	public static void handle(CPExecuteSkill msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
 			ServerPlayer serverPlayer = ctx.get().getSender();
-			ServerPlayerPatch playerpatch = (ServerPlayerPatch) serverPlayer.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY, null).orElse(null);
-
-			if (msg.active) {
-				playerpatch.getSkill(msg.skillSlot).requestExecute(playerpatch, msg.getBuffer());
-			} else {
-				Skill contain = playerpatch.getSkill(msg.skillSlot).getSkill();
-				if (contain != null) {
-					contain.cancelOnServer(playerpatch, msg.getBuffer());
-				}
+			ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(serverPlayer, ServerPlayerPatch.class);
+			SkillContainer skillContainer = playerpatch.getSkill(msg.skillSlot);
+			
+			switch (msg.workType) {
+			case ACTIVATE:
+				skillContainer.requestExecute(playerpatch, msg.getBuffer());
+				break;
+			case CANCEL:
+				skillContainer.requestCancel(playerpatch, msg.getBuffer());
+				break;
+			case CHARGING_START:
+				skillContainer.requestCharging(playerpatch, msg.getBuffer());
+				break;
 			}
 		});
+		
 		ctx.get().setPacketHandled(true);
+	}
+	
+	public static enum WorkType {
+		ACTIVATE, CANCEL, CHARGING_START
 	}
 }

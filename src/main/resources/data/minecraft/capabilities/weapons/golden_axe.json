@@ -4,8 +4,7 @@
 		"common":
 		{
 			"armor_negation":0.0,
-			"impact":1.2,
-			"max_strikes":1
+			"impact":1.2
 		}
 	},
 	"type":"axe"

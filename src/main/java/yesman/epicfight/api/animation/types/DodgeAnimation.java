@@ -1,68 +1,69 @@
 package yesman.epicfight.api.animation.types;
 
+import java.util.function.Function;
+
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.EntityDimensions;
+import yesman.epicfight.api.animation.property.AnimationEvent;
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
-import yesman.epicfight.api.model.Model;
+import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
+import yesman.epicfight.api.model.Armature;
+import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
+import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.network.EpicFightNetworkManager;
-import yesman.epicfight.network.client.CPRotatePlayerYaw;
+import yesman.epicfight.network.client.CPRotateEntityModelYRot;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+import yesman.epicfight.world.entity.DodgeLeft;
 
 public class DodgeAnimation extends ActionAnimation {
-	private final EntityDimensions size;
-	
-	public DodgeAnimation(float convertTime, String path, float width, float height, Model model) {
-		this(convertTime, 0.0F, path, width, height, model);
-	}
-	
-	public DodgeAnimation(float convertTime, float delayTime, String path, float width, float height, Model model) {
-		super(convertTime, delayTime, path, model);
-		
-		if (width > 0.0F || height > 0.0F) {
-			this.size = EntityDimensions.scalable(width, height);
-		} else {
-			this.size = null;
+	public static final Function<DamageSource, AttackResult.ResultType> DODGEABLE_SOURCE_VALIDATOR = (damagesource) -> {
+		if (damagesource instanceof EntityDamageSource && !damagesource.isExplosion() && !damagesource.isMagic() && !damagesource.isBypassArmor() && !damagesource.isBypassInvul()) {
+			return AttackResult.ResultType.MISSED;
 		}
 		
+		return AttackResult.ResultType.SUCCESS;
+	};
+	
+	public DodgeAnimation(float convertTime, String path, float width, float height, Armature armature) {
+		this(convertTime, 10.0F, path, width, height, armature);
+	}
+	
+	public DodgeAnimation(float convertTime, float delayTime, String path, float width, float height, Armature armature) {
+		super(convertTime, delayTime, path, armature);
+		
 		this.stateSpectrumBlueprint.clear()
-			.newTimePair(0.0F, 10.0F)
+			.newTimePair(0.0F, delayTime)
 			.addState(EntityState.TURNING_LOCKED, true)
 			.addState(EntityState.MOVEMENT_LOCKED, true)
 			.addState(EntityState.CAN_BASIC_ATTACK, false)
 			.addState(EntityState.CAN_SKILL_EXECUTION, false)
 			.addState(EntityState.INACTION, true)
-			.newTimePair(delayTime, Float.MAX_VALUE)
-			.addState(EntityState.INVULNERABILITY_PREDICATE, (damagesource) -> {
-				if (damagesource instanceof EntityDamageSource && !damagesource.isExplosion() && !damagesource.isMagic() && !damagesource.isBypassInvul()) {
-					return true;
-				}
-				return false;
-			});
+			.newTimePair(0.0F, Float.MAX_VALUE)
+			.addState(EntityState.ATTACK_RESULT, DODGEABLE_SOURCE_VALIDATOR);
 		
 		this.addProperty(ActionAnimationProperty.AFFECT_SPEED, true);
+		this.addEvents(StaticAnimationProperty.ON_END_EVENTS, AnimationEvent.create(Animations.ReusableSources.RESTORE_BOUNDING_BOX, AnimationEvent.Side.BOTH));
+		this.addEvents(StaticAnimationProperty.EVENTS, AnimationEvent.create(Animations.ReusableSources.RESIZE_BOUNDING_BOX, AnimationEvent.Side.BOTH).params(EntityDimensions.scalable(width, height)));
 	}
 	
 	@Override
-	public void tick(LivingEntityPatch<?> entitypatch) {
-		super.tick(entitypatch);
+	public void begin(LivingEntityPatch<?> entitypatch) {
+		super.begin(entitypatch);
 		
-		if (this.size != null) {
-			entitypatch.resetSize(this.size);
+		if (!entitypatch.isLogicalClient()) {
+			entitypatch.getOriginal().getLevel().addFreshEntity(new DodgeLeft(entitypatch));
 		}
 	}
 	
 	@Override
-	public void end(LivingEntityPatch<?> entitypatch, boolean isEnd) {
-		super.end(entitypatch, isEnd);
+	public void end(LivingEntityPatch<?> entitypatch, DynamicAnimation nextAnimation, boolean isEnd) {
+		super.end(entitypatch, nextAnimation, isEnd);
 		
-		if (this.size != null) {
-			entitypatch.getOriginal().refreshDimensions();
-		}
-		
-		if (entitypatch.isLogicalClient() && entitypatch instanceof LocalPlayerPatch) {
-			((LocalPlayerPatch)entitypatch).changeYaw(0);
-			EpicFightNetworkManager.sendToServer(new CPRotatePlayerYaw(0));
+		if (entitypatch.isLogicalClient() && entitypatch instanceof LocalPlayerPatch localPlayerPatch) {
+			localPlayerPatch.changeModelYRot(0);
+			EpicFightNetworkManager.sendToServer(new CPRotateEntityModelYRot(0));
 		}
 	}
 }

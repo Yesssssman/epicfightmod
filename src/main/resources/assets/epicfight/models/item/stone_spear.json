@@ -24,7 +24,7 @@
 	},
 	"perspectives":
 	{
-		"ground":
+	"ground":
 		{
 			"parent": "item/generated",
 			"textures":

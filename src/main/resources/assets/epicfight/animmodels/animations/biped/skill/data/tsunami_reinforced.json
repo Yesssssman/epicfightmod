@@ -1,0 +1,60 @@
+{
+	"trail_effects": [
+		{
+			"start_time": 0.25,
+			"end_time": 0.6,
+			"fade_time": 0.8,
+			"interpolations": 6,
+			"joint": "Root",
+			"item_skin_hand": "main_hand",
+			"color": [0, 232, 245],
+	    	"begin_pos": [1.0, 1.0, 0.0],
+	    	"end_pos": [1.0, 1.2, 0.0],
+	    	"lifetime": 16,
+	    	"texture_path": "epicfight:textures/particle/swing_trail.png",
+	    	"particle_type": "epicfight:swing_trail"
+		},
+		{
+			"start_time": 0.25,
+			"end_time": 0.6,
+			"fade_time": 0.8,
+			"interpolations": 6,
+			"joint": "Root",
+			"item_skin_hand": "main_hand",
+			"color": [0, 232, 245],
+	    	"begin_pos": [-1.0, 1.0, 0.0],
+	    	"end_pos": [-1.0, 1.2, 0.0],
+	    	"lifetime": 16,
+	    	"texture_path": "epicfight:textures/particle/swing_trail.png",
+	    	"particle_type": "epicfight:swing_trail"
+		},
+		{
+			"start_time": 0.25,
+			"end_time": 0.6,
+			"fade_time": 0.8,
+			"interpolations": 6,
+			"joint": "Root",
+			"item_skin_hand": "main_hand",
+			"color": [0, 232, 245],
+	    	"begin_pos": [0.0, 1.0, -1.0],
+	    	"end_pos": [0.0, 1.2, -1.0],
+	    	"lifetime": 16,
+	    	"texture_path": "epicfight:textures/particle/swing_trail.png",
+	    	"particle_type": "epicfight:swing_trail"
+		},
+		{
+			"start_time": 0.25,
+			"end_time": 0.6,
+			"fade_time": 0.8,
+			"interpolations": 6,
+			"joint": "Root",
+			"item_skin_hand": "main_hand",
+			"color": [0, 232, 245],
+	    	"begin_pos": [0.0, 1.0, 1.0],
+	    	"end_pos": [0.0, 1.2, 1.0],
+	    	"lifetime": 16,
+	    	"texture_path": "epicfight:textures/particle/swing_trail.png",
+	    	"particle_type": "epicfight:swing_trail"
+		}
+	]
+}

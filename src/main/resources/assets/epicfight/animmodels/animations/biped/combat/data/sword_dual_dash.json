@@ -1,0 +1,20 @@
+{
+	"trail_effects": [
+		{
+			"start_time": 0.05,
+			"end_time": 0.15,
+			"lifetime": 4,
+			"interpolations": 6,
+			"joint": "Tool_L",
+			"item_skin_hand": "off_hand"
+		},
+		{
+			"start_time": 0.05,
+			"end_time": 0.15,
+			"lifetime": 4,
+			"interpolations": 6,
+			"joint": "Tool_R",
+			"item_skin_hand": "main_hand"
+		}
+	]
+}

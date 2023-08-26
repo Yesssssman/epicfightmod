@@ -34,6 +34,16 @@ public class EpicFightEntities {
 			.fireImmune().sized(0.9F, 3.5F).clientTrackingRange(10).build("wither_ghost")
 		);
 	
+	public static final RegistryObject<EntityType<DeathHarvestOrb>> DEATH_HARVEST_ORB = ENTITIES.register("forbidden_strength_orb", () ->
+		EntityType.Builder.<DeathHarvestOrb>of(DeathHarvestOrb::new, MobCategory.MISC)
+			.sized(0.5F, 0.5F).clientTrackingRange(6).updateInterval(1).noSummon().noSave().build("forbidden_strength_orb")
+		);
+	
+	public static final RegistryObject<EntityType<DodgeLeft>> DODGE_LEFT = ENTITIES.register("dodge_left", () ->
+		EntityType.Builder.<DodgeLeft>of(DodgeLeft::new, MobCategory.MISC)
+			.sized(0.0F, 0.0F).clientTrackingRange(6).updateInterval(1).noSummon().noSave().build("dodge_left")
+		);
+	
 	public static void registerSpawnPlacements() {
 		SpawnPlacements.register(WITHER_SKELETON_MINION.get(), SpawnPlacements.Type.ON_GROUND, Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, Monster::checkAnyLightMonsterSpawnRules);
 	}

@@ -6,7 +6,6 @@ import com.google.common.collect.Lists;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
 
-import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Pose;
@@ -19,14 +18,14 @@ public class FABRIK {
 	private Vec3f startPos = new Vec3f();
 	private Pose pose;
 	
-	public FABRIK(Pose pose, Armature armature, String startJoint, String endJoint) {
+	public FABRIK(Pose pose, Armature armature, Joint startJoint, Joint endJoint) {
 		this.armature = armature;
 		this.pose = pose;
-		this.addChain(pose, this.armature.searchJointByName(startJoint), this.armature.searchJointByName(endJoint));
+		this.addChain(pose, this.armature.searchJointByName(startJoint.getName()), this.armature.searchJointByName(endJoint.getName()));
 	}
 	
 	public void addChain(Pose pose, Joint startJoint, Joint endJoint) {
-		OpenMatrix4f bindTransform = Animator.getBindedJointTransformByIndex(pose, this.armature, this.armature.searchPathIndex(startJoint.getName()));
+		OpenMatrix4f bindTransform = armature.getBindedTransformFor(pose, startJoint);
 		int pathIndex = Integer.parseInt(startJoint.searchPath(new String(""), endJoint.getName()));
 		this.startPos.set(bindTransform.toTranslationVector());
 		this.addChainInternal(pose, bindTransform, startJoint, pathIndex);

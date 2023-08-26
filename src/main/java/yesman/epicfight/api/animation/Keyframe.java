@@ -26,4 +26,8 @@ public class Keyframe {
 	public JointTransform transform() {
 		return this.transform;
 	}
+	
+	public String toString() {
+		return "Keyframe[Time: " + this.timeStamp + ", " + this.transform.toString() + "]";
+	}
 }

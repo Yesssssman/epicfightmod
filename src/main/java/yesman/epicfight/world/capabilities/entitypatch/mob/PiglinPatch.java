@@ -15,9 +15,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.client.animation.ClientAnimator;
-import yesman.epicfight.api.model.Model;
 import yesman.epicfight.gameasset.Animations;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPSpawnData;
@@ -83,11 +81,6 @@ public class PiglinPatch extends HumanoidMobPatch<Piglin> {
 			this.currentLivingMotion = LivingMotions.CELEBRATE;
 		else
 			super.commonAggressiveRangedMobUpdateMotion(considerInaction);
-	}
-
-	@Override
-	public <M extends Model> M getEntityModel(Models<M> modelDB) {
-		return modelDB.piglin;
 	}
 	
 	@Override

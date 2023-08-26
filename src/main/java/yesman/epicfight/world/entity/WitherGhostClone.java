@@ -30,7 +30,11 @@ public class WitherGhostClone extends FlyingMob {
 	
 	@Override
 	public boolean hurt(DamageSource damagesource, float damage) {
-		return false;
+		if (!damagesource.isBypassInvul()) {
+			return false;
+		}
+		
+		return super.hurt(damagesource, damage);
 	}
 	
 	public static AttributeSupplier.Builder createAttributes() {
@@ -38,9 +42,7 @@ public class WitherGhostClone extends FlyingMob {
 	}
 	
 	@Override
-	public void tick() {
-		super.tick();
-		
+	public void customServerAiStep() {
 		if (this.tickCount >= 40) {
 			this.remove(RemovalReason.DISCARDED);
 		}

@@ -14,7 +14,7 @@ public class BackUpIfTooCloseStopInaction<E extends Mob> extends BackUpIfTooClos
 	@Override
 	protected boolean checkExtraStartConditions(ServerLevel level, E mob) {
 		if (super.checkExtraStartConditions(level, mob)) {
-			MobPatch<?> mobpatch = (MobPatch<?>)mob.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+			MobPatch<?> mobpatch = EpicFightCapabilities.getEntityPatch(mob, MobPatch.class);
 			boolean inaction = mobpatch.getEntityState().inaction();
 			
 			if (inaction) {

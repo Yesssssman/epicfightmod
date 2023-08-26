@@ -1,0 +1,24 @@
+{
+	"multilayer": {
+		"base": {
+			"priority":"LOWEST",
+			"masks":
+			[
+				{
+					"livingmotion":"ALL",
+					"type":"none"
+				}
+			]
+		},
+		"composite": {
+			"priority":"LOWEST",
+			"masks":
+			[
+				{
+					"livingmotion":"ALL",
+					"type":"arms"
+				}
+			]
+		}
+	}
+}

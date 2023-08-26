@@ -40,7 +40,7 @@ public class PlayerModeCommand {
 		int i = 0;
 		
 		for (ServerPlayer serverplayer : players) {
-			ServerPlayerPatch playerpatch = (ServerPlayerPatch)serverplayer.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);
+			ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(serverplayer, ServerPlayerPatch.class);
 			
 			if (playerpatch != null) {
 				logGamemodeChange(command.getSource(), serverplayer, playerMode);

@@ -59,9 +59,9 @@ public class JointTransform {
 		Vec3f newV = jt.translation();
 		Quaternion newQ = jt.rotation();
 		Vec3f newS = jt.scale;
-		this.translation.set(newV.x, newV.y, newV.z);
+		this.translation.set(newV);
 		this.rotation.set(newQ.i(), newQ.j(), newQ.k(), newQ.r());
-		this.scale.set(newS.x, newS.y, newS.z);
+		this.scale.set(newS);
 		
 		for (Map.Entry<String, TransformEntry> entry : jt.entries.entrySet()) {
 			this.entries.put(entry.getKey(), entry.getValue());
@@ -96,8 +96,8 @@ public class JointTransform {
 		animationTransformEntry.put(ANIMATION_TRANSFROM, this.toMatrix(), OpenMatrix4f::mul);
 		animationTransformEntry.put(JOINT_LOCAL_TRANSFORM, joint.getLocalTrasnform());
 		animationTransformEntry.put(PARENT, parentTransform);
-		animationTransformEntry.put(ANIMATION_TRANSFROM, joint.getAnimatedTransform());
-		
+		animationTransformEntry.put(ANIMATION_TRANSFROM, joint.getPoseTransform());
+				
 		return animationTransformEntry.getResult();
 	}
 	

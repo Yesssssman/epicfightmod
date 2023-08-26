@@ -1,22 +1,22 @@
 modLoader="javafml" #mandatory
 loaderVersion="[40,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
-license="MIT License"
+license="GNU GENERAL PUBLIC LICENSE"
 #issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/" #optional
 [[mods]] #mandatory
 modId="epicfight" #mandatory
-version="18.3.8" #mandatory
+version="18.5.0.19" #mandatory
 displayName="Epic Fight" #mandatory
-#displayURL="https://change.me.to.your.mods.homepage.example.invalid/" #optional
-#logoFile="examplemod.png" #optional
-#credits="Thanks for this example mod goes to Java" #optional
-#authors="Love, Cheese and small house plants" #optional
-description='''
+#displayURL="https://www.curseforge.com/minecraft/mc-mods/epic-fight-mod" #optional
+#logoFile="epicfight.png" #optional
+#credits="METAL" #optional
+#authors="Yesman" #optional
+description='''Fight til u dead
 '''
 
 [[dependencies.epicfight]] #optional
     modId="forge" #mandatory
     mandatory=true #mandatory
-    versionRange="[40,)" #mandatory
+    versionRange="[40.2.0,)" #mandatory
     ordering="NONE"
     side="BOTH"
 [[dependencies.epicfight]]

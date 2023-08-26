@@ -1,9 +1,9 @@
 package yesman.epicfight.api.animation.types;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -15,13 +15,16 @@ import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.property.AnimationProperty;
-import yesman.epicfight.api.client.animation.JointMask.BindModifier;
+import yesman.epicfight.api.animation.types.EntityState.StateFactor;
+import yesman.epicfight.api.client.animation.Layer;
+import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
+import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.config.ConfigurationIngame;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public abstract class DynamicAnimation {
-	protected Map<String, TransformSheet> jointTransforms;
+	protected Map<String, TransformSheet> jointTransforms = Maps.newHashMap();
 	protected final boolean isRepeat;
 	protected final float convertTime;
 	protected float totalTime = 0.0F;
@@ -31,7 +34,6 @@ public abstract class DynamicAnimation {
 	}
 	
 	public DynamicAnimation(float convertTime, boolean isRepeat) {
-		this.jointTransforms = new HashMap<String, TransformSheet>();
 		this.isRepeat = isRepeat;
 		this.convertTime = convertTime;
 	}
@@ -40,13 +42,13 @@ public abstract class DynamicAnimation {
 		this.jointTransforms.put(jointName, sheet);
 	}
 	
-	public final Pose getPoseByTimeRaw(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
+	public final Pose getRawPose(float time) {
 		Pose pose = new Pose();
+		
 		for (String jointName : this.jointTransforms.keySet()) {
-			if (!entitypatch.isLogicalClient() || this.isJointEnabled(entitypatch, jointName)) {
-				pose.putJointData(jointName, this.jointTransforms.get(jointName).getInterpolatedTransform(time));
-			}
+			pose.putJointData(jointName, this.jointTransforms.get(jointName).getInterpolatedTransform(time));
 		}
+		
 		return pose;
 	}
 	
@@ -54,19 +56,16 @@ public abstract class DynamicAnimation {
 		Pose pose = new Pose();
 		
 		for (String jointName : this.jointTransforms.keySet()) {
-			if (!entitypatch.isLogicalClient() || this.isJointEnabled(entitypatch, jointName)) {
-				pose.putJointData(jointName, this.jointTransforms.get(jointName).getInterpolatedTransform(time));
-			}
+			pose.putJointData(jointName, this.jointTransforms.get(jointName).getInterpolatedTransform(time));
 		}
 		
-		this.modifyPose(pose, entitypatch, time);
+		this.modifyPose(this, pose, entitypatch, time, partialTicks);
 		
 		return pose;
 	}
 	
-	/** Modify the pose which also modified in link animation. **/
-	protected void modifyPose(Pose pose, LivingEntityPatch<?> entitypatch, float time) {
-		;
+	/** Modify the pose both this and link animation. **/
+	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 	}
 	
 	public void setLinkAnimation(Pose pose1, float convertTimeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
@@ -106,19 +105,29 @@ public abstract class DynamicAnimation {
 	
 	public void begin(LivingEntityPatch<?> entitypatch) {}
 	public void tick(LivingEntityPatch<?> entitypatch) {}
-	public void end(LivingEntityPatch<?> entitypatch, boolean isEnd) {}
-	public void linkTick(LivingEntityPatch<?> entitypatch, LinkAnimation linkAnimation) {};
+	public void end(LivingEntityPatch<?> entitypatch, DynamicAnimation nextAnimation, boolean isEnd) {}
+	public void linkTick(LivingEntityPatch<?> entitypatch, DynamicAnimation linkAnimation) {};
 	
-	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, String joint) {
+	@OnlyIn(Dist.CLIENT)
+	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
 		return this.jointTransforms.containsKey(joint);
 	}
 	
-	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, String joint) {
+	@OnlyIn(Dist.CLIENT)
+	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
 		return null;
 	}
 	
-	public EntityState getState(float time) {
-		return EntityState.DEFAULT;
+	public EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
+		return EntityState.DEFAULT_STATE;
+	}
+	
+	public TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
+		return new TypeFlexibleHashMap<> (false);
+	}
+	
+	public <T> T getState(StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
+		return stateFactor.defaultValue();
 	}
 	
 	public Map<String, TransformSheet> getTransfroms() {
@@ -127,6 +136,10 @@ public abstract class DynamicAnimation {
 	
 	public float getPlaySpeed(LivingEntityPatch<?> entitypatch) {
 		return 1.0F;
+	}
+	
+	public TransformSheet getCoord() {
+		return this.jointTransforms.get("Root");
 	}
 	
 	public DynamicAnimation getRealAnimation() {
@@ -165,6 +178,10 @@ public abstract class DynamicAnimation {
 		return Optional.empty();
 	}
 	
+	public boolean isBasicAttackAnimation() {
+		return false;
+	}
+	
 	public boolean isMainFrameAnimation() {
 		return false;
 	}
@@ -175,6 +192,18 @@ public abstract class DynamicAnimation {
 	
 	public boolean isMetaAnimation() {
 		return false;
+	}
+	
+	public boolean isClientAnimation() {
+		return false;
+	}
+	
+	public boolean isStaticAnimation() {
+		return false;
+	}
+	
+	public DynamicAnimation getThis() {
+		return this;
 	}
 	
 	@OnlyIn(Dist.CLIENT)

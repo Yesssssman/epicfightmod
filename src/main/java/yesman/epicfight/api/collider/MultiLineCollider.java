@@ -9,22 +9,14 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.util.Mth;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class MultiLineCollider extends MultiCollider<LineCollider> {
 	public MultiLineCollider(int arrayLength, double posX, double posY, double posZ, double vecX, double vecY, double vecZ) {
 		super(arrayLength, posX, posY, posZ, LineCollider.getInitialAABB(posX, posY, posZ, vecX, vecY, vecZ));
-		this.bigCollider = new LineCollider(this.outerAABB, posX, posY, posZ, vecX, vecY, vecZ);
-	}
-	
-	@Override
-	public LineCollider createCollider() {
-		return new LineCollider(this.outerAABB, this.modelCenter.x, this.modelCenter.y, this.modelCenter.z, this.bigCollider.modelVec.x, this.bigCollider.modelVec.y, this.bigCollider.modelVec.z);
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -33,13 +25,13 @@ public class MultiLineCollider extends MultiCollider<LineCollider> {
 		int numberOf = Math.max(Math.round(this.numberOfColliders * attackSpeed), 1);
 		float partialScale = 1.0F / numberOf;
 		float interpolation = partialScale;
-		Armature armature = entitypatch.getEntityModel(Models.LOGICAL_SERVER).getArmature();
-		int pathIndex =  armature.searchPathIndex(animation.getPathIndexByTime(elapsedTime));
+		Armature armature = entitypatch.getArmature();
+		int pathIndex =  armature.searchPathIndex(animation.getJointOn(elapsedTime).getName());
 		boolean red = entitypatch.getEntityState().attacking();
 		List<LineCollider> colliders = Lists.newArrayList();
 		
 		for (int i = 0; i < numberOf; i++) {
-			colliders.add(this.createCollider());
+			colliders.add(this.colliders.get(i).deepCopy());
 		}
 		
 		for (LineCollider lineCollider : colliders) {
@@ -51,7 +43,7 @@ public class MultiLineCollider extends MultiCollider<LineCollider> {
 			if (pathIndex == -1) {
 				mat = new OpenMatrix4f();
 			} else {
-				mat = Animator.getBindedJointTransformByIndex(animation.getPoseByTime(entitypatch, partialTime, 0.0F), armature, pathIndex);
+				mat = armature.getBindedTransformByJointIndex(animation.getPoseByTime(entitypatch, partialTime, 0.0F), pathIndex);
 			}
 			
 			lineCollider.drawInternal(matrixStackIn, buffer, mat, red);

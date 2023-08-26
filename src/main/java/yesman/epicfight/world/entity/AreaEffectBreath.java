@@ -15,8 +15,8 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import yesman.epicfight.api.utils.IndirectEpicFightDamageSource;
-import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
+import yesman.epicfight.world.damagesource.IndirectEpicFightDamageSource;
+import yesman.epicfight.world.damagesource.StunType;
 
 public class AreaEffectBreath extends AreaEffectCloud {
 	private static final EntityDataAccessor<Boolean> DATA_HORIZONTAL = SynchedEntityData.defineId(AreaEffectBreath.class, EntityDataSerializers.BOOLEAN);

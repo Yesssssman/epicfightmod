@@ -11,32 +11,35 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.network.NetworkEvent;
 
 public class SPPotion {
-	private MobEffect effect;
+	private MobEffectInstance effectInstance;
 	private Action action;
 	private int entityId;
 
 	public SPPotion() {
-		this.effect = null;
+		this.effectInstance = null;
 		this.entityId = 0;
 		this.action = Action.REMOVE;
 	}
 
-	public SPPotion(MobEffect effect, Action action, int entityId) {
-		this.effect = effect;
+	public SPPotion(MobEffectInstance effect, Action action, int entityId) {
+		this.effectInstance = effect;
 		this.entityId = entityId;
 		this.action = action;
 	}
 
 	public static SPPotion fromBytes(FriendlyByteBuf buf) {
 		MobEffect effect = MobEffect.byId(buf.readInt());
+		MobEffectInstance effectInstance = new MobEffectInstance(effect, 0, buf.readInt());
+		
 		int entityId = buf.readInt();
 		Action action = Action.getAction(buf.readInt());
 
-		return new SPPotion(effect, action, entityId);
+		return new SPPotion(effectInstance, action, entityId);
 	}
 
 	public static void toBytes(SPPotion msg, FriendlyByteBuf buf) {
-		buf.writeInt(MobEffect.getId(msg.effect));
+		buf.writeInt(MobEffect.getId(msg.effectInstance.getEffect()));
+		buf.writeInt(msg.effectInstance.getAmplifier());
 		buf.writeInt(msg.entityId);
 		buf.writeInt(msg.action.getSymb());
 	}
@@ -48,17 +51,18 @@ public class SPPotion {
 			
 			if (entity != null && entity instanceof LivingEntity) {
 				LivingEntity livEntity = ((LivingEntity)entity);
-
+				
 				switch (msg.action) {
 				case ACTIVATE:
-					livEntity.addEffect(new MobEffectInstance(msg.effect, 0));
+					livEntity.addEffect(msg.effectInstance);
 					break;
 				case REMOVE:
-					livEntity.removeEffect(msg.effect);
+					livEntity.removeEffect(msg.effectInstance.getEffect());
 					break;
 				}
 			}
 		});
+		
 		ctx.get().setPacketHandled(true);
 	}
 	

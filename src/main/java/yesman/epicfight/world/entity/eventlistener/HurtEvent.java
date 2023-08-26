@@ -2,18 +2,20 @@ package yesman.epicfight.world.entity.eventlistener;
 
 import net.minecraft.world.damagesource.DamageSource;
 import yesman.epicfight.api.utils.AttackResult;
-import yesman.epicfight.api.utils.ExtendedDamageSource;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
+import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 
 public abstract class HurtEvent<T> extends PlayerEvent<ServerPlayerPatch> {
 	private final T damageSource;
 	private float amount;
+	private boolean parried;
 	private AttackResult.ResultType result;
 	
-	public HurtEvent(ServerPlayerPatch playerpatch, T damageSource, float amount) {
-		super(playerpatch, true);
+	private HurtEvent(ServerPlayerPatch playerpatch, T damageSource, float amount, boolean cancelable) {
+		super(playerpatch, cancelable);
 		this.damageSource = damageSource;
 		this.amount = amount;
+		this.parried = false;
 		this.result = AttackResult.ResultType.SUCCESS;
 	}
 	
@@ -37,15 +39,23 @@ public abstract class HurtEvent<T> extends PlayerEvent<ServerPlayerPatch> {
 		this.result = result;
 	}
 	
+	public void setParried(boolean parried) {
+		this.parried = parried;
+	}
+	
+	public boolean isParried() {
+		return this.parried;
+	}
+	
 	public static class Pre extends HurtEvent<DamageSource> {
 		public Pre(ServerPlayerPatch playerpatch, DamageSource damageSource, float amount) {
-			super(playerpatch, damageSource, amount);
+			super(playerpatch, damageSource, amount, true);
 		}
 	}
 	
-	public static class Post extends HurtEvent<ExtendedDamageSource> {
-		public Post(ServerPlayerPatch playerpatch, ExtendedDamageSource damageSource, float amount) {
-			super(playerpatch, damageSource, amount);
+	public static class Post extends HurtEvent<EpicFightDamageSource> {
+		public Post(ServerPlayerPatch playerpatch, EpicFightDamageSource damageSource, float amount) {
+			super(playerpatch, damageSource, amount, false);
 		}
 	}
 }

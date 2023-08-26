@@ -1,69 +1,51 @@
 {
-	"loader": "forge:separate-perspective",
-	"base":
-	{
-		"loader": "forge:obj",
-  		"model": "epicfight:models/item/obj/knuckle.obj",
-  		"flip-v": true,
-  		"textures": { "#grip": "epicfight:item/swords.png" },
-  		"display":
-  		{
-    		"thirdperson_righthand":
-    		{
-      			"translation": [5, -5.75, 4.0],
-      			"rotation": [86, 0, 0],
-      			"scale": [0.6, 0.6, 0.6]
-    		},
-    		"thirdperson_lefthand":
-    		{
-      			"translation": [-5, -5.75, 4.0],
-      			"rotation": [86, 0, 0],
-      			"scale": [0.6, 0.6, 0.6]
-    		}
-  		}
+	"credit": "End_Rage waz here",
+	"textures": {
+		"0": "epicfight:item/knuckles",
+		"particle": "epicfight:item/knuckles"
 	},
-	"perspectives":
-	{
-		"ground":
+	"elements": [
 		{
-			"parent": "item/generated",
-			"textures":
-			{
-				"layer0": "epicfight:item/knuckle"
+			"from": [6, 6, 6],
+			"to": [10, 10, 10],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 8]},
+			"faces": {
+				"north": {"uv": [4, 0, 8, 4], "texture": "#0"},
+				"east": {"uv": [0, 0, 4, 4], "texture": "#0"},
+				"south": {"uv": [4, 4, 8, 8], "texture": "#0"},
+				"west": {"uv": [0, 4, 4, 8], "texture": "#0"},
+				"up": {"uv": [12, 4, 8, 8], "texture": "#0"},
+				"down": {"uv": [12, 0, 8, 4], "texture": "#0"}
 			}
+		}
+	],
+	"display": {
+		"thirdperson_righthand": {
+			"rotation": [95, 0, 0],
+			"translation": [0, -1.75, 0.5],
+			"scale": [1.15, 1.15, 1.15]
 		},
-		"gui":
-		{
-			"parent": "item/generated",
-			"textures":
-			{
-				"layer0": "epicfight:item/knuckle"
-			},
-			"gui_light": "front"
+		"thirdperson_lefthand": {
+			"rotation": [95, 180, 0],
+			"translation": [0, -1.75, 0.5],
+			"scale": [1.15, 1.15, 1.15]
 		},
-		"fixed":
-		{
-			"parent": "item/generated",
-			"textures":
-			{
-				"layer0": "epicfight:item/knuckle"
-			}
+		"firstperson_righthand": {
+			"rotation": [125, 65, -10],
+			"translation": [0, 0.75, 0],
+			"scale": [0.9, 0.9, 0.9]
 		},
-		"first_person_right_hand":
-    	{
-      		"parent": "item/generated",
-			"textures":
-			{
-				"layer0": "epicfight:item/knuckle"
-			}
-    	},
-    	"first_person_left_hand":
-    	{
-      		"parent": "item/generated",
-			"textures":
-			{
-				"layer0": "epicfight:item/knuckle"
-			}
-    	}
+		"firstperson_lefthand": {
+			"rotation": [125, -115, 10],
+			"translation": [0, 0.75, 0],
+			"scale": [0.9, 0.9, 0.9]
+		},
+		"gui": {
+			"rotation": [40.96, -29.63, 159.66],
+			"scale": [2, 2, 2]
+		},
+		"fixed": {
+			"scale": [2, 2, 2]
+		}
 	}
 }

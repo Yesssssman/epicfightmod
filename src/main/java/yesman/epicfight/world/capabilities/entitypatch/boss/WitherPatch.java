@@ -29,6 +29,7 @@ import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.LivingMotions;
@@ -36,25 +37,21 @@ import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimation
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
-import yesman.epicfight.api.model.Model;
 import yesman.epicfight.api.utils.AttackResult;
-import yesman.epicfight.api.utils.ExtendedDamageSource;
-import yesman.epicfight.api.utils.AttackResult.ResultType;
-import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.network.EpicFightDataSerializers;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
+import yesman.epicfight.world.damagesource.EpicFightDamageSource;
+import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.DroppedNetherStar;
 import yesman.epicfight.world.entity.WitherGhostClone;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
-import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 
 public class WitherPatch extends MobPatch<WitherBoss> {
 	private static final EntityDataAccessor<Boolean> DATA_ARMOR_ACTIVED = SynchedEntityData.defineId(WitherBoss.class, EntityDataSerializers.BOOLEAN);
@@ -205,9 +202,12 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 			} else {
 				if (this.original.tickCount % 4 == (this.blockingStartTick - 1) % 4) {
 					if (this.original.position().distanceToSqr(this.blockingEntity.getOriginal().position()) < 9.0D) {
-						ExtendedDamageSource extendedSource = this.getDamageSource(StunType.KNOCKDOWN, Animations.WITHER_CHARGE, InteractionHand.MAIN_HAND);
-						extendedSource.setImpact(4.0F);
-						extendedSource.setInitialPosition(this.lastAttackPosition);
+						EpicFightDamageSource extendedSource = this.getDamageSource(Animations.WITHER_CHARGE, InteractionHand.MAIN_HAND);
+						extendedSource
+							.setStunType(StunType.KNOCKDOWN)
+							.setImpact(4.0F)
+							.setInitialPosition(this.lastAttackPosition);
+						
 						AttackResult attackResult = this.tryHarm(this.blockingEntity.getOriginal(), extendedSource, blockingCount);
 						
 						if (attackResult.resultType == AttackResult.ResultType.SUCCESS) {
@@ -225,13 +225,11 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	}
 	
 	@Override
-	public void onAttackBlocked(HurtEvent.Pre hurtEvent, LivingEntityPatch<?> opponent) {
-		DamageSource damageSource = hurtEvent.getDamageSource();
-		
-		if (damageSource instanceof ExtendedDamageSource) {
-			ExtendedDamageSource extendedDamageSource = ((ExtendedDamageSource)damageSource);
+	public void onAttackBlocked(DamageSource damageSource, LivingEntityPatch<?> opponent) {
+		if (damageSource instanceof EpicFightDamageSource) {
+			EpicFightDamageSource extendedDamageSource = ((EpicFightDamageSource)damageSource);
 			
-			if (extendedDamageSource.getAnimationId() == Animations.WITHER_CHARGE.getId()) {
+			if (Animations.WITHER_CHARGE.equals(extendedDamageSource.getAnimation())) {
 				if (!this.blockedNow) {
 					this.blockedNow = true;
 					this.blockingStartTick = this.original.tickCount;
@@ -256,7 +254,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 			Entity entity = damageSource.getDirectEntity();
 			
 			if (entity instanceof AbstractArrow) {
-				return new AttackResult(ResultType.FAILED, 0.0F);
+				return AttackResult.blocked(0.0F);
 			}
 		}
 		
@@ -264,8 +262,8 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	}
 
 	@Override
-	public void onDeath() {
-		super.onDeath();
+	public void onDeath(LivingDeathEvent event) {
+		super.onDeath(event);
 		
 		if (!this.isLogicalClient() && this.original.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
 			Vec3 startMovement = this.original.getLookAngle().scale(0.4D).add(0.0D, 0.63D, 0.0D);
@@ -295,11 +293,6 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 		}
 		
 		return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, prevYRot, yRot, partialTicks, 1.0F, 1.0F, 1.0F);
-	}
-	
-	@Override
-	public <M extends Model> M getEntityModel(Models<M> modelDB) {
-		return modelDB.wither;
 	}
 	
 	@Override

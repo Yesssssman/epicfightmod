@@ -14,13 +14,11 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
-import yesman.epicfight.api.model.Model;
-import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
+import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 
@@ -65,16 +63,24 @@ public class SpiderPatch<T extends PathfinderMob> extends MobPatch<T> {
 
 	@Override
 	public StaticAnimation getHitAnimation(StunType stunType) {
-		return Animations.SPIDER_HIT;
+		switch(stunType) {
+		case SHORT:
+			return Animations.SPIDER_HIT;
+		case LONG:
+			return Animations.SPIDER_HIT;
+		case HOLD:
+			return Animations.SPIDER_HIT;
+		case KNOCKDOWN:
+			return Animations.SPIDER_NEUTRALIZED;
+		case NEUTRALIZE:
+			return Animations.SPIDER_NEUTRALIZED;
+		default:
+			return null;
+		}
 	}
 
 	@Override
 	public SoundEvent getSwingSound(InteractionHand hand) {
 		return SoundEvents.SPIDER_HURT;
-	}
-	
-	@Override
-	public <M extends Model> M getEntityModel(Models<M> modelDB) {
-		return modelDB.spider;
 	}
 }

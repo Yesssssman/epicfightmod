@@ -4,7 +4,6 @@ import java.util.Set;
 
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MoveTowardsTargetGoal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
@@ -15,15 +14,12 @@ import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
-import yesman.epicfight.api.model.Model;
-import yesman.epicfight.api.utils.ExtendedDamageSource;
-import yesman.epicfight.api.utils.ExtendedDamageSource.StunType;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
-import yesman.epicfight.gameasset.Models;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
+import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
@@ -100,18 +96,7 @@ public class IronGolemPatch extends MobPatch<IronGolem> {
 	}
 	
 	@Override
-	public float getDamageTo(Entity targetEntity, ExtendedDamageSource source, InteractionHand hand) {
-		float damage = super.getDamageTo(targetEntity, source, hand);
-		return (int)damage > 0 ? damage / 2.0F + (float)this.original.getRandom().nextInt((int)damage) : damage;
-	}
-
-	@Override
 	public StaticAnimation getHitAnimation(StunType stunType) {
 		return null;
-	}
-
-	@Override
-	public <M extends Model> M getEntityModel(Models<M> modelDB) {
-		return modelDB.ironGolem;
 	}
 }
