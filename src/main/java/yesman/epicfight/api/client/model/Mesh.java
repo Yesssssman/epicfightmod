@@ -72,6 +72,10 @@ public abstract class Mesh<T extends VertexIndicator> {
 	
 	protected abstract ModelPart<T> getOrLogException(Map<String, ModelPart<T>> parts, String name);
 	
+	public boolean hasPart(String part) {
+		return this.parts.containsKey(part);
+	}
+	
 	public ModelPart<T> getPart(String part) {
 		return this.parts.get(part);
 	}

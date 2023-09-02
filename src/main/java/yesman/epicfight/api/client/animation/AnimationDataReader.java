@@ -21,10 +21,12 @@ import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.property.JointMask;
@@ -37,44 +39,62 @@ public class AnimationDataReader {
 	static final Gson GSON = (new GsonBuilder()).registerTypeAdapter(AnimationDataReader.class, new Deserializer()).create();
 	static final TypeToken<AnimationDataReader> TYPE = new TypeToken<AnimationDataReader>() {};
 	
-	public static void readAndApply(StaticAnimation animation, Resource iresource) {
-		InputStream inputstream = iresource.getInputStream();
-        Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
-        AnimationDataReader propertySetter = GsonHelper.fromJson(GSON, reader, TYPE);
-        
-        if (propertySetter.layerInfo != null) {
-        	if (propertySetter.layerInfo.jointMaskEntry.isValid()) {
-        		animation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.layerInfo.jointMaskEntry);
-        	}
-        	
-        	animation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.layerInfo.layerType);
-        	animation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.layerInfo.priority);
-        }
-        
-        if (propertySetter.multilayerInfo != null) {
-        	animation.addProperty(ClientAnimationProperties.MULTILAYER, propertySetter.multilayerInfo);
-        }
-        
-        if (propertySetter.trailInfo.size() > 0) {
-        	animation.addProperty(ClientAnimationProperties.TRAIL_EFFECT, propertySetter.trailInfo);
-        }
-	}
-	
 	private final LayerInfo layerInfo;
 	private final LayerInfo multilayerInfo;
 	private final List<TrailInfo> trailInfo;
+	
+	public static void readAndApply(StaticAnimation animation, ResourceManager resourceManager, Resource iresource) {
+		InputStream inputstream = iresource.getInputStream();
+		Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
+		AnimationDataReader propertySetter = (AnimationDataReader) GsonHelper.fromJson(GSON, reader, TYPE);
+		
+		if (propertySetter.layerInfo != null) {
+			if (propertySetter.layerInfo.jointMaskEntry.isValid()) {
+				animation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.layerInfo.jointMaskEntry);
+			}
+			
+			animation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.layerInfo.layerType);
+			animation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.layerInfo.priority);
+		}
+		
+		if (propertySetter.multilayerInfo != null) {
+			StaticAnimation multilayerAnimation = new StaticAnimation(animation.getConvertTime(), animation.isRepeat(), String.valueOf(animation.getId()), animation.getArmature(), true);
+			
+			if (propertySetter.multilayerInfo.jointMaskEntry.isValid()) {
+				multilayerAnimation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.multilayerInfo.jointMaskEntry);
+			}
+			
+			multilayerAnimation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.multilayerInfo.layerType);
+			multilayerAnimation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.multilayerInfo.priority);
+			multilayerAnimation.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, (self, entitypatch, speed, elapsedTime) -> {
+				if (entitypatch.getClientAnimator().baseLayer.animationPlayer.getAnimation().getRealAnimation() != animation) {
+					return 0.0F;
+				}
+				
+				return animation.getPlaySpeed(entitypatch);
+			});
+			
+			multilayerAnimation.loadAnimation(resourceManager);
+			
+			animation.addProperty(ClientAnimationProperties.MULTILAYER_ANIMATION, multilayerAnimation);
+		}
+		
+		if (propertySetter.trailInfo.size() > 0) {
+			animation.addProperty(ClientAnimationProperties.TRAIL_EFFECT, propertySetter.trailInfo);
+		}
+	}
 	
 	private AnimationDataReader(LayerInfo compositeLayerInfo, LayerInfo layerInfo, List<TrailInfo> trailInfo) {
 		this.multilayerInfo = compositeLayerInfo;
 		this.layerInfo = layerInfo;
 		this.trailInfo = trailInfo;
 	}
-	
+
 	static class Deserializer implements JsonDeserializer<AnimationDataReader> {
 		static LayerInfo deserializeLayerInfo(JsonObject jsonObject) {
 			return deserializeLayerInfo(jsonObject, null);
 		}
-		
+
 		static LayerInfo deserializeLayerInfo(JsonObject jsonObject, Layer.LayerType defaultLayerType) {
 			JointMaskEntry.Builder builder = JointMaskEntry.builder();
 			Layer.Priority priority = jsonObject.has("priority") ? Layer.Priority.valueOf(GsonHelper.getAsString(jsonObject, "priority")) : null;
@@ -83,23 +103,20 @@ public class AnimationDataReader {
 			if (jsonObject.has("masks")) {
 				builder.defaultMask(JointMaskEntry.ALL);
 				JsonArray maskArray = jsonObject.get("masks").getAsJsonArray();
-				
-				maskArray.forEach((element) -> {
+				maskArray.forEach(element -> {
 					JsonObject jointMaskEntry = element.getAsJsonObject();
 					String livingMotionName = GsonHelper.getAsString(jointMaskEntry, "livingmotion");
 					
 					if (livingMotionName.equals("ALL")) {
-						builder.defaultMask(getJointMaskEntry(GsonHelper.getAsString(jointMaskEntry, "type")));
+						builder.defaultMask(AnimationDataReader.getJointMaskEntry(GsonHelper.getAsString(jointMaskEntry, "type")));
 					} else {
-						builder.mask(LivingMotion.ENUM_MANAGER.get(livingMotionName), getJointMaskEntry(GsonHelper.getAsString(jointMaskEntry, "type")));
+						builder.mask((LivingMotion) LivingMotion.ENUM_MANAGER.get(livingMotionName), AnimationDataReader.getJointMaskEntry(GsonHelper.getAsString(jointMaskEntry, "type")));
 					}
 				});
 			}
-			
-			return new LayerInfo(builder.create(), priority, defaultLayerType == null ? layerType : defaultLayerType);
+			return new LayerInfo(builder.create(), priority, (defaultLayerType == null) ? layerType : defaultLayerType);
 		}
-		
-		@Override
+
 		public AnimationDataReader deserialize(JsonElement json, Type type, JsonDeserializationContext context) throws JsonParseException {
 			JsonObject jsonObject = json.getAsJsonObject();
 			LayerInfo layerInfo = null;
@@ -117,10 +134,7 @@ public class AnimationDataReader {
 			
 			if (jsonObject.has("trail_effects")) {
 				JsonArray trailArray = jsonObject.get("trail_effects").getAsJsonArray();
-				
-				trailArray.forEach((element) -> {
-					trailInfos.add(TrailInfo.deserialize(element));
-				});
+				trailArray.forEach(element -> trailInfos.add(TrailInfo.deserialize(element)));
 			}
 			
 			return new AnimationDataReader(multilayerInfo, layerInfo, trailInfos);

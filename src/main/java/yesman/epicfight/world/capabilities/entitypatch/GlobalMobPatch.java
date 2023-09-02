@@ -15,13 +15,15 @@ public class GlobalMobPatch extends HurtableEntityPatch<Mob> {
 	}
 	
 	@Override
-	public void applyStun(StunType stunType, float stunTime) {
+	public boolean applyStun(StunType stunType, float stunTime) {
 		this.original.xxa = 0.0F;
 		this.original.yya = 0.0F;
 		this.original.zza = 0.0F;
 		this.original.setDeltaMovement(0.0D, 0.0D, 0.0D);
 		this.cancelKnockback = true;
 		this.remainStunTime = (int)(stunTime * 20.0F);
+		
+		return true;
 	}
 	
 	public boolean isStunned() {

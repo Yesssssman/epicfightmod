@@ -1,8 +1,11 @@
 package yesman.epicfight.world.capabilities.entitypatch.mob;
 
+import java.util.Set;
+
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.behavior.MeleeAttack;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraftforge.api.distmarker.Dist;
@@ -49,11 +52,16 @@ public class PiglinBrutePatch extends HumanoidMobPatch<PiglinBrute> {
 	}
 	
 	@Override
+	protected void selectGoalToRemove(Set<Goal> toRemove) {
+		BrainRecomposer.removeBehavior(this.original.getBrain(), Activity.FIGHT, 12, MeleeAttack.class);
+	}
+	
+	@Override
 	public void setAIAsInfantry(boolean holdingRanedWeapon) {
 		CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
 		
 		if (builder != null) {
-			BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 12, MeleeAttack.class, new AnimatedCombatBehavior<>(this, builder.build(this)));
+			BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 12, AnimatedCombatBehavior.class, new AnimatedCombatBehavior<>(this, builder.build(this)));
 		}
 		
 		BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.CORE, 1, MoveToTargetSink.class, new MoveToTargetSinkStopInaction());

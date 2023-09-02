@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
+import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.Layer;
 
 @OnlyIn(Dist.CLIENT)
@@ -30,7 +31,7 @@ public class ClientAnimationProperties {
 	public static final StaticAnimationProperty<List<TrailInfo>> TRAIL_EFFECT = new StaticAnimationProperty<List<TrailInfo>> ();
 	
 	/**
-	 * Multilayer information
+	 * Multilayer for living animations (e.g. Greatsword holding animation should be played simultaneously with jumping animation) 
 	 */
-	public static final StaticAnimationProperty<LayerInfo> MULTILAYER = new StaticAnimationProperty<LayerInfo> ();
+	public static final StaticAnimationProperty<StaticAnimation> MULTILAYER_ANIMATION = new StaticAnimationProperty<StaticAnimation> ();
 }

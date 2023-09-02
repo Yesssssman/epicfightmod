@@ -109,7 +109,7 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 			
 			if (resourceManager.hasResource(dataLocation)) {
 				try {
-					AnimationDataReader.readAndApply(animation, resourceManager.getResource(dataLocation));
+					AnimationDataReader.readAndApply(animation, resourceManager, resourceManager.getResource(dataLocation));
 				} catch (IOException e) {
 					e.printStackTrace();
 				}

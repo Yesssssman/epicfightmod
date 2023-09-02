@@ -1,5 +1,7 @@
 package yesman.epicfight.world.capabilities.entitypatch.mob;
 
+import java.util.Set;
+
 import io.netty.buffer.ByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
@@ -8,6 +10,7 @@ import net.minecraft.world.entity.ai.behavior.MeleeAttack;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.behavior.RunIf;
 import net.minecraft.world.entity.ai.behavior.RunOne;
+import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.CrossbowItem;
@@ -84,11 +87,16 @@ public class PiglinPatch extends HumanoidMobPatch<Piglin> {
 	}
 	
 	@Override
+	protected void selectGoalToRemove(Set<Goal> toRemove) {
+		BrainRecomposer.removeBehavior(this.original.getBrain(), Activity.FIGHT, 13, MeleeAttack.class);
+	}
+	
+	@Override
 	public void setAIAsInfantry(boolean holdingRanedWeapon) {
 		CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
 		
 		if (builder != null) {
-			BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 13, MeleeAttack.class, new AnimatedCombatBehavior<>(this, builder.build(this)));
+			BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 13, AnimatedCombatBehavior.class, new AnimatedCombatBehavior<>(this, builder.build(this)));
 		}
 		
 		BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 11, RunIf.class, new RunIf<>((entity) -> entity.isHolding(is -> is.getItem() instanceof CrossbowItem), new BackUpIfTooCloseStopInaction<>(5, 0.75F)));

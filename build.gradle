@@ -18,7 +18,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin'
 
 
-version = '18.5.0.19'
+version = '18.5.2'
 group = 'yesman.epicfight'
 archivesBaseName = 'epicfight'
 
@@ -99,9 +99,10 @@ sourceSets.main.resources { srcDir 'src/generated/resources' }
 
 repositories {
     // If you have mod jar dependencies in ./libs, you can declare them as a repository like so:
-    // flatDir {
-    //     dir 'libs'
-    // }
+    flatDir {
+        dir 'libs'
+    }
+    
     maven {
         url "https://cursemaven.com"
         content {
@@ -117,7 +118,7 @@ mixin {
 dependencies {
     minecraft 'net.minecraftforge:forge:1.18.2-40.2.10'
     
-    //implementation fg.deobf("curse.maven:firstperson-333287:3919332")
+    //implementation fg.deobf("yesman:epicfight:18.5.1")
     //implementation fg.deobf("curse.maven:mantle-74924:3829975")
     
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'

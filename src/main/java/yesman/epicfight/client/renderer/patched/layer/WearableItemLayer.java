@@ -66,6 +66,16 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				continue;
 			}
 			
+			boolean chestPart = false;
+			
+			if (entitypatch.isFirstPerson()) {
+				if (slot != EquipmentSlot.CHEST) {
+					continue;
+				} else {
+					chestPart = true;
+				}
+			}
+			
 			if (slot == EquipmentSlot.HEAD && this.doNotRenderHelmet) {
 				continue;
 			}
@@ -73,9 +83,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 			ItemStack stack = entityliving.getItemBySlot(slot);
 			Item item = stack.getItem();
 			
-			if (item instanceof ArmorItem) {
-				ArmorItem armorItem = (ArmorItem)stack.getItem();
-				
+			if (item instanceof ArmorItem armorItem) {
 				if (slot != armorItem.getSlot()) {
 					return;
 				}
@@ -88,10 +96,18 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				}
 				
 				AnimatedMesh model = this.getArmorModel(originalRenderer, entityliving, armorItem, stack, slot);
+				model.initialize();
+				
+				if (chestPart) {
+					if (model.hasPart("torso")) {
+						model.getPart("torso").hidden = true;
+					}
+				}
+				
 				boolean hasEffect = stack.hasFoil();
 				
-				if (armorItem instanceof DyeableLeatherItem) {
-					int i = ((DyeableLeatherItem)armorItem).getColor(stack);
+				if (armorItem instanceof DyeableLeatherItem dyeableItem) {
+					int i = dyeableItem.getColor(stack);
 					float r = (float) (i >> 16 & 255) / 255.0F;
 					float g = (float) (i >> 8 & 255) / 255.0F;
 					float b = (float) (i & 255) / 255.0F;

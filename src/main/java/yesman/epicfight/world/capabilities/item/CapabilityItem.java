@@ -87,11 +87,13 @@ public class CapabilityItem {
 			
 			if (textComp.getSiblings().size() > 0) {
 				Component sibling = textComp.getSiblings().get(0);
+				index = i;
 				
 				if (sibling instanceof TranslatableComponent translationComponent) {
 					if (translationComponent.getArgs().length > 1 && translationComponent.getArgs()[1] instanceof TranslatableComponent translatableArg) {
 						if (translatableArg.getKey().equals(Attributes.ATTACK_SPEED.getDescriptionId())) {
-							index = i;
+							index++;
+							break;
 						}
 					}
 				}

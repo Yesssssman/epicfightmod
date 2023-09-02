@@ -15,7 +15,6 @@ import yesman.epicfight.api.animation.types.LayerOffAnimation;
 import yesman.epicfight.api.animation.types.LinkAnimation;
 import yesman.epicfight.api.animation.types.MainFrameAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -191,20 +190,11 @@ public class Layer {
 			Priority priority = nextAnimation.getPriority();
 			this.baseLayerPriority = priority;
 			this.offCompositeLayerLowerThan(entitypatch, nextAnimation);
-			
-			nextAnimation.getProperty(ClientAnimationProperties.MULTILAYER).ifPresent((multilayerInfo) -> {
-				this.compositeLayers.get(multilayerInfo.priority).playAnimation(nextAnimation, entitypatch, convertTimeModifier);
-			});
-			
 			super.playAnimation(nextAnimation, entitypatch, convertTimeModifier);
 		}
 		
 		@Override
 		protected void playLivingAnimation(StaticAnimation nextAnimation, LivingEntityPatch<?> entitypatch) {
-			nextAnimation.getProperty(ClientAnimationProperties.MULTILAYER).ifPresent((multilayerInfo) -> {
-				this.compositeLayers.get(multilayerInfo.priority).playAnimation(nextAnimation, entitypatch, 0.0F);
-			});
-			
 			this.animationPlayer.getAnimation().end(entitypatch, nextAnimation, this.animationPlayer.isEnd());
 			this.resume();
 			nextAnimation.begin(entitypatch);

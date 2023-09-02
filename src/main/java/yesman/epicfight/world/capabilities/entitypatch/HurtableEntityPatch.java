@@ -31,7 +31,7 @@ public abstract class HurtableEntityPatch<T extends LivingEntity> extends Entity
 		return null;
 	}
 	
-	public abstract void applyStun(StunType stunType, float stunTime);
+	public abstract boolean applyStun(StunType stunType, float stunTime);
 	
 	public float getWeight() {
 		return (float)this.original.getAttributeValue(Attributes.MAX_HEALTH) * 2.0F;

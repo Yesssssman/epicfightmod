@@ -478,7 +478,7 @@ public class RenderEngine {
 
 		@SubscribeEvent
 		public static void itemTooltip(ItemTooltipEvent event) {
-			if (event.getPlayer() != null && event.getPlayer().level.isClientSide) {
+			if (event.getPlayer() != null && event.getPlayer().getLevel().isClientSide) {
 				CapabilityItem cap = EpicFightCapabilities.getItemStackCapabilityOr(event.getItemStack(), null);
 				LocalPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(event.getPlayer(), LocalPlayerPatch.class);
 				

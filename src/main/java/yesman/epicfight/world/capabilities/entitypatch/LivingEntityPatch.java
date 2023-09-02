@@ -426,7 +426,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
     }
 	
 	@Override
-	public void applyStun(StunType stunType, float stunTime) {
+	public boolean applyStun(StunType stunType, float stunTime) {
 		this.original.xxa = 0.0F;
 		this.original.yya = 0.0F;
 		this.original.zza = 0.0F;
@@ -437,7 +437,10 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		
 		if (hitAnimation != null) {
 			this.playAnimationSynchronized(hitAnimation, stunType.hasFixedStunTime() ? 0.0F : stunTime);
+			return true;
 		}
+		
+		return false;
 	}
 	
 	public void correctRotation() {

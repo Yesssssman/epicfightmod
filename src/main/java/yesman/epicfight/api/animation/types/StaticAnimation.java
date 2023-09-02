@@ -1,4 +1,3 @@
-
 package yesman.epicfight.api.animation.types;
 
 import java.util.List;
@@ -29,7 +28,6 @@ import yesman.epicfight.api.client.animation.Layer.LayerType;
 import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.property.JointMask;
 import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
-import yesman.epicfight.api.client.animation.property.LayerInfo;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
 import yesman.epicfight.api.client.model.ItemSkin;
 import yesman.epicfight.api.client.model.ItemSkins;
@@ -81,28 +79,36 @@ public class StaticAnimation extends DynamicAnimation {
 	
 	public StaticAnimation(float convertTime, boolean repeatPlay, String path, Armature armature, boolean notRegisteredInAnimationManager) {
 		super(convertTime, repeatPlay);
-		this.namespaceId = -1;
+		
+		AnimationManager animationManager = EpicFightMod.getInstance().animationManager;
+		this.namespaceId = animationManager.getModid().hashCode();
 		this.animationId = -1;
-		this.resourceLocation = new ResourceLocation(EpicFightMod.getInstance().animationManager.getModid(), "animmodels/animations/" + path);
+		this.resourceLocation = new ResourceLocation(animationManager.getModid(), "animmodels/animations/" + path);
 		this.armature = armature;
 	}
 	
+	public static void load(ResourceManager resourceManager, ResourceLocation rl, StaticAnimation animation) {
+		(new JsonModelLoader(resourceManager, rl)).loadStaticAnimation(animation);
+	}
+	
 	public static void load(ResourceManager resourceManager, StaticAnimation animation) {
-		ResourceLocation extenderPath = new ResourceLocation(animation.resourceLocation.getNamespace(), animation.resourceLocation.getPath() + ".json");
-		(new JsonModelLoader(resourceManager, extenderPath)).loadStaticAnimation(animation);
+		ResourceLocation path = new ResourceLocation(animation.resourceLocation.getNamespace(), animation.resourceLocation.getPath() + ".json");
+		(new JsonModelLoader(resourceManager, path)).loadStaticAnimation(animation);
 	}
 	
 	public static void loadBothSide(ResourceManager resourceManager, StaticAnimation animation) {
-		ResourceLocation extenderPath = new ResourceLocation(animation.resourceLocation.getNamespace(), animation.resourceLocation.getPath() + ".json");
-		(new JsonModelLoader(resourceManager, extenderPath)).loadStaticAnimationBothSide(animation);
+		ResourceLocation path = new ResourceLocation(animation.resourceLocation.getNamespace(), animation.resourceLocation.getPath() + ".json");
+		(new JsonModelLoader(resourceManager, path)).loadStaticAnimationBothSide(animation);
 	}
 	
 	public void loadAnimation(ResourceManager resourceManager) {
 		try {
 			int id = Integer.parseInt(this.resourceLocation.getPath().substring(22));
 			StaticAnimation animation = EpicFightMod.getInstance().animationManager.findAnimationById(this.namespaceId, id);
+			ResourceLocation path = new ResourceLocation(animation.resourceLocation.getNamespace(), animation.resourceLocation.getPath() + ".json");
+			load(resourceManager, path, this);
+			
 			this.jointTransforms = animation.jointTransforms;
-			this.setTotalTime(animation.totalTime);
 		} catch (NumberFormatException e) {
 			load(resourceManager, this);
 		}
@@ -216,13 +222,19 @@ public class StaticAnimation extends DynamicAnimation {
 		if (!super.isJointEnabled(entitypatch, layer, joint)) {
 			return false;
 		} else {
-			if (this.getProperty(ClientAnimationProperties.MULTILAYER).isPresent()) {
-				LayerInfo layerInfo = this.getProperty(ClientAnimationProperties.MULTILAYER).get();
+			
+			//System.out.println(this + " " + joint);
+			
+			/**
+			if (this.getProperty(ClientAnimationProperties.MULTILAYER_ANIMATION).isPresent()) {
+				StaticAnimation multiAnimation = this.getProperty(ClientAnimationProperties.MULTILAYER_ANIMATION).get();
 				
-				if (layer == layerInfo.priority) {
-					return !layerInfo.jointMaskEntry.isMasked(entitypatch.getCurrentLivingMotion(), joint);
+				if (layer == multiAnimation.getPriority()) {
+					return !multiAnimation.getProperty(ClientAnimationProperties.JOINT_MASK).map((bindModifier) -> 
+											!bindModifier.isMasked(entitypatch.getCurrentLivingMotion(), joint)).orElse(true);
 				}
 			}
+			**/
 			
 			return this.getProperty(ClientAnimationProperties.JOINT_MASK).map((bindModifier) -> 
 						!bindModifier.isMasked(entitypatch.getCurrentLivingMotion(), joint)).orElse(true);

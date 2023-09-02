@@ -76,6 +76,7 @@ public class ClientAnimator extends Animator {
 	@Override
 	public void addLivingAnimation(LivingMotion livingMotion, StaticAnimation animation) {
 		Layer.LayerType layerType = animation.getLayerType();
+		boolean isBaseLayer = (layerType == Layer.LayerType.BASE_LAYER);
 		
 		Map<LivingMotion, StaticAnimation> storage = layerType == Layer.LayerType.BASE_LAYER ? this.livingAnimations : this.compositeLivingAnimations;
 		LivingMotion compareMotion = layerType == Layer.LayerType.BASE_LAYER ? this.currentMotion : this.currentCompositeMotion;
@@ -89,6 +90,21 @@ public class ClientAnimator extends Animator {
 				layer.paused = false;
 				layer.playLivingAnimation(animation, this.entitypatch);
 			}
+		}
+		
+		if (isBaseLayer) {
+			animation.getProperty(ClientAnimationProperties.MULTILAYER_ANIMATION).ifPresent(multilayerAnimation -> {
+				this.compositeLivingAnimations.put(livingMotion, multilayerAnimation);
+				
+				if (livingMotion == this.currentCompositeMotion) {
+					EntityState state = getEntityState();
+					
+					if (!state.inaction()) {
+						layer.paused = false;
+						layer.playLivingAnimation(multilayerAnimation, this.entitypatch);
+					}
+				}
+			});
 		}
 	}
 	
@@ -142,8 +158,8 @@ public class ClientAnimator extends Animator {
 			this.getCompositeLayer(this.getCompositeLivingMotion(this.currentCompositeMotion).getPriority()).off(this.entitypatch);
 			
 			/* Turns off the multilayer of the base layer */
-			this.getLivingMotion(this.currentCompositeMotion).getProperty(ClientAnimationProperties.MULTILAYER).ifPresent((multilayerInfo) -> {
-				this.getCompositeLayer(multilayerInfo.priority).off(this.entitypatch);
+			this.getLivingMotion(this.currentCompositeMotion).getProperty(ClientAnimationProperties.MULTILAYER_ANIMATION).ifPresent((multilayerAnimation) -> {
+				this.getCompositeLayer(multilayerAnimation.getPriority()).off(this.entitypatch);
 			});
 			
 			if (this.compositeLivingAnimations.containsKey(this.entitypatch.currentCompositeMotion)) {

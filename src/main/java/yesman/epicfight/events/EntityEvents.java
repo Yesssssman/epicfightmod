@@ -299,10 +299,10 @@ public class EntityEvents {
 						
 						Vec3 sourcePosition = epicFightDamageSource.getInitialPosition();
 						hitHurtableEntityPatch.setStunReductionOnHit();
-						hitHurtableEntityPatch.applyStun(stunType, stunTime);
+						boolean stunApplied = hitHurtableEntityPatch.applyStun(stunType, stunTime);
 						
 						if (sourcePosition != null) {
-							if (!(hitEntity instanceof Player)) {
+							if (!(hitEntity instanceof Player) && stunApplied) {
 								hitEntity.lookAt(EntityAnchorArgument.Anchor.FEET, sourcePosition);
 							}
 							
