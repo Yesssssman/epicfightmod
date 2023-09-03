@@ -1,5 +1,7 @@
 package yesman.epicfight.api.animation.types;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -10,6 +12,7 @@ import javax.annotation.Nullable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.server.level.ServerLevel;
@@ -196,12 +199,11 @@ public class AttackAnimation extends ActionAnimation {
 	}
 	
 	protected void hurtCollidingEntities(LivingEntityPatch<?> entitypatch, float prevElapsedTime, float elapsedTime, EntityState prevState, EntityState state, Phase phase) {
-		Collider collider = this.getCollider(entitypatch, elapsedTime);
 		LivingEntity entity = entitypatch.getOriginal();
 		entitypatch.getArmature().initializeTransform();
 		float prevPoseTime = prevState.attacking() ? prevElapsedTime : phase.preDelay;
 		float poseTime = state.attacking() ? elapsedTime : phase.contact;
-		List<Entity> list = collider.updateAndSelectCollideEntity(entitypatch, this, prevPoseTime, poseTime, phase.getColliderJoint(), this.getPlaySpeed(entitypatch));
+		List<Entity> list = this.getPhaseByTime(elapsedTime).getCollidingEntities(entitypatch, this, prevPoseTime, poseTime, this.getPlaySpeed(entitypatch));
 		
 		if (list.size() > 0) {
 			HitEntityList hitEntities = new HitEntityList(entitypatch, list, phase.getProperty(AttackPhaseProperty.HIT_PRIORITY).orElse(HitEntityList.Priority.DISTANCE));
@@ -237,12 +239,6 @@ public class AttackAnimation extends ActionAnimation {
 				}
 			}
 		}
-	}
-	
-	public Collider getCollider(LivingEntityPatch<?> entitypatch, float elapsedTime) {
-		Phase phase = this.getPhaseByTime(elapsedTime);
-		
-		return phase.collider != null ? phase.collider : entitypatch.getColliderMatching(phase.hand);
 	}
 	
 	public LivingEntity getTrueEntity(Entity entity) {
@@ -360,10 +356,6 @@ public class AttackAnimation extends ActionAnimation {
 		return this;
 	}
 	
-	public Joint getJointOn(float elapsedTime) {
-		return this.getPhaseByTime(elapsedTime).joint;
-	}
-	
 	public Phase getPhaseByTime(float elapsedTime) {
 		Phase currentPhase = null;
 		
@@ -380,16 +372,26 @@ public class AttackAnimation extends ActionAnimation {
 	
 	@Deprecated
 	public void changeCollider(Collider newCollider, int index) {
-		this.phases[index].collider = newCollider;
+		//this.phases[index].collider = newCollider;
 	}
 	
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public void renderDebugging(PoseStack poseStack, MultiBufferSource buffer, LivingEntityPatch<?> entitypatch, float playTime, float partialTicks) {
+	public void renderDebugging(PoseStack poseStack, MultiBufferSource buffer, LivingEntityPatch<?> entitypatch, float playbackTime, float partialTicks) {
 		AnimationPlayer animPlayer = entitypatch.getAnimator().getPlayerFor(this);
 		float prevElapsedTime = animPlayer.getPrevElapsedTime();
 		float elapsedTime = animPlayer.getElapsedTime();
-		this.getCollider(entitypatch, elapsedTime).draw(poseStack, buffer, entitypatch, this, prevElapsedTime, elapsedTime, partialTicks, this.getPlaySpeed(entitypatch));
+		Phase phase = this.getPhaseByTime(playbackTime);
+		
+		for (Pair<Joint, Collider> colliderInfo : phase.colliders) {
+			Collider collider = colliderInfo.getSecond();
+			
+			if (collider == null) {
+				collider = entitypatch.getColliderMatching(phase.hand);
+			}
+			
+			collider.draw(poseStack, buffer, entitypatch, this, colliderInfo.getFirst(), prevElapsedTime, elapsedTime, partialTicks, this.getPlaySpeed(entitypatch));
+		}
 	}
 	
 	public static class Phase {
@@ -400,9 +402,8 @@ public class AttackAnimation extends ActionAnimation {
 		public final float contact;
 		public final float recovery;
 		public final float end;
-		public final Joint joint;
 		public final InteractionHand hand;
-		public /*final*/ Collider collider;
+		public List<Pair<Joint, Collider>> colliders;
 		public final boolean noStateBind;
 		
 		public Phase(float start, float antic, float contact, float recovery, float end, Joint joint, Collider collider) {
@@ -426,14 +427,17 @@ public class AttackAnimation extends ActionAnimation {
 		}
 		
 		public Phase(float start, float antic, float preDelay, float contact, float recovery, float end, boolean noStateBind, InteractionHand hand, Joint joint, Collider collider) {
+			this(start, antic, preDelay, contact, recovery, end, noStateBind, hand, List.of(Pair.of(joint, collider)));
+		}
+		
+		public Phase(float start, float antic, float preDelay, float contact, float recovery, float end, boolean noStateBind, InteractionHand hand, List<Pair<Joint, Collider>> colliders) {
 			this.start = start;
 			this.antic = antic;
 			this.preDelay = preDelay;
 			this.contact = contact;
 			this.recovery = recovery;
 			this.end = end;
-			this.collider = collider;
-			this.joint = joint;
+			this.colliders = colliders;
 			this.hand = hand;
 			this.noStateBind = noStateBind;
 		}
@@ -454,8 +458,24 @@ public class AttackAnimation extends ActionAnimation {
 			return (Optional<V>) Optional.ofNullable(this.properties.get(propertyType));
 		}
 		
-		public Joint getColliderJoint() {
-			return this.joint;
+		public List<Entity> getCollidingEntities(LivingEntityPatch<?> entitypatch, AttackAnimation animation, float prevElapsedTime, float elapsedTime, float attackSpeed) {
+			List<Entity> entities = Lists.newArrayList();
+			
+			for (Pair<Joint, Collider> colliderInfo : this.colliders) {
+				Collider collider = colliderInfo.getSecond();
+				
+				if (collider == null) {
+					collider = entitypatch.getColliderMatching(this.hand);
+				}
+				
+				entities.addAll(collider.updateAndSelectCollideEntity(entitypatch, animation, prevElapsedTime, elapsedTime, colliderInfo.getFirst(), attackSpeed));
+			}
+			
+			return new ArrayList<>(new HashSet<>(entities));
+		}
+		
+		public List<Pair<Joint, Collider>> getColliders() {
+			return this.colliders;
 		}
 		
 		public InteractionHand getHand() {

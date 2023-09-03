@@ -725,7 +725,7 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.0F);
 		GREATSWORD_AUTO2 = new BasicAttackAnimation(0.1F, 0.5F, 0.65F, 1.5F, null, biped.toolR, "biped/combat/greatsword_auto2", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.0F);
-		GREATSWORD_DASH = new DashAttackAnimation(0.2F, 0.2F, 0.35F, 0.6F, 1.2F, null, biped.toolR, "biped/combat/greatsword_dash", false, biped)
+		GREATSWORD_DASH = new DashAttackAnimation(0.2F, 0.2F, 0.35F, 0.6F, 1.2F, null, biped.toolR, "biped/combat/greatsword_dash", biped, false)
 				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(SourceTags.FINISHER))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.0F)
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, false)
@@ -753,8 +753,14 @@ public class Animations {
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
 		SWORD_DUAL_AUTO3 = new BasicAttackAnimation(0.1F, 0.0F, 0.25F, 0.36F, 0.6F, ColliderPreset.DUAL_SWORD, biped.torso, "biped/combat/sword_dual_auto3", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
-		SWORD_DUAL_DASH = new DashAttackAnimation(0.16F, 0.05F, 0.05F, 0.3F, 0.75F, ColliderPreset.DUAL_SWORD_DASH, biped.rootJoint, "biped/combat/sword_dual_dash", biped)
-				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
+		
+		SWORD_DUAL_DASH = new DashAttackAnimation(0.16F, "biped/combat/sword_dual_dash", biped,
+				new Phase(0.0F, 0.05F, 0.05F, 0.3F, 0.75F, Float.MAX_VALUE, false, InteractionHand.MAIN_HAND, List.of(Pair.of(biped.toolR, null), Pair.of(biped.toolL, null))))
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
+				.addProperty(ActionAnimationProperty.COORD_SET_BEGIN, MoveCoordFunctions.RAW_COORD)
+				.addProperty(ActionAnimationProperty.COORD_SET_TICK, null)
+				;
+		
 		UCHIGATANA_AUTO1 = new BasicAttackAnimation(0.05F, 0.15F, 0.25F, 0.3F, null, biped.toolR, "biped/combat/uchigatana_auto1", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
 		UCHIGATANA_AUTO2 = new BasicAttackAnimation(0.05F, 0.2F, 0.3F, 0.3F, null, biped.toolR, "biped/combat/uchigatana_auto2", biped)
@@ -799,7 +805,7 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		TACHI_AUTO3 = new BasicAttackAnimation(0.15F, 0.2F, 0.3F, 0.85F, null, biped.toolR, "biped/combat/tachi_auto3", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		TACHI_DASH = new DashAttackAnimation(0.05F, 0.3F, 0.3F, 0.4F, 1.0F, null, biped.toolR, "biped/combat/tachi_dash", false, biped)
+		TACHI_DASH = new DashAttackAnimation(0.05F, 0.3F, 0.3F, 0.4F, 1.0F, null, biped.toolR, "biped/combat/tachi_dash", biped, false)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		DAGGER_AUTO1 = new BasicAttackAnimation(0.05F, 0.05F, 0.15F, 0.2F, null, biped.toolR, "biped/combat/dagger_auto1", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);

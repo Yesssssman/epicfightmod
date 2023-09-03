@@ -24,6 +24,10 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 	protected final List<T> colliders = Lists.newArrayList();
 	protected final int numberOfColliders;
 	
+	public static enum Usage {
+		INTERPOLATION, MULTI_BONES
+	}
+	
 	public MultiCollider(int arrayLength, double posX, double posY, double posZ, AABB outerAABB) {
 		super(new Vec3(posX, posY, posZ), outerAABB);
 		this.numberOfColliders = arrayLength;

@@ -9,6 +9,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.util.Mth;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -21,12 +22,12 @@ public class MultiLineCollider extends MultiCollider<LineCollider> {
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void draw(PoseStack matrixStackIn, MultiBufferSource buffer, LivingEntityPatch<?> entitypatch, AttackAnimation animation, float prevElapsedTime, float elapsedTime, float partialTicks, float attackSpeed) {
+	public void draw(PoseStack matrixStackIn, MultiBufferSource buffer, LivingEntityPatch<?> entitypatch, AttackAnimation animation, Joint joint, float prevElapsedTime, float elapsedTime, float partialTicks, float attackSpeed) {
 		int numberOf = Math.max(Math.round(this.numberOfColliders * attackSpeed), 1);
 		float partialScale = 1.0F / numberOf;
 		float interpolation = partialScale;
 		Armature armature = entitypatch.getArmature();
-		int pathIndex =  armature.searchPathIndex(animation.getJointOn(elapsedTime).getName());
+		int pathIndex =  armature.searchPathIndex(joint.getName());
 		boolean red = entitypatch.getEntityState().attacking();
 		List<LineCollider> colliders = Lists.newArrayList();
 		

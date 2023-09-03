@@ -12,16 +12,24 @@ import yesman.epicfight.api.utils.math.ValueModifier;
 import yesman.epicfight.gameasset.Animations;
 
 public class DashAttackAnimation extends AttackAnimation {
-	
 	public DashAttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, @Nullable Collider collider, Joint colliderJoint, String path, Armature armature) {
-		super(convertTime, antic, preDelay, contact, recovery, collider, colliderJoint, path, armature);
-		this.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.5F);
-		this.addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.multiplier(1.333F));
-		this.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
+		this(convertTime, antic, preDelay, contact, recovery, collider, colliderJoint, path, armature, false);
 	}
 	
-	public DashAttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, @Nullable Collider collider, Joint colliderJoint, String path, boolean noDirectionAttack, Armature armature) {
+	public DashAttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, @Nullable Collider collider, Joint colliderJoint, String path, Armature armature, boolean directional) {
 		super(convertTime, antic, preDelay, contact, recovery, collider, colliderJoint, path, armature);
+		
+		this.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.5F);
+		this.addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.multiplier(1.333F));
+		
+		if (directional) {
+			this.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
+		}
+	}
+	
+	public DashAttackAnimation(float convertTime, String path, Armature armature, Phase... phases) {
+		super(convertTime, path, armature, phases);
+		
 		this.addProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR, 0.5F);
 		this.addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.multiplier(1.333F));
 	}

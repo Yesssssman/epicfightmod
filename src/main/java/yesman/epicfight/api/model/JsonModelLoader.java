@@ -16,6 +16,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
+import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -40,6 +41,7 @@ import yesman.epicfight.api.client.model.Meshes.MeshContructor;
 import yesman.epicfight.api.client.model.ModelPart;
 import yesman.epicfight.api.client.model.VertexIndicator;
 import yesman.epicfight.api.client.model.VertexIndicator.AnimatedVertexIndicator;
+import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -284,17 +286,20 @@ public class JsonModelLoader {
 		if (attack) {
 			for (Phase phase : ((AttackAnimation)animation).phases) {
 				Joint joint = armature.getRootJoint();
-				int pathIndex = armature.searchPathIndex(phase.getColliderJoint().getName());
 				
-				while (joint != null) {
-					allowedJoints.add(joint.getName());
-					int nextJoint = pathIndex % 10;
+				for (Pair<Joint, Collider> colliderInfo : phase.getColliders()) {
+					int pathIndex = armature.searchPathIndex(colliderInfo.getFirst().getName());
 					
-					if (nextJoint > 0) {
-						pathIndex /= 10;
-						joint = joint.getSubJoints().get(nextJoint - 1);
-					} else {
-						joint = null;
+					while (joint != null) {
+						allowedJoints.add(joint.getName());
+						int nextJoint = pathIndex % 10;
+						
+						if (nextJoint > 0) {
+							pathIndex /= 10;
+							joint = joint.getSubJoints().get(nextJoint - 1);
+						} else {
+							joint = null;
+						}
 					}
 				}
 			}

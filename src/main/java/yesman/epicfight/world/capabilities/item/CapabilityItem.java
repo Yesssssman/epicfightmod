@@ -79,7 +79,6 @@ public class CapabilityItem {
 		}
 		
 		Map<Attribute, AttributeModifier> attribute = this.getDamageAttributesInCondition(this.getStyle(entitypatch));
-		
 		int index = 0;
 		
 		for (int i = 0; i < itemTooltip.size(); i++) {
@@ -232,7 +231,7 @@ public class CapabilityItem {
 	}
 	
 	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot equipmentSlot, LivingEntityPatch<?> entitypatch) {
-		Multimap<Attribute, AttributeModifier> map = HashMultimap.<Attribute, AttributeModifier>create();
+		Multimap<Attribute, AttributeModifier> map = HashMultimap.create();
 		
 		if (entitypatch != null) {
 			Map<Attribute, AttributeModifier> modifierMap = this.getDamageAttributesInCondition(this.getStyle(entitypatch));

@@ -106,8 +106,14 @@ public class SetSkillFunction implements LootItemFunction {
 			JsonArray weightArray = jsonObj.getAsJsonArray("weights");
 			List<Pair<Float, String>> list = Lists.newArrayList();
 			
+			float totalWeights = 0.0F;
+			
 			for (int i = 0; i < skillArray.size(); i++) {
-				list.add(Pair.of(weightArray.get(i).getAsFloat(), skillArray.get(i).getAsString()));
+				totalWeights += weightArray.get(i).getAsFloat();
+			}
+			
+			for (int i = 0; i < skillArray.size(); i++) {
+				list.add(Pair.of(weightArray.get(i).getAsFloat() / totalWeights, skillArray.get(i).getAsString()));
 			}
 			
 			return new SetSkillFunction(list);

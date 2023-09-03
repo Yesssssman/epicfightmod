@@ -6,6 +6,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
@@ -81,6 +82,6 @@ public class PlaneCollider extends Collider {
 	}
 	
 	@Override
-	public void draw(PoseStack matrixStackIn, MultiBufferSource buffer, LivingEntityPatch<?> entitypatch, AttackAnimation animation, float prevElapsedTime, float elapsedTime, float partialTicks, float attackSpeed) {
+	public void draw(PoseStack matrixStackIn, MultiBufferSource buffer, LivingEntityPatch<?> entitypatch, AttackAnimation animation, Joint joint, float prevElapsedTime, float elapsedTime, float partialTicks, float attackSpeed) {
 	}
 }

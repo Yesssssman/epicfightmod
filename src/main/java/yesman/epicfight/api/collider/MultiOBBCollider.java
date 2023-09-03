@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
@@ -39,12 +40,12 @@ public class MultiOBBCollider extends MultiCollider<OBBCollider> {
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void draw(PoseStack matrixStackIn, MultiBufferSource buffer, LivingEntityPatch<?> entitypatch, AttackAnimation animation, float prevElapsedTime, float elapsedTime, float partialTicks, float attackSpeed) {
+	public void draw(PoseStack matrixStackIn, MultiBufferSource buffer, LivingEntityPatch<?> entitypatch, AttackAnimation animation, Joint joint, float prevElapsedTime, float elapsedTime, float partialTicks, float attackSpeed) {
 		int numberOf = Math.max(Math.round((this.numberOfColliders + animation.getProperty(AttackAnimationProperty.EXTRA_COLLIDERS).orElse(0)) * attackSpeed), this.numberOfColliders);
 		float partialScale = 1.0F / (numberOf - 1);
 		float interpolation = 0.0F;
 		Armature armature = entitypatch.getArmature();
-		int pathIndex =  armature.searchPathIndex(animation.getJointOn(elapsedTime).getName());
+		int pathIndex =  armature.searchPathIndex(joint.getName());
 		EntityState state = animation.getState(entitypatch, elapsedTime);
 		EntityState prevState = animation.getState(entitypatch, prevElapsedTime);
 		boolean red = prevState.attacking() || state.attacking() || (prevState.getLevel() < 2 && state.getLevel() > 2);

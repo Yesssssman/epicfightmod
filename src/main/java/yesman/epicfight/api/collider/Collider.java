@@ -26,7 +26,7 @@ public abstract class Collider {
 	protected final Vec3 modelCenter;
 	protected final AABB outerAABB;
 	protected Vec3 worldCenter;
-
+	
 	public Collider(Vec3 center, @Nullable AABB outerAABB) {
 		this.modelCenter = center;
 		this.outerAABB = outerAABB;
@@ -59,7 +59,7 @@ public abstract class Collider {
 	}
 	
 	public List<Entity> getCollideEntities(Entity entity) {
-		List<Entity> list = entity.level.getEntities(entity, this.getHitboxAABB(), (e) -> {
+		List<Entity> list = entity.getLevel().getEntities(entity, this.getHitboxAABB(), (e) -> {
 			if (e instanceof PartEntity<?> partEntity) {
 				if (partEntity.getParent().is(entity)) {
 					return false;
@@ -78,9 +78,9 @@ public abstract class Collider {
 	
 	/** Display on debug mode **/
 	@OnlyIn(Dist.CLIENT)
-	public void draw(PoseStack matrixStackIn, MultiBufferSource buffer, LivingEntityPatch<?> entitypatch, AttackAnimation animation, float prevElapsedTime, float elapsedTime, float partialTicks, float attackSpeed) {
+	public void draw(PoseStack matrixStackIn, MultiBufferSource buffer, LivingEntityPatch<?> entitypatch, AttackAnimation animation, Joint joint, float prevElapsedTime, float elapsedTime, float partialTicks, float attackSpeed) {
 		Armature armature = entitypatch.getArmature();
-		int pathIndex =  armature.searchPathIndex(animation.getJointOn(elapsedTime).getName());
+		int pathIndex =  armature.searchPathIndex(joint.getName());
 		EntityState state = animation.getState(entitypatch, elapsedTime);
 		EntityState prevState = animation.getState(entitypatch, prevElapsedTime);
 		boolean flag3 = prevState.attacking() || state.attacking() || (prevState.getLevel() < 2 && state.getLevel() > 2);
