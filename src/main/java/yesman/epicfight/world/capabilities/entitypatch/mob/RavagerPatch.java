@@ -67,11 +67,11 @@ public class RavagerPatch extends MobPatch<Ravager> {
 
 	@Override
 	public SoundEvent getWeaponHitSound(InteractionHand hand) {
-		return EpicFightSounds.BLUNT_HIT_HARD;
+		return EpicFightSounds.BLUNT_HIT_HARD.get();
 	}
 
 	@Override
 	public SoundEvent getSwingSound(InteractionHand hand) {
-		return EpicFightSounds.WHOOSH_BIG;
+		return EpicFightSounds.WHOOSH_BIG.get();
 	}
 }

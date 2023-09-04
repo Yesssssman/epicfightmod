@@ -1,14 +1,9 @@
 package yesman.epicfight.world.item;
 
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
@@ -23,6 +18,9 @@ import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 public class SkillBookItem extends Item {
 	public static void setContainingSkill(String name, ItemStack stack) {
@@ -56,7 +54,7 @@ public class SkillBookItem extends Item {
 	public void appendHoverText(ItemStack stack, @Nullable Level worldIn, List<Component> tooltip, TooltipFlag flagIn) {
 		if (stack.getTag() != null && stack.getTag().contains("skill")) {
 			ResourceLocation rl = new ResourceLocation(stack.getTag().getString("skill"));
-			tooltip.add(new TranslatableComponent(String.format("skill.%s.%s", rl.getNamespace(), rl.getPath())).withStyle(ChatFormatting.DARK_GRAY));
+			tooltip.add(Component.translatable(String.format("skill.%s.%s", rl.getNamespace(), rl.getPath())).withStyle(ChatFormatting.DARK_GRAY));
 		}
 	}
 	

@@ -19,9 +19,9 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class SPChangeLivingMotion {
-	private int entityId;
+	private final int entityId;
 	private int count;
-	private boolean setChangesAsDefault;
+	private final boolean setChangesAsDefault;
 	private List<LivingMotion> motionList = Lists.newArrayList();
 	private List<StaticAnimation> animationList = Lists.newArrayList();
 	

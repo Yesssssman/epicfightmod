@@ -69,9 +69,9 @@ public class ForceFieldParticle extends TexturedCustomModelParticle {
 	protected void setupPoseStack(PoseStack poseStack, Camera camera, float partialTicks) {
 		float yaw = Mth.lerp(partialTicks, this.yawO, this.yaw);
 		Vec3 vec3 = camera.getPosition();
-		float x = (float)(Mth.lerp((double)partialTicks, this.xo, this.x) - vec3.x());
-		float y = (float)(Mth.lerp((double)partialTicks, this.yo, this.y) - vec3.y());
-		float z = (float)(Mth.lerp((double)partialTicks, this.zo, this.z) - vec3.z());
+		float x = (float)(Mth.lerp(partialTicks, this.xo, this.x) - vec3.x());
+		float y = (float)(Mth.lerp(partialTicks, this.yo, this.y) - vec3.y());
+		float z = (float)(Mth.lerp(partialTicks, this.zo, this.z) - vec3.z());
 		float scale = (float)Mth.lerp((double)partialTicks, this.scaleO, this.scale);
 		poseStack.translate(x, y, z);
 		poseStack.mulPose(Vector3f.XP.rotationDegrees(this.pitch));

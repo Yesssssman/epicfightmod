@@ -1,10 +1,6 @@
 package yesman.epicfight.world.capabilities.entitypatch.boss;
 
-import java.util.EnumSet;
-import java.util.List;
-
 import com.google.common.collect.ImmutableList;
-
 import net.minecraft.commands.arguments.EntityAnchorArgument.Anchor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -31,7 +27,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
@@ -53,13 +49,16 @@ import yesman.epicfight.world.entity.WitherGhostClone;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
 
+import java.util.EnumSet;
+import java.util.List;
+
 public class WitherPatch extends MobPatch<WitherBoss> {
 	private static final EntityDataAccessor<Boolean> DATA_ARMOR_ACTIVED = SynchedEntityData.defineId(WitherBoss.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Boolean> DATA_GHOST = SynchedEntityData.defineId(WitherBoss.class, EntityDataSerializers.BOOLEAN);
 	private static final EntityDataAccessor<Integer> DATA_TRANSPARENCY = SynchedEntityData.defineId(WitherBoss.class, EntityDataSerializers.INT);
-	private static final EntityDataAccessor<Vec3> DATA_LASER_DESTINATION_A = SynchedEntityData.defineId(WitherBoss.class, EpicFightDataSerializers.VEC3);
-	private static final EntityDataAccessor<Vec3> DATA_LASER_DESTINATION_B = SynchedEntityData.defineId(WitherBoss.class, EpicFightDataSerializers.VEC3);
-	private static final EntityDataAccessor<Vec3> DATA_LASER_DESTINATION_C = SynchedEntityData.defineId(WitherBoss.class, EpicFightDataSerializers.VEC3);
+	private static final EntityDataAccessor<Vec3> DATA_LASER_DESTINATION_A = SynchedEntityData.defineId(WitherBoss.class, EpicFightDataSerializers.VEC3.get());
+	private static final EntityDataAccessor<Vec3> DATA_LASER_DESTINATION_B = SynchedEntityData.defineId(WitherBoss.class, EpicFightDataSerializers.VEC3.get());
+	private static final EntityDataAccessor<Vec3> DATA_LASER_DESTINATION_C = SynchedEntityData.defineId(WitherBoss.class, EpicFightDataSerializers.VEC3.get());
 	private static final List<EntityDataAccessor<Vec3>> DATA_LASER_TARGET_POSITIONS = ImmutableList.of(DATA_LASER_DESTINATION_A, DATA_LASER_DESTINATION_B, DATA_LASER_DESTINATION_C);
 	private static final EntityDataAccessor<Integer> DATA_LASER_TARGET_A = SynchedEntityData.defineId(WitherBoss.class, EntityDataSerializers.INT);
 	private static final EntityDataAccessor<Integer> DATA_LASER_TARGET_B = SynchedEntityData.defineId(WitherBoss.class, EntityDataSerializers.INT);
@@ -119,7 +118,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	}
 	
 	@Override
-	public void tick(LivingUpdateEvent event) {
+	public void tick(LivingEvent.LivingTickEvent event) {
 		if (this.original.getHealth() <= 0.0F) {
 			if (this.original.deathTime > 1 && this.deathTimerExt < 17) {
 				this.deathTimerExt++;
@@ -142,7 +141,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	}
 	
 	@Override
-	public void clientTick(LivingUpdateEvent event) {
+	public void clientTick(LivingEvent.LivingTickEvent event) {
 		super.clientTick(event);
 		this.original.setDeltaMovement(0.0D, 0.0D, 0.0D);
 		int transparencyCount = this.getTransparency();
@@ -153,7 +152,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	}
 	
 	@Override
-	public void serverTick(LivingUpdateEvent event) {
+	public void serverTick(LivingEvent.LivingTickEvent event) {
 		super.serverTick(event);
 		
 		if (this.original.getHealth() <= this.original.getMaxHealth() * 0.5F) {
@@ -189,14 +188,14 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 			}
 			
 			if (flag) {
-				this.original.level.levelEvent((Player) null, 1022, this.original.blockPosition(), 0);
+				this.original.level.levelEvent(null, 1022, this.original.blockPosition(), 0);
 			}
 		}
 		
 		if (this.blockedNow) {
 			if (this.blockingCount < 0) {
 				this.playAnimationSynchronized(Animations.WITHER_NEUTRALIZED, 0.0F);
-				this.original.playSound(EpicFightSounds.NEUTRALIZE_BOSSES, 5.0F, 1.0F);
+				this.original.playSound(EpicFightSounds.NEUTRALIZE_BOSSES.get(), 5.0F, 1.0F);
 				this.blockedNow = false;
 				this.blockingEntity = null;
 			} else {
@@ -226,9 +225,8 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	
 	@Override
 	public void onAttackBlocked(DamageSource damageSource, LivingEntityPatch<?> opponent) {
-		if (damageSource instanceof EpicFightDamageSource) {
-			EpicFightDamageSource extendedDamageSource = ((EpicFightDamageSource)damageSource);
-			
+		if (damageSource instanceof EpicFightDamageSource extendedDamageSource) {
+
 			if (Animations.WITHER_CHARGE.equals(extendedDamageSource.getAnimation())) {
 				if (!this.blockedNow) {
 					this.blockedNow = true;
@@ -283,8 +281,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 		float prevYRot;
 		float yRot;
 		
-		if (this.original.getVehicle() instanceof LivingEntity) {
-			LivingEntity ridingEntity = (LivingEntity)this.original.getVehicle();
+		if (this.original.getVehicle() instanceof LivingEntity ridingEntity) {
 			prevYRot = ridingEntity.yBodyRotO;
 			yRot = ridingEntity.yBodyRot;
 		} else {

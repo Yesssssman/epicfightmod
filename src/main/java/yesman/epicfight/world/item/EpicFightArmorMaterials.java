@@ -27,7 +27,7 @@ public enum EpicFightArmorMaterials implements ArmorMaterial {
 	private final float knockbackResistance;
 	private final LazyLoadedValue<Ingredient> repairMaterial;
 
-	private EpicFightArmorMaterials(String nameIn, int maxDamageFactorIn, int[] damageReductionAmountsIn, int enchantabilityIn,
+	EpicFightArmorMaterials(String nameIn, int maxDamageFactorIn, int[] damageReductionAmountsIn, int enchantabilityIn,
 			SoundEvent equipSoundIn, float toughness, float knockbackResistance, Supplier<Ingredient> repairMaterialSupplier) {
 		this.name = nameIn;
 	    this.durabilityMultiplier = maxDamageFactorIn;

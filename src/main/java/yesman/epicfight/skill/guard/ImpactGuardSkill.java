@@ -114,19 +114,19 @@ public class ImpactGuardSkill extends GuardSkill {
 	public List<Object> getTooltipArgsOfScreen(List<Object> list) {
 		list.clear();
 		list.add(String.format("%.1f", this.damageReducer));
-		
+
 		StringBuilder sb = new StringBuilder();
-		
+
 		Iterator<WeaponCategory> iter = this.advancedGuardMotions.keySet().iterator();
-		
+
 		while (iter.hasNext()) {
 			sb.append(WeaponCategory.ENUM_MANAGER.toTranslated(iter.next()));
-			
+
 			if (iter.hasNext()) {
 				sb.append(", ");
 			}
 		}
-		
+
         list.add(sb.toString());
 		
 		return list;

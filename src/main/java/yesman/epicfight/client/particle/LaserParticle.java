@@ -23,9 +23,9 @@ import yesman.epicfight.api.client.model.Meshes;
 
 @OnlyIn(Dist.CLIENT)
 public class LaserParticle extends CustomModelParticle<RawMesh> {
-	private float length;
-	private float xRot;
-	private float yRot;
+	private final float length;
+	private final float xRot;
+	private final float yRot;
 	
 	public LaserParticle(ClientLevel level, double x, double y, double z, double toX, double toY, double toZ) {
 		super(level, x, y, z, 0, 0, 0, Meshes.LASER);

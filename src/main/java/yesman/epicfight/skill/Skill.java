@@ -4,11 +4,9 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.CreativeModeTab;
@@ -16,7 +14,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.client.events.engine.ControllEngine;
-import yesman.epicfight.client.gui.BattleModeGui;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.config.ConfigurationIngame;
 import yesman.epicfight.network.EpicFightNetworkManager;
@@ -31,6 +28,10 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 import yesman.epicfight.world.entity.eventlistener.SkillCancelEvent;
 import yesman.epicfight.world.entity.eventlistener.SkillConsumeEvent;
 import yesman.epicfight.world.item.EpicFightCreativeTabs;
+import yesman.epicfight.client.gui.*;
+import java.util.List;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 public abstract class Skill {
 	public static class Builder<T extends Skill> {
@@ -149,7 +150,7 @@ public abstract class Skill {
 	public FriendlyByteBuf gatherArguments(LocalPlayerPatch executer, ControllEngine controllEngine) {
 		return null;
 	}
-	
+
 	public void executeOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
 		SPSkillExecutionFeedback feedbackPacket = SPSkillExecutionFeedback.executed(executer.getSkill(this).getSlotId());
 		SkillContainer container = executer.getSkill(this);
@@ -178,10 +179,10 @@ public abstract class Skill {
 	public void cancelOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
 		SkillCancelEvent skillCancelEvent = new SkillCancelEvent(executer, executer.getSkill(this));
 		executer.getEventListener().triggerEvents(EventType.SKILL_CANCEL_EVENT, skillCancelEvent);
-		
+
 		EpicFightNetworkManager.sendToPlayer(SPSkillExecutionFeedback.expired(executer.getSkill(this).getSlotId()), executer.getOriginal());
 	}
-	
+
 	public float getDefaultConsumeptionAmount(PlayerPatch<?> executer) {
 		switch(this.resource) {
 		case STAMINA:
@@ -194,7 +195,7 @@ public abstract class Skill {
 			return 0.0F;
 		}
 	}
-	
+
 	/**
 	 * Instant feedback when the skill is executed successfully
 	 * @param executer
@@ -384,7 +385,7 @@ public abstract class Skill {
 	public int getMaxDuration() {
 		return this.maxDuration;
 	}
-	
+
 	public float getConsumption() {
 		return this.consumption;
 	}
@@ -395,7 +396,7 @@ public abstract class Skill {
 	
 	public boolean resourcePredicate(PlayerPatch<?> playerpatch) {
 		float consumption = this.getDefaultConsumeptionAmount(playerpatch);
-		
+
 		SkillConsumeEvent event = new SkillConsumeEvent(playerpatch, this, this.resource, consumption, false);
 		playerpatch.getEventListener().triggerEvents(EventType.SKILL_CONSUME_EVENT, event);
 		
@@ -417,7 +418,7 @@ public abstract class Skill {
 	public Resource getResourceType() {
 		return this.resource;
 	}
-	
+
 	public Skill getPriorSkill() {
 		return null;
 	}
@@ -459,14 +460,14 @@ public abstract class Skill {
 	}
 	
 	public Component getDisplayName() {
-		return new TranslatableComponent(String.format("%s.%s.%s", "skill", this.getRegistryName().getNamespace(), this.getRegistryName().getPath()));
+		return Component.translatable(String.format("%s.%s.%s", "skill", this.getRegistryName().getNamespace(), this.getRegistryName().getPath()));
 	}
 	
-	public static enum ActivateType {
-		ONE_SHOT, DURATION, DURATION_INFINITE, TOGGLE, CHARGING;
+	public enum ActivateType {
+		ONE_SHOT, DURATION, DURATION_INFINITE, TOGGLE, CHARGING
 	}
 	
-	public static enum Resource {
+	public enum Resource {
 		NONE(
 			(skill, playerpatch, amount) -> true,
 			(skill, playerpatch, amount) -> {}
@@ -496,7 +497,7 @@ public abstract class Skill {
 				skill.setDurationSynchronize(playerpatch, skill.maxDuration);
 			}
 		),
-		
+
 		HEALTH(
 			(skill, playerpatch, amount) -> playerpatch.getOriginal().getHealth() > amount,
 			(skill, playerpatch, amount) -> {
@@ -512,15 +513,15 @@ public abstract class Skill {
 			this.predicate = predicate;
 			this.consumer = consumer;
 		}
-		
+
 		@FunctionalInterface
 		public interface ResourcePredicate {
-			public boolean canExecute(Skill skill, PlayerPatch<?> playerpatch, float amount);
+			boolean canExecute(Skill skill, PlayerPatch<?> playerpatch, float amount);
 		}
-		
+
 		@FunctionalInterface
 		public interface ResourceConsumer {
-			public void consume(Skill skill, ServerPlayerPatch playerpatch, float amount);
+			void consume(Skill skill, ServerPlayerPatch playerpatch, float amount);
 		}
 	}
 }

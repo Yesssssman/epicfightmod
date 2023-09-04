@@ -12,11 +12,11 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.math.ValueModifier;
 
 public interface EpicFightDamageSource {
-	public static EpicFightDamageSource commonEntityDamageSource(String msg, LivingEntity owner, StaticAnimation animation) {
+	static EpicFightDamageSource commonEntityDamageSource(String msg, LivingEntity owner, StaticAnimation animation) {
 		return new EpicFightEntityDamageSource(msg, owner, animation);
 	}
 	
-	public DamageSourceElements getDamageSourceElements();
+	DamageSourceElements getDamageSourceElements();
 	
 	default EpicFightDamageSource setHurtItem(ItemStack hurtItem) {
 		this.getDamageSourceElements().hurtItem = hurtItem;
@@ -101,8 +101,8 @@ public interface EpicFightDamageSource {
 		return (DamageSource)this;
 	}
 	
-	public EpicFightDamageSource setInitialPosition(Vec3 initialPosition);
-	public Vec3 getInitialPosition();
-	public boolean isBasicAttack();
-	public StaticAnimation getAnimation();
+	EpicFightDamageSource setInitialPosition(Vec3 initialPosition);
+	Vec3 getInitialPosition();
+	boolean isBasicAttack();
+	StaticAnimation getAnimation();
 }

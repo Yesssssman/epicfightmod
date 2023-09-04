@@ -78,12 +78,12 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			String pathString = rl.getPath();
 			ResourceLocation registryName = new ResourceLocation(rl.getNamespace(), pathString);
 			
-			if (!ForgeRegistries.ENTITIES.containsKey(registryName)) {
+			if (!ForgeRegistries.ENTITY_TYPES.containsKey(registryName)) {
 				EpicFightMod.LOGGER.warn("[Custom Entity] Entity named " + registryName + " does not exist");
 				continue;
 			}
 			
-			EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(registryName);
+			EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(registryName);
 			CompoundTag tag = null;
 			
 			try {
@@ -223,14 +223,12 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		String predicateType = tag.getString("predicate");
 		EpicFightPredicates<Entity> predicate = null;
 		List<String[]> loggerNote = Lists.newArrayList();
-		
-		switch (predicateType) {
-		case "has_tags":
+
+		if ("has_tags".equals(predicateType)) {
 			if (!tag.contains("tags", 9)) {
-				loggerNote.add(new String[] {"has_tags", "tags", "string list"});
+				loggerNote.add(new String[]{"has_tags", "tags", "string list"});
 			}
 			predicate = new EpicFightPredicates.HasTag(tag.getList("tags", 8));
-			break;
 		}
 		
 		for (String[] formatArgs : loggerNote) {
@@ -245,7 +243,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 	}
 	
 	public static AbstractMobPatchProvider deserializeMobPatchProvider(EntityType<?> entityType, CompoundTag tag, boolean clientSide) {
-		boolean disabled = tag.contains("disabled") ? tag.getBoolean("disabled") : false;
+		boolean disabled = tag.contains("disabled") && tag.getBoolean("disabled");
 		
 		if (disabled) {
 			return new NullPatchProvider();
@@ -256,7 +254,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 				provider.presetProvider = preset;
 				return provider;
 			} else {
-				boolean humanoid = tag.getBoolean("isHumanoid") ? tag.getBoolean("isHumanoid") : false;
+				boolean humanoid = tag.getBoolean("isHumanoid") && tag.getBoolean("isHumanoid");
 				CustomMobPatchProvider provider = humanoid ? new CustomHumanoidMobPatchProvider() : new CustomMobPatchProvider();
 				provider.attributeValues = deserializeAttributes(tag.getCompound("attributes"));
 				ResourceLocation modelLocation = new ResourceLocation(tag.getString("model"));
@@ -374,9 +372,8 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 				}
 				map.get(weaponCategory).put(style, motions.build());
 				
-			} else if (weponTypeTag instanceof ListTag) {
-				ListTag weponTypesTag = ((ListTag)weponTypeTag);
-				
+			} else if (weponTypeTag instanceof ListTag weponTypesTag) {
+
 				for (int j = 0; j < weponTypesTag.size(); j++) {
 					WeaponCategory weaponCategory = WeaponCategory.ENUM_MANAGER.get(weponTypesTag.getString(j));
 					if (!map.containsKey(weaponCategory)) {
@@ -397,8 +394,8 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			CompoundTag behaviorSeries = tag.getCompound(i);
 			float weight = (float)behaviorSeries.getDouble("weight");
 			int cooldown = behaviorSeries.contains("cooldown") ? behaviorSeries.getInt("cooldown") : 0;
-			boolean canBeInterrupted = behaviorSeries.contains("canBeInterrupted") ? behaviorSeries.getBoolean("canBeInterrupted") : false;
-			boolean looping = behaviorSeries.contains("looping") ? behaviorSeries.getBoolean("looping") : false;
+			boolean canBeInterrupted = behaviorSeries.contains("canBeInterrupted") && behaviorSeries.getBoolean("canBeInterrupted");
+			boolean looping = behaviorSeries.contains("looping") && behaviorSeries.getBoolean("looping");
 			ListTag behaviorList = behaviorSeries.getList("behaviors", 10);
 			BehaviorSeries.Builder<T> behaviorSeriesBuilder = BehaviorSeries.builder();
 			behaviorSeriesBuilder.weight(weight).cooldown(cooldown).canBeInterrupted(canBeInterrupted).looping(looping);
@@ -522,7 +519,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			extract.put("preset", original.get("preset"));
 		} else {
 			extract.put("model", original.get("model"));
-			extract.putBoolean("isHumanoid", original.contains("isHumanoid") ? original.getBoolean("isHumanoid") : false);
+			extract.putBoolean("isHumanoid", original.contains("isHumanoid") && original.getBoolean("isHumanoid"));
 			extract.put("renderer", original.get("renderer"));
 			extract.put("faction", original.get("faction"));
 			extract.put("default_livingmotions", original.get("default_livingmotions"));
@@ -534,7 +531,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 	
 	public static Stream<CompoundTag> getDataStream() {
 		Stream<CompoundTag> tagStream = TAGMAP.entrySet().stream().map((entry) -> {
-			entry.getValue().putString("id", entry.getKey().getRegistryName().toString());
+			entry.getValue().putString("id", ForgeRegistries.ENTITY_TYPES.getKey((EntityType<?>) entry).toString());
 			return entry.getValue();
 		});
 		
@@ -554,7 +551,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 				disabled = tag.getBoolean("disabled");
 			}
 			
-			EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(tag.getString("id")));
+			EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(tag.getString("id")));
 			MOB_PATCH_PROVIDERS.put(entityType, deserialize(entityType, tag, true));
 			EntityPatchProvider.putCustomEntityPatch(entityType, (entity) -> () -> MOB_PATCH_PROVIDERS.get(entity.getType()).get(entity));
 			

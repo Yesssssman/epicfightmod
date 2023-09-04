@@ -17,6 +17,7 @@ import net.minecraft.world.entity.npc.VillagerDataHolder;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.mesh.HumanoidMesh;
@@ -53,7 +54,7 @@ public class PatchedVillagerProfessionLayer extends PatchedLayer<ZombieVillager,
 			this.mesh.drawModelWithPose(matrixStackIn, builder1, packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, LivingEntityRenderer.getOverlayCoords(entityliving, 0.0F), entitypatch.getArmature(), poses);
 			
 			if (villagerdata.getProfession() != VillagerProfession.NONE) {
-				VertexConsumer builder2 = bufferIn.getBuffer(EpicFightRenderTypes.triangles(RenderType.entityCutoutNoCull(originalRenderer.getResourceLocation("profession", villagerdata.getProfession().getRegistryName()))));
+				VertexConsumer builder2 = bufferIn.getBuffer(EpicFightRenderTypes.triangles(RenderType.entityCutoutNoCull(originalRenderer.getResourceLocation("profession", ForgeRegistries.VILLAGER_PROFESSIONS.getKey(villagerdata.getProfession())))));
 				this.mesh.drawModelWithPose(matrixStackIn, builder2, packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, LivingEntityRenderer.getOverlayCoords(entityliving, 0.0F), entitypatch.getArmature(), poses);
 			}
 		}

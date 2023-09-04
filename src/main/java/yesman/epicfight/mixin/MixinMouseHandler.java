@@ -28,7 +28,7 @@ public abstract class MixinMouseHandler {
 	private void epicfight_turnPlayer(LocalPlayer entity, double d2, double d3) {
 		LocalPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(entity, LocalPlayerPatch.class);
 		RenderEngine renderEngine = ClientEngine.getInstance().renderEngine;
-		
+
 		if (playerpatch == null) {
 			entity.turn(d2, d3);
 		} else {

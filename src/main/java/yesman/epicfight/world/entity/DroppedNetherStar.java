@@ -35,7 +35,7 @@ public class DroppedNetherStar extends ItemEntity {
 		super.tick();
 		
 		if (this.tickCount % 70 == 0) {
-			this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), EpicFightSounds.NETHER_STAR_GLITTER, this.getSoundSource(), 1.0F, 1.0F, false);
+			this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), EpicFightSounds.NETHER_STAR_GLITTER.get(), this.getSoundSource(), 1.0F, 1.0F, false);
 		}
 		
 		Vec3 deltaMove = this.getDeltaMovement();

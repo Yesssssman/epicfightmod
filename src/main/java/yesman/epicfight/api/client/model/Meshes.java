@@ -37,8 +37,8 @@ public class Meshes implements PreparableReloadListener {
 	public static final Meshes INSTANCE = new Meshes();
 	
 	@FunctionalInterface
-	public static interface MeshContructor<V extends VertexIndicator, M extends Mesh<V>> {
-		public M invoke(Map<String, float[]> arrayMap, M parent, RenderProperties properties, Map<String, ModelPart<V>> parts);
+	public interface MeshContructor<V extends VertexIndicator, M extends Mesh<V>> {
+		M invoke(Map<String, float[]> arrayMap, M parent, RenderProperties properties, Map<String, ModelPart<V>> parts);
 	}
 		
 	private static final Map<ResourceLocation, Mesh<?>> MESHES = Maps.newHashMap();

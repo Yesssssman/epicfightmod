@@ -78,7 +78,7 @@ public abstract class Animator {
 	}
 	
 	public <T> T getAnimationVariables(TypeKey<T> key) {
-		return (T)this.animationVariables.get(key);
+		return this.animationVariables.get(key);
 	}
 	
 	public void resetLivingAnimations() {

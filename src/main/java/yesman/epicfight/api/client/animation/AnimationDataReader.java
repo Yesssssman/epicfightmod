@@ -1,5 +1,6 @@
 package yesman.epicfight.api.client.animation;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -42,43 +43,51 @@ public class AnimationDataReader {
 	private final LayerInfo layerInfo;
 	private final LayerInfo multilayerInfo;
 	private final List<TrailInfo> trailInfo;
-	
+
 	public static void readAndApply(StaticAnimation animation, ResourceManager resourceManager, Resource iresource) {
-		InputStream inputstream = iresource.getInputStream();
+		InputStream inputstream = null;
+
+		try {
+			inputstream = iresource.open();
+		} catch (IOException var5) {
+			var5.printStackTrace();
+		}
+
+		assert inputstream != null;
 		Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
-		AnimationDataReader propertySetter = (AnimationDataReader) GsonHelper.fromJson(GSON, reader, TYPE);
-		
+		AnimationDataReader propertySetter = GsonHelper.fromJson(GSON, reader, TYPE);
+
 		if (propertySetter.layerInfo != null) {
 			if (propertySetter.layerInfo.jointMaskEntry.isValid()) {
 				animation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.layerInfo.jointMaskEntry);
 			}
-			
+
 			animation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.layerInfo.layerType);
 			animation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.layerInfo.priority);
 		}
-		
+
 		if (propertySetter.multilayerInfo != null) {
 			StaticAnimation multilayerAnimation = new StaticAnimation(animation.getConvertTime(), animation.isRepeat(), String.valueOf(animation.getId()), animation.getArmature(), true);
-			
+
 			if (propertySetter.multilayerInfo.jointMaskEntry.isValid()) {
 				multilayerAnimation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.multilayerInfo.jointMaskEntry);
 			}
-			
+
 			multilayerAnimation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.multilayerInfo.layerType);
 			multilayerAnimation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.multilayerInfo.priority);
 			multilayerAnimation.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, (self, entitypatch, speed, elapsedTime) -> {
 				if (entitypatch.getClientAnimator().baseLayer.animationPlayer.getAnimation().getRealAnimation() != animation) {
 					return 0.0F;
 				}
-				
+
 				return animation.getPlaySpeed(entitypatch);
 			});
-			
+
 			multilayerAnimation.loadAnimation(resourceManager);
-			
+
 			animation.addProperty(ClientAnimationProperties.MULTILAYER_ANIMATION, multilayerAnimation);
 		}
-		
+
 		if (propertySetter.trailInfo.size() > 0) {
 			animation.addProperty(ClientAnimationProperties.TRAIL_EFFECT, propertySetter.trailInfo);
 		}
@@ -141,7 +150,7 @@ public class AnimationDataReader {
 		}
 	}
 	
-	private static Map<String, List<JointMask>> JOINT_MASKS = Maps.newHashMap();
+	private static final Map<String, List<JointMask>> JOINT_MASKS = Maps.newHashMap();
 	
 	static {
 		registerJointMask("none", JointMaskEntry.ALL);

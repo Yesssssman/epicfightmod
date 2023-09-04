@@ -1,11 +1,6 @@
 package yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-
 import com.google.common.collect.Maps;
-
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -24,9 +19,9 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.TransformSheet;
@@ -47,6 +42,10 @@ import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.item.EpicFightItems;
 import yesman.epicfight.world.item.SkillBookItem;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
 
 public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	public static final TargetingConditions DRAGON_TARGETING = TargetingConditions.forCombat().ignoreLineOfSight();
@@ -76,7 +75,7 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	
 	@SuppressWarnings("deprecation")
 	@Override
-	public void onJoinWorld(EnderDragon enderdragon, EntityJoinWorldEvent event) {
+	public void onJoinWorld(EnderDragon enderdragon, EntityJoinLevelEvent event) {
 		super.onJoinWorld(enderdragon, event);
 		
 		DragonPhaseInstance currentPhase = this.original.phaseManager.getCurrentPhase();
@@ -139,7 +138,7 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	}
 	
 	@Override
-	public void tick(LivingUpdateEvent event) {
+	public void tick(LivingEvent.LivingTickEvent event) {
 		super.tick(event);
 		
 		if (this.original.getPhaseManager().getCurrentPhase().isSitting()) {
@@ -148,7 +147,7 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	}
 	
 	@Override
-	public void serverTick(LivingUpdateEvent event) {
+	public void serverTick(LivingEvent.LivingTickEvent event) {
 		super.serverTick(event);
 		this.original.hurtTime = 2;
 		this.original.getSensing().tick();
@@ -194,12 +193,12 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 				}
 			}
 		}
-		
+
 		this.contributors.entrySet().removeIf((entry) -> this.original.tickCount - entry.getValue() > 600 || !entry.getKey().isAlive());
 	}
 	
 	@Override
-	public void clientTick(LivingUpdateEvent event) {
+	public void clientTick(LivingEvent.LivingTickEvent event) {
 		this.xRootO = this.xRoot;
 		this.zRootO = this.zRoot;
 		super.clientTick(event);
@@ -214,7 +213,7 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 			DragonPhaseInstance currentPhase = this.original.getPhaseManager().getCurrentPhase();
 			
 			if (currentPhase.getPhase() == PatchedPhases.CRYSTAL_LINK && ((DragonCrystalLinkPhase)currentPhase).getChargingCount() > 0) {
-				this.original.playSound(EpicFightSounds.NEUTRALIZE_BOSSES, 5.0F, 1.0F);
+				this.original.playSound(EpicFightSounds.NEUTRALIZE_BOSSES.get(), 5.0F, 1.0F);
 				this.original.getPhaseManager().setPhase(PatchedPhases.NEUTRALIZED);
 			}
 		}
@@ -223,11 +222,11 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	@Override
 	public AttackResult tryHurt(DamageSource damageSource, float amount) {
 		boolean isConsumingCrystal = this.original.getPhaseManager().getCurrentPhase().getPhase() == PatchedPhases.CRYSTAL_LINK;
-		
+
 		if (!isConsumingCrystal && amount > 0.0F && damageSource.getEntity() instanceof Player player) {
 			this.contributors.put(player, this.original.tickCount);
 		}
-		
+
 		return super.tryHurt(damageSource, isConsumingCrystal ? 0.0F : amount);
 	}
 	
@@ -242,14 +241,14 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	@Override
 	public void onDeath(LivingDeathEvent event) {
 		super.onDeath(event);
-		
+
 		for (Player player : this.contributors.keySet()) {
 			ItemStack skillbook = new ItemStack(EpicFightItems.SKILLBOOK.get());
 			SkillBookItem.setContainingSkill(EpicFightSkills.DEMOLITION_LEAP, skillbook);
 			player.addItem(skillbook);
 		}
 	}
-	
+
 	public void updateTipPoints() {
 		for (Map.Entry<String, TipPointAnimation> entry : this.tipPointAnimations.entrySet()) {
 			if (entry.getValue().isOnWorking()) {
@@ -307,7 +306,7 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	
 	@Override
 	public SoundEvent getSwingSound(InteractionHand hand) {
-		return EpicFightSounds.WHOOSH_BIG;
+		return EpicFightSounds.WHOOSH_BIG.get();
 	}
 	
 	@Override

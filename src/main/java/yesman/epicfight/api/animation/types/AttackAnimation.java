@@ -62,7 +62,7 @@ public class AttackAnimation extends ActionAnimation {
 			return 0;
 		}
 	};
-	
+
 	public AttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, @Nullable Collider collider, Joint colliderJoint, String path, Armature armature) {
 		this(convertTime, path, armature, new Phase(0.0F, antic, preDelay, contact, recovery, Float.MAX_VALUE, colliderJoint, collider));
 	}
@@ -163,7 +163,7 @@ public class AttackAnimation extends ActionAnimation {
 			Mob entity = mobpatch.getOriginal();
 			
 			if (entity.getTarget() != null && !entity.getTarget().isAlive()) {
-				entity.setTarget((LivingEntity)null);
+				entity.setTarget(null);
 			}
 		}
 	}

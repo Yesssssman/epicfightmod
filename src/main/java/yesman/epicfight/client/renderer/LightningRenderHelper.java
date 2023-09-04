@@ -28,7 +28,7 @@ public class LightningRenderHelper {
 	}
 	
 	private static void vertex4(VertexConsumer vertexConsumer, Matrix4f matrix4f, float width, float height, int rCol, int gCol, int bCol) {
-		vertexConsumer.vertex(matrix4f, 0.0F, width, 1.0F * height).color(rCol, gCol, bCol, 0).endVertex();
+		vertexConsumer.vertex(matrix4f, 0.0F, width, height).color(rCol, gCol, bCol, 0).endVertex();
 	}
 	
 	public static void renderCyclingLight(VertexConsumer vertexConsumer, PoseStack poseStack, int rCol, int gCol, int bCol, int density, float size, float progression, float repeater) {

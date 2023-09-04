@@ -31,7 +31,7 @@ public class WitherSkeletonMinion extends WitherSkeleton {
 	
 	@Override
 	public boolean canBeAffected(MobEffectInstance p_70687_1_) {
-		return p_70687_1_.getEffect() == MobEffects.WITHER ? false : super.canBeAffected(p_70687_1_);
+		return p_70687_1_.getEffect() != MobEffects.WITHER && super.canBeAffected(p_70687_1_);
 	}
 	
 	@Override

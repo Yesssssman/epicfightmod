@@ -26,7 +26,7 @@ public interface ProceduralAnimation {
 		for (IKInfo ikInfo : ikInfos) {
 			ikInfo.pathToEndJoint = Lists.newArrayList();
 			Joint start = armature.searchJointByName(ikInfo.startJoint.getName());
-			int pathToEnd = Integer.parseInt(start.searchPath(new String(""), ikInfo.endJoint.getName()));
+			int pathToEnd = Integer.parseInt(start.searchPath("", ikInfo.endJoint.getName()));
 			ikInfo.pathToEndJoint.add(start.getName());
 			
 			while (pathToEnd > 0) {
@@ -99,10 +99,10 @@ public interface ProceduralAnimation {
 		BlockHitResult clipResult = enderdragonpatch.getOriginal().level.clip(new ClipContext(new Vec3(clipStartWorld.x, clipStartWorld.y, clipStartWorld.z)
 				, new Vec3(clipStartWorld.x, clipStartWorld.y - maxYDown, clipStartWorld.z)
 				, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, enderdragonpatch.getOriginal()));
-		
-		float dy = (clipResult.getType() != HitResult.Type.MISS) ? (float)clipStartWorld.y - clipResult.getBlockPos().getY() - 1 : maxYDown;
-		
-		return new Vec3f((float)clipStartWorld.x, (float)clipStartWorld.y - dy + leastHeight, (float)clipStartWorld.z);
+
+		float dy = (clipResult.getType() != HitResult.Type.MISS) ? clipStartWorld.y - clipResult.getBlockPos().getY() - 1 : maxYDown;
+
+		return new Vec3f(clipStartWorld.x, clipStartWorld.y - dy + leastHeight, clipStartWorld.z);
 	}
 	
 	default void correctRootRotation(JointTransform rootTransform, EnderDragonPatch enderdragonpatch, float partialTicks) {
@@ -110,7 +110,7 @@ public interface ProceduralAnimation {
 		float zRoot = enderdragonpatch.zRootO + (enderdragonpatch.zRoot - enderdragonpatch.zRootO) * partialTicks;
 		Quaternion quat = Vector3f.ZP.rotationDegrees(zRoot);
 		quat.mul(Vector3f.XP.rotationDegrees(-xRoot));
-		
+
 		rootTransform.frontResult(JointTransform.getRotation(quat), OpenMatrix4f::mulAsOriginFront);
 	}
 	

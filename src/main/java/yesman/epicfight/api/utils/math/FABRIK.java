@@ -12,11 +12,11 @@ import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.model.Armature;
 
 public class FABRIK {
-	private Armature armature;
-	private List<Chain> chains = Lists.newArrayList();
-	private Vec3f target = new Vec3f();
-	private Vec3f startPos = new Vec3f();
-	private Pose pose;
+	private final Armature armature;
+	private final List<Chain> chains = Lists.newArrayList();
+	private final Vec3f target = new Vec3f();
+	private final Vec3f startPos = new Vec3f();
+	private final Pose pose;
 	
 	public FABRIK(Pose pose, Armature armature, Joint startJoint, Joint endJoint) {
 		this.armature = armature;
@@ -26,7 +26,7 @@ public class FABRIK {
 	
 	public void addChain(Pose pose, Joint startJoint, Joint endJoint) {
 		OpenMatrix4f bindTransform = armature.getBindedTransformFor(pose, startJoint);
-		int pathIndex = Integer.parseInt(startJoint.searchPath(new String(""), endJoint.getName()));
+		int pathIndex = Integer.parseInt(startJoint.searchPath("", endJoint.getName()));
 		this.startPos.set(bindTransform.toTranslationVector());
 		this.addChainInternal(pose, bindTransform, startJoint, pathIndex);
 	}

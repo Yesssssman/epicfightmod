@@ -11,8 +11,8 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
 
 public class SPSpawnData {
-	private int entityId;
-	private FriendlyByteBuf buffer;
+	private final int entityId;
+	private final FriendlyByteBuf buffer;
 	
 	public SPSpawnData() {
 		this.entityId = 0;

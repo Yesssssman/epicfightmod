@@ -145,12 +145,12 @@ public class EntityPatchProvider implements ICapabilityProvider, NonNullSupplier
 	
 	public static Function<Entity, Supplier<EntityPatch<?>>> get(String registryName) {
 		ResourceLocation rl = new ResourceLocation(registryName);
-		EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(rl);
+		EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(rl);
 		return CAPABILITIES.get(entityType);
 	}
 	
 	private EntityPatch<?> capability;
-	private LazyOptional<EntityPatch<?>> optional = LazyOptional.of(this);
+	private final LazyOptional<EntityPatch<?>> optional = LazyOptional.of(this);
 	
 	public EntityPatchProvider(Entity entity) {
 		Function<Entity, Supplier<EntityPatch<?>>> provider = CUSTOM_CAPABILITIES.getOrDefault(entity.getType(), CAPABILITIES.get(entity.getType()));

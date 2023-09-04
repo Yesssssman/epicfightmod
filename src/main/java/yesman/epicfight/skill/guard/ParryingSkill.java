@@ -89,7 +89,7 @@ public class ParryingSkill extends GuardSkill {
 				ServerPlayer playerentity = event.getPlayerPatch().getOriginal();
 				boolean successParrying = playerentity.tickCount - container.getDataManager().getDataValue(LAST_ACTIVE) < PARRY_WINDOW;
 				float penalty = container.getDataManager().getDataValue(PENALTY);
-				event.getPlayerPatch().playSound(EpicFightSounds.CLASH, -0.05F, 0.1F);
+				event.getPlayerPatch().playSound(EpicFightSounds.CLASH.get(), -0.05F, 0.1F);
 				EpicFightParticles.HIT_BLUNT.get().spawnParticleWithArgument(((ServerLevel)playerentity.level), HitParticleType.FRONT_OF_EYES, HitParticleType.ZERO, playerentity, damageSource.getDirectEntity());
 				
 				if (successParrying) {
@@ -117,7 +117,7 @@ public class ParryingSkill extends GuardSkill {
 				}
 				
 				if (blockType == BlockType.GUARD_BREAK) {
-					event.getPlayerPatch().playSound(EpicFightSounds.NEUTRALIZE_MOBS, 3.0F, 0.0F, 0.1F);
+					event.getPlayerPatch().playSound(EpicFightSounds.NEUTRALIZE_MOBS.get(), 3.0F, 0.0F, 0.1F);
 				}
 				
 				this.dealEvent(event.getPlayerPatch(), event, advanced);
@@ -172,20 +172,18 @@ public class ParryingSkill extends GuardSkill {
 	@Override
 	public List<Object> getTooltipArgsOfScreen(List<Object> list) {
 		list.clear();
-		
+
 		StringBuilder sb = new StringBuilder();
 		Iterator<WeaponCategory> iter = this.advancedGuardMotions.keySet().iterator();
-		
+
 		while (iter.hasNext()) {
 			sb.append(WeaponCategory.ENUM_MANAGER.toTranslated(iter.next()));
-			
-			if (iter.hasNext()) {
+			if (iter.hasNext())
 				sb.append(", ");
-			}
 		}
-        
-        list.add(sb.toString());
-		
+
+		list.add(sb.toString());
+
 		return list;
 	}
 }

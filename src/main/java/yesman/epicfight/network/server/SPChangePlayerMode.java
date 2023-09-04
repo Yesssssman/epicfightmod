@@ -10,8 +10,8 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class SPChangePlayerMode {
-	private int entityId;
-	private PlayerPatch.PlayerMode mode;
+	private final int entityId;
+	private final PlayerPatch.PlayerMode mode;
 
 	public SPChangePlayerMode() {
 		this.entityId = 0;

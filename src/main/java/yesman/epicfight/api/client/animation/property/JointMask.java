@@ -75,7 +75,7 @@ public class JointMask {
 	public String getJointName() {
 		return this.jointName;
 	}
-	
+
 	public BindModifier getBindModifier() {
 		return this.bindModifier;
 	}

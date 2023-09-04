@@ -29,12 +29,9 @@ public class TargetIndicator extends EntityIndicator {
 				return false;
 			} else if (entityIn.distanceToSqr(Minecraft.getInstance().getCameraEntity()) >= 400) {
 				return false;
-			} else if (entityIn instanceof Player) {
-				Player playerIn = (Player)entityIn;
-				
-				if (playerIn.isSpectator()) {
-					return false;
-				}
+			} else if (entityIn instanceof Player playerIn) {
+
+				return !playerIn.isSpectator();
 			}
 		}
 		

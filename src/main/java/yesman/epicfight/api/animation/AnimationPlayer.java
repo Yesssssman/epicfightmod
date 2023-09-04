@@ -116,6 +116,6 @@ public class AnimationPlayer {
 	}
 	
 	public boolean isEmpty() {
-		return this.play == Animations.DUMMY_ANIMATION ? true : false;
+		return this.play == Animations.DUMMY_ANIMATION;
 	}
 }

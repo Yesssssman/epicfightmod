@@ -17,6 +17,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.util.Mth;
+import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
@@ -128,6 +129,9 @@ import yesman.epicfight.world.damagesource.ExtraDamageInstance;
 import yesman.epicfight.world.damagesource.SourceTags;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+
+import java.util.List;
+import java.util.Set;
 
 @Mod.EventBusSubscriber(modid = EpicFightMod.MODID, bus = Bus.MOD)
 public class Animations {
@@ -484,22 +488,22 @@ public class Animations {
 		BIPED_WALK = new MovementAnimation(true, "biped/living/walk", biped);
 		BIPED_FLYING = new StaticAnimation(true, "biped/living/fly", biped);
 		BIPED_CREATIVE_IDLE = new StaticAnimation(true, "biped/living/creative_idle", biped);
-		
+
 		BIPED_CREATIVE_FLYING_FORWARD = new MovementAnimation(true, "biped/living/creative_fly", biped)
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.FLYING_CORRECTION);
-		
+
 		BIPED_CREATIVE_FLYING_BACKWARD = new MovementAnimation(true, "biped/living/creative_fly_backward", biped)
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.FLYING_CORRECTION2);
-		
+
 		BIPED_CREATIVE_FLYING = new SelectiveAnimation((entitypatch) -> {
 					Vec3 view = entitypatch.getOriginal().getViewVector(1.0F);
 					Vec3 move = entitypatch.getOriginal().getDeltaMovement();
-					
+
 					double dot = view.dot(move);
-					
+
 					return dot < 0.0D ? 1 : 0;
 				}, BIPED_CREATIVE_FLYING_FORWARD, BIPED_CREATIVE_FLYING_BACKWARD);
-		
+
 		BIPED_HOLD_CROSSBOW = new StaticAnimation(true, "biped/living/hold_crossbow", biped);
 		BIPED_RUN = new MovementAnimation(true, "biped/living/run", biped);
 		BIPED_SNEAK = new MovementAnimation(true, "biped/living/sneak", biped);
@@ -518,7 +522,7 @@ public class Animations {
 					if (self instanceof LinkAnimation) {
 						return speed;
 					}
-					
+
 					return 0.0F;
 				})
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, (self, pose, entitypatch, elapsedTime, partialTicks) -> {
@@ -527,7 +531,7 @@ public class Animations {
 					} else if (!(self instanceof LinkAnimation)) {
 						LivingMotion livingMotion = entitypatch.getCurrentLivingMotion();
 						Pose rawPose;
-						
+
 						if (livingMotion == LivingMotions.SWIM || livingMotion == LivingMotions.FLY || livingMotion == LivingMotions.CREATIVE_FLY) {
 							rawPose = self.getRawPose(3.3333F);
 						} else {
@@ -543,7 +547,7 @@ public class Animations {
 						}
 						
 						rawPose.getJointTransformData().forEach(pose.getJointTransformData()::put);
-					} 
+					}
 				});
 		BIPED_CROSSBOW_AIM = new AimAnimation(false, "biped/combat/crossbow_aim_mid", "biped/combat/crossbow_aim_up", "biped/combat/crossbow_aim_down", "biped/combat/crossbow_aim_lying", biped);
 		BIPED_CROSSBOW_SHOT = new ReboundAnimation(false, "biped/combat/crossbow_shot_mid", "biped/combat/crossbow_shot_up", "biped/combat/crossbow_shot_down", "biped/combat/crossbow_shot_lying", biped);
@@ -559,7 +563,7 @@ public class Animations {
 		BIPED_HOLD_SPEAR = new StaticAnimation(true, "biped/living/hold_spear", biped);
 		BIPED_HOLD_DUAL_WEAPON = new StaticAnimation(true, "biped/living/hold_dual", biped);
 		BIPED_HOLD_LIECHTENAUER = new StaticAnimation(true, "biped/living/hold_liechtenauer", biped);
-		
+
 		BIPED_WALK_GREATSWORD = new MovementAnimation(true, "biped/living/walk_greatsword", biped);
 		BIPED_WALK_SPEAR = new MovementAnimation(true, "biped/living/walk_spear", biped);
 		BIPED_WALK_UCHIGATANA_SHEATHING = new MovementAnimation(true, "biped/living/walk_uchigatana_sheath", biped);
@@ -567,19 +571,20 @@ public class Animations {
 		BIPED_WALK_TWOHAND = new MovementAnimation(true, "biped/living/walk_twohand", biped);
 		BIPED_WALK_LONGSWORD = new MovementAnimation(true, "biped/living/walk_longsword", biped);
 		BIPED_WALK_LIECHTENAUER = new MovementAnimation(true, "biped/living/walk_liechtenauer", biped);
-		
+
 		BIPED_RUN_GREATSWORD = new MovementAnimation(true, "biped/living/run_greatsword", biped);
 		BIPED_RUN_UCHIGATANA = new MovementAnimation(true, "biped/living/run_uchigatana", biped);
 		BIPED_RUN_UCHIGATANA_SHEATHING = new MovementAnimation(true, "biped/living/run_uchigatana_sheath", biped);
 		BIPED_RUN_DUAL = new MovementAnimation(true, "biped/living/run_dual", biped);
+
 		BIPED_RUN_LONGSWORD = new MovementAnimation(true, "biped/living/run_longsword", biped);
 		
 		BIPED_UCHIGATANA_SCRAP = new StaticAnimation(0.05F, false, "biped/living/uchigatana_scrap", biped)
-				.addEvents(TimeStampedEvent.create(0.15F, ReusableSources.PLAY_SOUND, AnimationEvent.Side.CLIENT).params(EpicFightSounds.SWORD_IN));
+				.addEvents(TimeStampedEvent.create(0.15F, ReusableSources.PLAY_SOUND, AnimationEvent.Side.CLIENT).params(EpicFightSounds.SWORD_IN.get()));
 		BIPED_LIECHTENAUER_READY = new StaticAnimation(0.1F, false, "biped/living/liechtenauer_ready", biped);
-		
+
 		BIPED_HIT_SHIELD = new MirrorAnimation(0.05F, false, "biped/combat/hit_shield", "biped/combat/hit_shield_mirror", biped);
-		
+
 		BIPED_CLIMBING = new MovementAnimation(0.16F, true, "biped/living/climb", biped)
 				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE);
 		BIPED_SLEEPING = new StaticAnimation(0.16F, true, "biped/living/sleep", biped);
@@ -654,9 +659,9 @@ public class Animations {
 		 * Main Frame Animations
 		 **/
 		BIPED_ROLL_FORWARD = new DodgeAnimation(0.1F, "biped/skill/roll_forward", 0.6F, 0.8F, biped)
-				.addEvents(TimeStampedEvent.create(0.0F, ReusableSources.PLAY_SOUND, AnimationEvent.Side.SERVER).params(EpicFightSounds.ROLL));
+				.addEvents(TimeStampedEvent.create(0.0F, ReusableSources.PLAY_SOUND, AnimationEvent.Side.SERVER).params(EpicFightSounds.ROLL.get()));
 		BIPED_ROLL_BACKWARD = new DodgeAnimation(0.1F, "biped/skill/roll_backward", 0.6F, 0.8F, biped)
-				.addEvents(TimeStampedEvent.create(0.0F, ReusableSources.PLAY_SOUND, AnimationEvent.Side.SERVER).params(EpicFightSounds.ROLL));
+				.addEvents(TimeStampedEvent.create(0.0F, ReusableSources.PLAY_SOUND, AnimationEvent.Side.SERVER).params(EpicFightSounds.ROLL.get()));
 		
 		BIPED_STEP_FORWARD = new DodgeAnimation(0.1F, 0.35F, "biped/skill/step_forward", 0.6F, 1.65F, biped)
 				.addState(EntityState.LOCKON_ROTATE, true)
@@ -689,13 +694,13 @@ public class Animations {
 					if (!self.isStaticAnimation()) {
 						return;
 					}
-					
+
 					float xRot = Mth.clamp(entitypatch.getCameraXRot(), -60.0F, 50.0F);
 					float yRot = Mth.clamp(Mth.wrapDegrees(entitypatch.getCameraYRot() - entitypatch.getOriginal().getYRot()), -60.0F, 60.0F);
 					
 					JointTransform chest = pose.getOrDefaultTransform("Chest");
 					chest.frontResult(JointTransform.getRotation(Vector3f.YP.rotationDegrees(yRot)), OpenMatrix4f::mulAsOriginFront);
-					
+
 					JointTransform head = pose.getOrDefaultTransform("Head");
 					MathUtils.mulQuaternion(Vector3f.XP.rotationDegrees(xRot), head.rotation(), head.rotation());
 				})
@@ -773,15 +778,15 @@ public class Animations {
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER, ValueModifier.adder(30.0F))
 				.addProperty(AttackPhaseProperty.DAMAGE_MODIFIER, ValueModifier.multiplier(2.0F))
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(3))
-				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP);
+				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP.get());
 		UCHIGATANA_SHEATHING_DASH = new DashAttackAnimation(0.05F, 0.05F, 0.2F, 0.35F, 0.65F, ColliderPreset.BATTOJUTSU_DASH, biped.rootJoint, "biped/combat/uchigatana_sheath_dash", biped)
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER, ValueModifier.adder(30.0F))
 				.addProperty(AttackPhaseProperty.DAMAGE_MODIFIER, ValueModifier.multiplier(2.0F))
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(3))
-				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP);
+				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP.get());
 		AXE_AUTO1 = new BasicAttackAnimation(0.16F, 0.05F, 0.16F, 0.7F, null, biped.toolR, "biped/combat/axe_auto1", biped);
 		AXE_AUTO2 = new BasicAttackAnimation(0.16F, 0.05F, 0.16F, 0.85F, null, biped.toolR, "biped/combat/axe_auto2", biped);
-		
+
 		LONGSWORD_AUTO1 = new BasicAttackAnimation(0.1F, 0.25F, 0.35F, 0.5F, null, biped.toolR, "biped/combat/longsword_auto1", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		LONGSWORD_AUTO2 = new BasicAttackAnimation(0.15F, 0.2F, 0.3F, 0.45F, null, biped.toolR, "biped/combat/longsword_auto2", biped)
@@ -790,14 +795,14 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		LONGSWORD_DASH = new DashAttackAnimation(0.1F, 0.1F, 0.25F, 0.4F, 0.75F, null, biped.toolR, "biped/combat/longsword_dash", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		
+
 		LONGSWORD_LIECHTENAUER_AUTO1 = new BasicAttackAnimation(0.1F, 0.15F, 0.25F, 0.5F, null, biped.toolR, "biped/combat/longsword_liechtenauer_auto1", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		LONGSWORD_LIECHTENAUER_AUTO2 = new BasicAttackAnimation(0.1F, 0.2F, 0.3F, 0.5F, null, biped.toolR, "biped/combat/longsword_liechtenauer_auto2", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		LONGSWORD_LIECHTENAUER_AUTO3 = new BasicAttackAnimation(0.25F, 0.1F, 0.2F, 0.7F, null, biped.toolR, "biped/combat/longsword_liechtenauer_auto3", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		
+
 		TACHI_AUTO1 = new BasicAttackAnimation(0.1F, 0.35F, 0.4F, 0.5F, null, biped.toolR, "biped/combat/tachi_auto1", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F)
 				.addProperty(AttackAnimationProperty.EXTRA_COLLIDERS, 3);
@@ -830,7 +835,7 @@ public class Animations {
 				  new Phase(0.0F, 0.1F, 0.1F, 0.2F, 0.2F, 0.2F, InteractionHand.OFF_HAND, biped.toolL, null)
 				, new Phase(0.2F, 0.2F, 0.3F, 0.6F, 0.6F, biped.toolR, null))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
-		
+
 		DAGGER_DUAL_DASH = new DashAttackAnimation(0.1F, 0.1F, 0.25F, 0.3F, 0.65F, ColliderPreset.DUAL_DAGGER_DASH, biped.rootJoint, "biped/combat/dagger_dual_dash", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F)
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true);
@@ -845,7 +850,7 @@ public class Animations {
 		UCHIGATANA_SHEATH_AIR_SLASH = new AirSlashAnimation(0.1F, 0.1F, 0.16F, 0.3F, null, biped.toolR, "biped/combat/uchigatana_sheath_airslash", biped)
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER, ValueModifier.adder(30.0F))
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(2))
-				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP)
+				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP.get())
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
 		SPEAR_ONEHAND_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.4F, null, biped.toolR, "biped/combat/spear_onehand_airslash", biped);
 		SPEAR_TWOHAND_AIR_SLASH = new AirSlashAnimation(0.1F, 0.25F, 0.36F, 0.6F, null, biped.toolR, "biped/combat/spear_twohand_airslash", biped)
@@ -933,15 +938,17 @@ public class Animations {
 		UCHIGATANA_GUARD_HIT = new GuardAnimation(0.05F, "biped/skill/guard_uchigatana_hit", biped);
 		
 		METEOR_SLAM = new AttackAnimation(0.05F, 0.0F, 0.2F, 0.3F, 1.0F, ColliderPreset.GREATSWORD, biped.toolR, "biped/skill/greatsword_slam", biped)
-				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.NO_SOUND)
+				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.NO_SOUND.get())
 				.addProperty(ActionAnimationProperty.MOVE_ON_LINK, false)
 				.addProperty(ActionAnimationProperty.STOP_MOVEMENT, true)
 				.addProperty(ActionAnimationProperty.COORD_SET_BEGIN, (self, entitypatch, transformSheet) -> {
 					HitResult hitResult = entitypatch.getOriginal().pick(50.0D, 1.0F, false);
 					Vec3 to = hitResult.getLocation();
+
+
 					Vec3 from = entitypatch.getOriginal().position();
 					Vec3 correction = to.subtract(from).normalize().scale(2.0D);
-					
+
 					TransformSheet correctedCoord = self.getCoord().getCorrectedModelCoord(entitypatch, from, to.add(correction), 0, 2);
 					transformSheet.readFrom(correctedCoord);
 				})
@@ -950,25 +957,25 @@ public class Animations {
 					if (0.2F > elapsedTime) {
 						if (entitypatch instanceof PlayerPatch<?> playerpatch) {
 							SkillContainer skill = playerpatch.getSkill(EpicFightSkills.METEOR_STRIKE);
-							
+
 							if (skill != null) {
 								return (float)Math.sqrt(7.0F / MeteorSlamSkill.getFallDistance(skill));
 							}
 						}
 					}
-					
+
 					return 1.0F;
 				})
 				.addEvents(StaticAnimationProperty.ON_BEGIN_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
-					entitypatch.playSound(EpicFightSounds.ENTITY_MOVE, 1.0F, 0.0F, 0.0F);
+					entitypatch.playSound(EpicFightSounds.ENTITY_MOVE.get(), 1.0F, 0.0F, 0.0F);
 				}, Side.CLIENT))
 				.addEvents(TimeStampedEvent.create(0.25F, Animations.ReusableSources.FRACTURE_METEOR_STRIKE, Side.SERVER)
 										   .params(new Vec3f(0.0F, -0.2F, -1.8F), Armatures.BIPED.toolR, 0.3F));
 		
 		REVELATION_ONEHAND = new AttackAnimation(0.05F, 0.0F, 0.05F, 0.1F, 0.35F, ColliderPreset.FIST, biped.legR, "biped/skill/revelation_normal", biped)
-				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH)
+				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH.get())
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT)
-				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLUNT_HIT)
+				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLUNT_HIT.get())
 				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(SourceTags.COUNTER))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.NEUTRALIZE)
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.setter(1))
@@ -980,9 +987,9 @@ public class Animations {
 				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE);
 		
 		REVELATION_TWOHAND = new AttackAnimation(0.1F, 0.0F, 0.05F, 0.1F, 0.35F, ColliderPreset.FIST_FIXED, biped.rootJoint, "biped/skill/revelation_twohand", biped)
-				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH)
+				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH.get())
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT)
-				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLUNT_HIT)
+				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLUNT_HIT.get())
 				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(SourceTags.COUNTER))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.NEUTRALIZE)
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.setter(1))
@@ -1051,8 +1058,8 @@ public class Animations {
 					TimeStampedEvent.create(0.25F, ReusableSources.WING_FLAP, AnimationEvent.Side.CLIENT),
 					TimeStampedEvent.create(1.05F, ReusableSources.WING_FLAP, AnimationEvent.Side.CLIENT),
 					TimeStampedEvent.create(1.45F, (entitypatch, animation, params) -> {
-						if (entitypatch instanceof EnderDragonPatch) {
-							((EnderDragonPatch)entitypatch).setFlyingPhase();
+						if (entitypatch instanceof EnderDragonPatch enderDragonPatch) {
+							enderDragonPatch.setFlyingPhase();
 						}
 					}, AnimationEvent.Side.BOTH)
 				);
@@ -1086,7 +1093,7 @@ public class Animations {
 				})
 				.addEvents(
 					TimeStampedEvent.create(0.3F, ReusableSources.WING_FLAP, AnimationEvent.Side.CLIENT), TimeStampedEvent.create(1.1F, (entitypatch, animation, params) -> {
-						entitypatch.playSound(EpicFightSounds.GROUND_SLAM, 0, 0);
+						entitypatch.playSound(EpicFightSounds.GROUND_SLAM.get(), 0, 0);
 						LivingEntity original = entitypatch.getOriginal();
 						BlockPos blockpos = original.level.getHeightmapPos(Heightmap.Types.WORLD_SURFACE, original.blockPosition());
 						original.level.addParticle(EpicFightParticles.GROUND_SLAM.get(), blockpos.getX(), blockpos.getY(), blockpos.getZ(), 3.0D, 100.0D, 1.0D);
@@ -1108,7 +1115,7 @@ public class Animations {
 			})
 			.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN)
 			.addEvents(TimeStampedEvent.create(0.65F, (entitypatch, animation, params) -> {
-				entitypatch.playSound(EpicFightSounds.GROUND_SLAM, 0, 0);
+				entitypatch.playSound(EpicFightSounds.GROUND_SLAM.get(), 0, 0);
 				
 				if (entitypatch instanceof EnderDragonPatch dragonpatch) {
 					Vec3f tipPosition = dragonpatch.getTipPointAnimation(dragon.legFrontR3.getName()).getTargetPosition();
@@ -1138,7 +1145,7 @@ public class Animations {
 			.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN)
 			.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true)
 			.addEvents(TimeStampedEvent.create(1.2F, (entitypatch, animation, params) -> {
-				entitypatch.playSound(EpicFightSounds.GROUND_SLAM, 0, 0);
+				entitypatch.playSound(EpicFightSounds.GROUND_SLAM.get(), 0, 0);
 				
 				if (entitypatch instanceof EnderDragonPatch dragonpatch) {
 					Vec3f tipPosition = dragonpatch.getTipPointAnimation(dragon.legFrontR3.getName()).getTargetPosition();
@@ -1175,7 +1182,7 @@ public class Animations {
             double d11 = target.getZ() - d8;
             
             if (!original.isSilent()) {
-               original.level.levelEvent((Player)null, 1017, original.blockPosition(), 0);
+               original.level.levelEvent(null, 1017, original.blockPosition(), 0);
             }
             
             DragonFireball dragonfireball = new DragonFireball(original.level, original, d9, d10, d11);
@@ -1210,7 +1217,7 @@ public class Animations {
 			})
 			.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true)
 			.addEvents(TimeStampedEvent.create(0.15F, (entitypatch, animation, params) -> {
-				entitypatch.playSound(EpicFightSounds.GROUND_SLAM, 0, 0);
+				entitypatch.playSound(EpicFightSounds.GROUND_SLAM.get(), 0, 0);
 				
 				if (entitypatch instanceof EnderDragonPatch dragonpatch) {
 					Vec3f tipPosition = dragonpatch.getTipPointAnimation(dragon.legFrontR3.getName()).getTargetPosition();
@@ -1314,8 +1321,8 @@ public class Animations {
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 		
 		WITHER_CHARGE = new AttackAnimation(0.35F, 0.35F, 0.35F, 0.66F, 2.05F, ColliderPreset.WITHER_CHARGE, wither.rootJoint, "wither/rush", wither)
-				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.BIG_ENTITY_MOVE)
-				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLUNT_HIT_HARD)
+				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.BIG_ENTITY_MOVE.get())
+				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLUNT_HIT_HARD.get())
 				.addProperty(AttackPhaseProperty.SOURCE_LOCATION_PROVIDER, (entitypatch) -> entitypatch.getLastAttackPosition())
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN)
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(100))
@@ -1387,7 +1394,7 @@ public class Animations {
 		WITHER_SPELL_ARMOR = new InvincibleAnimation(0.35F, "wither/spell_wither_armor", wither)
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, false)
 				.addEvents(StaticAnimationProperty.ON_BEGIN_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
-					entitypatch.playSound(EpicFightSounds.WITHER_SPELL_ARMOR, 5.0F, 0.0F, 0.0F);
+					entitypatch.playSound(EpicFightSounds.WITHER_SPELL_ARMOR.get(), 5.0F, 0.0F, 0.0F);
 					Entity entity = entitypatch.getOriginal();
 					entity.level.addParticle(EpicFightParticles.BOSS_CASTING.get(), entity.getX(), entity.getEyeY(), entity.getZ(), 5.0D, Double.longBitsToDouble(20), Double.longBitsToDouble(4));
 				}, Side.CLIENT))
@@ -1415,14 +1422,14 @@ public class Animations {
 		WITHER_GHOST_STANDBY = new InvincibleAnimation(0.16F, "wither/ghost_stand", wither);
 		
 		WITHER_SWIRL = new AttackAnimation(0.2F, 0.05F, 0.4F, 0.51F, 1.6F, ColliderPreset.WITHER_CHARGE, wither.torso, "wither/swirl", wither)
-				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_BIG)
+				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_BIG.get())
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.setter(3))
 				.addProperty(AttackPhaseProperty.DAMAGE_MODIFIER, ValueModifier.setter(6.0F));
 		
 		WITHER_BEAM = new ActionAnimation(0.05F, "wither/laser", wither)
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, false)
 				.addEvents(TimeStampedEvent.create(0.0F, (entitypatch, animation, params) -> {
-					entitypatch.playSound(EpicFightSounds.BUZZ, 0.0F, 0.0F);
+					entitypatch.playSound(EpicFightSounds.BUZZ.get(), 0.0F, 0.0F);
 					
 					if (entitypatch instanceof WitherPatch witherpatch) {
 						for (int i = 0; i < 3; i++) {
@@ -1452,7 +1459,7 @@ public class Animations {
 				}, Side.SERVER), TimeStampedEvent.create(0.9F, (entitypatch, animation, params) -> {
 					if (entitypatch instanceof WitherPatch witherpatch) {
 						WitherBoss witherboss = witherpatch.getOriginal();
-						witherboss.level.playLocalSound(witherboss.getX(), witherboss.getY(), witherboss.getZ(), EpicFightSounds.LASER_BLAST, SoundSource.HOSTILE, 1.0F, 1.0F, false);
+						witherboss.level.playLocalSound(witherboss.getX(), witherboss.getY(), witherboss.getZ(), EpicFightSounds.LASER_BLAST.get(), SoundSource.HOSTILE, 1.0F, 1.0F, false);
 						
 						for (int i = 0; i < 3; i++) {
 							Vec3 laserDestination = witherpatch.getLaserTargetPosition(i);
@@ -1516,8 +1523,8 @@ public class Animations {
 			);
 		
 		WITHER_BACKFLIP = new AttackAnimation(0.2F, 0.3F, 0.5F, 0.66F, 2.1F, ColliderPreset.WITHER_CHARGE, wither.torso, "wither/backflip", wither)
-				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.BIG_ENTITY_MOVE)
-				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLUNT_HIT_HARD)
+				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.BIG_ENTITY_MOVE.get())
+				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLUNT_HIT_HARD.get())
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(100))
 				.addProperty(AttackPhaseProperty.DAMAGE_MODIFIER, ValueModifier.setter(10.0F))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN)
@@ -1560,7 +1567,7 @@ public class Animations {
 						List<LivingEntity> hitEnemies = entitypatch.getCurrenltyAttackedEntities();
 						Vec3 vec = entitypatch.getOriginal().position().add(Vec3.directionFromRotation(new Vec2(0.0F, entitypatch.getOriginal().getYRot())));
 						AttackAnimation attackAnimation = (AttackAnimation)animation;
-						
+
 						for (LivingEntity e : hitEnemies) {
 							if (e.isAlive()) {
 								LivingEntityPatch<?> targetpatch = EpicFightCapabilities.getEntityPatch(e, LivingEntityPatch.class);
@@ -1622,21 +1629,21 @@ public class Animations {
 				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, false);
 		
 		BATTOJUTSU = new AttackAnimation(0.15F, 0.0F, 0.75F, 0.8F, 1.2F, ColliderPreset.BATTOJUTSU, biped.rootJoint, "biped/skill/battojutsu", biped)
-				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP)
+				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP.get())
 				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE)
-				.addEvents(TimeStampedEvent.create(0.05F, ReusableSources.PLAY_SOUND, AnimationEvent.Side.SERVER).params(EpicFightSounds.SWORD_IN));
+				.addEvents(TimeStampedEvent.create(0.05F, ReusableSources.PLAY_SOUND, AnimationEvent.Side.SERVER).params(EpicFightSounds.SWORD_IN.get()));
 		
 		BATTOJUTSU_DASH = new AttackAnimation(0.15F, 0.43F, 0.7F, 0.8F, 1.4F, ColliderPreset.BATTOJUTSU_DASH, biped.rootJoint, "biped/skill/battojutsu_dash", biped)
-				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP)
+				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP.get())
 				.addProperty(ActionAnimationProperty.COORD_SET_BEGIN, MoveCoordFunctions.RAW_COORD)
 				.addProperty(ActionAnimationProperty.COORD_SET_TICK, null)
 				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE)
 				.addEvents(
-					TimeStampedEvent.create(0.05F, ReusableSources.PLAY_SOUND, AnimationEvent.Side.SERVER).params(EpicFightSounds.SWORD_IN),
+					TimeStampedEvent.create(0.05F, ReusableSources.PLAY_SOUND, AnimationEvent.Side.SERVER).params(EpicFightSounds.SWORD_IN.get()),
 					TimeStampedEvent.create(0.7F, (entitypatch, animation, params) -> {
 						Entity entity = entitypatch.getOriginal();
 						entity.level.addParticle(EpicFightParticles.ENTITY_AFTER_IMAGE.get(), entity.getX(), entity.getY(), entity.getZ(), Double.longBitsToDouble(entity.getId()), 0, 0);
-						Random random = entitypatch.getOriginal().getRandom();
+						RandomSource random = entitypatch.getOriginal().getRandom();
 						double x = entity.getX() + (random.nextDouble() - random.nextDouble()) * 2.0D;
 						double y = entity.getY();
 						double z = entity.getZ() + (random.nextDouble() - random.nextDouble()) * 2.0D;
@@ -1676,7 +1683,7 @@ public class Animations {
 				.addProperty(ActionAnimationProperty.COORD_SET_TICK, MoveCoordFunctions.TRACE_LOCROT_TARGET);
 		
 		EVISCERATE_SECOND = new AttackAnimation(0.15F, 0.0F, 0.0F, 0.0F, 0.4F, null, biped.toolR, "biped/skill/eviscerate_second", biped)
-				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.EVISCERATE)
+				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.EVISCERATE.get())
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.EVISCERATE)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
 		
@@ -1731,14 +1738,14 @@ public class Animations {
 						LivingEntity grapplingTarget = entitypatch.getGrapplingTarget();
 						
 						if (grapplingTarget != null) {
-							entitypatch.playSound(EpicFightSounds.BLADE_HIT, 0.0F, 0.0F);
+							entitypatch.playSound(EpicFightSounds.BLADE_HIT.get(), 0.0F, 0.0F);
 						}
 					}, Side.CLIENT),
 					TimeStampedEvent.create(0.3F, (entitypatch, animation, params) -> {
 						LivingEntity grapplingTarget = entitypatch.getGrapplingTarget();
 						
 						if (grapplingTarget != null) {
-							entitypatch.playSound(EpicFightSounds.BLADE_HIT, 0.0F, 0.0F);
+							entitypatch.playSound(EpicFightSounds.BLADE_HIT.get(), 0.0F, 0.0F);
 						}
 					}, Side.CLIENT)
 				);
@@ -1751,8 +1758,8 @@ public class Animations {
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, null);
 		
 		WRATHFUL_LIGHTING = new AttackAnimation(0.15F, "biped/skill/wrathful_lighting", biped
-												,new Phase(0.0F, 0.0F, 0.3F, 0.36F, 1.0F, Float.MAX_VALUE, biped.toolR, (Collider)null)
-												,new Phase(InteractionHand.MAIN_HAND, biped.rootJoint, (Collider)null))
+												,new Phase(0.0F, 0.0F, 0.3F, 0.36F, 1.0F, Float.MAX_VALUE, biped.toolR, null)
+												,new Phase(InteractionHand.MAIN_HAND, biped.rootJoint, null))
 				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE)
 				.addEvents(TimeStampedEvent.create(0.35F, ReusableSources.SUMMON_THUNDER, AnimationEvent.Side.SERVER));
 		
@@ -1854,16 +1861,16 @@ public class Animations {
 			if (hitResult.getType() == HitResult.Type.BLOCK) {
 				Direction direction = hitResult.getDirection();
 				BlockPos collidePos = hitResult.getBlockPos().offset(direction.getStepX(), direction.getStepY(), direction.getStepZ());
-				
+
 				if (!LevelUtil.canTransferShockWave(level, collidePos, level.getBlockState(collidePos))) {
 					collidePos = collidePos.below();
 				}
-				
+
 				slamStartPos = new Vec3(collidePos.getX(), collidePos.getY(), collidePos.getZ());
 			} else {
 				slamStartPos = weaponEdge.subtract(0.0D, 1.0D, 0.0D);
 			}
-			
+
 			LevelUtil.circleSlamFracture(entitypatch.getOriginal(), level, slamStartPos, (double)params[2], false, false);
 		};
 		
@@ -1882,7 +1889,7 @@ public class Animations {
 			if (entitypatch.isLogicalClient()) {
 				return;
 			}
-			
+
 			if (animation instanceof AttackAnimation attackAnimation) {
 				Phase phase = attackAnimation.phases[1];
 				
@@ -1893,11 +1900,7 @@ public class Animations {
 				float total = damage + ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create().get(original, original.getItemInHand(InteractionHand.MAIN_HAND), null, damage);
 				
 				List<Entity> list = level.getEntities(original, original.getBoundingBox().inflate(10.0D, 4.0D, 10.0D), (e) -> {
-					if (e.distanceToSqr(original) > 100.0D || e.isAlliedTo(original) || !entitypatch.getOriginal().hasLineOfSight(e)) {
-						return false;
-					}
-					
-					return true;
+					return !(e.distanceToSqr(original) > 100.0D) && !e.isAlliedTo(original) && entitypatch.getOriginal().hasLineOfSight(e);
 				});
 				
 				list = HitEntityList.Priority.HOSTILITY.sort(entitypatch, list);
@@ -1914,7 +1917,7 @@ public class Animations {
 					e.hurt(attackAnimation.getEpicFightDamageSource(DamageSource.LIGHTNING_BOLT, entitypatch, e, phase)
 														.setHurtItem(entitypatch.getOriginal().getItemInHand(InteractionHand.MAIN_HAND)).cast(), total);
 					e.thunderHit(level, lightningbolt);
-					
+
 					level.addFreshEntity(lightningbolt);
 				}
 				
@@ -1927,14 +1930,14 @@ public class Animations {
 				}
 			}
 		};
-		
+
 		public static final AnimationEvent.AnimationEventConsumer PLAY_SOUND = (entitypatch, animation, params) -> entitypatch.playSound((SoundEvent)params[0], 0, 0);
 		
 		public static final AnimationProperty.PoseModifier COMBO_ATTACK_DIRECTION_MODIFIER = (self, pose, entitypatch, time, partialTicks) -> {
 			if (!self.isStaticAnimation() || entitypatch instanceof PlayerPatch<?> playerpatch && playerpatch.isFirstPerson()) {
 				return;
 			}
-			
+
 			float pitch = entitypatch.getAttackDirectionPitch();
 			JointTransform chest = pose.getOrDefaultTransform("Chest");
 			chest.frontResult(JointTransform.getRotation(Vector3f.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginFront);
@@ -1956,29 +1959,29 @@ public class Animations {
             Vec3 vec3d1 = entitypatch.getOriginal().getDeltaMovement();
             double d0 = vec3d1.horizontalDistanceSqr();
             double d1 = vec3d.horizontalDistanceSqr();
-            
+
             if (d0 > 0.0D && d1 > 0.0D) {
             	JointTransform root = pose.getOrDefaultTransform("Root");
             	JointTransform head = pose.getOrDefaultTransform("Head");
                 double d2 = (vec3d1.x * vec3d.x + vec3d1.z * vec3d.z) / (Math.sqrt(d0) * Math.sqrt(d1));
                 double d3 = vec3d1.x * vec3d.z - vec3d1.z * vec3d.x;
                 float zRot = Mth.clamp((float)(Math.signum(d3) * Math.acos(d2)), -1.0F, 1.0F);
-                
+
                 root.frontResult(JointTransform.getRotation(Vector3f.ZP.rotation(zRot)), OpenMatrix4f::mulAsOriginFront);
-                
+
                 float xRot = (float) MathUtils.getXRotOfVector(vec3d1) * 2.0F;
-                
+
                 MathUtils.mulQuaternion(Vector3f.XP.rotationDegrees(xRot), root.rotation(), root.rotation());
                 MathUtils.mulQuaternion(Vector3f.XP.rotationDegrees(-xRot), head.rotation(), head.rotation());
             }
 		};
-		
+
 		public static final AnimationProperty.PoseModifier FLYING_CORRECTION2 = (self, pose, entitypatch, elapsedTime, partialTicks) -> {
 			Vec3 vec3d = entitypatch.getOriginal().getViewVector(partialTicks);
             Vec3 vec3d1 = entitypatch.getOriginal().getDeltaMovement();
             double d0 = vec3d1.horizontalDistanceSqr();
             double d1 = vec3d.horizontalDistanceSqr();
-            
+
             if (d0 > 0.0D && d1 > 0.0D) {
             	JointTransform root = pose.getOrDefaultTransform("Root");
             	JointTransform head = pose.getOrDefaultTransform("Head");
@@ -1987,7 +1990,7 @@ public class Animations {
                 MathUtils.mulQuaternion(Vector3f.XP.rotationDegrees(xRot), head.rotation(), head.rotation());
             }
 		};
-		
+
 		public static final AnimationProperty.PlaySpeedModifier CONSTANT_ONE = (self, entitypatch, speed, elapsedTime) -> 1.0F;
 		
 		public static final AnimationProperty.PlaySpeedModifier CHARGING = (self, entitypatch, speed, elapsedTime) -> {

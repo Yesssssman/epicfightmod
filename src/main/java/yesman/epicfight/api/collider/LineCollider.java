@@ -113,12 +113,8 @@ public class LineCollider extends Collider {
 		
 		maxStart = maxStart < startZ ? startZ : maxStart;
 		minEnd = minEnd > endZ ? endZ : minEnd;
-		
-		if (maxStart >= minEnd) {
-			return false;
-		}
-		
-		return true;
+
+		return !(maxStart >= minEnd);
 	}
 	
 	@Override

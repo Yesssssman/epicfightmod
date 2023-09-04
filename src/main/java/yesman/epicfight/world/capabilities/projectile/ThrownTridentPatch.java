@@ -1,7 +1,5 @@
 package yesman.epicfight.world.capabilities.projectile;
 
-import java.util.List;
-
 import io.netty.buffer.ByteBuf;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -11,7 +9,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import yesman.epicfight.api.utils.math.ValueModifier;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSounds;
@@ -24,11 +22,9 @@ import yesman.epicfight.skill.weaponinnate.EverlastingAllegiance;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
-import yesman.epicfight.world.damagesource.EpicFightDamageSource;
-import yesman.epicfight.world.damagesource.ExtraDamageInstance;
-import yesman.epicfight.world.damagesource.IndirectEpicFightDamageSource;
-import yesman.epicfight.world.damagesource.SourceTags;
-import yesman.epicfight.world.damagesource.StunType;
+import yesman.epicfight.world.damagesource.*;
+
+import java.util.List;
 
 public class ThrownTridentPatch extends ProjectilePatch<ThrownTrident> {
 	private boolean innateActivated;
@@ -60,7 +56,7 @@ public class ThrownTridentPatch extends ProjectilePatch<ThrownTrident> {
 	}
 	
 	@Override
-	public void onJoinWorld(ThrownTrident projectileEntity, EntityJoinWorldEvent event) {
+	public void onJoinWorld(ThrownTrident projectileEntity, EntityJoinLevelEvent event) {
 		super.onJoinWorld(projectileEntity, event);
 		
 		if (!this.isLogicalClient()) {
@@ -113,7 +109,7 @@ public class ThrownTridentPatch extends ProjectilePatch<ThrownTrident> {
 						f += EnchantmentHelper.getDamageBonus(this.original.tridentItem, livingentity.getMobType());
 						
 						if (entity.hurt(source.cast(), f)) {
-							entity.playSound(EpicFightSounds.BLADE_HIT, 1.0F, 1.0F);
+							entity.playSound(EpicFightSounds.BLADE_HIT.get(), 1.0F, 1.0F);
 							((ServerLevel)entity.level).sendParticles(EpicFightParticles.HIT_BLADE.get()
 									, entity.position().x, entity.position().y + entity.getBbHeight() * 0.5D, entity.position().z, 0, 0, 0, 0, 1.0D);
 						}
@@ -145,7 +141,7 @@ public class ThrownTridentPatch extends ProjectilePatch<ThrownTrident> {
 			this.original.setXRot(this.independentXRot);
 			
 			if (this.original.tickCount % 3 == 0) {
-				this.original.playSound(EpicFightSounds.WHOOSH_ROD, 3.0F, 1.0F);
+				this.original.playSound(EpicFightSounds.WHOOSH_ROD.get(), 3.0F, 1.0F);
 			}
 		}
 	}

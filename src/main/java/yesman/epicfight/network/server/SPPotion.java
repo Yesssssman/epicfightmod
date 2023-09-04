@@ -11,9 +11,9 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.network.NetworkEvent;
 
 public class SPPotion {
-	private MobEffectInstance effectInstance;
-	private Action action;
-	private int entityId;
+	private final MobEffectInstance effectInstance;
+	private final Action action;
+	private final int entityId;
 
 	public SPPotion() {
 		this.effectInstance = null;
@@ -49,9 +49,8 @@ public class SPPotion {
 			Minecraft mc = Minecraft.getInstance();
 			Entity entity = mc.level.getEntity(msg.entityId);
 			
-			if (entity != null && entity instanceof LivingEntity) {
-				LivingEntity livEntity = ((LivingEntity)entity);
-				
+			if (entity != null && entity instanceof LivingEntity livEntity) {
+
 				switch (msg.action) {
 				case ACTIVATE:
 					livEntity.addEffect(msg.effectInstance);
@@ -66,7 +65,7 @@ public class SPPotion {
 		ctx.get().setPacketHandled(true);
 	}
 	
-	public static enum Action {
+	public enum Action {
 		ACTIVATE(0), REMOVE(1);
 
 		int action;

@@ -7,7 +7,7 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.gameasset.Animations;
 
 public class IndirectEpicFightDamageSource extends IndirectEntityDamageSource implements EpicFightDamageSource {
-	private DamageSourceElements damageSourceElements;
+	private final DamageSourceElements damageSourceElements;
 	private Vec3 projectileInitialPosition;
 	
 	public IndirectEpicFightDamageSource(String damageTypeIn, Entity owner, Entity projectile, StunType stunType) {

@@ -98,7 +98,7 @@ public class HyperVitalitySkill extends PassiveSkill {
 	@Override
 	public void drawOnGui(BattleModeGui gui, SkillContainer container, PoseStack poseStack, float x, float y) {
 		poseStack.pushPose();
-		poseStack.translate(0, (float)gui.getSlidingProgression() * 1.0F, 0);
+		poseStack.translate(0, (float) gui.getSlidingProgression(), 0);
 		RenderSystem.setShaderTexture(0, this.getSkillTexture());
 		GuiComponent.blit(poseStack, (int)x, (int)y, 24, 24, 0, 0, 1, 1, 1, 1);
 		

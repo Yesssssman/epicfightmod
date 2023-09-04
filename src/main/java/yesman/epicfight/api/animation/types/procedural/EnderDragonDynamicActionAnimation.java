@@ -46,9 +46,8 @@ public class EnderDragonDynamicActionAnimation extends ActionAnimation implement
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		Pose pose = super.getPoseByTime(entitypatch, time, partialTicks);
 		
-		if (entitypatch instanceof EnderDragonPatch) {
-			EnderDragonPatch enderdragonpatch = (EnderDragonPatch)entitypatch;
-	    	float x = (float)entitypatch.getOriginal().getX();
+		if (entitypatch instanceof EnderDragonPatch enderdragonpatch) {
+			float x = (float)entitypatch.getOriginal().getX();
 	    	float y = (float)entitypatch.getOriginal().getY();
 	    	float z = (float)entitypatch.getOriginal().getZ();
 	    	float xo = (float)entitypatch.getOriginal().xo;
@@ -72,8 +71,7 @@ public class EnderDragonDynamicActionAnimation extends ActionAnimation implement
 	public void begin(LivingEntityPatch<?> entitypatch) {
 		super.begin(entitypatch);
 		
-		if (entitypatch instanceof EnderDragonPatch) {
-			EnderDragonPatch enderdragonpatch = (EnderDragonPatch)entitypatch;
+		if (entitypatch instanceof EnderDragonPatch enderdragonpatch) {
 			Vec3 entitypos = enderdragonpatch.getOriginal().position();
 			OpenMatrix4f toWorld = OpenMatrix4f.mul(OpenMatrix4f.createTranslation((float)entitypos.x, (float)entitypos.y, (float)entitypos.z), enderdragonpatch.getModelMatrix(1.0F), null);
 			TransformSheet movementAnimation = enderdragonpatch.getArmature().getActionAnimationCoord();
@@ -109,8 +107,7 @@ public class EnderDragonDynamicActionAnimation extends ActionAnimation implement
 	public void tick(LivingEntityPatch<?> entitypatch) {
 		super.tick(entitypatch);
 		
-		if (entitypatch instanceof EnderDragonPatch) {
-			EnderDragonPatch enderdragonpatch = (EnderDragonPatch)entitypatch;
+		if (entitypatch instanceof EnderDragonPatch enderdragonpatch) {
 			float elapsedTime = entitypatch.getAnimator().getPlayerFor(this).getElapsedTime();
 			
 			for (IKInfo ikSetter : this.ikInfos) {
@@ -134,8 +131,7 @@ public class EnderDragonDynamicActionAnimation extends ActionAnimation implement
 	@Override
 	@OnlyIn(Dist.CLIENT)
 	public void renderDebugging(PoseStack poseStack, MultiBufferSource buffer, LivingEntityPatch<?> entitypatch, float playTime, float partialTicks) {
-		if (entitypatch instanceof EnderDragonPatch) {
-			EnderDragonPatch enderdragonpatch = ((EnderDragonPatch)entitypatch);
+		if (entitypatch instanceof EnderDragonPatch enderdragonpatch) {
 			OpenMatrix4f modelmat = enderdragonpatch.getModelMatrix(partialTicks);
 			LivingEntity originalEntity = entitypatch.getOriginal();
 			Vec3 entitypos = originalEntity.position();

@@ -1,10 +1,6 @@
 package yesman.epicfight.api.animation;
 
-import java.io.IOException;
-import java.util.Map;
-
 import com.google.common.collect.Maps;
-
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -14,6 +10,8 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.AnimationDataReader;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.main.EpicFightMod;
+
+import java.util.Map;
 
 public class AnimationManager extends SimplePreparableReloadListener<Map<Integer, Map<Integer, StaticAnimation>>> {
 	private final Map<Integer, Map<Integer, StaticAnimation>> animationById = Maps.newHashMap();
@@ -107,12 +105,8 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 		if (last > 0) {
 			ResourceLocation dataLocation = new ResourceLocation(location.getNamespace(), String.format("%s/data%s.json", path.substring(0, last), path.substring(last)));
 			
-			if (resourceManager.hasResource(dataLocation)) {
-				try {
-					AnimationDataReader.readAndApply(animation, resourceManager, resourceManager.getResource(dataLocation));
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
+			if (resourceManager.getResource(dataLocation).isPresent()) {
+				AnimationDataReader.readAndApply(animation, resourceManager, resourceManager.getResource(dataLocation).get());
 			}
 		}
 	}

@@ -1,24 +1,17 @@
 package yesman.epicfight.client.gui.screen;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.SkillContainer;
+
+import java.util.*;
 
 public class SlotSelectScreen extends Screen {
 	private static final ResourceLocation BACKGROUND = new ResourceLocation(EpicFightMod.MODID, "textures/gui/screen/slot_select.png");
@@ -26,7 +19,7 @@ public class SlotSelectScreen extends Screen {
 	private final List<SkillContainer> containers;
 	
 	public SlotSelectScreen(Set<SkillContainer> containers, SkillBookScreen parent) {
-		super(TextComponent.EMPTY);
+		super(Component.empty());
 		this.parent = parent;
 		this.containers = new ArrayList<>(containers);
 		
@@ -49,8 +42,8 @@ public class SlotSelectScreen extends Screen {
 		
 		for (SkillContainer container : this.containers) {
 			String slotName = container.getSlot().toString().toLowerCase(Locale.ROOT);
-			String skillName = container.getSkill() == null ? "Empty" : new TranslatableComponent(container.getSkill().getTranslationKey()).getString();
-			SlotButton slotbutton = new SlotButton(k, l, 167, 17, new TextComponent(slotName + ": "+ skillName), (button) -> {
+			String skillName = container.getSkill() == null ? "Empty" : Component.translatable(container.getSkill().getTranslationKey()).getString();
+			SlotButton slotbutton = new SlotButton(k, l, 167, 17, Component.literal(slotName + ": "+ skillName), (button) -> {
 				this.parent.learnSkill(container);
 				this.onClose();
 			});
@@ -81,7 +74,7 @@ public class SlotSelectScreen extends Screen {
 		RenderSystem.setShaderTexture(0, BACKGROUND);
 		this.blit(matrixStack, posX, posY, 0, 0, 191, 154);
 		
-		Component component = new TranslatableComponent("gui.epicfight.select_slot_tooltip");
+		Component component = Component.translatable("gui.epicfight.select_slot_tooltip");
 		int lineHeight = 0;
 		
 		for (FormattedCharSequence s : this.font.split(component, 250)) {

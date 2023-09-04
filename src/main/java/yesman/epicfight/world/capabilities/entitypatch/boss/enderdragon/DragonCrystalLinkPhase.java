@@ -33,7 +33,7 @@ public class DragonCrystalLinkPhase extends PatchedDragonPhase {
 	@Override
 	public void begin() {
 		this.dragonpatch.getAnimator().playAnimation(Animations.DRAGON_CRYSTAL_LINK, 0.0F);
-		this.dragon.level.playLocalSound(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ(), EpicFightSounds.ENDER_DRAGON_CRYSTAL_LINK, this.dragon.getSoundSource(), 10.0F, 1.0F, false);
+		this.dragon.level.playLocalSound(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ(), EpicFightSounds.ENDER_DRAGON_CRYSTAL_LINK.get(), this.dragon.getSoundSource(), 10.0F, 1.0F, false);
 		BlockPos blockpos = this.dragon.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(EndPodiumFeature.END_PODIUM_LOCATION));
 		List<EndCrystal> list = this.dragon.level.getEntitiesOfClass(EndCrystal.class, new AABB(blockpos).inflate(200.0D));
 		EndCrystal nearestCrystal = null;
@@ -80,7 +80,7 @@ public class DragonCrystalLinkPhase extends PatchedDragonPhase {
 		this.linkingCrystal = null;
 		
 		if (!this.dragonpatch.isLogicalClient()) {
-			this.dragon.level.explode((Entity)null, blockpos.getX(), blockpos.getY(), blockpos.getZ(), 6.0F, Explosion.BlockInteraction.DESTROY);
+			this.dragon.level.explode(null, blockpos.getX(), blockpos.getY(), blockpos.getZ(), 6.0F, Explosion.BlockInteraction.DESTROY);
 		}
 	}
 	

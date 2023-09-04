@@ -28,6 +28,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.AttackResult;
+import yesman.epicfight.api.utils.ExtendableEnumManager;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.gui.BattleModeGui;
 import yesman.epicfight.gameasset.Animations;
@@ -204,7 +205,7 @@ public class GuardSkill extends Skill {
 						if (epicfightDamageSource.hasTag(SourceTags.GUARD_PUNCTURE)) {
 							return;
 						}
-						
+
 						impact = ((EpicFightDamageSource)event.getDamageSource()).getImpact();
 						knockback += Math.min(impact * 0.1F, 1.0F);
 					}
@@ -219,7 +220,7 @@ public class GuardSkill extends Skill {
 		DamageSource damageSource = event.getDamageSource();
 		
 		if (this.isBlockableSource(damageSource, advanced)) {
-			event.getPlayerPatch().playSound(EpicFightSounds.CLASH, -0.05F, 0.1F);
+			event.getPlayerPatch().playSound(EpicFightSounds.CLASH.get(), -0.05F, 0.1F);
 			ServerPlayer serveerPlayer = event.getPlayerPatch().getOriginal();
 			EpicFightParticles.HIT_BLUNT.get().spawnParticleWithArgument(serveerPlayer.getLevel(), HitParticleType.FRONT_OF_EYES, HitParticleType.ZERO, serveerPlayer, damageSource.getDirectEntity());
 			
@@ -240,7 +241,7 @@ public class GuardSkill extends Skill {
 			}
 			
 			if (blockType == BlockType.GUARD_BREAK) {
-				event.getPlayerPatch().playSound(EpicFightSounds.NEUTRALIZE_MOBS, 3.0F, 0.0F, 0.1F);
+				event.getPlayerPatch().playSound(EpicFightSounds.NEUTRALIZE_MOBS.get(), 3.0F, 0.0F, 0.1F);
 			}
 			
 			this.dealEvent(event.getPlayerPatch(), event, advanced);
@@ -354,23 +355,17 @@ public class GuardSkill extends Skill {
 	@Override
 	public List<Object> getTooltipArgsOfScreen(List<Object> list) {
 		list.clear();
-		
+
 		StringBuilder sb = new StringBuilder();
-		
+
 		Iterator<WeaponCategory> iter = this.guardMotions.keySet().iterator();
-		int size = this.guardMotions.keySet().size();
-		int i = 0;
-		
 		while (iter.hasNext()) {
 			sb.append(WeaponCategory.ENUM_MANAGER.toTranslated(iter.next()));
-			
-			if (++i < size) {
+			if (iter.hasNext())
 				sb.append(", ");
-			}
 		}
-		
-        list.add(sb.toString());
-		
+
+		list.add(sb.toString());
 		return list;
 	}
 	
@@ -393,7 +388,7 @@ public class GuardSkill extends Skill {
 		return false;
 	}
 	
-	public static enum BlockType {
+	public enum BlockType {
 		GUARD_BREAK, GUARD, ADVANCED_GUARD
 	}
 }

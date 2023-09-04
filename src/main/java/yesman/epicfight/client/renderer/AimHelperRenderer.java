@@ -31,9 +31,9 @@ public class AimHelperRenderer {
 		Entity entity = minecraft.player;
 		HitResult ray = entity.pick(200.D, partialTicks, false);
 		Vec3 vec3 = ray.getLocation();
-		Vec3f pos1 = new Vec3f((float)Mth.lerp((double)partialTicks, entity.xOld, entity.getX()),
-							   (float)Mth.lerp((double)partialTicks, entity.yOld, entity.getY()) + entity.getEyeHeight() - 0.15F,
-							   (float)Mth.lerp((double)partialTicks, entity.zOld, entity.getZ()));
+		Vec3f pos1 = new Vec3f((float)Mth.lerp(partialTicks, entity.xOld, entity.getX()),
+							   (float)Mth.lerp(partialTicks, entity.yOld, entity.getY()) + entity.getEyeHeight() - 0.15F,
+							   (float)Mth.lerp(partialTicks, entity.zOld, entity.getZ()));
 		Vec3f pos2 = new Vec3f((float)vec3.x, (float)vec3.y, (float)vec3.z);
 		
 		Camera renderInfo = minecraft.gameRenderer.getMainCamera();

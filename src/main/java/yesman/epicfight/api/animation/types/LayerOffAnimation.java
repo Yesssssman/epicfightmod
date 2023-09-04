@@ -14,7 +14,7 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 public class LayerOffAnimation extends DynamicAnimation {
 	private DynamicAnimation lastAnimation;
 	private Pose lastPose;
-	private Priority layerPriority;
+	private final Priority layerPriority;
 	
 	public LayerOffAnimation(Priority layerPriority) {
 		this.layerPriority = layerPriority;

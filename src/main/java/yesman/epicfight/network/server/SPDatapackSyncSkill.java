@@ -12,8 +12,8 @@ import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillSlot;
 
 public class SPDatapackSyncSkill extends SPDatapackSync {
-	private List<String> learnedSkills = Lists.newArrayList();
-	private Map<SkillSlot, String> skillsBySlot = Maps.newHashMap();
+	private final List<String> learnedSkills = Lists.newArrayList();
+	private final Map<SkillSlot, String> skillsBySlot = Maps.newHashMap();
 	
 	public SPDatapackSyncSkill() {
 		this(0, SPDatapackSyncSkill.Type.WEAPON);
@@ -77,14 +77,14 @@ public class SPDatapackSyncSkill extends SPDatapackSync {
 		buf.writeInt(msg.learnedSkills.size());
 		
 		for (String skill : msg.learnedSkills) {
-			buf.writeUtf(skill.toString());
+			buf.writeUtf(skill);
 		}
 		
 		buf.writeInt(msg.skillsBySlot.size());
 		
 		for (Map.Entry<SkillSlot, String> slotBySkillEntry : msg.skillsBySlot.entrySet()) {
 			buf.writeInt(slotBySkillEntry.getKey().universalOrdinal());
-			buf.writeUtf(slotBySkillEntry.getValue().toString());
+			buf.writeUtf(slotBySkillEntry.getValue());
 		}
 	}
 }

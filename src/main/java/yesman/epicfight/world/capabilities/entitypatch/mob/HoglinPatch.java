@@ -62,12 +62,12 @@ public class HoglinPatch extends MobPatch<Hoglin> {
 	
 	@Override
 	public SoundEvent getWeaponHitSound(InteractionHand hand) {
-		return this.original.isBaby() ? EpicFightSounds.BLUNT_HIT : EpicFightSounds.BLUNT_HIT_HARD;
+		return this.original.isBaby() ? EpicFightSounds.BLUNT_HIT.get() : EpicFightSounds.BLUNT_HIT_HARD.get();
 	}
 	
 	@Override
 	public SoundEvent getSwingSound(InteractionHand hand) {
-		return this.original.isBaby() ? EpicFightSounds.WHOOSH : EpicFightSounds.WHOOSH_BIG;
+		return this.original.isBaby() ? EpicFightSounds.WHOOSH.get() : EpicFightSounds.WHOOSH_BIG.get();
 	}
 	
 	@Override

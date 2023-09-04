@@ -7,8 +7,8 @@ import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 public class AttackEndEvent extends PlayerEvent<ServerPlayerPatch> {
-	private List<LivingEntity> attackedEntity;
-	private AttackAnimation animation;
+	private final List<LivingEntity> attackedEntity;
+	private final AttackAnimation animation;
 	
 	public AttackEndEvent(ServerPlayerPatch playerpatch, List<LivingEntity> attackedEntity, AttackAnimation animation) {
 		super(playerpatch, false);

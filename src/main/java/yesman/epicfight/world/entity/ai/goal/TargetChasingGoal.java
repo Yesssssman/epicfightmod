@@ -26,7 +26,7 @@ public class TargetChasingGoal extends MeleeAttackGoal {
 		if (livingentity != null) {
 			double d0 = this.mob.distanceToSqr(livingentity.getX(), livingentity.getY(), livingentity.getZ());
 			
-			if (!(d0 > (double) this.attackRadiusSqr)) {
+			if (!(d0 > this.attackRadiusSqr)) {
 				this.mob.getNavigation().stop();
 				this.mob.getLookControl().setLookAt(livingentity, 30.0F, 30.0F);
 			} else {

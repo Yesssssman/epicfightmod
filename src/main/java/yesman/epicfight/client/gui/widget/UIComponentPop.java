@@ -1,21 +1,15 @@
 package yesman.epicfight.client.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Matrix4f;
-
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec2;
 import net.minecraftforge.api.distmarker.Dist;
@@ -38,7 +32,7 @@ public class UIComponentPop<T extends UIComponent> extends Screen implements Con
 	private boolean enable;
 	
 	public UIComponentPop(int width, int height, T parentWidget) {
-		super(new TextComponent(""));
+		super(Component.literal(""));
 		
 		this.width = width;
 		this.height = height;
@@ -80,7 +74,7 @@ public class UIComponentPop<T extends UIComponent> extends Screen implements Con
 	}
 	
 	public static Button createButton(int x, int y, int width, int height, Button.OnPress onpress) {
-		Button bt = new Button(x, y, width, height, new TextComponent(""), onpress);
+		Button bt = new Button(x, y, width, height, Component.literal(""), onpress);
 		bt.setBlitOffset(400);
 		
 		return bt;
@@ -165,8 +159,7 @@ public class UIComponentPop<T extends UIComponent> extends Screen implements Con
 		RenderSystem.disableTexture();
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
-		bufferbuilder.end();
-		BufferUploader.end(bufferbuilder);
+		BufferUploader.drawWithShader(bufferbuilder.end());
 		RenderSystem.disableBlend();
 		RenderSystem.enableTexture();
 		
@@ -202,12 +195,12 @@ public class UIComponentPop<T extends UIComponent> extends Screen implements Con
 		
 		public static class AlignButton extends Button {
 			private static final ResourceLocation BATTLE_ICONS = new ResourceLocation(EpicFightMod.MODID, "textures/gui/battle_icons.png");
-			private Option<HorizontalBasis> horBasis;
-			private Option<VerticalBasis> verBasis;
-			private Option<AlignDirection> alignDirection;
+			private final Option<HorizontalBasis> horBasis;
+			private final Option<VerticalBasis> verBasis;
+			private final Option<AlignDirection> alignDirection;
 			
 			public AlignButton(int x, int y, int width, int height, Option<HorizontalBasis> horBasis, Option<VerticalBasis> verBasis, Option<AlignDirection> alignDirection, OnPress onpress) {
-				super(x, y, width, height, new TextComponent(""), onpress);
+				super(x, y, width, height, Component.literal(""), onpress);
 				
 				this.horBasis = horBasis;
 				this.verBasis = verBasis;
@@ -288,8 +281,7 @@ public class UIComponentPop<T extends UIComponent> extends Screen implements Con
 				bufferbuilder.vertex(poseStack.last().pose(), this.x + this.width, this.y, this.getBlitOffset()).uv(texCoords[1].x, texCoords[1].y).endVertex();
 				bufferbuilder.vertex(poseStack.last().pose(), this.x + this.width, this.y + this.height, this.getBlitOffset()).uv(texCoords[2].x, texCoords[2].y).endVertex();
 				bufferbuilder.vertex(poseStack.last().pose(), this.x, this.y + this.height, this.getBlitOffset()).uv(texCoords[3].x, texCoords[3].y).endVertex();
-				bufferbuilder.end();
-				BufferUploader.end(bufferbuilder);
+				BufferUploader.drawWithShader(bufferbuilder.end());
 			}
 		}
 	}

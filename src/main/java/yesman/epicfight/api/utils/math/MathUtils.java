@@ -45,14 +45,13 @@ public class MathUtils {
 		float f4 = Mth.cos(f);
 		float f5 = Mth.sin(f);
 
-		return new Vec3((double) (f3 * f4), (double) (-f5), (double) (f2 * f4));
+		return new Vec3(f3 * f4, -f5, f2 * f4);
 	}
 	
 	public static float lerpBetween(float f1, float f2, float zero2one) {
 		float f = 0;
 
 		for (f = f2 - f1; f < -180.0F; f += 360.0F) {
-			;
 		}
 
 		while (f >= 180.0F) {

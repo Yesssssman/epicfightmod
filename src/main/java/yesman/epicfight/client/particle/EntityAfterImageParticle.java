@@ -24,8 +24,8 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class EntityAfterImageParticle extends CustomModelParticle<AnimatedMesh> {
-	private OpenMatrix4f[] poseMatrices;
-	private Matrix4f modelMatrix;
+	private final OpenMatrix4f[] poseMatrices;
+	private final Matrix4f modelMatrix;
 	private float alphaO;
 	
 	public EntityAfterImageParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, AnimatedMesh particleMesh, OpenMatrix4f[] matrices, Matrix4f modelMatrix) {

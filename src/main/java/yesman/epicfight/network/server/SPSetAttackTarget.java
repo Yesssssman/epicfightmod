@@ -10,7 +10,7 @@ import net.minecraft.world.entity.Mob;
 import net.minecraftforge.network.NetworkEvent;
 
 public class SPSetAttackTarget {
-	private int entityId;
+	private final int entityId;
 	private int targetEntityId;
 	
 	public SPSetAttackTarget() {
@@ -39,7 +39,7 @@ public class SPSetAttackTarget {
 			
 			if (entity != null && entity instanceof Mob) {
 				if (targetEntity == null || !(targetEntity instanceof LivingEntity)) {
-					((Mob)entity).setTarget((LivingEntity)null);
+					((Mob)entity).setTarget(null);
 				} else {
 					((Mob)entity).setTarget((LivingEntity)targetEntity);
 				}

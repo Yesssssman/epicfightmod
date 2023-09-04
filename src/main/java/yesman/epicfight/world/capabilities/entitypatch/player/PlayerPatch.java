@@ -1,7 +1,5 @@
 package yesman.epicfight.world.capabilities.entitypatch.player;
 
-import java.util.UUID;
-
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.util.Mth;
@@ -11,8 +9,8 @@ import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.ActionAnimation;
@@ -22,6 +20,7 @@ import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSkills;
+import yesman.epicfight.skill.*;
 import yesman.epicfight.skill.ChargeableSkill;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategories;
@@ -42,6 +41,8 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
+import java.util.UUID;
+
 public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T> {
 	private static final UUID ACTION_EVENT_UUID = UUID.fromString("e6beeac4-77d2-11eb-9439-0242ac130002");
 	public static final EntityDataAccessor<Float> STAMINA = new EntityDataAccessor<Float> (253, EntityDataSerializers.FLOAT);
@@ -56,7 +57,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	protected int lastChargingTick;
 	protected int chargingAmount;
 	protected ChargeableSkill chargingSkill;
-	
+
 	public PlayerPatch() {
 		this.eventListeners = new PlayerEventListener(this);
 	}
@@ -69,14 +70,14 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	@Override
-	public void onJoinWorld(T entityIn, EntityJoinWorldEvent event) {
+	public void onJoinWorld(T entityIn, EntityJoinLevelEvent event) {
 		super.onJoinWorld(entityIn, event);
 		
 		CapabilitySkill skillCapability = this.getSkillCapability();
 		skillCapability.skillContainers[SkillCategories.BASIC_ATTACK.universalOrdinal()].setSkill(EpicFightSkills.BASIC_ATTACK);
 		skillCapability.skillContainers[SkillCategories.AIR_ATTACK.universalOrdinal()].setSkill(EpicFightSkills.AIR_ATTACK);
 		skillCapability.skillContainers[SkillCategories.KNOCKDOWN_WAKEUP.universalOrdinal()].setSkill(EpicFightSkills.KNOCKDOWN_WAKEUP);
-		
+
 		this.tickSinceLastAction = 0;
 		
 		this.eventListeners.addEventListener(EventType.ACTION_EVENT_SERVER, ACTION_EVENT_UUID, (playerEvent) -> {
@@ -112,7 +113,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		clientAnimator.addLivingAnimation(LivingMotions.SLEEP, Animations.BIPED_SLEEPING);
 		clientAnimator.addLivingAnimation(LivingMotions.CREATIVE_FLY, Animations.BIPED_CREATIVE_FLYING);
 		clientAnimator.addLivingAnimation(LivingMotions.CREATIVE_IDLE, Animations.BIPED_CREATIVE_IDLE);
-		
+
 		/* Mix Animations */
 		clientAnimator.addLivingAnimation(LivingMotions.DIGGING, Animations.BIPED_DIG);
 		clientAnimator.addLivingAnimation(LivingMotions.AIM, Animations.BIPED_BOW_AIM);
@@ -120,7 +121,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		clientAnimator.addLivingAnimation(LivingMotions.DRINK, Animations.BIPED_DRINK);
 		clientAnimator.addLivingAnimation(LivingMotions.EAT, Animations.BIPED_EAT);
 		clientAnimator.addLivingAnimation(LivingMotions.SPECTATE, Animations.BIPED_SPYGLASS_USE);
-		
+
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
@@ -160,7 +161,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	@Override
-	public void serverTick(LivingUpdateEvent event) {
+	public void serverTick(LivingEvent.LivingTickEvent event) {
 		super.serverTick(event);
 		
 		if (this.state.canBasicAttack()) {
@@ -187,7 +188,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	@Override
-	public void tick(LivingUpdateEvent event) {
+	public void tick(LivingEvent.LivingTickEvent event) {
 		if (this.original.getVehicle() == null) {
 			for (SkillContainer container : this.getSkillCapability().skillContainers) {
 				if (container != null) {
@@ -244,12 +245,12 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		this.eventListeners.triggerEvents(EventType.MODIFY_ATTACK_SPEED_EVENT, event);
 		
 		float weight = this.getWeight();
-		
+
 		if (weight > 40.0F) {
 			float attenuation = Mth.clamp(this.getOriginal().level.getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY), 0, 100) / 100.0F;
-			
+
 			return event.getAttackSpeed() + (-0.1F * (weight / 40.0F) * (Math.max(event.getAttackSpeed() - 0.8F, 0.0F) * 1.5F) * attenuation);
-		} else { 
+		} else {
 			return event.getAttackSpeed();
 		}
 	}
@@ -308,10 +309,10 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	public float getModifiedStaminaConsume(float amount) {
 		float attenuation = Mth.clamp(this.original.level.getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY), 0, 100) / 100.0F;
 		float weight = this.getWeight();
-		
-		return ((float)(weight / 40.0F - 1.0F) * attenuation + 1.0F) * amount;
+
+		return ((weight / 40.0F - 1.0F) * attenuation + 1.0F) * amount;
 	}
-	
+
 	public void setStamina(float value) {
 		float f1 = Math.max(Math.min(value, this.getMaxStamina()), 0.0F);
 		this.original.getEntityData().set(STAMINA, f1);
@@ -334,7 +335,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	public boolean hasStamina(float amount) {
 		return this.getStamina() > amount;
 	}
-	
+
 	public void resetActionTick() {
 		this.tickSinceLastAction = 0;
 	}
@@ -348,7 +349,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		this.lastChargingTick = this.original.tickCount;
 		this.chargingSkill = chargingSkill;
 	}
-	
+
 	public void resetSkillCharging() {
 		if (this.chargingSkill != null) {
 			this.chargingAmount = 0;
@@ -356,7 +357,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 			this.chargingSkill = null;
 		}
 	}
-	
+
 	public boolean isChargingSkill() {
 		return this.chargingSkill != null;
 	}
@@ -392,7 +393,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	public int getAccumulatedChargeAmount() {
 		return this.getChargingSkill() != null ? this.getChargingSkill().getChargingAmount(this) : 0;
 	}
-	
+
 	public ChargeableSkill getChargingSkill() {
 		return this.chargingSkill;
 	}
@@ -407,7 +408,6 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	public void openSkillBook(ItemStack itemstack, InteractionHand hand) {
-		;
 	}
 	
 	public void onFall(PlayerFlyableFallEvent event) {
@@ -476,28 +476,18 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		if (this.original.getVehicle() != null) {
 			return Animations.BIPED_HIT_ON_MOUNT;
 		} else {
-			switch(stunType) {
-			case LONG:
-				return Animations.BIPED_HIT_LONG;
-			case SHORT:
-				return Animations.BIPED_HIT_SHORT;
-			case HOLD:
-				return Animations.BIPED_HIT_SHORT;
-			case KNOCKDOWN:
-				return Animations.BIPED_KNOCKDOWN;
-			case NEUTRALIZE:
-				return Animations.BIPED_COMMON_NEUTRALIZED;
-			case FALL:
-				return Animations.BIPED_LANDING;
-			case NONE:
-				return null;
-			}
+			return switch (stunType) {
+				case LONG -> Animations.BIPED_HIT_LONG;
+				case SHORT, HOLD -> Animations.BIPED_HIT_SHORT;
+				case KNOCKDOWN -> Animations.BIPED_KNOCKDOWN;
+				case FALL -> Animations.BIPED_LANDING;
+				case NONE -> null;
+				default -> null;
+			};
 		}
-		
-		return null;
 	}
 	
-	public static enum PlayerMode {
+	public enum PlayerMode {
 		MINING, BATTLE
 	}
 }

@@ -214,9 +214,9 @@ public class TransformSheet {
 	}
 	
 	private static class InterpolationInfo {
-		private int prev;
-		private int next;
-		private float zero2One;
+		private final int prev;
+		private final int next;
+		private final float zero2One;
 		
 		private InterpolationInfo(int prev, int next, float zero2One) {
 			this.prev = prev;

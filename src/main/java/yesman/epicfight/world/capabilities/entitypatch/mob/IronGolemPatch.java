@@ -1,7 +1,5 @@
 package yesman.epicfight.world.capabilities.entitypatch.mob;
 
-import java.util.Set;
-
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -10,7 +8,7 @@ import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
@@ -23,6 +21,8 @@ import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
+
+import java.util.Set;
 
 public class IronGolemPatch extends MobPatch<IronGolem> {
 	private int deathTimerExt;
@@ -73,7 +73,7 @@ public class IronGolemPatch extends MobPatch<IronGolem> {
 	}
 
 	@Override
-	public void tick(LivingUpdateEvent event) {
+	public void tick(LivingEvent.LivingTickEvent event) {
 		if (this.original.getHealth() <= 0.0F) {
 			this.original.setXRot(0);
 			if (this.original.deathTime > 1 && this.deathTimerExt < 20) {
@@ -87,12 +87,12 @@ public class IronGolemPatch extends MobPatch<IronGolem> {
 	
 	@Override
 	public SoundEvent getWeaponHitSound(InteractionHand hand) {
-		return EpicFightSounds.BLUNT_HIT_HARD;
+		return EpicFightSounds.BLUNT_HIT_HARD.get();
 	}
 	
 	@Override
 	public SoundEvent getSwingSound(InteractionHand hand) {
-		return EpicFightSounds.WHOOSH_BIG;
+		return EpicFightSounds.WHOOSH_BIG.get();
 	}
 	
 	@Override

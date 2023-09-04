@@ -244,7 +244,7 @@ public class LevelUtil {
 			boolean smallSlam = (radius < 1.5D);
 			
 			if (!noSound) {
-				level.playLocalSound(center.x, center.y, center.z, smallSlam ? EpicFightSounds.GROUND_SLAM_SMALL : EpicFightSounds.GROUND_SLAM, SoundSource.BLOCKS, 1.0F, 1.0F, false);
+				level.playLocalSound(center.x, center.y, center.z, smallSlam ? EpicFightSounds.GROUND_SLAM_SMALL.get() : EpicFightSounds.GROUND_SLAM.get(), SoundSource.BLOCKS, 1.0F, 1.0F, false);
 			}
 			
 			if (!smallSlam && !noParticle) {

@@ -1,18 +1,12 @@
 package yesman.epicfight.skill.weaponinnate;
 
-import java.util.List;
-import java.util.UUID;
-
 import com.google.common.collect.Lists;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.damagesource.DamageSource;
@@ -38,6 +32,9 @@ import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
+
+import java.util.List;
+import java.util.UUID;
 
 public class LiechtenauerSkill extends WeaponInnateSkill {
 	private static final UUID EVENT_UUID = UUID.fromString("244c57c0-a837-11eb-bcbc-0242ac130002");
@@ -84,7 +81,7 @@ public class LiechtenauerSkill extends WeaponInnateSkill {
 				}
 				
 				if (isFront) {
-					event.getPlayerPatch().playSound(EpicFightSounds.CLASH, -0.05F, 0.1F);
+					event.getPlayerPatch().playSound(EpicFightSounds.CLASH.get(), -0.05F, 0.1F);
 					ServerPlayer playerentity = event.getPlayerPatch().getOriginal();
 					EpicFightParticles.HIT_BLUNT.get().spawnParticleWithArgument(playerentity.getLevel(), HitParticleType.FRONT_OF_EYES, HitParticleType.ZERO, playerentity, damageSource.getDirectEntity());
 					
@@ -186,13 +183,13 @@ public class LiechtenauerSkill extends WeaponInnateSkill {
 		tooltipArgs.add(this.maxDuration / 20);
 		tooltipArgs.add(this.returnDuration / 20);
 		
-		list.add(new TranslatableComponent(traslatableText).withStyle(ChatFormatting.WHITE).append(new TextComponent(String.format("[%.0f]", this.consumption)).withStyle(ChatFormatting.AQUA)));
-		list.add(new TranslatableComponent(traslatableText + ".tooltip", tooltipArgs.toArray(new Object[0])).withStyle(ChatFormatting.DARK_GRAY));
+		list.add(Component.translatable(traslatableText).withStyle(ChatFormatting.WHITE).append(Component.literal(String.format("[%.0f]", this.consumption)).withStyle(ChatFormatting.AQUA)));
+		list.add(Component.translatable(traslatableText + ".tooltip", tooltipArgs.toArray(new Object[0])).withStyle(ChatFormatting.DARK_GRAY));
 		
 		return list;
 	}
 	
-	public static enum Stance {
+	public enum Stance {
 		VOM_TAG, PFLUG, OCHS
 	}
 }

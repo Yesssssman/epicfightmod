@@ -30,6 +30,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.main.EpicFightMod;
@@ -80,7 +81,7 @@ public class CustomModelBakery {
 	}
 	
 	public static AnimatedMesh bakeBipedCustomArmorModel(HumanoidModel<?> model, ArmorItem armorItem, EquipmentSlot slot, boolean debuggingMode) {
-		List<ModelPartition> boxes = Lists.<ModelPartition>newArrayList();
+		List<ModelPartition> boxes = Lists.newArrayList();
 		
 		model.head.setRotation(0.0F, 0.0F, 0.0F);
 		model.hat.setRotation(0.0F, 0.0F, 0.0F);
@@ -113,11 +114,11 @@ public class CustomModelBakery {
 			return null;
 		}
 		
-		ResourceLocation rl = new ResourceLocation(armorItem.getRegistryName().getNamespace(), "armor/" + armorItem.getRegistryName().getPath());
+		ResourceLocation rl = new ResourceLocation(ForgeRegistries.ITEMS.getKey(armorItem).getNamespace(), "armor/" + ForgeRegistries.ITEMS.getKey(armorItem).getPath());
 		AnimatedMesh armorModelMesh = bakeMeshFromCubes(boxes, debuggingMode);
 		Meshes.addMesh(rl, armorModelMesh);
 		
-		BAKED_MODELS.put(armorItem.getRegistryName(), armorModelMesh);
+		BAKED_MODELS.put(ForgeRegistries.ITEMS.getKey(armorItem), armorModelMesh);
 		
 		return armorModelMesh;
 	}
@@ -272,8 +273,8 @@ public class CustomModelBakery {
 		
 		@Override
 		public void bakeCube(PoseStack poseStack, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
-			List<AnimatedPolygon> xClipPolygons = Lists.<AnimatedPolygon>newArrayList();
-			List<AnimatedPolygon> xyClipPolygons = Lists.<AnimatedPolygon>newArrayList();
+			List<AnimatedPolygon> xClipPolygons = Lists.newArrayList();
+			List<AnimatedPolygon> xyClipPolygons = Lists.newArrayList();
 			
 			for (ModelPart.Polygon polygon : cube.polygons) {
 				Matrix4f matrix = poseStack.last().pose();
@@ -325,7 +326,7 @@ public class CustomModelBakery {
 				AnimatedVertex pos3 = upsideDown ? polygon.animatedVertexPositions[1] : polygon.animatedVertexPositions[3];
 				Direction direction = getDirectionFromVector(polygon.normal);
 				List<VertexWeight> vertexWeights = getMiddleYClipWeights(pos1.pos.y(), pos2.pos.y());
-				List<AnimatedVertex> animatedVertices = Lists.<AnimatedVertex>newArrayList();
+				List<AnimatedVertex> animatedVertices = Lists.newArrayList();
 				animatedVertices.add(pos0);
 				animatedVertices.add(pos1);
 				
@@ -414,7 +415,7 @@ public class CustomModelBakery {
 		}
 		
 		static List<VertexWeight> getMiddleYClipWeights(float minY, float maxY) {
-			List<VertexWeight> cutYs = Lists.<VertexWeight>newArrayList();
+			List<VertexWeight> cutYs = Lists.newArrayList();
 			for (VertexWeight vertexWeight : WEIGHT_ALONG_Y) {
 				if (vertexWeight.yClipCoord > minY && maxY >= vertexWeight.yClipCoord) {
 					cutYs.add(vertexWeight);
@@ -455,7 +456,7 @@ public class CustomModelBakery {
 		
 		@Override
 		public void bakeCube(PoseStack poseStack, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
-			List<AnimatedPolygon> polygons = Lists.<AnimatedPolygon>newArrayList();
+			List<AnimatedPolygon> polygons = Lists.newArrayList();
 			
 			for (ModelPart.Polygon quad : cube.polygons) {
 				Matrix4f matrix = poseStack.last().pose();

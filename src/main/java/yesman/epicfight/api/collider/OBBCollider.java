@@ -210,12 +210,8 @@ public class OBBCollider extends Collider {
 				maxProj2 = temp;
 			}
 		}
-		
-		if (MathUtils.projectVector(distance, seperateAxis).length() > MathUtils.projectVector(maxProj1, seperateAxis).length() + MathUtils.projectVector(maxProj2, seperateAxis).length()) {
-			return false;
-		}
-		
-		return true;
+
+		return !(MathUtils.projectVector(distance, seperateAxis).length() > MathUtils.projectVector(maxProj1, seperateAxis).length() + MathUtils.projectVector(maxProj2, seperateAxis).length());
 	}
 	
 	@Override

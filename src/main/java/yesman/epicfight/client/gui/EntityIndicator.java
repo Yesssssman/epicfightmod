@@ -56,11 +56,11 @@ public abstract class EntityIndicator extends GuiComponent {
 		poseStack.pushPose();
 		poseStack.translate(-posX, -posY, -posZ);
 		poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
-		
+
 		float screenX = posX + x;
 		float screenY = posY + y;
 		float screenZ = posZ + z;
-		
+
 		OpenMatrix4f viewMatrix = OpenMatrix4f.importFromMojangMatrix(poseStack.last().pose());
 		OpenMatrix4f finalMatrix = new OpenMatrix4f();
 		finalMatrix.translate(new Vec3f(-screenX, screenY, -screenZ));

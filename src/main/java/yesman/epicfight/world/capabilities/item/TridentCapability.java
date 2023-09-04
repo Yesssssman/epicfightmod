@@ -49,7 +49,7 @@ public class TridentCapability extends RangedWeaponCapability {
 	
 	@Override
 	public SoundEvent getHitSound() {
-		return EpicFightSounds.BLADE_HIT;
+		return EpicFightSounds.BLADE_HIT.get();
 	}
 	
 	@Override

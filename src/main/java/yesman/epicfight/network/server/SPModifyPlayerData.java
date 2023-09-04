@@ -17,8 +17,8 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 public class SPModifyPlayerData {
 	
 	PacketType packetType;
-	private int entityId;
-	private Map<String, Object> data;
+	private final int entityId;
+	private final Map<String, Object> data;
 
 	public SPModifyPlayerData() {
 		this.packetType = null;
@@ -94,7 +94,7 @@ public class SPModifyPlayerData {
 						if (grapplingTarget instanceof LivingEntity) {
 							playerpatch.setGrapplingTarget((LivingEntity)grapplingTarget);
 						} else {
-							playerpatch.setGrapplingTarget((LivingEntity)null);
+							playerpatch.setGrapplingTarget(null);
 						}
 						
 						break;
@@ -106,7 +106,7 @@ public class SPModifyPlayerData {
 		ctx.get().setPacketHandled(true);
 	}
 	
-	public static enum PacketType {
+	public enum PacketType {
 		YAW_CORRECTION( (packet, buffer) -> {
 			buffer.writeFloat( (float)packet.data.get("yaw") );
 		}, (packet, buffer) -> {

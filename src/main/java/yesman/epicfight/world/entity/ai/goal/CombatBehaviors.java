@@ -142,7 +142,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 	}
 	
 	public static class Builder<T extends MobPatch<?>> {
-		private List<BehaviorSeries.Builder<T>> behaviorSeriesList = Lists.newArrayList();
+		private final List<BehaviorSeries.Builder<T>> behaviorSeriesList = Lists.newArrayList();
 		
 		public Builder<T> newBehaviorSeries(BehaviorSeries.Builder<T> builder) {
 			this.behaviorSeriesList.add(builder);
@@ -160,7 +160,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 		private final boolean canBeInterrupted;
 		private final float weight;
 		private final int maxCooldown;
-		private List<Integer> cooldownSharingPointer;
+		private final List<Integer> cooldownSharingPointer;
 		private int cooldown;
 		private int nextBehaviorPointer;
 		private boolean loopFinished;
@@ -213,12 +213,12 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 		}
 		
 		public static class Builder<T extends MobPatch<?>> {
-			private List<Behavior.Builder<T>> behaviors = Lists.newArrayList();
+			private final List<Behavior.Builder<T>> behaviors = Lists.newArrayList();
 			private boolean looping = false;
 			private boolean canBeInterrupted = true;
 			private float weight;
 			private int cooldown;
-			private List<Integer> cooldownSharingPointers = Lists.newArrayList();
+			private final List<Integer> cooldownSharingPointers = Lists.newArrayList();
 			
 			public Builder<T> weight(float weight) {
 				this.weight = weight;
@@ -260,7 +260,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 	}
 	
 	public static class Behavior<T extends MobPatch<?>> {
-		private Consumer<T> behavior;
+		private final Consumer<T> behavior;
 		private final List<BehaviorPredicate<T>> predicates;
 		
 		private Behavior(Behavior.Builder<T> builder) {
@@ -289,7 +289,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 		
 		public static class Builder<T extends MobPatch<?>> {
 			private Consumer<T> behavior;
-			private List<BehaviorPredicate<T>> predicate = Lists.newArrayList();
+			private final List<BehaviorPredicate<T>> predicate = Lists.newArrayList();
 			private AnimationPacketProvider packetProvider = SPPlayAnimation::new;
 			
 			public Behavior.Builder<T> behavior(Consumer<T> behavior) {
@@ -465,7 +465,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 			return true;
 		}
 		
-		public static enum Comparator {
+		public enum Comparator {
 			GREATER_ABSOLUTE, LESS_ABSOLUTE, GREATER_RATIO, LESS_RATIO
 		}
 	}

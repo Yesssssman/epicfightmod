@@ -28,10 +28,10 @@ public class JointTransform {
 		}
 	}
 	
-	private Map<String, TransformEntry> entries = Maps.newHashMap();
-	private Vec3f translation;
-	private Vec3f scale;
-	private Quaternion rotation;
+	private final Map<String, TransformEntry> entries = Maps.newHashMap();
+	private final Vec3f translation;
+	private final Vec3f scale;
+	private final Quaternion rotation;
 	
 	public JointTransform(Vec3f translation, Quaternion rotation, Vec3f scale) {
 		this.translation = translation;

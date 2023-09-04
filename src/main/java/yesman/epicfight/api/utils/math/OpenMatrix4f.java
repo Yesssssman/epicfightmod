@@ -16,7 +16,7 @@ import yesman.epicfight.api.animation.JointTransform;
 public class OpenMatrix4f {
 	public static class AnimationTransformEntry {
 		private static final String[] BINDING_PRIORITY = {JointTransform.PARENT, JointTransform.JOINT_LOCAL_TRANSFORM, JointTransform.ANIMATION_TRANSFROM, JointTransform.RESULT1, JointTransform.RESULT2};
-		private Map<String, Pair<OpenMatrix4f, MatrixOperation>> matrices = Maps.newHashMap();
+		private final Map<String, Pair<OpenMatrix4f, MatrixOperation>> matrices = Maps.newHashMap();
 		
 		public void put(String entryPosition, OpenMatrix4f matrix) {
 			this.put(entryPosition, matrix, OpenMatrix4f::mul);
@@ -316,9 +316,9 @@ public class OpenMatrix4f {
 	}
 	
 	public static Vec3 transform(OpenMatrix4f matrix, Vec3 src) {
-		double x = matrix.m00 * src.x + matrix.m10 * src.y + matrix.m20 * src.z + matrix.m30 * 1.0F;
-		double y = matrix.m01 * src.x + matrix.m11 * src.y + matrix.m21 * src.z + matrix.m31 * 1.0F;
-		double z = matrix.m02 * src.x + matrix.m12 * src.y + matrix.m22 * src.z + matrix.m32 * 1.0F;
+		double x = matrix.m00 * src.x + matrix.m10 * src.y + matrix.m20 * src.z + matrix.m30;
+		double y = matrix.m01 * src.x + matrix.m11 * src.y + matrix.m21 * src.z + matrix.m31;
+		double z = matrix.m02 * src.x + matrix.m12 * src.y + matrix.m22 * src.z + matrix.m32;
 		
 		return new Vec3(x, y ,z);
 	}
@@ -664,13 +664,12 @@ public class OpenMatrix4f {
 	
 	@Override
 	public String toString() {
-		StringBuilder buf = new StringBuilder();
-		buf.append('\n');
-		buf.append(m00).append(' ').append(m10).append(' ').append(m20).append(' ').append(m30).append('\n');
-		buf.append(m01).append(' ').append(m11).append(' ').append(m21).append(' ').append(m31).append('\n');
-		buf.append(m02).append(' ').append(m12).append(' ').append(m22).append(' ').append(m32).append('\n');
-		buf.append(m03).append(' ').append(m13).append(' ').append(m23).append(' ').append(m33).append('\n');
-		return buf.toString();
+		String buf = String.valueOf('\n' +
+				m00 + ' ' + m10 + ' ' + m20 + ' ' + m30 + '\n' +
+				m01 + ' ' + m11 + ' ' + m21 + ' ' + m31 + '\n' +
+				m02 + ' ' + m12 + ' ' + m22 + ' ' + m32 + '\n' +
+				m03 + ' ' + m13 + ' ' + m23 + ' ' + m33) + '\n';
+		return buf;
 	}
 	
 	public static Matrix4f exportToMojangMatrix(OpenMatrix4f visibleMat) {

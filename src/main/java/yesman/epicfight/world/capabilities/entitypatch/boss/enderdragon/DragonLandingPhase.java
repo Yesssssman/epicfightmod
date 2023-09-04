@@ -69,13 +69,13 @@ public class DragonLandingPhase extends PatchedDragonPhase {
 			double yMove = dy;
 			
 			if (horizontalD > 0.0D) {
-				yMove = Mth.clamp(dy, (double) (-f5), (double) f5) * Mth.clamp((Math.abs(dy) - 13.0D) * 0.01D, 0.01D, 0.03D);
+				yMove = Mth.clamp(dy, -f5, f5) * Mth.clamp((Math.abs(dy) - 13.0D) * 0.01D, 0.01D, 0.03D);
 			}
 			
 			this.dragon.setDeltaMovement(this.dragon.getDeltaMovement().add(0.0D, yMove, 0.0D));
 			this.dragon.setYRot(Mth.wrapDegrees(this.dragon.getYRot()));
 			Vec3 vec32 = this.landingPosition.subtract(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ()).normalize();
-			Vec3 vec33 = (new Vec3((double) Mth.sin(this.dragon.getYRot() * ((float) Math.PI / 180F)), this.dragon.getDeltaMovement().y, (double) (-Mth.cos(this.dragon.getYRot() * ((float) Math.PI / 180F))))).normalize();
+			Vec3 vec33 = (new Vec3(Mth.sin(this.dragon.getYRot() * ((float) Math.PI / 180F)), this.dragon.getDeltaMovement().y, -Mth.cos(this.dragon.getYRot() * ((float) Math.PI / 180F)))).normalize();
 			float f6 = Math.max(((float) vec33.dot(vec32) + 0.5F) / 1.5F, 0.0F);
 			
 			if (Math.abs(dx) > (double) 1.0E-5F || Math.abs(dz) > (double) 1.0E-5F) {
@@ -89,14 +89,14 @@ public class DragonLandingPhase extends PatchedDragonPhase {
 			this.dragon.moveRelative(0.06F * (f6 * f18 + (1.0F - f18)), new Vec3(0.0D, 0.0D, -1.0D));
 			
 			if (this.dragon.inWall) {
-				this.dragon.move(MoverType.SELF, this.dragon.getDeltaMovement().scale((double) 0.8F));
+				this.dragon.move(MoverType.SELF, this.dragon.getDeltaMovement().scale(0.8F));
 			} else {
 				this.dragon.move(MoverType.SELF, this.dragon.getDeltaMovement());
 			}
 			
 			Vec3 vec34 = this.dragon.getDeltaMovement().normalize();
 			double d6 = (0.8D + 0.15D * (vec34.dot(vec33) + 1.0D) / 2.0D);
-			this.dragon.setDeltaMovement(this.dragon.getDeltaMovement().multiply(d6, (double) 0.91F, d6));
+			this.dragon.setDeltaMovement(this.dragon.getDeltaMovement().multiply(d6, 0.91F, d6));
 			
 			if (squaredD < 400.0D && Math.abs(dy) < 14.0D && (new Vec3(dx, 0, dz)).normalize().dot(Vec3.directionFromRotation(new Vec2(0, 180 + this.dragon.getYRot()))) > 0.95D) {
 				this.dragonpatch.playAnimationSynchronized(Animations.DRAGON_FLY_TO_GROUND, 0.0F);

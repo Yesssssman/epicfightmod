@@ -31,7 +31,7 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 
 public class DragonGroundBattlePhase extends PatchedDragonPhase {
-	private List<Player> recognizedPlayers = Lists.newArrayList();
+	private final List<Player> recognizedPlayers = Lists.newArrayList();
 	private PathFinder pathFinder;
 	private int aggroCounter;
 	private int noPathWarningCounter;

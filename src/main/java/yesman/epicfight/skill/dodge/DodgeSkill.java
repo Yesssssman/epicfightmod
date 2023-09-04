@@ -72,7 +72,7 @@ public class DodgeSkill extends Skill {
 	@Override
 	public FriendlyByteBuf gatherArguments(LocalPlayerPatch executer, ControllEngine controllEngine) {
 		Input input = executer.getOriginal().input;
-		input.tick(false);
+		input.tick(false, 0f);
 		
         int forward = input.up ? 1 : 0;
         int backward = input.down ? -1 : 0;

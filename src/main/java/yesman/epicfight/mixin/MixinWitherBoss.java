@@ -103,7 +103,7 @@ public abstract class MixinWitherBoss extends Monster implements PowerableMob, R
 						this.level.addParticle(ParticleTypes.ENTITY_EFFECT,
 								subHeadX + this.random.nextGaussian() * (double) 0.3F,
 								subHeadY + this.random.nextGaussian() * (double) 0.3F,
-								subHeadZ + this.random.nextGaussian() * (double) 0.3F, (double) 0.7F, (double) 0.7F,
+								subHeadZ + this.random.nextGaussian() * (double) 0.3F, 0.7F, 0.7F,
 								0.5D);
 					}
 				}
@@ -113,7 +113,7 @@ public abstract class MixinWitherBoss extends Monster implements PowerableMob, R
 				for (int i1 = 0; i1 < 3; ++i1) {
 					this.level.addParticle(ParticleTypes.ENTITY_EFFECT, this.getX() + this.random.nextGaussian(),
 							this.getY() + (double) (this.random.nextFloat() * 3.3F),
-							this.getZ() + this.random.nextGaussian(), (double) 0.7F, (double) 0.7F, (double) 0.9F);
+							this.getZ() + this.random.nextGaussian(), 0.7F, 0.7F, 0.9F);
 				}
 			}
 		}
@@ -242,7 +242,7 @@ public abstract class MixinWitherBoss extends Monster implements PowerableMob, R
 						}
 
 						if (flag) {
-							self.level.levelEvent((Player) null, 1022, self.blockPosition(), 0);
+							self.level.levelEvent(null, 1022, self.blockPosition(), 0);
 						}
 					}
 				}

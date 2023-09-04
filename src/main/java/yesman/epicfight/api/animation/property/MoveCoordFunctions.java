@@ -28,12 +28,12 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 public class MoveCoordFunctions {
 	@FunctionalInterface
 	public interface MoveCoordSetter {
-		public void set(DynamicAnimation animation, LivingEntityPatch<?> entitypatch, TransformSheet transformSheet);
+		void set(DynamicAnimation animation, LivingEntityPatch<?> entitypatch, TransformSheet transformSheet);
 	}
 	
 	@FunctionalInterface
 	public interface MoveCoordGetter {
-		public Vec3f get(DynamicAnimation animation, LivingEntityPatch<?> entitypatch, TransformSheet transformSheet);
+		Vec3f get(DynamicAnimation animation, LivingEntityPatch<?> entitypatch, TransformSheet transformSheet);
 	}
 	
 	public static final MoveCoordGetter DIFF_FROM_PREV_COORD = (animation, entitypatch, coord) -> {

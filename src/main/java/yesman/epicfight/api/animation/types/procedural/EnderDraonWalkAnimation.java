@@ -47,9 +47,8 @@ public class EnderDraonWalkAnimation extends StaticAnimation implements Procedur
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		Pose pose = super.getPoseByTime(entitypatch, time, partialTicks);
 		
-		if (entitypatch instanceof EnderDragonPatch) {
-			EnderDragonPatch enderdragonpatch = (EnderDragonPatch)entitypatch;
-	    	float x = (float)entitypatch.getOriginal().getX();
+		if (entitypatch instanceof EnderDragonPatch enderdragonpatch) {
+			float x = (float)entitypatch.getOriginal().getX();
 	    	float y = (float)entitypatch.getOriginal().getY();
 	    	float z = (float)entitypatch.getOriginal().getZ();
 	    	float xo = (float)entitypatch.getOriginal().xo;
@@ -108,9 +107,8 @@ public class EnderDraonWalkAnimation extends StaticAnimation implements Procedur
 		super.tick(entitypatch);
 		
 		if (entitypatch instanceof EnderDragonPatch enderdragonpatch) {
-			if (!(enderdragonpatch.getAnimator().getPlayerFor(null).getAnimation() == this)) {
+			if (!(enderdragonpatch.getAnimator().getPlayerFor(null).getAnimation() == this))
 				return;
-			}
 			
 			Vec3 entitypos = enderdragonpatch.getOriginal().position();
 			OpenMatrix4f toWorld = OpenMatrix4f.mul(OpenMatrix4f.createTranslation((float)entitypos.x, (float)entitypos.y, (float)entitypos.z), enderdragonpatch.getModelMatrix(1.0F), null);

@@ -9,9 +9,9 @@ import net.minecraftforge.network.NetworkEvent;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 public class SPChangeGamerule {
-	private SynchronizedGameRules gamerule;
-	private int gameruleId;
-	private Object object;
+	private final SynchronizedGameRules gamerule;
+	private final int gameruleId;
+	private final Object object;
 	
 	public SPChangeGamerule() {
 		this.gamerule = null;
@@ -69,7 +69,7 @@ public class SPChangeGamerule {
 		ctx.get().setPacketHandled(true);
 	}
 	
-	public static enum SynchronizedGameRules {
+	public enum SynchronizedGameRules {
 		HAS_FALL_ANIMATION(ValueType.BOOLEAN, EpicFightGamerules.HAS_FALL_ANIMATION), 
 		WEIGHT_PENALTY(ValueType.INTEGER, EpicFightGamerules.WEIGHT_PENALTY),
 		DIABLE_ENTITY_UI(ValueType.BOOLEAN, EpicFightGamerules.DISABLE_ENTITY_UI),

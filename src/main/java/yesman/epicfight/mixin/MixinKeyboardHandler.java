@@ -19,8 +19,7 @@ public abstract class MixinKeyboardHandler {
 	@Inject(at = @At(value = "HEAD"), method = "handleDebugKeys(I)Z", cancellable = true)
 	private void epicfight_handleDebugKeys(int key, CallbackInfoReturnable<Boolean> info) {
 		if (!(this.debugCrashKeyTime > 0L && this.debugCrashKeyTime < Util.getMillis() - 100L)) {
-			switch (key) {
-			case 89:
+			if (key == 89) {
 				boolean flag = ClientEngine.getInstance().switchArmorModelDebuggingMode();
 				this.debugFeedbackTranslated(flag ? "debug.armor_model_debugging.on" : "debug.armor_model_debugging.off");
 				info.cancel();

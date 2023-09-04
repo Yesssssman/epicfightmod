@@ -1,5 +1,6 @@
 package yesman.epicfight.world.capabilities.entitypatch;
 
+import com.google.common.collect.Lists;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -11,11 +12,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
@@ -26,10 +23,10 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotion;
@@ -61,6 +58,9 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.TargetIndicatorCheckEvent;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
+
+import javax.annotation.Nullable;
+import java.util.List;
 
 public abstract class LivingEntityPatch<T extends LivingEntity> extends HurtableEntityPatch<T> {
 	public static final EntityDataAccessor<Float> STUN_SHIELD = new EntityDataAccessor<Float> (251, EntityDataSerializers.FLOAT);
@@ -96,7 +96,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	@Override
-	public void onJoinWorld(T entityIn, EntityJoinWorldEvent event) {
+	public void onJoinWorld(T entityIn, EntityJoinLevelEvent event) {
 		super.onJoinWorld(entityIn, event);
 		this.original.getAttributes().supplier = new EpicFightAttributeSupplier(this.original.getAttributes().supplier);
 		this.initAttributes();
@@ -118,7 +118,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	@Override
-	public void tick(LivingUpdateEvent event) {
+	public void tick(LivingEvent.LivingTickEvent event) {
 		this.animator.tick();
 		super.tick(event);
 		
@@ -369,8 +369,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		float yRot;
 		float scale = this.original.isBaby() ? 0.5F : 1.0F;
 		
-		if (this.original.getVehicle() instanceof LivingEntity) {
-			LivingEntity ridingEntity = (LivingEntity) this.original.getVehicle();
+		if (this.original.getVehicle() instanceof LivingEntity ridingEntity) {
 			prevYRot = ridingEntity.yBodyRotO;
 			yRot = ridingEntity.yBodyRot;
 		} else {
@@ -396,8 +395,8 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	@FunctionalInterface
-	public static interface AnimationPacketProvider {
-		public SPPlayAnimation get(StaticAnimation animation, float convertTimeModifier, LivingEntityPatch<?> entitypatch);
+	public interface AnimationPacketProvider {
+		SPPlayAnimation get(StaticAnimation animation, float convertTimeModifier, LivingEntityPatch<?> entitypatch);
 	}
 	
 	protected void playReboundAnimation() {
@@ -420,7 +419,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	    	
 	    	if (entitysize1.width > entitysize.width && !this.original.level.isClientSide()) {
 	    		float f = entitysize.width - entitysize1.width;
-	        	this.original.move(MoverType.SELF, new Vec3((double)f, 0.0D, (double)f));
+	        	this.original.move(MoverType.SELF, new Vec3(f, 0.0D, f));
 	    	}
 	    }
     }
@@ -477,11 +476,11 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	public ClientAnimator getClientAnimator() {
-		return this.<ClientAnimator>getAnimator();
+		return this.getAnimator();
 	}
 	
 	public ServerAnimator getServerAnimator() {
-		return this.<ServerAnimator>getAnimator();
+		return this.getAnimator();
 	}
 	
 	public abstract StaticAnimation getHitAnimation(StunType stunType);
@@ -577,7 +576,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	public void setGrapplingTarget(LivingEntity grapplingTarget) {
 		this.grapplingTarget = grapplingTarget;
 	}
-	
+
 	public Vec3 getLastAttackPosition() {
 		return this.lastAttackPosition;
 	}
@@ -665,7 +664,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	public List<LivingEntity> getCurrenltyAttackedEntities() {
 		return this.getAnimator().getAnimationVariables(AttackAnimation.HIT_ENTITIES);
 	}
-	
+
 	@OnlyIn(Dist.CLIENT)
 	public boolean flashTargetIndicator(LocalPlayerPatch playerpatch) {
 		TargetIndicatorCheckEvent event = new TargetIndicatorCheckEvent(playerpatch, this);

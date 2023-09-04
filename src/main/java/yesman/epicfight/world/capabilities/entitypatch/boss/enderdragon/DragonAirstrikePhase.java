@@ -40,8 +40,8 @@ public class DragonAirstrikePhase extends PatchedDragonPhase {
 		this.dragonpatch.setAttakTargetSync(null);
 		
 		if (this.dragonpatch.isLogicalClient()) {
-			Minecraft.getInstance().getSoundManager().stop(EpicFightSounds.ENDER_DRAGON_BREATH.getLocation(), SoundSource.HOSTILE);
-			this.dragon.level.playLocalSound(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ(), EpicFightSounds.ENDER_DRAGON_BREATH_FINALE, this.dragon.getSoundSource(), 5.0F, 1.0F, false);
+			Minecraft.getInstance().getSoundManager().stop(EpicFightSounds.ENDER_DRAGON_BREATH.get().getLocation(), SoundSource.HOSTILE);
+			this.dragon.level.playLocalSound(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ(), EpicFightSounds.ENDER_DRAGON_BREATH_FINALE.get(), this.dragon.getSoundSource(), 5.0F, 1.0F, false);
 		}
 	}
 	
@@ -54,7 +54,7 @@ public class DragonAirstrikePhase extends PatchedDragonPhase {
 		float f = (float)this.dragon.getLatencyPos(7, 1.0F)[0];
 		float f1 = (float)(this.dragon.getLatencyPos(5, 1.0F)[1] - this.dragon.getLatencyPos(10, 1.0F)[1]);
 		@SuppressWarnings("deprecation")
-		float f2 = (float)Mth.rotWrap((this.dragon.getLatencyPos(5, 1.0F)[0] - this.dragon.getLatencyPos(10, 1.0F)[0]));
+		float f2 = Mth.rotWrap((this.dragon.getLatencyPos(5, 1.0F)[0] - this.dragon.getLatencyPos(10, 1.0F)[0]));
 		OpenMatrix4f modelMatrix = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, f1, f1, f, f, 1.0F, 1.0F, 1.0F, 1.0F).rotateDeg(-f2 * 1.5F, Vec3f.Z_AXIS);
 		mouthpos.mulFront(modelMatrix);
 		
@@ -62,7 +62,7 @@ public class DragonAirstrikePhase extends PatchedDragonPhase {
 			Vec3 vec31 = this.dragon.getTarget().position().add(0.0D, 12.0D, 0.0D);
 			
 			if (!this.isActuallyAttacking && vec31.subtract(this.dragon.position()).lengthSqr() < 900.0F) {
-				this.dragon.level.playLocalSound(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ(), EpicFightSounds.ENDER_DRAGON_BREATH, this.dragon.getSoundSource(), 5.0F, 1.0F, false);
+				this.dragon.level.playLocalSound(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ(), EpicFightSounds.ENDER_DRAGON_BREATH.get(), this.dragon.getSoundSource(), 5.0F, 1.0F, false);
 				this.isActuallyAttacking = true;
 			}
 		}
@@ -108,13 +108,13 @@ public class DragonAirstrikePhase extends PatchedDragonPhase {
 					double d4 = Math.sqrt(d8 * d8 + d10 * d10);
 					
 					if (d4 > 0.0D) {
-						d9 = Mth.clamp(d9 / d4, (double)-f5, (double)f5);
+						d9 = Mth.clamp(d9 / d4, -f5, f5);
 					}
 					
 					this.dragon.setDeltaMovement(this.dragon.getDeltaMovement().add(0.0D, d9 * 0.1D, 0.0D));
 					this.dragon.setYRot(Mth.wrapDegrees(this.dragon.getYRot()));
 					Vec3 vec32 = vec31.subtract(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ()).normalize();
-					Vec3 vec33 = (new Vec3((double)Mth.sin(this.dragon.getYRot() * ((float) Math.PI / 180F)), this.dragon.getDeltaMovement().y, (double) (-Mth.cos(this.dragon.getYRot() * ((float) Math.PI / 180F))))).normalize();
+					Vec3 vec33 = (new Vec3(Mth.sin(this.dragon.getYRot() * ((float) Math.PI / 180F)), this.dragon.getDeltaMovement().y, -Mth.cos(this.dragon.getYRot() * ((float) Math.PI / 180F)))).normalize();
 					float f6 = Math.max(((float)vec33.dot(vec32) + 0.5F) / 1.5F, 0.0F);
 					
 					if (Math.abs(d8) > (double)1.0E-5F || Math.abs(d10) > (double)1.0E-5F) {
@@ -128,20 +128,20 @@ public class DragonAirstrikePhase extends PatchedDragonPhase {
 					}
 					
 					if (this.dragon.inWall) {
-						this.dragon.move(MoverType.SELF, this.dragon.getDeltaMovement().scale((double) 0.8F));
+						this.dragon.move(MoverType.SELF, this.dragon.getDeltaMovement().scale(0.8F));
 					} else {
 						this.dragon.move(MoverType.SELF, this.dragon.getDeltaMovement());
 					}
 					
 					Vec3 vec34 = this.dragon.getDeltaMovement().normalize();
 					double d6 = 0.8D + 0.15D * (vec34.dot(vec33) + 1.0D) / 2.0D;
-					this.dragon.setDeltaMovement(this.dragon.getDeltaMovement().multiply(d6, (double) 0.91F, d6));
+					this.dragon.setDeltaMovement(this.dragon.getDeltaMovement().multiply(d6, 0.91F, d6));
 					
 					if (this.isActuallyAttacking) {
 						if (this.dragon.tickCount % 5 == 0) {
 							Vec3 createpos = this.dragon.position().add(this.dragon.getLookAngle().scale(-4.5D));
 							AreaEffectBreath breatharea = new AreaEffectBreath(this.dragon.level, createpos.x, createpos.y, createpos.z);
-							breatharea.setOwner((LivingEntity)this.dragon);
+							breatharea.setOwner(this.dragon);
 							breatharea.setWaitTime(0);
 							breatharea.setRadius(0.5F);
 							breatharea.setDuration(15);

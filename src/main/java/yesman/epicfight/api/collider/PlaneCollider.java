@@ -20,8 +20,8 @@ public class PlaneCollider extends Collider {
 		return new AABB(maxLength, maxLength, maxLength, -maxLength, -maxLength, -maxLength);
 	}
 	
-	private Vec3[] modelPos;
-	private Vec3[] worldPos;
+	private final Vec3[] modelPos;
+	private final Vec3[] worldPos;
 	
 	public PlaneCollider(double x, double y, double z, double aX, double aY, double aZ, double bX, double bY, double bZ) {
 		this(getInitialAABB(x, y, z, aX, aY, aZ, bX, bY, bZ), x, y, z, aX, aY, aZ, bX, bY, bZ);
@@ -52,12 +52,8 @@ public class PlaneCollider extends Collider {
 		}
 		
 		double dot2 = planeNorm.dot(neg) - planeD;
-		
-		if (dot2 > 0.0D) {
-			return false;
-		}
 
-		return true;
+		return !(dot2 > 0.0D);
 	}
 
 	@Override

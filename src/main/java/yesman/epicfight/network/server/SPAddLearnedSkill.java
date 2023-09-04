@@ -12,7 +12,7 @@ import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 
 public class SPAddLearnedSkill {
 	private String[] skillNames;
-	private int count;
+	private final int count;
 	
 	public SPAddLearnedSkill() {
 		this("");

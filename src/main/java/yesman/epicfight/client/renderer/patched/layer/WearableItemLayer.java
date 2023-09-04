@@ -26,6 +26,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.CustomModelBakery;
 import yesman.epicfight.api.model.Armature;
@@ -123,17 +124,19 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 	}
 	
 	private AnimatedMesh getArmorModel(HumanoidArmorLayer<E, M, M> originalRenderer, E entityliving, ArmorItem armorItem, ItemStack stack, EquipmentSlot slot) {
-		ResourceLocation registryName = armorItem.getRegistryName();
+		ResourceLocation registryName = ForgeRegistries.ITEMS.getKey(armorItem);
 		boolean debuggingMode = ClientEngine.getInstance().isArmorModelDebuggingMode();
 		
 		if (ARMOR_MODELS.containsKey(registryName) && !debuggingMode) {
 			return ARMOR_MODELS.get(registryName);
 		} else {
 			ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
-			ResourceLocation rl = new ResourceLocation(armorItem.getRegistryName().getNamespace(), "animmodels/armor/" + armorItem.getRegistryName().getPath() + ".json");
+			ResourceLocation rl = new ResourceLocation(ForgeRegistries.ITEMS.getKey(armorItem).getNamespace(), "animmodels/armor/" + ForgeRegistries.ITEMS.getKey(armorItem).getPath());
 			AnimatedMesh model = null;
-			
-			if (resourceManager.hasResource(rl)) {
+			//TODO double check
+			if(resourceManager.getResource(rl).isPresent()){
+
+			//if (resourceManager.hasResource(rl)) {
 				JsonModelLoader modelLoader = new JsonModelLoader(resourceManager, rl);
 				model = modelLoader.loadAnimatedMesh(AnimatedMesh::new);
 			} else {
@@ -175,8 +178,8 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		} else if (!EPICFIGHT_OVERRIDING_TEXTURES.containsKey(s2)) {
 			resourcelocation2 = new ResourceLocation(s2);
 			ResourceManager rm = Minecraft.getInstance().getResourceManager();
-			
-			if (rm.hasResource(resourcelocation2)) {
+			if(rm.getResource(resourcelocation2).isPresent()){ //TODO double check
+			//if (rm.hasResource(resourcelocation2)) {
 				EPICFIGHT_OVERRIDING_TEXTURES.put(s2, resourcelocation2);
 				return resourcelocation2;
 			} else {

@@ -1,15 +1,8 @@
 package yesman.epicfight.client.events.engine;
 
-import java.util.Map;
-import java.util.Set;
-import java.util.function.BiConsumer;
-
-import org.lwjgl.glfw.GLFW;
-
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
-
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
@@ -19,15 +12,15 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.HitResult;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
-import net.minecraftforge.client.event.InputEvent.MouseInputEvent;
-import net.minecraftforge.client.event.InputEvent.MouseScrollEvent;
+import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.MovementInputUpdateEvent;
-import net.minecraftforge.client.settings.KeyBindingMap;
+import net.minecraftforge.client.settings.KeyMappingLookup;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
+import yesman.epicfight.api.animation.types.BasicAttackAnimation;
+import org.lwjgl.glfw.GLFW;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.client.gui.screen.IngameConfigurationScreen;
 import yesman.epicfight.client.gui.screen.SkillEditScreen;
@@ -44,14 +37,18 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 import yesman.epicfight.world.entity.eventlistener.SkillExecuteEvent;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiConsumer;
+
 @OnlyIn(Dist.CLIENT)
 public class ControllEngine {
-	private Map<KeyMapping, BiConsumer<KeyMapping, Integer>> keyFunctions = Maps.newHashMap();
-	private Set<Object> packets = Sets.newHashSet();
-	private Minecraft minecraft;
+	private final Map<KeyMapping, BiConsumer<KeyMapping, Integer>> keyFunctions = Maps.newHashMap();
+	private final Set<Object> packets = Sets.newHashSet();
+	private final Minecraft minecraft;
 	private LocalPlayer player;
 	private LocalPlayerPatch playerpatch;
-	private KeyBindingMap keyHash;
+	private KeyMappingLookup keyHash;
 	private int weaponInnatePressCounter = 0;
 	private int sneakPressCounter = 0;
 	private int moverPressCounter = 0;
@@ -82,7 +79,7 @@ public class ControllEngine {
 		this.keyFunctions.put(EpicFightKeyMappings.LOCK_ON, this::lockonPressed);
 		
 		try {
-			this.keyHash = (KeyBindingMap) ObfuscationReflectionHelper.findField(KeyMapping.class, "f_90810_").get(null);
+			this.keyHash = (KeyMappingLookup) ObfuscationReflectionHelper.findField(KeyMapping.class, "f_90810_").get(null);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
 		}
@@ -190,7 +187,7 @@ public class ControllEngine {
 			}
 		}
 	}
-	
+
 	private void lockonPressed(KeyMapping key, int action) {
 		if (action == 1) {
 			this.playerpatch.toggleLockOn();
@@ -339,11 +336,11 @@ public class ControllEngine {
 						if (skill.getSkill() != null) {
 							skill.sendExecuteRequest(this.playerpatch, this);
 						}
-						
+
 						this.releaseAllServedKeys();
 					}
 				}
-				
+
 				if (this.playerpatch.getSkillChargingTicks() >= chargingSkill.getAllowedMaxChargingTicks()) {
 					this.releaseAllServedKeys();
 				}
@@ -434,11 +431,11 @@ public class ControllEngine {
 		static ControllEngine controllEngine;
 		
 		@SubscribeEvent
-		public static void mouseEvent(MouseInputEvent event) {
+		public static void mouseEvent(InputEvent.MouseButton event) {
 			if (controllEngine.minecraft.player != null && Minecraft.getInstance().screen == null) {
 				InputConstants.Key input = InputConstants.Type.MOUSE.getOrCreate(event.getButton());
-				
-				for (KeyMapping keybinding : controllEngine.keyHash.lookupAll(input)) {
+
+				for (KeyMapping keybinding : controllEngine.keyHash.getAll(input)) {
 					if (controllEngine.keyFunctions.containsKey(keybinding)) {
 						controllEngine.keyFunctions.get(keybinding).accept(keybinding, event.getAction());
 					}
@@ -447,7 +444,7 @@ public class ControllEngine {
 		}
 		
 		@SubscribeEvent
-		public static void mouseScrollEvent(MouseScrollEvent event) {
+		public static void mouseScrollEvent(InputEvent.MouseScrollingEvent event) {
 			if (controllEngine.minecraft.player != null && controllEngine.playerpatch != null && controllEngine.playerpatch.getEntityState().inaction()) {
 				if (controllEngine.minecraft.screen == null) {
 					event.setCanceled(true);
@@ -456,11 +453,11 @@ public class ControllEngine {
 		}
 		
 		@SubscribeEvent
-		public static void keyboardEvent(KeyInputEvent event) {
-			if (controllEngine.minecraft.player != null && controllEngine.playerpatch != null && Minecraft.getInstance().screen == null) {
+		public static void keyboardEvent(InputEvent.Key event) {
+			if (controllEngine.minecraft.player != null && Minecraft.getInstance().screen == null) {
 				InputConstants.Key input = InputConstants.Type.KEYSYM.getOrCreate(event.getKey());
-				
-				for (KeyMapping keybinding : controllEngine.keyHash.lookupAll(input)) {
+
+				for (KeyMapping keybinding : controllEngine.keyHash.getAll(input)) {
 					if (controllEngine.keyFunctions.containsKey(keybinding)) {
 						controllEngine.keyFunctions.get(keybinding).accept(keybinding, event.getAction());
 					}
@@ -480,7 +477,7 @@ public class ControllEngine {
 		@SubscribeEvent
 		public static void clientTickEndEvent(TickEvent.ClientTickEvent event) {
 			if (event.phase == TickEvent.Phase.START) {
-				
+
 				if (controllEngine.playerpatch != null) {
 					controllEngine.tick();
 				}
