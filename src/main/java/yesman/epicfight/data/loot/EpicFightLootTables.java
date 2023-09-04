@@ -2,6 +2,7 @@ package yesman.epicfight.data.loot;
 
 import com.mojang.serialization.Codec;
 import net.minecraft.core.Registry;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootPool;
@@ -29,7 +30,7 @@ public class EpicFightLootTables {
 	public static final RegistryObject<Codec<? extends IGlobalLootModifier>> SKILLS = LOOT_MODIFIERS.register("skillbook_loot_table_modifier", SkillBookLootModifier.SKILL_CODEC);
 
 	public static void registerLootItemFunctionType() {
-		Registry.register(Registry.LOOT_FUNCTION_TYPE, new ResourceLocation("epicfight", "set_skill"), new LootItemFunctionType(new SetSkillFunction.Serializer()));
+		Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE, new ResourceLocation("epicfight", "set_skill"), new LootItemFunctionType(new SetSkillFunction.Serializer()));
 	}
 
 	@SubscribeEvent

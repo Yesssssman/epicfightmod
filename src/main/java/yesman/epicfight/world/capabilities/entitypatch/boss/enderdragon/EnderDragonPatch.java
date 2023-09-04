@@ -82,9 +82,9 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 		EnderDragonPhase<?> startPhase = (currentPhase == null || !(currentPhase instanceof PatchedDragonPhase)) ? PatchedPhases.FLYING : this.original.phaseManager.getCurrentPhase().getPhase();
 		this.original.phaseManager = new PhaseManagerPatch(this.original, this);
 		this.original.phaseManager.setPhase(startPhase);
-		enderdragon.maxUpStep = 1.0F;
+		enderdragon.setMaxUpStep(1.0f);
 		
-		if (enderdragon.level.isClientSide()) {
+		if (enderdragon.level().isClientSide()) {
 			INSTANCE_CLIENT = this;
 		} else {
 			INSTANCE_SERVER = this;
@@ -164,7 +164,7 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 		this.updateTipPoints();
 		Entity bodyPart = this.original.getParts()[2];
 		AABB bodyBoundingBox = bodyPart.getBoundingBox();
-		List<Entity> list = this.original.level.getEntities(this.original, bodyBoundingBox, EntitySelector.pushableBy(this.original));
+		List<Entity> list = this.original.level().getEntities(this.original, bodyBoundingBox, EntitySelector.pushableBy(this.original));
 		
 		if (!list.isEmpty()) {
 			for (int l = 0; l < list.size(); ++l) {

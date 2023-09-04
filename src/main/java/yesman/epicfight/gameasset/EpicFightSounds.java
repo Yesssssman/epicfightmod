@@ -41,7 +41,7 @@ public class EpicFightSounds {
 
 	private static RegistryObject<SoundEvent> registerSound(String name) {
 		ResourceLocation res = new ResourceLocation("epicfight", name);
-		return SOUNDS.register(name, () -> new SoundEvent(res));
+		return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(res));
 
 	}
 

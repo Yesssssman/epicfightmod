@@ -1,7 +1,5 @@
 package yesman.epicfight.api.animation.types;
 
-import com.mojang.math.Vector3f;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
@@ -16,6 +14,7 @@ import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.config.ConfigurationIngame;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -82,8 +81,8 @@ public class AimAnimation extends StaticAnimation {
 			float f = 90.0F;
 			float ratio = (f - Math.abs(entitypatch.getOriginal().getXRot())) / f;
 			float yawOffset = entitypatch.getOriginal().getVehicle() != null ? entitypatch.getOriginal().getYHeadRot() : entitypatch.getOriginal().yBodyRot;
-			MathUtils.mulQuaternion(Vector3f.YP.rotationDegrees(Mth.wrapDegrees(yawOffset - entitypatch.getOriginal().getYHeadRot()) * ratio), head.rotation(), head.rotation());
-			chest.frontResult(JointTransform.getRotation(Vector3f.YP.rotationDegrees(Mth.wrapDegrees(entitypatch.getOriginal().getYHeadRot() - yawOffset) * ratio)), OpenMatrix4f::mulAsOriginFront);
+			MathUtils.mulQuaternion(QuaternionUtils.YP.rotationDegrees(Mth.wrapDegrees(yawOffset - entitypatch.getOriginal().getYHeadRot()) * ratio), head.rotation(), head.rotation());
+			chest.frontResult(JointTransform.getRotation(QuaternionUtils.YP.rotationDegrees(Mth.wrapDegrees(entitypatch.getOriginal().getYHeadRot() - yawOffset) * ratio)), OpenMatrix4f::mulAsOriginFront);
 		}
 	}
 	

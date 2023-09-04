@@ -9,8 +9,7 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -26,7 +25,7 @@ import yesman.epicfight.config.ClientConfig.VerticalBasis;
 import yesman.epicfight.config.Option;
 
 @OnlyIn(Dist.CLIENT)
-public class UIComponent extends Button {
+public class UIComponent extends BasicButton {
 	protected final UISetupScreen parentScreen;
 	protected final ResourceLocation texture;
 	protected int texU;
@@ -81,11 +80,11 @@ public class UIComponent extends Button {
 				
 				if (this.clicked(mouseX, mouseY)) {
 					this.parentScreen.beginToDrag(this);
-					this.pressX = mouseX - this.x;
-					this.pressY = mouseY - this.y;
+					this.pressX = mouseX - this.getX();
+					this.pressY = mouseY - this.getY();
 					this.playDownSound(Minecraft.getInstance().getSoundManager());
 					
-					if (!this.popupScreen.isHoverd(x, y)) {
+					if (!this.popupScreen.isHoverd(getX(), getY())) {
 						this.popupScreen.closePop();
 					}
 					
@@ -102,8 +101,8 @@ public class UIComponent extends Button {
 	@Override
 	protected void onDrag(double x, double y, double dx, double dy) {
 		if (this.parentScreen.isDraggingComponent(this)) {
-			this.x = (int)(x - this.pressX);
-			this.y = (int)(y - this.pressY);
+			this.setX((int)(x - this.pressX));
+			this.setY((int)(y - this.pressY));
 			this.draggingTime++;
 		}
 	}
@@ -114,8 +113,8 @@ public class UIComponent extends Button {
 			this.onRelease(mouseX, mouseY);
 			this.parentScreen.endDragging();
 			
-			int xCoord = this.horizontalBasis.getValue().saveCoordGetter.apply(this.parentScreen.width, x);
-			int yCoord = this.verticalBasis.getValue().saveCoordGetter.apply(this.parentScreen.height, y);
+			int xCoord = this.horizontalBasis.getValue().saveCoordGetter.apply(this.parentScreen.width, getX());
+			int yCoord = this.verticalBasis.getValue().saveCoordGetter.apply(this.parentScreen.height, getY());
 			
 			this.xCoord.setValue(xCoord);
 			this.yCoord.setValue(yCoord);
@@ -145,11 +144,13 @@ public class UIComponent extends Button {
 		}
 	}
 	
-	public void drawOutline(PoseStack poseStack) {
-		float screenX = this.x - 1;
-		float screenXEnd = (this.x + this.width) + 1;
-		float screenY = this.y - 1;
-		float screenYEnd = (this.y + this.height) + 1;
+	public void drawOutline(GuiGraphics guiGraphics) {
+		PoseStack poseStack = guiGraphics.pose();
+
+		float screenX = this.getX() - 1;
+		float screenXEnd = (this.getX() + this.width) + 1;
+		float screenY = this.getY() - 1;
+		float screenYEnd = (this.getY() + this.height) + 1;
 		
         RenderSystem.disableCull();
 		RenderSystem.lineWidth(2.0F);
@@ -194,24 +195,23 @@ public class UIComponent extends Button {
 		}
 		BufferUploader.drawWithShader(bufferbuilder.end());
 	}
-	
+
 	@Override
-	public void renderButton(PoseStack poseStack, int x, int y, float partialTicks) {
+	protected void renderWidget(GuiGraphics guiGraphics, int x, int y, float partialTicks) {
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
-		RenderSystem.setShaderTexture(0, this.texture);
 		RenderSystem.setShaderColor(this.r, this.g, this.b, this.alpha);
 		RenderSystem.enableBlend();
 		RenderSystem.defaultBlendFunc();
 		RenderSystem.enableDepthTest();
-		
-		GuiComponent.blit(poseStack, this.x, this.y, this.width, this.height, this.texU, this.texV, this.texW, this.texH, this.resolutionDivW, this.resolutionDivH);
+
+		guiGraphics.blit(texture, getX(), getY(), this.width, this.height, this.texU, this.texV, this.texW, this.texH, this.resolutionDivW, this.resolutionDivH);
 		
 		if (this.isHoveredOrFocused() || this.popupScreen.isOpen()) {
-			this.drawOutline(poseStack);
+			this.drawOutline(guiGraphics);
 		}
 		
 		if (this.popupScreen.isOpen()) {
-			this.popupScreen.render(poseStack, x, y, partialTicks);
+			this.popupScreen.render(guiGraphics, x, y, partialTicks);
 		}
 	}
 	
@@ -228,37 +228,35 @@ public class UIComponent extends Button {
 			this.alignDirection = alignDirection;
 			this.texture2 = texture2;
 		}
-		
+
 		@Override
-		public void renderButton(PoseStack poseStack, int x, int y, float partialTicks) {
-			Vec2i startPos = this.alignDirection.getValue().startCoordGetter.get(this.x, this.y, this.width, this.height, 2, this.horizontalBasis.getValue(), this.verticalBasis.getValue());
+		protected void renderWidget(GuiGraphics guiGraphics, int x, int y, float partialTicks) {
+			Vec2i startPos = this.alignDirection.getValue().startCoordGetter.get(getX(), getY(), this.width, this.height, 2, this.horizontalBasis.getValue(), this.verticalBasis.getValue());
 			
 			RenderSystem.setShader(GameRenderer::getPositionTexShader);
-			RenderSystem.setShaderTexture(0, this.texture);
 			RenderSystem.setShaderColor(this.r, this.g, this.b, this.alpha);
 			RenderSystem.enableBlend();
 			RenderSystem.defaultBlendFunc();
 			RenderSystem.enableDepthTest();
 			
-			GuiComponent.blit(poseStack, startPos.x, startPos.y, this.width, this.height, this.texU, this.texV, this.texW, this.texH, this.resolutionDivW, this.resolutionDivH);
+			guiGraphics.blit(this.texture, startPos.x, startPos.y, this.width, this.height, this.texU, this.texV, this.texW, this.texH, this.resolutionDivW, this.resolutionDivH);
 			
 			if (this.isHoveredOrFocused() || this.popupScreen.isOpen()) {
-				this.drawOutline(poseStack);
+				this.drawOutline(guiGraphics);
 			}
 			
 			if (this.popupScreen.isOpen()) {
-				this.popupScreen.render(poseStack, x, y, partialTicks);
+				this.popupScreen.render(guiGraphics, x, y, partialTicks);
 			}
 			
 			Vec2i nextPos = this.alignDirection.getValue().nextPositionGetter.getNext(this.horizontalBasis.getValue(), this.verticalBasis.getValue(), startPos, this.width, this.height);
 			
 			RenderSystem.setShader(GameRenderer::getPositionTexShader);
-			RenderSystem.setShaderTexture(0, this.texture2);
 			RenderSystem.setShaderColor(this.r, this.g, this.b, this.alpha);
 			RenderSystem.enableBlend();
 			RenderSystem.defaultBlendFunc();
 			RenderSystem.enableDepthTest();
-			GuiComponent.blit(poseStack, nextPos.x, nextPos.y, this.width, this.height, this.texU, this.texV, this.texW, this.texH, this.resolutionDivW, this.resolutionDivH);
+			guiGraphics.blit(texture2, nextPos.x, nextPos.y, this.width, this.height, this.texU, this.texV, this.texW, this.texH, this.resolutionDivW, this.resolutionDivH);
 		}
 	}
 }

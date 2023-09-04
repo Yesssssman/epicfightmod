@@ -40,7 +40,7 @@ public class SPPlayAnimation {
 	
 	public <T extends SPPlayAnimation> void onArrive() {
 		Minecraft mc = Minecraft.getInstance();
-		Entity entity = mc.player.level.getEntity(this.entityId);
+		Entity entity = mc.player.level().getEntity(this.entityId);
 		
 		if (entity == null) {
 			return;

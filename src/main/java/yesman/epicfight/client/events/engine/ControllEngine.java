@@ -100,11 +100,11 @@ public class ControllEngine {
 	}
 	
 	public boolean canPlayerMove(EntityState playerState) {
-		return !playerState.movementLocked() || this.player.isRidingJumpable();
+		return !playerState.movementLocked() || this.player.jumpableVehicle() != null;
 	}
 	
 	public boolean canPlayerRotate(EntityState playerState) {
-		return !playerState.turningLocked() || this.player.isRidingJumpable();
+		return !playerState.turningLocked() || this.player.jumpableVehicle() != null;
 	}
 	
 	private void attackKeyPressed(KeyMapping key, int action) {
@@ -146,7 +146,7 @@ public class ControllEngine {
 	
 	private void switchModeKeyPressed(KeyMapping key, int action) {
 		if (action == 1) {
-			if (this.playerpatch.getOriginal().level.getGameRules().getBoolean(EpicFightGamerules.CAN_SWITCH_COMBAT)) {
+			if (this.playerpatch.getOriginal().level().getGameRules().getBoolean(EpicFightGamerules.CAN_SWITCH_COMBAT)) {
 				this.playerpatch.toggleMode();
 			}
 		}
@@ -200,7 +200,7 @@ public class ControllEngine {
 				this.moverPressToggle = false;
 				this.moverPressCounter = 0;
 				
-				if (this.player.isOnGround()) {
+				if (this.player.onGround()) {
 					input.jumping = true;
 				}
 			} else {
@@ -283,7 +283,7 @@ public class ControllEngine {
 		}
 		
 		if (this.attackLightPressToggle) {
-			SkillSlot slot = (!this.player.isOnGround() && !this.player.isInWater() && this.player.getDeltaMovement().y > 0.05D) ? SkillSlots.AIR_ATTACK : SkillSlots.BASIC_ATTACK;
+			SkillSlot slot = (!this.player.onGround() && !this.player.isInWater() && this.player.getDeltaMovement().y > 0.05D) ? SkillSlots.AIR_ATTACK : SkillSlots.BASIC_ATTACK;
 			
 			if (this.playerpatch.getSkill(slot).sendExecuteRequest(this.playerpatch, this).isExecutable()) {
 				this.player.resetAttackStrengthTicker();

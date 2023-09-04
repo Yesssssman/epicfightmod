@@ -1,5 +1,6 @@
 package yesman.epicfight.world.capabilities.projectile;
 
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -17,7 +18,8 @@ import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.RangedWeaponCapability;
-import yesman.epicfight.world.damagesource.IndirectEpicFightDamageSource;
+import yesman.epicfight.world.damagesource.EpicFightDamageSource;
+import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
@@ -76,9 +78,10 @@ public abstract class ProjectilePatch<T extends Projectile> extends EntityPatch<
 	
 	protected abstract void setMaxStrikes(T projectileEntity, int maxStrikes);
 	
-	public IndirectEpicFightDamageSource getEpicFightDamageSource(DamageSource original) {
-		IndirectEpicFightDamageSource extSource = new IndirectEpicFightDamageSource(original.msgId, original.getEntity(), original.getDirectEntity(), StunType.SHORT);
-		extSource.setProjectile();
+	public EpicFightDamageSource getEpicFightDamageSource(DamageSource original) {
+		EpicFightDamageSource extSource = EpicFightDamageSources.copy(original);
+		extSource.setStunType(StunType.SHORT);
+		extSource.addRuntimeTag(DamageTypeTags.IS_PROJECTILE);
 		extSource.setArmorNegation(this.armorNegation);
 		extSource.setImpact(this.impact);
 		extSource.setInitialPosition(this.initialFirePosition);

@@ -1,6 +1,5 @@
 package yesman.epicfight.world.capabilities.projectile;
 
-import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.DragonFireball;
 import net.minecraft.world.phys.EntityHitResult;
@@ -28,7 +27,7 @@ public class DragonFireballPatch extends ProjectilePatch<DragonFireball> {
 			Entity entity = ((EntityHitResult)event.getRayTraceResult()).getEntity();
 			
 			if (!entity.is(event.getProjectile().getOwner())) {
-				entity.hurt(DamageSource.indirectMagic(event.getProjectile(), event.getProjectile().getOwner()), 8.0F);
+				entity.hurt(entity.level().damageSources().indirectMagic(event.getProjectile(), event.getProjectile().getOwner()), 8.0F);
 			}
 		}
 		

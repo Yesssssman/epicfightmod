@@ -41,7 +41,7 @@ public class MainFrameAnimation extends StaticAnimation {
 	@Override
 	public void tick(LivingEntityPatch<?> entitypatch) {
 		super.tick(entitypatch);
-		entitypatch.getOriginal().animationSpeed = 0;
+		entitypatch.getOriginal().walkAnimation.setSpeed(0);
 	}
 	
 	@Override

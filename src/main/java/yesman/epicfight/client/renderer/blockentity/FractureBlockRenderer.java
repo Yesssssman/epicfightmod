@@ -2,8 +2,6 @@ package yesman.epicfight.client.renderer.blockentity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.LevelRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -26,6 +24,9 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.model.data.ModelData;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.world.level.block.entity.FractureBlockEntity;
+
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 
 import java.util.BitSet;
 import java.util.List;
@@ -70,8 +71,8 @@ public class FractureBlockRenderer implements BlockEntityRenderer<FractureBlockE
 		Minecraft mc = Minecraft.getInstance();
 		float turnBackTime = 5.0F;
 		float lerpAmount = Mth.clamp(partialTicks * (1.0F / turnBackTime) + (turnBackTime - (blockEntity.getMaxLifeTime() - blockEntity.getLifeTime())) * (1.0F / turnBackTime), 0.0F, 1.0F);
-		Vector3f translate = blockEntity.getMaxLifeTime() > blockEntity.getLifeTime() + turnBackTime ? blockEntity.getTranslate() : MathUtils.lerpMojangVector(blockEntity.getTranslate(), Vector3f.ZERO, lerpAmount);
-		Quaternion rotate = blockEntity.getMaxLifeTime() > blockEntity.getLifeTime() + turnBackTime ? blockEntity.getRotation() : MathUtils.lerpQuaternion(blockEntity.getRotation(), Quaternion.ONE, lerpAmount);
+		Vector3f translate = blockEntity.getMaxLifeTime() > blockEntity.getLifeTime() + turnBackTime ? blockEntity.getTranslate() : MathUtils.lerpMojangVector(blockEntity.getTranslate(), new Vector3f(), lerpAmount);
+		Quaternionf rotate = blockEntity.getMaxLifeTime() > blockEntity.getLifeTime() + turnBackTime ? blockEntity.getRotation() : MathUtils.lerpQuaternion(blockEntity.getRotation(), new Quaternionf(), lerpAmount);
 		
 		double BOUNCE_MAX_HEIGHT = blockEntity.getBouncing();
 		double TIME = Math.max(BOUNCE_MAX_HEIGHT * 8.0D, 8.0D);

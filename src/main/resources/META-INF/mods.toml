@@ -4,7 +4,7 @@ license="GNU GENERAL PUBLIC LICENSE"
 #issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/" #optional
 [[mods]] #mandatory
 modId="epicfight" #mandatory
-version="19.5.2" #mandatory
+version="20.5.2" #mandatory
 displayName="Epic Fight" #mandatory
 #displayURL="https://www.curseforge.com/minecraft/mc-mods/epic-fight-mod" #optional
 #logoFile="epicfight.png" #optional
@@ -22,6 +22,6 @@ description='''Fight til u dead
 [[dependencies.epicfight]]
     modId="minecraft"
     mandatory=true
-    versionRange="[1.19,1.19.2)"
+    versionRange="[1.20,1.21)"
     ordering="NONE"
     side="BOTH"

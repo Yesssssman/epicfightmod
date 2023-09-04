@@ -1,8 +1,8 @@
 package yesman.epicfight.client.gui.screen;
 
-import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
@@ -12,6 +12,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.CustomModelBakery;
 import yesman.epicfight.client.gui.widget.ColorSlider;
+import yesman.epicfight.client.gui.widget.BasicButton;
 import yesman.epicfight.client.gui.widget.RewindableButton;
 import yesman.epicfight.config.ClientConfig;
 import yesman.epicfight.config.Option;
@@ -53,86 +54,86 @@ public class IngameConfigurationScreen extends Screen {
 			(button) -> {
 				longPressCounter.setValue(longPressCounter.getValue() - 1);
 				button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".long_press_counter", (ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(longPressCounter.getValue()))));
-			}, (button, matrixStack, mouseX, mouseY) -> {
-		        this.renderTooltip(matrixStack, this.minecraft.font.split(Component.translatable("gui.epicfight.long_press_counter.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+			}, (button, guiGraphics, mouseX, mouseY) -> {
+				guiGraphics.renderTooltip(this.minecraft.font, this.minecraft.font.split(Component.translatable("gui.epicfight.long_press_counter.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 			}
 		));
 		
-		Button filterAnimationButton = this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 4 + buttonHeight, 160, 20,
+		Button filterAnimationButton = this.addRenderableWidget(new BasicButton(this.width / 2 + 5, this.height / 4 + buttonHeight, 160, 20,
 			Component.translatable("gui."+EpicFightMod.MODID+".filter_animation." + (filterAnimation.getValue() ? "on" : "off")), (button) -> {
 				filterAnimation.setValue(!filterAnimation.getValue());
 				button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".filter_animation." + (filterAnimation.getValue() ? "on" : "off")));
-			}, (button, matrixStack, mouseX, mouseY) -> {
-		        this.renderTooltip(matrixStack, this.minecraft.font.split(Component.translatable("gui.epicfight.filter_animation.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+			}, (button, guiGraphics, mouseX, mouseY) -> {
+				guiGraphics.renderTooltip(this.minecraft.font, this.minecraft.font.split(Component.translatable("gui.epicfight.filter_animation.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 			}
 		));
 
 		buttonHeight += 24;
 
-		Button health_barShowOptionButton = this.addRenderableWidget(new Button(this.width / 2 - 165, this.height / 4 - 8, 160, 20,
+		Button health_barShowOptionButton = this.addRenderableWidget(new BasicButton(this.width / 2 - 165, this.height / 4 - 8, 160, 20,
 			Component.translatable("gui."+EpicFightMod.MODID+".health_bar_show_option." + showHealthIndicator.getValue().toString()), (button) -> {
 				showHealthIndicator.setValue(showHealthIndicator.getValue().nextOption());
 				button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".health_bar_show_option." + showHealthIndicator.getValue().toString()));
-			}, (button, matrixStack, mouseX, mouseY) -> {
-		        this.renderTooltip(matrixStack, this.minecraft.font.split(Component.translatable("gui.epicfight.health_bar_show_option.tooltip"), Math.max(this.width / 2 - 43, 400)), mouseX, mouseY);
+			}, (button, guiGraphics, mouseX, mouseY) -> {
+				guiGraphics.renderTooltip(this.minecraft.font, this.minecraft.font.split(Component.translatable("gui.epicfight.health_bar_show_option.tooltip"), Math.max(this.width / 2 - 43, 400)), mouseX, mouseY);
 			}
 		));
 		
-		Button showTargetIndicatorButton = this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 4 - 8, 160, 20,
+		Button showTargetIndicatorButton = this.addRenderableWidget(new BasicButton(this.width / 2 + 5, this.height / 4 - 8, 160, 20,
 				Component.translatable("gui."+EpicFightMod.MODID+".target_indicator." + (showTargetIndicator.getValue() ? "on" : "off")), (button) -> {
 					showTargetIndicator.setValue(!showTargetIndicator.getValue());
 					button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".target_indicator." + (showTargetIndicator.getValue() ? "on" : "off")));
-				}, (button, matrixStack, mouseX, mouseY) -> {
-			        this.renderTooltip(matrixStack, this.minecraft.font.split(Component.translatable("gui.epicfight.target_indicator.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+				}, (button, guiGraphics, mouseX, mouseY) -> {
+					guiGraphics.renderTooltip(this.minecraft.font, this.minecraft.font.split(Component.translatable("gui.epicfight.target_indicator.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 				}
 			));
 		buttonHeight+=24;
-		Button cameraAutoSwitchButton = this.addRenderableWidget(new Button(this.width / 2 - 165, this.height / 4 + buttonHeight, 160, 20,
+		Button cameraAutoSwitchButton = this.addRenderableWidget(new BasicButton(this.width / 2 - 165, this.height / 4 + buttonHeight, 160, 20,
 				Component.translatable("gui."+EpicFightMod.MODID+".camera_auto_switch." + (cameraAutoSwitch.getValue() ? "on" : "off")), (button) -> {
 					cameraAutoSwitch.setValue(!cameraAutoSwitch.getValue());
 					button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".camera_auto_switch." + (cameraAutoSwitch.getValue() ? "on" : "off")));
-				}, (button, matrixStack, mouseX, mouseY) -> {
-			        this.renderTooltip(matrixStack, this.minecraft.font.split(Component.translatable("gui."+EpicFightMod.MODID+".camera_auto_switch.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+				}, (button, guiGraphics, mouseX, mouseY) -> {
+					guiGraphics.renderTooltip(this.minecraft.font, this.minecraft.font.split(Component.translatable("gui."+EpicFightMod.MODID+".camera_auto_switch.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 				}
 			));
 		
-		Button enableAimHelperButton = this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 4 + buttonHeight, 160, 20,
+		Button enableAimHelperButton = this.addRenderableWidget(new BasicButton(this.width / 2 + 5, this.height / 4 + buttonHeight, 160, 20,
 				Component.translatable("gui."+EpicFightMod.MODID+".aim_helper." + (enableAimHelper.getValue() ? "on" : "off")), (button) -> {
 					enableAimHelper.setValue(!enableAimHelper.getValue());
 					button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".aim_helper." + (enableAimHelper.getValue() ? "on" : "off")));
-				}, (button, matrixStack, mouseX, mouseY) -> {
-			        this.renderTooltip(matrixStack, this.minecraft.font.split(Component.translatable("gui."+EpicFightMod.MODID+".aim_helper.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+				}, (button, guiGraphics, mouseX, mouseY) -> {
+					guiGraphics.renderTooltip(this.minecraft.font, this.minecraft.font.split(Component.translatable("gui."+EpicFightMod.MODID+".aim_helper.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 				}
 			));
 		buttonHeight+=24;
-		Button autoPreparationButton = this.addRenderableWidget(new Button(this.width / 2 - 165, this.height / 4 + buttonHeight, 160, 20,
+		Button autoPreparationButton = this.addRenderableWidget(new BasicButton(this.width / 2 - 165, this.height / 4 + buttonHeight, 160, 20,
 				Component.translatable("gui."+EpicFightMod.MODID+".auto_preparation." + (autoPreparation.getValue() ? "on" : "off")), (button) -> {
 					autoPreparation.setValue(!autoPreparation.getValue());
 					button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".auto_preparation." + (autoPreparation.getValue() ? "on" : "off")));
-				}, (button, matrixStack, mouseX, mouseY) -> {
-			        this.renderTooltip(matrixStack, this.minecraft.font.split(Component.translatable("gui.epicfight.auto_preparation.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+				}, (button, guiGraphics, mouseX, mouseY) -> {
+					guiGraphics.renderTooltip(this.minecraft.font, this.minecraft.font.split(Component.translatable("gui.epicfight.auto_preparation.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 				}
 			));
 		
-		Button offGoreButton = this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 4 + buttonHeight, 160, 20,
+		Button offGoreButton = this.addRenderableWidget(new BasicButton(this.width / 2 + 5, this.height / 4 + buttonHeight, 160, 20,
 				Component.translatable("gui."+EpicFightMod.MODID+".off_blood_effects." + (offBlood.getValue() ? "on" : "off")), (button) -> {
 					offBlood.setValue(!offBlood.getValue());
 					button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".off_blood_effects." + (offBlood.getValue() ? "on" : "off")));
-				}, (button, matrixStack, mouseX, mouseY) -> {
-			        this.renderTooltip(matrixStack, this.minecraft.font.split(Component.translatable("gui.epicfight.off_blood_effects.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+				}, (button, guiGraphics, mouseX, mouseY) -> {
+					guiGraphics.renderTooltip(this.minecraft.font, this.minecraft.font.split(Component.translatable("gui.epicfight.off_blood_effects.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 				}
 			));
 		
 		buttonHeight += 24;
 
-		this.addRenderableWidget(new Button(this.width / 2 - 165, this.height / 4 + buttonHeight, 160, 20, Component.translatable("gui."+EpicFightMod.MODID+".auto_switching_items"),  (button) -> {
+		this.addRenderableWidget(new BasicButton(this.width / 2 - 165, this.height / 4 + buttonHeight, 160, 20, Component.translatable("gui."+EpicFightMod.MODID+".auto_switching_items"),  (button) -> {
 			this.minecraft.setScreen(new EditSwitchingItemScreen(this));
-		}, (button, matrixStack, mouseX, mouseY) -> {
-	        this.renderTooltip(matrixStack, this.minecraft.font.split(Component.translatable("gui.epicfight.auto_switching_items.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+		}, (button, guiGraphics, mouseX, mouseY) -> {
+			guiGraphics.renderTooltip(this.minecraft.font, this.minecraft.font.split(Component.translatable("gui.epicfight.auto_switching_items.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 		}));
 		
-		this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 4 + buttonHeight, 160, 20, Component.translatable("gui."+EpicFightMod.MODID+".export_custom_armor"),  (button) -> {
-			File resourcePackDirectory = Minecraft.getInstance().getResourcePackDirectory();
+		this.addRenderableWidget(new BasicButton(this.width / 2 + 5, this.height / 4 + buttonHeight, 160, 20, Component.translatable("gui."+EpicFightMod.MODID+".export_custom_armor"),  (button) -> {
+			File resourcePackDirectory = Minecraft.getInstance().getResourcePackDirectory().toFile();
 			try {
 				CustomModelBakery.exportModels(resourcePackDirectory);
 				Util.getPlatform().openFile(resourcePackDirectory);
@@ -140,17 +141,17 @@ public class IngameConfigurationScreen extends Screen {
 				EpicFightMod.LOGGER.info("Failed to export custom armor models");
 				e.printStackTrace();
 			}
-		}, (button, matrixStack, mouseX, mouseY) -> {
-	        this.renderTooltip(matrixStack, this.minecraft.font.split(Component.translatable("gui.epicfight.export_custom_armor.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+		}, (button, guiGraphics, mouseX, mouseY) -> {
+			guiGraphics.renderTooltip(this.minecraft.font, this.minecraft.font.split(Component.translatable("gui.epicfight.export_custom_armor.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 		}));
 		
 		buttonHeight += 24;
 
-		this.addRenderableWidget(new Button(this.width / 2 - 165, this.height / 4 + buttonHeight, 160, 20,
+		this.addRenderableWidget(new BasicButton(this.width / 2 - 165, this.height / 4 + buttonHeight, 160, 20,
 			Component.translatable("gui."+EpicFightMod.MODID+".ui_setup"), (button) -> {
 				this.minecraft.setScreen(new UISetupScreen(this));
-			}, (button, matrixStack, mouseX, mouseY) -> {
-		        this.renderTooltip(matrixStack, this.minecraft.font.split(Component.translatable("gui."+EpicFightMod.MODID+".ui_setup.tooltip"), Math.max(this.width / 2 - 43, 400)), mouseX, mouseY);
+			}, (button, guiGraphics, mouseX, mouseY) -> {
+				guiGraphics.renderTooltip(this.minecraft.font, this.minecraft.font.split(Component.translatable("gui."+EpicFightMod.MODID+".ui_setup.tooltip"), Math.max(this.width / 2 - 43, 400)), mouseX, mouseY);
 			}
 		));
 
@@ -158,12 +159,12 @@ public class IngameConfigurationScreen extends Screen {
 
 		this.addRenderableWidget(new ColorSlider(this.width / 2 - 150, this.height / 4 + buttonHeight, 300, 20, Component.translatable("gui."+EpicFightMod.MODID+".aim_helper_color"), aimHelperColor.getValue(), EpicFightMod.CLIENT_INGAME_CONFIG.aimHelperColor));
 
-		this.addRenderableWidget(new Button(this.width / 2 + 90, this.height / 4 + 150, 48, 20, CommonComponents.GUI_DONE, (button) -> {
+		this.addRenderableWidget(new BasicButton(this.width / 2 + 90, this.height / 4 + 150, 48, 20, CommonComponents.GUI_DONE, (button) -> {
 			EpicFightMod.CLIENT_INGAME_CONFIG.save();
 			this.onClose();
 		}));
 		
-		this.addRenderableWidget(new Button(this.width / 2 + 140, this.height / 4 + 150, 48, 20, Component.translatable("controls.reset"), (button) -> {
+		this.addRenderableWidget(new BasicButton(this.width / 2 + 140, this.height / 4 + 150, 48, 20, Component.translatable("controls.reset"), (button) -> {
 			EpicFightMod.CLIENT_INGAME_CONFIG.resetSettings();
 			filterAnimationButton.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".filter_animation." + (filterAnimation.getValue() ? "on" : "off")));
 			longPressCounterButton.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".long_press_counter", (ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(longPressCounter.getValue()))));
@@ -177,9 +178,9 @@ public class IngameConfigurationScreen extends Screen {
 	}
 	
 	@Override
-	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		this.renderDirtBackground(0);
-		super.render(matrixStack, mouseX, mouseY, partialTicks);
+	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		this.renderDirtBackground(guiGraphics);
+		super.render(guiGraphics, mouseX, mouseY, partialTicks);
 	}
 	
 	@Override

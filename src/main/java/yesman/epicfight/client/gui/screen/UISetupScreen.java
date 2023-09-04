@@ -1,6 +1,6 @@
 package yesman.epicfight.client.gui.screen;
 
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
@@ -59,7 +59,7 @@ public class UISetupScreen extends Screen {
 			, 24, 24, 0, 0, 1, 1, 1, 1, 255, 255, 255, this, new ResourceLocation(EpicFightMod.MODID, "textures/gui/skills/guard.png"), new ResourceLocation(EpicFightMod.MODID, "textures/gui/skills/berserker.png")
 		));
 	}
-	
+
 	@Override
 	public boolean mouseClicked(double x, double y, int pressType) {
 		for (GuiEventListener guieventlistener : this.children()) {
@@ -90,9 +90,9 @@ public class UISetupScreen extends Screen {
 	}
 
 	@Override
-	public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-		this.renderBackground(poseStack, mouseY);
-		super.render(poseStack, mouseX, mouseY, partialTicks);
+	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		this.renderDirtBackground(guiGraphics);
+		super.render(guiGraphics, mouseX, mouseY, partialTicks);
 	}
 	
 	@Override

@@ -2,7 +2,6 @@ package yesman.epicfight.api.collider;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
@@ -14,6 +13,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
+
+import org.joml.Matrix4f;
 
 public class OBBCollider extends Collider {
 	protected final Vec3[] modelVertex;

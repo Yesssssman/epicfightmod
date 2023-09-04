@@ -6,11 +6,9 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
 import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.common.Mod;
 import yesman.epicfight.main.EpicFightMod;
 
-@Mod.EventBusSubscriber(value = Dist.CLIENT, bus=Mod.EventBusSubscriber.Bus.MOD)
+@OnlyIn(Dist.CLIENT)
 public class EpicFightKeyMappings {
 	public static final KeyMapping WEAPON_INNATE_SKILL_TOOLTIP = new KeyMapping("key." + EpicFightMod.MODID + ".show_tooltip", InputConstants.KEY_LSHIFT, "key." + EpicFightMod.MODID + ".gui");
 	public static final KeyMapping SWITCH_MODE = new KeyMapping("key." + EpicFightMod.MODID + ".switch_mode", InputConstants.KEY_R, "key." + EpicFightMod.MODID + ".combat");
@@ -21,7 +19,6 @@ public class EpicFightKeyMappings {
 	public static final KeyMapping LOCK_ON = new KeyMapping("key." + EpicFightMod.MODID + ".lock_on", InputConstants.Type.MOUSE, 2, "key." + EpicFightMod.MODID + ".combat");
 	public static final KeyMapping CONFIG = new KeyMapping("key." + EpicFightMod.MODID + ".config", -1, "key." + EpicFightMod.MODID + ".gui");
 
-	@SubscribeEvent
 	public static void registerKeys(RegisterKeyMappingsEvent event) {
 		event.register(WEAPON_INNATE_SKILL_TOOLTIP);
 		event.register(SWITCH_MODE);

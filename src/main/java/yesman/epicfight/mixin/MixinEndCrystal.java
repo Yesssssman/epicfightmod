@@ -18,7 +18,7 @@ public abstract class MixinEndCrystal {
 	private void epicfight_hurt(DamageSource damagesource, float amount, CallbackInfoReturnable<Boolean> info) {
 		EndCrystal self = (EndCrystal)((Object)this);
 		
-		if (!self.level.isClientSide()) {
+		if (!self.level().isClientSide()) {
 			EnderDragonPatch dragonpatch = EnderDragonPatch.INSTANCE_SERVER;
 			
 			if (dragonpatch != null) {

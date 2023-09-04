@@ -7,6 +7,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
@@ -80,19 +81,9 @@ public class CapabilityItem {
 
 		for (int i = 0; i < itemTooltip.size(); i++) {
 			Component textComp = itemTooltip.get(i);
-
-			if (textComp.getSiblings().size() > 0) {
-				Component sibling = textComp.getSiblings().get(0);
+			index = i;
+			if (findComponentArgument(textComp, Attributes.ATTACK_SPEED.getDescriptionId()) != null) {
 				index = i;
-				
-				if (sibling instanceof MutableComponent translationComponent) {
-					if (translationComponent.getSiblings().size() > 1 && translationComponent.getSiblings().get(1) instanceof MutableComponent translatableArg) {
-						if (translatableArg.getString().equals(Attributes.ATTACK_SPEED.getDescriptionId())) {
-							index++;
-							break;
-						}
-					}
-				}
 			}
 		}
 
@@ -130,7 +121,34 @@ public class CapabilityItem {
 			}
 		}
 	}
-	
+
+	private Object findComponentArgument(Component component, String key) {
+		// check the content.
+		if (component.getContents() instanceof TranslatableContents contents) {
+			// is self?
+			if (contents.getKey().equals(key)) {
+				return component;
+			}
+			// check all arguments.
+			for (Object arg : contents.getArgs()) {
+				if (arg instanceof Component argComponent) {
+					Object ret = findComponentArgument(argComponent, key);
+					if (ret != null) {
+						return ret;
+					}
+				}
+			}
+		}
+		// check all sibling.
+		for (Component siblingComponent : component.getSiblings()) {
+			Object ret = findComponentArgument(siblingComponent, key);
+			if (ret != null) {
+				return ret;
+			}
+		}
+		return null;
+	}
+
 	public List<StaticAnimation> getAutoAttckMotion(PlayerPatch<?> playerpatch) {
 		return getBasicAutoAttackMotion();
 	}

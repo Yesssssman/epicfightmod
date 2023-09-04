@@ -31,7 +31,7 @@ public class PatchedElytraLayer<E extends LivingEntity, T extends LivingEntityPa
 			matrixStackIn.pushPose();
 			MathUtils.translateStack(matrixStackIn, modelMatrix);
 			MathUtils.rotateStack(matrixStackIn, transpose);
-			originalRenderer.render(matrixStackIn, buffer, packedLightIn, livingentity, livingentity.animationPosition, livingentity.animationSpeed, partialTicks, livingentity.tickCount, netYawHead, pitchHead);
+			originalRenderer.render(matrixStackIn, buffer, packedLightIn, livingentity, livingentity.walkAnimation.position(), livingentity.walkAnimation.speed(), partialTicks, livingentity.tickCount, netYawHead, pitchHead);
 			matrixStackIn.popPose();
 		}
 	}

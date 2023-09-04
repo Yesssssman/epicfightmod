@@ -47,7 +47,7 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	public void onJoinWorld(T entityIn, EntityJoinLevelEvent event) {
 		super.onJoinWorld(entityIn, event);
 		
-		if (!entityIn.level.isClientSide() && !this.original.isNoAi()) {
+		if (!entityIn.level().isClientSide() && !this.original.isNoAi()) {
 			this.initAI();
 		}
 	}
@@ -79,7 +79,7 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 			else
 				if (this.original.getDeltaMovement().y < -0.55F || this.isAirborneState())
 					currentLivingMotion = LivingMotions.FALL;
-				else if (original.animationSpeed > 0.01F)
+				else if (original.walkAnimation.speed() > 0.01F)
 					currentLivingMotion = LivingMotions.WALK;
 				else
 					currentLivingMotion = LivingMotions.IDLE;
@@ -99,7 +99,7 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 			} else {
 				if (this.original.getDeltaMovement().y < -0.55F || this.isAirborneState())
 					currentLivingMotion = LivingMotions.FALL;
-				else if (original.animationSpeed > 0.08F)
+				else if (original.walkAnimation.speed() > 0.08F)
 					if (original.isAggressive())
 						currentLivingMotion = LivingMotions.CHASE;
 					else
@@ -178,7 +178,7 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	}
 	
 	public void setAttakTargetSync(LivingEntity entityIn) {
-		if (!this.original.level.isClientSide()) {
+		if (!this.original.level().isClientSide()) {
 			this.original.setTarget(entityIn);
 			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(new SPSetAttackTarget(this.original.getId(), entityIn != null ? entityIn.getId() : -1), this.original);
 		}

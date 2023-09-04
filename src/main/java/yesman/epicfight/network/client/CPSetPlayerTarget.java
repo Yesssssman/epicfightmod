@@ -37,7 +37,7 @@ public class CPSetPlayerTarget {
 				ServerPlayerPatch entitypatch = EpicFightCapabilities.getEntityPatch(player, ServerPlayerPatch.class);
 				
 				if (entitypatch != null) {
-					Entity entity = entitypatch.getOriginal().level.getEntity(msg.entityId);
+					Entity entity = entitypatch.getOriginal().level().getEntity(msg.entityId);
 					
 					if (entity instanceof LivingEntity livingEntity) {
 						entitypatch.setAttackTarget(livingEntity);

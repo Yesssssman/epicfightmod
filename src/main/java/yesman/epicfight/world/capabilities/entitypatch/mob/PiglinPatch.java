@@ -8,8 +8,9 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.ai.behavior.MeleeAttack;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
-import net.minecraft.world.entity.ai.behavior.RunIf;
+import net.minecraft.world.entity.ai.behavior.OneShot;
 import net.minecraft.world.entity.ai.behavior.RunOne;
+import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.schedule.Activity;
@@ -94,12 +95,12 @@ public class PiglinPatch extends HumanoidMobPatch<Piglin> {
 	@Override
 	public void setAIAsInfantry(boolean holdingRanedWeapon) {
 		CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
-		
+
 		if (builder != null) {
 			BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 13, AnimatedCombatBehavior.class, new AnimatedCombatBehavior<>(this, builder.build(this)));
 		}
-		
-		BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 11, RunIf.class, new RunIf<>((entity) -> entity.isHolding(is -> is.getItem() instanceof CrossbowItem), new BackUpIfTooCloseStopInaction<>(5, 0.75F)));
+
+		BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 11, OneShot.class, BehaviorBuilder.triggerIf((entity) -> entity.isHolding(is -> is.getItem() instanceof CrossbowItem), BackUpIfTooCloseStopInaction.create(5, 0.75F)));
 		BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.CORE, 1, MoveToTargetSink.class, new MoveToTargetSinkStopInaction());
 		BrainRecomposer.removeBehavior(this.original.getBrain(), Activity.CELEBRATE, 15, RunOne.class);
 	}

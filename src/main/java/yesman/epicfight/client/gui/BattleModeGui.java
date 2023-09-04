@@ -6,7 +6,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -25,7 +25,7 @@ import yesman.epicfight.skill.Skill.ActivateType;
 import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
-public class BattleModeGui extends GuiComponent {
+public class BattleModeGui extends ModIngameGui {
 	private static final Vec2f[] CLOCK_POS = {
 		new Vec2f(0.5F, 0.5F),
 		new Vec2f(0.5F, 0.0F),
@@ -48,7 +48,7 @@ public class BattleModeGui extends GuiComponent {
 		this.config = EpicFightMod.CLIENT_INGAME_CONFIG;
 	}
 	
-	public void renderGui(PoseStack poseStack, LocalPlayerPatch playerpatch, float partialTicks) {
+	public void renderGui(LocalPlayerPatch playerpatch, GuiGraphics guiGraphics, float partialTicks) {
 		if (!playerpatch.getOriginal().isAlive() || playerpatch.getOriginal().getVehicle() != null) {
 			return;
 		}
@@ -78,12 +78,12 @@ public class BattleModeGui extends GuiComponent {
 			RenderSystem.enableBlend();
 		}
 		
+		PoseStack poseStack = guiGraphics.pose();
 		poseStack.pushPose();
 		poseStack.setIdentity();
 
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
-	    RenderSystem.setShaderTexture(0, EntityIndicator.BATTLE_ICON);
-		
+
 		float maxStamina = playerpatch.getMaxStamina();
 		float stamina = playerpatch.getStamina();
 		
@@ -95,8 +95,8 @@ public class BattleModeGui extends GuiComponent {
 			poseStack.pushPose();
 			poseStack.translate(0, this.sliding, 0);
 			RenderSystem.setShaderColor(1.0F, ratio, 0.25F, 1.0F);
-			GuiComponent.blit(poseStack, pos.x, pos.y, 118, 4, 2, 38, 237, 9, 255, 255);
-			GuiComponent.blit(poseStack, pos.x, pos.y, (int)(118*ratio), 4, 2, 47, (int)(237*ratio), 9, 255, 255);
+			guiGraphics.blit(EntityIndicator.BATTLE_ICON, pos.x, pos.y, 118, 4, 2, 38, 237, 9, 255, 255);
+			guiGraphics.blit(EntityIndicator.BATTLE_ICON, pos.x, pos.y, (int)(118*ratio), 4, 2, 47, (int)(237*ratio), 9, 255, 255);
 			poseStack.popPose();
 		}
 		
@@ -109,15 +109,15 @@ public class BattleModeGui extends GuiComponent {
 			poseStack.pushPose();
 			poseStack.translate(0, this.sliding, 0);
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-			GuiComponent.blit(poseStack, pos.x, pos.y, 1, 71, 238, 13, 255, 255);
-			GuiComponent.blit(poseStack, pos.x, pos.y, 1, 57, (int)(238 * ratio), 13, 255, 255);
-			
+			guiGraphics.blit(EntityIndicator.BATTLE_ICON, pos.x, pos.y, 1, 71, 238, 13, 255, 255);
+			guiGraphics.blit(EntityIndicator.BATTLE_ICON, pos.x, pos.y, 1, 57, (int)(238 * ratio), 13, 255, 255);
+
 			ResourceLocation rl = new ResourceLocation(playerpatch.getChargingSkill().toString());
 			String skillName = Component.translatable(String.format("skill.%s.%s", rl.getNamespace(), rl.getPath())).getString();
 			
 			int stringWidth = this.font.width(skillName);
-			this.font.drawShadow(poseStack, skillName, (pos.x + 120 - stringWidth * 0.5F), pos.y - 12, 16777215);
-			
+			guiGraphics.drawString(this.font, skillName, (pos.x + 120 - stringWidth * 0.5F), pos.y - 12, 16777215, true);
+
 			poseStack.popPose();
 		}
 		
@@ -135,7 +135,7 @@ public class BattleModeGui extends GuiComponent {
 		SkillContainer innateSkillContainer = playerpatch.getSkill(SkillSlots.WEAPON_INNATE);
 
 		if (!innateSkillContainer.isEmpty()) {
-			this.drawWeaponInnateIcon(playerpatch, playerpatch.getSkill(SkillSlots.WEAPON_INNATE), poseStack, partialTicks);
+			this.drawWeaponInnateIcon(playerpatch, playerpatch.getSkill(SkillSlots.WEAPON_INNATE), guiGraphics, partialTicks);
 		}
 
 		ClientConfig.AlignDirection alignDirection = this.config.passivesAlignDirection.getValue();
@@ -153,7 +153,7 @@ public class BattleModeGui extends GuiComponent {
 				if (skill.shouldDraw(container)) {
 					RenderSystem.enableBlend();
 					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-					skill.drawOnGui(this, container, poseStack, slotCoord.x, slotCoord.y);
+					skill.drawOnGui(this, container, guiGraphics, slotCoord.x, slotCoord.y);
 					slotCoord = alignDirection.nextPositionGetter.getNext(horBasis, verBasis, slotCoord, 24, 24);
 				}
 			}
@@ -170,7 +170,8 @@ public class BattleModeGui extends GuiComponent {
 		}
 	}
 	
-	private void drawWeaponInnateIcon(LocalPlayerPatch playerpatch, SkillContainer container, PoseStack matStack, float partialTicks) {
+	private void drawWeaponInnateIcon(LocalPlayerPatch playerpatch, SkillContainer container, GuiGraphics guiGraphics, float partialTicks) {
+		PoseStack matStack = guiGraphics.pose();
 		Window sr = Minecraft.getInstance().getWindow();
 		int width = sr.getGuiScaledWidth();
 		int height = sr.getGuiScaledHeight();
@@ -279,17 +280,17 @@ public class BattleModeGui extends GuiComponent {
         if (container.isActivated() && (container.getSkill().getActivateType() == ActivateType.DURATION || container.getSkill().getActivateType() == ActivateType.DURATION_INFINITE)) {
 			String s = String.format("%.0f", container.getRemainDuration() / 20.0F);
 			int stringWidth = (this.font.width(s) - 6) / 3;
-			this.font.drawShadow(matStack, s, pos.x + 13 - stringWidth, pos.y + 13, 16777215);
+			guiGraphics.drawString(this.font, s, pos.x + 13 - stringWidth, pos.y + 13, 16777215, true);
 		} else if (!fullstack) {
 			String s = String.valueOf((int)(cooldownRatio * 100.0F));
 			int stringWidth = (this.font.width(s) - 6) / 3;
-			this.font.drawShadow(matStack, s, pos.x + 13 - stringWidth, pos.y + 13, 16777215);
+			guiGraphics.drawString(this.font, s, pos.x + 13 - stringWidth, pos.y + 13, 16777215, true);
 		}
 		
 		if (container.getSkill().getMaxStack() > 1) {
 			String s = String.valueOf(container.getStack());
 			int stringWidth = (this.font.width(s) - 6) / 3;
-			this.font.drawShadow(matStack, s, pos.x + 25 - stringWidth, pos.y + 22, 16777215);
+			guiGraphics.drawString(font, s, pos.x + 25 - stringWidth, pos.y + 22, 16777215, true);
 		}
 		
 		matStack.popPose();

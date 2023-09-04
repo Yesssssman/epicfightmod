@@ -69,7 +69,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 				currentLivingMotion = LivingMotions.SWIM;
 			} else if (original.isSleeping()) {
 				currentLivingMotion = LivingMotions.SLEEP;
-			} else if (!original.isOnGround() && original.onClimbable()) {
+			} else if (!original.onGround() && original.onClimbable()) {
 				currentLivingMotion = LivingMotions.CLIMB;
 				double y = original.yCloak - original.yCloakO;
 				
@@ -224,11 +224,11 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
         float prvePitch = 0;
         
         UseAnim useAnim = this.original.getUseItem().getUseAnimation();
-        
+
         if (this.getOriginal().isUsingItem() && (useAnim == UseAnim.DRINK || useAnim == UseAnim.EAT || useAnim == UseAnim.SPYGLASS)) {
         	
         } else {
-        	if (this.getEntityState().inaction() || this.original.getVehicle() != null || (!this.original.isOnGround() && this.original.onClimbable())) {
+        	if (this.getEntityState().inaction() || this.original.getVehicle() != null || (!this.original.onGround() && this.original.onClimbable())) {
     	        yaw = 0;
     		} else {
     			float f = MathUtils.lerpBetween(this.prevBodyYaw, this.bodyYaw, partialTick);
@@ -283,7 +283,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			BlockState blockstate = this.original.getFeetBlockState();
 			float yaw = 0.0F;
 			
-			if (blockstate.isBed(this.original.level, this.original.getSleepingPos().orElse(null), this.original)) {
+			if (blockstate.isBed(this.original.level(), this.original.getSleepingPos().orElse(null), this.original)) {
 				if (blockstate.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
             		switch(blockstate.getValue(BlockStateProperties.HORIZONTAL_FACING)) {
             		case EAST:
@@ -302,7 +302,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			}
 			
 			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yaw, yaw, 0, 0.9375F, 0.9375F, 0.9375F);
-		} else if ((direction = this.getLadderDirection(this.original.getFeetBlockState(), this.original.level, this.original.blockPosition(), this.original)) != Direction.UP) {
+		} else if ((direction = this.getLadderDirection(this.original.getFeetBlockState(), this.original.level(), this.original.blockPosition(), this.original)) != Direction.UP) {
 			float yaw = 0.0F;
 			
 			switch(direction) {
@@ -358,7 +358,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	
 	public Direction getLadderDirection(@Nonnull BlockState state, @Nonnull Level world, @Nonnull BlockPos pos, @Nonnull LivingEntity entity) {
 		boolean isSpectator = (entity instanceof Player && entity.isSpectator());
-        if (isSpectator || this.original.isOnGround() || !this.original.isAlive()) {
+        if (isSpectator || this.original.onGround() || !this.original.isAlive()) {
         	return Direction.UP;
         }
         

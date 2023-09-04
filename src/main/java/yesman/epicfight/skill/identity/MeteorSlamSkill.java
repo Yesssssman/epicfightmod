@@ -8,8 +8,8 @@ import java.util.function.BiFunction;
 
 import com.google.common.collect.Maps;
 
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -61,12 +61,6 @@ public class MeteorSlamSkill extends Skill {
 			this.resource = resource;
 			return this;
 		}
-		
-		@Override
-		public Builder setCreativeTab(CreativeModeTab tab) {
-			this.tab = tab;
-			return this;
-		}
 	}
 	
 	public static float getFallDistance(SkillContainer skillContainer) {
@@ -107,7 +101,7 @@ public class MeteorSlamSkill extends Skill {
 					return;
 				}
 				
-				if (container.getExecuter().getOriginal().isOnGround() || container.getExecuter().getOriginal().getXRot() < 40.0F) {
+				if (container.getExecuter().getOriginal().onGround() || container.getExecuter().getOriginal().getXRot() < 40.0F) {
 					return;
 				}
 				
@@ -126,7 +120,7 @@ public class MeteorSlamSkill extends Skill {
 				Vec3 vec3 = container.getExecuter().getOriginal().getEyePosition(1.0F);
 				Vec3 vec31 = container.getExecuter().getOriginal().getViewVector(1.0F);
 				Vec3 vec32 = vec3.add(vec31.x * 50.0D, vec31.y * 50.0D, vec31.z * 50.0D);
-				HitResult hitResult = container.getExecuter().getOriginal().level.clip(new ClipContext(vec3, vec32, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, container.getExecuter().getOriginal()));
+				HitResult hitResult = container.getExecuter().getOriginal().level().clip(new ClipContext(vec3, vec32, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, container.getExecuter().getOriginal()));
 				
 				if (hitResult.getType() != HitResult.Type.MISS) {
 					Vec3 to = hitResult.getLocation();
@@ -144,7 +138,7 @@ public class MeteorSlamSkill extends Skill {
 		});
 		
 		listener.addEventListener(EventType.HURT_EVENT_PRE, EVENT_UUID, (event) -> {
-			if (event.getDamageSource().isFall() && container.getDataManager().getDataValue(PROTECT_NEXT_FALL)) {
+			if (event.getDamageSource().is(DamageTypeTags.IS_FALL) && container.getDataManager().getDataValue(PROTECT_NEXT_FALL)) {
 				float stamina = container.getExecuter().getStamina();
 				float damage = event.getAmount();
 				event.setAmount(damage - stamina);

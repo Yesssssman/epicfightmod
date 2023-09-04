@@ -2,6 +2,7 @@ package yesman.epicfight.world.entity;
 
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EntityType;
@@ -25,7 +26,7 @@ public class WitherSkeletonMinion extends WitherSkeleton {
 		this.summoner = summoner;
 		
 		if (this.summoner != null && this.summoner.isAlive()) {
-			this.setTarget((LivingEntity)this.summoner.level.getEntity(this.summoner.getAlternativeTarget(0)));
+			this.setTarget((LivingEntity)this.summoner.level().getEntity(this.summoner.getAlternativeTarget(0)));
 		}
 	}
 	
@@ -53,11 +54,11 @@ public class WitherSkeletonMinion extends WitherSkeleton {
 	public void tick() {
 		super.tick();
 		
-		if (this.level.isClientSide()) {
-			this.level.addParticle(ParticleTypes.SMOKE, this.getX() + this.random.nextGaussian() * (double) 0.3F, this.getEyeY() + this.random.nextGaussian() * (double) 0.3F, this.getZ() + this.random.nextGaussian() * (double) 0.3F, 0.0D, 0.0D, 0.0D);
+		if (this.level().isClientSide()) {
+			this.level().addParticle(ParticleTypes.SMOKE, this.getX() + this.random.nextGaussian() * (double) 0.3F, this.getEyeY() + this.random.nextGaussian() * (double) 0.3F, this.getZ() + this.random.nextGaussian() * (double) 0.3F, 0.0D, 0.0D, 0.0D);
 		} else {
 			if (this.tickCount > 200 && this.tickCount % 30 == 0) {
-				this.hurt(DamageSource.WITHER, 1.0F);
+				this.hurt(this.level().damageSources().wither(), 1.0F);
 			}
 			
 			if (this.summoner != null && !this.summoner.isAlive()) {

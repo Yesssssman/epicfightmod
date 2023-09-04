@@ -73,7 +73,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	}
 	
 	public void onRespawnLocalPlayer(ClientPlayerNetworkEvent.Clone event) {
-		this.onJoinWorld(event.getNewPlayer(), new EntityJoinLevelEvent(event.getNewPlayer(), event.getNewPlayer().level));
+		this.onJoinWorld(event.getNewPlayer(), new EntityJoinLevelEvent(event.getNewPlayer(), event.getNewPlayer().level()));
 	}
 	
 	@Override
@@ -286,7 +286,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 			return false;
 		}
 
-		if (actionAnimation instanceof BasicAttackAnimation && !this.original.level.getGameRules().getRule(EpicFightGamerules.STIFF_COMBO_ATTACKS).get()) {
+		if (actionAnimation instanceof BasicAttackAnimation && !this.original.level().getGameRules().getRule(EpicFightGamerules.STIFF_COMBO_ATTACKS).get()) {
 			if (this.original.input.forwardImpulse != 0.0F || this.original.input.leftImpulse != 0.0F) {
 				return false;
 			}

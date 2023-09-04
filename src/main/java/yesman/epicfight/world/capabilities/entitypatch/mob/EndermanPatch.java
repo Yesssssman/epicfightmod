@@ -6,7 +6,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
@@ -65,7 +64,7 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 	
 	@Override
 	public void onJoinWorld(EnderMan enderman, EntityJoinLevelEvent event) {
-		if (enderman.level.dimension() == Level.END) {
+		if (enderman.level().dimension() == Level.END) {
 			if (enderman.position().horizontalDistanceSqr() < 40000) {
 				event.setCanceled(true);
 			}
@@ -156,8 +155,8 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 	
 	@Override
 	public AttackResult tryHurt(DamageSource damageSource, float amount) {
-		if (!this.original.level.isClientSide()) {
-			if (damageSource instanceof EntityDamageSource && !this.isRaging()) {
+		if (!this.original.level().isClientSide()) {
+			if (damageSource.getEntity() != null && !this.isRaging()) {
 				EpicFightDamageSource extDamageSource = null;
 				
 				if (damageSource instanceof EpicFightDamageSource) {
@@ -327,7 +326,7 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 				if (flag) {
 					this.mobpatch.rotateTo(target, 360.0F, true);
 					this.move.execute(this.mobpatch);
-		        	this.mob.level.playSound(null, this.mob.xo, this.mob.yo, this.mob.zo, SoundEvents.ENDERMAN_TELEPORT, this.mob.getSoundSource(), 1.0F, 1.0F);
+		        	this.mob.level().playSound(null, this.mob.xo, this.mob.yo, this.mob.zo, SoundEvents.ENDERMAN_TELEPORT, this.mob.getSoundSource(), 1.0F, 1.0F);
 		        	this.mob.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0F, 1.0F);
 		        	this.waitingCounter = 0;
 				} else {

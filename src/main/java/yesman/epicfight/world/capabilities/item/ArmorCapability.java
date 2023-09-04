@@ -73,15 +73,16 @@ public class ArmorCapability extends CapabilityItem {
 		public Builder item(Item item) {
 			if (item instanceof ArmorItem armorItem) {
 				ArmorMaterial armorMaterial = armorItem.getMaterial();
+				ArmorItem.Type armorType = armorItem.getType();
 				
-				this.equipmentSlot = armorItem.getSlot();
+				this.equipmentSlot = armorItem.getEquipmentSlot();
 				
 				if (this.weight < 0.0D) {
-					this.weight = armorMaterial.getDefenseForSlot(this.equipmentSlot) * 2.5F;
+					this.weight = armorMaterial.getDefenseForType(armorType) * 2.5F;
 				}
 				
 				if (this.stunArmor < 0.0D) {
-					this.stunArmor = armorMaterial.getDefenseForSlot(this.equipmentSlot) * 0.375F;
+					this.stunArmor = armorMaterial.getDefenseForType(armorType) * 0.375F;
 				}
 			}
 			

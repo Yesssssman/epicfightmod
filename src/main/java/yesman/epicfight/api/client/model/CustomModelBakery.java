@@ -14,9 +14,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.client.model.HumanoidModel;
@@ -31,6 +28,10 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
+import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.main.EpicFightMod;
@@ -72,7 +73,7 @@ public class CustomModelBakery {
 		JsonObject root = new JsonObject();
 		JsonObject pack = new JsonObject();
 		pack.addProperty("description", "epicfight_custom_armor_models");
-		pack.addProperty("pack_format", PackType.CLIENT_RESOURCES.getVersion(SharedConstants.getCurrentVersion()));
+		pack.addProperty("pack_format", SharedConstants.getCurrentVersion().getPackVersion(PackType.CLIENT_RESOURCES));
 		root.add("pack", pack);
 		out.putNextEntry(zipEntry);
 		out.write(gson.toJson(root).getBytes());
@@ -128,8 +129,8 @@ public class CustomModelBakery {
 		Map<String, List<Integer>> indices = Maps.newHashMap();
 		PoseStack poseStack = new PoseStack();
 		indexCount = 0;
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
-		poseStack.mulPose(Vector3f.XP.rotationDegrees(180.0F));
+		poseStack.mulPose(QuaternionUtils.YP.rotationDegrees(180.0F));
+		poseStack.mulPose(QuaternionUtils.XP.rotationDegrees(180.0F));
 		poseStack.translate(0, -24, 0);
 		
 		for (ModelPartition modelpartition : partitions) {
@@ -144,15 +145,15 @@ public class CustomModelBakery {
 		poseStack.translate(part.x, part.y, part.z);
 		
 		if (part.zRot != 0.0F) {
-			poseStack.mulPose(Vector3f.ZP.rotation(part.zRot));
+			poseStack.mulPose(QuaternionUtils.ZP.rotation(part.zRot));
 		}
 		
 		if (part.yRot != 0.0F) {
-			poseStack.mulPose(Vector3f.YP.rotation(part.yRot));
+			poseStack.mulPose(QuaternionUtils.YP.rotation(part.yRot));
 		}
 		
 		if (part.xRot != 0.0F) {
-			poseStack.mulPose(Vector3f.XP.rotation(part.xRot));
+			poseStack.mulPose(QuaternionUtils.XP.rotation(part.xRot));
 		}
 		
 		for (ModelPart.Cube cube : part.cubes) {
@@ -209,12 +210,12 @@ public class CustomModelBakery {
 		
 		public void bakeCube(PoseStack poseStack, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
 			for (ModelPart.Polygon quad : cube.polygons) {
-				Vector3f norm = quad.normal.copy();
-				norm.transform(poseStack.last().normal());
+				Vector3f norm = new Vector3f(quad.normal);
+				norm.mul(poseStack.last().normal());
 				
 				for (ModelPart.Vertex vertex : quad.vertices) {
-					Vector4f pos = new Vector4f(vertex.pos);
-					pos.transform(poseStack.last().pose());
+					Vector4f pos = new Vector4f(vertex.pos, 1);
+					pos.mul(poseStack.last().pose());
 					vertices.add(new SingleVertex()
 						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
@@ -252,7 +253,7 @@ public class CustomModelBakery {
 		@Override
 		public void bakeCube(PoseStack poseStack, Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
 			Vector4f cubeCenter = new Vector4f(cube.minX + (cube.maxX - cube.minX) * 0.5F, cube.minY + (cube.maxY - cube.minY) * 0.5F, cube.minZ + (cube.maxZ - cube.minZ) * 0.5F, 1.0F);
-			cubeCenter.transform(poseStack.last().pose());
+			cubeCenter.mul(poseStack.last().pose());
 			
 			if (cubeCenter.y() > this.yClipCoord) {
 				this.upperBaker.bakeCube(poseStack, cube, vertices, indices);
@@ -360,11 +361,11 @@ public class CustomModelBakery {
 			}
 			
 			for (AnimatedPolygon polygon : xyClipPolygons) {
-				Vector3f norm = polygon.normal.copy();
-				norm.transform(poseStack.last().normal());
+				Vector3f norm = new Vector3f(polygon.normal);
+				norm.mul(poseStack.last().normal());
 				
 				for (AnimatedVertex vertex : polygon.animatedVertexPositions) {
-					Vector4f pos = new Vector4f(vertex.pos);
+					Vector4f pos = new Vector4f(vertex.pos, 1);
 					float weight1 = vertex.weight.x;
 					float weight2 = vertex.weight.y;
 					int joint1 = vertex.jointId.getX();
@@ -530,11 +531,11 @@ public class CustomModelBakery {
 			}
 			
 			for (AnimatedPolygon quad : polygons) {
-				Vector3f norm = quad.normal.copy();
-				norm.transform(poseStack.last().normal());
+				Vector3f norm = new Vector3f(quad.normal);
+				norm.mul(poseStack.last().normal());
 				
 				for (AnimatedVertex vertex : quad.animatedVertexPositions) {
-					Vector4f pos = new Vector4f(vertex.pos);
+					Vector4f pos = new Vector4f(vertex.pos, 1);
 					vertices.add(new SingleVertex()
 						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
@@ -568,8 +569,8 @@ public class CustomModelBakery {
 	}
 	
 	static ModelPart.Vertex getTranslatedVertex(ModelPart.Vertex original, Matrix4f matrix) {
-		Vector4f translatedPosition = new Vector4f(original.pos);
-		translatedPosition.transform(matrix);
+		Vector4f translatedPosition = new Vector4f(original.pos, 1);
+		translatedPosition.mul(matrix);
 		
 		return new ModelPart.Vertex(translatedPosition.x(), translatedPosition.y(), translatedPosition.z(), original.u, original.v);
 	}

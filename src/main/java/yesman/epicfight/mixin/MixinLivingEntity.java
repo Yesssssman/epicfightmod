@@ -23,7 +23,7 @@ public abstract class MixinLivingEntity {
 			opponentEntitypatch.setLastAttackResult(self, AttackResult.blocked(0.0F));
 			
 			if (selfEntitypatch != null && opponentEntitypatch.getEpicFightDamageSource() != null) {
-				opponentEntitypatch.onAttackBlocked(opponentEntitypatch.getEpicFightDamageSource().cast(), selfEntitypatch);
+				opponentEntitypatch.onAttackBlocked(opponentEntitypatch.getEpicFightDamageSource(), selfEntitypatch);
 			}
 		}
 	}

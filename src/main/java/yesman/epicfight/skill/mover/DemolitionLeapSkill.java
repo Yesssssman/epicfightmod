@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -63,7 +64,7 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 		});
 
 		listener.addEventListener(EventType.HURT_EVENT_PRE, EVENT_UUID, (event) -> {
-			if (event.getDamageSource().isFall() && container.getDataManager().getDataValue(PROTECT_NEXT_FALL)) {
+			if (event.getDamageSource().is(DamageTypeTags.IS_FALL) && container.getDataManager().getDataValue(PROTECT_NEXT_FALL)) {
 				float damage = event.getAmount();
 				event.setAmount(damage * 0.5F);
 				event.setCanceled(true);
@@ -88,7 +89,7 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 
 	@Override
 	public boolean isExecutableState(PlayerPatch<?> executer) {
-		return super.isExecutableState(executer) && executer.getOriginal().isOnGround();
+		return super.isExecutableState(executer) && executer.getOriginal().onGround();
 	}
 
 	@Override
@@ -141,12 +142,12 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 		} else {
 			caster.playSound(EpicFightSounds.ROCKET_JUMP.get(), 1.0F, 0.0F, 0.0F);
 			caster.playSound(EpicFightSounds.ENTITY_MOVE.get(), 1.0F, 0.0F, 0.0F);
-			
+
 			int accumulatedTicks = caster.getChargingAmount();
 			
-			LevelUtil.circleSlamFracture(null, caster.getOriginal().level, caster.getOriginal().position().subtract(0, 1, 0), accumulatedTicks * 0.05D, true, false, false);
+			LevelUtil.circleSlamFracture(null, caster.getOriginal().level(), caster.getOriginal().position().subtract(0, 1, 0), accumulatedTicks * 0.05D, true, false, false);
 			Vec3 entityEyepos = caster.getOriginal().getEyePosition();
-			EpicFightParticles.AIR_BURST.get().spawnParticleWithArgument(caster.getOriginal().getLevel(), entityEyepos.x, entityEyepos.y, entityEyepos.z, 0.0D, 0.0D, 2 + 0.05D * chargingTicks);
+			EpicFightParticles.AIR_BURST.get().spawnParticleWithArgument(caster.getOriginal().serverLevel(), entityEyepos.x, entityEyepos.y, entityEyepos.z, 0.0D, 0.0D, 2 + 0.05D * chargingTicks);
 
 			caster.playAnimationSynchronized(this.shootAnimation, 0.0F);
 			feedbackPacket.getBuffer().writeInt(accumulatedTicks);

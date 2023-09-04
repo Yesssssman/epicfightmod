@@ -50,7 +50,7 @@ public class PatchedHeadLayer<E extends LivingEntity, T extends LivingEntityPatc
 				matrixStackIn.scale(1.6F, 1.6F, 1.6F);
 			}
 			
-			originalRenderer.render(matrixStackIn, buffer, packedLightIn, entity, entity.animationPosition, entity.animationSpeed, packedLightIn, entity.tickCount, netYawHead, pitchHead);
+			originalRenderer.render(matrixStackIn, buffer, packedLightIn, entity, entity.walkAnimation.position(), entity.walkAnimation.speed(), packedLightIn, entity.tickCount, netYawHead, pitchHead);
 			matrixStackIn.popPose();
 		}
 	}

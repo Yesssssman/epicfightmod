@@ -5,8 +5,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.client.renderer.block.model.ItemTransforms.TransformType;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -28,7 +28,7 @@ public class RenderShootableWeapon extends RenderItemBase {
 		
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, modelMatrix);
-		Minecraft.getInstance().gameRenderer.itemInHandRenderer.renderItem(entitypatch.getOriginal(), stack, TransformType.THIRD_PERSON_RIGHT_HAND, false, poseStack, buffer, packedLight);
+		Minecraft.getInstance().gameRenderer.itemInHandRenderer.renderItem(entitypatch.getOriginal(), stack, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, false, poseStack, buffer, packedLight);
 		poseStack.popPose();
 		
 		GlStateManager._enableDepthTest();

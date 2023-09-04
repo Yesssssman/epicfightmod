@@ -20,7 +20,6 @@ import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSkills;
-import yesman.epicfight.skill.*;
 import yesman.epicfight.skill.ChargeableSkill;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategories;
@@ -32,6 +31,7 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
+import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.eventlistener.AttackSpeedModifyEvent;
@@ -247,7 +247,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		float weight = this.getWeight();
 
 		if (weight > 40.0F) {
-			float attenuation = Mth.clamp(this.getOriginal().level.getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY), 0, 100) / 100.0F;
+			float attenuation = Mth.clamp(this.getOriginal().level().getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY), 0, 100) / 100.0F;
 
 			return event.getAttackSpeed() + (-0.1F * (weight / 40.0F) * (Math.max(event.getAttackSpeed() - 0.8F, 0.0F) * 1.5F) * attenuation);
 		} else {
@@ -262,7 +262,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	@Override
 	public AttackResult attack(EpicFightDamageSource damageSource, Entity target, InteractionHand hand) {
 		float fallDist = this.original.fallDistance;
-		boolean isOnGround = this.original.onGround;
+		boolean onGround = this.original.onGround;
 		boolean shouldSwap = hand == InteractionHand.OFF_HAND;
 		
 		// Prevents crit and sweeping edge effect
@@ -275,14 +275,15 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		this.swapHand(shouldSwap);
 		this.epicFightDamageSource = null;
 		this.original.fallDistance = fallDist;
-		this.original.onGround = isOnGround;
+		this.original.onGround = onGround;
 		
 		return super.attack(damageSource, target, hand);
 	}
 	
 	@Override
 	public EpicFightDamageSource getDamageSource(StaticAnimation animation, InteractionHand hand) {
-		EpicFightDamageSource damagesource = EpicFightDamageSource.commonEntityDamageSource("player", this.original, animation);
+		EpicFightDamageSources damageSources = EpicFightDamageSources.of(this.original.level());
+		EpicFightDamageSource damagesource = damageSources.playerAttack(this.original).setAnimation(animation);
 		damagesource.setImpact(this.getImpact(hand));
 		damagesource.setArmorNegation(this.getArmorNegation(hand));
 		damagesource.setHurtItem(this.getOriginal().getItemInHand(hand));
@@ -307,7 +308,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	public float getModifiedStaminaConsume(float amount) {
-		float attenuation = Mth.clamp(this.original.level.getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY), 0, 100) / 100.0F;
+		float attenuation = Mth.clamp(this.original.level().getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY), 0, 100) / 100.0F;
 		float weight = this.getWeight();
 
 		return ((weight / 40.0F - 1.0F) * attenuation + 1.0F) * amount;

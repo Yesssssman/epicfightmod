@@ -6,7 +6,6 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -17,6 +16,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.joml.Matrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.main.EpicFightMod;
 
@@ -51,7 +51,7 @@ public class AimHelperRenderer {
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
-		RenderSystem.disableTexture();
+//		RenderSystem.disableTexture();
 		RenderSystem.enableBlend();
         RenderSystem.disableCull();
 		RenderSystem.lineWidth(2.0F);

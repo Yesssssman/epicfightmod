@@ -5,6 +5,8 @@ import java.util.List;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
+import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.AreaEffectCloud;
@@ -15,7 +17,9 @@ import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec3;
-import yesman.epicfight.world.damagesource.IndirectEpicFightDamageSource;
+import yesman.epicfight.gameasset.Animations;
+import yesman.epicfight.world.damagesource.EpicFightDamageSource;
+import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 import yesman.epicfight.world.damagesource.StunType;
 
 public class AreaEffectBreath extends AreaEffectCloud {
@@ -38,7 +42,7 @@ public class AreaEffectBreath extends AreaEffectCloud {
 	public void tick() {
 		this.move(MoverType.SELF, this.getDeltaMovement());
 		
-		if (!this.level.isClientSide) {
+		if (!this.level().isClientSide) {
 			if (this.tickCount >= this.getDuration()) {
 				this.discard();
 				return;
@@ -61,7 +65,7 @@ public class AreaEffectBreath extends AreaEffectCloud {
 				return this.tickCount >= p_146784_.getValue();
 			});
 			
-			List<LivingEntity> list1 = this.level.getEntitiesOfClass(LivingEntity.class, this.getBoundingBox());
+			List<LivingEntity> list1 = this.level().getEntitiesOfClass(LivingEntity.class, this.getBoundingBox());
 			
 			if (!list1.isEmpty()) {
 				for (LivingEntity livingentity : list1) {
@@ -73,11 +77,11 @@ public class AreaEffectBreath extends AreaEffectCloud {
 						if (d3 <= (double) (f * f)) {
 							this.victims.put(livingentity, this.tickCount + 3);
 							livingentity.invulnerableTime = 0;
-							IndirectEpicFightDamageSource damagesource = new IndirectEpicFightDamageSource("indirectMagic", this.getOwner(), this, StunType.SHORT);
-							damagesource.setInitialPosition(this.initialFirePosition);
-							damagesource.bypassArmor().setMagic();
-							damagesource.setImpact(2.0F);
-							livingentity.hurt(damagesource, 3.0F);
+							EpicFightDamageSources damageSources = EpicFightDamageSources.of(livingentity.level());
+							EpicFightDamageSource damageSource = damageSources.indirectMagic(this.getOwner(), this).setAnimation(Animations.DUMMY_ANIMATION).setStunType(StunType.SHORT);
+							damageSource.setInitialPosition(this.initialFirePosition);
+							damageSource.setImpact(2.0F);
+							livingentity.hurt(damageSource, 3.0F);
 						}
 					}
 				}

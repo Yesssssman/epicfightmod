@@ -5,16 +5,14 @@ import java.util.UUID;
 import java.util.function.BiFunction;
 
 import com.google.common.collect.Maps;
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.CreativeModeTab;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -69,11 +67,6 @@ public class RevelationSkill extends Skill {
 		
 		public Builder setResource(Resource resource) {
 			this.resource = resource;
-			return this;
-		}
-		
-		public Builder setCreativeTab(CreativeModeTab tab) {
-			this.tab = tab;
 			return this;
 		}
 		
@@ -220,17 +213,18 @@ public class RevelationSkill extends Skill {
 	public boolean shouldDraw(SkillContainer container) {
 		return container.getExecuter().getTarget() != null;
 	}
-	
+
+
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void drawOnGui(BattleModeGui gui, SkillContainer container, PoseStack poseStack, float x, float y) {
+	public void drawOnGui(BattleModeGui gui, SkillContainer container, GuiGraphics guiGraphics, float x, float y) {
+		PoseStack poseStack = guiGraphics.pose();
 		poseStack.pushPose();
 		poseStack.translate(0, (float)gui.getSlidingProgression(), 0);
-		RenderSystem.setShaderTexture(0, this.getSkillTexture());
-		GuiComponent.blit(poseStack, (int)x, (int)y, 24, 24, 0, 0, 1, 1, 1, 1);
+		guiGraphics.blit(this.getSkillTexture(), (int)x, (int)y, 24, 24, 0, 0, 1, 1, 1, 1);
 		int stacks = container.getRemainDuration() > 0 ? 0 : this.maxRevelationStacks.getOrDefault(container.getExecuter().getTarget().getType(), this.defaultRevelationStacks)
 																- container.getDataManager().getDataValue(STACKS);
-		gui.font.drawShadow(poseStack, String.format("%d", stacks), x + 18, y + 14, 16777215);
+		guiGraphics.drawString(gui.font, String.format("%d", stacks), x + 18, y + 14, 16777215, true);
 		poseStack.popPose();
 	}
 }

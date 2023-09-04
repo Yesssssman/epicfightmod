@@ -8,7 +8,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Camera;
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.BossHealthOverlay;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -394,7 +394,7 @@ public class RenderEngine {
 		public static void renderLivingEvent(RenderLivingEvent.Pre<? extends LivingEntity, ? extends EntityModel<? extends LivingEntity>> event) {
 			LivingEntity livingentity = event.getEntity();
 			
-			if (livingentity.level == null) {
+			if (livingentity.level() == null) {
 				return;
 			}
 			
@@ -425,7 +425,7 @@ public class RenderEngine {
 				}
 			}
 			
-			if (ClientEngine.getInstance().getPlayerPatch() != null && !renderEngine.minecraft.options.hideGui && !livingentity.level.getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI)) {
+			if (ClientEngine.getInstance().getPlayerPatch() != null && !renderEngine.minecraft.options.hideGui && !livingentity.level().getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI)) {
 				LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(livingentity, LivingEntityPatch.class);
 				
 				for (EntityIndicator entityIndicator : EntityIndicator.ENTITY_INDICATOR_RENDERERS) {
@@ -438,7 +438,7 @@ public class RenderEngine {
 
 		@SubscribeEvent
 		public static void itemTooltip(ItemTooltipEvent event) {
-			if (event.getPlayer() != null && event.getPlayer().getLevel().isClientSide) {
+			if (event.getEntity() != null && event.getEntity().level().isClientSide) {
 				CapabilityItem cap = EpicFightCapabilities.getItemStackCapabilityOr(event.getItemStack(), null);
 				LocalPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), LocalPlayerPatch.class);
 				
@@ -552,7 +552,7 @@ public class RenderEngine {
 					renderEngine.overlayManager.renderTick(window.getGuiScaledWidth(), window.getGuiScaledHeight());
 					
 					if (Minecraft.renderNames() && !(Minecraft.getInstance().screen instanceof UISetupScreen)) {
-						renderEngine.battleModeUI.renderGui(event.getPoseStack(), playerpatch, event.getPartialTick());
+						renderEngine.battleModeUI.renderGui(playerpatch, event.getGuiGraphics(), event.getPartialTick());
 					}
 				}
 			//}
@@ -564,6 +564,7 @@ public class RenderEngine {
 				if (EnderDragonPatch.INSTANCE_CLIENT != null) {
 					EnderDragonPatch dragonpatch = EnderDragonPatch.INSTANCE_CLIENT;
 					float stunShield = dragonpatch.getStunShield();
+					GuiGraphics guiGraphics = event.getGuiGraphics();
 					
 					if (stunShield > 0) {
 						float progression = stunShield / dragonpatch.getMaxStunShield();
@@ -571,9 +572,8 @@ public class RenderEngine {
 						int y = event.getY();
 						
 						RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-			            RenderSystem.setShaderTexture(0, BossHealthOverlay.GUI_BARS_LOCATION);
-						GuiComponent.blit(event.getPoseStack(), x, y + 6, 183, 2, 0, 45.0F, 182, 6, 255, 255);
-						GuiComponent.blit(event.getPoseStack(), x + (int)(183 * progression), y + 6, (int)(183 * (1.0F - progression)), 2, 0, 39.0F, 182, 6, 255, 255);
+						guiGraphics.blit(BossHealthOverlay.GUI_BARS_LOCATION, x, y + 6, 183, 2, 0, 45.0F, 182, 6, 255, 255);
+						guiGraphics.blit(BossHealthOverlay.GUI_BARS_LOCATION, x + (int)(183 * progression), y + 6, (int)(183 * (1.0F - progression)), 2, 0, 39.0F, 182, 6, 255, 255);
 					}
 				}
 			}

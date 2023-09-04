@@ -8,6 +8,7 @@ import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -28,6 +29,7 @@ import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.gui.screen.IngameConfigurationScreen;
+import yesman.epicfight.client.input.EpicFightKeyMappings;
 import yesman.epicfight.client.renderer.patched.item.EpicFightItemProperties;
 import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.config.ConfigurationIngame;
@@ -62,6 +64,7 @@ import yesman.epicfight.world.effect.EpicFightPotions;
 import yesman.epicfight.world.entity.EpicFightEntities;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
+import yesman.epicfight.world.item.EpicFightCreativeTabs;
 import yesman.epicfight.world.item.EpicFightItems;
 import yesman.epicfight.world.level.block.EpicFightBlocks;
 import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
@@ -109,6 +112,7 @@ public class EpicFightMod {
     	EpicFightMobEffects.EFFECTS.register(bus);
     	EpicFightPotions.POTIONS.register(bus);
         EpicFightAttributes.ATTRIBUTES.register(bus);
+        EpicFightCreativeTabs.TABS.register(bus);
         EpicFightItems.ITEMS.register(bus);
         EpicFightParticles.PARTICLES.register(bus);
         EpicFightEntities.ENTITIES.register(bus);
@@ -128,6 +132,11 @@ public class EpicFightMod {
         ConfigManager.loadConfig(ConfigManager.CLIENT_CONFIG, FMLPaths.CONFIGDIR.get().resolve(MODID + "-client.toml").toString());
         ConfigManager.loadConfig(ConfigManager.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve(CONFIG_FILE_PATH).toString());
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory(IngameConfigurationScreen::new));
+
+		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+			// only client side!!
+			bus.addListener(EpicFightKeyMappings::registerKeys);
+		});
     }
     
 	private void doClientStuff(final FMLClientSetupEvent event) {

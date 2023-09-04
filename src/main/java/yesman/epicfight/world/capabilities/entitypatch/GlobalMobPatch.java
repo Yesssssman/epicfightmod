@@ -27,6 +27,6 @@ public class GlobalMobPatch extends HurtableEntityPatch<Mob> {
 	}
 	
 	public boolean isStunned() {
-		return this.remainStunTime > 0 && this.original.level.getGameRules().getBoolean(EpicFightGamerules.GLOBAL_STUN);
+		return this.remainStunTime > 0 && this.original.level().getGameRules().getBoolean(EpicFightGamerules.GLOBAL_STUN);
 	}
 }

@@ -93,7 +93,7 @@ public class PlayerEvents {
 		if (oldCap != null) {
 			ServerPlayerPatch newCap = EpicFightCapabilities.getEntityPatch(event.getEntity(), ServerPlayerPatch.class);
 			
-			if ((!event.isWasDeath() || event.getOriginal().level.getGameRules().getBoolean(EpicFightGamerules.KEEP_SKILLS))) {
+			if ((!event.isWasDeath() || event.getOriginal().level().getGameRules().getBoolean(EpicFightGamerules.KEEP_SKILLS))) {
 				newCap.copySkillsFrom(oldCap);
 			}
 			
@@ -109,13 +109,13 @@ public class PlayerEvents {
 		ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(player, ServerPlayerPatch.class);
 		playerpatch.modifyLivingMotionByCurrentItem();
 		
-		EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.WEIGHT_PENALTY, player.level.getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY)), (ServerPlayer)player);
-		EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.DIABLE_ENTITY_UI, player.level.getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI)), (ServerPlayer)player);
+		EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.WEIGHT_PENALTY, player.level().getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY)), (ServerPlayer)player);
+		EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.DIABLE_ENTITY_UI, player.level().getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI)), (ServerPlayer)player);
 	}
 	
 	@SubscribeEvent
 	public static void itemUseStopEvent(LivingEntityUseItemEvent.Stop event) {
-		if (event.getEntity().level.isClientSide()) {
+		if (event.getEntity().level().isClientSide()) {
 			if (event.getEntity() instanceof LocalPlayer) {
 				ClientEngine.getInstance().renderEngine.zoomOut(0);
 			}
@@ -146,7 +146,7 @@ public class PlayerEvents {
 		PlayerPatch<?> playerpatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), PlayerPatch.class);
 		
 		if (playerpatch != null) {
-			if (!event.getEntity().level.getGameRules().getBoolean(EpicFightGamerules.DO_VANILLA_ATTACK) && isLivingTarget && playerpatch.getEpicFightDamageSource() == null) {
+			if (!event.getEntity().level().getGameRules().getBoolean(EpicFightGamerules.DO_VANILLA_ATTACK) && isLivingTarget && playerpatch.getEpicFightDamageSource() == null) {
 				event.setCanceled(true);
 			}
 		}

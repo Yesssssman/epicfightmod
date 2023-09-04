@@ -1,6 +1,5 @@
 package yesman.epicfight.world.capabilities.entitypatch;
 
-import com.google.common.collect.Lists;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -52,15 +51,13 @@ import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
+import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributeSupplier;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.TargetIndicatorCheckEvent;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
-
-import javax.annotation.Nullable;
-import java.util.List;
 
 public abstract class LivingEntityPatch<T extends LivingEntity> extends HurtableEntityPatch<T> {
 	public static final EntityDataAccessor<Float> STUN_SHIELD = new EntityDataAccessor<Float> (251, EntityDataSerializers.FLOAT);
@@ -132,9 +129,9 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	public void onFall(LivingFallEvent event) {
-		if (!this.getOriginal().level.isClientSide() && (this.isAirborneState() || (this.getOriginal().level.getGameRules().getBoolean(EpicFightGamerules.HAS_FALL_ANIMATION)
+		if (!this.getOriginal().level().isClientSide() && (this.isAirborneState() || (this.getOriginal().level().getGameRules().getBoolean(EpicFightGamerules.HAS_FALL_ANIMATION)
 				&& event.getDamageMultiplier() > 0.0F) && !this.getEntityState().inaction())) {
-			
+
 			if (this.isAirborneState() || event.getDistance() > 5.0F) {
 				StaticAnimation fallAnimation = this.getAnimator().getLivingAnimation(LivingMotions.LANDING_RECOVERY, this.getHitAnimation(StunType.FALL));
 				
@@ -178,11 +175,11 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	public EpicFightDamageSource getDamageSource(StaticAnimation animation, InteractionHand hand) {
-		EpicFightDamageSource damagesource = EpicFightDamageSource.commonEntityDamageSource("mob", this.original, animation);
+		EpicFightDamageSources damageSources = EpicFightDamageSources.of(this.original.level());
+		EpicFightDamageSource damagesource = damageSources.mobAttack(this.original).setAnimation(animation);
 		damagesource.setImpact(this.getImpact(hand));
 		damagesource.setArmorNegation(this.getArmorNegation(hand));
 		damagesource.setHurtItem(this.original.getItemInHand(hand));
-		
 		return damagesource;
 	}
 	
@@ -417,7 +414,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	    	this.original.setBoundingBox(new AABB(axisalignedbb.minX, axisalignedbb.minY, axisalignedbb.minZ, axisalignedbb.minX + (double)entitysize1.width,
 	    			axisalignedbb.minY + (double)entitysize1.height, axisalignedbb.minZ + (double)entitysize1.width));
 	    	
-	    	if (entitysize1.width > entitysize.width && !this.original.level.isClientSide()) {
+	    	if (entitysize1.width > entitysize.width && !this.original.level().isClientSide()) {
 	    		float f = entitysize.width - entitysize1.width;
 	        	this.original.move(MoverType.SELF, new Vec3(f, 0.0D, f));
 	    	}

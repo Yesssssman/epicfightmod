@@ -1,13 +1,10 @@
 package yesman.epicfight.gameasset;
 
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -29,7 +26,6 @@ import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.DragonFireball;
 import net.minecraft.world.level.ClipContext;
-import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
@@ -98,6 +94,7 @@ import yesman.epicfight.api.utils.LevelUtil;
 import yesman.epicfight.api.utils.TimePairList;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.api.utils.math.ValueModifier;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.main.EpicFightMod;
@@ -125,13 +122,13 @@ import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.PatchedP
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
+import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 import yesman.epicfight.world.damagesource.ExtraDamageInstance;
 import yesman.epicfight.world.damagesource.SourceTags;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
-import java.util.List;
-import java.util.Set;
+import org.joml.Quaternionf;
 
 @Mod.EventBusSubscriber(modid = EpicFightMod.MODID, bus = Bus.MOD)
 public class Animations {
@@ -541,7 +538,7 @@ public class Animations {
 							float ratio = (f - Math.abs(entitypatch.getOriginal().getXRot())) / f;
 							float yawOffset = entitypatch.getOriginal().getVehicle() != null ? entitypatch.getOriginal().getYHeadRot() : entitypatch.getOriginal().yBodyRot;
 							rawPose.getJointTransformData().get("Chest").frontResult(
-								  JointTransform.getRotation(Vector3f.YP.rotationDegrees(Mth.wrapDegrees(entitypatch.getOriginal().getYHeadRot() - yawOffset) * ratio))
+								  JointTransform.getRotation(QuaternionUtils.YP.rotationDegrees(Mth.wrapDegrees(entitypatch.getOriginal().getYHeadRot() - yawOffset) * ratio))
 								, OpenMatrix4f::mulAsOriginFront
 							);
 						}
@@ -699,16 +696,16 @@ public class Animations {
 					float yRot = Mth.clamp(Mth.wrapDegrees(entitypatch.getCameraYRot() - entitypatch.getOriginal().getYRot()), -60.0F, 60.0F);
 					
 					JointTransform chest = pose.getOrDefaultTransform("Chest");
-					chest.frontResult(JointTransform.getRotation(Vector3f.YP.rotationDegrees(yRot)), OpenMatrix4f::mulAsOriginFront);
+					chest.frontResult(JointTransform.getRotation(QuaternionUtils.YP.rotationDegrees(yRot)), OpenMatrix4f::mulAsOriginFront);
 
 					JointTransform head = pose.getOrDefaultTransform("Head");
-					MathUtils.mulQuaternion(Vector3f.XP.rotationDegrees(xRot), head.rotation(), head.rotation());
+					MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(xRot), head.rotation(), head.rotation());
 				})
 				.newTimePair(0.0F, Float.MAX_VALUE)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, true)
 				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, true);
 		BIPED_DEMOLITION_LEAP = new ActionAnimation(0.05F, 0.45F, "biped/skill/demolition_leap", biped);
-		
+
 		FIST_AUTO1 = new BasicAttackAnimation(0.08F, 0.0F, 0.11F, 0.16F, InteractionHand.OFF_HAND, null, biped.toolL, "biped/combat/fist_auto1", biped)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT);
 		FIST_AUTO2 = new BasicAttackAnimation(0.08F, 0.0F, 0.11F, 0.16F, null, biped.toolR, "biped/combat/fist_auto2", biped)
@@ -1095,13 +1092,14 @@ public class Animations {
 					TimeStampedEvent.create(0.3F, ReusableSources.WING_FLAP, AnimationEvent.Side.CLIENT), TimeStampedEvent.create(1.1F, (entitypatch, animation, params) -> {
 						entitypatch.playSound(EpicFightSounds.GROUND_SLAM.get(), 0, 0);
 						LivingEntity original = entitypatch.getOriginal();
-						BlockPos blockpos = original.level.getHeightmapPos(Heightmap.Types.WORLD_SURFACE, original.blockPosition());
-						original.level.addParticle(EpicFightParticles.GROUND_SLAM.get(), blockpos.getX(), blockpos.getY(), blockpos.getZ(), 3.0D, 100.0D, 1.0D);
+						BlockPos blockpos = original.level().getHeightmapPos(Heightmap.Types.WORLD_SURFACE, original.blockPosition());
+						original.level().addParticle(EpicFightParticles.GROUND_SLAM.get(), blockpos.getX(), blockpos.getY(), blockpos.getZ(), 3.0D, 100.0D, 1.0D);
 					}, AnimationEvent.Side.CLIENT),
 					TimeStampedEvent.create(1.1F, (entitypatch, animation, params) -> {
 						LivingEntity original = entitypatch.getOriginal();
-						DamageSource extDamageSource = EpicFightDamageSource.commonEntityDamageSource("mob", original, DRAGON_FLY_TO_GROUND).setStunType(StunType.KNOCKDOWN).cast();
-						for (Entity entity : original.level.getEntities(original, original.getBoundingBox().deflate(3.0D, 0.0D, 3.0D))) {
+						EpicFightDamageSources damageSources = EpicFightDamageSources.of(original.level());
+						DamageSource extDamageSource = damageSources.mobAttack(original).setAnimation(DRAGON_FLY_TO_GROUND).setStunType(StunType.KNOCKDOWN);
+						for (Entity entity : original.level().getEntities(original, original.getBoundingBox().deflate(3.0D, 0.0D, 3.0D))) {
 							entity.hurt(extDamageSource, 6.0F);
 						}
 					}, AnimationEvent.Side.SERVER)
@@ -1120,7 +1118,7 @@ public class Animations {
 				if (entitypatch instanceof EnderDragonPatch dragonpatch) {
 					Vec3f tipPosition = dragonpatch.getTipPointAnimation(dragon.legFrontR3.getName()).getTargetPosition();
 					LivingEntity original = entitypatch.getOriginal();
-					original.level.addParticle(EpicFightParticles.GROUND_SLAM.get(), tipPosition.x, tipPosition.y, tipPosition.z, 0.5D, 100.0D, 0.5D);
+					original.level().addParticle(EpicFightParticles.GROUND_SLAM.get(), tipPosition.x, tipPosition.y, tipPosition.z, 0.5D, 100.0D, 0.5D);
 				}
 			}, AnimationEvent.Side.CLIENT));
 		
@@ -1150,7 +1148,7 @@ public class Animations {
 				if (entitypatch instanceof EnderDragonPatch dragonpatch) {
 					Vec3f tipPosition = dragonpatch.getTipPointAnimation(dragon.legFrontR3.getName()).getTargetPosition();
 					LivingEntity original = entitypatch.getOriginal();
-					original.level.addParticle(EpicFightParticles.GROUND_SLAM.get(), tipPosition.x, tipPosition.y, tipPosition.z, 3.0D, 100.0D, 1.0D);
+					original.level().addParticle(EpicFightParticles.GROUND_SLAM.get(), tipPosition.x, tipPosition.y, tipPosition.z, 3.0D, 100.0D, 1.0D);
 				}
 			}, AnimationEvent.Side.CLIENT), TimeStampedEvent.create(1.85F, (entitypatch, animation, params) -> {
 				entitypatch.getAnimator().reserveAnimation(DRAGON_ATTACK4_RECOVERY);
@@ -1182,12 +1180,12 @@ public class Animations {
             double d11 = target.getZ() - d8;
             
             if (!original.isSilent()) {
-               original.level.levelEvent(null, 1017, original.blockPosition(), 0);
+               original.level().levelEvent(null, 1017, original.blockPosition(), 0);
             }
             
-            DragonFireball dragonfireball = new DragonFireball(original.level, original, d9, d10, d11);
+            DragonFireball dragonfireball = new DragonFireball(original.level(), original, d9, d10, d11);
             dragonfireball.moveTo(d6, d7, d8, 0.0F, 0.0F);
-            original.level.addFreshEntity(dragonfireball);
+            original.level().addFreshEntity(dragonfireball);
 		}, Side.SERVER));
 		
 		DRAGON_AIRSTRIKE = new StaticAnimation(0.35F, true, "dragon/airstrike", dragon)
@@ -1222,7 +1220,7 @@ public class Animations {
 				if (entitypatch instanceof EnderDragonPatch dragonpatch) {
 					Vec3f tipPosition = dragonpatch.getTipPointAnimation(dragon.legFrontR3.getName()).getTargetPosition();
 					LivingEntity original = entitypatch.getOriginal();
-					original.level.addParticle(EpicFightParticles.GROUND_SLAM.get(), tipPosition.x, tipPosition.y, tipPosition.z, 3.0D, 100.0D, 1.0D);
+					original.level().addParticle(EpicFightParticles.GROUND_SLAM.get(), tipPosition.x, tipPosition.y, tipPosition.z, 3.0D, 100.0D, 1.0D);
 				}
 			}, AnimationEvent.Side.CLIENT));
 		
@@ -1242,7 +1240,7 @@ public class Animations {
 				}
 			}, AnimationEvent.Side.SERVER), TimeStampedEvent.create(7.0F, (entitypatch, animation, params) -> {
 				Entity original = entitypatch.getOriginal();
-				original.level.addParticle(EpicFightParticles.FORCE_FIELD_END.get(), original.getX(), original.getY() + 2.0D, original.getZ(), 0, 0, 0);
+				original.level().addParticle(EpicFightParticles.FORCE_FIELD_END.get(), original.getX(), original.getY() + 2.0D, original.getZ(), 0, 0, 0);
 			}, AnimationEvent.Side.CLIENT));
 		
 		DRAGON_NEUTRALIZED = new EnderDragonActionAnimation(0.1F, "dragon/neutralized", dragon, new IKInfo[] {
@@ -1337,13 +1335,13 @@ public class Animations {
 						Vec3f keyOrigin = keyframes[startFrame].transform().translation().multiply(1.0F, 1.0F, 0.0F);
 						Vec3f keyLast = keyframes[3].transform().translation();
 						Vec3 pos = entitypatch.getOriginal().getEyePosition();
-						Vec3 targetpos = entitypatch.getOriginal().level.getEntity(witherpatch.getOriginal().getAlternativeTarget(0)).position();
+						Vec3 targetpos = entitypatch.getOriginal().level().getEntity(witherpatch.getOriginal().getAlternativeTarget(0)).position();
 						float horizontalDistance = (float)targetpos.subtract(pos).length();
 						float verticalDistance = (float)(targetpos.y - pos.y);
 						Vec3f prevPosition = Vec3f.sub(keyLast, keyOrigin, null);
 						Vec3f newPosition = new Vec3f(keyLast.x, verticalDistance, -horizontalDistance);
 						float scale = Math.min(newPosition.length() / prevPosition.length(), 5.0F);
-						Quaternion rotator = Vec3f.getRotatorBetween(newPosition, keyLast);
+						Quaternionf rotator = Vec3f.getRotatorBetween(newPosition, keyLast);
 						
 						for (int i = startFrame; i <= endFrame; i++) {
 							Vec3f translation = keyframes[i].transform().translation();
@@ -1364,7 +1362,7 @@ public class Animations {
 						}
 					}, Side.SERVER), TimeStampedEvent.create(0.4F, (entitypatch, animation, params) -> {
 						Entity entity = entitypatch.getOriginal();
-						entitypatch.getOriginal().level.addParticle(EpicFightParticles.ENTITY_AFTER_IMAGE.get(), entity.getX(), entity.getY(), entity.getZ(), Double.longBitsToDouble(entity.getId()), 0, 0);
+						entitypatch.getOriginal().level().addParticle(EpicFightParticles.ENTITY_AFTER_IMAGE.get(), entity.getX(), entity.getY(), entity.getZ(), Double.longBitsToDouble(entity.getId()), 0, 0);
 					}, Side.CLIENT))
 				.addEvents(StaticAnimationProperty.ON_BEGIN_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
 						if (entitypatch instanceof WitherPatch witherpatch) {
@@ -1387,7 +1385,7 @@ public class Animations {
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true)
 				.addEvents(StaticAnimationProperty.ON_BEGIN_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
 					Entity entity = entitypatch.getOriginal();
-					entity.level.addParticle(EpicFightParticles.NEUTRALIZE.get(), entity.getX(), entity.getEyeY(), entity.getZ(), 3.0D, Double.longBitsToDouble(15), Double.NaN);
+					entity.level().addParticle(EpicFightParticles.NEUTRALIZE.get(), entity.getX(), entity.getEyeY(), entity.getZ(), 3.0D, Double.longBitsToDouble(15), Double.NaN);
 				}, Side.CLIENT)
 			);
 		
@@ -1396,7 +1394,7 @@ public class Animations {
 				.addEvents(StaticAnimationProperty.ON_BEGIN_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
 					entitypatch.playSound(EpicFightSounds.WITHER_SPELL_ARMOR.get(), 5.0F, 0.0F, 0.0F);
 					Entity entity = entitypatch.getOriginal();
-					entity.level.addParticle(EpicFightParticles.BOSS_CASTING.get(), entity.getX(), entity.getEyeY(), entity.getZ(), 5.0D, Double.longBitsToDouble(20), Double.longBitsToDouble(4));
+					entity.level().addParticle(EpicFightParticles.BOSS_CASTING.get(), entity.getX(), entity.getEyeY(), entity.getZ(), 5.0D, Double.longBitsToDouble(20), Double.longBitsToDouble(4));
 				}, Side.CLIENT))
 				.addEvents(TimeStampedEvent.create(0.5F, (entitypatch, animation, params) -> {
 					((WitherPatch)entitypatch).setArmorActivated(true);
@@ -1459,14 +1457,14 @@ public class Animations {
 				}, Side.SERVER), TimeStampedEvent.create(0.9F, (entitypatch, animation, params) -> {
 					if (entitypatch instanceof WitherPatch witherpatch) {
 						WitherBoss witherboss = witherpatch.getOriginal();
-						witherboss.level.playLocalSound(witherboss.getX(), witherboss.getY(), witherboss.getZ(), EpicFightSounds.LASER_BLAST.get(), SoundSource.HOSTILE, 1.0F, 1.0F, false);
+						witherboss.level().playLocalSound(witherboss.getX(), witherboss.getY(), witherboss.getZ(), EpicFightSounds.LASER_BLAST.get(), SoundSource.HOSTILE, 1.0F, 1.0F, false);
 						
 						for (int i = 0; i < 3; i++) {
 							Vec3 laserDestination = witherpatch.getLaserTargetPosition(i);
 							Entity headTarget = witherpatch.getAlternativeTargetEntity(i);
 							
 							if (headTarget != null) {
-								witherpatch.getOriginal().level.addAlwaysVisibleParticle(EpicFightParticles.LASER.get(), witherboss.getHeadX(i), witherboss.getHeadY(i), witherboss.getHeadZ(i), laserDestination.x, laserDestination.y, laserDestination.z);
+								witherpatch.getOriginal().level().addAlwaysVisibleParticle(EpicFightParticles.LASER.get(), witherboss.getHeadX(i), witherboss.getHeadY(i), witherboss.getHeadZ(i), laserDestination.x, laserDestination.y, laserDestination.z);
 							}
 						}
 					}
@@ -1486,7 +1484,7 @@ public class Animations {
 								Vec3 direction = laserDestination.subtract(x, y, z);
 								Vec3 start = new Vec3(x, y, z);
 								Vec3 destination = start.add(direction.normalize().scale(200.0D));
-								BlockHitResult hitResult = witherboss.level.clip(new ClipContext(start, destination, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, null));
+								BlockHitResult hitResult = witherboss.level().clip(new ClipContext(start, destination, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, null));
 								Vec3 hitLocation = hitResult.getLocation();
 								double xLength = hitLocation.x - x;
 								double yLength = hitLocation.y - y;
@@ -1498,9 +1496,10 @@ public class Animations {
 								OBBCollider collider = new OBBCollider(0.25D, 0.25D, length * 0.5D, 0.0D, 0.0D, length * 0.5D);
 								collider.transform(OpenMatrix4f.createTranslation((float)-x, (float)y, (float)-z).rotateDeg(yRot, Vec3f.Y_AXIS).rotateDeg(-xRot, Vec3f.X_AXIS));
 								List<Entity> hitEntities = collider.getCollideEntities(witherboss);
-								
-								DamageSource damagesource = EpicFightDamageSource.commonEntityDamageSource("wither_beam", witherboss, WITHER_BEAM).cast().setMagic();
-								
+
+								EpicFightDamageSources damageSources = EpicFightDamageSources.of(witherboss.level());
+								EpicFightDamageSource damagesource = damageSources.witherBeam(witherboss).setAnimation(WITHER_BEAM);
+
 								hitEntities.forEach((entity) -> {
 									if (!hurted.contains(entity)) {
 										hurted.add(entity);
@@ -1508,8 +1507,8 @@ public class Animations {
 									}
 								});
 								
-								Explosion.BlockInteraction explosion$blockinteraction = ForgeEventFactory.getMobGriefingEvent(witherboss.level, witherboss) ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE;
-								witherboss.level.explode(witherboss, hitLocation.x, hitLocation.y, hitLocation.z, 0.0F, false, explosion$blockinteraction);
+								Level.ExplosionInteraction explosion$blockinteraction = ForgeEventFactory.getMobGriefingEvent(witherboss.level(), witherboss) ? Level.ExplosionInteraction.BLOCK : Level.ExplosionInteraction.NONE;
+								witherboss.level().explode(witherboss, hitLocation.x, hitLocation.y, hitLocation.z, 0.0F, false, explosion$blockinteraction);
 							}
 						}
 					}
@@ -1573,7 +1572,7 @@ public class Animations {
 								LivingEntityPatch<?> targetpatch = EpicFightCapabilities.getEntityPatch(e, LivingEntityPatch.class);
 								
 								if (targetpatch != null) {
-									DamageSource dmgSource = attackAnimation.getEpicFightDamageSource(entitypatch, e, attackAnimation.phases[0]).cast();
+									DamageSource dmgSource = attackAnimation.getEpicFightDamageSource(entitypatch, e, attackAnimation.phases[0]);
 									
 									if (!targetpatch.tryHurt(dmgSource, 0).resultType.dealtDamage()) {
 										continue;
@@ -1642,12 +1641,12 @@ public class Animations {
 					TimeStampedEvent.create(0.05F, ReusableSources.PLAY_SOUND, AnimationEvent.Side.SERVER).params(EpicFightSounds.SWORD_IN.get()),
 					TimeStampedEvent.create(0.7F, (entitypatch, animation, params) -> {
 						Entity entity = entitypatch.getOriginal();
-						entity.level.addParticle(EpicFightParticles.ENTITY_AFTER_IMAGE.get(), entity.getX(), entity.getY(), entity.getZ(), Double.longBitsToDouble(entity.getId()), 0, 0);
+						entity.level().addParticle(EpicFightParticles.ENTITY_AFTER_IMAGE.get(), entity.getX(), entity.getY(), entity.getZ(), Double.longBitsToDouble(entity.getId()), 0, 0);
 						RandomSource random = entitypatch.getOriginal().getRandom();
 						double x = entity.getX() + (random.nextDouble() - random.nextDouble()) * 2.0D;
 						double y = entity.getY();
 						double z = entity.getZ() + (random.nextDouble() - random.nextDouble()) * 2.0D;
-						entity.level.addParticle(ParticleTypes.EXPLOSION, x, y, z, random.nextDouble() * 0.005D, 0.0D, 0.0D);
+						entity.level().addParticle(ParticleTypes.EXPLOSION, x, y, z, random.nextDouble() * 0.005D, 0.0D, 0.0D);
 					}, Side.CLIENT)
 				);
 		
@@ -1778,14 +1777,14 @@ public class Animations {
 					for (int x = -1; x <= 1; x += 2) {
 						for (int z = -1; z <= 1; z += 2) {
 							Vec3 rand = new Vec3(Math.random() * x, Math.random(), Math.random() * z).normalize().scale(2.0D);
-							entitypatch.getOriginal().level.addParticle(EpicFightParticles.TSUNAMI_SPLASH.get(), pos.x + rand.x, pos.y + rand.y - 1.0D, pos.z + rand.z, rand.x * 0.1D, rand.y * 0.1D, rand.z * 0.1D);
+							entitypatch.getOriginal().level().addParticle(EpicFightParticles.TSUNAMI_SPLASH.get(), pos.x + rand.x, pos.y + rand.y - 1.0D, pos.z + rand.z, rand.x * 0.1D, rand.y * 0.1D, rand.z * 0.1D);
 						}
 					}
 				}, AnimationEvent.Side.CLIENT))
 				.addEvents(TimeStampedEvent.create(0.35F, (entitypatch, animation, params) -> {
 					entitypatch.playSound(SoundEvents.TRIDENT_RIPTIDE_3, 0, 0);
 				}, Side.CLIENT), TimeStampedEvent.create(0.35F, (entitypatch, animation, params) -> {
-					if (entitypatch.getOriginal().isOnGround()) {
+					if (entitypatch.getOriginal().onGround()) {
 						entitypatch.setAirborneState(true);
 					}
 				}, AnimationEvent.Side.SERVER));
@@ -1808,14 +1807,14 @@ public class Animations {
 					for (int x = -1; x <= 1; x += 2) {
 						for (int z = -1; z <= 1; z += 2) {
 							Vec3 rand = new Vec3(Math.random() * x, Math.random(), Math.random() * z).normalize().scale(2.0D);
-							entitypatch.getOriginal().level.addParticle(EpicFightParticles.TSUNAMI_SPLASH.get(), pos.x + rand.x, pos.y + rand.y - 1.0D, pos.z + rand.z, rand.x * 0.1D, rand.y * 0.1D, rand.z * 0.1D);
+							entitypatch.getOriginal().level().addParticle(EpicFightParticles.TSUNAMI_SPLASH.get(), pos.x + rand.x, pos.y + rand.y - 1.0D, pos.z + rand.z, rand.x * 0.1D, rand.y * 0.1D, rand.z * 0.1D);
 						}
 					}
 				}, AnimationEvent.Side.CLIENT))
 				.addEvents(TimeStampedEvent.create(0.35F, (entitypatch, animation, params) -> {
 					entitypatch.playSound(SoundEvents.TRIDENT_RIPTIDE_3, 0, 0);
 				}, Side.CLIENT), TimeStampedEvent.create(0.35F, (entitypatch, animation, params) -> {
-					if (entitypatch.getOriginal().isOnGround()) {
+					if (entitypatch.getOriginal().onGround()) {
 						entitypatch.setAirborneState(true);
 					}
 				}, AnimationEvent.Side.SERVER));
@@ -1853,11 +1852,11 @@ public class Animations {
 														             .mulBack(OpenMatrix4f.createRotatorDeg(180.0F, Vec3f.Y_AXIS)
 														             .mulBack(entitypatch.getModelMatrix(1.0F))));
 			
-			Level level = entitypatch.getOriginal().level;
+			Level level = entitypatch.getOriginal().level();
 			Vec3 weaponEdge = OpenMatrix4f.transform(modelTransform, ((Vec3f)params[0]).toDoubleVector());
 			Vec3 slamStartPos;
 			BlockHitResult hitResult = level.clip(new ClipContext(position.add(0.0D, 0.1D, 0.0D), weaponEdge, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entitypatch.getOriginal()));
-			
+
 			if (hitResult.getType() == HitResult.Type.BLOCK) {
 				Direction direction = hitResult.getDirection();
 				BlockPos collidePos = hitResult.getBlockPos().offset(direction.getStepX(), direction.getStepY(), direction.getStepZ());
@@ -1896,7 +1895,7 @@ public class Animations {
 				int i = (int)phase.getProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER).orElse(ValueModifier.setter(3)).getTotalValue(0);
 				float damage = phase.getProperty(AttackPhaseProperty.DAMAGE_MODIFIER).orElse(ValueModifier.setter(8.0F)).getTotalValue(0);
 				LivingEntity original = entitypatch.getOriginal();
-				ServerLevel level = (ServerLevel)original.level;
+				ServerLevel level = (ServerLevel)original.level();
 				float total = damage + ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create().get(original, original.getItemInHand(InteractionHand.MAIN_HAND), null, damage);
 				
 				List<Entity> list = level.getEntities(original, original.getBoundingBox().inflate(10.0D, 4.0D, 10.0D), (e) -> {
@@ -1914,8 +1913,8 @@ public class Animations {
 					lightningbolt.moveTo(Vec3.atBottomCenterOf(blockpos));
 					lightningbolt.setDamage(0.0F);
 					lightningbolt.setCause(entitypatch instanceof ServerPlayerPatch serverPlayerPatch ? serverPlayerPatch.getOriginal() : null);
-					e.hurt(attackAnimation.getEpicFightDamageSource(DamageSource.LIGHTNING_BOLT, entitypatch, e, phase)
-														.setHurtItem(entitypatch.getOriginal().getItemInHand(InteractionHand.MAIN_HAND)).cast(), total);
+					e.hurt(attackAnimation.getEpicFightDamageSource(e.level().damageSources().lightningBolt(), entitypatch, e, phase)
+														.setHurtItem(entitypatch.getOriginal().getItemInHand(InteractionHand.MAIN_HAND)), total);
 					e.thunderHit(level, lightningbolt);
 
 					level.addFreshEntity(lightningbolt);
@@ -1940,18 +1939,18 @@ public class Animations {
 
 			float pitch = entitypatch.getAttackDirectionPitch();
 			JointTransform chest = pose.getOrDefaultTransform("Chest");
-			chest.frontResult(JointTransform.getRotation(Vector3f.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginFront);
+			chest.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginFront);
 			
 			if (entitypatch instanceof PlayerPatch) {
 				JointTransform head = pose.getOrDefaultTransform("Head");
-				MathUtils.mulQuaternion(Vector3f.XP.rotationDegrees(pitch), head.rotation(), head.rotation());
+				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(pitch), head.rotation(), head.rotation());
 			}
 		};
 		
 		public static final AnimationProperty.PoseModifier ROOT_X_MODIFIER = (self, pose, entitypatch, time, partialTicks) -> {
 			float pitch = -entitypatch.getOriginal().getXRot();
 			JointTransform chest = pose.getOrDefaultTransform("Root");
-			chest.frontResult(JointTransform.getRotation(Vector3f.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginFront);
+			chest.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginFront);
 		};
 		
 		public static final AnimationProperty.PoseModifier FLYING_CORRECTION = (self, pose, entitypatch, elapsedTime, partialTicks) -> {
@@ -1967,12 +1966,12 @@ public class Animations {
                 double d3 = vec3d1.x * vec3d.z - vec3d1.z * vec3d.x;
                 float zRot = Mth.clamp((float)(Math.signum(d3) * Math.acos(d2)), -1.0F, 1.0F);
 
-                root.frontResult(JointTransform.getRotation(Vector3f.ZP.rotation(zRot)), OpenMatrix4f::mulAsOriginFront);
+                root.frontResult(JointTransform.getRotation(QuaternionUtils.ZP.rotation(zRot)), OpenMatrix4f::mulAsOriginFront);
 
                 float xRot = (float) MathUtils.getXRotOfVector(vec3d1) * 2.0F;
 
-                MathUtils.mulQuaternion(Vector3f.XP.rotationDegrees(xRot), root.rotation(), root.rotation());
-                MathUtils.mulQuaternion(Vector3f.XP.rotationDegrees(-xRot), head.rotation(), head.rotation());
+                MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(xRot), root.rotation(), root.rotation());
+                MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(-xRot), head.rotation(), head.rotation());
             }
 		};
 
@@ -1986,8 +1985,8 @@ public class Animations {
             	JointTransform root = pose.getOrDefaultTransform("Root");
             	JointTransform head = pose.getOrDefaultTransform("Head");
                 float xRot = (float) MathUtils.getXRotOfVector(vec3d1) * 2.0F;
-                MathUtils.mulQuaternion(Vector3f.XP.rotationDegrees(-xRot), root.rotation(), root.rotation());
-                MathUtils.mulQuaternion(Vector3f.XP.rotationDegrees(xRot), head.rotation(), head.rotation());
+                MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(-xRot), root.rotation(), root.rotation());
+                MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(xRot), head.rotation(), head.rotation());
             }
 		};
 

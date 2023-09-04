@@ -1,5 +1,5 @@
 {
-    "type": "minecraft:smithing",
+    "type": "minecraft:smithing_transform",
     "base": {
         "item": "epicfight:diamond_greatsword"
     },
@@ -8,5 +8,8 @@
     },
     "result": {
         "item": "epicfight:netherite_greatsword"
+    },
+    "template": {
+      "item": "minecraft:netherite_upgrade_smithing_template"
     }
 }

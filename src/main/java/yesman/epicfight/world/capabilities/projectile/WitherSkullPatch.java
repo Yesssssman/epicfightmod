@@ -39,9 +39,9 @@ public class WitherSkullPatch extends ProjectilePatch<WitherSkull> {
 		if (!(event.getRayTraceResult() instanceof EntityHitResult)) {
 			if (Math.random() < 0.2D) {
 				Vec3 location = event.getRayTraceResult().getLocation();
-				BlockPos blockpos = new BlockPos(location);
+				BlockPos blockpos = new BlockPos.MutableBlockPos(location.x, location.y, location.z);
 				Projectile projectile = event.getProjectile();
-				ServerLevel level = (ServerLevel)projectile.level;
+				ServerLevel level = (ServerLevel)projectile.level();
 				EntityType<?> entityType = EpicFightEntities.WITHER_SKELETON_MINION.get();
 				
 				if (NaturalSpawner.isSpawnPositionOk(SpawnPlacements.getPlacementType(entityType), level, blockpos, entityType) && SpawnPlacements.checkSpawnRules(entityType, level, MobSpawnType.REINFORCEMENT, blockpos, level.random)) {

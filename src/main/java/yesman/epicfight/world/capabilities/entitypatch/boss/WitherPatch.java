@@ -18,7 +18,6 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
@@ -128,7 +127,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 		
 		if (!this.getEntityState().inaction()) {
 			int targetId = this.original.getAlternativeTarget(0);
-			Entity target = this.original.level.getEntity(targetId);
+			Entity target = this.original.level().getEntity(targetId);
 			
 			if (target != null) {
 				Vec3 vec3 = target.position().subtract(this.original.position()).normalize();
@@ -165,7 +164,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 			}
 		}
 		
-		if (this.animator.getPlayerFor(null).getAnimation().equals(Animations.WITHER_CHARGE) && this.getEntityState().attacking() && ForgeEventFactory.getMobGriefingEvent(this.original.level, this.original)) {
+		if (this.animator.getPlayerFor(null).getAnimation().equals(Animations.WITHER_CHARGE) && this.getEntityState().attacking() && ForgeEventFactory.getMobGriefingEvent(this.original.level(), this.original)) {
 			int x = Mth.floor(this.original.getX());
 			int y = Mth.floor(this.original.getY());
 			int z = Mth.floor(this.original.getZ());
@@ -178,17 +177,17 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 						int l = y + k;
 						int i1 = z + k2;
 						BlockPos blockpos = new BlockPos(l2, l, i1);
-						BlockState blockstate = this.original.level.getBlockState(blockpos);
+						BlockState blockstate = this.original.level().getBlockState(blockpos);
 						
-						if (blockstate.canEntityDestroy(this.original.level, blockpos, this.original) && ForgeEventFactory.onEntityDestroyBlock(this.original, blockpos, blockstate)) {
-							flag = this.original.level.destroyBlock(blockpos, true, this.original) || flag;
+						if (blockstate.canEntityDestroy(this.original.level(), blockpos, this.original) && ForgeEventFactory.onEntityDestroyBlock(this.original, blockpos, blockstate)) {
+							flag = this.original.level().destroyBlock(blockpos, true, this.original) || flag;
 						}
 					}
 				}
 			}
 			
 			if (flag) {
-				this.original.level.levelEvent(null, 1022, this.original.blockPosition(), 0);
+				this.original.level().levelEvent(null, 1022, this.original.blockPosition(), 0);
 			}
 		}
 		
@@ -263,10 +262,10 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	public void onDeath(LivingDeathEvent event) {
 		super.onDeath(event);
 		
-		if (!this.isLogicalClient() && this.original.level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+		if (!this.isLogicalClient() && this.original.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
 			Vec3 startMovement = this.original.getLookAngle().scale(0.4D).add(0.0D, 0.63D, 0.0D);
-			ItemEntity itemEntity = new DroppedNetherStar(this.original.level, this.original.position().add(0.0D, this.original.getBbHeight() * 0.5D, 0.0D), startMovement);
-			this.original.level.addFreshEntity(itemEntity);
+			ItemEntity itemEntity = new DroppedNetherStar(this.original.level(), this.original.position().add(0.0D, this.original.getBbHeight() * 0.5D, 0.0D), startMovement);
+			this.original.level().addFreshEntity(itemEntity);
 		}
 	}
 	
@@ -343,13 +342,13 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	
 	public Entity getLaserTargetEntity(int head) {
 		int laserTarget = this.original.getEntityData().get(DATA_LASER_TARGETS.get(head));
-		return laserTarget > 0 ? this.original.level.getEntity(laserTarget) : null;
+		return laserTarget > 0 ? this.original.level().getEntity(laserTarget) : null;
 	}
 	
 	public Entity getAlternativeTargetEntity(int head) {
 		int id = this.original.getAlternativeTarget(head);
 		
-		return id > 0 ? this.original.level.getEntity(id) : null;
+		return id > 0 ? this.original.level().getEntity(id) : null;
 	}
 	
 	public double getHeadX(int index) {
@@ -416,8 +415,8 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 					if (nearbyEnemies.size() > 0) {
 						LivingEntity randomTarget = nearbyEnemies.get(WitherPatch.this.original.getRandom().nextInt(nearbyEnemies.size()));
 						Vec3 summonPosition = randomTarget.position().add(new Vec3(0.0D, 0.0D, 6.0D).yRot(WitherPatch.this.original.getRandom().nextFloat() * 360.0F));
-						WitherGhostClone ghostclone = new WitherGhostClone((ServerLevel)WitherPatch.this.original.level, summonPosition, randomTarget);
-						WitherPatch.this.original.level.addFreshEntity(ghostclone);
+						WitherGhostClone ghostclone = new WitherGhostClone((ServerLevel)WitherPatch.this.original.level(), summonPosition, randomTarget);
+						WitherPatch.this.original.level().addFreshEntity(ghostclone);
 					} else {
 						this.ghostSummonCount = this.maxGhostSpawn + 1;
 					}
@@ -453,7 +452,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 		}
 		
 		public List<LivingEntity> getNearbyTargets() {
-			return WitherPatch.this.original.level.getNearbyEntities(LivingEntity.class, WTIHER_GHOST_TARGETING_CONDITIONS, WitherPatch.this.original, WitherPatch.this.original.getBoundingBox().inflate(20.0D, 5.0D, 20.0D));
+			return WitherPatch.this.original.level().getNearbyEntities(LivingEntity.class, WTIHER_GHOST_TARGETING_CONDITIONS, WitherPatch.this.original, WitherPatch.this.original.getBoundingBox().inflate(20.0D, 5.0D, 20.0D));
 		}
 	}
 	
@@ -471,7 +470,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 		public void tick() {
 			WitherBoss witherBoss = WitherPatch.this.getOriginal();
 			Vec3 vec3 = witherBoss.getDeltaMovement().multiply(1.0D, 0.6D, 1.0D);
-			Entity entity = witherBoss.level.getEntity(WitherPatch.this.original.getAlternativeTarget(0));
+			Entity entity = witherBoss.level().getEntity(WitherPatch.this.original.getAlternativeTarget(0));
 			
 			if (!WitherPatch.this.getEntityState().hurt() && !WitherPatch.this.blockedNow) {
 				if (entity != null) {

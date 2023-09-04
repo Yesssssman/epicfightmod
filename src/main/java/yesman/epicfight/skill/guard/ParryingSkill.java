@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -90,7 +91,7 @@ public class ParryingSkill extends GuardSkill {
 				boolean successParrying = playerentity.tickCount - container.getDataManager().getDataValue(LAST_ACTIVE) < PARRY_WINDOW;
 				float penalty = container.getDataManager().getDataValue(PENALTY);
 				event.getPlayerPatch().playSound(EpicFightSounds.CLASH.get(), -0.05F, 0.1F);
-				EpicFightParticles.HIT_BLUNT.get().spawnParticleWithArgument(((ServerLevel)playerentity.level), HitParticleType.FRONT_OF_EYES, HitParticleType.ZERO, playerentity, damageSource.getDirectEntity());
+				EpicFightParticles.HIT_BLUNT.get().spawnParticleWithArgument(((ServerLevel)playerentity.level()), HitParticleType.FRONT_OF_EYES, HitParticleType.ZERO, playerentity, damageSource.getDirectEntity());
 				
 				if (successParrying) {
 					event.setParried(true);
@@ -131,7 +132,7 @@ public class ParryingSkill extends GuardSkill {
 	
 	@Override
 	protected boolean isBlockableSource(DamageSource damageSource, boolean advanced) {
-		return (damageSource.isProjectile() && advanced) || super.isBlockableSource(damageSource, false);
+		return (damageSource.is(DamageTypeTags.IS_PROJECTILE) && advanced) || super.isBlockableSource(damageSource, false);
 	}
 	
 	@Nullable

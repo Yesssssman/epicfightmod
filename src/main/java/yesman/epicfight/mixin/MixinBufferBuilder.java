@@ -4,10 +4,11 @@ import com.google.common.primitives.Floats;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
-import com.mojang.math.Vector3f;
+import com.mojang.blaze3d.vertex.VertexSorting;
 import it.unimi.dsi.fastutil.ints.IntArrays;
 import it.unimi.dsi.fastutil.ints.IntConsumer;
 import net.minecraft.util.Mth;
+import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,22 +32,17 @@ public abstract class MixinBufferBuilder {
 	@Shadow private VertexFormat.Mode mode;
 	@Shadow private boolean building;
 	@Shadow private Vector3f[] sortingPoints;
-	@Shadow private float sortX;
-	@Shadow private float sortY;
-	@Shadow private float sortZ;
+	@Shadow private VertexSorting sorting;
 	@Shadow private boolean indexOnly;
 
 	@Shadow
 	private void putSortedQuadIndices(VertexFormat.IndexType indexType) {}
 
-	@Inject(at = @At(value = "HEAD"), method = "setQuadSortOrigin(FFF)V")
-	public void epicfight_setQuadSortOrigin(float x, float y, float z, CallbackInfo callbackInfo) {
+	@Inject(at = @At(value = "HEAD"), method = "setQuadSorting")
+	public void epicfight_setQuadSortOrigin(VertexSorting sorting, CallbackInfo ci) {
 		if (this.mode == VertexFormat.Mode.TRIANGLES) {
-			if (this.sortX != x || this.sortY != y || this.sortZ != z) {
-				this.sortX = x;
-				this.sortY = y;
-				this.sortZ = z;
-				
+			if (this.sorting != sorting) {
+				this.sorting = sorting;
 				if (this.sortingPoints == null) {
 					this.sortingPoints = this.makeTrianglesSortingPoints();
 				}
@@ -66,18 +62,7 @@ public abstract class MixinBufferBuilder {
 		}
 	}
 	private void putSortedTriangleIndices(VertexFormat.IndexType indexType) {
-		float[] afloat = new float[this.sortingPoints.length];
-		int[] aint = new int[this.sortingPoints.length];
-		
-		for (int i = 0; i < this.sortingPoints.length; aint[i] = i++) {
-			float f = this.sortingPoints[i].x() - this.sortX;
-			float f1 = this.sortingPoints[i].y() - this.sortY;
-			float f2 = this.sortingPoints[i].z() - this.sortZ;
-			afloat[i] = f * f + f1 * f1 + f2 * f2;
-		}
-		
-		IntArrays.mergeSort(aint, (p_166784_, p_166785_) -> Floats.compare(afloat[p_166785_], afloat[p_166784_]));
-		
+		int[] aint = this.sorting.sort(this.sortingPoints);
 		IntConsumer intconsumer = this.intConsumer(this.nextElementByte,indexType);
 		
 		for (int j : aint) {

@@ -94,7 +94,7 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 			}
 		}
 		
-		List<Entity> entities = entitypatch.getOriginal().level.getEntities(entitypatch.getOriginal(), outerBox, (entity) -> {
+		List<Entity> entities = entitypatch.getOriginal().level().getEntities(entitypatch.getOriginal(), outerBox, (entity) -> {
 			if (entity instanceof PartEntity) {
 				if (((PartEntity<?>)entity).getParent().is(entitypatch.getOriginal())) {
 					return false;

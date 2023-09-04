@@ -4,6 +4,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.ThrownTrident;
@@ -91,8 +92,11 @@ public class ThrownTridentPatch extends ProjectilePatch<ThrownTrident> {
 			}
 			
 			if (this.innateActivated) {
-				List<Entity> entities = this.original.level.getEntities(this.original, this.original.getBoundingBox().inflate(1.0D, 1.0D, 1.0D));
-				EpicFightDamageSource source = new IndirectEpicFightDamageSource("trident", this.original.getOwner(), this.original, StunType.HOLD)
+				List<Entity> entities = this.original.level().getEntities(this.original, this.original.getBoundingBox().inflate(1.0D, 1.0D, 1.0D));
+
+				EpicFightDamageSources damageSources = EpicFightDamageSources.of(this.original.level());
+				EpicFightDamageSource source = damageSources.trident(this.original.getOwner(), this.original)
+						.setStunType(StunType.HOLD)
 						.addTag(SourceTags.WEAPON_INNATE)
 						.addExtraDamage(ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create())
 						.setDamageModifier(ValueModifier.multiplier(1.4F))
@@ -108,9 +112,9 @@ public class ThrownTridentPatch extends ProjectilePatch<ThrownTrident> {
 					if (entity instanceof LivingEntity livingentity) {
 						f += EnchantmentHelper.getDamageBonus(this.original.tridentItem, livingentity.getMobType());
 						
-						if (entity.hurt(source.cast(), f)) {
+						if (entity.hurt(source, f)) {
 							entity.playSound(EpicFightSounds.BLADE_HIT.get(), 1.0F, 1.0F);
-							((ServerLevel)entity.level).sendParticles(EpicFightParticles.HIT_BLADE.get()
+							((ServerLevel)entity.level()).sendParticles(EpicFightParticles.HIT_BLADE.get()
 									, entity.position().x, entity.position().y + entity.getBbHeight() * 0.5D, entity.position().z, 0, 0, 0, 0, 1.0D);
 						}
 					}

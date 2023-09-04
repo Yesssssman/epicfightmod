@@ -74,7 +74,7 @@ public class SPModifyPlayerData {
 	public static void handle(SPModifyPlayerData msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
 			Minecraft mc = Minecraft.getInstance();
-			Entity entity = mc.player.level.getEntity(msg.entityId);
+			Entity entity = mc.player.level().getEntity(msg.entityId);
 			
 			if (entity != null) {
 				if (entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null) instanceof PlayerPatch<?> playerpatch) {
@@ -89,7 +89,7 @@ public class SPModifyPlayerData {
 						playerpatch.setLastAttackSuccess((boolean)msg.data.get("lastAttackSuccess"));
 						break;
 					case SET_GRAPPLE_TARGET:
-						Entity grapplingTarget = mc.player.level.getEntity((int)msg.data.get("grapplingTarget"));
+						Entity grapplingTarget = mc.player.level().getEntity((int)msg.data.get("grapplingTarget"));
 						
 						if (grapplingTarget instanceof LivingEntity) {
 							playerpatch.setGrapplingTarget((LivingEntity)grapplingTarget);

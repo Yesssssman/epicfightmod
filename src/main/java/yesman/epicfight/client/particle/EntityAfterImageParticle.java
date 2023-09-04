@@ -2,7 +2,6 @@ package yesman.epicfight.client.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -21,6 +20,8 @@ import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.renderer.patched.entity.PatchedEntityRenderer;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+
+import org.joml.Matrix4f;
 
 @OnlyIn(Dist.CLIENT)
 public class EntityAfterImageParticle extends CustomModelParticle<AnimatedMesh> {

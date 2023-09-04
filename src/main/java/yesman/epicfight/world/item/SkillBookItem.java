@@ -21,6 +21,7 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.function.Consumer;
 
 public class SkillBookItem extends Item {
 	public static void setContainingSkill(String name, ItemStack stack) {
@@ -58,13 +59,12 @@ public class SkillBookItem extends Item {
 		}
 	}
 	
-	@Override
-	public void fillItemCategory(CreativeModeTab group, NonNullList<ItemStack> items) {
-		SkillManager.getLearnableSkillNames((skillBuilder) -> (skillBuilder.isLearnable() && (group == skillBuilder.getCreativeTab() || group == CreativeModeTab.TAB_SEARCH)))
+	public void fillItemCategory(Consumer<ItemStack> items) {
+		SkillManager.getLearnableSkillNames(Skill.Builder::isLearnable)
 			.forEach((rl) -> {
 				ItemStack stack = new ItemStack(this);
 				setContainingSkill(rl.toString(), stack);
-				items.add(stack);
+				items.accept(stack);
 			}
 		);
 	}

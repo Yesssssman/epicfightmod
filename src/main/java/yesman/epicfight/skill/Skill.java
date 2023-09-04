@@ -3,7 +3,7 @@ package yesman.epicfight.skill;
 import java.util.List;
 
 import com.google.common.collect.Lists;
-import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
@@ -39,8 +39,7 @@ public abstract class Skill {
 		protected SkillCategory category;
 		protected ActivateType activateType;
 		protected Resource resource;
-		protected CreativeModeTab tab = EpicFightCreativeTabs.ITEMS;
-		
+
 		public Builder<T> setRegistryName(ResourceLocation registryName) {
 			this.registryName = registryName;
 			return this;
@@ -59,15 +58,6 @@ public abstract class Skill {
 		public Builder<T> setResource(Resource resource) {
 			this.resource = resource;
 			return this;
-		}
-		
-		public Builder<T> setCreativeTab(CreativeModeTab tab) {
-			this.tab = tab;
-			return this;
-		}
-		
-		public CreativeModeTab getCreativeTab() {
-			return this.tab;
 		}
 		
 		public ResourceLocation getRegistryName() {
@@ -439,8 +429,7 @@ public abstract class Skill {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public void drawOnGui(BattleModeGui gui, SkillContainer container, PoseStack poseStack, float x, float y) {
-		
+	public void drawOnGui(BattleModeGui gui, SkillContainer container, GuiGraphics guiGraphics, float x, float y) {
 	}
 	
 	@OnlyIn(Dist.CLIENT)

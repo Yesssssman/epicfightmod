@@ -44,6 +44,7 @@ import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
+import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 import yesman.epicfight.world.entity.eventlistener.AttackEndEvent;
 import yesman.epicfight.world.entity.eventlistener.DealtDamageEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
@@ -227,8 +228,8 @@ public class AttackAnimation extends ActionAnimation {
 									playerpatch.getEventListener().triggerEvents(EventType.DEALT_DAMAGE_EVENT_POST, new DealtDamageEvent(playerpatch, trueEntity, source, attackResult.damage));
 								}
 								
-								hitten.level.playSound(null, hitten.getX(), hitten.getY(), hitten.getZ(), this.getHitSound(entitypatch, phase), hitten.getSoundSource(), 1.0F, 1.0F);
-								this.spawnHitParticle((ServerLevel)hitten.level, entitypatch, hitten, phase);
+								hitten.level().playSound(null, hitten.getX(), hitten.getY(), hitten.getZ(), this.getHitSound(entitypatch, phase), hitten.getSoundSource(), 1.0F, 1.0F);
+								this.spawnHitParticle((ServerLevel)hitten.level(), entitypatch, hitten, phase);
 							}
 							
 							if (attackResult.resultType.shouldCount()) {
@@ -268,7 +269,7 @@ public class AttackAnimation extends ActionAnimation {
 	}
 	
 	public EpicFightDamageSource getEpicFightDamageSource(LivingEntityPatch<?> entitypatch, Entity target, Phase phase) {
-		return this.getEpicFightDamageSource(entitypatch.getDamageSource(this, phase.hand).cast(), entitypatch, target, phase);
+		return this.getEpicFightDamageSource(entitypatch.getDamageSource(this, phase.hand), entitypatch, target, phase);
 	}
 	
 	public EpicFightDamageSource getEpicFightDamageSource(DamageSource originalSource, LivingEntityPatch<?> entitypatch, Entity target, Phase phase) {
@@ -281,7 +282,7 @@ public class AttackAnimation extends ActionAnimation {
 		if (originalSource instanceof EpicFightDamageSource epicfightDamageSource) {
 			extendedSource = epicfightDamageSource;
 		} else {
-			extendedSource = EpicFightDamageSource.commonEntityDamageSource(originalSource.msgId, entitypatch.getOriginal(), this);
+			extendedSource = EpicFightDamageSources.copy(originalSource).setAnimation(this);
 		}
 		
 		phase.getProperty(AttackPhaseProperty.DAMAGE_MODIFIER).ifPresent((opt) -> {

@@ -19,9 +19,9 @@ public class DragonLandingPhase extends PatchedDragonPhase {
 	public DragonLandingPhase(EnderDragon enderdragon) {
 		super(enderdragon);
 		this.landingCandidates = new BlockPos[3];
-		this.landingCandidates[0] = enderdragon.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(-3, 0, -11));
-		this.landingCandidates[1] = enderdragon.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(17, 0, 0));
-		this.landingCandidates[2] = enderdragon.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(0, 0, 17));
+		this.landingCandidates[0] = enderdragon.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(-3, 0, -11));
+		this.landingCandidates[1] = enderdragon.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(17, 0, 0));
+		this.landingCandidates[2] = enderdragon.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING, new BlockPos(0, 0, 17));
 	}
 	
 	@Override

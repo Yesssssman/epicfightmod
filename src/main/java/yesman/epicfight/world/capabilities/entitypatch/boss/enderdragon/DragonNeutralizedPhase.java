@@ -20,7 +20,7 @@ public class DragonNeutralizedPhase extends PatchedDragonPhase {
 		
 		if (this.dragonpatch.isLogicalClient()) {
 			Minecraft.getInstance().getSoundManager().stop(EpicFightSounds.ENDER_DRAGON_CRYSTAL_LINK.get().getLocation(), SoundSource.HOSTILE);
-			this.dragon.level.addParticle(EpicFightParticles.FORCE_FIELD_END.get(), this.dragon.getX(), this.dragon.getY(), this.dragon.getZ(), 0, 0, 0);
+			this.dragon.level().addParticle(EpicFightParticles.FORCE_FIELD_END.get(), this.dragon.getX(), this.dragon.getY(), this.dragon.getZ(), 0, 0, 0);
 		}
 	}
 	

@@ -24,6 +24,7 @@ import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 import java.util.Collection;
 import java.util.Locale;
+import java.util.function.Supplier;
 
 public class PlayerSkillCommand {
 	private static final SimpleCommandExceptionType ERROR_ADD_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.epicfight.skill.add.failed"));
@@ -78,9 +79,9 @@ public class PlayerSkillCommand {
 		
 		if (i > 0) {
 			if (i == 1) {
-				commandSourceStack.sendSuccess(Component.translatable("commands.epicfight.skill.clear.success.single", targets.iterator().next().getDisplayName()), true);
+				commandSourceStack.sendSuccess(wrap(Component.translatable("commands.epicfight.skill.clear.success.single", targets.iterator().next().getDisplayName())), true);
 			} else {
-				commandSourceStack.sendSuccess(Component.translatable("commands.epicfight.skill.clear.success.multiple", i), true);
+				commandSourceStack.sendSuccess(wrap(Component.translatable("commands.epicfight.skill.clear.success.multiple", i)), true);
 			}
 		} else {
 			throw ERROR_CLEAR_FAILED.create();
@@ -104,12 +105,12 @@ public class PlayerSkillCommand {
 				i++;
 			}
 		}
-		
+
 		if (i > 0) {
 			if (i == 1) {
-				commandSourceStack.sendSuccess(Component.translatable("commands.epicfight.skill.add.success.single", skill.getDisplayName(), targets.iterator().next().getDisplayName()), true);
+				commandSourceStack.sendSuccess(wrap(Component.translatable("commands.epicfight.skill.add.success.single", skill.getDisplayName(), targets.iterator().next().getDisplayName())), true);
 			} else {
-				commandSourceStack.sendSuccess(Component.translatable("commands.epicfight.skill.add.success.multiple", skill.getDisplayName(), i), true);
+				commandSourceStack.sendSuccess(wrap(Component.translatable("commands.epicfight.skill.add.success.multiple", skill.getDisplayName(), i)), true);
 			}
 		} else {
 			throw ERROR_ADD_FAILED.create();
@@ -147,17 +148,21 @@ public class PlayerSkillCommand {
 				}
 			}
 		}
-		
+
 		if (i > 0) {
 			if (i == 1) {
-				commandSourceStack.sendSuccess(Component.translatable("commands.epicfight.skill.remove.success.single", skill.getDisplayName(), targets.iterator().next().getDisplayName()), true);
+				commandSourceStack.sendSuccess(wrap(Component.translatable("commands.epicfight.skill.remove.success.single", skill.getDisplayName(), targets.iterator().next().getDisplayName())), true);
 			} else {
-				commandSourceStack.sendSuccess(Component.translatable("commands.epicfight.skill.remove.success.multiple", skill.getDisplayName(), i), true);
+				commandSourceStack.sendSuccess(wrap(Component.translatable("commands.epicfight.skill.remove.success.multiple", skill.getDisplayName(), i)), true);
 			}
 		} else {
 			throw ERROR_REMOVE_FAILED.create();
 		}
 		
 		return i;
+	}
+
+	private static <T> Supplier<T> wrap(T value) {
+		return () -> value;
 	}
 }

@@ -2,8 +2,9 @@ package yesman.epicfight.api.animation.types;
 
 import java.util.function.Function;
 
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.EntityDamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.EntityDimensions;
 import yesman.epicfight.api.animation.property.AnimationEvent;
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
@@ -19,7 +20,7 @@ import yesman.epicfight.world.entity.DodgeLeft;
 
 public class DodgeAnimation extends ActionAnimation {
 	public static final Function<DamageSource, AttackResult.ResultType> DODGEABLE_SOURCE_VALIDATOR = (damagesource) -> {
-		if (damagesource instanceof EntityDamageSource && !damagesource.isExplosion() && !damagesource.isMagic() && !damagesource.isBypassArmor() && !damagesource.isBypassInvul()) {
+		if (damagesource.getEntity() != null && !damagesource.is(DamageTypeTags.IS_EXPLOSION) && !damagesource.is(DamageTypes.MAGIC) && !damagesource.is(DamageTypeTags.BYPASSES_ARMOR) && !damagesource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
 			return AttackResult.ResultType.MISSED;
 		}
 		
@@ -42,7 +43,7 @@ public class DodgeAnimation extends ActionAnimation {
 			.addState(EntityState.INACTION, true)
 			.newTimePair(0.0F, Float.MAX_VALUE)
 			.addState(EntityState.ATTACK_RESULT, DODGEABLE_SOURCE_VALIDATOR);
-		
+
 		this.addProperty(ActionAnimationProperty.AFFECT_SPEED, true);
 		this.addEvents(StaticAnimationProperty.ON_END_EVENTS, AnimationEvent.create(Animations.ReusableSources.RESTORE_BOUNDING_BOX, AnimationEvent.Side.BOTH));
 		this.addEvents(StaticAnimationProperty.EVENTS, AnimationEvent.create(Animations.ReusableSources.RESIZE_BOUNDING_BOX, AnimationEvent.Side.BOTH).params(EntityDimensions.scalable(width, height)));
@@ -53,7 +54,7 @@ public class DodgeAnimation extends ActionAnimation {
 		super.begin(entitypatch);
 		
 		if (!entitypatch.isLogicalClient()) {
-			entitypatch.getOriginal().getLevel().addFreshEntity(new DodgeLeft(entitypatch));
+			entitypatch.getOriginal().level().addFreshEntity(new DodgeLeft(entitypatch));
 		}
 	}
 	

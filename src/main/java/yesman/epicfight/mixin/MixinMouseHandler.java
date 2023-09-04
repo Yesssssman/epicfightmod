@@ -32,7 +32,7 @@ public abstract class MixinMouseHandler {
 		if (playerpatch == null) {
 			entity.turn(d2, d3);
 		} else {
-			if (!playerpatch.getEntityState().turningLocked() || entity.isRidingJumpable()) {
+			if (!playerpatch.getEntityState().turningLocked() || entity.jumpableVehicle() != null) {
 				if (!playerpatch.isTargetLockedOn()) {
 					entity.turn(d2, d3);
 				}

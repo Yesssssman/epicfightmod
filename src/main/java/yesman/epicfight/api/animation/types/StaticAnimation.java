@@ -152,7 +152,7 @@ public class StaticAnimation extends DynamicAnimation {
 						continue;
 					}
 					
-					entitypatch.getOriginal().level.addParticle(trailInfo.particle, eid, modid, animid, jointId, index, 0);
+					entitypatch.getOriginal().level().addParticle(trailInfo.particle, eid, modid, animid, jointId, index, 0);
 				}
 			});
 		}

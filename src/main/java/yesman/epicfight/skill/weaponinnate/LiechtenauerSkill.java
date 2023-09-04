@@ -9,6 +9,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
@@ -83,8 +84,8 @@ public class LiechtenauerSkill extends WeaponInnateSkill {
 				if (isFront) {
 					event.getPlayerPatch().playSound(EpicFightSounds.CLASH.get(), -0.05F, 0.1F);
 					ServerPlayer playerentity = event.getPlayerPatch().getOriginal();
-					EpicFightParticles.HIT_BLUNT.get().spawnParticleWithArgument(playerentity.getLevel(), HitParticleType.FRONT_OF_EYES, HitParticleType.ZERO, playerentity, damageSource.getDirectEntity());
-					
+					EpicFightParticles.HIT_BLUNT.get().spawnParticleWithArgument(playerentity.serverLevel(), HitParticleType.FRONT_OF_EYES, HitParticleType.ZERO, playerentity, damageSource.getDirectEntity());
+
 					float knockback = 0.25F;
 					
 					if (damageSource instanceof EpicFightDamageSource epicfightSource) {
@@ -170,7 +171,7 @@ public class LiechtenauerSkill extends WeaponInnateSkill {
 	}
 	
 	private static boolean isBlockableSource(DamageSource damageSource) {
-		return !damageSource.isBypassInvul() && !damageSource.isExplosion();
+		return !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !damageSource.is(DamageTypeTags.IS_EXPLOSION);
 	}
 	
 	@OnlyIn(Dist.CLIENT)

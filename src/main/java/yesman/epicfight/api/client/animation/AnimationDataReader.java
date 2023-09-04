@@ -43,7 +43,7 @@ public class AnimationDataReader {
 	private final LayerInfo layerInfo;
 	private final LayerInfo multilayerInfo;
 	private final List<TrailInfo> trailInfo;
-
+	
 	public static void readAndApply(StaticAnimation animation, ResourceManager resourceManager, Resource iresource) {
 		InputStream inputstream = null;
 
@@ -54,44 +54,45 @@ public class AnimationDataReader {
 		}
 
 		assert inputstream != null;
-		Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
-		AnimationDataReader propertySetter = GsonHelper.fromJson(GSON, reader, TYPE);
+        Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
+        AnimationDataReader propertySetter = GsonHelper.fromJson(GSON, reader, TYPE);
 
-		if (propertySetter.layerInfo != null) {
-			if (propertySetter.layerInfo.jointMaskEntry.isValid()) {
-				animation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.layerInfo.jointMaskEntry);
-			}
+        if (propertySetter.layerInfo != null) {
+        	if (propertySetter.layerInfo.jointMaskEntry.isValid()) {
+        		animation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.layerInfo.jointMaskEntry);
+        	}
 
-			animation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.layerInfo.layerType);
-			animation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.layerInfo.priority);
-		}
-
+        	animation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.layerInfo.layerType);
+        	animation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.layerInfo.priority);
+        }
+		
 		if (propertySetter.multilayerInfo != null) {
 			StaticAnimation multilayerAnimation = new StaticAnimation(animation.getConvertTime(), animation.isRepeat(), String.valueOf(animation.getId()), animation.getArmature(), true);
-
+			
 			if (propertySetter.multilayerInfo.jointMaskEntry.isValid()) {
 				multilayerAnimation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.multilayerInfo.jointMaskEntry);
 			}
-
+			
 			multilayerAnimation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.multilayerInfo.layerType);
 			multilayerAnimation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.multilayerInfo.priority);
 			multilayerAnimation.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, (self, entitypatch, speed, elapsedTime) -> {
 				if (entitypatch.getClientAnimator().baseLayer.animationPlayer.getAnimation().getRealAnimation() != animation) {
 					return 0.0F;
 				}
-
+				
 				return animation.getPlaySpeed(entitypatch);
 			});
-
+			
 			multilayerAnimation.loadAnimation(resourceManager);
-
+			
 			animation.addProperty(ClientAnimationProperties.MULTILAYER_ANIMATION, multilayerAnimation);
 		}
-
+		
 		if (propertySetter.trailInfo.size() > 0) {
 			animation.addProperty(ClientAnimationProperties.TRAIL_EFFECT, propertySetter.trailInfo);
 		}
 	}
+
 	
 	private AnimationDataReader(LayerInfo compositeLayerInfo, LayerInfo layerInfo, List<TrailInfo> trailInfo) {
 		this.multilayerInfo = compositeLayerInfo;

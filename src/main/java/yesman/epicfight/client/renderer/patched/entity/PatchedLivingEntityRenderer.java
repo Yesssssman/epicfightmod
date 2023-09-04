@@ -128,7 +128,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
 		
 		layers.forEach((layer) -> {
-			layer.render(poseStack, buffer, packedLightIn, entityIn, entityIn.animationPosition, entityIn.animationSpeed, partialTicks, entityIn.tickCount, f2, f7);
+			layer.render(poseStack, buffer, packedLightIn, entityIn, entityIn.walkAnimation.position(), entityIn.walkAnimation.speed(), partialTicks, entityIn.tickCount, f2, f7);
 		});
 		
 		poseStack.popPose();

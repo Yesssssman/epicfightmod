@@ -100,7 +100,7 @@ public class SPChangeLivingMotion {
 	public static void handle(SPChangeLivingMotion msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
 			Minecraft mc = Minecraft.getInstance();
-			Entity entity = mc.player.level.getEntity(msg.entityId);
+			Entity entity = mc.player.level().getEntity(msg.entityId);
 			
 			if (entity != null) {
 				if (entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null) instanceof LivingEntityPatch<?> entitypatch) {

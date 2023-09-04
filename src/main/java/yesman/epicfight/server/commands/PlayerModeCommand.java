@@ -54,12 +54,12 @@ public class PlayerModeCommand {
 		Component component = Component.translatable("gameMode.epicfight." + playerMode.name().toLowerCase(Locale.ROOT));
 		
 		if (command.getEntity() == serverPlayer) {
-			command.sendSuccess(Component.translatable("commands.gamemode.success.self", component), true);
+			command.sendSuccess(() -> Component.translatable("commands.gamemode.success.self", component), true);
 		} else {
 			if (command.getLevel().getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
 				serverPlayer.sendSystemMessage(Component.translatable("gameMode.changed", component));
 			}
-			command.sendSuccess(Component.translatable("commands.gamemode.success.other", serverPlayer.getDisplayName(), component), true);
+			command.sendSuccess(() -> Component.translatable("commands.gamemode.success.other", serverPlayer.getDisplayName(), component), true);
 		}
 
 	}

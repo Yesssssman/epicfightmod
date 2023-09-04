@@ -1,7 +1,6 @@
 package yesman.epicfight.client.renderer.patched.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
@@ -19,6 +18,7 @@ import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
 
 import java.lang.reflect.InvocationTargetException;
@@ -58,14 +58,14 @@ public abstract class PatchedEntityRenderer<E extends Entity, T extends EntityPa
 	public void mulPoseStack(PoseStack poseStack, Armature armature, E entityIn, T entitypatch, float partialTicks) {
 		OpenMatrix4f modelMatrix = entitypatch.getModelMatrix(partialTicks);
         OpenMatrix4f transpose = modelMatrix.transpose(null);
-        poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
+        poseStack.mulPose(QuaternionUtils.YP.rotationDegrees(180.0F));
         MathUtils.translateStack(poseStack, modelMatrix);
         MathUtils.rotateStack(poseStack, transpose);
         MathUtils.scaleStack(poseStack, transpose);
         
         if (entitypatch.getOriginal() instanceof LivingEntity livingEntity && LivingEntityRenderer.isEntityUpsideDown(livingEntity)) {
         	poseStack.translate(0.0D, livingEntity.getBbHeight() + 0.1F, 0.0D);
-        	poseStack.mulPose(Vector3f.ZP.rotationDegrees(180.0F));
+        	poseStack.mulPose(QuaternionUtils.ZP.rotationDegrees(180.0F));
 		}
 	}
 	

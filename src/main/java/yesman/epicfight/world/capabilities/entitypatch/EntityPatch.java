@@ -55,7 +55,7 @@ public abstract class EntityPatch<T extends Entity> {
 	}
 	
 	public boolean isLogicalClient() {
-		return this.original.level.isClientSide();
+		return this.original.level().isClientSide();
 	}
 	
 	public OpenMatrix4f getMatrix(float partialTicks) {
