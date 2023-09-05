@@ -197,26 +197,9 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		return result;
 	}
 	
-	public void setLastAttackResult(Entity tryHurtEntity, AttackResult attackResult) {
-		this.lastTryHurtEntity = tryHurtEntity;
-		this.lastResultType = attackResult.resultType;
-		this.lastDealDamage = attackResult.damage;
-	}
-	
 	@Nullable
 	public EpicFightDamageSource getEpicFightDamageSource() {
 		return this.epicFightDamageSource;
-	}
-	
-	public boolean checkAttackSuccess(Entity target) {
-		boolean success = target.is(this.lastTryHurtEntity);
-		this.lastTryHurtEntity = null;
-		
-		if (success && !this.isLastAttackSuccess) {
-			this.setLastAttackSuccess(true);
-		}
-		
-		return success;
 	}
 	
 	/**
@@ -230,7 +213,6 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		
 		AttributeInstance mainhandDamage = this.original.getAttribute(Attributes.ATTACK_DAMAGE);
 		AttributeInstance offhandDamage = this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get());
-		
 		ItemStack mainHandItem = this.getOriginal().getMainHandItem();
 		ItemStack offHandItem = this.getOriginal().getOffhandItem();
 		
@@ -241,12 +223,28 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		this.original.getAttributes().attributes.put(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get(), mainhandDamage);
 	}
 	
-	public AttackResult getLastAttackResult() {
-		return new AttackResult(this.lastResultType, this.lastDealDamage);
+	public void setLastAttackResult(AttackResult attackResult) {
+		this.lastResultType = attackResult.resultType;
+		this.lastDealDamage = attackResult.damage;
+	}
+	
+	public void setLastAttackEntity(Entity tryHurtEntity) {
+		this.lastTryHurtEntity = tryHurtEntity;
+	}
+	
+	protected boolean checkLastAttackSuccess(Entity target) {
+		boolean success = target.is(this.lastTryHurtEntity);
+		this.lastTryHurtEntity = null;
+		
+		if (success && !this.isLastAttackSuccess) {
+			this.setLastAttackSuccess(true);
+		}
+		
+		return success;
 	}
 	
 	public AttackResult attack(EpicFightDamageSource damageSource, Entity target, InteractionHand hand) {
-		return this.checkAttackSuccess(target) ? this.getLastAttackResult() : AttackResult.blocked(0.0F);
+		return this.checkLastAttackSuccess(target) ? new AttackResult(this.lastResultType, this.lastDealDamage) : AttackResult.blocked(0.0F);
 	}
 	
 	public float getModifiedBaseDamage(float baseDamage) {
@@ -664,6 +662,15 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	
 	public List<LivingEntity> getCurrenltyAttackedEntities() {
 		return this.getAnimator().getAnimationVariables(AttackAnimation.HIT_ENTITIES);
+	}
+	
+	public List<LivingEntity> getCurrenltyHurtEntities() {
+		return this.getAnimator().getAnimationVariables(AttackAnimation.HURT_ENTITIES);
+	}
+	
+	public void removeHurtEntities() {
+		this.getAnimator().getAnimationVariables(AttackAnimation.HIT_ENTITIES).clear();
+		this.getAnimator().getAnimationVariables(AttackAnimation.HURT_ENTITIES).clear();
 	}
 	
 	@OnlyIn(Dist.CLIENT)

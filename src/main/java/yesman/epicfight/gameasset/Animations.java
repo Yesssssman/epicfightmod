@@ -751,16 +751,14 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.newTimePair(0.0F, 0.2F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
-		SWORD_DUAL_AUTO3 = new BasicAttackAnimation(0.1F, 0.0F, 0.25F, 0.36F, 0.6F, ColliderPreset.DUAL_SWORD, biped.torso, "biped/combat/sword_dual_auto3", biped)
+		SWORD_DUAL_AUTO3 = new BasicAttackAnimation(0.1F, "biped/combat/sword_dual_auto3", biped,
+				new Phase(0.0F, 0.25F, 0.25F, 0.35F, 0.6F, Float.MAX_VALUE, false, InteractionHand.MAIN_HAND, List.of(Pair.of(biped.toolR, null), Pair.of(biped.toolL, null))))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
-		
 		SWORD_DUAL_DASH = new DashAttackAnimation(0.16F, "biped/combat/sword_dual_dash", biped,
 				new Phase(0.0F, 0.05F, 0.05F, 0.3F, 0.75F, Float.MAX_VALUE, false, InteractionHand.MAIN_HAND, List.of(Pair.of(biped.toolR, null), Pair.of(biped.toolL, null))))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.addProperty(ActionAnimationProperty.COORD_SET_BEGIN, MoveCoordFunctions.RAW_COORD)
-				.addProperty(ActionAnimationProperty.COORD_SET_TICK, null)
-				;
-		
+				.addProperty(ActionAnimationProperty.COORD_SET_TICK, null);
 		UCHIGATANA_AUTO1 = new BasicAttackAnimation(0.05F, 0.15F, 0.25F, 0.3F, null, biped.toolR, "biped/combat/uchigatana_auto1", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
 		UCHIGATANA_AUTO2 = new BasicAttackAnimation(0.05F, 0.2F, 0.3F, 0.3F, null, biped.toolR, "biped/combat/uchigatana_auto2", biped)
@@ -817,7 +815,7 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F)
 				.newTimePair(0.0F, 0.4F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false)
-				.newConditionalTimePair((entitypatch) -> (entitypatch.isLastAttackSuccess() ? 1 : 0 ), 0.4F, 0.6F)
+				.newConditionalTimePair((entitypatch) -> (entitypatch.isLastAttackSuccess() ? 1 : 0), 0.4F, 0.6F)
 				.addConditionalState(0, EntityState.CAN_BASIC_ATTACK, false)
 				.addConditionalState(1, EntityState.CAN_BASIC_ATTACK, true);
 		DAGGER_DUAL_AUTO1 = new BasicAttackAnimation(0.05F, 0.1F, 0.2F, 0.25F, null, biped.toolR, "biped/combat/dagger_dual_auto1", biped)
@@ -1557,7 +1555,7 @@ public class Animations {
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER)
 				.addEvents(StaticAnimationProperty.ON_END_EVENTS,
 					AnimationEvent.create((entitypatch, animation, params) -> {
-						List<LivingEntity> hitEnemies = entitypatch.getCurrenltyAttackedEntities();
+						List<LivingEntity> hitEnemies = entitypatch.getCurrenltyHurtEntities();
 						Vec3 vec = entitypatch.getOriginal().position().add(Vec3.directionFromRotation(new Vec2(0.0F, entitypatch.getOriginal().getYRot())));
 						AttackAnimation attackAnimation = (AttackAnimation)animation;
 						
@@ -1580,9 +1578,7 @@ public class Animations {
 					}, AnimationEvent.Side.SERVER))
 				.addEvents(
 					TimeStampedEvent.create(0.75F, (entitypatch, animation, params) -> {
-						List<LivingEntity> hitEnemies = entitypatch.getCurrenltyAttackedEntities();
-						
-						if (hitEnemies.size() >= 1) {
+						if (entitypatch.isLastAttackSuccess()) {
 							entitypatch.playAnimationSynchronized(GRASPING_SPIRAL_SECOND, 0.0F);
 						}
 					}, AnimationEvent.Side.SERVER)

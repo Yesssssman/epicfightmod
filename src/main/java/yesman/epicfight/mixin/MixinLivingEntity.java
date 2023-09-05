@@ -3,8 +3,11 @@ package yesman.epicfight.mixin;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import net.minecraft.world.damagesource.CombatTracker;
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import yesman.epicfight.api.utils.AttackResult;
@@ -20,12 +23,25 @@ public abstract class MixinLivingEntity {
 		LivingEntityPatch<?> selfEntitypatch = EpicFightCapabilities.getEntityPatch(self, LivingEntityPatch.class);
 		
 		if (opponentEntitypatch != null) {
-			opponentEntitypatch.setLastAttackResult(self, AttackResult.blocked(0.0F));
+			opponentEntitypatch.setLastAttackResult(AttackResult.blocked(0.0F));
 			
 			if (selfEntitypatch != null && opponentEntitypatch.getEpicFightDamageSource() != null) {
 				opponentEntitypatch.onAttackBlocked(opponentEntitypatch.getEpicFightDamageSource().cast(), selfEntitypatch);
 			}
 		}
+	}
+	
+	@Redirect(at = @At( value = "INVOKE", 
+					   target = "Lnet/minecraft/world/damagesource/CombatTracker;recordDamage(Lnet/minecraft/world/damagesource/DamageSource;FF)V"),
+		  method = "actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V")
+	private void epicfight_recordDamage(CombatTracker self, DamageSource damagesource, float health, float damage) {
+		LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(damagesource.getEntity(), LivingEntityPatch.class);
+		
+		if (entitypatch != null) {
+			entitypatch.setLastAttackEntity(self.getMob());
+		}
+		
+		self.recordDamage(damagesource, health, damage);
 	}
 	
 	@Inject(at = @At(value = "HEAD"), method = "push(Lnet/minecraft/world/entity/Entity;)V", cancellable = true)
