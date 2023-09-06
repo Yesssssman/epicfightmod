@@ -38,7 +38,7 @@ public class GraspingSpireSkill extends WeaponInnateSkill {
 		
 		container.getExecuter().getEventListener().addEventListener(EventType.ATTACK_ANIMATION_END_EVENT, EVENT_UUID, (event) -> {
 			if (this.first.equals(event.getAnimation())) {
-				container.getDataManager().setDataSync(LAST_HIT_COUNT, event.getPlayerPatch().getCurrenltyAttackedEntities().size(), event.getPlayerPatch().getOriginal());
+				container.getDataManager().setDataSync(LAST_HIT_COUNT, event.getPlayerPatch().getCurrenltyHurtEntities().size(), event.getPlayerPatch().getOriginal());
 			}
 		});
 		

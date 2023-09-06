@@ -340,7 +340,7 @@ public class EntityEvents {
 			AttackResult result = (entitypatch != null && !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) ? entitypatch.tryHurt(damageSource, event.getAmount()) : AttackResult.success(event.getAmount());
 			
 			if (attackerPatch != null) {
-				attackerPatch.setLastAttackResult(event.getEntity(), result);
+				attackerPatch.setLastAttackResult(result);
 			}
 			
 			if (!result.resultType.dealtDamage()) {
@@ -403,8 +403,8 @@ public class EntityEvents {
 						event.setCanceled(true);
 					}
 					
-					if (rayresult.getEntity() instanceof PartEntity) {
-						Entity parent = ((PartEntity<?>)rayresult.getEntity()).getParent();
+					if (rayresult.getEntity() instanceof PartEntity<?> partEntity) {
+						Entity parent = partEntity.getParent();
 						
 						if (event.getProjectile().getOwner().is(parent)) {
 							event.setCanceled(true);

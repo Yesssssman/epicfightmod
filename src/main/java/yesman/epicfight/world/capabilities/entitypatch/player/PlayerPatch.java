@@ -299,7 +299,6 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	
 	public float getMaxStamina() {
 		AttributeInstance maxStamina = this.original.getAttribute(EpicFightAttributes.MAX_STAMINA.get());
-		
 		return (float)(maxStamina == null ? 0 : maxStamina.getValue());
 	}
 	

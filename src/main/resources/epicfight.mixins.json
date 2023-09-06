@@ -16,6 +16,7 @@
 		"MixinWitherBoss",
 		"MixinLivingEntity",
 		"MixinMob",
+		"MixinPlayer",
 		"MixinServerPlayer",
 		"MixinThrownTrident"
 	],
