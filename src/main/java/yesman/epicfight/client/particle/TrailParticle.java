@@ -3,9 +3,6 @@ package yesman.epicfight.client.particle;
 import java.util.List;
 import java.util.Optional;
 
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
 
@@ -13,6 +10,9 @@ import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector4f;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -273,10 +273,10 @@ public class TrailParticle extends TextureSheetParticle {
 			Vector4f pos3 = new Vector4f((float)e2.end.x, (float)e2.end.y, (float)e2.end.z, 1.0F);
 			Vector4f pos4 = new Vector4f((float)e2.start.x, (float)e2.start.y, (float)e2.start.z, 1.0F);
 			
-			pos1.mul(matrix4f);
-			pos2.mul(matrix4f);
-			pos3.mul(matrix4f);
-			pos4.mul(matrix4f);
+			pos1.transform(matrix4f);
+			pos2.transform(matrix4f);
+			pos3.transform(matrix4f);
+			pos4.transform(matrix4f);
 			
 			float alphaFrom = Mth.clamp(from, 0.0F, 1.0F);
 			float alphaTo = Mth.clamp(to, 0.0F, 1.0F);
@@ -297,7 +297,7 @@ public class TrailParticle extends TextureSheetParticle {
 	}
 	
 	protected void setupPoseStack(PoseStack poseStack, Camera camera, float partialTicks) {
-		Quaternionf rotation = new Quaternionf(0.0F, 0.0F, 0.0F, 1.0F);
+		Quaternion rotation = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
 		Vec3 vec3 = camera.getPosition();
 		float x = (float)-vec3.x();
 		float y = (float)-vec3.y();

@@ -40,7 +40,12 @@ public class DodgeSkill extends Skill {
 			this.resource = resource;
 			return this;
 		}
-
+		
+		public Builder setCreativeTab(CreativeModeTab tab) {
+			this.tab = tab;
+			return this;
+		}
+		
 		public Builder setAnimations(ResourceLocation... animations) {
 			this.animations = animations;
 			return this;
@@ -67,7 +72,7 @@ public class DodgeSkill extends Skill {
 	@Override
 	public FriendlyByteBuf gatherArguments(LocalPlayerPatch executer, ControllEngine controllEngine) {
 		Input input = executer.getOriginal().input;
-		input.tick(false, 0f);
+		input.tick(false);
 		
         int forward = input.up ? 1 : 0;
         int backward = input.down ? -1 : 0;

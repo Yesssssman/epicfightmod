@@ -13,9 +13,9 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class SPChangeSkill {
-	private final SkillSlot skillSlot;
-	private final String skillName;
-	private final SPChangeSkill.State state;
+	private SkillSlot skillSlot;
+	private String skillName;
+	private SPChangeSkill.State state;
 	
 	public SPChangeSkill() {
 		this(SkillSlots.BASIC_ATTACK, "", SPChangeSkill.State.ENABLE);
@@ -61,7 +61,7 @@ public class SPChangeSkill {
 		ctx.get().setPacketHandled(true);
 	}
 	
-	public enum State {
+	public static enum State {
 		ENABLE(false), DISABLE(true);
 		
 		boolean setter;

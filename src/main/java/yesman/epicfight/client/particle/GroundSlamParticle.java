@@ -22,7 +22,7 @@ public class GroundSlamParticle extends NoRenderParticle {
 	protected GroundSlamParticle(ClientLevel level, double x, double y, double z, double dx, double dy, double dz) {
 		super(level, x, y, z, dx, dy, dz);
 		
-		BlockPos blockpos = new BlockPos.MutableBlockPos(x, y, z);
+		BlockPos blockpos = new BlockPos(x, y, z);
 		BlockState blockstate = level.getBlockState(blockpos.below());
 		Minecraft mc = Minecraft.getInstance();
 		

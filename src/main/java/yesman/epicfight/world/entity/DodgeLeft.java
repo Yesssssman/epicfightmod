@@ -19,7 +19,7 @@ public class DodgeLeft extends LivingEntity {
 	}
 	
 	public DodgeLeft(LivingEntityPatch<?> entitypatch) {
-		this(EpicFightEntities.DODGE_LEFT.get(), entitypatch.getOriginal().level());
+		this(EpicFightEntities.DODGE_LEFT.get(), entitypatch.getOriginal().level);
 		
 		this.entitypatch = entitypatch;
 		Vec3 pos = entitypatch.getOriginal().position();

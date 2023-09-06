@@ -1,14 +1,15 @@
 package yesman.epicfight.world.capabilities.projectile;
 
+import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.DragonFireball;
 import net.minecraft.world.phys.EntityHitResult;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 
 public class DragonFireballPatch extends ProjectilePatch<DragonFireball> {
 	@Override
-	public void onJoinWorld(DragonFireball projectileEntity, EntityJoinLevelEvent event) {
+	public void onJoinWorld(DragonFireball projectileEntity, EntityJoinWorldEvent event) {
 		super.onJoinWorld(projectileEntity, event);
 		this.impact = 1.0F;
 		projectileEntity.xPower *= 2.0D;
@@ -27,7 +28,7 @@ public class DragonFireballPatch extends ProjectilePatch<DragonFireball> {
 			Entity entity = ((EntityHitResult)event.getRayTraceResult()).getEntity();
 			
 			if (!entity.is(event.getProjectile().getOwner())) {
-				entity.hurt(entity.level().damageSources().indirectMagic(event.getProjectile(), event.getProjectile().getOwner()), 8.0F);
+				entity.hurt(DamageSource.indirectMagic(event.getProjectile(), event.getProjectile().getOwner()), 8.0F);
 			}
 		}
 		

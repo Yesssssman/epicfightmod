@@ -1,5 +1,8 @@
 package yesman.epicfight.world.capabilities.entitypatch.player;
 
+import java.util.List;
+import java.util.Map;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -15,14 +18,12 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.network.EpicFightNetworkManager;
-import yesman.epicfight.network.server.*;
-import yesman.epicfight.skill.*;
 import yesman.epicfight.network.server.SPAddLearnedSkill;
 import yesman.epicfight.network.server.SPAddOrRemoveSkillData;
 import yesman.epicfight.network.server.SPChangeLivingMotion;
@@ -46,33 +47,30 @@ import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.SetTargetEvent;
 
-import java.util.List;
-import java.util.Map;
-
 public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	private LivingEntity attackTarget;
 	private boolean updatedMotionCurrentTick;
 	
 	@Override
-	public void onJoinWorld(ServerPlayer player, EntityJoinLevelEvent event) {
+	public void onJoinWorld(ServerPlayer player, EntityJoinWorldEvent event) {
 		super.onJoinWorld(player, event);
 		
 		CapabilitySkill skillCapability = this.getSkillCapability();
-
+		
 		for (SkillContainer skill : skillCapability.skillContainers) {
 			if (skill.getSkill() != null && skill.getSkill().getCategory().shouldSynchronize()) {
 				EpicFightNetworkManager.sendToPlayer(new SPChangeSkill(skill.getSlot(), skill.getSkill().toString(), SPChangeSkill.State.ENABLE), this.original);
 			}
 		}
-
+		
 		List<String> learnedSkill = Lists.newArrayList();
-
+		
 		for (SkillCategory category : SkillCategory.ENUM_MANAGER.universalValues()) {
 			if (skillCapability.hasCategory(category)) {
 				learnedSkill.addAll(Lists.newArrayList(skillCapability.getLearnedSkills(category).stream().map((skill) -> skill.toString()).iterator()));
 			}
 		}
-
+		
 		EpicFightNetworkManager.sendToPlayer(new SPAddLearnedSkill(learnedSkill.toArray(new String[0])), this.original);
 		EpicFightNetworkManager.sendToPlayer(new SPModifyPlayerData(this.getOriginal().getId(), this.playerMode), this.original);
 	}
@@ -113,7 +111,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	}
 	
 	@Override
-	public void tick(LivingEvent.LivingTickEvent event) {
+	public void tick(LivingUpdateEvent event) {
 		super.tick(event);
 		this.updatedMotionCurrentTick = false;
 	}
@@ -240,11 +238,11 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	@Override
 	public void onDodgeSuccess(DamageSource damageSource) {
 		super.onDodgeSuccess(damageSource);
-
+		
 		DodgeSuccessEvent dodgeSuccessEvent = new DodgeSuccessEvent(this, damageSource);
 		this.getEventListener().triggerEvents(EventType.DODGE_SUCCESS_EVENT, dodgeSuccessEvent);
 	}
-
+	
 	@Override
 	public void toMiningMode(boolean synchronize) {
 		super.toMiningMode(synchronize);
@@ -284,7 +282,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	public void setAttackTarget(LivingEntity entity) {
 		SetTargetEvent setTargetEvent = new SetTargetEvent(this, entity);
 		this.getEventListener().triggerEvents(EventType.SET_TARGET_EVENT, setTargetEvent);
-
+		
 		this.attackTarget = setTargetEvent.getTarget();
 	}
 	
@@ -293,7 +291,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 		super.startSkillCharging(chargingSkill);
 		EpicFightNetworkManager.sendToPlayer(SPSkillExecutionFeedback.chargingBegin(this.getSkill((Skill)chargingSkill).getSlotId()), this.getOriginal());
 	}
-
+	
 	@Override
 	public LivingEntity getTarget() {
 		return this.attackTarget;

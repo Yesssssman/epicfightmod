@@ -38,7 +38,7 @@ public class ComboCounterHandleEvent extends PlayerEvent<ServerPlayerPatch> {
 		this.nextValue = nextValue;
 	}
 	
-	public enum Causal {
+	public static enum Causal {
 		BASIC_ATTACK_COUNT, ACTION_ANIMATION_RESET, TIME_EXPIRED_RESET
 	}
 }

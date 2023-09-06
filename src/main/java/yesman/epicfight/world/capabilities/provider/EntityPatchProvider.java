@@ -145,19 +145,19 @@ public class EntityPatchProvider implements ICapabilityProvider, NonNullSupplier
 	
 	public static Function<Entity, Supplier<EntityPatch<?>>> get(String registryName) {
 		ResourceLocation rl = new ResourceLocation(registryName);
-		EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(rl);
+		EntityType<?> entityType = ForgeRegistries.ENTITIES.getValue(rl);
 		return CAPABILITIES.get(entityType);
 	}
 	
 	private EntityPatch<?> capability;
-	private final LazyOptional<EntityPatch<?>> optional = LazyOptional.of(this);
+	private LazyOptional<EntityPatch<?>> optional = LazyOptional.of(this);
 	
 	public EntityPatchProvider(Entity entity) {
 		Function<Entity, Supplier<EntityPatch<?>>> provider = CUSTOM_CAPABILITIES.getOrDefault(entity.getType(), CAPABILITIES.get(entity.getType()));
 		
 		if (provider != null) {
 			this.capability = provider.apply(entity).get();
-		} else if (entity instanceof Mob && entity.level().getGameRules().getRule(EpicFightGamerules.GLOBAL_STUN).get()) {
+		} else if (entity instanceof Mob && entity.level.getGameRules().getRule(EpicFightGamerules.GLOBAL_STUN).get()) {
 			this.capability = new GlobalMobPatch();
 		}
 	}

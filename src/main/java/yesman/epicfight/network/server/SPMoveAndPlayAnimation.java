@@ -38,7 +38,7 @@ public class SPMoveAndPlayAnimation extends SPPlayAnimationAndSetTarget {
 	public void onArrive() {
 		super.onArrive();
 		Minecraft mc = Minecraft.getInstance();
-		Entity entity = mc.player.level().getEntity(this.entityId);
+		Entity entity = mc.player.level.getEntity(this.entityId);
 		entity.setPos(this.posX, this.posY, this.posZ);
 		entity.setYRot(this.yRot);
 		entity.xo = entity.getX();

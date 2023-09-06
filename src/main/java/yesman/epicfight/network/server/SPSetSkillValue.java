@@ -9,9 +9,9 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class SPSetSkillValue {
-	private final float floatType;
+	private float floatType;
 	private boolean booleanType;
-	private final int index;
+	private int index;
 	private Target target;
 
 	public SPSetSkillValue() {
@@ -66,7 +66,7 @@ public class SPSetSkillValue {
 		ctx.get().setPacketHandled(true);
 	}
 	
-	public enum Target {
-		COOLDOWN, DURATION, MAX_DURATION, STACK, MAX_RESOURCE
+	public static enum Target {
+		COOLDOWN, DURATION, MAX_DURATION, STACK, MAX_RESOURCE;
 	}
 }

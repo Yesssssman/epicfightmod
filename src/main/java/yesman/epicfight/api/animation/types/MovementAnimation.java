@@ -17,8 +17,8 @@ public class MovementAnimation extends StaticAnimation {
 	public float getPlaySpeed(LivingEntityPatch<?> entitypatch) {
 		float movementSpeed = 1.0F;
 		
-		if (Math.abs(entitypatch.getOriginal().walkAnimation.speed() - entitypatch.getOriginal().walkAnimation.speed(1)) < 0.007F) {
-			movementSpeed *= (entitypatch.getOriginal().walkAnimation.speed() * 1.16F);
+		if (Math.abs(entitypatch.getOriginal().animationSpeed - entitypatch.getOriginal().animationSpeedOld) < 0.007F) {
+			movementSpeed *= (entitypatch.getOriginal().animationSpeed * 1.16F);
 		}
 		
 		return movementSpeed;

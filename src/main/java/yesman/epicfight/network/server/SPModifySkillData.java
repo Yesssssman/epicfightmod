@@ -12,7 +12,7 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class SPModifySkillData {
-	private final Object value;
+	private Object value;
 	private int slot;
 	private int keyId;
 	private int entityId;

@@ -5,7 +5,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.world.damagesource.StunType;
@@ -16,7 +16,7 @@ public abstract class HurtableEntityPatch<T extends LivingEntity> extends Entity
 	protected boolean cancelKnockback;
 	
 	@Override
-	protected void serverTick(LivingEvent.LivingTickEvent event) {
+	protected void serverTick(LivingUpdateEvent event) {
 		this.cancelKnockback = false;
 		
 		if (this.stunTimeReduction > 0.0F) {
@@ -61,7 +61,7 @@ public abstract class HurtableEntityPatch<T extends LivingEntity> extends Entity
 	public EntityState getEntityState() {
 		return EntityState.DEFAULT_STATE;
 	}
-
+	
 	public boolean shouldCancelKnockback() {
 		return this.cancelKnockback;
 	}
@@ -89,21 +89,21 @@ public abstract class HurtableEntityPatch<T extends LivingEntity> extends Entity
 	public void playSound(SoundEvent sound, float pitchModifierMin, float pitchModifierMax) {
 		this.playSound(sound, 1.0F, pitchModifierMin, pitchModifierMax);
 	}
-
+	
 	public void playSound(SoundEvent sound, float volume, float pitchModifierMin, float pitchModifierMax) {
 		if (sound == null) {
 			return;
 		}
-
+		
 		float pitch = (this.original.getRandom().nextFloat() * 2.0F - 1.0F) * (pitchModifierMax - pitchModifierMin);
-
+		
 		if (!this.isLogicalClient()) {
-			this.original.level().playSound(null, this.original.getX(), this.original.getY(), this.original.getZ(), sound, this.original.getSoundSource(), volume, 1.0F + pitch);
+			this.original.level.playSound(null, this.original.getX(), this.original.getY(), this.original.getZ(), sound, this.original.getSoundSource(), volume, 1.0F + pitch);
 		} else {
-			this.original.level().playLocalSound(this.original.getX(), this.original.getY(), this.original.getZ(), sound, this.original.getSoundSource(), volume, 1.0F + pitch, false);
+			this.original.level.playLocalSound(this.original.getX(), this.original.getY(), this.original.getZ(), sound, this.original.getSoundSource(), volume, 1.0F + pitch, false);
 		}
 	}
-
+	
 	@Override
 	public boolean overrideRender() {
 		return false;

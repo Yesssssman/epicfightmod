@@ -13,7 +13,7 @@ public class CubicBezierCurve {
 	 * https://towardsdatascience.com/b%C3%A9zier-interpolation-8033e9a262c2
 	 */
 	
-	private static final List<Double> MATRIX_CONSTANTS = Lists.newArrayList();
+	private static List<Double> MATRIX_CONSTANTS = Lists.newArrayList();
 	
 	static {
 		MATRIX_CONSTANTS.add(0.5D);

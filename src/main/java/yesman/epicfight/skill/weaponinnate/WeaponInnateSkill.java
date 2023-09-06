@@ -1,12 +1,20 @@
 package yesman.epicfight.skill.weaponinnate;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -24,11 +32,6 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Set;
 
 public abstract class WeaponInnateSkill extends Skill {
 	public static Skill.Builder<WeaponInnateSkill> createWeaponInnateBuilder() {
@@ -60,8 +63,8 @@ public abstract class WeaponInnateSkill extends Skill {
 		List<Component> list = Lists.newArrayList();
 		String traslatableText = this.getTranslationKey();
 		
-		list.add(Component.translatable(traslatableText).withStyle(ChatFormatting.WHITE).append(Component.literal(String.format("[%.0f]", this.consumption)).withStyle(ChatFormatting.AQUA)));
-		list.add(Component.translatable(traslatableText + ".tooltip").withStyle(ChatFormatting.DARK_GRAY));
+		list.add(new TranslatableComponent(traslatableText).withStyle(ChatFormatting.WHITE).append(new TextComponent(String.format("[%.0f]", this.consumption)).withStyle(ChatFormatting.AQUA)));
+		list.add(new TranslatableComponent(traslatableText + ".tooltip").withStyle(ChatFormatting.DARK_GRAY));
 		
 		return list;
 	}
@@ -111,10 +114,10 @@ public abstract class WeaponInnateSkill extends Skill {
 		impact = impactModifier.getTotalValue((float)impact);
 		maxStrikes = maxStrikesModifier.getTotalValue((float)maxStrikes);
 		
-		list.add(Component.literal(title).withStyle(ChatFormatting.UNDERLINE).withStyle(ChatFormatting.GRAY));
+		list.add(new TextComponent(title).withStyle(ChatFormatting.UNDERLINE).withStyle(ChatFormatting.GRAY));
 		
-		MutableComponent damageComponent = Component.translatable("damage_source.epicfight.damage",
-					Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(damage)).withStyle(ChatFormatting.RED)
+		MutableComponent damageComponent = new TranslatableComponent("damage_source.epicfight.damage",
+					new TextComponent(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(damage)).withStyle(ChatFormatting.RED)
 				).withStyle(ChatFormatting.DARK_GRAY);
 		
 		this.getProperty(AttackPhaseProperty.EXTRA_DAMAGE, propertyMap).ifPresent((extraDamageSet) -> {
@@ -126,30 +129,30 @@ public abstract class WeaponInnateSkill extends Skill {
 		list.add(damageComponent);
 		
 		if (armorNegation != 0.0D) {
-			list.add(Component.translatable( EpicFightAttributes.ARMOR_NEGATION.get().getDescriptionId()
-											  , Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(armorNegation) + "%"
+			list.add(new TranslatableComponent( EpicFightAttributes.ARMOR_NEGATION.get().getDescriptionId()
+											  , new TextComponent(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(armorNegation) + "%"
 											  ).withStyle(ChatFormatting.GOLD)).withStyle(ChatFormatting.DARK_GRAY));
 		}
 		
 		if (impact != 0.0D) {
-			list.add(Component.translatable( EpicFightAttributes.IMPACT.get().getDescriptionId()
-					                          , Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(impact)
+			list.add(new TranslatableComponent( EpicFightAttributes.IMPACT.get().getDescriptionId()
+					                          , new TextComponent(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(impact)
 					                          ).withStyle(ChatFormatting.AQUA)
 			                                  ).withStyle(ChatFormatting.DARK_GRAY));
 		}
 		
-		list.add(Component.translatable(EpicFightAttributes.MAX_STRIKES.get().getDescriptionId(),
-				Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(maxStrikes)).withStyle(ChatFormatting.WHITE)
+		list.add(new TranslatableComponent(EpicFightAttributes.MAX_STRIKES.get().getDescriptionId(),
+				new TextComponent(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(maxStrikes)).withStyle(ChatFormatting.WHITE)
 		).withStyle(ChatFormatting.DARK_GRAY));
 		
 		Optional<StunType> stunOption = this.getProperty(AttackPhaseProperty.STUN_TYPE, propertyMap);
 		
 		stunOption.ifPresent((stunType) -> {
-			list.add(Component.translatable(stunType.toString()).withStyle(ChatFormatting.DARK_GRAY));
+			list.add(new TranslatableComponent(stunType.toString()).withStyle(ChatFormatting.DARK_GRAY));
 		});
 		
 		if (!stunOption.isPresent()) {
-			list.add(Component.translatable(StunType.SHORT.toString()).withStyle(ChatFormatting.DARK_GRAY));
+			list.add(new TranslatableComponent(StunType.SHORT.toString()).withStyle(ChatFormatting.DARK_GRAY));
 		}	
 	}
 	
@@ -159,7 +162,7 @@ public abstract class WeaponInnateSkill extends Skill {
 	}
 	
 	public WeaponInnateSkill newProperty() {
-		this.properties.add(Maps.newHashMap());
+		this.properties.add(Maps.<AttackPhaseProperty<?>, Object>newHashMap());
 		
 		return this;
 	}

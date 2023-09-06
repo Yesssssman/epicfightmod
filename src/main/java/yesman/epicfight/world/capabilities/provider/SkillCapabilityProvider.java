@@ -12,8 +12,8 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 
 public class SkillCapabilityProvider implements ICapabilityProvider, NonNullSupplier<CapabilitySkill>, ICapabilitySerializable<CompoundTag> {
-	private final CapabilitySkill capability;
-	private final LazyOptional<CapabilitySkill> optional = LazyOptional.of(this);
+	private CapabilitySkill capability;
+	private LazyOptional<CapabilitySkill> optional = LazyOptional.of(this);
 	
 	public SkillCapabilityProvider(PlayerPatch<?> player) {
 		this.capability = new CapabilitySkill(player);

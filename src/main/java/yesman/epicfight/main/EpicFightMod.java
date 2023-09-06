@@ -1,14 +1,19 @@
 package yesman.epicfight.main;
 
+import java.util.function.Function;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.client.ConfigScreenHandler;
+import net.minecraftforge.client.ConfigGuiHandler;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
@@ -18,9 +23,12 @@ import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import yesman.epicfight.api.animation.*;
+import net.minecraftforge.registries.DataSerializerEntry;
+import yesman.epicfight.api.animation.AnimationManager;
+import yesman.epicfight.api.animation.Animator;
+import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
+import yesman.epicfight.api.animation.ServerAnimator;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.model.ItemSkins;
 import yesman.epicfight.api.client.model.Meshes;
@@ -33,13 +41,13 @@ import yesman.epicfight.client.input.EpicFightKeyMappings;
 import yesman.epicfight.client.renderer.patched.item.EpicFightItemProperties;
 import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.config.ConfigurationIngame;
-import yesman.epicfight.data.loot.EpicFightLootTables;
+import yesman.epicfight.data.loot.EpicFightLootModifiers;
 import yesman.epicfight.events.CapabilityEvent;
 import yesman.epicfight.events.EntityEvents;
+import yesman.epicfight.events.ModBusEvents;
 import yesman.epicfight.events.PlayerEvents;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.gameasset.EpicFightSkills;
-import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.network.EpicFightDataSerializers;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.particle.EpicFightParticles;
@@ -64,12 +72,9 @@ import yesman.epicfight.world.effect.EpicFightPotions;
 import yesman.epicfight.world.entity.EpicFightEntities;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
-import yesman.epicfight.world.item.EpicFightCreativeTabs;
 import yesman.epicfight.world.item.EpicFightItems;
 import yesman.epicfight.world.level.block.EpicFightBlocks;
 import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
-
-import java.util.function.Function;
 
 @Mod("epicfight")
 public class EpicFightMod {
@@ -90,7 +95,8 @@ public class EpicFightMod {
     	this.animationManager = new AnimationManager();
     	instance = this;
     	ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ConfigManager.CLIENT_CONFIG);
-		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+    	
+    	IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
     	bus.addListener(this::doClientStuff);
     	bus.addListener(this::doCommonStuff);
     	bus.addListener(this::doServerStuff);
@@ -98,10 +104,9 @@ public class EpicFightMod {
     	bus.addListener(EpicFightAttributes::registerNewMobs);
     	bus.addListener(EpicFightAttributes::modifyExistingMobs);
     	bus.addListener(EpicFightCapabilities::registerCapabilities);
-    	//bus.addGenericListener(DataSerializerEntry.class, EpicFightDataSerializers::register);
-
-    	//bus.addGenericListener(IGlobalLootModifier.class, EpicFightDeferedRegister::registerGlobalLootModifier);
-
+    	bus.addGenericListener(DataSerializerEntry.class, EpicFightDataSerializers::register);
+    	bus.addGenericListener(GlobalLootModifierSerializer.class, EpicFightLootModifiers::registerGlobalLootModifier);
+    	
     	LivingMotion.ENUM_MANAGER.loadPreemptive(LivingMotions.class);
     	SkillCategory.ENUM_MANAGER.loadPreemptive(SkillCategories.class);
     	SkillSlot.ENUM_MANAGER.loadPreemptive(SkillSlots.class);
@@ -112,43 +117,35 @@ public class EpicFightMod {
     	EpicFightMobEffects.EFFECTS.register(bus);
     	EpicFightPotions.POTIONS.register(bus);
         EpicFightAttributes.ATTRIBUTES.register(bus);
-        EpicFightCreativeTabs.TABS.register(bus);
         EpicFightItems.ITEMS.register(bus);
         EpicFightParticles.PARTICLES.register(bus);
         EpicFightEntities.ENTITIES.register(bus);
         EpicFightBlocks.BLOCKS.register(bus);
         EpicFightBlockEntities.BLOCK_ENTITIES.register(bus);
-		EpicFightLootTables.LOOT_MODIFIERS.register(bus);
-		EpicFightSounds.SOUNDS.register(bus);
-		//SkillArgument.SKILLS.register(bus);
-		EpicFightDataSerializers.VEC.register(bus);
         EpicFightSkills.registerSkills();
-		//SkillBookLootModifier.createSkillLootTable();
+        
         MinecraftForge.EVENT_BUS.addListener(this::reloadListnerEvent);
         MinecraftForge.EVENT_BUS.register(EntityEvents.class);
+        MinecraftForge.EVENT_BUS.register(ModBusEvents.class);
         MinecraftForge.EVENT_BUS.register(CapabilityEvent.class);
         MinecraftForge.EVENT_BUS.register(PlayerEvents.class);
         
         ConfigManager.loadConfig(ConfigManager.CLIENT_CONFIG, FMLPaths.CONFIGDIR.get().resolve(MODID + "-client.toml").toString());
         ConfigManager.loadConfig(ConfigManager.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve(CONFIG_FILE_PATH).toString());
-        ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory(IngameConfigurationScreen::new));
-
-		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-			// only client side!!
-			bus.addListener(EpicFightKeyMappings::registerKeys);
-		});
+        ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory(IngameConfigurationScreen::new));
     }
     
 	private void doClientStuff(final FMLClientSetupEvent event) {
 		CLIENT_INGAME_CONFIG = new ConfigurationIngame();
     	new ClientEngine();
-		//IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
     	
         this.animatorProvider = ClientAnimator::getAnimator;
 		EntityPatchProvider.registerEntityPatchesClient();
+		
 		ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
 		Armatures.build(resourceManager);
-
+		
+		EpicFightKeyMappings.registerKeys();
 		EpicFightItemProperties.registerItemProperties();
     }
 	
@@ -168,7 +165,7 @@ public class EpicFightMod {
 		event.enqueueWork(EpicFightEntities::registerSpawnPlacements);
 		event.enqueueWork(WeaponCapabilityPresets::register);
 		event.enqueueWork(EpicFightMobEffects::addOffhandModifier);
-		//event.enqueueWork(EpicFightLootModifiers::registerLootItemFunctionType);
+		event.enqueueWork(EpicFightLootModifiers::registerLootItemFunctionType);
     }
 	
 	private void registerClientReloadListnerEvent(final RegisterClientReloadListenersEvent event) {

@@ -38,7 +38,7 @@ public class PatchedCapeLayer extends PatchedLayer<AbstractClientPlayer, Abstrac
 				MathUtils.translateStack(matrixStackIn, modelMatrix);
 				MathUtils.rotateStack(matrixStackIn, transpose);
 				matrixStackIn.translate(0.0D, -0.4D, -0.025D);
-				originalRenderer.render(matrixStackIn, buffer, packedLightIn, entityliving, entityliving.walkAnimation.position(), entityliving.walkAnimation.speed(), partialTicks, entityliving.tickCount, netYawHead, pitchHead);
+				originalRenderer.render(matrixStackIn, buffer, packedLightIn, entityliving, entityliving.animationPosition, entityliving.animationSpeed, partialTicks, entityliving.tickCount, netYawHead, pitchHead);
 				matrixStackIn.popPose();
 			}
 		}

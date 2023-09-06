@@ -6,6 +6,8 @@ import java.util.Random;
 import javax.annotation.Nullable;
 
 import com.google.common.collect.Lists;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -13,7 +15,6 @@ import net.minecraft.client.particle.TerrainParticle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundSource;
-import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.GameRules;
@@ -26,20 +27,16 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.math.Vec2i;
-import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPFracture;
 import yesman.epicfight.particle.EpicFightParticles;
-import yesman.epicfight.world.damagesource.EpicFightDamageSources;
+import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.damagesource.SourceTags;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.level.block.FractureBlock;
 import yesman.epicfight.world.level.block.FractureBlockState;
-
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
 
 public class LevelUtil {
 	private static final Vec3 IMPACT_DIRECTION = new Vec3(0.0D, -1.0D, 0.0D);
@@ -81,7 +78,7 @@ public class LevelUtil {
 		double y = center.y;
 		
 		for (Vec2i block : affectedBlocks) {
-			BlockPos bp = new BlockPos.MutableBlockPos(block.x, y, block.y);
+			BlockPos bp = new BlockPos(block.x, y, block.y);
 			BlockState bs = level.getBlockState(bp);
 			BlockPos aboveBp = bp.above();
 			BlockState aboveState = level.getBlockState(aboveBp);
@@ -132,14 +129,14 @@ public class LevelUtil {
 				Vec3 rotAxis = IMPACT_DIRECTION.cross(centerToBlock).normalize();
 				Vector3f axis = new Vector3f((float)rotAxis.x, (float)rotAxis.y, (float)rotAxis.z);
 				Vector3f translator = new Vector3f(0, Math.max(0.0F, (float)(distance / length) - 0.5F) * 0.5F, 0);
-				Quaternionf rotator = QuaternionUtils.rotationDegrees(axis, (float)(distance / length) * 15.0F + level.random.nextFloat() * 10.0F - 5.0F);
+				Quaternion rotator = axis.rotationDegrees((float)(distance / length) * 15.0F + level.random.nextFloat() * 10.0F - 5.0F);
 				
-				rotator.mul(QuaternionUtils.XP.rotationDegrees(level.random.nextFloat() * 15.0F - 7.5F));
-				rotator.mul(QuaternionUtils.YP.rotationDegrees(level.random.nextFloat() * 40.0F - 20.0F));
-				rotator.mul(QuaternionUtils.ZP.rotationDegrees(level.random.nextFloat() * 15.0F - 7.5F));
+				rotator.mul(Vector3f.XP.rotationDegrees(level.random.nextFloat() * 15.0F - 7.5F));
+				rotator.mul(Vector3f.YP.rotationDegrees(level.random.nextFloat() * 40.0F - 20.0F));
+				rotator.mul(Vector3f.ZP.rotationDegrees(level.random.nextFloat() * 15.0F - 7.5F));
 				int lifeTime = 30 + level.random.nextInt((int)length * 80);
 				double bouncing = Math.pow(distance, 2) * bounceExponentCoef;
-
+				
 				FractureBlockState fractureBlockState = FractureBlock.getDefaultFractureBlockState(null);
 				fractureBlockState.setFractureInfo(bp, bs, translator, rotator, bouncing, lifeTime);
 				
@@ -202,7 +199,7 @@ public class LevelUtil {
 			center = centerOfBlock;
 		}
 		
-		BlockPos blockPos = new BlockPos.MutableBlockPos(center.x, center.y, center.z);
+		BlockPos blockPos = new BlockPos(center);
 		BlockState originBlockState = level.getBlockState(blockPos);
 		
 		if (!canTransferShockWave(level, blockPos, originBlockState)) {
@@ -233,21 +230,21 @@ public class LevelUtil {
 				if (!entity.is(caster)) {
 					double damageInflict = 1.0D - ((entity.position().distanceTo(center) - radius * 0.5D) / radius);
 					float damage = (float)(radius * 2.0D * Math.min(damageInflict, 1.0D));
-					EpicFightDamageSources damageSources = EpicFightDamageSources.of(entity.level());
-					entity.hurt(damageSources.shockwave(caster)
-										     .setAnimation(Animations.DUMMY_ANIMATION)
-									         .setInitialPosition(center)
-						                     .addTag(SourceTags.FINISHER)
-						                     .setStunType(StunType.KNOCKDOWN)
-											 .addRuntimeTag(DamageTypes.EXPLOSION)
-							,damage);
+					
+					entity.hurt(EpicFightDamageSource.commonEntityDamageSource("shockwave", caster, Animations.DUMMY_ANIMATION)
+						                             .setInitialPosition(center)
+						                             .addTag(SourceTags.FINISHER)
+						                             .setStunType(StunType.KNOCKDOWN)
+						                             .cast()
+						                             .setExplosion()
+						      , damage);
 				}
 			}
 		} else {
 			boolean smallSlam = (radius < 1.5D);
 			
 			if (!noSound) {
-				level.playLocalSound(center.x, center.y, center.z, smallSlam ? EpicFightSounds.GROUND_SLAM_SMALL.get() : EpicFightSounds.GROUND_SLAM.get(), SoundSource.BLOCKS, 1.0F, 1.0F, false);
+				level.playLocalSound(center.x, center.y, center.z, smallSlam ? EpicFightSounds.GROUND_SLAM_SMALL : EpicFightSounds.GROUND_SLAM, SoundSource.BLOCKS, 1.0F, 1.0F, false);
 			}
 			
 			if (!smallSlam && !noParticle) {

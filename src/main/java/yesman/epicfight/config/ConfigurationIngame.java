@@ -1,6 +1,9 @@
 package yesman.epicfight.config;
 
+import java.util.List;
+
 import com.google.common.collect.Lists;
+
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -8,8 +11,6 @@ import yesman.epicfight.api.utils.math.Vec2i;
 import yesman.epicfight.client.gui.widget.ColorSlider;
 import yesman.epicfight.config.Option.DoubleOption;
 import yesman.epicfight.config.Option.IntegerOption;
-
-import java.util.List;
 
 public class ConfigurationIngame {
 	public static final float A_TICK = 0.05F;
@@ -32,23 +33,23 @@ public class ConfigurationIngame {
 	public final Option<Integer> staminaBarY;
 	public final Option<ClientConfig.HorizontalBasis> staminaBarXBase;
 	public final Option<ClientConfig.VerticalBasis> staminaBarYBase;
-
+	
 	public final Option<Integer> weaponInnateX;
 	public final Option<Integer> weaponInnateY;
 	public final Option<ClientConfig.HorizontalBasis> weaponInnateXBase;
 	public final Option<ClientConfig.VerticalBasis> weaponInnateYBase;
-
+	
 	public final Option<Integer> passivesX;
 	public final Option<Integer> passivesY;
 	public final Option<ClientConfig.HorizontalBasis> passivesXBase;
 	public final Option<ClientConfig.VerticalBasis> passivesYBase;
 	public final Option<ClientConfig.AlignDirection> passivesAlignDirection;
-
+	
 	public final Option<Integer> chargingBarX;
 	public final Option<Integer> chargingBarY;
 	public final Option<ClientConfig.HorizontalBasis> chargingBarXBase;
 	public final Option<ClientConfig.VerticalBasis> chargingBarYBase;
-
+	
 	public ConfigurationIngame() {
 		ClientConfig config = ConfigManager.INGAME_CONFIG;
 		this.longPressCount = new IntegerOption(config.longPressCountConfig.get(), 1, 10);
@@ -67,23 +68,23 @@ public class ConfigurationIngame {
 		this.miningAutoSwitchItems = Lists.newArrayList(config.miningAutoSwitchItems.get().stream().map((itemName) ->
 			ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName))).iterator()
 		);
-
+		
 		this.staminaBarX = new Option<Integer>(config.staminaBarX.get());
 		this.staminaBarY = new Option<Integer>(config.staminaBarY.get());
 		this.staminaBarXBase = new Option<ClientConfig.HorizontalBasis>(config.staminaBarXBase.get());
 		this.staminaBarYBase = new Option<ClientConfig.VerticalBasis>(config.staminaBarYBase.get());
-
+		
 		this.weaponInnateX = new Option<Integer>(config.weaponInnateX.get());
 		this.weaponInnateY = new Option<Integer>(config.weaponInnateY.get());
 		this.weaponInnateXBase = new Option<ClientConfig.HorizontalBasis>(config.weaponInnateXBase.get());
 		this.weaponInnateYBase = new Option<ClientConfig.VerticalBasis>(config.weaponInnateYBase.get());
-
+		
 		this.passivesX = new Option<Integer>(config.passivesX.get());
 		this.passivesY = new Option<Integer>(config.passivesY.get());
 		this.passivesXBase = new Option<ClientConfig.HorizontalBasis>(config.passivesXBase.get());
 		this.passivesYBase = new Option<ClientConfig.VerticalBasis>(config.passivesYBase.get());
 		this.passivesAlignDirection = new Option<ClientConfig.AlignDirection>(config.passivesAlignDirection.get());
-
+		
 		this.chargingBarX = new Option<Integer>(config.chargingBarX.get());
 		this.chargingBarY = new Option<Integer>(config.chargingBarY.get());
 		this.chargingBarXBase = new Option<ClientConfig.HorizontalBasis>(config.chargingBarXBase.get());
@@ -132,8 +133,8 @@ public class ConfigurationIngame {
 		config.autoPreparation.set(this.autoPreparation.getValue());
 		config.offBloodEffects.set(this.offBloodEffects.getValue());
 		this.aimHelperRealColor = ColorSlider.toColorInteger(this.aimHelperColor.getValue());
-		config.battleAutoSwitchItems.set(Lists.newArrayList(this.battleAutoSwitchItems.stream().map((item) -> ForgeRegistries.ITEMS.getKey(item).toString()).iterator()));
-		config.miningAutoSwitchItems.set(Lists.newArrayList(this.miningAutoSwitchItems.stream().map((item) -> ForgeRegistries.ITEMS.getKey(item).toString()).iterator()));
+		config.battleAutoSwitchItems.set(Lists.newArrayList(this.battleAutoSwitchItems.stream().map((item) -> item.getRegistryName().toString()).iterator()));
+		config.miningAutoSwitchItems.set(Lists.newArrayList(this.miningAutoSwitchItems.stream().map((item) -> item.getRegistryName().toString()).iterator()));
 		config.staminaBarX.set(this.staminaBarX.getValue());
 		config.staminaBarY.set(this.staminaBarY.getValue());
 		config.staminaBarXBase.set(this.staminaBarXBase.getValue());
@@ -148,25 +149,25 @@ public class ConfigurationIngame {
 		config.passivesYBase.set(this.passivesYBase.getValue());
 		config.passivesAlignDirection.set(this.passivesAlignDirection.getValue());
 	}
-
+	
 	public Vec2i getStaminaPosition(int width, int height) {
 		int posX = this.staminaBarXBase.getValue().positionGetter.apply(width, this.staminaBarX.getValue());
 		int posY = this.staminaBarYBase.getValue().positionGetter.apply(height, this.staminaBarY.getValue());
-
+		
 		return new Vec2i(posX, posY);
 	}
-
+	
 	public Vec2i getWeaponInnatePosition(int width, int height) {
 		int posX = this.weaponInnateXBase.getValue().positionGetter.apply(width, this.weaponInnateX.getValue());
 		int posY = this.weaponInnateYBase.getValue().positionGetter.apply(height, this.weaponInnateY.getValue());
-
+		
 		return new Vec2i(posX, posY);
 	}
-
+	
 	public Vec2i getChargingBarPosition(int width, int height) {
 		int posX = this.chargingBarXBase.getValue().positionGetter.apply(width, this.chargingBarX.getValue());
 		int posY = this.chargingBarYBase.getValue().positionGetter.apply(height, this.chargingBarY.getValue());
-
+		
 		return new Vec2i(posX, posY);
 	}
 }

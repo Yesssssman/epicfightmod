@@ -1,7 +1,5 @@
 package yesman.epicfight.skill.passive;
 
-import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
@@ -37,7 +35,7 @@ public class SwordmasterSkill extends PassiveSkill {
 		container.getExecuter().getEventListener().addEventListener(EventType.MODIFY_ATTACK_SPEED_EVENT, EVENT_UUID, (event) -> {
 			WeaponCategory heldWeaponCategory = event.getItemCapability().getWeaponCategory();
 			
-			for (WeaponCategory weaponCategory : AVAILABLE_WEAPON_TYPES) {
+			for (WeaponCategories weaponCategory : AVAILABLE_WEAPON_TYPES) {
 				if (weaponCategory == heldWeaponCategory) {
 					float attackSpeed = event.getAttackSpeed();
 					event.setAttackSpeed(attackSpeed * (1.0F + this.speedBonus * 0.01F));
@@ -58,13 +56,15 @@ public class SwordmasterSkill extends PassiveSkill {
 	@Override
 	public List<Object> getTooltipArgsOfScreen(List<Object> list) {
 		list.add(String.format("%.0f", this.speedBonus));
+		
 		StringBuilder sb = new StringBuilder();
 		
         for (int i = 0; i < AVAILABLE_WEAPON_TYPES.length; i++) {
             sb.append(WeaponCategory.ENUM_MANAGER.toTranslated(AVAILABLE_WEAPON_TYPES[i]));
             
-            if (i < AVAILABLE_WEAPON_TYPES.length - 1)
+            if (i < AVAILABLE_WEAPON_TYPES.length - 1) {
             	sb.append(", ");
+            }
         }
         
         list.add(sb.toString());

@@ -52,8 +52,8 @@ public class EnderParticle extends TextureSheetParticle {
 	}
 	
 	private enum Usage {
-		DRAGON_BREATH_FLAME, ENDERMAN_DEATH
-    }
+		DRAGON_BREATH_FLAME, ENDERMAN_DEATH;
+	}
 	
 	@OnlyIn(Dist.CLIENT)
 	public static class EndermanDeathEmitProvider implements ParticleProvider<SimpleParticleType> {

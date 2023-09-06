@@ -3,13 +3,13 @@ package yesman.epicfight.particle;
 import java.util.Random;
 import java.util.function.BiFunction;
 
+import com.mojang.math.Vector3d;
+
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.phys.Vec3;
-
-import org.joml.Vector3d;
 
 public class HitParticleType extends SimpleParticleType {
 	public static final BiFunction<Entity, Entity, Vector3d> CENTER_OF_TARGET = (target, attacker) -> {

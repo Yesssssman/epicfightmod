@@ -1,7 +1,6 @@
 package yesman.epicfight.api.animation;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 import com.google.common.collect.Lists;
@@ -15,8 +14,8 @@ public class Joint {
 	private final int jointId;
 	private final String jointName;
 	private final OpenMatrix4f localTransform;
-	private final OpenMatrix4f toOrigin = new OpenMatrix4f();
-	private final OpenMatrix4f poseTransform = new OpenMatrix4f();
+	private OpenMatrix4f toOrigin = new OpenMatrix4f();
+	private OpenMatrix4f poseTransform = new OpenMatrix4f();
 	
 	public Joint(String name, int jointID, OpenMatrix4f localTransform) {
 		this.jointId = jointID;
@@ -25,7 +24,9 @@ public class Joint {
 	}
 
 	public void addSubJoint(Joint... joints) {
-        Collections.addAll(this.subJoints, joints);
+		for (Joint joint : joints) {
+			this.subJoints.add(joint);
+		}
 	}
 
 	public void resetPoseTransforms() {
@@ -90,7 +91,7 @@ public class Joint {
 		} else {
 			int i = 1;
 			for (Joint subJoint : this.subJoints) {
-				String str = subJoint.searchPath(i + path, joint);
+				String str = subJoint.searchPath(String.valueOf(i) + path, joint);
 				i++;
 				if (str != null) {
 					return str;

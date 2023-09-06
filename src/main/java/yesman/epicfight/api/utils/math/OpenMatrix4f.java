@@ -5,11 +5,10 @@ import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.util.Map;
 
-import org.joml.Matrix4f;
-import org.joml.Quaternionf;
-
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.math.Matrix4f;
+import com.mojang.math.Quaternion;
 
 import net.minecraft.world.phys.Vec3;
 import yesman.epicfight.api.animation.JointTransform;
@@ -17,7 +16,7 @@ import yesman.epicfight.api.animation.JointTransform;
 public class OpenMatrix4f {
 	public static class AnimationTransformEntry {
 		private static final String[] BINDING_PRIORITY = {JointTransform.PARENT, JointTransform.JOINT_LOCAL_TRANSFORM, JointTransform.ANIMATION_TRANSFROM, JointTransform.RESULT1, JointTransform.RESULT2};
-		private final Map<String, Pair<OpenMatrix4f, MatrixOperation>> matrices = Maps.newHashMap();
+		private Map<String, Pair<OpenMatrix4f, MatrixOperation>> matrices = Maps.newHashMap();
 		
 		public void put(String entryPosition, OpenMatrix4f matrix) {
 			this.put(entryPosition, matrix, OpenMatrix4f::mul);
@@ -46,7 +45,7 @@ public class OpenMatrix4f {
 			return result;
 		}
 	}
-
+	
 	private static final FloatBuffer MATRIX_TRANSFORMER = ByteBuffer.allocateDirect(16 * 4).order(ByteOrder.nativeOrder()).asFloatBuffer();
 	
 	/*
@@ -163,33 +162,10 @@ public class OpenMatrix4f {
 		mat.m31 = buf.get();
 		mat.m32 = buf.get();
 		mat.m33 = buf.get();
+		
 		return mat;
 	}
-
-	public OpenMatrix4f load(FloatBuffer buf) {
-		return OpenMatrix4f.load(this, buf);
-	}
-
-	public OpenMatrix4f store(FloatBuffer buf) {
-		buf.put(m00);
-		buf.put(m01);
-		buf.put(m02);
-		buf.put(m03);
-		buf.put(m10);
-		buf.put(m11);
-		buf.put(m12);
-		buf.put(m13);
-		buf.put(m20);
-		buf.put(m21);
-		buf.put(m22);
-		buf.put(m23);
-		buf.put(m30);
-		buf.put(m31);
-		buf.put(m32);
-		buf.put(m33);
-		return this;
-	}
-
+	
 	public OpenMatrix4f toFloat() {
 		float[] elements = new float[16];
 		
@@ -340,9 +316,9 @@ public class OpenMatrix4f {
 	}
 	
 	public static Vec3 transform(OpenMatrix4f matrix, Vec3 src) {
-		double x = matrix.m00 * src.x + matrix.m10 * src.y + matrix.m20 * src.z + matrix.m30;
-		double y = matrix.m01 * src.x + matrix.m11 * src.y + matrix.m21 * src.z + matrix.m31;
-		double z = matrix.m02 * src.x + matrix.m12 * src.y + matrix.m22 * src.z + matrix.m32;
+		double x = matrix.m00 * src.x + matrix.m10 * src.y + matrix.m20 * src.z + matrix.m30 * 1.0F;
+		double y = matrix.m01 * src.x + matrix.m11 * src.y + matrix.m21 * src.z + matrix.m31 * 1.0F;
+		double z = matrix.m02 * src.x + matrix.m12 * src.y + matrix.m22 * src.z + matrix.m32 * 1.0F;
 		
 		return new Vec3(x, y ,z);
 	}
@@ -580,11 +556,11 @@ public class OpenMatrix4f {
 		return new Vec3f(matrix.m30, matrix.m31, matrix.m32);
 	}
 	
-	public Quaternionf toQuaternion() {
+	public Quaternion toQuaternion() {
 		return OpenMatrix4f.toQuaternion(this);
 	}
 	
-	public static Quaternionf toQuaternion(OpenMatrix4f matrix) {
+	public static Quaternion toQuaternion(OpenMatrix4f matrix) {
 		float w, x, y, z;
 		float diagonal = matrix.m00 + matrix.m11 + matrix.m22;
 		if (diagonal > 0) {
@@ -612,15 +588,15 @@ public class OpenMatrix4f {
 			y = (matrix.m12 + matrix.m21) / z4;
 			z = z4 / 4f;
 		}
-		return new Quaternionf(x, y, z, w);
+		return new Quaternion(x, y, z, w);
 	}
 	
-	public static OpenMatrix4f fromQuaternion(Quaternionf quaternion) {
+	public static OpenMatrix4f fromQuaternion(Quaternion quaternion) {
 		OpenMatrix4f matrix = new OpenMatrix4f();
-		float x = quaternion.x();
-		float y = quaternion.y();
-		float z = quaternion.z();
-		float w = quaternion.w();
+		float x = quaternion.i();
+		float y = quaternion.j();
+		float z = quaternion.k();
+		float w = quaternion.r();
 		float xy = x * y;
 		float xz = x * z;
 		float xw = x * w;
@@ -688,24 +664,41 @@ public class OpenMatrix4f {
 	
 	@Override
 	public String toString() {
-		String buf = String.valueOf('\n' +
-				m00 + ' ' + m10 + ' ' + m20 + ' ' + m30 + '\n' +
-				m01 + ' ' + m11 + ' ' + m21 + ' ' + m31 + '\n' +
-				m02 + ' ' + m12 + ' ' + m22 + ' ' + m32 + '\n' +
-				m03 + ' ' + m13 + ' ' + m23 + ' ' + m33) + '\n';
-		return buf;
+		StringBuilder buf = new StringBuilder();
+		buf.append('\n');
+		buf.append(m00).append(' ').append(m10).append(' ').append(m20).append(' ').append(m30).append('\n');
+		buf.append(m01).append(' ').append(m11).append(' ').append(m21).append(' ').append(m31).append('\n');
+		buf.append(m02).append(' ').append(m12).append(' ').append(m22).append(' ').append(m32).append('\n');
+		buf.append(m03).append(' ').append(m13).append(' ').append(m23).append(' ').append(m33).append('\n');
+		return buf.toString();
 	}
 	
 	public static Matrix4f exportToMojangMatrix(OpenMatrix4f visibleMat) {
-		MATRIX_TRANSFORMER.position(0);
-		visibleMat.store(MATRIX_TRANSFORMER);
-		MATRIX_TRANSFORMER.position(0);
-		return new Matrix4f(MATRIX_TRANSFORMER);
+		float[] arr = new float[16];
+		arr[0] = visibleMat.m00;
+		arr[1] = visibleMat.m10;
+		arr[2] = visibleMat.m20;
+		arr[3] = visibleMat.m30;
+		arr[4] = visibleMat.m01;
+		arr[5] = visibleMat.m11;
+		arr[6] = visibleMat.m21;
+		arr[7] = visibleMat.m31;
+		arr[8] = visibleMat.m02;
+		arr[9] = visibleMat.m12;
+		arr[10] = visibleMat.m22;
+		arr[11] = visibleMat.m32;
+		arr[12] = visibleMat.m03;
+		arr[13] = visibleMat.m13;
+		arr[14] = visibleMat.m23;
+		arr[15] = visibleMat.m33;
+		
+		return new Matrix4f(arr);
 	}
 	
 	public static OpenMatrix4f importFromMojangMatrix(Matrix4f mat4f) {
 		MATRIX_TRANSFORMER.position(0);
-		mat4f.get(MATRIX_TRANSFORMER);
+		mat4f.store(MATRIX_TRANSFORMER);
+		
 		return OpenMatrix4f.load(null, MATRIX_TRANSFORMER);
 	}
 }

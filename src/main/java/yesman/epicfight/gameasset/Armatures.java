@@ -37,8 +37,8 @@ public class Armatures implements PreparableReloadListener {
 	public static final Armatures INSTANCE = new Armatures();
 	
 	@FunctionalInterface
-	public interface ArmatureContructor<T extends Armature> {
-		T invoke(int jointNumber, Joint joint, Map<String, Joint> jointMap);
+	public static interface ArmatureContructor<T extends Armature> {		
+		public T invoke(int jointNumber, Joint joint, Map<String, Joint> jointMap);
 	}
 	
 	private static final Map<ResourceLocation, Armature> ARMATURES = Maps.newHashMap();

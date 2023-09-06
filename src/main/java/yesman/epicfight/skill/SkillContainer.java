@@ -227,7 +227,11 @@ public class SkillContainer {
 			if (executer.isChargingSkill(this.containingSkill) && this.containingSkill instanceof ChargeableSkill chargingSkill) {
 				if (executer.isLogicalClient()) {
 					return true;
-				} else return executer.getSkillChargingTicks() >= chargingSkill.getMinChargingTicks();
+				} else if (executer.getSkillChargingTicks() < chargingSkill.getMinChargingTicks()) {
+					return false;
+				} else {
+					return true;
+				}
 			}
 			
 			event.setResourcePredicate(this.containingSkill.resourcePredicate(executer) || (this.isActivated() && this.containingSkill.activateType == ActivateType.DURATION));
@@ -286,11 +290,11 @@ public class SkillContainer {
 	}
 	
 	public boolean hasSkill(Skill skill) {
-		return this.containingSkill != null && this.containingSkill.equals(skill);
+		return this.containingSkill != null ? this.containingSkill.equals(skill) : false;
 	}
 	
 	public boolean isFull() {
-		return this.containingSkill == null || this.stack >= this.containingSkill.maxStackSize;
+		return this.containingSkill != null ? this.stack >= this.containingSkill.maxStackSize : true;
 	}
 	
 	public float getResource(float partialTicks) {

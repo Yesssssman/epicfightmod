@@ -159,17 +159,17 @@ public abstract class AnimationProperty<T> {
 	
 	@FunctionalInterface
 	public interface Registerer<T> {
-		void register(Map<AnimationProperty<T>, Object> properties, AnimationProperty<T> key, T object);
+		public void register(Map<AnimationProperty<T>, Object> properties, AnimationProperty<T> key, T object);
 	}
 	
 	@FunctionalInterface
 	public interface PoseModifier {
-		void modify(DynamicAnimation self, Pose pose, LivingEntityPatch<?> entitypatch, float elapsedTime, float partialTicks);
+		public void modify(DynamicAnimation self, Pose pose, LivingEntityPatch<?> entitypatch, float elapsedTime, float partialTicks);
 	}
 	
 	@FunctionalInterface
 	public interface PlaySpeedModifier {
-		float modify(DynamicAnimation self, LivingEntityPatch<?> entitypatch, float speed, float elapsedTime);
+		public float modify(DynamicAnimation self, LivingEntityPatch<?> entitypatch, float speed, float elapsedTime);
 	}
 	
 	public static class AttackPhaseProperty<T> extends AnimationProperty<T> {

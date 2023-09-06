@@ -22,7 +22,7 @@ public enum EpicFightItemTier implements Tier {
 	private final int enchantability;
 	private final LazyLoadedValue<Ingredient> repairMaterial;
 
-	EpicFightItemTier(int harvestLevelIn, int maxUsesIn, float efficiencyIn, float attackDamageIn, int enchantabilityIn, Supplier<Ingredient> repairMaterialIn) {
+	private EpicFightItemTier(int harvestLevelIn, int maxUsesIn, float efficiencyIn, float attackDamageIn, int enchantabilityIn, Supplier<Ingredient> repairMaterialIn) {
 		this.harvestLevel = harvestLevelIn;
 		this.maxUses = maxUsesIn;
 		this.efficiency = efficiencyIn;

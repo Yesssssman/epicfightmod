@@ -6,8 +6,8 @@ import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 
 public class DealtDamageEvent extends PlayerEvent<ServerPlayerPatch> {
 	private float attackDamage;
-	private final LivingEntity target;
-	private final EpicFightDamageSource damageSource;
+	private LivingEntity target;
+	private EpicFightDamageSource damageSource;
 	
 	public DealtDamageEvent(ServerPlayerPatch playerpatch, LivingEntity target, EpicFightDamageSource source, float damage) {
 		super(playerpatch, false);

@@ -4,11 +4,11 @@ import yesman.epicfight.api.utils.ExtendableEnum;
 import yesman.epicfight.api.utils.ExtendableEnumManager;
 
 public interface SkillCategory extends ExtendableEnum {
-	ExtendableEnumManager<SkillCategory> ENUM_MANAGER = new ExtendableEnumManager<> ("skill_category");
+	public static final ExtendableEnumManager<SkillCategory> ENUM_MANAGER = new ExtendableEnumManager<> ("skill_category");
 	
-	boolean shouldSave();
+	public boolean shouldSave();
 	
-	boolean shouldSynchronize();
+	public boolean shouldSynchronize();
 	
-	boolean learnable();
+	public boolean learnable();
 }

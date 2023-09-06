@@ -9,10 +9,10 @@ import net.minecraftforge.network.NetworkEvent;
 import yesman.epicfight.api.utils.LevelUtil;
 
 public class SPFracture {
-	private final double radius;
-	private final Vec3 location;
-	private final boolean noSound;
-	private final boolean noParticle;
+	private double radius;
+	private Vec3 location;
+	private boolean noSound;
+	private boolean noParticle;
 	
 	public SPFracture() {
 		this(Vec3.ZERO, 0.0D);

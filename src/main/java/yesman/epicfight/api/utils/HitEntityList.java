@@ -14,7 +14,7 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class HitEntityList {
-	private final List<Entity> hitEntites;
+	private List<Entity> hitEntites;
 	private int index;
 	
 	public HitEntityList(LivingEntityPatch<?> attacker, List<Entity> entities, Priority priority) {
@@ -28,13 +28,13 @@ public class HitEntityList {
 	
 	public boolean next() {
 		this.index++;
-		return this.hitEntites.size() > this.index;
+		return this.hitEntites.size() > this.index ? true : false;
 	}
 	
-	public enum Priority {
+	public static enum Priority {
 		DISTANCE((attacker, list) -> {
-			List<Double> distanceToAttacker = Lists.newArrayList();
-			List<Entity> hitEntites = Lists.newArrayList();
+			List<Double> distanceToAttacker = Lists.<Double>newArrayList();
+			List<Entity> hitEntites = Lists.<Entity>newArrayList();
 			
 			Outer:
 			for (Entity entity : list) {
@@ -56,7 +56,7 @@ public class HitEntityList {
 		}),
 		
 		TARGET((attacker, list) -> {
-			List<Entity> hitEntites = Lists.newArrayList();
+			List<Entity> hitEntites = Lists.<Entity>newArrayList();
 			
 			for (Entity entity : list) {
 				if (entity.is(attacker.getTarget())) {
@@ -76,14 +76,14 @@ public class HitEntityList {
 				if (attacker.isTeammate(e)) {
 					continue;
 				}
-
+				
 				if (attacker.getOriginal().getLastHurtByMob() == e || attacker.getTarget() == e) {
 					firstTargets.add(e);
 					continue;
 				}
-
+				
 				LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(e, LivingEntityPatch.class);
-
+				
 				if (entitypatch != null) {
 					if (attacker.getOriginal().is(entitypatch.getTarget())) {
 						firstTargets.add(e);

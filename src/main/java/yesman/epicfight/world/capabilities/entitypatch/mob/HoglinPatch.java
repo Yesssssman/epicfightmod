@@ -6,8 +6,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
-import net.minecraft.world.entity.ai.behavior.OneShot;
-import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
+import net.minecraft.world.entity.ai.behavior.RunIf;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.schedule.Activity;
@@ -31,8 +30,8 @@ public class HoglinPatch extends MobPatch<Hoglin> {
 	public void initAI() {
 		super.initAI();
 		BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.CORE, 1, MoveToTargetSink.class, new MoveToTargetSinkStopInaction());
-		BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 13, OneShot.class, new AnimatedCombatBehavior<>(this, MobCombatBehaviors.HOGLIN.build(this)));
-		BrainRecomposer.removeBehavior(this.original.getBrain(), Activity.FIGHT, 14, OneShot.class);
+		BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 13, RunIf.class, new AnimatedCombatBehavior<>(this, MobCombatBehaviors.HOGLIN.build(this)));
+		BrainRecomposer.removeBehavior(this.original.getBrain(), Activity.FIGHT, 14, RunIf.class);
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -63,12 +62,12 @@ public class HoglinPatch extends MobPatch<Hoglin> {
 	
 	@Override
 	public SoundEvent getWeaponHitSound(InteractionHand hand) {
-		return this.original.isBaby() ? EpicFightSounds.BLUNT_HIT.get() : EpicFightSounds.BLUNT_HIT_HARD.get();
+		return this.original.isBaby() ? EpicFightSounds.BLUNT_HIT : EpicFightSounds.BLUNT_HIT_HARD;
 	}
 	
 	@Override
 	public SoundEvent getSwingSound(InteractionHand hand) {
-		return this.original.isBaby() ? EpicFightSounds.WHOOSH.get() : EpicFightSounds.WHOOSH_BIG.get();
+		return this.original.isBaby() ? EpicFightSounds.WHOOSH : EpicFightSounds.WHOOSH_BIG;
 	}
 	
 	@Override

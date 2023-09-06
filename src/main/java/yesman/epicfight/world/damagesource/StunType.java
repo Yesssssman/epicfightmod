@@ -9,8 +9,8 @@ public enum StunType {
 	NEUTRALIZE("damage_source.epicfight.stun_neutralize", true),
 	FALL("damage_source.epicfight.stun_fall", true);
 	
-	private final String tooltip;
-	private final boolean fixedStunTime;
+	private String tooltip;
+	private boolean fixedStunTime;
 	
 	StunType(String tooltip, boolean fixedStunTime) {
 		this.tooltip = tooltip;

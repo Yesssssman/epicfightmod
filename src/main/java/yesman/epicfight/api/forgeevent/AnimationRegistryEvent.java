@@ -6,7 +6,7 @@ import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.fml.event.IModBusEvent;
 
 public class AnimationRegistryEvent extends Event implements IModBusEvent {
-	private final Map<String, Runnable> registryMap;
+	private Map<String, Runnable> registryMap;
 	
 	public AnimationRegistryEvent(Map<String, Runnable> registryMap) {
 		this.registryMap = registryMap;

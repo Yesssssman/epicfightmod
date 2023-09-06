@@ -59,7 +59,7 @@ public abstract class Collider {
 	}
 	
 	public List<Entity> getCollideEntities(Entity entity) {
-		List<Entity> list = entity.level().getEntities(entity, this.getHitboxAABB(), (e) -> {
+		List<Entity> list = entity.getLevel().getEntities(entity, this.getHitboxAABB(), (e) -> {
 			if (e instanceof PartEntity<?> partEntity) {
 				if (partEntity.getParent().is(entity)) {
 					return false;

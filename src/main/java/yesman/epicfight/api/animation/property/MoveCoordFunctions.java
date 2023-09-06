@@ -1,5 +1,7 @@
 package yesman.epicfight.api.animation.property;
 
+import com.mojang.math.Quaternion;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
@@ -10,7 +12,6 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
-import org.joml.Quaternionf;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
@@ -27,12 +28,12 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 public class MoveCoordFunctions {
 	@FunctionalInterface
 	public interface MoveCoordSetter {
-		void set(DynamicAnimation animation, LivingEntityPatch<?> entitypatch, TransformSheet transformSheet);
+		public void set(DynamicAnimation animation, LivingEntityPatch<?> entitypatch, TransformSheet transformSheet);
 	}
 	
 	@FunctionalInterface
 	public interface MoveCoordGetter {
-		Vec3f get(DynamicAnimation animation, LivingEntityPatch<?> entitypatch, TransformSheet transformSheet);
+		public Vec3f get(DynamicAnimation animation, LivingEntityPatch<?> entitypatch, TransformSheet transformSheet);
 	}
 	
 	public static final MoveCoordGetter DIFF_FROM_PREV_COORD = (animation, entitypatch, coord) -> {
@@ -56,11 +57,11 @@ public class MoveCoordFunctions {
 		dx = Math.abs(dx) > 0.0001F ? dx : 0.0F;
 		dz = Math.abs(dz) > 0.0001F ? dz : 0.0F;
 		
-		BlockPos blockpos = new BlockPos.MutableBlockPos(livingentity.getX(), livingentity.getBoundingBox().minY - 1.0D, livingentity.getZ());
-		BlockState blockState = livingentity.level().getBlockState(blockpos);
+		BlockPos blockpos = new BlockPos(livingentity.getX(), livingentity.getBoundingBox().minY - 1.0D, livingentity.getZ());
+		BlockState blockState = livingentity.level.getBlockState(blockpos);
 		AttributeInstance movementSpeed = livingentity.getAttribute(Attributes.MOVEMENT_SPEED);
 		boolean soulboost = blockState.is(BlockTags.SOUL_SPEED_BLOCKS) && EnchantmentHelper.getEnchantmentLevel(Enchantments.SOUL_SPEED, livingentity) > 0;
-		float speedFactor = (float)(soulboost ? 1.0D : livingentity.level().getBlockState(blockpos).getBlock().getSpeedFactor());
+		float speedFactor = (float)(soulboost ? 1.0D : livingentity.level.getBlockState(blockpos).getBlock().getSpeedFactor());
 		float moveMultiplier = (float)(animation.getProperty(ActionAnimationProperty.AFFECT_SPEED).orElse(false) ? (movementSpeed.getValue() / movementSpeed.getBaseValue()) : 1.0F);
 		
 		return new Vec3f(dx * moveMultiplier * speedFactor, dy, dz * moveMultiplier * speedFactor);
@@ -247,7 +248,7 @@ public class MoveCoordFunctions {
 		Vec3 pos = entitypatch.getOriginal().position();
 		Vec3 targetpos = entitypatch.getTarget().position();
 		float verticalDistance = (float) (targetpos.y - pos.y);
-		Quaternionf rotator = Vec3f.getRotatorBetween(new Vec3f(0.0F, -verticalDistance, (float)targetpos.subtract(pos).horizontalDistance()), new Vec3f(0.0F, 0.0F, 1.0F));
+		Quaternion rotator = Vec3f.getRotatorBetween(new Vec3f(0.0F, -verticalDistance, (float)targetpos.subtract(pos).horizontalDistance()), new Vec3f(0.0F, 0.0F, 1.0F));
 		
 		for (int i = startFrame; i <= endFrame; i++) {
 			Vec3f translation = keyframes[i].transform().translation();

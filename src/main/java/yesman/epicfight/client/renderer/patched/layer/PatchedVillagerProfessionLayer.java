@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.VillagerProfessionLayer;
 import net.minecraft.client.resources.metadata.animation.VillagerMetaDataSection;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.Registry;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.monster.ZombieVillager;
 import net.minecraft.world.entity.npc.VillagerData;
@@ -17,7 +17,6 @@ import net.minecraft.world.entity.npc.VillagerDataHolder;
 import net.minecraft.world.entity.npc.VillagerProfession;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.mesh.HumanoidMesh;
@@ -36,9 +35,9 @@ public class PatchedVillagerProfessionLayer extends PatchedLayer<ZombieVillager,
 		if (!entityliving.isInvisible()) {
 			VillagerData villagerdata = ((VillagerDataHolder)entitypatch.getOriginal()).getVillagerData();
 			
-			VillagerMetaDataSection.Hat typeHat = originalRenderer.getHatData(originalRenderer.typeHatCache, "type", BuiltInRegistries.VILLAGER_TYPE, villagerdata.getType());
+			VillagerMetaDataSection.Hat typeHat = originalRenderer.getHatData(originalRenderer.typeHatCache, "type", Registry.VILLAGER_TYPE, villagerdata.getType());
 	        @SuppressWarnings("deprecation")
-	        VillagerMetaDataSection.Hat professionHat = originalRenderer.getHatData(originalRenderer.professionHatCache, "profession", BuiltInRegistries.VILLAGER_PROFESSION, villagerdata.getProfession());
+	        VillagerMetaDataSection.Hat professionHat = originalRenderer.getHatData(originalRenderer.professionHatCache, "profession", Registry.VILLAGER_PROFESSION, villagerdata.getProfession());
 	        
 	        if (!(typeHat == VillagerMetaDataSection.Hat.NONE || typeHat == VillagerMetaDataSection.Hat.PARTIAL && professionHat != VillagerMetaDataSection.Hat.FULL)
 	        		|| !entityliving.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
@@ -50,11 +49,11 @@ public class PatchedVillagerProfessionLayer extends PatchedLayer<ZombieVillager,
 				this.mesh.jacket.hidden = true;
 			}
 	        
-			VertexConsumer builder1 = bufferIn.getBuffer(EpicFightRenderTypes.triangles(RenderType.entityCutoutNoCull(originalRenderer.getResourceLocation("type", BuiltInRegistries.VILLAGER_TYPE.getKey(villagerdata.getType())))));
+			VertexConsumer builder1 = bufferIn.getBuffer(EpicFightRenderTypes.triangles(RenderType.entityCutoutNoCull(originalRenderer.getResourceLocation("type", Registry.VILLAGER_TYPE.getKey(villagerdata.getType())))));
 			this.mesh.drawModelWithPose(matrixStackIn, builder1, packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, LivingEntityRenderer.getOverlayCoords(entityliving, 0.0F), entitypatch.getArmature(), poses);
 			
 			if (villagerdata.getProfession() != VillagerProfession.NONE) {
-				VertexConsumer builder2 = bufferIn.getBuffer(EpicFightRenderTypes.triangles(RenderType.entityCutoutNoCull(originalRenderer.getResourceLocation("profession", ForgeRegistries.VILLAGER_PROFESSIONS.getKey(villagerdata.getProfession())))));
+				VertexConsumer builder2 = bufferIn.getBuffer(EpicFightRenderTypes.triangles(RenderType.entityCutoutNoCull(originalRenderer.getResourceLocation("profession", villagerdata.getProfession().getRegistryName()))));
 				this.mesh.drawModelWithPose(matrixStackIn, builder2, packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, LivingEntityRenderer.getOverlayCoords(entityliving, 0.0F), entitypatch.getArmature(), poses);
 			}
 		}

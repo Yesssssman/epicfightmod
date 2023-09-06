@@ -3,7 +3,7 @@ package yesman.epicfight.world.entity.eventlistener;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class PlayerEvent<T extends PlayerPatch<?>> {
-	private final T playerpatch;
+	private T playerpatch;
 	private final boolean cancelable;
 	private boolean canceled;
 	
@@ -18,14 +18,14 @@ public class PlayerEvent<T extends PlayerPatch<?>> {
 	
 	public void setCanceled(boolean canceled) {
 		if (!this.cancelable) {
-			throw new UnsupportedOperationException(String.format("Event %s is not cancelable.", this));
+			throw new UnsupportedOperationException(String.format("Event %s is not cancelable.", this.toString()));
 		}
 		
 		this.canceled = canceled;
 	}
 	
 	public boolean isCanceled() {
-		return this.cancelable && this.canceled;
+		return this.cancelable ? this.canceled : false;
 	}
 	
 	@Override

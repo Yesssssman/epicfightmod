@@ -2,6 +2,9 @@ package yesman.epicfight.world.level.block.entity;
 
 import java.util.Random;
 
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -14,12 +17,9 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.world.level.block.FractureBlockState;
 
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
-
 public class FractureBlockEntity extends BlockEntity {
 	private Vector3f translate;
-	private Quaternionf rotation;
+	private Quaternion rotation;
 	private BlockState originalBlockState;
 	private double bouncing;
 	private int maxLifeTime;
@@ -39,7 +39,7 @@ public class FractureBlockEntity extends BlockEntity {
 		this.maxLifeTime = fractureBlockState.getLifeTime();
 	}
 	
-	public FractureBlockEntity(BlockPos blockPos, BlockState blockState, Vector3f translate, Quaternionf rotation, double bouncing, int maxLifeTime) {
+	public FractureBlockEntity(BlockPos blockPos, BlockState blockState, Vector3f translate, Quaternion rotation, double bouncing, int maxLifeTime) {
 		super(EpicFightBlockEntities.FRACTURE.get(), blockPos, blockState);
 		
 		this.originalBlockState = blockState;
@@ -57,7 +57,7 @@ public class FractureBlockEntity extends BlockEntity {
 		return this.translate;
 	}
 	
-	public Quaternionf getRotation() {
+	public Quaternion getRotation() {
 		return this.rotation;
 	}
 	

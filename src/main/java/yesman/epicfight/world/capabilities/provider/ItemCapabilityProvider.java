@@ -76,7 +76,7 @@ public class ItemCapabilityProvider implements ICapabilityProvider, NonNullSuppl
 	}
 	
 	private CapabilityItem capability;
-	private final LazyOptional<CapabilityItem> optional = LazyOptional.of(this);
+	private LazyOptional<CapabilityItem> optional = LazyOptional.of(this);
 	
 	public ItemCapabilityProvider(ItemStack itemstack) {
 		this.capability = CAPABILITIES.get(itemstack.getItem());

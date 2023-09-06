@@ -13,14 +13,12 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.CreativeModeTab;
@@ -30,7 +28,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.AttackResult;
-import yesman.epicfight.api.utils.ExtendableEnumManager;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.gui.BattleModeGui;
 import yesman.epicfight.gameasset.Animations;
@@ -78,6 +75,11 @@ public class GuardSkill extends Skill {
 		
 		public Builder setResource(Resource resource) {
 			this.resource = resource;
+			return this;
+		}
+		
+		public Builder setCreativeTab(CreativeModeTab tab) {
+			this.tab = tab;
 			return this;
 		}
 		
@@ -202,7 +204,7 @@ public class GuardSkill extends Skill {
 						if (epicfightDamageSource.hasTag(SourceTags.GUARD_PUNCTURE)) {
 							return;
 						}
-
+						
 						impact = ((EpicFightDamageSource)event.getDamageSource()).getImpact();
 						knockback += Math.min(impact * 0.1F, 1.0F);
 					}
@@ -217,10 +219,10 @@ public class GuardSkill extends Skill {
 		DamageSource damageSource = event.getDamageSource();
 		
 		if (this.isBlockableSource(damageSource, advanced)) {
-			event.getPlayerPatch().playSound(EpicFightSounds.CLASH.get(), -0.05F, 0.1F);
+			event.getPlayerPatch().playSound(EpicFightSounds.CLASH, -0.05F, 0.1F);
 			ServerPlayer serveerPlayer = event.getPlayerPatch().getOriginal();
-			EpicFightParticles.HIT_BLUNT.get().spawnParticleWithArgument(serveerPlayer.serverLevel(), HitParticleType.FRONT_OF_EYES, HitParticleType.ZERO, serveerPlayer, damageSource.getDirectEntity());
-
+			EpicFightParticles.HIT_BLUNT.get().spawnParticleWithArgument(serveerPlayer.getLevel(), HitParticleType.FRONT_OF_EYES, HitParticleType.ZERO, serveerPlayer, damageSource.getDirectEntity());
+			
 			if (damageSource.getDirectEntity() instanceof LivingEntity livingEntity) {
 				knockback += EnchantmentHelper.getKnockbackBonus(livingEntity) * 0.1F;
 			}
@@ -238,7 +240,7 @@ public class GuardSkill extends Skill {
 			}
 			
 			if (blockType == BlockType.GUARD_BREAK) {
-				event.getPlayerPatch().playSound(EpicFightSounds.NEUTRALIZE_MOBS.get(), 3.0F, 0.0F, 0.1F);
+				event.getPlayerPatch().playSound(EpicFightSounds.NEUTRALIZE_MOBS, 3.0F, 0.0F, 0.1F);
 			}
 			
 			this.dealEvent(event.getPlayerPatch(), event, advanced);
@@ -345,24 +347,30 @@ public class GuardSkill extends Skill {
 	}
 	
 	protected boolean isBlockableSource(DamageSource damageSource, boolean advanced) {
-		return !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !damageSource.is(DamageTypeTags.BYPASSES_ARMOR) && !damageSource.is(DamageTypeTags.IS_PROJECTILE) && !damageSource.is(DamageTypeTags.IS_EXPLOSION) && !damageSource.is(DamageTypes.MAGIC) && !damageSource.is(DamageTypeTags.IS_FIRE);
+		return !damageSource.isBypassInvul() && !damageSource.isBypassArmor() && !damageSource.isProjectile() && !damageSource.isExplosion() && !damageSource.isMagic() && !damageSource.isFire();
 	}
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public List<Object> getTooltipArgsOfScreen(List<Object> list) {
 		list.clear();
-
+		
 		StringBuilder sb = new StringBuilder();
-
+		
 		Iterator<WeaponCategory> iter = this.guardMotions.keySet().iterator();
+		int size = this.guardMotions.keySet().size();
+		int i = 0;
+		
 		while (iter.hasNext()) {
 			sb.append(WeaponCategory.ENUM_MANAGER.toTranslated(iter.next()));
-			if (iter.hasNext())
+			
+			if (++i < size) {
 				sb.append(", ");
+			}
 		}
-
-		list.add(sb.toString());
+		
+        list.add(sb.toString());
+		
 		return list;
 	}
 	
@@ -373,20 +381,19 @@ public class GuardSkill extends Skill {
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void drawOnGui(BattleModeGui gui, SkillContainer container, GuiGraphics guiGraphics, float x, float y) {
-		PoseStack poseStack = guiGraphics.pose();
+	public void drawOnGui(BattleModeGui gui, SkillContainer container, PoseStack poseStack, float x, float y) {
 		poseStack.pushPose();
 		poseStack.translate(0, (float)gui.getSlidingProgression(), 0);
-		guiGraphics.blit(EpicFightSkills.GUARD.getSkillTexture(), (int)x, (int)y, 24, 24, 0, 0, 1, 1, 1, 1);
-		guiGraphics.drawString(gui.font, String.format("x%.1f", container.getDataManager().getDataValue(PENALTY)), x, y + 6, 16777215, true);
-		poseStack.popPose();
+		RenderSystem.setShaderTexture(0, EpicFightSkills.GUARD.getSkillTexture());
+		GuiComponent.blit(poseStack, (int)x, (int)y, 24, 24, 0, 0, 1, 1, 1, 1);
+		gui.font.drawShadow(poseStack, String.format("x%.1f", container.getDataManager().getDataValue(PENALTY)), x, y + 6, 16777215);
 	}
 	
 	protected boolean isAdvancedGuard() {
 		return false;
 	}
 	
-	public enum BlockType {
+	public static enum BlockType {
 		GUARD_BREAK, GUARD, ADVANCED_GUARD
 	}
 }

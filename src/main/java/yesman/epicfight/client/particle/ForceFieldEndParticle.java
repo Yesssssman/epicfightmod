@@ -36,9 +36,9 @@ public class ForceFieldEndParticle extends Particle {
 	public void render(VertexConsumer vertexBuilder, Camera camera, float parttialTick) {
 		PoseStack poseStack = new PoseStack();
 		Vec3 vec3 = camera.getPosition();
-		float f = (float) (Mth.lerp(parttialTick, this.xo, this.x) - vec3.x());
-		float f1 = (float) (Mth.lerp(parttialTick, this.yo, this.y) - vec3.y());
-		float f2 = (float) (Mth.lerp(parttialTick, this.zo, this.z) - vec3.z());
+		float f = (float) (Mth.lerp((double) parttialTick, this.xo, this.x) - vec3.x());
+		float f1 = (float) (Mth.lerp((double) parttialTick, this.yo, this.y) - vec3.y());
+		float f2 = (float) (Mth.lerp((double) parttialTick, this.zo, this.z) - vec3.z());
 		poseStack.translate(f, f1, f2);
 		
 		if (this.age > 0) {

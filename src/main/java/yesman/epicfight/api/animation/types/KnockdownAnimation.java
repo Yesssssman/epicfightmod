@@ -1,7 +1,6 @@
 package yesman.epicfight.api.animation.types;
 
-import net.minecraft.tags.DamageTypeTags;
-import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.damagesource.EntityDamageSource;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
@@ -14,7 +13,7 @@ public class KnockdownAnimation extends LongHitAnimation {
 		this.stateSpectrumBlueprint
 			.addState(EntityState.KNOCKDOWN, true)
 			.addState(EntityState.ATTACK_RESULT, (damagesource) -> {
-				if (damagesource.getEntity() != null && !damagesource.is(DamageTypeTags.IS_EXPLOSION) && !damagesource.is(DamageTypes.MAGIC) && !damagesource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+				if (damagesource instanceof EntityDamageSource && !damagesource.isExplosion() && !damagesource.isMagic() && !damagesource.isBypassInvul()) {
 					if (damagesource instanceof EpicFightDamageSource) {
 						return ((EpicFightDamageSource)damagesource).hasTag(SourceTags.FINISHER) ? AttackResult.ResultType.SUCCESS : AttackResult.ResultType.BLOCKED;
 					} else {

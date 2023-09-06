@@ -25,6 +25,7 @@ import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.monster.Monster;
 import net.minecraft.world.entity.monster.RangedAttackMob;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
@@ -67,7 +68,7 @@ public abstract class MixinWitherBoss extends Monster implements PowerableMob, R
 				Entity entity1 = null;
 				
 				if (k > 0) {
-					entity1 = this.level().getEntity(k);
+					entity1 = this.level.getEntity(k);
 				}
 				
 				if (this.epicfightPatch.getLaserTargetEntity(j + 1) != null) {
@@ -94,15 +95,15 @@ public abstract class MixinWitherBoss extends Monster implements PowerableMob, R
 				double subHeadZ = self.getHeadZ(l);
 				
 				if (!this.epicfightPatch.isGhost()) {
-					this.level().addParticle(ParticleTypes.SMOKE, subHeadX + this.random.nextGaussian() * (double) 0.3F,
+					this.level.addParticle(ParticleTypes.SMOKE, subHeadX + this.random.nextGaussian() * (double) 0.3F,
 							subHeadY + this.random.nextGaussian() * (double) 0.3F,
 							subHeadZ + this.random.nextGaussian() * (double) 0.3F, 0.0D, 0.0D, 0.0D);
 					
-					if (powered && this.level().random.nextInt(4) == 0) {
-						this.level().addParticle(ParticleTypes.ENTITY_EFFECT,
+					if (powered && this.level.random.nextInt(4) == 0) {
+						this.level.addParticle(ParticleTypes.ENTITY_EFFECT,
 								subHeadX + this.random.nextGaussian() * (double) 0.3F,
 								subHeadY + this.random.nextGaussian() * (double) 0.3F,
-								subHeadZ + this.random.nextGaussian() * (double) 0.3F, 0.7F, 0.7F,
+								subHeadZ + this.random.nextGaussian() * (double) 0.3F, (double) 0.7F, (double) 0.7F,
 								0.5D);
 					}
 				}
@@ -110,9 +111,9 @@ public abstract class MixinWitherBoss extends Monster implements PowerableMob, R
 			
 			if (self.getInvulnerableTicks() > 0) {
 				for (int i1 = 0; i1 < 3; ++i1) {
-					this.level().addParticle(ParticleTypes.ENTITY_EFFECT, this.getX() + this.random.nextGaussian(),
+					this.level.addParticle(ParticleTypes.ENTITY_EFFECT, this.getX() + this.random.nextGaussian(),
 							this.getY() + (double) (this.random.nextFloat() * 3.3F),
-							this.getZ() + this.random.nextGaussian(), 0.7F, 0.7F, 0.9F);
+							this.getZ() + this.random.nextGaussian(), (double) 0.7F, (double) 0.7F, (double) 0.9F);
 				}
 			}
 		}
@@ -145,11 +146,11 @@ public abstract class MixinWitherBoss extends Monster implements PowerableMob, R
 				this.bossEvent.setProgress(1.0F - (float) k1 / 220.0F);
 
 				if (k1 <= 0) {
-					Level.ExplosionInteraction explosion$blockinteraction = ForgeEventFactory.getMobGriefingEvent(self.level(), this) ? Level.ExplosionInteraction.BLOCK : Level.ExplosionInteraction.NONE;
-					self.level().explode(this, self.getX(), self.getEyeY(), self.getZ(), 7.0F, false, explosion$blockinteraction);
+					Explosion.BlockInteraction explosion$blockinteraction = ForgeEventFactory.getMobGriefingEvent(self.level, this) ? Explosion.BlockInteraction.DESTROY : Explosion.BlockInteraction.NONE;
+					self.level.explode(this, self.getX(), self.getEyeY(), self.getZ(), 7.0F, false, explosion$blockinteraction);
 
 					if (!self.isSilent()) {
-						self.level().globalLevelEvent(1023, self.blockPosition(), 0);
+						self.level.globalLevelEvent(1023, self.blockPosition(), 0);
 					}
 				}
 
@@ -164,7 +165,7 @@ public abstract class MixinWitherBoss extends Monster implements PowerableMob, R
 					if (self.tickCount >= this.nextHeadUpdate[i - 1]) {
 						this.nextHeadUpdate[i - 1] = self.tickCount + 10 + self.getRandom().nextInt(10);
 
-						if ((self.level().getDifficulty() == Difficulty.NORMAL || self.level().getDifficulty() == Difficulty.HARD) && !this.epicfightPatch.getEntityState().inaction()) {
+						if ((self.level.getDifficulty() == Difficulty.NORMAL || self.level.getDifficulty() == Difficulty.HARD) && !this.epicfightPatch.getEntityState().inaction()) {
 							int i3 = i - 1;
 							int j3 = this.idleHeadUpdates[i - 1];
 							this.idleHeadUpdates[i3] = this.idleHeadUpdates[i - 1] + 1;
@@ -185,7 +186,7 @@ public abstract class MixinWitherBoss extends Monster implements PowerableMob, R
 						}
 
 						if (l1 > 0) {
-							LivingEntity livingentity = (LivingEntity) self.level().getEntity(l1);
+							LivingEntity livingentity = (LivingEntity) self.level.getEntity(l1);
 
 							if (livingentity != null && self.canAttack(livingentity) && !(self.distanceToSqr(livingentity) > 900.0D) && self.hasLineOfSight(livingentity)) {
 								if (!this.epicfightPatch.getEntityState().inaction()) {
@@ -197,7 +198,7 @@ public abstract class MixinWitherBoss extends Monster implements PowerableMob, R
 								self.setAlternativeTarget(i, 0);
 							}
 						} else {
-							List<LivingEntity> list = self.level().getNearbyEntities(LivingEntity.class,
+							List<LivingEntity> list = self.level.getNearbyEntities(LivingEntity.class,
 									WitherPatch.WTIHER_TARGETING_CONDITIONS, this,
 									self.getBoundingBox().inflate(20.0D, 8.0D, 20.0D));
 
@@ -218,7 +219,7 @@ public abstract class MixinWitherBoss extends Monster implements PowerableMob, R
 				if (this.destroyBlocksTick > 0) {
 					--this.destroyBlocksTick;
 
-					if (this.destroyBlocksTick == 0 && ForgeEventFactory.getMobGriefingEvent(self.level(), this)) {
+					if (this.destroyBlocksTick == 0 && ForgeEventFactory.getMobGriefingEvent(self.level, this)) {
 						int j1 = Mth.floor(self.getY());
 						int i2 = Mth.floor(self.getX());
 						int j2 = Mth.floor(self.getZ());
@@ -231,17 +232,17 @@ public abstract class MixinWitherBoss extends Monster implements PowerableMob, R
 									int l = j1 + k;
 									int i1 = j2 + k2;
 									BlockPos blockpos = new BlockPos(l2, l, i1);
-									BlockState blockstate = self.level().getBlockState(blockpos);
+									BlockState blockstate = self.level.getBlockState(blockpos);
 
-									if (blockstate.canEntityDestroy(self.level(), blockpos, this) && ForgeEventFactory.onEntityDestroyBlock(this, blockpos, blockstate)) {
-										flag = self.level().destroyBlock(blockpos, true, this) || flag;
+									if (blockstate.canEntityDestroy(self.level, blockpos, this) && ForgeEventFactory.onEntityDestroyBlock(this, blockpos, blockstate)) {
+										flag = self.level.destroyBlock(blockpos, true, this) || flag;
 									}
 								}
 							}
 						}
 
 						if (flag) {
-							self.level().levelEvent(null, 1022, self.blockPosition(), 0);
+							self.level.levelEvent((Player) null, 1022, self.blockPosition(), 0);
 						}
 					}
 				}

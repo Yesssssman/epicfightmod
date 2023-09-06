@@ -10,7 +10,6 @@ import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.enderdragon.phases.DragonPhaseInstance;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
 import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.levelgen.feature.EndPodiumFeature;
 import net.minecraft.world.phys.AABB;
@@ -34,9 +33,9 @@ public class DragonCrystalLinkPhase extends PatchedDragonPhase {
 	@Override
 	public void begin() {
 		this.dragonpatch.getAnimator().playAnimation(Animations.DRAGON_CRYSTAL_LINK, 0.0F);
-		this.dragon.level().playLocalSound(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ(), EpicFightSounds.ENDER_DRAGON_CRYSTAL_LINK.get(), this.dragon.getSoundSource(), 10.0F, 1.0F, false);
-		BlockPos blockpos = this.dragon.level().getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, EndPodiumFeature.getLocation(new BlockPos(0, 0, 0)));
-		List<EndCrystal> list = this.dragon.level().getEntitiesOfClass(EndCrystal.class, new AABB(blockpos).inflate(200.0D));
+		this.dragon.level.playLocalSound(this.dragon.getX(), this.dragon.getY(), this.dragon.getZ(), EpicFightSounds.ENDER_DRAGON_CRYSTAL_LINK, this.dragon.getSoundSource(), 10.0F, 1.0F, false);
+		BlockPos blockpos = this.dragon.level.getHeightmapPos(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES, new BlockPos(EndPodiumFeature.END_PODIUM_LOCATION));
+		List<EndCrystal> list = this.dragon.level.getEntitiesOfClass(EndCrystal.class, new AABB(blockpos).inflate(200.0D));
 		EndCrystal nearestCrystal = null;
 		double d0 = Double.MAX_VALUE;
 		
@@ -60,7 +59,7 @@ public class DragonCrystalLinkPhase extends PatchedDragonPhase {
 			
 			for (int i = 0; i < 2; i++) {
 				for (int j = 0; j < 2; j++) {
-					this.dragon.level().addAlwaysVisibleParticle(EpicFightParticles.FORCE_FIELD.get(), spawnPosition.x, spawnPosition.y, spawnPosition.z, x + 90.0D * i, Double.longBitsToDouble(this.dragon.getId()), z + 90.0D * j);
+					this.dragon.level.addAlwaysVisibleParticle(EpicFightParticles.FORCE_FIELD.get(), spawnPosition.x, spawnPosition.y, spawnPosition.z, x + 90.0D * i, Double.longBitsToDouble(this.dragon.getId()), z + 90.0D * j);
 				}
 			}
 		} else {
@@ -81,7 +80,7 @@ public class DragonCrystalLinkPhase extends PatchedDragonPhase {
 		this.linkingCrystal = null;
 		
 		if (!this.dragonpatch.isLogicalClient()) {
-			this.dragon.level().explode(null, blockpos.getX(), blockpos.getY(), blockpos.getZ(), 6.0F, Level.ExplosionInteraction.BLOCK);
+			this.dragon.level.explode((Entity)null, blockpos.getX(), blockpos.getY(), blockpos.getZ(), 6.0F, Explosion.BlockInteraction.DESTROY);
 		}
 	}
 	

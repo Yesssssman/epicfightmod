@@ -103,7 +103,8 @@ public class EnderDragonActionAnimation extends ActionAnimation implements Proce
 	public void tick(LivingEntityPatch<?> entitypatch) {
 		super.tick(entitypatch);
 		
-		if (entitypatch instanceof EnderDragonPatch enderdragonpatch) {
+		if (entitypatch instanceof EnderDragonPatch) {
+			EnderDragonPatch enderdragonpatch = (EnderDragonPatch)entitypatch;
 			Vec3 entitypos = enderdragonpatch.getOriginal().position();
 			OpenMatrix4f toWorld = OpenMatrix4f.mul(OpenMatrix4f.createTranslation((float)entitypos.x, (float)entitypos.y, (float)entitypos.z), enderdragonpatch.getModelMatrix(1.0F), null);
 			float elapsedTime = entitypatch.getAnimator().getPlayerFor(this).getElapsedTime();
@@ -163,7 +164,7 @@ public class EnderDragonActionAnimation extends ActionAnimation implements Proce
 				
 				FABRIK fabrik = new FABRIK(pose, entitypatch.getArmature(), ikInfo.startJoint, ikInfo.endJoint);
 			   	fabrik.run(jointModelpos, 10);
-
+			   	
 		       	for (Vec3f vec : fabrik.getChainingPosition()) {
 		       		RenderingTool.drawCube(poseStack, vertexBuilder, vec, 0.3F, 0.0F, 1.0F, 0.0F);
 		       	}

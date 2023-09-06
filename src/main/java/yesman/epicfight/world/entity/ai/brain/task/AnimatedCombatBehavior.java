@@ -68,6 +68,6 @@ public class AnimatedCombatBehavior<T extends MobPatch<?>> extends Behavior<Mob>
 	}
 	
 	protected boolean isValidTarget(LivingEntity attackTarget) {
-    	return attackTarget != null && attackTarget.isAlive() && !((attackTarget instanceof Player) && (attackTarget.isSpectator() || ((Player)attackTarget).isCreative()));
+    	return attackTarget != null && attackTarget.isAlive() && !((attackTarget instanceof Player) && (((Player)attackTarget).isSpectator() || ((Player)attackTarget).isCreative()));
     }
 }

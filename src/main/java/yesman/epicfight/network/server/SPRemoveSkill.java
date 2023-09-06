@@ -14,8 +14,8 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class SPRemoveSkill {
-	private final String skillName;
-	private final SkillSlot skillSlot;
+	private String skillName;
+	private SkillSlot skillSlot;
 	
 	public SPRemoveSkill() {
 		this("", SkillSlots.BASIC_ATTACK);

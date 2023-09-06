@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -17,15 +18,12 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.config.ClientConfig;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.effect.VisibleMobEffect;
-
-import org.joml.Matrix4f;
 
 @OnlyIn(Dist.CLIENT)
 public class HealthBarIndicator extends EntityIndicator {
@@ -49,10 +47,18 @@ public class HealthBarIndicator extends EntityIndicator {
 		}
 		
 		if (option == ClientConfig.HealthBarShowOptions.TARGET) {
-			return playerpatch.getTarget() == entityIn;
+			if (playerpatch.getTarget() == entityIn) {
+				return true;
+			}
+			
+			return false;
 		}
-
-		return (!entityIn.getActiveEffects().isEmpty() || !(entityIn.getHealth() >= entityIn.getMaxHealth())) && entityIn.deathTime < 19;
+		
+		if (entityIn.getActiveEffects().isEmpty() && entityIn.getHealth() >= entityIn.getMaxHealth() || entityIn.deathTime >= 19) {
+			return false;
+		}
+		
+		return true;
 	}
 	
 	@Override
@@ -77,7 +83,7 @@ public class HealthBarIndicator extends EntityIndicator {
 					if (effect instanceof VisibleMobEffect visibleMobEffect) {
 						rl = visibleMobEffect.getIcon(effectInstance);
 					} else {
-						rl = new ResourceLocation(ForgeRegistries.MOB_EFFECTS.getKey(effect).getNamespace(), "textures/mob_effect/" + ForgeRegistries.MOB_EFFECTS.getKey(effect).getPath() + ".png");
+						rl = new ResourceLocation(effect.getRegistryName().getNamespace(), "textures/mob_effect/" + effect.getRegistryName().getPath() + ".png");
 					}
 					
 					Minecraft.getInstance().getTextureManager().bindForSetup(rl);

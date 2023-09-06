@@ -44,7 +44,6 @@ import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
-import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 import yesman.epicfight.world.entity.eventlistener.AttackEndEvent;
 import yesman.epicfight.world.entity.eventlistener.DealtDamageEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
@@ -71,7 +70,7 @@ public class AttackAnimation extends ActionAnimation {
 			return 0;
 		}
 	};
-
+	
 	public AttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, @Nullable Collider collider, Joint colliderJoint, String path, Armature armature) {
 		this(convertTime, path, armature, new Phase(0.0F, antic, preDelay, contact, recovery, Float.MAX_VALUE, colliderJoint, collider));
 	}
@@ -172,7 +171,7 @@ public class AttackAnimation extends ActionAnimation {
 			Mob entity = mobpatch.getOriginal();
 			
 			if (entity.getTarget() != null && !entity.getTarget().isAlive()) {
-				entity.setTarget(null);
+				entity.setTarget((LivingEntity)null);
 			}
 		}
 	}
@@ -238,8 +237,8 @@ public class AttackAnimation extends ActionAnimation {
 									playerpatch.getEventListener().triggerEvents(EventType.DEALT_DAMAGE_EVENT_POST, new DealtDamageEvent(playerpatch, trueEntity, source, attackResult.damage));
 								}
 								
-								hitten.level().playSound(null, hitten.getX(), hitten.getY(), hitten.getZ(), this.getHitSound(entitypatch, phase), hitten.getSoundSource(), 1.0F, 1.0F);
-								this.spawnHitParticle((ServerLevel)hitten.level(), entitypatch, hitten, phase);
+								hitten.level.playSound(null, hitten.getX(), hitten.getY(), hitten.getZ(), this.getHitSound(entitypatch, phase), hitten.getSoundSource(), 1.0F, 1.0F);
+								this.spawnHitParticle((ServerLevel)hitten.getLevel(), entitypatch, hitten, phase);
 							}
 							
 							if (attackResult.resultType.shouldCount()) {
@@ -279,7 +278,7 @@ public class AttackAnimation extends ActionAnimation {
 	}
 	
 	public EpicFightDamageSource getEpicFightDamageSource(LivingEntityPatch<?> entitypatch, Entity target, Phase phase) {
-		return this.getEpicFightDamageSource(entitypatch.getDamageSource(this, phase.hand), entitypatch, target, phase);
+		return this.getEpicFightDamageSource(entitypatch.getDamageSource(this, phase.hand).cast(), entitypatch, target, phase);
 	}
 	
 	public EpicFightDamageSource getEpicFightDamageSource(DamageSource originalSource, LivingEntityPatch<?> entitypatch, Entity target, Phase phase) {
@@ -292,7 +291,7 @@ public class AttackAnimation extends ActionAnimation {
 		if (originalSource instanceof EpicFightDamageSource epicfightDamageSource) {
 			extendedSource = epicfightDamageSource;
 		} else {
-			extendedSource = EpicFightDamageSources.copy(originalSource).setAnimation(this);
+			extendedSource = EpicFightDamageSource.commonEntityDamageSource(originalSource.msgId, entitypatch.getOriginal(), this);
 		}
 		
 		phase.getProperty(AttackPhaseProperty.DAMAGE_MODIFIER).ifPresent((opt) -> {

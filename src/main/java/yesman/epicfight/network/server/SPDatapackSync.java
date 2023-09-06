@@ -70,7 +70,7 @@ public class SPDatapackSync {
 		ctx.get().setPacketHandled(true);
 	}
 	
-	public enum Type {
+	public static enum Type {
 		ARMOR, WEAPON, MOB, SKILL_PARAMS
 	}
 }

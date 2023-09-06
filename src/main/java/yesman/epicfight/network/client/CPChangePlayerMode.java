@@ -12,7 +12,7 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 public class CPChangePlayerMode {
-	private final PlayerPatch.PlayerMode mode;
+	private PlayerPatch.PlayerMode mode;
 	
 	public CPChangePlayerMode(PlayerPatch.PlayerMode mode) {
 		this.mode = mode;

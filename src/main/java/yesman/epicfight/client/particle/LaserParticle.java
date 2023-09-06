@@ -2,6 +2,7 @@ package yesman.epicfight.client.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Vector3f;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -19,13 +20,12 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.Mesh.RawMesh;
 import yesman.epicfight.api.client.model.Meshes;
-import yesman.epicfight.api.utils.math.QuaternionUtils;
 
 @OnlyIn(Dist.CLIENT)
 public class LaserParticle extends CustomModelParticle<RawMesh> {
-	private final float length;
-	private final float xRot;
-	private final float yRot;
+	private float length;
+	private float xRot;
+	private float yRot;
 	
 	public LaserParticle(ClientLevel level, double x, double y, double z, double toX, double toY, double toZ) {
 		super(level, x, y, z, 0, 0, 0, Meshes.LASER);
@@ -53,8 +53,8 @@ public class LaserParticle extends CustomModelParticle<RawMesh> {
 	
 	@Override
 	public void prepareDraw(PoseStack poseStack, float partialTicks) {
-		poseStack.mulPose(QuaternionUtils.YP.rotationDegrees(this.yRot));
-		poseStack.mulPose(QuaternionUtils.XP.rotationDegrees(this.xRot));
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(this.yRot));
+		poseStack.mulPose(Vector3f.XP.rotationDegrees(this.xRot));
 		float progression = (this.age + partialTicks) / (this.lifetime + 1);
 		float scale = Mth.sin(progression * (float)Math.PI);
 		float zScale = progression > 0.5F ? 1.0F : Mth.sin(progression * (float)Math.PI);

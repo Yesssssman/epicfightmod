@@ -7,7 +7,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers;
-import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
+import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -44,7 +44,7 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 @Mod.EventBusSubscriber(modid=EpicFightMod.MODID, value=Dist.CLIENT, bus=EventBusSubscriber.Bus.MOD)
 public class ClientModBusEvent {
 	@SubscribeEvent(priority = EventPriority.LOWEST)
-	public static void onParticleRegistry(final RegisterParticleProvidersEvent event) {
+	public static void onParticleRegistry(final ParticleFactoryRegisterEvent event) {
 		Minecraft mc = Minecraft.getInstance();
 		ParticleEngine particleEngine = mc.particleEngine;
     	particleEngine.register(EpicFightParticles.ENDERMAN_DEATH_EMIT.get(), EnderParticle.EndermanDeathEmitProvider::new);

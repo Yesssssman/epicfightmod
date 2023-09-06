@@ -15,7 +15,7 @@ import yesman.epicfight.particle.EpicFightParticles;
 
 @OnlyIn(Dist.CLIENT)
 public class DustParticle extends TextureSheetParticle {
-	private final DustParticle.PhysicsType physicsType;
+	private DustParticle.PhysicsType physicsType;
 	
 	public DustParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, DustParticle.PhysicsType physicsType) {
 		super(level, x, y, z);
@@ -27,7 +27,7 @@ public class DustParticle extends TextureSheetParticle {
 	    this.bCol = 1.0F;
 	    this.quadSize = (physicsType == DustParticle.PhysicsType.NORMAL ? this.random.nextFloat() * 0.01F + 0.01F : this.random.nextFloat() * 0.02F + 0.02F);
 		this.lifetime = (physicsType == DustParticle.PhysicsType.NORMAL ? 12 : 2) + this.random.nextInt(6);
-		this.hasPhysics = physicsType == PhysicsType.NORMAL;
+		this.hasPhysics = physicsType == DustParticle.PhysicsType.NORMAL ? true : false;
 		this.gravity = physicsType == DustParticle.PhysicsType.NORMAL ? 0.68F : 0.0F;
 		float angle = this.random.nextFloat() * 360.0F;
 		this.roll = angle;
@@ -86,8 +86,8 @@ public class DustParticle extends TextureSheetParticle {
 	
 	@OnlyIn(Dist.CLIENT)
 	public static class ContractiveMetaParticle extends NoRenderParticle {
-		private final double radius;
-		private final int density;
+		private double radius;
+		private int density;
 		
 		public ContractiveMetaParticle(ClientLevel level, double x, double y, double z, double radius, int lifetime, int density) {
 			super(level, x, y, z);
@@ -175,7 +175,7 @@ public class DustParticle extends TextureSheetParticle {
 		Vec3 getDeltaMovement(double x, double y, double z);
 	}
 	
-	private enum PhysicsType {
+	private static enum PhysicsType {
 		EXPANSIVE((dx, dy, dz) -> {
 			return new Vec3(dx, dy, dz);
 		}), CONTRACTIVE((dx, dy, dz) -> {

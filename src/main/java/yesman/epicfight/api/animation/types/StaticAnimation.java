@@ -69,7 +69,7 @@ public class StaticAnimation extends DynamicAnimation {
 		
 		int colon = path.indexOf(':');
 		String modid = (colon == -1) ? animationManager.getModid() : path.substring(0, colon);
-		String folderPath = (colon == -1) ? path : path.substring(colon + 1);
+		String folderPath = (colon == -1) ? path : path.substring(colon + 1, path.length());
 		
 		animationManager.getIdMap().put(this.animationId, this);
 		this.resourceLocation = new ResourceLocation(modid, "animmodels/animations/" + folderPath);
@@ -152,7 +152,7 @@ public class StaticAnimation extends DynamicAnimation {
 						continue;
 					}
 					
-					entitypatch.getOriginal().level().addParticle(trailInfo.particle, eid, modid, animid, jointId, index, 0);
+					entitypatch.getOriginal().level.addParticle(trailInfo.particle, eid, modid, animid, jointId, index, 0);
 				}
 			});
 		}
@@ -291,7 +291,11 @@ public class StaticAnimation extends DynamicAnimation {
 	public boolean between(StaticAnimation a1, StaticAnimation a2) {
 		if (a1.getNamespaceId() != a2.getNamespaceId()) {
 			return false;
-		} else return a1.getId() <= this.getId() && a2.getId() >= this.getId();
+		} else if (a1.getId() <= this.getId() && a2.getId() >= this.getId()) {
+			return true;
+		} else {
+			return false;
+		}
 	}
 	
 	public boolean in(StaticAnimation[] animations) {

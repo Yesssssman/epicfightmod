@@ -14,7 +14,7 @@ public class ServerAnimator extends Animator {
 	
 	public final AnimationPlayer animationPlayer;
 	protected DynamicAnimation nextPlaying;
-	private final LinkAnimation linkAnimation;
+	private LinkAnimation linkAnimation;
 	public boolean pause = false;
 	
 	public ServerAnimator(LivingEntityPatch<?> entitypatch) {

@@ -1,14 +1,15 @@
 package yesman.epicfight.api.utils;
 
-import com.google.common.collect.Maps;
-import net.minecraft.network.chat.Component;
-import yesman.epicfight.main.EpicFightMod;
-
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.Locale;
 import java.util.Map;
+
+import com.google.common.collect.Maps;
+
+import net.minecraft.network.chat.TranslatableComponent;
+import yesman.epicfight.main.EpicFightMod;
 
 public class ExtendableEnumManager<T> {
 	private final Map<Integer, T> enumMapByOrdinal = Maps.newLinkedHashMap();
@@ -58,7 +59,7 @@ public class ExtendableEnumManager<T> {
 	}
 	
 	public String toTranslated(ExtendableEnum e) {
-		return Component.translatable(EpicFightMod.MODID + "." + this.namespace + "." + e.toString().toLowerCase(Locale.ROOT)).getString();
-
+		TranslatableComponent t = new TranslatableComponent(EpicFightMod.MODID + "." + this.namespace + "." + e.toString().toLowerCase(Locale.ROOT));
+		return t.getString();
 	}
 }

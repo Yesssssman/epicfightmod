@@ -1,5 +1,10 @@
 package yesman.epicfight.server.commands.arguments;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -7,25 +12,22 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.synchronization.ArgumentTypeInfos;
-import net.minecraft.commands.synchronization.SingletonArgumentInfo;
-import net.minecraft.network.chat.Component;
+import net.minecraft.commands.synchronization.ArgumentTypes;
+import net.minecraft.commands.synchronization.EmptyArgumentSerializer;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.resources.ResourceLocation;
 import yesman.epicfight.api.data.reloader.SkillManager;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategory;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 
 public class SkillArgument implements ArgumentType<Skill> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("spooky", "effect");
 	public static final DynamicCommandExceptionType ERROR_UNKNOWN_SKILL = new DynamicCommandExceptionType((obj) -> {
-		return Component.literal("epicfight.skillNotFound");
+		return new TranslatableComponent("epicfight.skillNotFound", obj);
 	});
 	
 	public static SkillArgument skill() {
@@ -45,10 +47,9 @@ public class SkillArgument implements ArgumentType<Skill> {
 	public SkillArgument(SkillCategory skillCategory) {
 		this.skillCategory = skillCategory;
 	}
-
-	//TODO fix args
+	
 	public static void registerArgumentTypes() {
-		ArgumentTypeInfos.registerByClass(/*EpicFightMod.MODID + ":skill",*/ SkillArgument.class, SingletonArgumentInfo.contextFree(SkillArgument::skill));
+		ArgumentTypes.register(EpicFightMod.MODID + ":skill", SkillArgument.class, new EmptyArgumentSerializer<>(SkillArgument::skill));
 	}
 	
 	public static Skill getSkill(CommandContext<CommandSourceStack> commandContext, String name) {

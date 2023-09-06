@@ -12,7 +12,7 @@ import net.minecraftforge.registries.RegistryObject;
 import yesman.epicfight.main.EpicFightMod;
 
 public class EpicFightEntities {
-	public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITY_TYPES, EpicFightMod.MODID);
+	public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, EpicFightMod.MODID);
 	
 	public static final RegistryObject<EntityType<AreaEffectBreath>> AREA_EFFECT_BREATH = ENTITIES.register("area_effect_breath", () ->
 		EntityType.Builder.<AreaEffectBreath>of(AreaEffectBreath::new, MobCategory.MISC)

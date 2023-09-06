@@ -37,8 +37,8 @@ public class SteelWhirlwindSkill extends WeaponInnateSkill implements Chargeable
 		return skillContainer.getDataManager().getDataValue(CHARGING_POWER);
 	}
 	
-	private final StaticAnimation chargingAnimation;
-	private final StaticAnimation attackAnimation;
+	private StaticAnimation chargingAnimation;
+	private StaticAnimation attackAnimation;
 	
 	public SteelWhirlwindSkill(Builder<? extends Skill> builder) {
 		super(builder);

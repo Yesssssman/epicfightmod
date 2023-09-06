@@ -174,7 +174,7 @@ public class SkillDataManager {
 			
 			@Override
 			public Boolean get(Data data) {
-				return data != null && ((BooleanData) data).data;
+				return data != null ? ((BooleanData)data).data : false;
 			}
 			
 			@Override
@@ -218,7 +218,7 @@ public class SkillDataManager {
 	
 	public static class SkillDataKey<T> {
 		private static int NEXT_ID;
-		private static final Map<Integer, SkillDataKey<?>> KEYS = Maps.newHashMap();
+		private static final Map<Integer, SkillDataKey<?>> KEYS = Maps.<Integer, SkillDataKey<?>>newHashMap();
 		
 		public static <V> SkillDataKey<V> createDataKey(ValueType<V> valueType) {
 			return createDataKey(valueType, false);

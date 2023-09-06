@@ -2,6 +2,7 @@ package yesman.epicfight.api.collider;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.util.Mth;
@@ -11,8 +12,6 @@ import net.minecraft.world.phys.Vec3;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
-
-import org.joml.Matrix4f;
 
 public class LineCollider extends Collider {
 	protected Vec3 modelVec;
@@ -114,8 +113,12 @@ public class LineCollider extends Collider {
 		
 		maxStart = maxStart < startZ ? startZ : maxStart;
 		minEnd = minEnd > endZ ? endZ : minEnd;
-
-		return !(maxStart >= minEnd);
+		
+		if (maxStart >= minEnd) {
+			return false;
+		}
+		
+		return true;
 	}
 	
 	@Override

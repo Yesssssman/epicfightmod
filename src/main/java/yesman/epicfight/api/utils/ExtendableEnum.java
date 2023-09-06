@@ -1,5 +1,5 @@
 package yesman.epicfight.api.utils;
 
 public interface ExtendableEnum {
-	int universalOrdinal();
+	public int universalOrdinal();
 }

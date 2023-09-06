@@ -6,7 +6,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
-import net.minecraft.world.entity.ai.behavior.OneShot;
+import net.minecraft.world.entity.ai.behavior.RunIf;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.Zoglin;
 import net.minecraft.world.entity.schedule.Activity;
@@ -30,8 +30,8 @@ public class ZoglinPatch extends MobPatch<Zoglin> {
 	public void initAI() {
 		super.initAI();
 		BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.CORE, 1, MoveToTargetSink.class, new MoveToTargetSinkStopInaction());
-		BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 11, OneShot.class, new AnimatedCombatBehavior<>(this, MobCombatBehaviors.HOGLIN.build(this)));
-		BrainRecomposer.removeBehavior(this.original.getBrain(), Activity.FIGHT, 12, OneShot.class);
+		BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 11, RunIf.class, new AnimatedCombatBehavior<>(this, MobCombatBehaviors.HOGLIN.build(this)));
+		BrainRecomposer.removeBehavior(this.original.getBrain(), Activity.FIGHT, 12, RunIf.class);
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -62,12 +62,12 @@ public class ZoglinPatch extends MobPatch<Zoglin> {
 
 	@Override
 	public SoundEvent getWeaponHitSound(InteractionHand hand) {
-		return EpicFightSounds.BLUNT_HIT_HARD.get();
+		return EpicFightSounds.BLUNT_HIT_HARD;
 	}
 
 	@Override
 	public SoundEvent getSwingSound(InteractionHand hand) {
-		return EpicFightSounds.WHOOSH_BIG.get();
+		return EpicFightSounds.WHOOSH_BIG;
 	}
 
 	@Override

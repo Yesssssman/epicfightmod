@@ -131,7 +131,7 @@ public class JointMaskEntry {
 	}
 	
 	public static class Builder {
-		private final List<Pair<LivingMotion, List<JointMask>>> masks = Lists.newArrayList();
+		private List<Pair<LivingMotion, List<JointMask>>> masks = Lists.newArrayList();
 		private List<JointMask> defaultMask = null;
 		
 		public JointMaskEntry.Builder mask(LivingMotion motion, List<JointMask> masks) {

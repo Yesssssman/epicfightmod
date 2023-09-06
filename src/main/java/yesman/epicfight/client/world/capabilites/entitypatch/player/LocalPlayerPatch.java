@@ -1,5 +1,7 @@
 package yesman.epicfight.client.world.capabilites.entitypatch.player;
 
+import java.util.UUID;
+
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -19,10 +21,9 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.entity.PartEntity;
-import net.minecraftforge.event.TickEvent;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.BasicAttackAnimation;
@@ -41,8 +42,6 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
-import java.util.UUID;
-
 @OnlyIn(Dist.CLIENT)
 public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	private static final UUID ACTION_EVENT_UUID = UUID.fromString("d1a1e102-1621-11ed-861d-0242ac120002");
@@ -51,7 +50,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	private boolean targetLockedOn;
 	private float prevStamina;
 	private int prevChargingAmount;
-
+	
 	private float lockOnXRot;
 	private float lockOnXRotO;
 	private float lockOnYRot;
@@ -65,15 +64,15 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	}
 	
 	@Override
-	public void onJoinWorld(LocalPlayer entityIn, EntityJoinLevelEvent event) {
+	public void onJoinWorld(LocalPlayer entityIn, EntityJoinWorldEvent event) {
 		super.onJoinWorld(entityIn, event);
 		this.eventListeners.addEventListener(EventType.ACTION_EVENT_CLIENT, ACTION_EVENT_UUID, (playerEvent) -> {
 			ClientEngine.getInstance().controllEngine.unlockHotkeys();
 		});
 	}
 	
-	public void onRespawnLocalPlayer(ClientPlayerNetworkEvent.Clone event) {
-		this.onJoinWorld(event.getNewPlayer(), new EntityJoinLevelEvent(event.getNewPlayer(), event.getNewPlayer().level()));
+	public void onRespawnLocalPlayer(ClientPlayerNetworkEvent.RespawnEvent event) {
+		this.onJoinWorld(event.getNewPlayer(), new EntityJoinWorldEvent(event.getNewPlayer(), event.getNewPlayer().level));
 	}
 	
 	@Override
@@ -89,28 +88,27 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	}
 	
 	@Override
-	public void tick(LivingEvent.LivingTickEvent event) {
+	public void tick(LivingUpdateEvent event) {
 		this.prevStamina = this.getStamina();
-
+		
 		if (this.isChargingSkill()) {
 			this.prevChargingAmount = this.getChargingSkill().getChargingAmount(this);
 		} else {
 			this.prevChargingAmount = 0;
 		}
-
+		
 		super.tick(event);
 	}
-
+	
 	@Override
-	public void clientTick(LivingEvent.LivingTickEvent event) {
-		this.prevStamina = this.getStamina();
+	public void clientTick(LivingUpdateEvent event) {
 		super.clientTick(event);
 		
 		HitResult cameraHitResult = this.minecraft.hitResult;
 		RenderEngine renderEngine = ClientEngine.getInstance().renderEngine;
 		
 		if (renderEngine.isPlayerRotationLocked()) {
-			double pickRange = this.minecraft.gameMode.getPickRange();
+			double pickRange = (double)this.minecraft.gameMode.getPickRange();
 			Vec3 vec3 = this.original.getEyePosition(1.0F);
 			Vec3 vec31 = MathUtils.getVectorForRotation(renderEngine.getCorrectedXRot(), renderEngine.getCorrectedYRot());
 			Vec3 vec32 = vec3.add(vec31.x * pickRange, vec31.y * pickRange, vec31.z * pickRange);
@@ -285,16 +283,16 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		if (!this.isLogicalClient()) {
 			return false;
 		}
-
-		if (actionAnimation instanceof BasicAttackAnimation && !this.original.level().getGameRules().getRule(EpicFightGamerules.STIFF_COMBO_ATTACKS).get()) {
+		
+		if (actionAnimation instanceof BasicAttackAnimation && !this.original.level.getGameRules().getRule(EpicFightGamerules.STIFF_COMBO_ATTACKS).get()) {
 			if (this.original.input.forwardImpulse != 0.0F || this.original.input.leftImpulse != 0.0F) {
 				return false;
 			}
 		}
-
+		
 		return true;
 	}
-
+	
 	@Override
 	public boolean consumeStamina(float amount) {
 		float currentStamina = this.getStamina();
@@ -308,7 +306,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	public int getPrevChargingAmount() {
 		return this.prevChargingAmount;
 	}
-
+	
 	public float getLerpedLockOnX(double partial) {
 		return Mth.rotLerp((float)partial, this.lockOnXRotO, this.lockOnXRot);
 	}

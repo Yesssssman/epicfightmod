@@ -125,7 +125,7 @@ public abstract class DynamicAnimation {
 	public TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
 		return new TypeFlexibleHashMap<> (false);
 	}
-
+	
 	public <T> T getState(StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
 		return stateFactor.defaultValue();
 	}
@@ -133,7 +133,7 @@ public abstract class DynamicAnimation {
 	public Map<String, TransformSheet> getTransfroms() {
 		return this.jointTransforms;
 	}
-
+	
 	public float getPlaySpeed(LivingEntityPatch<?> entitypatch) {
 		return 1.0F;
 	}
@@ -181,7 +181,7 @@ public abstract class DynamicAnimation {
 	public boolean isBasicAttackAnimation() {
 		return false;
 	}
-
+	
 	public boolean isMainFrameAnimation() {
 		return false;
 	}
@@ -205,7 +205,7 @@ public abstract class DynamicAnimation {
 	public DynamicAnimation getThis() {
 		return this;
 	}
-
+	
 	@OnlyIn(Dist.CLIENT)
 	public void renderDebugging(PoseStack poseStack, MultiBufferSource buffer, LivingEntityPatch<?> entitypatch, float playTime, float partialTicks) {
 		

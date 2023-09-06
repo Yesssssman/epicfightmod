@@ -212,10 +212,10 @@ public class MobCombatBehaviors {
 				.nextBehavior(Behavior.<EndermanPatch>builder().animationBehavior(Animations.ENDERMAN_GRASP).withinEyeHeight().withinDistance(0.0D, 2.0D))
 		);
 	
-	public static final CombatBehaviors.Builder<MobPatch<?>> HOGLIN = CombatBehaviors.builder()
+	public static final CombatBehaviors.Builder<MobPatch<?>> HOGLIN = CombatBehaviors.<MobPatch<?>>builder()
 		.newBehaviorSeries(
-			BehaviorSeries.builder().weight(10.0F).canBeInterrupted(true).looping(false)
-				.nextBehavior(Behavior.builder().animationBehavior(Animations.HOGLIN_ATTACK).withinEyeHeight().withinAngleHorizontal(0.0F, 20.0F).withinDistance(0.0D, 4.0D))
+			BehaviorSeries.<MobPatch<?>>builder().weight(10.0F).canBeInterrupted(true).looping(false)
+				.nextBehavior(Behavior.<MobPatch<?>>builder().animationBehavior(Animations.HOGLIN_ATTACK).withinEyeHeight().withinAngleHorizontal(0.0F, 20.0F).withinDistance(0.0D, 4.0D))
 		);
 	
 	public static final CombatBehaviors.Builder<IronGolemPatch> IRON_GOLEM = CombatBehaviors.<IronGolemPatch>builder()

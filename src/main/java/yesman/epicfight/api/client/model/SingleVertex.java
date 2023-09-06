@@ -78,12 +78,12 @@ public class SingleVertex {
 	}
 	
 	public static AnimatedMesh loadVertexInformation(List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
-		List<Float> positions = Lists.newArrayList();
-		List<Float> normals = Lists.newArrayList();
-		List<Float> texCoords = Lists.newArrayList();
-		List<Integer> animationIndices = Lists.newArrayList();
-		List<Float> jointWeights = Lists.newArrayList();
-		List<Integer> affectCountList = Lists.newArrayList();
+		List<Float> positions = Lists.<Float>newArrayList();
+		List<Float> normals = Lists.<Float>newArrayList();
+		List<Float> texCoords = Lists.<Float>newArrayList();
+		List<Integer> animationIndices = Lists.<Integer>newArrayList();
+		List<Float> jointWeights = Lists.<Float>newArrayList();
+		List<Integer> affectCountList = Lists.<Integer>newArrayList();
 		
 		for (int i = 0; i < vertices.size(); i++) {
 			SingleVertex vertex = vertices.get(i);
@@ -148,6 +148,6 @@ public class SingleVertex {
 	}
 	
 	public enum State {
-		EMPTY, EQUAL, DIFFERENT
+		EMPTY, EQUAL, DIFFERENT;
 	}
 }

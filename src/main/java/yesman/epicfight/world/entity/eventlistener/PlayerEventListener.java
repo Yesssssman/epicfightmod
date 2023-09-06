@@ -14,8 +14,8 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 public class PlayerEventListener {
-	private final Map<EventType<? extends PlayerEvent<?>>, TreeMultimap<Integer, EventTrigger<? extends PlayerEvent<?>>>> events;
-	private final PlayerPatch<?> playerpatch;
+	private Map<EventType<? extends PlayerEvent<?>>, TreeMultimap<Integer, EventTrigger<? extends PlayerEvent<?>>>> events;
+	private PlayerPatch<?> playerpatch;
 	
 	public PlayerEventListener(PlayerPatch<?> playerpatch) {
 		this.playerpatch = playerpatch;
@@ -113,7 +113,7 @@ public class PlayerEventListener {
 		}
 		
 		public boolean shouldActive(boolean isRemote) {
-			return this.side == null || this.side.isClient() == isRemote;
+			return this.side == null ? true : this.side.isClient() == isRemote;
 		}
 	}
 }

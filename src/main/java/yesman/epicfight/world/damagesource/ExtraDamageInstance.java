@@ -1,8 +1,9 @@
 package yesman.epicfight.world.damagesource;
 
 import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -10,33 +11,33 @@ import net.minecraft.world.item.enchantment.Enchantments;
 
 public class ExtraDamageInstance {
 	public static final ExtraDamage TARGET_LOST_HEALTH = new ExtraDamage((attacker, itemstack, target, baseDamage, params) -> {
-			return (target.getMaxHealth() - target.getHealth()) * params[0];
+			return (target.getMaxHealth() - target.getHealth()) * (float)params[0];
 		}, (itemstack, tooltips, baseDamage, params) -> {
-			tooltips.append(Component.translatable("damage_source.epicfight.target_lost_health",
-					Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(params[0] * 100F) + "%").withStyle(ChatFormatting.RED)
+			tooltips.append(new TranslatableComponent("damage_source.epicfight.target_lost_health", 
+					new TextComponent(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(params[0] * 100F) + "%").withStyle(ChatFormatting.RED)
 				).withStyle(ChatFormatting.DARK_GRAY));
 		});
 	
 	public static final ExtraDamage SWEEPING_EDGE_ENCHANTMENT = new ExtraDamage((attacker, itemstack, target, baseDamage, params) -> {
 			int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SWEEPING_EDGE, itemstack);
-			float modifier = (i > 0) ? (float)i / (i + 1.0F) : 0.0F;
+			float modifier = (i > 0) ? (float)i / (float)(i + 1.0F) : 0.0F;
 			
 			return baseDamage * modifier;
 		}, (itemstack, tooltips, baseDamage, params) -> {
 			int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SWEEPING_EDGE, itemstack);
 			
 			if (i > 0) {
-				double modifier = (double)i / (i + 1.0D);
+				double modifier = (double)i / (double)(i + 1.0D);
 				double damage = baseDamage * modifier;
 				
-				tooltips.append(Component.translatable("damage.epicfight.sweeping_edge_enchant_level",
-						Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(damage)).withStyle(ChatFormatting.DARK_PURPLE), i
+				tooltips.append(new TranslatableComponent("damage_source.epicfight.sweeping_edge_enchant_level", 
+						new TextComponent(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(damage)).withStyle(ChatFormatting.DARK_PURPLE), i
 					).withStyle(ChatFormatting.DARK_GRAY));
 			}
 		});
 	
-	private final ExtraDamage calculator;
-	private final float[] params;
+	private ExtraDamage calculator;
+	private float[] params;
 	
 	public ExtraDamageInstance(ExtraDamage calculator, float... params) {
 		this.calculator = calculator;
@@ -51,7 +52,7 @@ public class ExtraDamageInstance {
 		Object[] params = new Object[this.params.length];
 		
 		for (int i = 0; i < params.length; i++) {
-			params[i] = Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(this.params[i] * 100F) + "%").withStyle(ChatFormatting.RED);
+			params[i] = new TextComponent(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(this.params[i] * 100F) + "%").withStyle(ChatFormatting.RED);
 		}
 		
 		return params;

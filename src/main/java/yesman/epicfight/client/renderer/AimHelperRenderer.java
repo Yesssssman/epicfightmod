@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.Minecraft;
@@ -16,7 +17,6 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.joml.Matrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.main.EpicFightMod;
 
@@ -31,9 +31,9 @@ public class AimHelperRenderer {
 		Entity entity = minecraft.player;
 		HitResult ray = entity.pick(200.D, partialTicks, false);
 		Vec3 vec3 = ray.getLocation();
-		Vec3f pos1 = new Vec3f((float)Mth.lerp(partialTicks, entity.xOld, entity.getX()),
-							   (float)Mth.lerp(partialTicks, entity.yOld, entity.getY()) + entity.getEyeHeight() - 0.15F,
-							   (float)Mth.lerp(partialTicks, entity.zOld, entity.getZ()));
+		Vec3f pos1 = new Vec3f((float)Mth.lerp((double)partialTicks, entity.xOld, entity.getX()),
+							   (float)Mth.lerp((double)partialTicks, entity.yOld, entity.getY()) + entity.getEyeHeight() - 0.15F,
+							   (float)Mth.lerp((double)partialTicks, entity.zOld, entity.getZ()));
 		Vec3f pos2 = new Vec3f((float)vec3.x, (float)vec3.y, (float)vec3.z);
 		
 		Camera renderInfo = minecraft.gameRenderer.getMainCamera();
@@ -51,7 +51,7 @@ public class AimHelperRenderer {
 		Tesselator tesselator = Tesselator.getInstance();
 		BufferBuilder bufferBuilder = tesselator.getBuilder();
 		RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
-//		RenderSystem.disableTexture();
+		RenderSystem.disableTexture();
 		RenderSystem.enableBlend();
         RenderSystem.disableCull();
 		RenderSystem.lineWidth(2.0F);

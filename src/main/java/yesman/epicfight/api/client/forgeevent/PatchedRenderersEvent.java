@@ -16,8 +16,8 @@ import yesman.epicfight.client.renderer.patched.item.RenderItemBase;
 @SuppressWarnings("rawtypes")
 public abstract class PatchedRenderersEvent extends Event implements IModBusEvent {
 	public static class Add extends PatchedRenderersEvent {
-		private final Map<EntityType<?>, Supplier<PatchedEntityRenderer>> entityRendererProvider;
-		private final Map<Item, RenderItemBase> itemRenerers;
+		private Map<EntityType<?>, Supplier<PatchedEntityRenderer>> entityRendererProvider;
+		private Map<Item, RenderItemBase> itemRenerers;
 		
 		public Add(Map<EntityType<?>, Supplier<PatchedEntityRenderer>> entityRendererProvider, Map<Item, RenderItemBase> itemRenerers) {
 			this.entityRendererProvider = entityRendererProvider;
@@ -34,7 +34,7 @@ public abstract class PatchedRenderersEvent extends Event implements IModBusEven
 	}
 	
 	public static class Modify extends PatchedRenderersEvent {
-		private final Map<EntityType<?>, PatchedEntityRenderer> renderers;
+		private Map<EntityType<?>, PatchedEntityRenderer> renderers;
 		
 		public Modify(Map<EntityType<?>, PatchedEntityRenderer> renderers) {
 			this.renderers = renderers;

@@ -6,9 +6,9 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
@@ -31,7 +31,7 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 
 public class DragonGroundBattlePhase extends PatchedDragonPhase {
-	private final List<Player> recognizedPlayers = Lists.newArrayList();
+	private List<Player> recognizedPlayers = Lists.newArrayList();
 	private PathFinder pathFinder;
 	private int aggroCounter;
 	private int noPathWarningCounter;
@@ -40,7 +40,7 @@ public class DragonGroundBattlePhase extends PatchedDragonPhase {
 	public DragonGroundBattlePhase(EnderDragon dragon) {
 		super(dragon);
 		
-		if (!dragon.level().isClientSide()) {
+		if (!dragon.level.isClientSide()) {
 			this.combatBehaviors = MobCombatBehaviors.ENDER_DRAGON.build(this.dragonpatch);
 			NodeEvaluator nodeEvaluator = new WalkNodeEvaluator();
 			nodeEvaluator.setCanPassDoors(true);
@@ -120,7 +120,7 @@ public class DragonGroundBattlePhase extends PatchedDragonPhase {
 	
 	@Override
 	public float onHurt(DamageSource damagesource, float amount) {
-		if (damagesource.is(DamageTypeTags.IS_PROJECTILE)) {
+		if (damagesource.isProjectile()) {
 			if (damagesource.getDirectEntity() instanceof AbstractArrow) {
 				damagesource.getDirectEntity().setSecondsOnFire(1);
 			}
@@ -129,7 +129,7 @@ public class DragonGroundBattlePhase extends PatchedDragonPhase {
 		
 		LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(damagesource.getEntity(), LivingEntityPatch.class);
 		
-		if (damagesource.getEntity() != null && (entitypatch == null || entitypatch.getEpicFightDamageSource() == null)) {
+		if (damagesource instanceof EntityDamageSource && (entitypatch == null || entitypatch.getEpicFightDamageSource() == null)) {
 			return 0.0F;
 		} else {
 			return super.onHurt(damagesource, amount);
@@ -144,16 +144,16 @@ public class DragonGroundBattlePhase extends PatchedDragonPhase {
 	private boolean checkTargetPath(LivingEntity target) {
 		BlockPos blockpos = this.dragon.blockPosition();
 		
-		while (this.dragon.level().getBlockState(blockpos).blocksMotion()) {
+		while (this.dragon.level.getBlockState(blockpos).getMaterial().blocksMotion()) {
 			blockpos = blockpos.above();
 		}
 		
-		while (!this.dragon.level().getBlockState(blockpos.below()).blocksMotion()) {
+		while (!this.dragon.level.getBlockState(blockpos.below()).getMaterial().blocksMotion()) {
 			blockpos = blockpos.below();
 		}
 		
         int sight = 60;
-        PathNavigationRegion pathnavigationregion = new PathNavigationRegion(this.dragon.level(), blockpos.offset(-sight, -sight, -sight), blockpos.offset(sight, sight, sight));
+        PathNavigationRegion pathnavigationregion = new PathNavigationRegion(this.dragon.level, blockpos.offset(-sight, -sight, -sight), blockpos.offset(sight, sight, sight));
         
         Path path = this.pathFinder.findPath(pathnavigationregion, this.dragon, ImmutableSet.of(target.blockPosition()), sight, 0, 1.0F);
         

@@ -2,7 +2,6 @@ package yesman.epicfight.world.entity;
 
 import net.minecraft.commands.arguments.EntityAnchorArgument.Anchor;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.FlyingMob;
@@ -31,7 +30,7 @@ public class WitherGhostClone extends FlyingMob {
 	
 	@Override
 	public boolean hurt(DamageSource damagesource, float damage) {
-		if (!damagesource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+		if (!damagesource.isBypassInvul()) {
 			return false;
 		}
 		

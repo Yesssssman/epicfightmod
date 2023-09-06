@@ -4,6 +4,8 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+import com.mojang.math.Quaternion;
+import com.mojang.math.Vector3f;
 import com.mojang.serialization.MapCodec;
 
 import net.minecraft.core.BlockPos;
@@ -17,12 +19,9 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
-
 public class FractureBlockState extends BlockState {
 	private Vector3f translate;
-	private Quaternionf rotation;
+	private Quaternion rotation;
 	private double bouncing;
 	private int maxLifeTime;
 	private static final Map<Integer, BlockState> ORIGINAL_BLOCK_STATE_CACHE = Maps.newHashMap();
@@ -39,7 +38,7 @@ public class FractureBlockState extends BlockState {
 		super(block, propertyMap, mapCodec);
 	}
 	
-	public void setFractureInfo(BlockPos bp, BlockState originalState, Vector3f translate, Quaternionf rotation, double bouncing, int maxLifeTime) {
+	public void setFractureInfo(BlockPos bp, BlockState originalState, Vector3f translate, Quaternion rotation, double bouncing, int maxLifeTime) {
 		ORIGINAL_BLOCK_STATE_CACHE.put(bp.hashCode(), originalState);
 		this.translate = translate;
 		this.rotation = rotation;
@@ -51,7 +50,7 @@ public class FractureBlockState extends BlockState {
 		return this.translate;
 	}
 	
-	public Quaternionf getRotation() {
+	public Quaternion getRotation() {
 		return this.rotation;
 	}
 	

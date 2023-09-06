@@ -1,6 +1,7 @@
 package yesman.epicfight.client.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Vector3f;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -17,7 +18,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.Mesh.RawMesh;
 import yesman.epicfight.api.client.model.Meshes;
-import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
@@ -69,14 +69,14 @@ public class ForceFieldParticle extends TexturedCustomModelParticle {
 	protected void setupPoseStack(PoseStack poseStack, Camera camera, float partialTicks) {
 		float yaw = Mth.lerp(partialTicks, this.yawO, this.yaw);
 		Vec3 vec3 = camera.getPosition();
-		float x = (float)(Mth.lerp(partialTicks, this.xo, this.x) - vec3.x());
-		float y = (float)(Mth.lerp(partialTicks, this.yo, this.y) - vec3.y());
-		float z = (float)(Mth.lerp(partialTicks, this.zo, this.z) - vec3.z());
+		float x = (float)(Mth.lerp((double)partialTicks, this.xo, this.x) - vec3.x());
+		float y = (float)(Mth.lerp((double)partialTicks, this.yo, this.y) - vec3.y());
+		float z = (float)(Mth.lerp((double)partialTicks, this.zo, this.z) - vec3.z());
 		float scale = (float)Mth.lerp((double)partialTicks, this.scaleO, this.scale);
 		poseStack.translate(x, y, z);
-		poseStack.mulPose(QuaternionUtils.XP.rotationDegrees(this.pitch));
-		poseStack.mulPose(QuaternionUtils.ZP.rotationDegrees(this.roll));
-		poseStack.mulPose(QuaternionUtils.YP.rotationDegrees(yaw));
+		poseStack.mulPose(Vector3f.XP.rotationDegrees(this.pitch));
+		poseStack.mulPose(Vector3f.ZP.rotationDegrees(this.roll));
+		poseStack.mulPose(Vector3f.YP.rotationDegrees(yaw));
 		poseStack.scale(scale, scale, scale);
 	}
 	

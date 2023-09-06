@@ -23,13 +23,14 @@ import yesman.epicfight.main.EpicFightMod;
 @OnlyIn(Dist.CLIENT)
 public class EpicFightRenderTypes extends RenderType {
 	
-	private static final Map<RenderType, RenderType> renderTypeCache = Maps.newHashMap();
+	private static Map<RenderType, RenderType> renderTypeCache = Maps.newHashMap();
 	
 	public static RenderType triangles(RenderType renderType) {
 		return renderTypeCache.computeIfAbsent(renderType, (key) -> {
 			RenderType trianglesRenderType = null;
 			
-			if (renderType instanceof CompositeRenderType compositeRenderType) {
+			if (renderType instanceof CompositeRenderType) {
+				CompositeRenderType compositeRenderType = (CompositeRenderType)renderType;
 				trianglesRenderType = new CompositeRenderType(renderType.name, renderType.format, VertexFormat.Mode.TRIANGLES, renderType.bufferSize(), renderType.affectsCrumbling(), renderType.sortOnUpload, compositeRenderType.state);
 			}
 			
@@ -44,8 +45,9 @@ public class EpicFightRenderTypes extends RenderType {
 	private static VertexConsumer getTriangleBuffer(MultiBufferSource bufferSource, RenderType renderType) {
 		RenderType triangleRenderType = triangles(renderType);
 		
-		if (bufferSource instanceof MultiBufferSource.BufferSource cast) {
-
+		if (bufferSource instanceof MultiBufferSource.BufferSource) {
+			MultiBufferSource.BufferSource cast = (MultiBufferSource.BufferSource)bufferSource;
+			
 			if (cast.fixedBuffers.containsKey(renderType)) {
 				cast.fixedBuffers.computeIfAbsent(triangleRenderType, (key) -> new BufferBuilder(renderType.bufferSize()));
 				

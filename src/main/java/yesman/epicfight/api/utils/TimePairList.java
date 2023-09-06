@@ -1,7 +1,7 @@
 package yesman.epicfight.api.utils;
 
 public class TimePairList {
-	private final TimePair[] timePairs;
+	private TimePair[] timePairs;
 	
 	private TimePairList(TimePair[] timePairs) {
 		this.timePairs = timePairs;

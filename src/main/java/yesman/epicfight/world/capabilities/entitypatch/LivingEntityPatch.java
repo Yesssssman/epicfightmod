@@ -11,7 +11,11 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
@@ -22,10 +26,10 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotion;
@@ -51,7 +55,6 @@ import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
-import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributeSupplier;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
@@ -93,7 +96,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	@Override
-	public void onJoinWorld(T entityIn, EntityJoinLevelEvent event) {
+	public void onJoinWorld(T entityIn, EntityJoinWorldEvent event) {
 		super.onJoinWorld(entityIn, event);
 		this.original.getAttributes().supplier = new EpicFightAttributeSupplier(this.original.getAttributes().supplier);
 		this.initAttributes();
@@ -115,7 +118,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	@Override
-	public void tick(LivingEvent.LivingTickEvent event) {
+	public void tick(LivingUpdateEvent event) {
 		this.animator.tick();
 		super.tick(event);
 		
@@ -129,9 +132,9 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	public void onFall(LivingFallEvent event) {
-		if (!this.getOriginal().level().isClientSide() && (this.isAirborneState() || (this.getOriginal().level().getGameRules().getBoolean(EpicFightGamerules.HAS_FALL_ANIMATION)
+		if (!this.getOriginal().level.isClientSide() && (this.isAirborneState() || (this.getOriginal().level.getGameRules().getBoolean(EpicFightGamerules.HAS_FALL_ANIMATION)
 				&& event.getDamageMultiplier() > 0.0F) && !this.getEntityState().inaction())) {
-
+			
 			if (this.isAirborneState() || event.getDistance() > 5.0F) {
 				StaticAnimation fallAnimation = this.getAnimator().getLivingAnimation(LivingMotions.LANDING_RECOVERY, this.getHitAnimation(StunType.FALL));
 				
@@ -175,11 +178,11 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	public EpicFightDamageSource getDamageSource(StaticAnimation animation, InteractionHand hand) {
-		EpicFightDamageSources damageSources = EpicFightDamageSources.of(this.original.level());
-		EpicFightDamageSource damagesource = damageSources.mobAttack(this.original).setAnimation(animation);
+		EpicFightDamageSource damagesource = EpicFightDamageSource.commonEntityDamageSource("mob", this.original, animation);
 		damagesource.setImpact(this.getImpact(hand));
 		damagesource.setArmorNegation(this.getArmorNegation(hand));
 		damagesource.setHurtItem(this.original.getItemInHand(hand));
+		
 		return damagesource;
 	}
 	
@@ -364,7 +367,8 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		float yRot;
 		float scale = this.original.isBaby() ? 0.5F : 1.0F;
 		
-		if (this.original.getVehicle() instanceof LivingEntity ridingEntity) {
+		if (this.original.getVehicle() instanceof LivingEntity) {
+			LivingEntity ridingEntity = (LivingEntity) this.original.getVehicle();
 			prevYRot = ridingEntity.yBodyRotO;
 			yRot = ridingEntity.yBodyRot;
 		} else {
@@ -390,8 +394,8 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	@FunctionalInterface
-	public interface AnimationPacketProvider {
-		SPPlayAnimation get(StaticAnimation animation, float convertTimeModifier, LivingEntityPatch<?> entitypatch);
+	public static interface AnimationPacketProvider {
+		public SPPlayAnimation get(StaticAnimation animation, float convertTimeModifier, LivingEntityPatch<?> entitypatch);
 	}
 	
 	protected void playReboundAnimation() {
@@ -412,9 +416,9 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	    	this.original.setBoundingBox(new AABB(axisalignedbb.minX, axisalignedbb.minY, axisalignedbb.minZ, axisalignedbb.minX + (double)entitysize1.width,
 	    			axisalignedbb.minY + (double)entitysize1.height, axisalignedbb.minZ + (double)entitysize1.width));
 	    	
-	    	if (entitysize1.width > entitysize.width && !this.original.level().isClientSide()) {
+	    	if (entitysize1.width > entitysize.width && !this.original.level.isClientSide()) {
 	    		float f = entitysize.width - entitysize1.width;
-	        	this.original.move(MoverType.SELF, new Vec3(f, 0.0D, f));
+	        	this.original.move(MoverType.SELF, new Vec3((double)f, 0.0D, (double)f));
 	    	}
 	    }
     }
@@ -471,11 +475,11 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	public ClientAnimator getClientAnimator() {
-		return this.getAnimator();
+		return this.<ClientAnimator>getAnimator();
 	}
 	
 	public ServerAnimator getServerAnimator() {
-		return this.getAnimator();
+		return this.<ServerAnimator>getAnimator();
 	}
 	
 	public abstract StaticAnimation getHitAnimation(StunType stunType);
@@ -571,7 +575,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	public void setGrapplingTarget(LivingEntity grapplingTarget) {
 		this.grapplingTarget = grapplingTarget;
 	}
-
+	
 	public Vec3 getLastAttackPosition() {
 		return this.lastAttackPosition;
 	}

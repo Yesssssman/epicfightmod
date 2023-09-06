@@ -252,11 +252,11 @@ public class Layer {
 		}
 	}
 	
-	public enum LayerType {
-		BASE_LAYER, COMPOSITE_LAYER
+	public static enum LayerType {
+		BASE_LAYER, COMPOSITE_LAYER;
 	}
 	
-	public enum Priority {
+	public static enum Priority {
 		/**
 		 * LOWEST: Common living motions (Composite layer having this priority will be overrided if base layer is {@link MainFrameAnimation})
 		 * MIDDLE: Composite living motions

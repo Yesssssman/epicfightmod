@@ -2,7 +2,7 @@ package yesman.epicfight.api.animation;
 
 public class Keyframe {
 	private float timeStamp;
-	private final JointTransform transform;
+	private JointTransform transform;
 
 	public Keyframe(float timeStamp, JointTransform trasnform) {
 		this.timeStamp = timeStamp;

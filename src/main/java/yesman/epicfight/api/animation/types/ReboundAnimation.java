@@ -22,7 +22,8 @@ public class ReboundAnimation extends AimAnimation {
 	
 	@Override
 	public void tick(LivingEntityPatch<?> entitypatch) {
-    }
+		;
+	}
 	
 	@Override
 	public boolean isReboundAnimation() {

@@ -1,6 +1,5 @@
 package yesman.epicfight.api.client.animation;
 
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -45,26 +44,18 @@ public class AnimationDataReader {
 	private final List<TrailInfo> trailInfo;
 	
 	public static void readAndApply(StaticAnimation animation, ResourceManager resourceManager, Resource iresource) {
-		InputStream inputstream = null;
-
-		try {
-			inputstream = iresource.open();
-		} catch (IOException var5) {
-			var5.printStackTrace();
+		InputStream inputstream = iresource.getInputStream();
+		Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
+		AnimationDataReader propertySetter = (AnimationDataReader) GsonHelper.fromJson(GSON, reader, TYPE);
+		
+		if (propertySetter.layerInfo != null) {
+			if (propertySetter.layerInfo.jointMaskEntry.isValid()) {
+				animation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.layerInfo.jointMaskEntry);
+			}
+			
+			animation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.layerInfo.layerType);
+			animation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.layerInfo.priority);
 		}
-
-		assert inputstream != null;
-        Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
-        AnimationDataReader propertySetter = GsonHelper.fromJson(GSON, reader, TYPE);
-
-        if (propertySetter.layerInfo != null) {
-        	if (propertySetter.layerInfo.jointMaskEntry.isValid()) {
-        		animation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.layerInfo.jointMaskEntry);
-        	}
-
-        	animation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.layerInfo.layerType);
-        	animation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.layerInfo.priority);
-        }
 		
 		if (propertySetter.multilayerInfo != null) {
 			StaticAnimation multilayerAnimation = new StaticAnimation(animation.getConvertTime(), animation.isRepeat(), String.valueOf(animation.getId()), animation.getArmature(), true);
@@ -92,7 +83,6 @@ public class AnimationDataReader {
 			animation.addProperty(ClientAnimationProperties.TRAIL_EFFECT, propertySetter.trailInfo);
 		}
 	}
-
 	
 	private AnimationDataReader(LayerInfo compositeLayerInfo, LayerInfo layerInfo, List<TrailInfo> trailInfo) {
 		this.multilayerInfo = compositeLayerInfo;
@@ -151,7 +141,7 @@ public class AnimationDataReader {
 		}
 	}
 	
-	private static final Map<String, List<JointMask>> JOINT_MASKS = Maps.newHashMap();
+	private static Map<String, List<JointMask>> JOINT_MASKS = Maps.newHashMap();
 	
 	static {
 		registerJointMask("none", JointMaskEntry.ALL);

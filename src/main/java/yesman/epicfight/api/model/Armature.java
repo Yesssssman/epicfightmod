@@ -19,7 +19,7 @@ public class Armature {
 	private final Map<String, Integer> pathIndexMap;
 	private final int jointNumber;
 	public final Joint rootJoint;
-	private final TransformSheet actionAnimationCoord = new TransformSheet();
+	private TransformSheet actionAnimationCoord = new TransformSheet();
 	private Pose prevPose = new Pose();
 	private Pose currentPose = new Pose();
 	
@@ -119,7 +119,7 @@ public class Armature {
 		if (this.pathIndexMap.containsKey(joint)) {
 			return this.pathIndexMap.get(joint);
 		} else {
-			String pathIndex = this.rootJoint.searchPath("", joint);
+			String pathIndex = this.rootJoint.searchPath(new String(""), joint);
 			int pathIndex2Int = 0;
 			
 			if (pathIndex == null) {

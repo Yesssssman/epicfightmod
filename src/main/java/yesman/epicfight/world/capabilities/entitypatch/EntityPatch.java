@@ -6,9 +6,9 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
-import net.minecraftforge.event.entity.living.LivingEvent;
+import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 
@@ -16,7 +16,7 @@ public abstract class EntityPatch<T extends Entity> {
 	protected T original;
 	protected boolean initialized = false;
 	
-	public void tick(LivingEvent.LivingTickEvent event) {
+	public void tick(LivingUpdateEvent event) {
 		if (this.isLogicalClient()) {
 			this.clientTick(event);
 		} else {
@@ -24,8 +24,8 @@ public abstract class EntityPatch<T extends Entity> {
 		}
 	}
 	
-	protected void clientTick(LivingEvent.LivingTickEvent event) {}
-	protected void serverTick(LivingEvent.LivingTickEvent event) {}
+	protected void clientTick(LivingUpdateEvent event) {}
+	protected void serverTick(LivingUpdateEvent event) {}
 	public abstract boolean overrideRender();
 	
 	public void onStartTracking(ServerPlayer trackingPlayer) {
@@ -39,13 +39,13 @@ public abstract class EntityPatch<T extends Entity> {
 		this.original = entityIn;
 	}
 	
-	public void onJoinWorld(T entityIn, EntityJoinLevelEvent event) {
+	public void onJoinWorld(T entityIn, EntityJoinWorldEvent event) {
 		this.initialized = true;
 	}
-
+	
 	public void onDeath(LivingDeathEvent event) {
 	}
-
+	
 	public final T getOriginal() {
 		return this.original;
 	}
@@ -55,7 +55,7 @@ public abstract class EntityPatch<T extends Entity> {
 	}
 	
 	public boolean isLogicalClient() {
-		return this.original.level().isClientSide();
+		return this.original.level.isClientSide();
 	}
 	
 	public OpenMatrix4f getMatrix(float partialTicks) {

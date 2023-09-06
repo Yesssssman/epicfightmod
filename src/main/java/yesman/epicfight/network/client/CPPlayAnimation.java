@@ -13,10 +13,10 @@ import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 public class CPPlayAnimation {
 	private int namespaceId;
-	private final int animationId;
-	private final float modifyTime;
+	private int animationId;
+	private float modifyTime;
 	private boolean isClientSideAnimation;
-	private final boolean resendToSender;
+	private boolean resendToSender;
 	
 	public CPPlayAnimation() {
 		this.animationId = 0;

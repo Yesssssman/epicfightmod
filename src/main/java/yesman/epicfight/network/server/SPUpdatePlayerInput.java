@@ -35,7 +35,7 @@ public class SPUpdatePlayerInput {
 	public static void handle(SPUpdatePlayerInput msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
 			Minecraft mc = Minecraft.getInstance();
-			Entity entity = mc.player.level().getEntity(msg.entityId);
+			Entity entity = mc.player.level.getEntity(msg.entityId);
 			
 			if (entity instanceof LivingEntity livingentity) {
 				livingentity.xxa = msg.leftImpulse;

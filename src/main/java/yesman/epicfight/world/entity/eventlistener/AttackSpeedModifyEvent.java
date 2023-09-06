@@ -4,7 +4,7 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 
 public class AttackSpeedModifyEvent extends PlayerEvent<PlayerPatch<?>> {
-	private final CapabilityItem item;
+	private CapabilityItem item;
 	private float attackSpeed;
 	
 	public AttackSpeedModifyEvent(PlayerPatch<?> playerpatch, CapabilityItem item, float attackSpeed) {

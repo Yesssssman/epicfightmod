@@ -1,11 +1,11 @@
 package yesman.epicfight.client.input;
 
 import com.mojang.blaze3d.platform.InputConstants;
+
 import net.minecraft.client.KeyMapping;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
-import net.minecraftforge.client.event.RegisterKeyMappingsEvent;
+import net.minecraftforge.client.ClientRegistry;
 import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
@@ -18,15 +18,15 @@ public class EpicFightKeyMappings {
 	public static final KeyMapping SKILL_EDIT = new KeyMapping("key." + EpicFightMod.MODID + ".skill_gui", InputConstants.KEY_K, "key." + EpicFightMod.MODID + ".gui");
 	public static final KeyMapping LOCK_ON = new KeyMapping("key." + EpicFightMod.MODID + ".lock_on", InputConstants.KEY_G, "key." + EpicFightMod.MODID + ".combat");
 	public static final KeyMapping CONFIG = new KeyMapping("key." + EpicFightMod.MODID + ".config", -1, "key." + EpicFightMod.MODID + ".gui");
-
-	public static void registerKeys(RegisterKeyMappingsEvent event) {
-		event.register(WEAPON_INNATE_SKILL_TOOLTIP);
-		event.register(SWITCH_MODE);
-		event.register(DODGE);
-		event.register(WEAPON_INNATE_SKILL);
-		event.register(MOVER_SKILL);
-		event.register(SKILL_EDIT);
-		event.register(LOCK_ON);
-		event.register(CONFIG);
+	
+	public static void registerKeys() {
+		ClientRegistry.registerKeyBinding(WEAPON_INNATE_SKILL_TOOLTIP);
+		ClientRegistry.registerKeyBinding(SWITCH_MODE);
+		ClientRegistry.registerKeyBinding(DODGE);
+		ClientRegistry.registerKeyBinding(WEAPON_INNATE_SKILL);
+		ClientRegistry.registerKeyBinding(MOVER_SKILL);
+		ClientRegistry.registerKeyBinding(SKILL_EDIT);
+		ClientRegistry.registerKeyBinding(LOCK_ON);
+		ClientRegistry.registerKeyBinding(CONFIG);
 	}
 }
