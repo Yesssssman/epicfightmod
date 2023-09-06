@@ -123,7 +123,7 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 						return false;
 					}
 					
-					return compound.contains(nbtKey) ? compound.getString(nbtKey).equals(nbtValue) : false;
+					return compound.contains(nbtKey) && compound.getString(nbtKey).equals(nbtValue);
 				};
 				
 				list.add(Pair.of(predicate, deserializeWeapon(item, innerTag, innerDefaultCapabilityBuilder)));

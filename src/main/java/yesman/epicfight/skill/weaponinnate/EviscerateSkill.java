@@ -19,8 +19,8 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 
 public class EviscerateSkill extends WeaponInnateSkill {
 	private static final UUID EVENT_UUID = UUID.fromString("f082557a-b2f9-11eb-8529-0242ac130003");
-	private StaticAnimation first;
-	private StaticAnimation second;
+	private final StaticAnimation first;
+	private final StaticAnimation second;
 	
 	public EviscerateSkill(Builder<? extends Skill> builder) {
 		super(builder);

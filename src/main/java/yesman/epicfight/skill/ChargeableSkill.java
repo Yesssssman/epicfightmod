@@ -27,19 +27,19 @@ public interface ChargeableSkill {
 	 * Max charging ticks players can persists
 	 * @return
 	 */
-	public int getAllowedMaxChargingTicks();
+	int getAllowedMaxChargingTicks();
 	
 	/**
 	 * An limitation value for charging that returns at {@link PlayerPatch#getSkillChargingTime}
 	 * @return
 	 */
-	public int getMaxChargingTicks();
+	int getMaxChargingTicks();
 	
 	/**
 	 * A required minimal charging tick to execute the skill
 	 * @return
 	 */
-	public int getMinChargingTicks();
+	int getMinChargingTicks();
 	
 	/**
 	 * Called each tick during charging skill
@@ -63,13 +63,13 @@ public interface ChargeableSkill {
 	 * @param chargingTicks
 	 * @param onMaxTick
 	 */
-	public void castSkill(ServerPlayerPatch caster, SkillContainer skillContainer, int chargingTicks, SPSkillExecutionFeedback feedbackPacket, boolean onMaxTick);
+	void castSkill(ServerPlayerPatch caster, SkillContainer skillContainer, int chargingTicks, SPSkillExecutionFeedback feedbackPacket, boolean onMaxTick);
 	
 	@OnlyIn(Dist.CLIENT)
-	public void gatherChargingArguemtns(LocalPlayerPatch caster, ControllEngine controllEngine, FriendlyByteBuf buffer);
+	void gatherChargingArguemtns(LocalPlayerPatch caster, ControllEngine controllEngine, FriendlyByteBuf buffer);
 	
 	@OnlyIn(Dist.CLIENT)
-	public KeyMapping getKeyMapping();
+	KeyMapping getKeyMapping();
 	
 	default Skill asSkill() {
 		return (Skill)this;

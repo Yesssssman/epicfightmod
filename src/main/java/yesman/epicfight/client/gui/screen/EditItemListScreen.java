@@ -1,33 +1,26 @@
 package yesman.epicfight.client.gui.screen;
 
-import java.util.List;
-
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
-
+import com.mojang.blaze3d.vertex.*;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
+import yesman.epicfight.client.gui.widget.BasicButton;
+
+import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
 public class EditItemListScreen extends Screen {
@@ -40,7 +33,7 @@ public class EditItemListScreen extends Screen {
 	private EditItemListScreen.ButtonList selectedItemList;
 	
 	protected EditItemListScreen(Screen parentScreen, EditSwitchingItemScreen.RegisteredItemList targetList, EditSwitchingItemScreen.RegisteredItemList opponentList) {
-		super(TextComponent.EMPTY);
+		super(Component.empty());
 		this.parentScreen = parentScreen;
 		this.targetList = targetList;
 		this.opponentList = opponentList;
@@ -58,7 +51,7 @@ public class EditItemListScreen extends Screen {
 		this.selectedItemList.setLeftPos(25);
 		this.addRenderableWidget(this.itemButtonList);
 		this.addRenderableWidget(this.selectedItemList);
-		this.addRenderableWidget(new Button(this.width / 2 + 125, this.height - 26, 60, 20, CommonComponents.GUI_DONE, (button) -> {
+		this.addRenderableWidget(new BasicButton(this.width / 2 + 125, this.height - 26, 60, 20, CommonComponents.GUI_DONE, (button) -> {
 			for (Item item : this.selectedItemList.toList()) {
 				this.targetList.addEntry(item);
 				this.opponentList.removeIfPresent(item);
@@ -66,15 +59,15 @@ public class EditItemListScreen extends Screen {
 			this.onClose();
 		}));
 	}
-	
+
 	@Override
-	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		this.renderDirtBackground(0);
-		this.itemButtonList.render(matrixStack, mouseX, mouseY, partialTicks);
-		this.selectedItemList.render(matrixStack, mouseX, mouseY, partialTicks);
-		drawString(matrixStack, this.font, new TextComponent("Item List").withStyle(ChatFormatting.UNDERLINE), 28, 10, 16777215);
-		drawString(matrixStack, this.font, new TextComponent("Seleted Items").withStyle(ChatFormatting.UNDERLINE), 28, this.height-114, 16777215);
-		super.render(matrixStack, mouseX, mouseY, partialTicks);
+	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		this.renderDirtBackground(guiGraphics);
+		this.itemButtonList.render(guiGraphics, mouseX, mouseY, partialTicks);
+		this.selectedItemList.render(guiGraphics, mouseX, mouseY, partialTicks);
+		guiGraphics.drawString(font, Component.literal("Item List").withStyle(ChatFormatting.UNDERLINE), 28, 10, 16777215, false);
+		guiGraphics.drawString(font, Component.literal("Seleted Items").withStyle(ChatFormatting.UNDERLINE), 28, this.height-114, 16777215, false);
+		super.render(guiGraphics, mouseX, mouseY, partialTicks);
 	}
 	
 	@Override
@@ -82,7 +75,7 @@ public class EditItemListScreen extends Screen {
 		this.minecraft.setScreen(this.parentScreen);
 	}
 	
-	private static enum Type {
+	private enum Type {
 		LIST, SELECTED
 	}
 	
@@ -106,7 +99,7 @@ public class EditItemListScreen extends Screen {
 		public boolean has(Item item) {
 			for (ButtonEntry entry : this.children()) {
 				for (ItemButton button : entry.buttonList) {
-					if (button.item.equals(item)) {
+					if (button.itemStack.getItem().equals(item)) {
 						return true;
 					}
 				}
@@ -122,12 +115,12 @@ public class EditItemListScreen extends Screen {
 			}
 			
 			IPressableExtended pressAction = null;
-			Button.OnTooltip onTooltip = null;
+			BasicButton.OnTooltip onTooltip = null;
 			
 			if (ButtonList.this.type == Type.LIST) {
 				pressAction = (screen, button, x, y) -> {
 					if (!screen.selectedItemList.has(item)) {
-						screen.selectedItemList.addItem(button.item);
+						screen.selectedItemList.addItem(button.itemStack.getItem());
 					}
 				};
 			} else if (ButtonList.this.type == Type.SELECTED) {
@@ -137,22 +130,22 @@ public class EditItemListScreen extends Screen {
 			}
 			
 			if (EditItemListScreen.this.opponentRegistered.contains(item)) {
-				onTooltip = (button, matrixStack, mouseX, mouseY) -> {
-					Component displayName = ((ItemButton)button).item.getName(ItemStack.EMPTY);
-					EditItemListScreen.this.renderTooltip(matrixStack, new TranslatableComponent("epicfight.gui.warn_already_registered",
-						displayName.equals(TextComponent.EMPTY) ? new TextComponent(((ItemButton)button).item.getRegistryName().toString())
+				onTooltip = (button, guiGraphics, mouseX, mouseY) -> {
+					Component displayName = ((ItemButton)button).itemStack.getHoverName();
+					guiGraphics.renderTooltip(EditItemListScreen.this.font, Component.translatable("epicfight.gui.warn_already_registered",
+						displayName.equals(Component.empty()) ? Component.literal((ForgeRegistries.ITEMS.getKey(((ItemButton)button).itemStack.getItem()).toString()))
 							: displayName), mouseX, mouseY
 					);
 				};
 			} else {
-				onTooltip = (button, matrixStack, mouseX, mouseY) -> {
-					Component displayName = ((ItemButton)button).item.getName(ItemStack.EMPTY);
-					EditItemListScreen.this.renderTooltip(matrixStack, displayName.equals(TextComponent.EMPTY) ?
-						new TextComponent(((ItemButton)button).item.getRegistryName().toString()) : displayName, mouseX, mouseY);
+				onTooltip = (button, guiGraphics, mouseX, mouseY) -> {
+					Component displayName = ((ItemButton)button).itemStack.getHoverName();
+					guiGraphics.renderTooltip(EditItemListScreen.this.font, displayName.equals(Component.empty()) ?
+						Component.literal((ForgeRegistries.ITEMS.getKey(((ItemButton)button).itemStack.getItem()).toString()) ) : displayName, mouseX, mouseY);
 				};
 			}
 			
-			entry.buttonList.add(new ItemButton(0, 0, 16, 16, pressAction, onTooltip, EditItemListScreen.this, item));
+			entry.buttonList.add(new ItemButton(0, 0, 16, 16, pressAction, onTooltip, EditItemListScreen.this, item.getDefaultInstance()));
 		}
 		
 		public void removeAndRearrange(int x, int y) {
@@ -163,7 +156,7 @@ public class EditItemListScreen extends Screen {
 			List<Item> result = Lists.newArrayList();
 			for (ButtonEntry entry : this.children()) {
 				for (ItemButton button : entry.buttonList) {
-					result.add(button.item);
+					result.add(button.itemStack.getItem());
 				}
 			}
 			return result;
@@ -192,62 +185,62 @@ public class EditItemListScreen extends Screen {
 		}
 		
 		@Override
-		public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-			this.renderBackground(matrixStack);
+		public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+			this.renderBackground(guiGraphics);
 			int i = this.getScrollbarPosition();
 			int j = i + 6;
 			
 			Tesselator tessellator = Tesselator.getInstance();
 			BufferBuilder bufferbuilder = tessellator.getBuilder();
 			RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-			RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
+			RenderSystem.setShaderTexture(0, Screen.BACKGROUND_LOCATION);
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-			bufferbuilder.vertex((double) this.x0, (double) this.y1, 0.0D).uv((float) this.x0 / 32.0F, (float) (this.y1 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
-			bufferbuilder.vertex((double) this.x1, (double) this.y1, 0.0D).uv((float) this.x1 / 32.0F, (float) (this.y1 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
-			bufferbuilder.vertex((double) this.x1, (double) this.y0, 0.0D).uv((float) this.x1 / 32.0F, (float) (this.y0 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
-			bufferbuilder.vertex((double) this.x0, (double) this.y0, 0.0D).uv((float) this.x0 / 32.0F, (float) (this.y0 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
+			bufferbuilder.vertex(this.x0, this.y1, 0.0D).uv((float) this.x0 / 32.0F, (float) (this.y1 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
+			bufferbuilder.vertex(this.x1, this.y1, 0.0D).uv((float) this.x1 / 32.0F, (float) (this.y1 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
+			bufferbuilder.vertex(this.x1, this.y0, 0.0D).uv((float) this.x1 / 32.0F, (float) (this.y0 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
+			bufferbuilder.vertex(this.x0, this.y0, 0.0D).uv((float) this.x0 / 32.0F, (float) (this.y0 + (int) this.getScrollAmount()) / 32.0F).color(32, 32, 32, 255).endVertex();
 			tessellator.end();
 			
 			int j1 = this.getRowLeft();
 			int k = this.y0 + 4 - (int) this.getScrollAmount();
-			this.renderHeader(matrixStack, j1, k, tessellator);
-			this.renderList(matrixStack, j1, k, mouseX, mouseY, partialTicks);
+			this.renderHeader(guiGraphics, j1, k);
+			this.renderList(guiGraphics, mouseX, mouseY, partialTicks);
 			
 			RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-			RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
+			RenderSystem.setShaderTexture(0, Screen.BACKGROUND_LOCATION);
 		    RenderSystem.enableDepthTest();
 		    RenderSystem.depthFunc(519);
 		    bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-		    bufferbuilder.vertex((double)this.x0, (double)this.y0, -100.0D).uv(0.0F, (float)this.y0 / 32.0F).color(64, 64, 64, 255).endVertex();
-		    bufferbuilder.vertex((double)(this.x0 + this.width), (double)this.y0, -100.0D).uv((float)this.width / 32.0F, (float)this.y0 / 32.0F).color(64, 64, 64, 255).endVertex();
-		    bufferbuilder.vertex((double)(this.x0 + this.width), (double)this.y0 - 16, -100.0D).uv((float)this.width / 32.0F, (float)(this.y0 - 16) / 32.0F).color(64, 64, 64, 255).endVertex();
-		    bufferbuilder.vertex((double)this.x0, (double)this.y0 - 16, -100.0D).uv(0.0F, (float)(this.y0 - 16) / 32.0F).color(64, 64, 64, 255).endVertex();
-		  	bufferbuilder.vertex((double)this.x0, (double)this.height, -100.0D).uv(0.0F, (float)this.height / 32.0F).color(64, 64, 64, 255).endVertex();
-		   	bufferbuilder.vertex((double)(this.x0 + this.width), (double)this.height, -100.0D).uv((float)this.width / 32.0F, (float)this.height / 32.0F).color(64, 64, 64, 255).endVertex();
-		   	bufferbuilder.vertex((double)(this.x0 + this.width), (double)this.y1, -100.0D).uv((float)this.width / 32.0F, (float)this.y1 / 32.0F).color(64, 64, 64, 255).endVertex();
-		    bufferbuilder.vertex((double)this.x0, (double)this.y1, -100.0D).uv(0.0F, (float)this.y1 / 32.0F).color(64, 64, 64, 255).endVertex();
+		    bufferbuilder.vertex(this.x0, this.y0, -100.0D).uv(0.0F, (float)this.y0 / 32.0F).color(64, 64, 64, 255).endVertex();
+		    bufferbuilder.vertex(this.x0 + this.width, this.y0, -100.0D).uv((float)this.width / 32.0F, (float)this.y0 / 32.0F).color(64, 64, 64, 255).endVertex();
+		    bufferbuilder.vertex(this.x0 + this.width, (double)this.y0 - 16, -100.0D).uv((float)this.width / 32.0F, (float)(this.y0 - 16) / 32.0F).color(64, 64, 64, 255).endVertex();
+		    bufferbuilder.vertex(this.x0, (double)this.y0 - 16, -100.0D).uv(0.0F, (float)(this.y0 - 16) / 32.0F).color(64, 64, 64, 255).endVertex();
+		  	bufferbuilder.vertex(this.x0, this.height, -100.0D).uv(0.0F, (float)this.height / 32.0F).color(64, 64, 64, 255).endVertex();
+		   	bufferbuilder.vertex(this.x0 + this.width, this.height, -100.0D).uv((float)this.width / 32.0F, (float)this.height / 32.0F).color(64, 64, 64, 255).endVertex();
+		   	bufferbuilder.vertex(this.x0 + this.width, this.y1, -100.0D).uv((float)this.width / 32.0F, (float)this.y1 / 32.0F).color(64, 64, 64, 255).endVertex();
+		    bufferbuilder.vertex(this.x0, this.y1, -100.0D).uv(0.0F, (float)this.y1 / 32.0F).color(64, 64, 64, 255).endVertex();
 		    tessellator.end();
 		    RenderSystem.depthFunc(515);
 		    RenderSystem.disableDepthTest();
 			RenderSystem.enableBlend();
 			RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA, GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE);
-			RenderSystem.disableTexture();
+//			RenderSystem.disableTexture();
 			RenderSystem.setShader(GameRenderer::getPositionColorShader);
 			bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-			bufferbuilder.vertex((double) this.x0, (double) (this.y0 + 4), 0.0D).color(0, 0, 0, 0).endVertex();
-			bufferbuilder.vertex((double) this.x1, (double) (this.y0 + 4), 0.0D).color(0, 0, 0, 0).endVertex();
-			bufferbuilder.vertex((double) this.x1, (double) this.y0, 0.0D).color(0, 0, 0, 255).endVertex();
-			bufferbuilder.vertex((double) this.x0, (double) this.y0, 0.0D).color(0, 0, 0, 255).endVertex();
-			bufferbuilder.vertex((double) this.x0, (double) this.y1, 0.0D).color(0, 0, 0, 255).endVertex();
-			bufferbuilder.vertex((double) this.x1, (double) this.y1, 0.0D).color(0, 0, 0, 255).endVertex();
-			bufferbuilder.vertex((double) this.x1, (double) (this.y1 - 4), 0.0D).color(0, 0, 0, 0).endVertex();
-			bufferbuilder.vertex((double) this.x0, (double) (this.y1 - 4), 0.0D).color(0, 0, 0, 0).endVertex();
+			bufferbuilder.vertex(this.x0, this.y0 + 4, 0.0D).color(0, 0, 0, 0).endVertex();
+			bufferbuilder.vertex(this.x1, this.y0 + 4, 0.0D).color(0, 0, 0, 0).endVertex();
+			bufferbuilder.vertex(this.x1, this.y0, 0.0D).color(0, 0, 0, 255).endVertex();
+			bufferbuilder.vertex(this.x0, this.y0, 0.0D).color(0, 0, 0, 255).endVertex();
+			bufferbuilder.vertex(this.x0, this.y1, 0.0D).color(0, 0, 0, 255).endVertex();
+			bufferbuilder.vertex(this.x1, this.y1, 0.0D).color(0, 0, 0, 255).endVertex();
+			bufferbuilder.vertex(this.x1, this.y1 - 4, 0.0D).color(0, 0, 0, 0).endVertex();
+			bufferbuilder.vertex(this.x0, this.y1 - 4, 0.0D).color(0, 0, 0, 0).endVertex();
 			tessellator.end();
 			
 			int k1 = this.getMaxScroll();
 			if (k1 > 0) {
-				RenderSystem.disableTexture();
+//				RenderSystem.disableTexture();
 				RenderSystem.setShader(GameRenderer::getPositionColorShader);
 				int l1 = (int) ((float) ((this.y1 - this.y0) * (this.y1 - this.y0)) / (float) this.getMaxPosition());
 				l1 = Mth.clamp(l1, 32, this.y1 - this.y0 - 8);
@@ -257,23 +250,23 @@ public class EditItemListScreen extends Screen {
 				}
 				
 				bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-				bufferbuilder.vertex((double) i, (double) this.y1, 0.0D).color(0, 0, 0, 255).endVertex();
-				bufferbuilder.vertex((double) j, (double) this.y1, 0.0D).color(0, 0, 0, 255).endVertex();
-				bufferbuilder.vertex((double) j, (double) this.y0, 0.0D).color(0, 0, 0, 255).endVertex();
-				bufferbuilder.vertex((double) i, (double) this.y0, 0.0D).color(0, 0, 0, 255).endVertex();
-				bufferbuilder.vertex((double) i, (double) (i2 + l1), 0.0D).color(128, 128, 128, 255).endVertex();
-				bufferbuilder.vertex((double) j, (double) (i2 + l1), 0.0D).color(128, 128, 128, 255).endVertex();
-				bufferbuilder.vertex((double) j, (double) i2, 0.0D).color(128, 128, 128, 255).endVertex();
-				bufferbuilder.vertex((double) i, (double) i2, 0.0D).color(128, 128, 128, 255).endVertex();
-				bufferbuilder.vertex((double) i, (double) (i2 + l1 - 1), 0.0D).color(192, 192, 192, 255).endVertex();
-				bufferbuilder.vertex((double) (j - 1), (double) (i2 + l1 - 1), 0.0D).color(192, 192, 192, 255).endVertex();
-				bufferbuilder.vertex((double) (j - 1), (double) i2, 0.0D).color(192, 192, 192, 255).endVertex();
-				bufferbuilder.vertex((double) i, (double) i2, 0.0D).color(192, 192, 192, 255).endVertex();
+				bufferbuilder.vertex(i, this.y1, 0.0D).color(0, 0, 0, 255).endVertex();
+				bufferbuilder.vertex(j, this.y1, 0.0D).color(0, 0, 0, 255).endVertex();
+				bufferbuilder.vertex(j, this.y0, 0.0D).color(0, 0, 0, 255).endVertex();
+				bufferbuilder.vertex(i, this.y0, 0.0D).color(0, 0, 0, 255).endVertex();
+				bufferbuilder.vertex(i, i2 + l1, 0.0D).color(128, 128, 128, 255).endVertex();
+				bufferbuilder.vertex(j, i2 + l1, 0.0D).color(128, 128, 128, 255).endVertex();
+				bufferbuilder.vertex(j, i2, 0.0D).color(128, 128, 128, 255).endVertex();
+				bufferbuilder.vertex(i, i2, 0.0D).color(128, 128, 128, 255).endVertex();
+				bufferbuilder.vertex(i, i2 + l1 - 1, 0.0D).color(192, 192, 192, 255).endVertex();
+				bufferbuilder.vertex(j - 1, i2 + l1 - 1, 0.0D).color(192, 192, 192, 255).endVertex();
+				bufferbuilder.vertex(j - 1, i2, 0.0D).color(192, 192, 192, 255).endVertex();
+				bufferbuilder.vertex(i, i2, 0.0D).color(192, 192, 192, 255).endVertex();
 				tessellator.end();
 			}
 			
-			this.renderDecorations(matrixStack, mouseX, mouseY);
-			RenderSystem.enableTexture();
+			this.renderDecorations(guiGraphics, mouseX, mouseY);
+//			RenderSystem.enableTexture();
 			RenderSystem.disableBlend();
 		}
 		
@@ -296,12 +289,12 @@ public class EditItemListScreen extends Screen {
 			}
 			
 			@Override
-			public void render(PoseStack matrixStack, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
+			public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
 				int x = 0;
 				for (ItemButton button : buttonList) {
-					button.x = left + x;
-					button.y = top;
-					button.render(matrixStack, mouseX, mouseY, partialTicks);
+					button.setX(left + x);
+					button.setY(top);
+					button.render(guiGraphics, mouseX, mouseY, partialTicks);
 					x+=16;
 				}
 			}
@@ -329,38 +322,38 @@ public class EditItemListScreen extends Screen {
 
 			@Override
 			public Component getNarration() {
-				return TextComponent.EMPTY;
+				return Component.empty();
 			}
 		}
 	}
 	
-	class ItemButton extends Button {
-		private final Item item;
+	class ItemButton extends BasicButton {
+		private final ItemStack itemStack;
 		private final IPressableExtended pressedAction;
 		
-		public ItemButton(int x, int y, int width, int height, IPressableExtended pressedAction, OnTooltip onTooltip, EditItemListScreen screen, Item item) {
-			super(x, y, width, height, TextComponent.EMPTY, (button)->{}, onTooltip);
-			this.item = item;
+		public ItemButton(int x, int y, int width, int height, IPressableExtended pressedAction, OnTooltip onTooltip, EditItemListScreen screen, ItemStack itemStack) {
+			super(x, y, width, height, Component.empty(), (button)->{}, onTooltip);
+			this.itemStack = itemStack;
 			this.pressedAction = pressedAction;
 		}
 		
 		@Override
-		public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+		public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 			if (this.isMouseOver(mouseX, mouseY)) {
 				Tesselator tessellator = Tesselator.getInstance();
-				GlStateManager._disableTexture();
+				//GlStateManager._disableTexture();
 				BufferBuilder bufferbuilder = tessellator.getBuilder();
 				bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-				bufferbuilder.vertex((double) this.x, (double) this.y + this.height, 0.0D).color(255, 255, 255, 255).endVertex();
-				bufferbuilder.vertex((double) this.x + this.width, (double) this.y + this.height, 0.0D).color(255, 255, 255, 255).endVertex();
-				bufferbuilder.vertex((double) this.x + this.width, (double) this.y, 0.0D).color(255, 255, 255, 255).endVertex();
-				bufferbuilder.vertex((double) this.x, (double) this.y, 0.0D).color(255, 255, 255, 255).endVertex();
+				bufferbuilder.vertex(this.getX(), (double) this.getY() + this.height, 0.0D).color(255, 255, 255, 255).endVertex();
+				bufferbuilder.vertex((double) this.getX() + this.width, (double) this.getY() + this.height, 0.0D).color(255, 255, 255, 255).endVertex();
+				bufferbuilder.vertex((double) this.getX() + this.width, this.getY(), 0.0D).color(255, 255, 255, 255).endVertex();
+				bufferbuilder.vertex(this.getX(), this.getY(), 0.0D).color(255, 255, 255, 255).endVertex();
 				tessellator.end();
-				this.onTooltip.onTooltip(this, matrixStack, mouseX, mouseY);
+				this.onTooltip.onTooltip(this, guiGraphics, mouseX, mouseY);
 			}
 			
 			try {
-				EditItemListScreen.this.itemRenderer.renderGuiItem(new ItemStack(this.item), this.x, this.y);
+				guiGraphics.renderItem(itemStack, this.getX(), this.getY());
 			} catch (Exception e) {
 			}
 		}

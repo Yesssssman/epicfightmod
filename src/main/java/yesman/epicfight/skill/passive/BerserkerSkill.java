@@ -3,10 +3,9 @@ package yesman.epicfight.skill.passive;
 import java.util.List;
 import java.util.UUID;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
@@ -80,17 +79,17 @@ public class BerserkerSkill extends PassiveSkill {
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void drawOnGui(BattleModeGui gui, SkillContainer container, PoseStack poseStack, float x, float y) {
+	public void drawOnGui(BattleModeGui gui, SkillContainer container, GuiGraphics guiGraphics, float x, float y) {
+		PoseStack poseStack = guiGraphics.pose();
 		poseStack.pushPose();
 		poseStack.translate(0, (float)gui.getSlidingProgression(), 0);
-		RenderSystem.setShaderTexture(0, this.getSkillTexture());
-		GuiComponent.blit(poseStack, (int)x, (int)y, 24, 24, 0, 0, 1, 1, 1, 1);
+		guiGraphics.blit(this.getSkillTexture(), (int)x, (int)y, 24, 24, 0, 0, 1, 1, 1, 1);
 		Player player = container.getExecuter().getOriginal();
 		float health = player.getHealth();
 		float maxHealth = player.getMaxHealth();
 		float lostHealthPercentage = (maxHealth - health) / maxHealth;
 		lostHealthPercentage = (float)Math.floor(lostHealthPercentage * 100.0F);
-		gui.font.drawShadow(poseStack, String.format("%.0f%%", lostHealthPercentage), x + 4, y + 6, 16777215);
+		guiGraphics.drawString(gui.font, String.format("%.0f%%", lostHealthPercentage), x + 4, y + 6, 16777215, true);
 		poseStack.popPose();
 	}
 	

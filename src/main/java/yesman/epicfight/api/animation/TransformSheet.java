@@ -3,10 +3,9 @@ package yesman.epicfight.api.animation;
 import java.util.List;
 import java.util.function.Consumer;
 
-import com.mojang.math.Quaternion;
-
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -86,9 +85,9 @@ public class TransformSheet {
 		return vec3f;
 	}
 	
-	public Quaternion getInterpolatedRotation(float currentTime) {
+	public Quaternionf getInterpolatedRotation(float currentTime) {
 		InterpolationInfo interpolInfo = this.getInterpolationInfo(currentTime);
-		Quaternion quat = MathUtils.lerpQuaternion(this.keyframes[interpolInfo.prev].transform().rotation(), this.keyframes[interpolInfo.next].transform().rotation(), interpolInfo.zero2One);
+		Quaternionf quat = MathUtils.lerpQuaternion(this.keyframes[interpolInfo.prev].transform().rotation(), this.keyframes[interpolInfo.next].transform().rotation(), interpolInfo.zero2One);
 		return quat;
 	}
 	
@@ -214,9 +213,9 @@ public class TransformSheet {
 	}
 	
 	private static class InterpolationInfo {
-		private int prev;
-		private int next;
-		private float zero2One;
+		private final int prev;
+		private final int next;
+		private final float zero2One;
 		
 		private InterpolationInfo(int prev, int next, float zero2One) {
 			this.prev = prev;

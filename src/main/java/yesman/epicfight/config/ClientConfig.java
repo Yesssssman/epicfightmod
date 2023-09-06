@@ -101,7 +101,7 @@ public class ClientConfig {
 	private static final BiFunction<Integer, Integer, Integer> CENTER = ((screenLength, value) -> screenLength / 2 + value);
 	private static final BiFunction<Integer, Integer, Integer> CENTER_SAVE = ((screenLength, value) -> value - screenLength / 2);
 	
-	public static enum HorizontalBasis {
+	public enum HorizontalBasis {
 		LEFT(ClientConfig.ORIGIN, ClientConfig.ORIGIN), RIGHT(ClientConfig.SCREEN_EDGE, ClientConfig.SCREEN_EDGE), CENTER(ClientConfig.CENTER, ClientConfig.CENTER_SAVE);
 		
 		public BiFunction<Integer, Integer, Integer> positionGetter;
@@ -113,7 +113,7 @@ public class ClientConfig {
 		}
 	}
 	
-	public static enum VerticalBasis {
+	public enum VerticalBasis {
 		TOP(ClientConfig.ORIGIN, ClientConfig.ORIGIN), BOTTOM(ClientConfig.SCREEN_EDGE, ClientConfig.SCREEN_EDGE), CENTER(ClientConfig.CENTER, ClientConfig.CENTER_SAVE);
 		
 		public BiFunction<Integer, Integer, Integer> positionGetter;
@@ -127,7 +127,7 @@ public class ClientConfig {
 	
 	@FunctionalInterface
 	public interface StartCoordGetter {
-		public Vec2i get(int x, int y, int width, int height, int icons, HorizontalBasis horBasis, VerticalBasis verBasis);
+		Vec2i get(int x, int y, int width, int height, int icons, HorizontalBasis horBasis, VerticalBasis verBasis);
 	}
 	
 	private static final StartCoordGetter START_HORIZONTAL = (x, y, width, height, icons, horBasis, verBasis) -> {
@@ -148,7 +148,7 @@ public class ClientConfig {
 	
 	@FunctionalInterface
 	public interface NextCoordGetter {
-		public Vec2i getNext(HorizontalBasis horBasis, VerticalBasis verBasis, Vec2i prevCoord, int width, int height);
+		Vec2i getNext(HorizontalBasis horBasis, VerticalBasis verBasis, Vec2i prevCoord, int width, int height);
 	}
 	
 	private static final NextCoordGetter NEXT_HORIZONTAL = (horBasis, verBasis, oldPos, width, height) -> {
@@ -167,7 +167,7 @@ public class ClientConfig {
 		}
 	};
 	
-	public static enum AlignDirection {
+	public enum AlignDirection {
 		HORIZONTAL(START_HORIZONTAL, NEXT_HORIZONTAL), VERTICAL(START_VERTICAL, NEXT_VERTICAL);
 		
 		public StartCoordGetter startCoordGetter;
@@ -179,7 +179,7 @@ public class ClientConfig {
 		}
 	}
 	
-	public static enum HealthBarShowOptions {
+	public enum HealthBarShowOptions {
 		NONE, HURT, TARGET;
 		
 		@Override

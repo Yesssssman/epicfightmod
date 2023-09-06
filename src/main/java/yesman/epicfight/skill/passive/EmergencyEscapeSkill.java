@@ -47,12 +47,7 @@ public class EmergencyEscapeSkill extends PassiveSkill {
 			this.resource = resource;
 			return this;
 		}
-		
-		public Builder setCreativeTab(CreativeModeTab tab) {
-			this.tab = tab;
-			return this;
-		}
-		
+
 		public Builder addAvailableWeaponCategory(WeaponCategory... wc) {
 			this.availableWeapons.addAll(Arrays.asList(wc));
 			return this;

@@ -71,8 +71,8 @@ public class ActionAnimation extends MainFrameAnimation {
 	@Override
 	public void linkTick(LivingEntityPatch<?> entitypatch, DynamicAnimation linkAnimation) {
 		this.move(entitypatch, linkAnimation);
-	};
-	
+	}
+
 	protected void move(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
 		if (!this.validateMovement(entitypatch, animation)) {
 			return;
@@ -177,12 +177,8 @@ public class ActionAnimation extends MainFrameAnimation {
 	protected Vec3 getCoordVector(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
 		AnimationPlayer player = entitypatch.getAnimator().getPlayerFor(animation);
 		TimePairList coordUpdateTime = this.getProperty(ActionAnimationProperty.COORD_UPDATE_TIME).orElse(null);
-		boolean isCoordUpdateTime = true;
-		
-		if (coordUpdateTime != null && !coordUpdateTime.isTimeInPairs(player.getElapsedTime())) {
-			isCoordUpdateTime = false;
-		}
-		
+		boolean isCoordUpdateTime = coordUpdateTime == null || coordUpdateTime.isTimeInPairs(player.getElapsedTime());
+
 		MoveCoordSetter moveCoordsetter = isCoordUpdateTime ? this.getProperty(ActionAnimationProperty.COORD_SET_TICK).orElse(null) : MoveCoordFunctions.RAW_COORD;
 		
 		if (moveCoordsetter != null) {

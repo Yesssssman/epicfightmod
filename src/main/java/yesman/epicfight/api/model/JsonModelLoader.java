@@ -66,8 +66,10 @@ public class JsonModelLoader {
 				this.rootJson = Streams.parse(in).getAsJsonObject();	
 			} else {
 				this.resourceManager = resourceManager;
-				Resource resource = resourceManager.getResource(resourceLocation);
-				JsonReader in = new JsonReader(new InputStreamReader(resource.getInputStream(), StandardCharsets.UTF_8));
+				Resource resource = resourceManager.getResource(resourceLocation).get();
+
+				//TODO Double check
+				JsonReader in = new JsonReader(new InputStreamReader(resource.open(), StandardCharsets.UTF_8));
 				in.setLenient(true);
 				this.rootJson = Streams.parse(in).getAsJsonObject();
 			}
@@ -82,7 +84,7 @@ public class JsonModelLoader {
 		JsonObject properties = this.rootJson.getAsJsonObject("render_properties");
 		
 		if (properties != null) {
-			return AnimatedMesh.RenderProperties.builder().transparency(properties.has("transparent") ? properties.get("transparent").getAsBoolean() : false).build();
+			return AnimatedMesh.RenderProperties.builder().transparency(properties.has("transparent") && properties.get("transparent").getAsBoolean()).build();
 		} else {
 			return AnimatedMesh.RenderProperties.DEFAULT;
 		}
@@ -275,13 +277,12 @@ public class JsonModelLoader {
 		boolean root = true;
 		Armature armature = animation.getArmature();
 		
-		if (!action && !attack) {
-			if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
+		if (!action && !attack && (FMLEnvironment.dist == Dist.DEDICATED_SERVER)) {
 				return;
-			}
+
 		}
 		
-		Set<String> allowedJoints = Sets.<String>newLinkedHashSet();
+		Set<String> allowedJoints = Sets.newLinkedHashSet();
 		
 		if (attack) {
 			for (Phase phase : ((AttackAnimation)animation).phases) {
@@ -423,13 +424,13 @@ public class JsonModelLoader {
 		
 		for (int i = 0; i < times.length; i++) {
 			float timeStamp = times[i];
-			
+
 			if (timeStamp < 0) {
 				continue;
 			}
 			
 			float[] matrixElements = new float[16];
-			
+
 			for (int j = 0; j < 16; j++) {
 				matrixElements[j] = trasnformMatrix[i*16 + j];
 			}

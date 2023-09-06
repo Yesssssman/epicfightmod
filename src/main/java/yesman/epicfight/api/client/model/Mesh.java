@@ -5,13 +5,14 @@ import java.util.Map;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix3f;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
-import com.mojang.math.Vector4f;
 
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class Mesh<T extends VertexIndicator> {
@@ -100,8 +101,8 @@ public abstract class Mesh<T extends VertexIndicator> {
 					int uv = vi.uv * 2;
 					Vector4f posVec = new Vector4f(this.positions[pos], this.positions[pos + 1], this.positions[pos + 2], 1.0F);
 					Vector3f normVec = new Vector3f(this.normals[norm], this.normals[norm + 1], this.normals[norm + 2]);
-					posVec.transform(matrix4f);
-					normVec.transform(matrix3f);
+					posVec.mul(matrix4f);
+					normVec.mul(matrix3f);
 					builder.vertex(posVec.x(), posVec.y(), posVec.z(), r, g, b, a, this.uvs[uv], this.uvs[uv + 1], overlayCoord, packedLightIn, normVec.x(), normVec.y(), normVec.z());
 				}
 			}
@@ -117,7 +118,7 @@ public abstract class Mesh<T extends VertexIndicator> {
 					int pos = vi.position * 3;
 					int uv = vi.uv * 2;
 					Vector4f posVec = new Vector4f(this.positions[pos], this.positions[pos + 1], this.positions[pos + 2], 1.0F);
-					posVec.transform(matrix4f);
+					posVec.mul(matrix4f);
 					builder.vertex(posVec.x(), posVec.y(), posVec.z()).color(r, g, b, a).uv(this.uvs[uv], this.uvs[uv + 1]).uv2(packedLightIn).endVertex();
 				}
 			}

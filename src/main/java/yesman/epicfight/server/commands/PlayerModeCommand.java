@@ -1,25 +1,23 @@
 package yesman.epicfight.server.commands;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Locale;
-
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-
 import net.minecraft.Util;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch.PlayerMode;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
+
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Locale;
 
 public class PlayerModeCommand {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
@@ -53,15 +51,15 @@ public class PlayerModeCommand {
 	}
 	
 	private static void logGamemodeChange(CommandSourceStack command, ServerPlayer serverPlayer, PlayerPatch.PlayerMode playerMode) {
-		Component component = new TranslatableComponent("gameMode.epicfight." + playerMode.name().toLowerCase(Locale.ROOT));
+		Component component = Component.translatable("gameMode.epicfight." + playerMode.name().toLowerCase(Locale.ROOT));
 		
 		if (command.getEntity() == serverPlayer) {
-			command.sendSuccess(new TranslatableComponent("commands.gamemode.success.self", component), true);
+			command.sendSuccess(() -> Component.translatable("commands.gamemode.success.self", component), true);
 		} else {
 			if (command.getLevel().getGameRules().getBoolean(GameRules.RULE_SENDCOMMANDFEEDBACK)) {
-				serverPlayer.sendMessage(new TranslatableComponent("gameMode.changed", component), Util.NIL_UUID);
+				serverPlayer.sendSystemMessage(Component.translatable("gameMode.changed", component));
 			}
-			command.sendSuccess(new TranslatableComponent("commands.gamemode.success.other", serverPlayer.getDisplayName(), component), true);
+			command.sendSuccess(() -> Component.translatable("commands.gamemode.success.other", serverPlayer.getDisplayName(), component), true);
 		}
 
 	}

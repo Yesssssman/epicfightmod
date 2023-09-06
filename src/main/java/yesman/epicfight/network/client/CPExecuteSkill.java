@@ -11,9 +11,9 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 public class CPExecuteSkill {
-	private int skillSlot;
-	private WorkType workType;
-	private FriendlyByteBuf buffer;
+	private final int skillSlot;
+	private final WorkType workType;
+	private final FriendlyByteBuf buffer;
 
 	public CPExecuteSkill() {
 		this(0);
@@ -84,7 +84,7 @@ public class CPExecuteSkill {
 		ctx.get().setPacketHandled(true);
 	}
 	
-	public static enum WorkType {
+	public enum WorkType {
 		ACTIVATE, CANCEL, CHARGING_START
 	}
 }

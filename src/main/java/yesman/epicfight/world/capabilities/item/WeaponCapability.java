@@ -174,8 +174,8 @@ public class WeaponCapability extends CapabilityItem {
 			this.styleProvider = (entitypatch) -> Styles.ONE_HAND;
 			this.weaponCombinationPredicator = (entitypatch) -> false;
 			this.passiveSkill = null;
-			this.swingSound = EpicFightSounds.WHOOSH;
-			this.hitSound = EpicFightSounds.BLUNT_HIT;
+			this.swingSound = EpicFightSounds.WHOOSH.get();
+			this.hitSound = EpicFightSounds.BLUNT_HIT.get();
 			this.hitParticle = EpicFightParticles.HIT_BLADE.get();
 			this.collider = ColliderPreset.FIST;
 			this.autoAttackMotionMap = Maps.newHashMap();
@@ -228,11 +228,11 @@ public class WeaponCapability extends CapabilityItem {
 		
 		public Builder livingMotionModifier(Style wieldStyle, LivingMotion livingMotion, StaticAnimation animation) {
 			if (this.livingMotionModifiers == null) {
-				this.livingMotionModifiers = Maps.<Style, Map<LivingMotion, StaticAnimation>>newHashMap();
+				this.livingMotionModifiers = Maps.newHashMap();
 			}
 			
 			if (!this.livingMotionModifiers.containsKey(wieldStyle)) {
-				this.livingMotionModifiers.put(wieldStyle, Maps.<LivingMotion, StaticAnimation>newHashMap());
+				this.livingMotionModifiers.put(wieldStyle, Maps.newHashMap());
 			}
 			
 			this.livingMotionModifiers.get(wieldStyle).put(livingMotion, animation);

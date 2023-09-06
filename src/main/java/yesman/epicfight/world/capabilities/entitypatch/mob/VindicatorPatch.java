@@ -62,7 +62,7 @@ public class VindicatorPatch<T extends PathfinderMob> extends AbstractIllagerPat
 		} else {
 			boolean isAngry = this.original.isAggressive();
 			
-			if (this.original.animationSpeed > 0.01F) {
+			if (this.original.walkAnimation.speed() > 0.01F) {
 				currentLivingMotion = isAngry ? LivingMotions.CHASE : LivingMotions.WALK;
 			} else {
 				currentLivingMotion = isAngry ? LivingMotions.ANGRY : LivingMotions.IDLE;

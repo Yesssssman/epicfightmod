@@ -1,28 +1,20 @@
 package yesman.epicfight.client.gui.screen;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.client.gui.widget.BasicButton;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.client.CPChangeSkill;
@@ -30,10 +22,15 @@ import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillSlot;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 @OnlyIn(Dist.CLIENT)
 public class SkillEditScreen extends Screen {
 	private static final ResourceLocation SKILL_EDIT_UI = new ResourceLocation(EpicFightMod.MODID, "textures/gui/screen/skill_edit.png");
-	private static final TranslatableComponent NO_SKILLS = new TranslatableComponent("gui.epicfight.no_skills");
+	private static final MutableComponent NO_SKILLS = Component.literal("gui.epicfight.no_skills");
 	private static final int MAX_SHOWING_BUTTONS = 6;
 	
 	private final Player player;
@@ -44,7 +41,7 @@ public class SkillEditScreen extends Screen {
 	private SlotButton selectedSlotButton;
 	
 	public SkillEditScreen(Player player, CapabilitySkill skills) {
-		super(new TranslatableComponent("gui.epicfight.skill_edit"));
+		super(Component.translatable("gui.epicfight.skill_edit"));
 		this.player = player;
 		this.skills = skills;
 	}
@@ -73,7 +70,7 @@ public class SkillEditScreen extends Screen {
 					Collection<Skill> learnedSkillCollection = this.skills.getLearnedSkills(skillSlot.category());
 					
 					for (Skill learnedSkill : learnedSkillCollection) {
-						this.learnedSkillButtons.add(new LearnSkillButton(k, l, 147, 24, learnedSkill, new TranslatableComponent(learnedSkill.getTranslationKey()), (pressedButton) -> {
+						this.learnedSkillButtons.add(new LearnSkillButton(k, l, 147, 24, learnedSkill, Component.translatable(learnedSkill.getTranslationKey()), (pressedButton) -> {
 							if (this.minecraft.player.experienceLevel >= learnedSkill.getRequiredXp() || this.minecraft.player.isCreative()) {
 								if (!this.canPress(pressedButton)) {
 									return;
@@ -94,8 +91,8 @@ public class SkillEditScreen extends Screen {
 					
 					this.selectedSlotButton = (SlotButton)button;
 					
-				}, (button, PoseStack, x, y) -> {
-					this.renderTooltip(PoseStack, this.minecraft.font.split(new TextComponent(SkillSlot.ENUM_MANAGER.toTranslated(skillSlot)), Math.max(this.width / 2 - 43, 170)), x, y);
+				}, (button, guiGraphics, x, y) -> {
+					guiGraphics.renderTooltip(this.minecraft.font, this.minecraft.font.split(Component.translatable(SkillSlot.ENUM_MANAGER.toTranslated(skillSlot)), Math.max(this.width / 2 - 43, 170)), x, y);
 				});
 				
 				this.slotButtons.put(skillSlot, slotButton);
@@ -109,31 +106,31 @@ public class SkillEditScreen extends Screen {
 			this.selectedSlotButton.onPress();
 		}
 	}
-	
+
 	@Override
-	public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-		this.renderBackground(poseStack);
+	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		this.renderBackground(guiGraphics);
 		
 		if (this.canScroll()) {
 			int scrollPosition = (int)(140 * (this.start / (float)(this.learnedSkillButtons.size() - MAX_SHOWING_BUTTONS)));
-			GuiComponent.blit(poseStack, this.width / 2 + 80, this.height / 2 - 80 + scrollPosition, 12, 15, 231, 2, 12, 15, 256, 256);
+			guiGraphics.blit(SKILL_EDIT_UI, this.width / 2 + 80, this.height / 2 - 80 + scrollPosition, 12, 15, 231, 2, 12, 15, 256, 256);
 		}
 		
 		int maxShowingButtons = Math.min(this.learnedSkillButtons.size(), MAX_SHOWING_BUTTONS);
 		
 		for (int i = this.start; i < maxShowingButtons + this.start; ++i) {
-			this.learnedSkillButtons.get(i).render(poseStack, mouseX, mouseY, partialTicks);
+			this.learnedSkillButtons.get(i).render(guiGraphics, mouseX, mouseY, partialTicks);
 		}
 		
 		for (SlotButton sb : this.slotButtons.values()) {
-			sb.render(poseStack, mouseX, mouseY, partialTicks);
+			sb.render(guiGraphics, mouseX, mouseY, partialTicks);
 		}
 		
 		if (this.slotButtons.isEmpty()) {
 			int lineHeight = 0;
 			
 			for (FormattedCharSequence s : this.font.split(NO_SKILLS, 110)) {
-				this.font.draw(poseStack, s, this.width / 2 - 50, this.height / 2 - 72 + lineHeight, 3158064);
+				guiGraphics.drawString(this.font, s, this.width / 2 - 50, this.height / 2 - 72 + lineHeight, 3158064, false);
 				
 				lineHeight += 10;
 			}
@@ -141,10 +138,9 @@ public class SkillEditScreen extends Screen {
 	}
 	
 	@Override
-	public void renderBackground(PoseStack PoseStack) {
-		super.renderBackground(PoseStack);
-		RenderSystem.setShaderTexture(0, SKILL_EDIT_UI);
-	    this.blit(PoseStack, this.width / 2 - 104, this.height / 2 - 100, 0, 0, 208, 200);
+	public void renderBackground(GuiGraphics guiGraphics) {
+		super.renderBackground(guiGraphics);
+		guiGraphics.blit(SKILL_EDIT_UI, this.width / 2 - 104, this.height / 2 - 100, 0, 0, 208, 200);
 	}
 	
 	private boolean canScroll() {
@@ -167,7 +163,7 @@ public class SkillEditScreen extends Screen {
 					--this.start;
 					
 					for (Button button : this.learnedSkillButtons) {
-						button.y += 26;
+						button.setY(button.getY() + 26);
 					}
 					
 					return true;
@@ -177,7 +173,7 @@ public class SkillEditScreen extends Screen {
 					++this.start;
 					
 					for (Button button : this.learnedSkillButtons) {
-						button.y -= 26;
+						button.setY(button.getY() - 26);
 					}
 					
 					return true;
@@ -188,62 +184,57 @@ public class SkillEditScreen extends Screen {
 		}
 	}
 	
-	class SlotButton extends Button {
-		private Skill iconSkill;
-		private SkillSlot slot;
-		
+	class SlotButton extends BasicButton {
+		private final Skill iconSkill;
+		private final SkillSlot slot;
+
 		public SlotButton(int x, int y, int width, int height, SkillSlot slot, Skill skill, OnPress pressedAction, OnTooltip onTooltip) {
-			super(x, y, width, height, TextComponent.EMPTY, pressedAction, onTooltip);
+			super(x, y, width, height, Component.empty(), pressedAction, onTooltip);
 			this.iconSkill = skill;
 			this.slot = slot;
 		}
 		
 		@Override
-		public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
-			RenderSystem.setShaderTexture(0, SKILL_EDIT_UI);
-			this.isHovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
+		public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+			this.isHovered = mouseX >= this.getX() && mouseY >= this.getY() && mouseX < this.getX() + this.width && mouseY < this.getY() + this.height;
 			int y = (this.isHovered || SkillEditScreen.this.selectedSlotButton == this) ? 35 : 17;
-			this.blit(poseStack, this.x, this.y, 237, y, this.width, this.height);
+			guiGraphics.blit(SKILL_EDIT_UI, this.getX(), this.getY(), 237, y, this.width, this.height);
 			
 			if (this.iconSkill != null) {
 				RenderSystem.enableBlend();
-				RenderSystem.setShaderTexture(0, this.iconSkill.getSkillTexture());
-				GuiComponent.blit(poseStack, this.x + 1, this.y + 1, 16, 16, 0, 0, 128, 128, 128, 128);
+				guiGraphics.blit(this.iconSkill.getSkillTexture(), this.getX() + 1, this.getY() + 1, 16, 16, 0, 0, 128, 128, 128, 128);
 			}
 			
 			if (this.isHoveredOrFocused()) {
-				this.renderToolTip(poseStack, mouseX, mouseY);
+				this.renderToolTip(guiGraphics, mouseX, mouseY);
 			}
 		}
 	}
 	
-	class LearnSkillButton extends Button {
-		private Skill skill;
-		
+	class LearnSkillButton extends BasicButton {
+		private final Skill skill;
+
 		public LearnSkillButton(int x, int y, int width, int height, Skill skill, Component title, OnPress pressedAction) {
-			super(x, y, width, height, title, pressedAction, Button.NO_TOOLTIP);
+			super(x, y, width, height, title, pressedAction, BasicButton.NO_TOOLTIP);
 			this.skill = skill;
 		}
 		
 		@Override
-		public void render(PoseStack PoseStack, int mouseX, int mouseY, float partialTicks) {
-			RenderSystem.setShaderTexture(0, SKILL_EDIT_UI);
-			
-			this.isHovered = mouseX >= this.x && mouseY >= this.y && mouseX < this.x + this.width && mouseY < this.y + this.height;
+		public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+			this.isHovered = mouseX >= this.getX() && mouseY >= this.getY() && mouseX < this.getX() + this.width && mouseY < this.getY() + this.height;
 			int texY = (this.isHovered || !this.active) ? 224 : 200;
-			this.blit(PoseStack, this.x, this.y, 0, texY, this.width, this.height);
+			guiGraphics.blit(SKILL_EDIT_UI, this.getX(), this.getY(), 0, texY, this.width, this.height);
 			
 			RenderSystem.enableBlend();
-			RenderSystem.setShaderTexture(0, this.skill.getSkillTexture());
-			GuiComponent.blit(PoseStack, this.x + 5, this.y + 4, 16, 16, 0, 0, 128, 128, 128, 128);
-			drawString(PoseStack, SkillEditScreen.this.font, this.getMessage(), this.x+26, this.y + 2, -1);
+			guiGraphics.blit(this.skill.getSkillTexture(), this.getX() + 5, this.getY() + 4, 16, 16, 0, 0, 128, 128, 128, 128);
+			guiGraphics.drawString(SkillEditScreen.this.font, this.getMessage(), this.getX()+26, this.getY() + 2, -1, false);
 			
 			if (this.active) {
 				int color = (SkillEditScreen.this.minecraft.player.experienceLevel >= this.skill.getRequiredXp() || SkillEditScreen.this.minecraft.player.isCreative()) ? 8453920 : 16736352;
-				drawString(PoseStack, SkillEditScreen.this.font, new TranslatableComponent("gui.epicfight.changing_cost", this.skill.getRequiredXp()), this.x+70, this.y + 12, color);
+				guiGraphics.drawString(SkillEditScreen.this.font, Component.translatable("gui.epicfight.changing_cost", this.skill.getRequiredXp()), this.getX()+70, this.getY() + 12, color, false);
 			} else {
-				drawString(PoseStack, SkillEditScreen.this.font, new TextComponent(
-						SkillEditScreen.this.skills.getSkillContainer(this.skill).getSlot().toString().toLowerCase(Locale.ROOT)), this.x+26, this.y + 12, 16736352);
+				guiGraphics.drawString(SkillEditScreen.this.font, Component.literal(
+						SkillEditScreen.this.skills.getSkillContainer(this.skill).getSlot().toString().toLowerCase(Locale.ROOT)), this.getX()+26, this.getY() + 12, 16736352, false);
 			}
 		}
 		
@@ -254,7 +245,7 @@ public class SkillEditScreen extends Screen {
 				
 				if (flag) {
 					this.playDownSound(Minecraft.getInstance().getSoundManager());
-					SkillEditScreen.this.minecraft.setScreen(new SkillBookScreen(SkillEditScreen.this.player, this.skill, (InteractionHand)null, SkillEditScreen.this));
+					SkillEditScreen.this.minecraft.setScreen(new SkillBookScreen(SkillEditScreen.this.player, this.skill, null, SkillEditScreen.this));
 					return true;
 				}
 			}
@@ -263,7 +254,7 @@ public class SkillEditScreen extends Screen {
 		}
 		
 		protected boolean clickedNoCountActive(double x, double y) {
-			return this.visible && x >= (double) this.x && y >= (double) this.y && x < (double) (this.x + this.width) && y < (double) (this.y + this.height);
+			return this.visible && x >= (double) this.getX() && y >= (double) this.getY() && x < (double) (this.getX() + this.width) && y < (double) (this.getY() + this.height);
 		}
 		
 		public LearnSkillButton setActive(boolean active) {

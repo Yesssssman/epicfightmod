@@ -1,7 +1,6 @@
 package yesman.epicfight.client.events;
 
 import com.mojang.datafixers.util.Pair;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.resources.ResourceLocation;
@@ -11,10 +10,8 @@ import net.minecraft.world.item.UseAnim;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
-import net.minecraftforge.client.event.ScreenEvent.KeyboardKeyPressedEvent;
-import net.minecraftforge.client.event.ScreenEvent.MouseClickedEvent;
-import net.minecraftforge.client.event.ScreenEvent.MouseReleasedEvent;
-import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickItem;
+import net.minecraftforge.client.event.ScreenEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
@@ -34,10 +31,10 @@ import yesman.epicfight.world.level.block.FractureBlockState;
 @Mod.EventBusSubscriber(modid = EpicFightMod.MODID, value = Dist.CLIENT)
 public class ClientEvents {
 	private static final Pair<ResourceLocation, ResourceLocation> OFFHAND_TEXTURE = Pair.of(InventoryMenu.BLOCK_ATLAS, InventoryMenu.EMPTY_ARMOR_SLOT_SHIELD);
-	private static Minecraft minecraft = Minecraft.getInstance();
+	private static final Minecraft minecraft = Minecraft.getInstance();
 	
 	@SubscribeEvent
-	public static void mouseClickEvent(MouseClickedEvent.Pre event) {
+	public static void mouseClickEvent(ScreenEvent.MouseButtonPressed.Pre event) {
 		if (event.getScreen() instanceof AbstractContainerScreen) {
 			Slot slot = ((AbstractContainerScreen<?>)event.getScreen()).getSlotUnderMouse();
 			
@@ -54,7 +51,7 @@ public class ClientEvents {
 	}
 	
 	@SubscribeEvent
-	public static void mouseReleaseEvent(MouseReleasedEvent.Pre event) {
+	public static void mouseReleaseEvent(ScreenEvent.MouseButtonReleased.Pre event) {
 		if (event.getScreen() instanceof AbstractContainerScreen) {
 			Slot slot = ((AbstractContainerScreen<?>)event.getScreen()).getSlotUnderMouse();
 			
@@ -71,7 +68,7 @@ public class ClientEvents {
 	}
 	
 	@SubscribeEvent
-	public static void presssKeyInGui(KeyboardKeyPressedEvent.Pre event) {
+	public static void presssKeyInGui(ScreenEvent.KeyPressed.Pre event) {
 		CapabilityItem itemCapability = CapabilityItem.EMPTY;
 		
 		if (event.getKeyCode() == minecraft.options.keySwapOffhand.getKey().getValue()) {
@@ -102,9 +99,9 @@ public class ClientEvents {
 	}
 	
 	@SubscribeEvent
-	public static void rightClickItemClient(RightClickItem event) {
+	public static void rightClickItemClient(PlayerInteractEvent.RightClickItem event) {
 		if (event.getSide() == LogicalSide.CLIENT) {
-			LocalPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(event.getPlayer(), LocalPlayerPatch.class);
+			LocalPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), LocalPlayerPatch.class);
 			
 			if (playerpatch != null && playerpatch.getOriginal().getOffhandItem().getUseAnimation() == UseAnim.NONE) {
 				boolean canceled = playerpatch.getEventListener().triggerEvents(EventType.CLIENT_ITEM_USE_EVENT, new RightClickItemEvent<>(playerpatch));
@@ -119,7 +116,7 @@ public class ClientEvents {
 	}
 	
 	@SubscribeEvent
-	public static void clientRespawnEvent(ClientPlayerNetworkEvent.RespawnEvent event) {
+	public static void clientRespawnEvent(ClientPlayerNetworkEvent.Clone event) {
 		LocalPlayerPatch oldCap = EpicFightCapabilities.getEntityPatch(event.getOldPlayer(), LocalPlayerPatch.class);
 		
 		if (oldCap != null) {
@@ -133,7 +130,7 @@ public class ClientEvents {
 	}
 	
 	@SubscribeEvent
-	public static void clientLogoutEvent(ClientPlayerNetworkEvent.LoggedOutEvent event) {
+	public static void clientLogoutEvent(ClientPlayerNetworkEvent.LoggingOut event) {
 		if (event.getPlayer() != null) {
 			ItemCapabilityReloadListener.reset();
 			ItemCapabilityProvider.clear();

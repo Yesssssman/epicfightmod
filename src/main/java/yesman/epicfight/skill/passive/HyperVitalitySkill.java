@@ -2,10 +2,9 @@ package yesman.epicfight.skill.passive;
 
 import java.util.UUID;
 
-import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.api.distmarker.Dist;
@@ -93,19 +92,19 @@ public class HyperVitalitySkill extends PassiveSkill {
 	public boolean shouldDraw(SkillContainer container) {
 		return container.isActivated() || container.getStack() == 0;
 	}
-	
+
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void drawOnGui(BattleModeGui gui, SkillContainer container, PoseStack poseStack, float x, float y) {
+	public void drawOnGui(BattleModeGui gui, SkillContainer container, GuiGraphics guiGraphics, float x, float y) {
+		PoseStack poseStack = new PoseStack();
 		poseStack.pushPose();
-		poseStack.translate(0, (float)gui.getSlidingProgression() * 1.0F, 0);
-		RenderSystem.setShaderTexture(0, this.getSkillTexture());
-		GuiComponent.blit(poseStack, (int)x, (int)y, 24, 24, 0, 0, 1, 1, 1, 1);
+		poseStack.translate(0, (float) gui.getSlidingProgression(), 0);
+		guiGraphics.blit(this.getSkillTexture(), (int)x, (int)y, 24, 24, 0, 0, 1, 1, 1, 1);
 		
 		if (!container.isActivated()) {
 			String remainTime = String.format("%.0f", container.getMaxResource() - container.getResource());
-			gui.font.drawShadow(poseStack, remainTime, (x + 12 - 4 * (remainTime.length())), y + 6, 16777215);
-			poseStack.popPose();
+			guiGraphics.drawString(gui.font, remainTime, (x + 12 - 4 * (remainTime.length())), y + 6, 16777215, true);
 		}
+		poseStack.popPose();
 	}
 }

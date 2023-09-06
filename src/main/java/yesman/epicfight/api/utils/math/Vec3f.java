@@ -1,9 +1,8 @@
 package yesman.epicfight.api.utils.math;
 
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
-
 import net.minecraft.world.phys.Vec3;
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
 import yesman.epicfight.main.EpicFightMod;
 
 public class Vec3f extends Vec2f {
@@ -148,7 +147,7 @@ public class Vec3f extends Vec2f {
 		return (float) Math.acos(Math.min(1.0F, Vec3f.dot(a, b) / (a.length() * b.length())));
 	}
 	
-	public static Quaternion getRotatorBetween(Vec3f a, Vec3f b) {
+	public static Quaternionf getRotatorBetween(Vec3f a, Vec3f b) {
 		Vec3f axis = Vec3f.cross(a, b, null).normalise();
 		float dotDivLength = Vec3f.dot(a, b) / (a.length() * b.length());
 		
@@ -159,7 +158,7 @@ public class Vec3f extends Vec2f {
 		}
 		
 		float radian = (float)Math.acos(Math.min(1.0F, dotDivLength));
-		return new Quaternion(axis.toMojangVector(), radian, false);
+		return QuaternionUtils.rotation(axis.toMojangVector(), radian);
 	}
 	
 	public Vec3f normalise() {

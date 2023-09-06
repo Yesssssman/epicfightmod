@@ -12,7 +12,7 @@ public abstract class EpicFightPredicates<T> {
 	public abstract boolean test(T object);
 	
 	public static class HasTag extends EpicFightPredicates<Entity> {
-		private Set<String> allowedTags = Sets.newHashSet();
+		private final Set<String> allowedTags = Sets.newHashSet();
 		
 		public HasTag(ListTag allowedTags) {
 			allowedTags.stream().map(Tag::getAsString).forEach(this.allowedTags::add);

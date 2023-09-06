@@ -7,10 +7,7 @@ import javax.annotation.Nullable;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Matrix4f;
-import com.mojang.math.Vector3f;
 
-import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -18,13 +15,16 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
+import org.joml.Matrix4f;
+
 @OnlyIn(Dist.CLIENT)
-public abstract class EntityIndicator extends GuiComponent {
+public abstract class EntityIndicator extends ModIngameGui {
 	public static final List<EntityIndicator> ENTITY_INDICATOR_RENDERERS = Lists.newArrayList();
 	public static final ResourceLocation BATTLE_ICON = new ResourceLocation(EpicFightMod.MODID, "textures/gui/battle_icons.png");
 	
@@ -50,17 +50,17 @@ public abstract class EntityIndicator extends GuiComponent {
 	}
 	
 	public final Matrix4f getMVMatrix(PoseStack poseStack, LivingEntity entity, float x, float y, float z, boolean lockRotation, float partialTicks) {
-		float posX = (float)Mth.lerp((double)partialTicks, entity.xOld, entity.getX());
-		float posY = (float)Mth.lerp((double)partialTicks, entity.yOld, entity.getY());
-		float posZ = (float)Mth.lerp((double)partialTicks, entity.zOld, entity.getZ());
+		float posX = (float)Mth.lerp(partialTicks, entity.xOld, entity.getX());
+		float posY = (float)Mth.lerp(partialTicks, entity.yOld, entity.getY());
+		float posZ = (float)Mth.lerp(partialTicks, entity.zOld, entity.getZ());
 		poseStack.pushPose();
 		poseStack.translate(-posX, -posY, -posZ);
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
-		
+		poseStack.mulPose(QuaternionUtils.YP.rotationDegrees(180.0F));
+
 		float screenX = posX + x;
 		float screenY = posY + y;
 		float screenZ = posZ + z;
-		
+
 		OpenMatrix4f viewMatrix = OpenMatrix4f.importFromMojangMatrix(poseStack.last().pose());
 		OpenMatrix4f finalMatrix = new OpenMatrix4f();
 		finalMatrix.translate(new Vec3f(-screenX, screenY, -screenZ));

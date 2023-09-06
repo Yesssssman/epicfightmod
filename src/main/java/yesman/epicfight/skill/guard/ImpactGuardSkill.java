@@ -5,7 +5,9 @@ import java.util.List;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
@@ -54,7 +56,7 @@ public class ImpactGuardSkill extends GuardSkill {
 	public void guard(SkillContainer container, CapabilityItem itemCapapbility, HurtEvent.Pre event, float knockback, float impact, boolean advanced) {
 		boolean canUse = this.isHoldingWeaponAvailable(event.getPlayerPatch(), itemCapapbility, BlockType.ADVANCED_GUARD);
 		
-		if (event.getDamageSource().isExplosion()) {
+		if (event.getDamageSource().is(DamageTypeTags.IS_EXPLOSION)) {
 			impact = event.getAmount();
 		}
 		
@@ -77,7 +79,7 @@ public class ImpactGuardSkill extends GuardSkill {
 		
 		if (advanced) {
 			LivingEntity original = playerpatch.getOriginal();
-			EpicFightParticles.AIR_BURST.get().spawnParticleWithArgument(((ServerLevel)original.level), original, directEntity);
+			EpicFightParticles.AIR_BURST.get().spawnParticleWithArgument(((ServerLevel)original.level()), original, directEntity);
 		}
 		
 		if (entitypatch != null) {
@@ -87,7 +89,7 @@ public class ImpactGuardSkill extends GuardSkill {
 	
 	@Override
 	protected boolean isBlockableSource(DamageSource damageSource, boolean advanced) {
-		return !damageSource.isBypassInvul() && (!damageSource.isBypassArmor() && !damageSource.isProjectile() && !damageSource.isExplosion() && !damageSource.isMagic() && !damageSource.isFire() || advanced);
+		return !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && (!damageSource.is(DamageTypeTags.BYPASSES_ARMOR) && !damageSource.is(DamageTypeTags.IS_PROJECTILE) && !damageSource.is(DamageTypeTags.IS_EXPLOSION) && !damageSource.is(DamageTypes.MAGIC) && !damageSource.is(DamageTypeTags.IS_FIRE) || advanced);
 	}
 	
 	@Override
@@ -96,7 +98,11 @@ public class ImpactGuardSkill extends GuardSkill {
 	}
 	
 	private static boolean isAdvancedBlockableDamageSource(DamageSource damageSource) {
-		return damageSource.isExplosion() || damageSource.isMagic() || damageSource.isFire() || damageSource.isProjectile() || damageSource.isBypassArmor();
+		return damageSource.is(DamageTypeTags.IS_EXPLOSION)
+				|| damageSource.is(DamageTypes.MAGIC)
+				|| damageSource.is(DamageTypeTags.IS_FIRE)
+				|| damageSource.is(DamageTypeTags.IS_PROJECTILE)
+				|| damageSource.is(DamageTypeTags.BYPASSES_ARMOR);
 	}
 	
 	@Override
@@ -114,19 +120,19 @@ public class ImpactGuardSkill extends GuardSkill {
 	public List<Object> getTooltipArgsOfScreen(List<Object> list) {
 		list.clear();
 		list.add(String.format("%.1f", this.damageReducer));
-		
+
 		StringBuilder sb = new StringBuilder();
-		
+
 		Iterator<WeaponCategory> iter = this.advancedGuardMotions.keySet().iterator();
-		
+
 		while (iter.hasNext()) {
 			sb.append(WeaponCategory.ENUM_MANAGER.toTranslated(iter.next()));
-			
+
 			if (iter.hasNext()) {
 				sb.append(", ");
 			}
 		}
-		
+
         list.add(sb.toString());
 		
 		return list;

@@ -1,6 +1,6 @@
 # Blender v2.79 (sub 0) OBJ File: 'spear.blend'
 # www.blender.org
-mtllib spear.mtl
+mtllib stone_spear.mtl
 o Cube_Cube.016
 v -0.034520 0.049497 0.377275
 v -0.034520 -0.098995 -2.147097

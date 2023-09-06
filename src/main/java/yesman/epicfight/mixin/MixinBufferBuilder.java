@@ -1,10 +1,14 @@
 package yesman.epicfight.mixin;
 
-import java.nio.ByteBuffer;
-import java.nio.FloatBuffer;
-import java.util.List;
-
-import org.spongepowered.asm.mixin.Final;
+import com.google.common.primitives.Floats;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.VertexFormat;
+import com.mojang.blaze3d.vertex.VertexFormatElement;
+import com.mojang.blaze3d.vertex.VertexSorting;
+import it.unimi.dsi.fastutil.ints.IntArrays;
+import it.unimi.dsi.fastutil.ints.IntConsumer;
+import net.minecraft.util.Mth;
+import org.joml.Vector3f;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -12,21 +16,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.google.common.primitives.Floats;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.VertexFormatElement;
-import com.mojang.math.Vector3f;
-
-import it.unimi.dsi.fastutil.ints.IntArrays;
-import it.unimi.dsi.fastutil.ints.IntConsumer;
-import net.minecraft.util.Mth;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
 
 @Mixin(value = BufferBuilder.class)
 public abstract class MixinBufferBuilder {
 	@Shadow private ByteBuffer buffer;
-	@Shadow @Final private List<BufferBuilder.DrawState> drawStates;
-	@Shadow private int totalRenderedBytes;
+	//@Shadow @Final private List<BufferBuilder.DrawState> drawStates;
+	@Shadow private int renderedBufferCount;
 	@Shadow private int nextElementByte;
 	@Shadow private int vertices;
 	@Shadow private VertexFormatElement currentElement;
@@ -35,25 +32,17 @@ public abstract class MixinBufferBuilder {
 	@Shadow private VertexFormat.Mode mode;
 	@Shadow private boolean building;
 	@Shadow private Vector3f[] sortingPoints;
-	@Shadow private float sortX;
-	@Shadow private float sortY;
-	@Shadow private float sortZ;
+	@Shadow private VertexSorting sorting;
 	@Shadow private boolean indexOnly;
-	
+
 	@Shadow
-	private IntConsumer intConsumer(VertexFormat.IndexType indexType) {throw new AbstractMethodError("Shadow");}
-	
-	@Shadow
-	private void putSortedQuadIndices(VertexFormat.IndexType indexType) {};
-	
-	@Inject(at = @At(value = "HEAD"), method = "setQuadSortOrigin(FFF)V")
-	public void epicfight_setQuadSortOrigin(float x, float y, float z, CallbackInfo callbackInfo) {
+	private void putSortedQuadIndices(VertexFormat.IndexType indexType) {}
+
+	@Inject(at = @At(value = "HEAD"), method = "setQuadSorting")
+	public void epicfight_setQuadSortOrigin(VertexSorting sorting, CallbackInfo ci) {
 		if (this.mode == VertexFormat.Mode.TRIANGLES) {
-			if (this.sortX != x || this.sortY != y || this.sortZ != z) {
-				this.sortX = x;
-				this.sortY = y;
-				this.sortZ = z;
-				
+			if (this.sorting != sorting) {
+				this.sorting = sorting;
 				if (this.sortingPoints == null) {
 					this.sortingPoints = this.makeTrianglesSortingPoints();
 				}
@@ -61,58 +50,49 @@ public abstract class MixinBufferBuilder {
 		}
 	}
 	
-	@Redirect(     at = @At(   value = "INVOKE"
-			                , target = "Lcom/mojang/blaze3d/vertex/BufferBuilder;putSortedQuadIndices(Lcom/mojang/blaze3d/vertex/VertexFormat$IndexType;)V")
-	         , method = "end()V")
-	public void epicfight_end(BufferBuilder bufferBuilder, VertexFormat.IndexType vertexformat$indextype) {
+
+
+	//@Shadow protected abstract void putSortedQuadIndices(VertexFormat.IndexType p_166787_);
+	@Redirect(method = "storeRenderedBuffer()Lcom/mojang/blaze3d/vertex/BufferBuilder$RenderedBuffer;", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/BufferBuilder;putSortedQuadIndices(Lcom/mojang/blaze3d/vertex/VertexFormat$IndexType;)V"))
+	public void epicfight_storeRenderedBuffer(BufferBuilder instance, VertexFormat.IndexType vertexformat$indextype) {
 		if (this.mode == VertexFormat.Mode.QUADS) {
 			this.putSortedQuadIndices(vertexformat$indextype);
 		} else if (this.mode == VertexFormat.Mode.TRIANGLES) {
 			this.putSortedTriangleIndices(vertexformat$indextype);
 		}
 	}
-	
 	private void putSortedTriangleIndices(VertexFormat.IndexType indexType) {
-		float[] afloat = new float[this.sortingPoints.length];
-		int[] aint = new int[this.sortingPoints.length];
-		
-		for (int i = 0; i < this.sortingPoints.length; aint[i] = i++) {
-			float f = this.sortingPoints[i].x() - this.sortX;
-			float f1 = this.sortingPoints[i].y() - this.sortY;
-			float f2 = this.sortingPoints[i].z() - this.sortZ;
-			afloat[i] = f * f + f1 * f1 + f2 * f2;
-		}
-		
-		IntArrays.mergeSort(aint, (p_166784_, p_166785_) -> {
-			return Floats.compare(afloat[p_166785_], afloat[p_166784_]);
-		});
-		
-		IntConsumer intconsumer = this.intConsumer(indexType);
-		this.buffer.position(this.nextElementByte);
+		int[] aint = this.sorting.sort(this.sortingPoints);
+		IntConsumer intconsumer = this.intConsumer(this.nextElementByte,indexType);
 		
 		for (int j : aint) {
-			intconsumer.accept(j * this.mode.primitiveStride + 0);
+			intconsumer.accept(j * this.mode.primitiveStride);
 			intconsumer.accept(j * this.mode.primitiveStride + 1);
 			intconsumer.accept(j * this.mode.primitiveStride + 2);
 		}
 	}
 	
+	@Shadow
+	public abstract void ensureCapacity(int size);
+	@Shadow
+	public abstract IntConsumer intConsumer(int int1, VertexFormat.IndexType indexType);
+	
 	public Vector3f[] makeTrianglesSortingPoints() {
 		FloatBuffer floatbuffer = this.buffer.asFloatBuffer();
-		int i = this.totalRenderedBytes / 4;
+		int i = this.renderedBufferCount / 4;
 		int j = this.format.getIntegerSize();
 		int k = j * this.mode.primitiveStride;
 		int l = this.vertices / this.mode.primitiveStride;
 		Vector3f[] avector3f = new Vector3f[l];
 		
 		for (int i1 = 0; i1 < l; ++i1) {
-			float x1 = floatbuffer.get(i + i1 * k + 0);
+			float x1 = floatbuffer.get(i + i1 * k);
 			float y1 = floatbuffer.get(i + i1 * k + 1);
 			float z1 = floatbuffer.get(i + i1 * k + 2);
-			float x2 = floatbuffer.get(i + i1 * k + j + 0);
+			float x2 = floatbuffer.get(i + i1 * k + j);
 			float y2 = floatbuffer.get(i + i1 * k + j + 1);
 			float z2 = floatbuffer.get(i + i1 * k + j + 2);
-			float x3 = floatbuffer.get(i + i1 * k + j * 2 + 0);
+			float x3 = floatbuffer.get(i + i1 * k + j * 2);
 			float y3 = floatbuffer.get(i + i1 * k + j * 2 + 1);
 			float z3 = floatbuffer.get(i + i1 * k + j * 2 + 2);
 			

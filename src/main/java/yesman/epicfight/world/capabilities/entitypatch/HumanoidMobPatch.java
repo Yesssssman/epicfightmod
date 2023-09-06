@@ -222,7 +222,7 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 			return;
 		}
 		
-		if (!this.original.level.isClientSide() && !this.original.isNoAi()) {
+		if (!this.original.level().isClientSide() && !this.original.isNoAi()) {
 			Set<Goal> toRemove = Sets.newHashSet();
 			this.selectGoalToRemove(toRemove);
 			toRemove.forEach(this.original.goalSelector::removeGoal);

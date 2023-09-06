@@ -11,10 +11,10 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 public class CPChangeSkill {
-	private int skillSlotIndex;
-	private int itemSlotIndex;
-	private String skillName;
-	private boolean consumeXp;
+	private final int skillSlotIndex;
+	private final int itemSlotIndex;
+	private final String skillName;
+	private final boolean consumeXp;
 	
 	public CPChangeSkill() {
 		this(0, -1, "", false);

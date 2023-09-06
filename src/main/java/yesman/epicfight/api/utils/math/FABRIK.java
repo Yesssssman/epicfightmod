@@ -3,20 +3,21 @@ package yesman.epicfight.api.utils.math;
 import java.util.List;
 
 import com.google.common.collect.Lists;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
 
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.model.Armature;
 
+import org.joml.Vector3f;
+import org.joml.Quaternionf;
+
 public class FABRIK {
-	private Armature armature;
-	private List<Chain> chains = Lists.newArrayList();
-	private Vec3f target = new Vec3f();
-	private Vec3f startPos = new Vec3f();
-	private Pose pose;
+	private final Armature armature;
+	private final List<Chain> chains = Lists.newArrayList();
+	private final Vec3f target = new Vec3f();
+	private final Vec3f startPos = new Vec3f();
+	private final Pose pose;
 	
 	public FABRIK(Pose pose, Armature armature, Joint startJoint, Joint endJoint) {
 		this.armature = armature;
@@ -26,7 +27,7 @@ public class FABRIK {
 	
 	public void addChain(Pose pose, Joint startJoint, Joint endJoint) {
 		OpenMatrix4f bindTransform = armature.getBindedTransformFor(pose, startJoint);
-		int pathIndex = Integer.parseInt(startJoint.searchPath(new String(""), endJoint.getName()));
+		int pathIndex = Integer.parseInt(startJoint.searchPath("", endJoint.getName()));
 		this.startPos.set(bindTransform.toTranslationVector());
 		this.addChainInternal(pose, bindTransform, startJoint, pathIndex);
 	}
@@ -50,18 +51,18 @@ public class FABRIK {
 			this.backward();
 			this.forward();
 		}
-		
-		Quaternion parentQuaternion = Quaternion.ONE;
-		
+
+		Quaternionf parentQuaternion = new Quaternionf(0.0F, 0.0F, 0.0F, 1.0F);
+
 		for (Chain chain : this.chains) {
 			Vector3f tailToHeadM = chain.tailToHead.toMojangVector();
-			tailToHeadM.transform(parentQuaternion);
+			tailToHeadM.rotate(parentQuaternion);
 			Vec3f tailToHead = Vec3f.fromMojangVector(tailToHeadM);
 			Vec3f tailToNewHead = chain.head.copy().sub(chain.tail);
 			Vec3f axis = Vec3f.cross(tailToNewHead, tailToHead, null).normalise();
 			float radian = Vec3f.getAngleBetween(tailToNewHead, tailToHead);
-			Quaternion rotationQuat = new Quaternion(axis.toMojangVector(), radian, false);
-			parentQuaternion = new Quaternion(axis.scale(-1.0F).toMojangVector(), radian, false);
+			Quaternionf rotationQuat = QuaternionUtils.rotation(axis.toMojangVector(), radian);
+			parentQuaternion = QuaternionUtils.rotation(axis.scale(-1.0F).toMojangVector(), radian);
 			
 			JointTransform jt = this.pose.getOrDefaultTransform(chain.jointName);
 			jt.frontResult(JointTransform.getRotation(rotationQuat), OpenMatrix4f::mulAsOriginFront);

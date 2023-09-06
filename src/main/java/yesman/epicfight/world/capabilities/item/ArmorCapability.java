@@ -1,15 +1,9 @@
 package yesman.epicfight.world.capabilities.item;
 
-import java.util.List;
-import java.util.UUID;
-
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -20,6 +14,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+
+import java.util.List;
+import java.util.UUID;
 
 public class ArmorCapability extends CapabilityItem {
 	protected static final UUID[] ARMOR_MODIFIERS = new UUID[] {UUID.fromString("845DB27C-C624-495F-8C9F-6020A9A58B6B"), UUID.fromString("D8499B04-0E66-4726-AB29-64469D734E0D"), UUID.fromString("9F3D476D-C118-4544-8365-64846904B48E"), UUID.fromString("2AD3F246-FEE1-4E67-B886-69FD380BB150")};
@@ -39,16 +36,16 @@ public class ArmorCapability extends CapabilityItem {
 	
 	@Override
 	public void modifyItemTooltip(ItemStack stack, List<Component> itemTooltip, LivingEntityPatch<?> entitypatch) {
-		itemTooltip.add(1, new TextComponent(ChatFormatting.BLUE + " +" + (int)this.weight + " ").append(new TranslatableComponent(EpicFightAttributes.WEIGHT.get().getDescriptionId()).withStyle(ChatFormatting.BLUE)));
-		
+		itemTooltip.add(1, Component.literal(ChatFormatting.BLUE + " +" + (int)this.weight + " ").append(Component.translatable(EpicFightAttributes.WEIGHT.get().getDescriptionId()).withStyle(ChatFormatting.BLUE)));
+
 		if (this.stunArmor > 0.0F) {
-			itemTooltip.add(1, new TextComponent(ChatFormatting.BLUE + " +" + ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(this.stunArmor) + " ").append(new TranslatableComponent(EpicFightAttributes.STUN_ARMOR.get().getDescriptionId()).withStyle(ChatFormatting.BLUE)));
+			itemTooltip.add(1, Component.literal(ChatFormatting.BLUE + " +" + ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(this.stunArmor) + " ").append(Component.translatable(EpicFightAttributes.STUN_ARMOR.get().getDescriptionId()).withStyle(ChatFormatting.BLUE)));
 		}
 	}
 	
 	@Override
 	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot equipmentSlot, LivingEntityPatch<?> entitypatch) {
-		Multimap<Attribute, AttributeModifier> map = HashMultimap.<Attribute, AttributeModifier>create();
+		Multimap<Attribute, AttributeModifier> map = HashMultimap.create();
 		
 		if (entitypatch != null && equipmentSlot == this.equipmentSlot) {
 			map.put(EpicFightAttributes.WEIGHT.get(), new AttributeModifier(ARMOR_MODIFIERS[equipmentSlot.getIndex()], "Armor modifier", this.weight, Operation.ADDITION));
@@ -74,18 +71,18 @@ public class ArmorCapability extends CapabilityItem {
 		}
 		
 		public Builder item(Item item) {
-			if (item instanceof ArmorItem) {
-				ArmorItem armorItem = (ArmorItem) item;
+			if (item instanceof ArmorItem armorItem) {
 				ArmorMaterial armorMaterial = armorItem.getMaterial();
+				ArmorItem.Type armorType = armorItem.getType();
 				
-				this.equipmentSlot = armorItem.getSlot();
+				this.equipmentSlot = armorItem.getEquipmentSlot();
 				
 				if (this.weight < 0.0D) {
-					this.weight = armorMaterial.getDefenseForSlot(this.equipmentSlot) * 2.5F;
+					this.weight = armorMaterial.getDefenseForType(armorType) * 2.5F;
 				}
 				
 				if (this.stunArmor < 0.0D) {
-					this.stunArmor = armorMaterial.getDefenseForSlot(this.equipmentSlot) * 0.375F;
+					this.stunArmor = armorMaterial.getDefenseForType(armorType) * 0.375F;
 				}
 			}
 			

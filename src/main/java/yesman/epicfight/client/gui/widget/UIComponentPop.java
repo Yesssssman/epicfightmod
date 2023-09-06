@@ -1,21 +1,15 @@
 package yesman.epicfight.client.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.BufferBuilder;
-import com.mojang.blaze3d.vertex.BufferUploader;
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.Tesselator;
-import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.math.Matrix4f;
-
+import com.mojang.blaze3d.vertex.*;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.ContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
-import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec2;
 import net.minecraftforge.api.distmarker.Dist;
@@ -38,7 +32,7 @@ public class UIComponentPop<T extends UIComponent> extends Screen implements Con
 	private boolean enable;
 	
 	public UIComponentPop(int width, int height, T parentWidget) {
-		super(new TextComponent(""));
+		super(Component.literal(""));
 		
 		this.width = width;
 		this.height = height;
@@ -80,9 +74,8 @@ public class UIComponentPop<T extends UIComponent> extends Screen implements Con
 	}
 	
 	public static Button createButton(int x, int y, int width, int height, Button.OnPress onpress) {
-		Button bt = new Button(x, y, width, height, new TextComponent(""), onpress);
-		bt.setBlitOffset(400);
-		
+		Button bt = new BasicButton(x, y, width, height, Component.literal(""), onpress);
+
 		return bt;
 	}
 	
@@ -117,24 +110,32 @@ public class UIComponentPop<T extends UIComponent> extends Screen implements Con
 			return false;
 		}
 	}
-	
+
 	@Override
-	public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		if (this.enable) {
 			boolean popupOut = mouseX < this.x - 3 || mouseY < this.y - 3 || mouseX >= this.x + this.width + 3 || mouseY >= this.y + this.height + 3;
-			boolean parentOut = mouseX < this.parentWidget.x - 3 || mouseY < this.parentWidget.y - 3
-					|| mouseX >= this.parentWidget.x + this.parentWidget.getWidth() + 3 || mouseY >= this.parentWidget.y + this.parentWidget.getHeight() + 3;
+			boolean parentOut = mouseX < this.parentWidget.getX() - 3 || mouseY < this.parentWidget.getY() - 3
+					|| mouseX >= this.parentWidget.getX() + this.parentWidget.getWidth() + 3 || mouseY >= this.parentWidget.getY() + this.parentWidget.getHeight() + 3;
 			
 			if (popupOut && parentOut) {
 				this.enable = false;
 			}
+
+			PoseStack poseStack = guiGraphics.pose();
+			poseStack.pushPose();
+			poseStack.translate(0, 0, 200); // zlevel
 			
-			this.renderPopup(poseStack, this.x, this.y, this.width, this.height);
-			super.render(poseStack, mouseX, mouseY, partialTicks);
+			this.renderPopup(guiGraphics, this.x, this.y, this.width, this.height);
+			super.render(guiGraphics, mouseX, mouseY, partialTicks);
+
+			poseStack.popPose();;
 		}
 	}
 	
-	protected void renderPopup(PoseStack poseStack, int x, int y, int width, int height) {
+	protected void renderPopup(GuiGraphics guiGraphics, int x, int y, int width, int height) {
+		PoseStack poseStack = guiGraphics.pose();
+
 		int i = width;
 		int j = height;
 		int j2 = x;
@@ -142,34 +143,22 @@ public class UIComponentPop<T extends UIComponent> extends Screen implements Con
 		
 		poseStack.pushPose();
 		
-		Tesselator tesselator = Tesselator.getInstance();
-		BufferBuilder bufferbuilder = tesselator.getBuilder();
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
-		bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
-		Matrix4f matrix4f = poseStack.last().pose();
-		
+
 		int backgroundStart = 0xf0100010;
 		int backgroundEnd = 0xf0100010;
 		int boarderStart = 0x505000FF;
 		int boarderEnd = 0x5028007F;
-		fillGradient(matrix4f, bufferbuilder, j2 - 3, k2 - 4, j2 + i + 3, k2 - 3, 400, backgroundStart, backgroundStart);
-		fillGradient(matrix4f, bufferbuilder, j2 - 3, k2 + j + 3, j2 + i + 3, k2 + j + 4, 400, backgroundEnd, backgroundEnd);
-		fillGradient(matrix4f, bufferbuilder, j2 - 3, k2 - 3, j2 + i + 3, k2 + j + 3, 400, backgroundStart, backgroundEnd);
-		fillGradient(matrix4f, bufferbuilder, j2 - 4, k2 - 3, j2 - 3, k2 + j + 3, 400, backgroundStart, backgroundEnd);
-		fillGradient(matrix4f, bufferbuilder, j2 + i + 3, k2 - 3, j2 + i + 4, k2 + j + 3, 400, backgroundStart, backgroundEnd);
-		fillGradient(matrix4f, bufferbuilder, j2 - 3, k2 - 3 + 1, j2 - 3 + 1, k2 + j + 3 - 1, 400, boarderStart, boarderEnd);
-		fillGradient(matrix4f, bufferbuilder, j2 + i + 2, k2 - 3 + 1, j2 + i + 3, k2 + j + 3 - 1, 400, boarderStart, boarderEnd);
-		fillGradient(matrix4f, bufferbuilder, j2 - 3, k2 - 3, j2 + i + 3, k2 - 3 + 1, 400, boarderStart, boarderStart);
-		fillGradient(matrix4f, bufferbuilder, j2 - 3, k2 + j + 2, j2 + i + 3, k2 + j + 3, 400, boarderEnd, boarderEnd);
-		RenderSystem.enableDepthTest();
-		RenderSystem.disableTexture();
-		RenderSystem.enableBlend();
-		RenderSystem.defaultBlendFunc();
-		bufferbuilder.end();
-		BufferUploader.end(bufferbuilder);
-		RenderSystem.disableBlend();
-		RenderSystem.enableTexture();
-		
+		guiGraphics.fillGradient(j2 - 3, k2 - 4, j2 + i + 3, k2 - 3, 400, backgroundStart, backgroundStart);
+		guiGraphics.fillGradient(j2 - 3, k2 + j + 3, j2 + i + 3, k2 + j + 4, 400, backgroundEnd, backgroundEnd);
+		guiGraphics.fillGradient(j2 - 3, k2 - 3, j2 + i + 3, k2 + j + 3, 400, backgroundStart, backgroundEnd);
+		guiGraphics.fillGradient(j2 - 4, k2 - 3, j2 - 3, k2 + j + 3, 400, backgroundStart, backgroundEnd);
+		guiGraphics.fillGradient(j2 + i + 3, k2 - 3, j2 + i + 4, k2 + j + 3, 400, backgroundStart, backgroundEnd);
+		guiGraphics.fillGradient(j2 - 3, k2 - 3 + 1, j2 - 3 + 1, k2 + j + 3 - 1, 400, boarderStart, boarderEnd);
+		guiGraphics.fillGradient(j2 + i + 2, k2 - 3 + 1, j2 + i + 3, k2 + j + 3 - 1, 400, boarderStart, boarderEnd);
+		guiGraphics.fillGradient(j2 - 3, k2 - 3, j2 + i + 3, k2 - 3 + 1, 400, boarderStart, boarderStart);
+		guiGraphics.fillGradient(j2 - 3, k2 + j + 2, j2 + i + 3, k2 + j + 3, 400, boarderEnd, boarderEnd);
+
 		poseStack.popPose();
 	}
 	
@@ -180,8 +169,8 @@ public class UIComponentPop<T extends UIComponent> extends Screen implements Con
 		}
 		
 		@Override
-		protected void renderPopup(PoseStack poseStack, int x, int y, int width, int height) {
-			super.renderPopup(poseStack, x, y + 14, width, height - 14);
+		protected void renderPopup(GuiGraphics guiGraphics, int x, int y, int width, int height) {
+			super.renderPopup(guiGraphics, x, y + 14, width, height - 14);
 		}
 		
 		@Override
@@ -190,7 +179,7 @@ public class UIComponentPop<T extends UIComponent> extends Screen implements Con
 			
 			for (GuiEventListener gui : this.children()) {
 				if (gui instanceof AbstractWidget widget) {
-					widget.y += 14;
+					widget.setY(widget.getY() + 14);
 				}
 			}
 			
@@ -200,22 +189,22 @@ public class UIComponentPop<T extends UIComponent> extends Screen implements Con
 			}));
 		}
 		
-		public static class AlignButton extends Button {
+		public static class AlignButton extends BasicButton {
 			private static final ResourceLocation BATTLE_ICONS = new ResourceLocation(EpicFightMod.MODID, "textures/gui/battle_icons.png");
-			private Option<HorizontalBasis> horBasis;
-			private Option<VerticalBasis> verBasis;
-			private Option<AlignDirection> alignDirection;
+			private final Option<HorizontalBasis> horBasis;
+			private final Option<VerticalBasis> verBasis;
+			private final Option<AlignDirection> alignDirection;
 			
 			public AlignButton(int x, int y, int width, int height, Option<HorizontalBasis> horBasis, Option<VerticalBasis> verBasis, Option<AlignDirection> alignDirection, OnPress onpress) {
-				super(x, y, width, height, new TextComponent(""), onpress);
+				super(x, y, width, height, Component.literal(""), onpress);
 				
 				this.horBasis = horBasis;
 				this.verBasis = verBasis;
 				this.alignDirection = alignDirection;
 			}
-			
+
 			@Override
-			public void renderButton(PoseStack poseStack, int x, int y, float partialTicks) {
+			protected void renderWidget(GuiGraphics guiGraphics, int x, int y, float partialTicks) {
 				RenderSystem.setShader(GameRenderer::getPositionTexShader);
 				RenderSystem.setShaderTexture(0, BATTLE_ICONS);
 				RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.alpha);
@@ -277,19 +266,23 @@ public class UIComponentPop<T extends UIComponent> extends Screen implements Con
 					}
 				}
 				
-				this.blitRotate(poseStack, texCoords);
+				this.blitRotate(guiGraphics, texCoords);
 			}
 			
-			public void blitRotate(PoseStack poseStack, Vec2[] texCoords) {
+			public void blitRotate(GuiGraphics guiGraphics, Vec2[] texCoords) {
+				PoseStack poseStack = guiGraphics.pose();
 				RenderSystem.setShader(GameRenderer::getPositionTexShader);
 				BufferBuilder bufferbuilder = Tesselator.getInstance().getBuilder();
 				bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-				bufferbuilder.vertex(poseStack.last().pose(), this.x, this.y, this.getBlitOffset()).uv(texCoords[0].x, texCoords[0].y).endVertex();
-				bufferbuilder.vertex(poseStack.last().pose(), this.x + this.width, this.y, this.getBlitOffset()).uv(texCoords[1].x, texCoords[1].y).endVertex();
-				bufferbuilder.vertex(poseStack.last().pose(), this.x + this.width, this.y + this.height, this.getBlitOffset()).uv(texCoords[2].x, texCoords[2].y).endVertex();
-				bufferbuilder.vertex(poseStack.last().pose(), this.x, this.y + this.height, this.getBlitOffset()).uv(texCoords[3].x, texCoords[3].y).endVertex();
-				bufferbuilder.end();
-				BufferUploader.end(bufferbuilder);
+				bufferbuilder.vertex(poseStack.last().pose(), this.getX(), this.getY(), this.getBlitOffset()).uv(texCoords[0].x, texCoords[0].y).endVertex();
+				bufferbuilder.vertex(poseStack.last().pose(), this.getX() + this.width, this.getY(), this.getBlitOffset()).uv(texCoords[1].x, texCoords[1].y).endVertex();
+				bufferbuilder.vertex(poseStack.last().pose(), this.getX() + this.width, this.getY() + this.height, this.getBlitOffset()).uv(texCoords[2].x, texCoords[2].y).endVertex();
+				bufferbuilder.vertex(poseStack.last().pose(), this.getX(), this.getY() + this.height, this.getBlitOffset()).uv(texCoords[3].x, texCoords[3].y).endVertex();
+				BufferUploader.drawWithShader(bufferbuilder.end());
+			}
+
+			public int getBlitOffset() {
+				return 0;
 			}
 		}
 	}

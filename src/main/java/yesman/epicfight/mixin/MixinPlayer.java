@@ -12,16 +12,16 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @Mixin(value = Player.class)
 public abstract class MixinPlayer {
-	@Redirect(at = @At( value = "INVOKE", 
-					   target = "Lnet/minecraft/world/damagesource/CombatTracker;recordDamage(Lnet/minecraft/world/damagesource/DamageSource;FF)V"),
+	@Redirect(at = @At( value = "INVOKE",
+			target = "Lnet/minecraft/world/damagesource/CombatTracker;recordDamage(Lnet/minecraft/world/damagesource/DamageSource;F)V"),
 		  method = "actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V")
-	private void epicfight_recordDamage(CombatTracker self, DamageSource damagesource, float health, float damage) {
+	private void epicfight_recordDamage(CombatTracker self, DamageSource damagesource, float damage) {
 		LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(damagesource.getEntity(), LivingEntityPatch.class);
-		
+
 		if (entitypatch != null) {
-			entitypatch.setLastAttackEntity(self.getMob());
+			entitypatch.setLastAttackEntity(self.mob);
 		}
 		
-		self.recordDamage(damagesource, health, damage);
+		self.recordDamage(damagesource, damage);
 	}
 }

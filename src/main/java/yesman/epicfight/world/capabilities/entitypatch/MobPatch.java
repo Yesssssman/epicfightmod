@@ -1,10 +1,6 @@
 package yesman.epicfight.world.capabilities.entitypatch;
 
-import java.util.Optional;
-import java.util.Set;
-
 import com.google.common.collect.Sets;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -19,7 +15,7 @@ import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.utils.AttackResult;
@@ -33,6 +29,9 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 
+import java.util.Optional;
+import java.util.Set;
+
 public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	protected final Faction mobFaction;
 	
@@ -45,10 +44,10 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	}
 	
 	@Override
-	public void onJoinWorld(T entityIn, EntityJoinWorldEvent event) {
+	public void onJoinWorld(T entityIn, EntityJoinLevelEvent event) {
 		super.onJoinWorld(entityIn, event);
 		
-		if (!entityIn.level.isClientSide() && !this.original.isNoAi()) {
+		if (!entityIn.level().isClientSide() && !this.original.isNoAi()) {
 			this.initAI();
 		}
 	}
@@ -80,7 +79,7 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 			else
 				if (this.original.getDeltaMovement().y < -0.55F || this.isAirborneState())
 					currentLivingMotion = LivingMotions.FALL;
-				else if (original.animationSpeed > 0.01F)
+				else if (original.walkAnimation.speed() > 0.01F)
 					currentLivingMotion = LivingMotions.WALK;
 				else
 					currentLivingMotion = LivingMotions.IDLE;
@@ -100,7 +99,7 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 			} else {
 				if (this.original.getDeltaMovement().y < -0.55F || this.isAirborneState())
 					currentLivingMotion = LivingMotions.FALL;
-				else if (original.animationSpeed > 0.08F)
+				else if (original.walkAnimation.speed() > 0.08F)
 					if (original.isAggressive())
 						currentLivingMotion = LivingMotions.CHASE;
 					else
@@ -179,7 +178,7 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	}
 	
 	public void setAttakTargetSync(LivingEntity entityIn) {
-		if (!this.original.level.isClientSide()) {
+		if (!this.original.level().isClientSide()) {
 			this.original.setTarget(entityIn);
 			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(new SPSetAttackTarget(this.original.getId(), entityIn != null ? entityIn.getId() : -1), this.original);
 		}
@@ -195,7 +194,7 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 			double d0 = target.x - vector3d.x;
 			double d1 = target.y - vector3d.y;
 			double d2 = target.z - vector3d.z;
-			double d3 = (double) Math.sqrt(d0 * d0 + d2 * d2);
+			double d3 = Math.sqrt(d0 * d0 + d2 * d2);
 			return Mth.clamp(Mth.wrapDegrees((float) ((Mth.atan2(d1, d3) * (double) (180F / (float) Math.PI)))), -30.0F, 30.0F);
 		} else {
 			return super.getAttackDirectionPitch();

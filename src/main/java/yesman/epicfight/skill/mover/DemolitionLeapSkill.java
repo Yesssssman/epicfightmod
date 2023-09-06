@@ -4,6 +4,7 @@ import java.util.UUID;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -40,8 +41,8 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 					.setResource(Resource.STAMINA);
 	}
 	
-	private StaticAnimation chargingAnimation;
-	private StaticAnimation shootAnimation;
+	private final StaticAnimation chargingAnimation;
+	private final StaticAnimation shootAnimation;
 	
 	public DemolitionLeapSkill(Builder<? extends Skill> builder) {
 		super(builder);
@@ -53,7 +54,7 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 	@Override
 	public void onInitiate(SkillContainer container) {
 		container.getDataManager().registerData(PROTECT_NEXT_FALL);
-		
+
 		PlayerEventListener listener = container.getExecuter().getEventListener();
 		
 		listener.addEventListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID, (event) -> {
@@ -61,17 +62,17 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 				event.getMovementInput().jumping = false;
 			}
 		});
-		
+
 		listener.addEventListener(EventType.HURT_EVENT_PRE, EVENT_UUID, (event) -> {
-			if (event.getDamageSource().isFall() && container.getDataManager().getDataValue(PROTECT_NEXT_FALL)) {
+			if (event.getDamageSource().is(DamageTypeTags.IS_FALL) && container.getDataManager().getDataValue(PROTECT_NEXT_FALL)) {
 				float damage = event.getAmount();
 				event.setAmount(damage * 0.5F);
 				event.setCanceled(true);
-				
+
 				container.getDataManager().setData(PROTECT_NEXT_FALL, false);
 			}
 		}, 1);
-		
+
 		listener.addEventListener(EventType.FALL_EVENT, EVENT_UUID, (event) -> {
 			container.getDataManager().setData(PROTECT_NEXT_FALL, false);
 		});
@@ -80,24 +81,24 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 	@Override
 	public void onRemoved(SkillContainer container) {
 		super.onRemoved(container);
-		
+
 		container.getExecuter().getEventListener().removeListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID);
 		container.getExecuter().getEventListener().removeListener(EventType.HURT_EVENT_PRE, EVENT_UUID, 1);
 		container.getExecuter().getEventListener().removeListener(EventType.FALL_EVENT, EVENT_UUID);
 	}
-	
+
 	@Override
 	public boolean isExecutableState(PlayerPatch<?> executer) {
-		return super.isExecutableState(executer) && executer.getOriginal().isOnGround();
+		return super.isExecutableState(executer) && executer.getOriginal().onGround();
 	}
-	
+
 	@Override
 	public void cancelOnClient(LocalPlayerPatch executer, FriendlyByteBuf args) {
 		super.cancelOnClient(executer, args);
 		executer.resetSkillCharging();
 		executer.playAnimationSynchronized(Animations.BIPED_IDLE, 0.0F);
 	}
-	
+
 	@Override
 	public void executeOnClient(LocalPlayerPatch executer, FriendlyByteBuf args) {
 		args.readInt(); // discard raw charging ticks
@@ -105,11 +106,11 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 		int modifiedTicks = (int)(7.4668F * Math.log10(ticks + 1.0F) / Math.log10(2));
 		Vec3f jumpDirection = new Vec3f(0, modifiedTicks * 0.05F, 0);
 		float xRot = Mth.clamp(70.0F + Mth.clamp(executer.getCameraXRot(), -90.0F, 0.0F), 0.0F, 70.0F);
-		
+
 		jumpDirection.add(0.0F, (xRot / 70.0F) * 0.05F, 0.0F);
 		jumpDirection.rotate(xRot, Vec3f.X_AXIS);
 		jumpDirection.rotate(-executer.getCameraYRot(), Vec3f.Y_AXIS);
-		
+
 		executer.getOriginal().setDeltaMovement(jumpDirection.toDoubleVector());
 		executer.resetSkillCharging();
 	}
@@ -120,34 +121,34 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 		controllEngine.setChargingKey(SkillSlots.MOVER, this.getKeyMapping());
 		caster.startSkillCharging(this);
 	}
-	
+
 	@Override
 	public void startCharging(PlayerPatch<?> caster) {
 		caster.getAnimator().playAnimation(this.chargingAnimation, 0.0F);
-		
+
 		if (!caster.isLogicalClient()) {
 			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(new SPPlayAnimation(this.chargingAnimation, 0.0F, caster), caster.getOriginal());
 		}
 	}
-	
+
 	@Override
 	public void resetCharging(PlayerPatch<?> caster) {
 	}
-	
+
 	@Override
 	public void castSkill(ServerPlayerPatch caster, SkillContainer skillContainer, int chargingTicks, SPSkillExecutionFeedback feedbackPacket, boolean onMaxTick) {
 		if (onMaxTick) {
 			feedbackPacket.setFeedbackType(SPSkillExecutionFeedback.FeedbackType.EXPIRED);
 		} else {
-			caster.playSound(EpicFightSounds.ROCKET_JUMP, 1.0F, 0.0F, 0.0F);
-			caster.playSound(EpicFightSounds.ENTITY_MOVE, 1.0F, 0.0F, 0.0F);
-			
+			caster.playSound(EpicFightSounds.ROCKET_JUMP.get(), 1.0F, 0.0F, 0.0F);
+			caster.playSound(EpicFightSounds.ENTITY_MOVE.get(), 1.0F, 0.0F, 0.0F);
+
 			int accumulatedTicks = caster.getChargingAmount();
 			
-			LevelUtil.circleSlamFracture(null, caster.getOriginal().level, caster.getOriginal().position().subtract(0, 1, 0), accumulatedTicks * 0.05D, true, false, false);
+			LevelUtil.circleSlamFracture(null, caster.getOriginal().level(), caster.getOriginal().position().subtract(0, 1, 0), accumulatedTicks * 0.05D, true, false, false);
 			Vec3 entityEyepos = caster.getOriginal().getEyePosition();
-			EpicFightParticles.AIR_BURST.get().spawnParticleWithArgument(caster.getOriginal().getLevel(), entityEyepos.x, entityEyepos.y, entityEyepos.z, 0.0D, 0.0D, 2 + 0.05D * chargingTicks);
-			
+			EpicFightParticles.AIR_BURST.get().spawnParticleWithArgument(caster.getOriginal().serverLevel(), entityEyepos.x, entityEyepos.y, entityEyepos.z, 0.0D, 0.0D, 2 + 0.05D * chargingTicks);
+
 			caster.playAnimationSynchronized(this.shootAnimation, 0.0F);
 			feedbackPacket.getBuffer().writeInt(accumulatedTicks);
 			skillContainer.getDataManager().setData(PROTECT_NEXT_FALL, true);
@@ -168,12 +169,12 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 	public int getMinChargingTicks() {
 		return 12;
 	}
-	
+
 	@Override
 	public KeyMapping getKeyMapping() {
 		return EpicFightKeyMappings.MOVER_SKILL;
 	}
-	
+
 	@Override
 	public void chargingTick(PlayerPatch<?> caster) {
 		int chargingTicks = caster.getSkillChargingTicks();

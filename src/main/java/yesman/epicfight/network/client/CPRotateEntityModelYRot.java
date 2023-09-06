@@ -11,7 +11,7 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class CPRotateEntityModelYRot {
-	private float modelYRot;
+	private final float modelYRot;
 
 	public CPRotateEntityModelYRot() {
 		this.modelYRot = 0F;

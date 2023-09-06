@@ -11,9 +11,9 @@ import yesman.epicfight.skill.ChargeableSkill;
 import yesman.epicfight.skill.SkillContainer;
 
 public class SPSkillExecutionFeedback {
-	private int skillSlot;
+	private final int skillSlot;
 	private FeedbackType feedbackType;
-	private FriendlyByteBuf buffer;
+	private final FriendlyByteBuf buffer;
 	
 	public SPSkillExecutionFeedback() {
 		this(0, FeedbackType.EXECUTED);
@@ -91,7 +91,7 @@ public class SPSkillExecutionFeedback {
 		ctx.get().setPacketHandled(true);
 	}
 	
-	public static enum FeedbackType {
+	public enum FeedbackType {
 		EXECUTED, CHARGING_BEGIN, EXPIRED
 	}
 }

@@ -2,15 +2,16 @@ package yesman.epicfight.client.gui.widget;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Vector3f;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractSliderButton;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.config.Option.DoubleOption;
 
 @OnlyIn(Dist.CLIENT)
@@ -22,30 +23,29 @@ public class ColorSlider extends AbstractSliderButton {
 		super(x, y, width, height, message, defaultValue);
 		this.colorOption = option;
 	}
-	
+
 	@Override
-	public void renderButton(PoseStack PoseStack, int mouseX, int mouseY, float partialTicks) {
+	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		Minecraft minecraft = Minecraft.getInstance();
 		Font fontrenderer = minecraft.font;
 		RenderSystem.enableBlend();
 		
 		for (int i = 0; i < 6; i++) {
-			this.fillGradient(PoseStack, this.x + (this.width * i / 6), this.y, this.x + (this.width * (i + 1) / 6), this.y + this.height, COLOR_ARRAY[i], COLOR_ARRAY[i+1]);
+			this.fillGradient(guiGraphics, this.getX() + (this.width * i / 6), this.getY(), this.getX() + (this.width * (i + 1) / 6), this.getY() + this.height, COLOR_ARRAY[i], COLOR_ARRAY[i+1]);
 		}
 		
-		this.renderBg(PoseStack, minecraft, mouseX, mouseY);
+		this.renderBg(guiGraphics, minecraft, mouseX, mouseY);
 		int j = getFGColor();
-		drawCenteredString(PoseStack, fontrenderer, this.getMessage(), this.x + this.width / 2, this.y + (this.height - 8) / 2, j | Mth.ceil(this.alpha * 255.0F) << 24);
+		guiGraphics.drawCenteredString(fontrenderer, this.getMessage(), this.getX() + this.width / 2, this.getY() + (this.height - 8) / 2, j | Mth.ceil(this.alpha * 255.0F) << 24);
 	}
-	
-	@Override
-	protected void renderBg(PoseStack PoseStack, Minecraft minecraft, int mouseX, int mouseY) {
+
+	protected void renderBg(GuiGraphics guiGraphics, Minecraft minecraft, int mouseX, int mouseY) {
 		RenderSystem.setShaderTexture(0, WIDGETS_LOCATION);
 		int i = (this.isHoveredOrFocused() ? 2 : 1) * 20;
-		int minX = this.x + (int) (this.value * (double) (this.width - 8));
-		this.blit(PoseStack, minX, this.y, 0, 46 + i, 4, 20);
-		this.blit(PoseStack, minX + 4, this.y, 196, 46 + i, 4, 20);
-		fill(PoseStack, minX + 1, this.y + 1, minX + 7, this.y + 19, toColorInteger(this.value));
+		int minX = this.getX() + (int) (this.value * (double) (this.width - 8));
+		guiGraphics.blit(WIDGETS_LOCATION, minX, this.getY(), 0, 46 + i, 4, 20);
+		guiGraphics.blit(WIDGETS_LOCATION, minX + 4, this.getY(), 196, 46 + i, 4, 20);
+		guiGraphics.fill(minX + 1, this.getY() + 1, minX + 7, this.getY() + 19, toColorInteger(this.value));
 	}
 	
 	@Override
@@ -86,17 +86,17 @@ public class ColorSlider extends AbstractSliderButton {
 		
 		return packedColor;
 	}
-	
-	@Override
-	protected void fillGradient(PoseStack poseStack, int x1, int y1, int x2, int y2, int colorA, int colorB) {
+
+	protected void fillGradient(GuiGraphics guiGraphics, int x1, int y1, int x2, int y2, int colorA, int colorB) {
+		PoseStack poseStack = guiGraphics.pose();
 		poseStack.pushPose();
 		int width = x2 - x1;
 		int height = y2 - y1;
 		int newX = x1 + width / 2;
 		int newY = y1 + height / 2;
 		poseStack.translate(newX, newY, 0.0F);
-		poseStack.mulPose(Vector3f.ZP.rotationDegrees(-90.0F));
-		super.fillGradient(poseStack, -height/2, -width/2, height/2, width/2, colorA, colorB);
+		poseStack.mulPose(QuaternionUtils.ZP.rotationDegrees(-90.0F));
+		guiGraphics.fillGradient(-height/2, -width/2, height/2, width/2, colorA, colorB);
 		poseStack.popPose();
 	}
 }

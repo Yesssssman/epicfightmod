@@ -62,7 +62,7 @@ public class ConditionalWeaponInnateSkill extends WeaponInnateSkill {
 	
 	public ConditionalWeaponInnateSkill(ConditionalWeaponInnateSkill.Builder builder) {
 		super(builder);
-		this.properties = Lists.<Map<AttackPhaseProperty<?>, Object>>newArrayList();
+		this.properties = Lists.newArrayList();
 		this.attackAnimations = new StaticAnimation[builder.animationLocations.length];
 		this.selector = builder.selector;
 		

@@ -1,5 +1,6 @@
 package yesman.epicfight.api.collider;
 
+import java.util.Collections;
 import java.util.List;
 
 import com.google.common.collect.Lists;
@@ -36,10 +37,8 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 	@SafeVarargs
 	public MultiCollider(T... colliders) {
 		super(null, null);
-		
-		for (T collider : colliders) {
-			this.colliders.add(collider);
-		}
+
+		Collections.addAll(this.colliders, colliders);
 		
 		this.numberOfColliders = colliders.length;
 	}
@@ -95,7 +94,7 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 			}
 		}
 		
-		List<Entity> entities = entitypatch.getOriginal().level.getEntities(entitypatch.getOriginal(), outerBox, (entity) -> {
+		List<Entity> entities = entitypatch.getOriginal().level().getEntities(entitypatch.getOriginal(), outerBox, (entity) -> {
 			if (entity instanceof PartEntity) {
 				if (((PartEntity<?>)entity).getParent().is(entitypatch.getOriginal())) {
 					return false;
@@ -116,7 +115,6 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 	
 	@Override
 	public void drawInternal(PoseStack matrixStackIn, MultiBufferSource buffer, OpenMatrix4f pose, boolean red) {
-		;
 	}
 	
 	@Override

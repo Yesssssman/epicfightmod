@@ -17,8 +17,8 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 public class SPModifyPlayerData {
 	
 	PacketType packetType;
-	private int entityId;
-	private Map<String, Object> data;
+	private final int entityId;
+	private final Map<String, Object> data;
 
 	public SPModifyPlayerData() {
 		this.packetType = null;
@@ -74,7 +74,7 @@ public class SPModifyPlayerData {
 	public static void handle(SPModifyPlayerData msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
 			Minecraft mc = Minecraft.getInstance();
-			Entity entity = mc.player.level.getEntity(msg.entityId);
+			Entity entity = mc.player.level().getEntity(msg.entityId);
 			
 			if (entity != null) {
 				if (entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null) instanceof PlayerPatch<?> playerpatch) {
@@ -89,12 +89,12 @@ public class SPModifyPlayerData {
 						playerpatch.setLastAttackSuccess((boolean)msg.data.get("lastAttackSuccess"));
 						break;
 					case SET_GRAPPLE_TARGET:
-						Entity grapplingTarget = mc.player.level.getEntity((int)msg.data.get("grapplingTarget"));
+						Entity grapplingTarget = mc.player.level().getEntity((int)msg.data.get("grapplingTarget"));
 						
 						if (grapplingTarget instanceof LivingEntity) {
 							playerpatch.setGrapplingTarget((LivingEntity)grapplingTarget);
 						} else {
-							playerpatch.setGrapplingTarget((LivingEntity)null);
+							playerpatch.setGrapplingTarget(null);
 						}
 						
 						break;
@@ -106,7 +106,7 @@ public class SPModifyPlayerData {
 		ctx.get().setPacketHandled(true);
 	}
 	
-	public static enum PacketType {
+	public enum PacketType {
 		YAW_CORRECTION( (packet, buffer) -> {
 			buffer.writeFloat( (float)packet.data.get("yaw") );
 		}, (packet, buffer) -> {

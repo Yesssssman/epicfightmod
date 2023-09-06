@@ -31,8 +31,8 @@ public class ForbiddenStrengthSkill extends PassiveSkill {
 					
 					if (event.shouldConsume()) {
 						Player player = container.getExecuter().getOriginal();
-						player.level.playSound(null, player.getX(), player.getY(), player.getZ(), EpicFightSounds.FORBIDDEN_STRENGTH, player.getSoundSource(), 1.0F, 1.0F);
-						((ServerLevel)player.level).sendParticles(ParticleTypes.DAMAGE_INDICATOR, player.getX(), player.getY(0.5D), player.getZ(), (int)staminaConsume, 0.1D, 0.0D, 0.1D, 0.2D);
+						player.level().playSound(null, player.getX(), player.getY(), player.getZ(), EpicFightSounds.FORBIDDEN_STRENGTH.get(), player.getSoundSource(), 1.0F, 1.0F);
+						((ServerLevel)player.level()).sendParticles(ParticleTypes.DAMAGE_INDICATOR, player.getX(), player.getY(0.5D), player.getZ(), (int)staminaConsume, 0.1D, 0.0D, 0.1D, 0.2D);
 					}
 				}
 			}

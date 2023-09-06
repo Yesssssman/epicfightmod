@@ -159,10 +159,10 @@ public class EpicFightSkills {
 		GUARD = onBuild.build(EpicFightMod.MODID, "guard");
 		PARRYING = onBuild.build(EpicFightMod.MODID, "parrying");
 		IMPACT_GUARD = onBuild.build(EpicFightMod.MODID, "impact_guard");
-		
-		BERSERKER = onBuild.build(EpicFightMod.MODID, "berserker");
+			BERSERKER = onBuild.build(EpicFightMod.MODID, "berserker");
 		DEATH_HARVEST = onBuild.build(EpicFightMod.MODID, "death_harvest");
 		EMERGENCY_ESCAPE = onBuild.build(EpicFightMod.MODID, "emergency_escape");
+
 		ENDURANCE = onBuild.build(EpicFightMod.MODID, "endurance");
 		FORBIDDEN_STRENGTH = onBuild.build(EpicFightMod.MODID, "forbidden_strength");
 		HYPERVITALITY = onBuild.build(EpicFightMod.MODID, "hypervitality");
@@ -269,7 +269,7 @@ public class EpicFightSkills {
 					.addProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER, ValueModifier.adder(50.0F))
 					.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(2))
 					.addProperty(AttackPhaseProperty.DAMAGE_MODIFIER, ValueModifier.multiplier(1.7F))
-					.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP)
+					.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP.get())
 					.addProperty(AttackPhaseProperty.EXTRA_DAMAGE, Set.of(ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create()))
 					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(SourceTags.WEAPON_INNATE))
 					.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.HOLD)
@@ -296,7 +296,7 @@ public class EpicFightSkills {
 					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(SourceTags.WEAPON_INNATE, SourceTags.GUARD_PUNCTURE))
 					.registerPropertiesToAnimation();
 		SHARP_STAB = sharpStab;
-		
+
 		LIECHTENAUER = onBuild.build(EpicFightMod.MODID, "liechtenauer");
 		
 		WeaponInnateSkill eviscerate = onBuild.build(EpicFightMod.MODID, "eviscerate");
@@ -322,7 +322,7 @@ public class EpicFightSkills {
 					.newProperty()
 					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(SourceTags.EXECUTION, SourceTags.WEAPON_INNATE))
 					.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.NONE)
-					.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLADE_RUSH_FINISHER)
+					.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLADE_RUSH_FINISHER.get())
 				.registerPropertiesToAnimation();
 		BLADE_RUSH = bladeRush;
 		

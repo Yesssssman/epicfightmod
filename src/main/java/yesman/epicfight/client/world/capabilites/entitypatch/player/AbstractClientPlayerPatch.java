@@ -1,7 +1,5 @@
 package yesman.epicfight.client.world.capabilites.entitypatch.player;
 
-import javax.annotation.Nonnull;
-
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -10,11 +8,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.CrossbowItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.ProjectileWeaponItem;
-import net.minecraft.world.item.UseAnim;
+import net.minecraft.world.item.*;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -24,8 +18,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeConfig;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.event.entity.EntityJoinWorldEvent;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -41,6 +35,8 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.RangedWeaponCapability;
 
+import javax.annotation.Nonnull;
+
 @OnlyIn(Dist.CLIENT)
 public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends PlayerPatch<T> {
 	protected float prevYaw;
@@ -50,7 +46,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	private Item prevHeldItemOffHand;
 	
 	@Override
-	public void onJoinWorld(T entityIn, EntityJoinWorldEvent event) {
+	public void onJoinWorld(T entityIn, EntityJoinLevelEvent event) {
 		super.onJoinWorld(entityIn, event);
 		this.prevHeldItem = Items.AIR;
 		this.prevHeldItemOffHand = Items.AIR;
@@ -73,7 +69,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 				currentLivingMotion = LivingMotions.SWIM;
 			} else if (original.isSleeping()) {
 				currentLivingMotion = LivingMotions.SLEEP;
-			} else if (!original.isOnGround() && original.onClimbable()) {
+			} else if (!original.onGround() && original.onClimbable()) {
 				currentLivingMotion = LivingMotions.CLIMB;
 				double y = original.yCloak - original.yCloakO;
 				
@@ -81,11 +77,8 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 					animator.baseLayer.pause();
 				} else {
 					animator.baseLayer.resume();
-					
-					if (y < 0)
-						animator.baseLayer.animationPlayer.setReversed(true);
-					else 
-						animator.baseLayer.animationPlayer.setReversed(false);
+
+					animator.baseLayer.animationPlayer.setReversed(y < 0);
 				}
 			} else if (!original.getAbilities().flying) {
 				if (original.isUnderWater() && (original.yCloak - original.yCloakO) < -0.005)
@@ -99,11 +92,8 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 						currentLivingMotion = LivingMotions.RUN;
 					else
 						currentLivingMotion = LivingMotions.WALK;
-					
-					if (original.zza < 0)
-						animator.baseLayer.animationPlayer.setReversed(true);
-					else 
-						animator.baseLayer.animationPlayer.setReversed(false);
+
+					animator.baseLayer.animationPlayer.setReversed(original.zza < 0);
 					
 				} else {
 					animator.baseLayer.animationPlayer.setReversed(false);
@@ -164,7 +154,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	}
 	
 	@Override
-	protected void clientTick(LivingUpdateEvent event) {
+	protected void clientTick(LivingEvent.LivingTickEvent event) {
 		this.prevYaw = this.modelYRot;
 		this.prevBodyYaw = this.bodyYaw;
 		
@@ -209,7 +199,6 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	
 	@Override
 	public void playAnimationSynchronized(StaticAnimation animation, float convertTimeModifier, AnimationPacketProvider packetProvider) {
-		;
 	}
 	
 	@Override
@@ -235,11 +224,11 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
         float prvePitch = 0;
         
         UseAnim useAnim = this.original.getUseItem().getUseAnimation();
-        
+
         if (this.getOriginal().isUsingItem() && (useAnim == UseAnim.DRINK || useAnim == UseAnim.EAT || useAnim == UseAnim.SPYGLASS)) {
         	
         } else {
-        	if (this.getEntityState().inaction() || this.original.getVehicle() != null || (!this.original.isOnGround() && this.original.onClimbable())) {
+        	if (this.getEntityState().inaction() || this.original.getVehicle() != null || (!this.original.onGround() && this.original.onClimbable())) {
     	        yaw = 0;
     		} else {
     			float f = MathUtils.lerpBetween(this.prevBodyYaw, this.bodyYaw, partialTick);
@@ -294,7 +283,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			BlockState blockstate = this.original.getFeetBlockState();
 			float yaw = 0.0F;
 			
-			if (blockstate.isBed(this.original.level, this.original.getSleepingPos().orElse(null), this.original)) {
+			if (blockstate.isBed(this.original.level(), this.original.getSleepingPos().orElse(null), this.original)) {
 				if (blockstate.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
             		switch(blockstate.getValue(BlockStateProperties.HORIZONTAL_FACING)) {
             		case EAST:
@@ -313,7 +302,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			}
 			
 			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yaw, yaw, 0, 0.9375F, 0.9375F, 0.9375F);
-		} else if ((direction = this.getLadderDirection(this.original.getFeetBlockState(), this.original.level, this.original.blockPosition(), this.original)) != Direction.UP) {
+		} else if ((direction = this.getLadderDirection(this.original.getFeetBlockState(), this.original.level(), this.original.blockPosition(), this.original)) != Direction.UP) {
 			float yaw = 0.0F;
 			
 			switch(direction) {
@@ -338,8 +327,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			float prevPitch = 0;
 			float pitch = 0;
 			
-			if (this.original.getVehicle() instanceof LivingEntity) {
-				LivingEntity ridingEntity = (LivingEntity)this.original.getVehicle();
+			if (this.original.getVehicle() instanceof LivingEntity ridingEntity) {
 				prevRotYaw = ridingEntity.yBodyRotO;
 				rotyaw = ridingEntity.yBodyRot;
 			} else {
@@ -369,8 +357,8 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	}
 	
 	public Direction getLadderDirection(@Nonnull BlockState state, @Nonnull Level world, @Nonnull BlockPos pos, @Nonnull LivingEntity entity) {
-		boolean isSpectator = (entity instanceof Player && ((Player)entity).isSpectator());
-        if (isSpectator || this.original.isOnGround() || !this.original.isAlive()) {
+		boolean isSpectator = (entity instanceof Player && entity.isSpectator());
+        if (isSpectator || this.original.onGround() || !this.original.isAlive()) {
         	return Direction.UP;
         }
         

@@ -3,7 +3,6 @@ package yesman.epicfight.client.gui;
 import javax.annotation.Nullable;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Matrix4f;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -15,6 +14,8 @@ import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+
+import org.joml.Matrix4f;
 
 @OnlyIn(Dist.CLIENT)
 public class TargetIndicator extends EntityIndicator {
@@ -29,12 +30,9 @@ public class TargetIndicator extends EntityIndicator {
 				return false;
 			} else if (entityIn.distanceToSqr(Minecraft.getInstance().getCameraEntity()) >= 400) {
 				return false;
-			} else if (entityIn instanceof Player) {
-				Player playerIn = (Player)entityIn;
-				
-				if (playerIn.isSpectator()) {
-					return false;
-				}
+			} else if (entityIn instanceof Player playerIn) {
+
+				return !playerIn.isSpectator();
 			}
 		}
 		

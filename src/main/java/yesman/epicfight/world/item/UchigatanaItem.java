@@ -1,13 +1,6 @@
 package yesman.epicfight.world.item;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
-
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -17,6 +10,11 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.main.EpicFightMod;
 
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+
+
 public class UchigatanaItem extends WeaponItem {
 	@OnlyIn(Dist.CLIENT)
 	private List<Component> tooltipExpand;
@@ -24,9 +22,9 @@ public class UchigatanaItem extends WeaponItem {
 	public UchigatanaItem(Item.Properties build) {
 		super(EpicFightItemTier.UCHIGATANA, 0, -2.0F, build);
 		if (EpicFightMod.isPhysicalClient()) {
-			this.tooltipExpand = new ArrayList<Component> ();
-			this.tooltipExpand.add(new TextComponent(""));
-			this.tooltipExpand.add(new TranslatableComponent("item." + EpicFightMod.MODID + ".uchigatana.tooltip"));
+			this.tooltipExpand = new ArrayList<Component>();
+			this.tooltipExpand.add(Component.literal(""));
+			this.tooltipExpand.add(Component.translatable("item." + EpicFightMod.MODID + ".uchigatana.tooltip"));
 		}
 	}
 	

@@ -2,6 +2,7 @@ package yesman.epicfight.client.renderer.patched.layer;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Function;
 
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -12,20 +13,25 @@ import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ArmorMaterial;
 import net.minecraft.world.item.DyeableLeatherItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.armortrim.ArmorTrim;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.CustomModelBakery;
 import yesman.epicfight.api.model.Armature;
@@ -47,7 +53,8 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 	}
 	
 	private final boolean doNotRenderHelmet;
-	
+	private final Function<ResourceLocation, TextureAtlasSprite> armorTrimAtlas = Minecraft.getInstance().getTextureAtlas(Sheets.ARMOR_TRIMS_SHEET);
+
 	public WearableItemLayer(AM mesh, boolean doNotRenderHelmet) {
 		super(mesh);
 		
@@ -58,7 +65,15 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		VertexConsumer vertexConsumer = EpicFightRenderTypes.getArmorFoilBufferTriangles(multiBufferSource, RenderType.armorCutoutNoCull(armorTexture), false, hasEffect);
 		model.drawModelWithPose(matStack, vertexConsumer, packedLightIn, r, g, b, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
 	}
-	
+
+	private void renderTrim(PoseStack matStack, MultiBufferSource multiBufferSource, int packedLightIn, boolean hasEffect, AnimatedMesh model, Armature armature, ArmorMaterial armorMaterial, ArmorTrim armorTrim, OpenMatrix4f[] poses) {
+		ResourceLocation armorTexture = armorTrim.outerTexture(armorMaterial);
+		TextureAtlasSprite textureatlassprite = this.armorTrimAtlas.apply(armorTexture);
+		VertexConsumer vertexConsumer = textureatlassprite.wrap(EpicFightRenderTypes.getArmorFoilBufferTriangles(multiBufferSource, Sheets.armorTrimsSheet(), false, hasEffect));
+
+		model.drawModelWithPose(matStack, vertexConsumer, packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
+	}
+
 	@Override
 	public void renderLayer(T entitypatch, E entityliving, HumanoidArmorLayer<E, M, M> originalRenderer, PoseStack poseStack, MultiBufferSource buf, int packedLightIn, OpenMatrix4f[] poses, float netYawHead, float pitchHead, float partialTicks) {
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
@@ -84,7 +99,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 			Item item = stack.getItem();
 			
 			if (item instanceof ArmorItem armorItem) {
-				if (slot != armorItem.getSlot()) {
+				if (slot != armorItem.getEquipmentSlot()) {
 					return;
 				}
 				
@@ -116,24 +131,30 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				} else {
 					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, model, entitypatch.getArmature(), 1.0F, 1.0F, 1.0F, this.getArmorTexture(stack, entityliving, slot, null), poses);
 				}
-				
+
+				ArmorTrim.getTrim(entityliving.level().registryAccess(), stack).ifPresent((armorTrim) -> {
+					this.renderTrim(poseStack, buf, packedLightIn, hasEffect, model, entitypatch.getArmature(), armorItem.getMaterial(), armorTrim, poses);
+				});
+
 				poseStack.popPose();
 			}
 		}
 	}
 	
 	private AnimatedMesh getArmorModel(HumanoidArmorLayer<E, M, M> originalRenderer, E entityliving, ArmorItem armorItem, ItemStack stack, EquipmentSlot slot) {
-		ResourceLocation registryName = armorItem.getRegistryName();
+		ResourceLocation registryName = ForgeRegistries.ITEMS.getKey(armorItem);
 		boolean debuggingMode = ClientEngine.getInstance().isArmorModelDebuggingMode();
 		
 		if (ARMOR_MODELS.containsKey(registryName) && !debuggingMode) {
 			return ARMOR_MODELS.get(registryName);
 		} else {
 			ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
-			ResourceLocation rl = new ResourceLocation(armorItem.getRegistryName().getNamespace(), "animmodels/armor/" + armorItem.getRegistryName().getPath() + ".json");
+			ResourceLocation rl = new ResourceLocation(ForgeRegistries.ITEMS.getKey(armorItem).getNamespace(), "animmodels/armor/" + ForgeRegistries.ITEMS.getKey(armorItem).getPath());
 			AnimatedMesh model = null;
-			
-			if (resourceManager.hasResource(rl)) {
+			//TODO double check
+			if(resourceManager.getResource(rl).isPresent()){
+
+			//if (resourceManager.hasResource(rl)) {
 				JsonModelLoader modelLoader = new JsonModelLoader(resourceManager, rl);
 				model = modelLoader.loadAnimatedMesh(AnimatedMesh::new);
 			} else {
@@ -175,8 +196,8 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		} else if (!EPICFIGHT_OVERRIDING_TEXTURES.containsKey(s2)) {
 			resourcelocation2 = new ResourceLocation(s2);
 			ResourceManager rm = Minecraft.getInstance().getResourceManager();
-			
-			if (rm.hasResource(resourcelocation2)) {
+			if(rm.getResource(resourcelocation2).isPresent()){ //TODO double check
+			//if (rm.hasResource(resourcelocation2)) {
 				EPICFIGHT_OVERRIDING_TEXTURES.put(s2, resourcelocation2);
 				return resourcelocation2;
 			} else {

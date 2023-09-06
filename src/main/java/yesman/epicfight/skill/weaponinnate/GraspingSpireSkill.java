@@ -21,8 +21,8 @@ public class GraspingSpireSkill extends WeaponInnateSkill {
 	private static final SkillDataKey<Integer> LAST_HIT_COUNT = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
 	private static final UUID EVENT_UUID = UUID.fromString("3fa26bbc-d14e-11ed-afa1-0242ac120002");
 	
-	private AttackAnimation first;
-	private AttackAnimation second;
+	private final AttackAnimation first;
+	private final AttackAnimation second;
 	
 	public GraspingSpireSkill(Builder<? extends Skill> builder) {
 		super(builder);

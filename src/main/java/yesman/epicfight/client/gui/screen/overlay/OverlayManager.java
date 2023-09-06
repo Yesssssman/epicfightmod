@@ -13,7 +13,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class OverlayManager {
-	private Map<String, OverlayManager.Overlay> overlays = Maps.newHashMap();
+	private final Map<String, OverlayManager.Overlay> overlays = Maps.newHashMap();
 	
 	public void renderTick(int xResolution, int yResolution) {
 		List<String> toRemove = Lists.newArrayList();

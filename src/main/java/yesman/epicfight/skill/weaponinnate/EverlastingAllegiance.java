@@ -61,7 +61,7 @@ public class EverlastingAllegiance extends WeaponInnateSkill {
 	public void executeOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
 		super.executeOnServer(executer, args);
 		
-		if (executer.getOriginal().level.getEntity(executer.getSkill(this).getDataManager().getDataValue(THROWN_TRIDENT_ENTITY_ID)) instanceof ThrownTrident trident) {
+		if (executer.getOriginal().level().getEntity(executer.getSkill(this).getDataManager().getDataValue(THROWN_TRIDENT_ENTITY_ID)) instanceof ThrownTrident trident) {
 			ThrownTridentPatch tridentPatch = EpicFightCapabilities.getEntityPatch(trident, ThrownTridentPatch.class);
 			tridentPatch.recalledBySkill();
 			executer.playAnimationSynchronized(this.callingAnimation, 0.0F);
@@ -75,7 +75,7 @@ public class EverlastingAllegiance extends WeaponInnateSkill {
 	public void cancelOnClient(LocalPlayerPatch executer, FriendlyByteBuf args) {
 		super.cancelOnClient(executer, args);
 		
-		if (executer.getOriginal().level.getEntity(executer.getSkill(this).getDataManager().getDataValue(THROWN_TRIDENT_ENTITY_ID)) instanceof ThrownTrident trident) {
+		if (executer.getOriginal().level().getEntity(executer.getSkill(this).getDataManager().getDataValue(THROWN_TRIDENT_ENTITY_ID)) instanceof ThrownTrident trident) {
 			ThrownTridentPatch tridentPatch = EpicFightCapabilities.getEntityPatch(trident, ThrownTridentPatch.class);
 			tridentPatch.recalledBySkill();
 		}

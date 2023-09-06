@@ -7,7 +7,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class RewindableButton extends Button {
+public class RewindableButton extends BasicButton {
 	protected final Button.OnPress onRewindPress;
 	
 	public RewindableButton(int x, int y, int width, int height, Component title, OnPress pressedAction, OnPress rewindPressedAction, OnTooltip onTooltip) {

@@ -2,9 +2,6 @@ package yesman.epicfight.client.particle;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.math.Quaternion;
-import com.mojang.math.Vector3f;
-
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -14,6 +11,9 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.Mesh;
+import yesman.epicfight.api.utils.math.QuaternionUtils;
+
+import org.joml.Quaternionf;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class CustomModelParticle<M extends Mesh<?>> extends Particle {
@@ -53,18 +53,18 @@ public abstract class CustomModelParticle<M extends Mesh<?>> extends Particle {
 	public void prepareDraw(PoseStack poseStack, float partialTicks) {}
 	
 	protected void setupPoseStack(PoseStack poseStack, Camera camera, float partialTicks) {
-		Quaternion rotation = new Quaternion(0.0F, 0.0F, 0.0F, 1.0F);
+		Quaternionf rotation = new Quaternionf(0.0F, 0.0F, 0.0F, 1.0F);
 		float roll = Mth.lerp(partialTicks, this.oRoll, this.roll);
 		float pitch = Mth.lerp(partialTicks, this.pitchO, this.pitch);
 		float yaw = Mth.lerp(partialTicks, this.yawO, this.yaw);
-		rotation.mul(Vector3f.YP.rotationDegrees(yaw));
-		rotation.mul(Vector3f.XP.rotationDegrees(pitch));
-		rotation.mul(Vector3f.ZP.rotationDegrees(roll));
+		rotation.mul(QuaternionUtils.YP.rotationDegrees(yaw));
+		rotation.mul(QuaternionUtils.XP.rotationDegrees(pitch));
+		rotation.mul(QuaternionUtils.ZP.rotationDegrees(roll));
 		
 		Vec3 vec3 = camera.getPosition();
-		float x = (float)(Mth.lerp((double)partialTicks, this.xo, this.x) - vec3.x());
-		float y = (float)(Mth.lerp((double)partialTicks, this.yo, this.y) - vec3.y());
-		float z = (float)(Mth.lerp((double)partialTicks, this.zo, this.z) - vec3.z());
+		float x = (float)(Mth.lerp(partialTicks, this.xo, this.x) - vec3.x());
+		float y = (float)(Mth.lerp(partialTicks, this.yo, this.y) - vec3.y());
+		float z = (float)(Mth.lerp(partialTicks, this.zo, this.z) - vec3.z());
 		float scale = (float)Mth.lerp((double)partialTicks, this.scaleO, this.scale);
 		
 		poseStack.translate(x, y, z);

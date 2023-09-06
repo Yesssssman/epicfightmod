@@ -8,8 +8,8 @@ import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 
 public class EntityState {
 	public static class StateFactor<T> implements TypeFlexibleHashMap.TypeKey<T> {
-		private String name;
-		private T defaultValue;
+		private final String name;
+		private final T defaultValue;
 		
 		public StateFactor(String name, T defaultValue) {
 			this.name = name;

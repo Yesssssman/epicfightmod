@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
@@ -89,8 +90,8 @@ public class ParryingSkill extends GuardSkill {
 				ServerPlayer playerentity = event.getPlayerPatch().getOriginal();
 				boolean successParrying = playerentity.tickCount - container.getDataManager().getDataValue(LAST_ACTIVE) < PARRY_WINDOW;
 				float penalty = container.getDataManager().getDataValue(PENALTY);
-				event.getPlayerPatch().playSound(EpicFightSounds.CLASH, -0.05F, 0.1F);
-				EpicFightParticles.HIT_BLUNT.get().spawnParticleWithArgument(((ServerLevel)playerentity.level), HitParticleType.FRONT_OF_EYES, HitParticleType.ZERO, playerentity, damageSource.getDirectEntity());
+				event.getPlayerPatch().playSound(EpicFightSounds.CLASH.get(), -0.05F, 0.1F);
+				EpicFightParticles.HIT_BLUNT.get().spawnParticleWithArgument(((ServerLevel)playerentity.level()), HitParticleType.FRONT_OF_EYES, HitParticleType.ZERO, playerentity, damageSource.getDirectEntity());
 				
 				if (successParrying) {
 					event.setParried(true);
@@ -117,7 +118,7 @@ public class ParryingSkill extends GuardSkill {
 				}
 				
 				if (blockType == BlockType.GUARD_BREAK) {
-					event.getPlayerPatch().playSound(EpicFightSounds.NEUTRALIZE_MOBS, 3.0F, 0.0F, 0.1F);
+					event.getPlayerPatch().playSound(EpicFightSounds.NEUTRALIZE_MOBS.get(), 3.0F, 0.0F, 0.1F);
 				}
 				
 				this.dealEvent(event.getPlayerPatch(), event, advanced);
@@ -131,7 +132,7 @@ public class ParryingSkill extends GuardSkill {
 	
 	@Override
 	protected boolean isBlockableSource(DamageSource damageSource, boolean advanced) {
-		return (damageSource.isProjectile() && advanced) || super.isBlockableSource(damageSource, false);
+		return (damageSource.is(DamageTypeTags.IS_PROJECTILE) && advanced) || super.isBlockableSource(damageSource, false);
 	}
 	
 	@Nullable
@@ -172,20 +173,18 @@ public class ParryingSkill extends GuardSkill {
 	@Override
 	public List<Object> getTooltipArgsOfScreen(List<Object> list) {
 		list.clear();
-		
+
 		StringBuilder sb = new StringBuilder();
 		Iterator<WeaponCategory> iter = this.advancedGuardMotions.keySet().iterator();
-		
+
 		while (iter.hasNext()) {
 			sb.append(WeaponCategory.ENUM_MANAGER.toTranslated(iter.next()));
-			
-			if (iter.hasNext()) {
+			if (iter.hasNext())
 				sb.append(", ");
-			}
 		}
-        
-        list.add(sb.toString());
-		
+
+		list.add(sb.toString());
+
 		return list;
 	}
 }

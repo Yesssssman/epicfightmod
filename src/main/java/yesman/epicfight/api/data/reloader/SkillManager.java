@@ -81,10 +81,11 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 	
 	public static void buildAll() {
 		SkillBuildEvent onBuild = new SkillBuildEvent(BUILDERS, SKILLS, LEARNABLE_SKILLS);
-		
+
 		MinecraftForge.EVENT_BUS.post(onBuild);
-		
-		SkillBookLootModifier.createSkillLootTable(BUILDERS.keySet());
+
+		//SkillBookLootModifier.createSkillLootTable(BUILDERS.keySet()); //todo fix create SkillLootTable
+		SkillBookLootModifier.createSkillLootTable();
 	}
 	
 	public static Stream<CompoundTag> getDataStream() {
@@ -130,28 +131,28 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 	@OnlyIn(Dist.CLIENT)
 	public static void processServerPacket(SPDatapackSyncSkill packet) {
 		SkillManager.buildAll();
-		
+
 		for (CompoundTag tag : packet.getTags()) {
 			if (!SKILLS.containsKey(new ResourceLocation(tag.getString("id")))) {
 				EpicFightMod.LOGGER.warn("Failed to syncronize Datapack for skill: " + tag.getString("id"));
 				continue;
 			}
-			
+
 			SKILLS.get(new ResourceLocation(tag.getString("id"))).setParams(tag);
 		}
-		
+
 		LocalPlayerPatch localplayerpatch = ClientEngine.getInstance().getPlayerPatch();
-		
+
 		if (localplayerpatch != null) {
 			for (String skillName : packet.getLearnedSkills()) {
 				localplayerpatch.getSkillCapability().addLearnedSkill(SkillManager.getSkill(skillName));
 			}
-			
+
 			for (Map.Entry<SkillSlot, String> skillsBySlotEntry : packet.getSkillsBySlot().entrySet()) {
 				localplayerpatch.getSkill(skillsBySlotEntry.getKey()).setSkill(SkillManager.getSkill(skillsBySlotEntry.getValue()));
 				localplayerpatch.getSkill(skillsBySlotEntry.getKey()).setDisabled(false);
 			}
-			
+
 			CapabilitySkill skillCapability = localplayerpatch.getSkillCapability();
 			skillCapability.skillContainers[SkillCategories.BASIC_ATTACK.universalOrdinal()].setSkill(EpicFightSkills.BASIC_ATTACK);
 			skillCapability.skillContainers[SkillCategories.AIR_ATTACK.universalOrdinal()].setSkill(EpicFightSkills.AIR_ATTACK);

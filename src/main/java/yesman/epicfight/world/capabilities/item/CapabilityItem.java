@@ -1,22 +1,13 @@
 package yesman.epicfight.world.capabilities.item;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
-import java.util.function.Function;
-
-import javax.annotation.Nullable;
-
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
@@ -48,6 +39,13 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.function.Function;
+
 public class CapabilityItem {
 	public static CapabilityItem EMPTY = CapabilityItem.builder().build();
 	protected static List<StaticAnimation> commonAutoAttackMotion;
@@ -75,30 +73,20 @@ public class CapabilityItem {
 	
 	public void modifyItemTooltip(ItemStack itemstack, List<Component> itemTooltip, LivingEntityPatch<?> entitypatch) {
 		if (!this.getStyle(entitypatch).canUseOffhand()) {
-			itemTooltip.add(1, new TextComponent(" ").append(new TranslatableComponent("attribute.name." + EpicFightMod.MODID + ".twohanded").withStyle(ChatFormatting.DARK_GRAY)));
+			itemTooltip.add(1, Component.literal(" ").append(Component.translatable("attribute.name." + EpicFightMod.MODID + ".twohanded").withStyle(ChatFormatting.DARK_GRAY)));
 		}
 		
 		Map<Attribute, AttributeModifier> attribute = this.getDamageAttributesInCondition(this.getStyle(entitypatch));
 		int index = 0;
-		
+
 		for (int i = 0; i < itemTooltip.size(); i++) {
 			Component textComp = itemTooltip.get(i);
-			
-			if (textComp.getSiblings().size() > 0) {
-				Component sibling = textComp.getSiblings().get(0);
+			index = i;
+			if (findComponentArgument(textComp, Attributes.ATTACK_SPEED.getDescriptionId()) != null) {
 				index = i;
-				
-				if (sibling instanceof TranslatableComponent translationComponent) {
-					if (translationComponent.getArgs().length > 1 && translationComponent.getArgs()[1] instanceof TranslatableComponent translatableArg) {
-						if (translatableArg.getKey().equals(Attributes.ATTACK_SPEED.getDescriptionId())) {
-							index++;
-							break;
-						}
-					}
-				}
 			}
 		}
-		
+
 		if (attribute != null) {
 			Attribute armorNegation = EpicFightAttributes.ARMOR_NEGATION.get();
 			Attribute impact = EpicFightAttributes.IMPACT.get();
@@ -106,34 +94,61 @@ public class CapabilityItem {
 			
 			if (attribute.containsKey(armorNegation)) {
 				double value = attribute.get(armorNegation).getAmount() + entitypatch.getOriginal().getAttribute(armorNegation).getBaseValue();
-				
+
 				if (value > 0.0D) {
-					itemTooltip.add(index, new TextComponent(" ").append(new TranslatableComponent(armorNegation.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
+					itemTooltip.add(index, Component.literal(" ").append(Component.translatable(armorNegation.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
 				}
 			}
 			
 			if (attribute.containsKey(impact)) {
 				double value = attribute.get(impact).getAmount() + entitypatch.getOriginal().getAttribute(impact).getBaseValue();
-				
+
 				if (value > 0.0D) {
 					int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, itemstack);
 					value *= (1.0F + i * 0.12F);
-					itemTooltip.add(index++, new TextComponent(" ").append(new TranslatableComponent(impact.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
+					itemTooltip.add(index++, Component.literal(" ").append(Component.translatable(impact.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
 				}
 			}
 			
 			if (attribute.containsKey(maxStrikes)) {
 				double value = attribute.get(maxStrikes).getAmount() + entitypatch.getOriginal().getAttribute(maxStrikes).getBaseValue();
-				
+
 				if (value > 0.0D) {
-					itemTooltip.add(index, new TextComponent(" ").append(new TranslatableComponent(maxStrikes.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
+					itemTooltip.add(index++, Component.literal(" ").append(Component.translatable(maxStrikes.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
 				}
 			} else {
-				itemTooltip.add(index, new TextComponent(" ").append(new TranslatableComponent(maxStrikes.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(maxStrikes.getDefaultValue()))));
+				itemTooltip.add(index++, Component.literal(" ").append(Component.translatable(maxStrikes.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(maxStrikes.getDefaultValue()))));
 			}
 		}
 	}
-	
+
+	private Object findComponentArgument(Component component, String key) {
+		// check the content.
+		if (component.getContents() instanceof TranslatableContents contents) {
+			// is self?
+			if (contents.getKey().equals(key)) {
+				return component;
+			}
+			// check all arguments.
+			for (Object arg : contents.getArgs()) {
+				if (arg instanceof Component argComponent) {
+					Object ret = findComponentArgument(argComponent, key);
+					if (ret != null) {
+						return ret;
+					}
+				}
+			}
+		}
+		// check all sibling.
+		for (Component siblingComponent : component.getSiblings()) {
+			Object ret = findComponentArgument(siblingComponent, key);
+			if (ret != null) {
+				return ret;
+			}
+		}
+		return null;
+	}
+
 	public List<StaticAnimation> getAutoAttckMotion(PlayerPatch<?> playerpatch) {
 		return getBasicAutoAttackMotion();
 	}
@@ -191,11 +206,11 @@ public class CapabilityItem {
 	}
 	
 	public SoundEvent getSmashingSound() {
-		return EpicFightSounds.WHOOSH;
+		return EpicFightSounds.WHOOSH.get();
 	}
 
 	public SoundEvent getHitSound() {
-		return EpicFightSounds.BLUNT_HIT;
+		return EpicFightSounds.BLUNT_HIT.get();
 	}
 
 	public Collider getWeaponCollider() {
@@ -207,7 +222,7 @@ public class CapabilityItem {
 	}
 	
 	public void addStyleAttibutes(Style style, Pair<Attribute, AttributeModifier> attributePair) {
-		Map<Attribute, AttributeModifier> map = this.attributeMap.computeIfAbsent(style, (key) -> Maps.<Attribute, AttributeModifier>newHashMap());
+		Map<Attribute, AttributeModifier> map = this.attributeMap.computeIfAbsent(style, (key) -> Maps.newHashMap());
 		map.put(attributePair.getFirst(), attributePair.getSecond());
 	}
 	
@@ -247,7 +262,7 @@ public class CapabilityItem {
     }
 	
 	public Multimap<Attribute, AttributeModifier> getAllAttributeModifiers(EquipmentSlot equipmentSlot) {
-		Multimap<Attribute, AttributeModifier> map = HashMultimap.<Attribute, AttributeModifier>create();
+		Multimap<Attribute, AttributeModifier> map = HashMultimap.create();
 		
 		for (Map<Attribute, AttributeModifier> attrMap : this.attributeMap.values()) {
 			for (Entry<Attribute, AttributeModifier> entry : attrMap.entrySet()) {
@@ -259,7 +274,7 @@ public class CapabilityItem {
     }
 	
 	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(LivingEntityPatch<?> playerpatch, InteractionHand hand) {
-		return Maps.<LivingMotion, StaticAnimation>newHashMap();
+		return Maps.newHashMap();
 	}
 	
 	public Style getStyle(LivingEntityPatch<?> entitypatch) {
@@ -373,7 +388,7 @@ public class CapabilityItem {
 		}
 		
 		public Builder addStyleAttibutes(Style style, Pair<Attribute, AttributeModifier> attributePair) {
-			Map<Attribute, AttributeModifier> map = this.attributeMap.computeIfAbsent(style, (key) -> Maps.<Attribute, AttributeModifier>newHashMap());
+			Map<Attribute, AttributeModifier> map = this.attributeMap.computeIfAbsent(style, (key) -> Maps.newHashMap());
 			map.put(attributePair.getFirst(), attributePair.getSecond());
 			
 			return this;

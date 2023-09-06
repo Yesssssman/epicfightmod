@@ -16,7 +16,7 @@ public class FlickeringOverlay extends OverlayManager.Overlay {
 		this.deltaTime = deltaTime;
 		this.strength = strength;
 		Minecraft minecraft = Minecraft.getInstance();
-		this.initialGamma = minecraft.options.gamma;
+		this.initialGamma = minecraft.options.gamma().get();
 	}
 	
 	@Override
@@ -25,7 +25,7 @@ public class FlickeringOverlay extends OverlayManager.Overlay {
 		float darkenAmount = Mth.clamp((float)Math.sin(this.time), -1.0F, 0.0F);
 		
 		Minecraft minecraft = Minecraft.getInstance();
-		minecraft.options.gamma = this.initialGamma + darkenAmount * strength;
+		minecraft.options.gamma().set(this.initialGamma + darkenAmount * strength);
 		
 		if (this.time >= 0) {
 			this.isRemoved = true;

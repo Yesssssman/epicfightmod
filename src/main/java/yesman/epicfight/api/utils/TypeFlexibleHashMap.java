@@ -37,6 +37,6 @@ public class TypeFlexibleHashMap<A extends TypeKey<?>> extends HashMap<A, Object
 	}
 	
 	public interface TypeKey<T> {
-		public T defaultValue();
+		T defaultValue();
 	}
 }

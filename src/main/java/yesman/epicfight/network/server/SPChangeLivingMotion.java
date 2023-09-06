@@ -19,9 +19,9 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class SPChangeLivingMotion {
-	private int entityId;
+	private final int entityId;
 	private int count;
-	private boolean setChangesAsDefault;
+	private final boolean setChangesAsDefault;
 	private List<LivingMotion> motionList = Lists.newArrayList();
 	private List<StaticAnimation> animationList = Lists.newArrayList();
 	
@@ -100,7 +100,7 @@ public class SPChangeLivingMotion {
 	public static void handle(SPChangeLivingMotion msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
 			Minecraft mc = Minecraft.getInstance();
-			Entity entity = mc.player.level.getEntity(msg.entityId);
+			Entity entity = mc.player.level().getEntity(msg.entityId);
 			
 			if (entity != null) {
 				if (entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null) instanceof LivingEntityPatch<?> entitypatch) {

@@ -114,7 +114,7 @@ public class AnimationEvent {
 		}
 	}
 	
-	public static enum Side {
+	public enum Side {
 		CLIENT((isLogicalClient) -> isLogicalClient), SERVER((isLogicalClient) -> !isLogicalClient), BOTH((isLogicalClient) -> true);
 		
 		Predicate<Boolean> predicate;
@@ -125,7 +125,7 @@ public class AnimationEvent {
 	}
 	
 	@FunctionalInterface
-	public static interface AnimationEventConsumer {
-		public abstract void fire(LivingEntityPatch<?> entitypatch, StaticAnimation animation, Object... params);
+	public interface AnimationEventConsumer {
+		void fire(LivingEntityPatch<?> entitypatch, StaticAnimation animation, Object... params);
 	}
 }

@@ -11,8 +11,8 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
 
 public class SPSpawnData {
-	private int entityId;
-	private FriendlyByteBuf buffer;
+	private final int entityId;
+	private final FriendlyByteBuf buffer;
 	
 	public SPSpawnData() {
 		this.entityId = 0;
@@ -49,7 +49,7 @@ public class SPSpawnData {
 	public static void handle(SPSpawnData msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
 			Minecraft mc = Minecraft.getInstance();
-			Entity entity = mc.player.level.getEntity(msg.entityId);
+			Entity entity = mc.player.level().getEntity(msg.entityId);
 			
 			if (entity != null) {
 				EntityPatch<?> entitypatch = entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null);

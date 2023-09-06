@@ -35,14 +35,14 @@ public class DroppedNetherStar extends ItemEntity {
 		super.tick();
 		
 		if (this.tickCount % 70 == 0) {
-			this.level.playLocalSound(this.getX(), this.getY(), this.getZ(), EpicFightSounds.NETHER_STAR_GLITTER, this.getSoundSource(), 1.0F, 1.0F, false);
+			this.level().playLocalSound(this.getX(), this.getY(), this.getZ(), EpicFightSounds.NETHER_STAR_GLITTER.get(), this.getSoundSource(), 1.0F, 1.0F, false);
 		}
 		
 		Vec3 deltaMove = this.getDeltaMovement();
 		
-		if (this.level.isClientSide()) {
+		if (this.level().isClientSide()) {
 			Vec3 particleDeltaMove = new Vec3(-deltaMove.x, -1.0D, -deltaMove.z).normalize().add((this.random.nextFloat() - 0.5F) * 0.1F, 0.0D, (this.random.nextFloat() - 0.5F) * 0.1F);
-			this.level.addParticle(EpicFightParticles.NORMAL_DUST.get(), this.getX() + (this.random.nextFloat() - 0.5F) * this.getBbWidth(), this.getY() + this.getBbHeight() * 2.5D, this.getZ() + (this.random.nextFloat() - 0.5F) * this.getBbWidth(), particleDeltaMove.x, 0.0D, particleDeltaMove.z);
+			this.level().addParticle(EpicFightParticles.NORMAL_DUST.get(), this.getX() + (this.random.nextFloat() - 0.5F) * this.getBbWidth(), this.getY() + this.getBbHeight() * 2.5D, this.getZ() + (this.random.nextFloat() - 0.5F) * this.getBbWidth(), particleDeltaMove.x, 0.0D, particleDeltaMove.z);
 		}
 		
 		this.setDeltaMovement(deltaMove.multiply(0.68D, 0.68D, 0.68D));

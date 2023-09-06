@@ -1,5 +1,6 @@
 package yesman.epicfight.skill.passive;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.UUID;
 
@@ -86,7 +87,7 @@ public class EnduranceSkill extends PassiveSkill {
 		list.add(String.format("%.0f", this.consumption));
 		list.add(String.format("%.1f", this.staminaRatio * 100.0F));
 		list.add(String.format("%d", this.maxDuration / 20));
-		
+
 		return list;
 	}
 }

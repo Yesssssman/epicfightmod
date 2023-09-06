@@ -99,7 +99,7 @@ public class DragonFlyingPhase extends PatchedDragonPhase {
 				k = k + 12;
 			}
 			
-			this.currentPath = this.dragon.findPath(j, k, (Node)null);
+			this.currentPath = this.dragon.findPath(j, k, null);
 			
 			if (this.currentPath != null) {
 				this.currentPath.advance();
@@ -113,12 +113,12 @@ public class DragonFlyingPhase extends PatchedDragonPhase {
 		if (this.currentPath != null && !this.currentPath.isDone()) {
 			Vec3i vec3i = this.currentPath.getNextNodePos();
 			this.currentPath.advance();
-			double d0 = (double) vec3i.getX();
-			double d1 = (double) vec3i.getZ();
+			double d0 = vec3i.getX();
+			double d1 = vec3i.getZ();
 			double d2;
 			
 			do {
-				d2 = (double) ((float) vec3i.getY() + this.dragon.getRandom().nextFloat() * 20.0F);
+				d2 = (float) vec3i.getY() + this.dragon.getRandom().nextFloat() * 20.0F;
 			} while (d2 < (double) vec3i.getY());
 			
 			this.targetLocation = new Vec3(d0, d2, d1);
