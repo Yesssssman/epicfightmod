@@ -43,7 +43,7 @@ public class WitherSkeletonPatch<T extends PathfinderMob> extends SkeletonPatch<
 	
 	@Override
 	public void updateMotion(boolean considerInaction) {
-		super.commonAggressiveMobUpdateMotion(considerInaction);
+		super.commonAggressiveRangedMobUpdateMotion(considerInaction);
 	}
 	
 	@Override

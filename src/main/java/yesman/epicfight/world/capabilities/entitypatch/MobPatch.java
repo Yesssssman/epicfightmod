@@ -165,9 +165,9 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 		boolean shouldSwap = hand == InteractionHand.OFF_HAND;
 		
 		this.epicFightDamageSource = damageSource;
-		this.swapHand(shouldSwap);
+		this.setOffhandDamage(shouldSwap);
 		this.original.doHurtTarget(target);
-		this.swapHand(shouldSwap);
+		this.recoverMainhandDamage(shouldSwap);
 		this.epicFightDamageSource = null;
 		
 		return super.attack(damageSource, target, hand);

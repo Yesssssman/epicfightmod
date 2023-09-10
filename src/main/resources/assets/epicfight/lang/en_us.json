@@ -230,7 +230,7 @@
 	"skill.epicfight.parrying": "Parrying",
 	"skill.epicfight.parrying.tooltip": "Allows you to time your guards accordingly to prevent stamina use. You are now able to guard against ranged attacks.\n\nAvailable Weapon Types: %s",
 	"skill.epicfight.impact_guard": "Impact Guard",
-	"skill.epicfight.impact_guard.tooltip": "Reduces stamina consumption on guarding. You can now guard against explosions, fire, magic, and projectiles with 80% efficiency.\n\nAvailable Weapon Types: %s",
+	"skill.epicfight.impact_guard.tooltip": "Reduces stamina consumption on guarding. You can now guard against explosions, fire, magic, and projectiles with %d%% efficiency.\n\nAvailable Weapon Types: %s",
 	"skill.epicfight.berserker": "Berserker",
 	"skill.epicfight.berserker.tooltip": "Gain %s%% additional attack damage and %s%% additional attack speed for each 1%% of missing health.\n\nAdditional attack speed cannot exceed 5.0",
 	"skill.epicfight.stamina_pillager": "Stamina Pillager",

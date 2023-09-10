@@ -269,9 +269,9 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		this.original.attackStrengthTicker = Integer.MAX_VALUE;
 		this.original.fallDistance = 0.0F;
 		this.original.onGround = false;
-		this.swapHand(shouldSwap);
+		this.setOffhandDamage(shouldSwap);
 		this.original.attack(target);
-		this.swapHand(shouldSwap);
+		this.recoverMainhandDamage(shouldSwap);
 		this.epicFightDamageSource = null;
 		this.original.fallDistance = fallDist;
 		this.original.onGround = isOnGround;

@@ -25,7 +25,6 @@ public class EpicFightAttributeSupplier extends AttributeSupplier {
 				.add(EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get())
 				.add(EpicFightAttributes.OFFHAND_IMPACT.get())
 				.add(EpicFightAttributes.OFFHAND_MAX_STRIKES.get())
-				.add(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get())
 				.add(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get())
 			.build();
 		

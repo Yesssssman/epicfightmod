@@ -1,5 +1,6 @@
 package yesman.epicfight.world.capabilities.entitypatch;
 
+import java.util.Collection;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -17,6 +18,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -203,24 +205,43 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	/**
-	 * This method swap the ATTACK_DAMAGE and OFFHAND_ATTACK_DAMAGE in a very unsafe way.
-	 * You must call this method again after finishing the damaging process.
+	 * Set offhand item's attribute modifiers when in mainhand
+	 * You must call {@link #recoverMainAttributes()} method again after finishing the damaging process.
 	 */
-	protected void swapHand(boolean shouldSwap) {
-		if (!shouldSwap) {
+	protected void setOffhandDamage(boolean execute) {
+		if (!execute) {
 			return;
 		}
 		
-		AttributeInstance mainhandDamage = this.original.getAttribute(Attributes.ATTACK_DAMAGE);
-		AttributeInstance offhandDamage = this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get());
+		AttributeInstance damageAttributeInstance = this.original.getAttribute(Attributes.ATTACK_DAMAGE);
 		ItemStack mainHandItem = this.getOriginal().getMainHandItem();
 		ItemStack offHandItem = this.getOriginal().getOffhandItem();
+		Collection<AttributeModifier> modifiers = this.isOffhandItemValid() ? offHandItem.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE) : null;
+		mainHandItem.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE).forEach(damageAttributeInstance::removeModifier);
 		
-		this.getOriginal().setItemSlot(EquipmentSlot.MAINHAND, offHandItem);
-		this.getOriginal().setItemSlot(EquipmentSlot.OFFHAND, mainHandItem);
+		if (modifiers != null) {
+			modifiers.forEach(damageAttributeInstance::addTransientModifier);
+		}
+	}
+	
+	/**
+	 * Set mainhand item's attribute modifiers
+	 */
+	protected void recoverMainhandDamage(boolean execute) {
+		if (!execute) {
+			return;
+		}
 		
-		this.original.getAttributes().attributes.put(Attributes.ATTACK_DAMAGE, offhandDamage);
-		this.original.getAttributes().attributes.put(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get(), mainhandDamage);
+		AttributeInstance damageAttributeInstance = this.original.getAttribute(Attributes.ATTACK_DAMAGE);
+		ItemStack mainHandItem = this.getOriginal().getMainHandItem();
+		ItemStack offHandItem = this.getOriginal().getOffhandItem();
+		Collection<AttributeModifier> modifiers = this.isOffhandItemValid() ? offHandItem.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE) : null;
+		
+		if (modifiers != null) {
+			modifiers.forEach(damageAttributeInstance::removeModifier);
+		}
+		
+		mainHandItem.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE).forEach(damageAttributeInstance::addTransientModifier);
 	}
 	
 	public void setLastAttackResult(AttackResult attackResult) {

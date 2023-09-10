@@ -23,6 +23,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.entity.PartEntity;
+import net.minecraftforge.event.ItemAttributeModifierEvent;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
@@ -244,19 +245,21 @@ public class EntityEvents {
 				
 				if (event.getAmount() + trueDamage > 0.0F) {
 					if (hitHurtableEntityPatch != null) {
-						StunType stunType = StunType.NONE;
+						StunType stunType = epicFightDamageSource.getStunType();
 						float stunTime = 0.0F;
 						float knockBackAmount = 0.0F;
 						float weight = 40.0F / (float)hitHurtableEntityPatch.getWeight();
 						float stunShield = hitHurtableEntityPatch.getStunShield();
 						
 						if (stunShield > epicFightDamageSource.getImpact()) {
-							epicFightDamageSource.setStunType(StunType.NONE);
+							if (stunType == StunType.SHORT || stunType == StunType.LONG) {
+								stunType = StunType.NONE;
+							}
 						}
 						
 						hitHurtableEntityPatch.setStunShield(stunShield - epicFightDamageSource.getImpact());
 						
-						switch (epicFightDamageSource.getStunType()) {
+						switch (stunType) {
 						case SHORT:
 							if (!hitEntity.hasEffect(EpicFightMobEffects.STUN_IMMUNITY.get()) && (hitHurtableEntityPatch.getStunShield() == 0.0F)) {
 								float totalStunTime = (0.25F + (epicFightDamageSource.getImpact()) * 0.1F) * weight;
@@ -430,6 +433,14 @@ public class EntityEvents {
 					}
 				}
 			}
+		}
+	}
+	
+	@SubscribeEvent
+	public static void itemAttributeModifierEvent(ItemAttributeModifierEvent event) {
+		CapabilityItem itemCap = EpicFightCapabilities.getItemStackCapability(event.getItemStack());
+		
+		if (!itemCap.isEmpty()) {
 		}
 	}
 	

@@ -4,6 +4,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.client.ClientEngine;
 
 @OnlyIn(Dist.CLIENT)
 public class FlickeringOverlay extends OverlayManager.Overlay {
@@ -20,15 +21,17 @@ public class FlickeringOverlay extends OverlayManager.Overlay {
 	}
 	
 	@Override
-	public void render(int xResolution, int yResolution) {
+	public boolean render(int xResolution, int yResolution) {
 		this.time += this.deltaTime;
 		float darkenAmount = Mth.clamp((float)Math.sin(this.time), -1.0F, 0.0F);
 		
-		Minecraft minecraft = Minecraft.getInstance();
-		minecraft.options.gamma = this.initialGamma + darkenAmount * strength;
+		OverlayManager overlayManager = ClientEngine.getInstance().renderEngine.getOverlayManager();
+		overlayManager.setModifiedGamma(this.initialGamma + darkenAmount * strength);
 		
 		if (this.time >= 0) {
-			this.isRemoved = true;
+			return true;
 		}
+		
+		return false;
 	}
 }
