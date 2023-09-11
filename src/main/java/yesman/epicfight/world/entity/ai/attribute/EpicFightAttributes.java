@@ -21,6 +21,7 @@ import yesman.epicfight.world.entity.WitherGhostClone;
 
 public class EpicFightAttributes {
 	public static final DeferredRegister<Attribute> ATTRIBUTES = DeferredRegister.create(ForgeRegistries.ATTRIBUTES, EpicFightMod.MODID);
+	
     public static final RegistryObject<Attribute> MAX_STAMINA = ATTRIBUTES.register("staminar", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".staminar", 0.0D, 0.0D, 1024.0D).setSyncable(true));
     public static final RegistryObject<Attribute> STAMINA_REGEN = ATTRIBUTES.register("stamina_regen", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".stamina_regen", 0.0D, 0.0D, 1024.0D).setSyncable(true));
     public static final RegistryObject<Attribute> STUN_ARMOR = ATTRIBUTES.register("stun_armor", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".stun_armor", 0.0D, 0.0D, 1024.0D).setSyncable(true));

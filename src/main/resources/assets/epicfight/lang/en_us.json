@@ -52,6 +52,7 @@
 	"epicfight.gui.tooltip_mining": "Automatically registers all items not included in Battle Mode.",
 	"epicfight.gui.delete_all": "Delete All",
 	"epicfight.gui.auto_add": "Auto Add",
+	"epicfight.gui.attribute": "Epic Fight Attributes:",
 	
 	"epicfight.skillNotFound": "Unknown skill: %s",
 	

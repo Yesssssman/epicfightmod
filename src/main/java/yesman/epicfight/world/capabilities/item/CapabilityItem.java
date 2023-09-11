@@ -80,6 +80,7 @@ public class CapabilityItem {
 		
 		Map<Attribute, AttributeModifier> attribute = this.getDamageAttributesInCondition(this.getStyle(entitypatch));
 		int index = 0;
+		boolean modifyIn = false;
 		
 		for (int i = 0; i < itemTooltip.size(); i++) {
 			Component textComp = itemTooltip.get(i);
@@ -91,6 +92,7 @@ public class CapabilityItem {
 				if (sibling instanceof TranslatableComponent translationComponent) {
 					if (translationComponent.getArgs().length > 1 && translationComponent.getArgs()[1] instanceof TranslatableComponent translatableArg) {
 						if (translatableArg.getKey().equals(Attributes.ATTACK_SPEED.getDescriptionId())) {
+							modifyIn = true;
 							break;
 						}
 					}
@@ -101,6 +103,13 @@ public class CapabilityItem {
 		index++;
 		
 		if (attribute != null) {
+			if (!modifyIn) {
+				itemTooltip.add(index, new TextComponent(""));
+				index++;
+				itemTooltip.add(index, new TranslatableComponent("epicfight.gui.attribute").withStyle(ChatFormatting.GRAY));
+				index++;
+			}
+			
 			Attribute armorNegation = EpicFightAttributes.ARMOR_NEGATION.get();
 			Attribute impact = EpicFightAttributes.IMPACT.get();
 			Attribute maxStrikes = EpicFightAttributes.MAX_STRIKES.get();
