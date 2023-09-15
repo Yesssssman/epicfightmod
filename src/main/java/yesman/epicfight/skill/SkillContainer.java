@@ -29,6 +29,8 @@ public class SkillContainer {
 	protected SkillDataManager skillDataManager;
 	protected boolean disabled;
 	
+	protected Skill.Resource lastResource;
+	
 	public SkillContainer(PlayerPatch<?> executer, SkillSlot skillSlot) {
 		this.executer = executer;
 		this.slot = skillSlot;

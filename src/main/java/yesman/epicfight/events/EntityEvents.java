@@ -235,8 +235,12 @@ public class EntityEvents {
 		        
 				if (absorpAmount < 0.0F) {
 					hitEntity.setHealth(hitEntity.getHealth() + absorpAmount);
-		        	
+					
 					if (attackerEntityPatch != null) {
+						if (!hitEntity.isAlive()) {
+							attackerEntityPatch.setLastAttackEntity(hitEntity);
+						}
+						
 						attackerEntityPatch.gatherDamageDealt(epicFightDamageSource, calculatedDamage);
 					}
 		        }

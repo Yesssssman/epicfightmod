@@ -11,7 +11,7 @@ import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.gui.screen.overlay.OverlayManager;
 
 @Mixin(value = LightTexture.class)
-public abstract class MIxinLightTexture {
+public abstract class MixinLightTexture {
 	@Inject(at = @At(value = "HEAD"), method = "updateLightTexture(F)V", cancellable = true)
 	private void epicfight_head_updateLightTexture(CallbackInfo info) {
 		OverlayManager overlayManager = ClientEngine.getInstance().renderEngine.getOverlayManager();

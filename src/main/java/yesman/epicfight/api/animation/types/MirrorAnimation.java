@@ -16,8 +16,9 @@ public class MirrorAnimation extends StaticAnimation {
 	
 	public MirrorAnimation(float convertTime, boolean repeatPlay, String path1, String path2, Armature armature) {
 		super(0.0F, false, path1, armature);
-		this.original = new StaticAnimation(convertTime, repeatPlay, path1, armature, true);
-		this.mirror = new StaticAnimation(convertTime, repeatPlay, path2, armature, true);
+		
+		this.original = new StaticAnimation(convertTime, repeatPlay, path1, armature);
+		this.mirror = new StaticAnimation(convertTime, repeatPlay, path2, armature);
 	}
 	
 	@Override
