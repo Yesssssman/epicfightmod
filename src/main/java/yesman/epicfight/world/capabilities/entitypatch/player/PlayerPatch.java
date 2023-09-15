@@ -105,6 +105,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		clientAnimator.addLivingAnimation(LivingMotions.KNEEL, Animations.BIPED_KNEEL);
 		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
 		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
+		clientAnimator.addLivingAnimation(LivingMotions.SIT, Animations.BIPED_SIT);
 		clientAnimator.addLivingAnimation(LivingMotions.FLY, Animations.BIPED_FLYING);
 		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
 		clientAnimator.addLivingAnimation(LivingMotions.JUMP, Animations.BIPED_JUMP);

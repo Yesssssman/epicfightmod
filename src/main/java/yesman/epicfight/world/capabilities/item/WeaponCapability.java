@@ -151,6 +151,11 @@ public class WeaponCapability extends CapabilityItem {
 		return super.checkOffhandValid(entitypatch) || this.weaponCombinationPredicator.apply(entitypatch);
 	}
 	
+	@Override
+	public boolean availableOnHorse() {
+		return this.getMountAttackMotion() != null;
+	}
+	
 	public static WeaponCapability.Builder builder() {
 		return new WeaponCapability.Builder();
 	}

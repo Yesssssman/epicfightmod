@@ -146,6 +146,7 @@ public class Animations {
 	public static StaticAnimation BIPED_CREATIVE_FLYING_FORWARD;
 	public static StaticAnimation BIPED_CREATIVE_FLYING_BACKWARD;
 	public static StaticAnimation BIPED_MOUNT;
+	public static StaticAnimation BIPED_SIT;
 	public static StaticAnimation BIPED_JUMP;
 	public static StaticAnimation BIPED_DEATH;
 	public static StaticAnimation BIPED_DIG;
@@ -508,6 +509,7 @@ public class Animations {
 		BIPED_KNEEL = new StaticAnimation(true, "biped/living/kneel", biped);
 		BIPED_FALL = new StaticAnimation(true, "biped/living/fall", biped);
 		BIPED_MOUNT = new StaticAnimation(true, "biped/living/mount", biped);
+		BIPED_SIT = new StaticAnimation(true, "biped/living/sit", biped);
 		BIPED_DIG = new StaticAnimation(0.11F, true, "biped/living/dig", biped);
 		BIPED_BOW_AIM = new AimAnimation(false, "biped/combat/bow_aim_mid", "biped/combat/bow_aim_up", "biped/combat/bow_aim_down", "biped/combat/bow_aim_lying", biped);
 		BIPED_BOW_SHOT = new ReboundAnimation(0.04F, false, "biped/combat/bow_shot_mid", "biped/combat/bow_shot_up", "biped/combat/bow_shot_down", "biped/combat/bow_shot_lying", biped);

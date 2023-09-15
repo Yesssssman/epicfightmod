@@ -297,7 +297,7 @@ public class CapabilityItem {
 	}
 	
 	public boolean availableOnHorse() {
-		return this.getMountAttackMotion() != null;
+		return true;
 	}
 	
 	public void setConfigFileAttribute(double armorNegation1, double impact1, int maxStrikes1, double armorNegation2, double impact2, int maxStrikes2) {
