@@ -18,7 +18,7 @@ public abstract class MixinLightTexture {
 		
 		if (overlayManager.isGammaChanged()) {
 			Minecraft minecraft = Minecraft.getInstance();
-			minecraft.options.gamma = overlayManager.getModifiedGamma(minecraft.options.gamma);
+			minecraft.options.gamma().set(overlayManager.getModifiedGamma(minecraft.options.gamma().get()));
 		}
 	}
 	
@@ -28,7 +28,7 @@ public abstract class MixinLightTexture {
 		
 		if (overlayManager.isGammaChanged()) {
 			Minecraft minecraft = Minecraft.getInstance();
-			minecraft.options.gamma = overlayManager.getOriginalGamma();			
+			minecraft.options.gamma().set(overlayManager.getOriginalGamma());
 		}
 	}
 }

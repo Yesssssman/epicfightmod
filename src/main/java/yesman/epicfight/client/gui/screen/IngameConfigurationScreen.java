@@ -156,13 +156,12 @@ public class IngameConfigurationScreen extends Screen {
 		));
 
 		Button noMiningInCombatButton = this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 4 + buttonHeight, 160, 20,
-			Component.translatable("gui."+EpicFightMod.MODID+".no_mining_in_combat." + (noMiningInCombat.getValue() ? "on" : "off")), (button) -> {
-				noMiningInCombat.setValue(!noMiningInCombat.getValue());
-				button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".no_mining_in_combat." + (noMiningInCombat.getValue() ? "on" : "off")));
-			}, (button, matrixStack, mouseX, mouseY) -> {
-		        this.renderTooltip(matrixStack, this.minecraft.font.split(Component.translatable("gui." + EpicFightMod.MODID + ".no_mining_in_combat.tooltip") {
-				}, Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
-			}
+				Component.translatable("gui."+EpicFightMod.MODID+".no_mining_in_combat." + (noMiningInCombat.getValue() ? "on" : "off")), (button) -> {
+			noMiningInCombat.setValue(!noMiningInCombat.getValue());
+			button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".no_mining_in_combat." + (noMiningInCombat.getValue() ? "on" : "off")));
+		}, (button, matrixStack, mouseX, mouseY) -> {
+			this.renderTooltip(matrixStack, this.minecraft.font.split(Component.translatable("gui."+EpicFightMod.MODID+".no_mining_in_combat.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+		}
 		));
 
 		buttonHeight += 30;
