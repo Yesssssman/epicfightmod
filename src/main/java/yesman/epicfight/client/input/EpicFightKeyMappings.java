@@ -18,7 +18,7 @@ public class EpicFightKeyMappings {
 	public static final KeyMapping WEAPON_INNATE_SKILL = new WeaponInnateSkillKeyMapping("key." + EpicFightMod.MODID + ".weapon_innate_skill", InputConstants.Type.MOUSE, 0, "key." + EpicFightMod.MODID + ".combat");
 	public static final KeyMapping MOVER_SKILL = new WeaponInnateSkillKeyMapping("key." + EpicFightMod.MODID + ".mover_skill", InputConstants.Type.KEYSYM, InputConstants.KEY_SPACE, "key." + EpicFightMod.MODID + ".combat");
 	public static final KeyMapping SKILL_EDIT = new KeyMapping("key." + EpicFightMod.MODID + ".skill_gui", InputConstants.KEY_K, "key." + EpicFightMod.MODID + ".gui");
-	public static final KeyMapping LOCK_ON = new KeyMapping("key." + EpicFightMod.MODID + ".lock_on", InputConstants.Type.MOUSE, 2, "key." + EpicFightMod.MODID + ".combat");
+	public static final KeyMapping LOCK_ON = new KeyMapping("key." + EpicFightMod.MODID + ".lock_on", InputConstants.KEY_G, "key." + EpicFightMod.MODID + ".combat");
 	public static final KeyMapping CONFIG = new KeyMapping("key." + EpicFightMod.MODID + ".config", -1, "key." + EpicFightMod.MODID + ".gui");
 
 	@SubscribeEvent

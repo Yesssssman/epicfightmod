@@ -12,6 +12,7 @@ import com.mojang.math.Matrix4f;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -95,7 +96,8 @@ public class HealthBarIndicator extends EntityIndicator {
 		}
 		
 		VertexConsumer vertexBuilder = bufferIn.getBuffer(EpicFightRenderTypes.entityIndicator(BATTLE_ICON));
-		float ratio = entityIn.getHealth() / entityIn.getMaxHealth();
+		
+		float ratio = Mth.clamp(entityIn.getHealth() / entityIn.getMaxHealth(), 0.0F, 1.0F);
 		float healthRatio = -0.5F + ratio;
 		int textureRatio = (int) (62 * ratio);
 		this.drawTexturedModalRect2DPlane(mvMatrix, vertexBuilder, -0.5F, -0.05F, healthRatio, 0.05F, 1, 15, textureRatio, 20);
@@ -103,7 +105,7 @@ public class HealthBarIndicator extends EntityIndicator {
 		float absorption = entityIn.getAbsorptionAmount();
 		
 		if (absorption > 0.0D) {
-			float absorptionRatio = absorption / entityIn.getMaxHealth();
+			float absorptionRatio = Mth.clamp(absorption / entityIn.getMaxHealth(), 0.0F, 1.0F);
 			int absTexRatio = (int) (62 * absorptionRatio);
 			this.drawTexturedModalRect2DPlane(mvMatrix, vertexBuilder, -0.5F, -0.05F, absorptionRatio - 0.5F, 0.05F, 1, 20, absTexRatio, 25);
 		}
@@ -118,7 +120,7 @@ public class HealthBarIndicator extends EntityIndicator {
 			return;
 		}
 		
-		float ratio = entitypatch.getStunShield() / entitypatch.getMaxStunShield();
+		float ratio = Mth.clamp(entitypatch.getStunShield() / entitypatch.getMaxStunShield(), 0.0F, 1.0F);
 		float barRatio = -0.5F + ratio;
 		int textureRatio = (int) (62 * ratio);
 		

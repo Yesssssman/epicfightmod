@@ -21,7 +21,7 @@ public class KnockdownWakeupSkill extends DodgeSkill {
 		int left = args.readInt();
 		int right = args.readInt();
 		int horizon = left + right;
-		int animation = horizon > 0 ? 0 : 1; 
+		int animation = horizon > 0 ? 0 : 1;
 		
 		CPExecuteSkill packet = new CPExecuteSkill(executer.getSkill(this).getSlotId());
 		packet.getBuffer().writeInt(animation);

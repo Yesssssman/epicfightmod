@@ -16,6 +16,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProperty;
 import yesman.epicfight.api.utils.math.ValueModifier;
+import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
@@ -38,15 +39,17 @@ public class GuillotineAxeSkill extends SimpleWeaponInnateSkill {
 		super.onInitiate(container);
 		
 		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_PRE, EVENT_UUID, (event) -> {
-			ValueModifier damageModifier = ValueModifier.empty();
-			this.getProperty(AttackPhaseProperty.DAMAGE_MODIFIER, this.properties.get(0)).ifPresent(damageModifier::merge);
-			damageModifier.merge(ValueModifier.multiplier(0.8F));
-			float health = event.getTarget().getHealth();
-			float executionHealth = damageModifier.getTotalValue((float)event.getPlayerPatch().getOriginal().getAttributeValue(Attributes.ATTACK_DAMAGE));
-			
-			if (health < executionHealth) {
-				if (event.getDamageSource() != null) {
-					event.getDamageSource().addTag(SourceTags.EXECUTION);
+			if (event.getDamageSource().getAnimation() == Animations.THE_GUILLOTINE) {
+				ValueModifier damageModifier = ValueModifier.empty();
+				this.getProperty(AttackPhaseProperty.DAMAGE_MODIFIER, this.properties.get(0)).ifPresent(damageModifier::merge);
+				damageModifier.merge(ValueModifier.multiplier(0.8F));
+				float health = event.getTarget().getHealth();
+				float executionHealth = damageModifier.getTotalValue((float)event.getPlayerPatch().getOriginal().getAttributeValue(Attributes.ATTACK_DAMAGE));
+				
+				if (health < executionHealth) {
+					if (event.getDamageSource() != null) {
+						event.getDamageSource().addTag(SourceTags.EXECUTION);
+					}
 				}
 			}
 		});

@@ -51,7 +51,15 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 public class AttackAnimation extends ActionAnimation {
 	public final Phase[] phases;
 	
+	/** Entities that collided **/
 	public static final TypeKey<List<LivingEntity>> HIT_ENTITIES = new TypeKey<>() {
+		public List<LivingEntity> defaultValue() {
+			return Lists.newArrayList();
+		}
+	};
+	
+	/** Entities that actually hurt **/
+	public static final TypeKey<List<LivingEntity>> HURT_ENTITIES = new TypeKey<>() {
 		public List<LivingEntity> defaultValue() {
 			return Lists.newArrayList();
 		}
@@ -156,7 +164,7 @@ public class AttackAnimation extends ActionAnimation {
 		super.end(entitypatch, nextAnimation, isEnd);
 		
 		if (entitypatch instanceof ServerPlayerPatch playerpatch && isEnd) {
-			playerpatch.getEventListener().triggerEvents(EventType.ATTACK_ANIMATION_END_EVENT, new AttackEndEvent(playerpatch, entitypatch.getCurrenltyAttackedEntities(), this));
+			playerpatch.getEventListener().triggerEvents(EventType.ATTACK_ANIMATION_END_EVENT, new AttackEndEvent(playerpatch, this));
 		}
 		
 		if (entitypatch instanceof HumanoidMobPatch<?> mobpatch && entitypatch.isLogicalClient()) {
@@ -191,7 +199,7 @@ public class AttackAnimation extends ActionAnimation {
 		if (prevState.attacking() || state.attacking() || (prevState.getLevel() < 2 && state.getLevel() > 2)) {
 			if (!prevState.attacking() || (phase != this.getPhaseByTime(prevElapsedTime) && (state.attacking() || (prevState.getLevel() < 2 && state.getLevel() > 2)))) {
 				entitypatch.playSound(this.getSwingSound(entitypatch, phase), 0.0F, 0.0F);
-				entitypatch.getCurrenltyAttackedEntities().clear();
+				entitypatch.removeHurtEntities();
 			}
 			
 			this.hurtCollidingEntities(entitypatch, prevElapsedTime, elapsedTime, prevState, state, phase);
@@ -223,12 +231,14 @@ public class AttackAnimation extends ActionAnimation {
 							hitten.invulnerableTime = prevInvulTime;
 							
 							if (attackResult.resultType.dealtDamage()) {
+								entitypatch.getCurrenltyHurtEntities().add(trueEntity);
+								
 								if (entitypatch instanceof ServerPlayerPatch playerpatch) {
 									playerpatch.getEventListener().triggerEvents(EventType.DEALT_DAMAGE_EVENT_POST, new DealtDamageEvent(playerpatch, trueEntity, source, attackResult.damage));
 								}
 								
 								hitten.level.playSound(null, hitten.getX(), hitten.getY(), hitten.getZ(), this.getHitSound(entitypatch, phase), hitten.getSoundSource(), 1.0F, 1.0F);
-								this.spawnHitParticle((ServerLevel)hitten.level, entitypatch, hitten, phase);
+								this.spawnHitParticle((ServerLevel)hitten.getLevel(), entitypatch, hitten, phase);
 							}
 							
 							if (attackResult.resultType.shouldCount()) {

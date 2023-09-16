@@ -41,6 +41,7 @@ public class IngameConfigurationScreen extends Screen {
 		Option<Boolean> cameraAutoSwitch = EpicFightMod.CLIENT_INGAME_CONFIG.cameraAutoSwitch;
 		Option<Boolean> autoPreparation = EpicFightMod.CLIENT_INGAME_CONFIG.autoPreparation;
 		Option<Boolean> offBlood = EpicFightMod.CLIENT_INGAME_CONFIG.offBloodEffects;
+		Option<Boolean> noMiningInCombat = EpicFightMod.CLIENT_INGAME_CONFIG.noMiningInCombat;
 
 		int buttonHeight = -32;
 
@@ -151,6 +152,16 @@ public class IngameConfigurationScreen extends Screen {
 				this.minecraft.setScreen(new UISetupScreen(this));
 			}, (button, matrixStack, mouseX, mouseY) -> {
 		        this.renderTooltip(matrixStack, this.minecraft.font.split(Component.translatable("gui."+EpicFightMod.MODID+".ui_setup.tooltip"), Math.max(this.width / 2 - 43, 400)), mouseX, mouseY);
+			}
+		));
+
+		Button noMiningInCombatButton = this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 4 + buttonHeight, 160, 20,
+			Component.translatable("gui."+EpicFightMod.MODID+".no_mining_in_combat." + (noMiningInCombat.getValue() ? "on" : "off")), (button) -> {
+				noMiningInCombat.setValue(!noMiningInCombat.getValue());
+				button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".no_mining_in_combat." + (noMiningInCombat.getValue() ? "on" : "off")));
+			}, (button, matrixStack, mouseX, mouseY) -> {
+		        this.renderTooltip(matrixStack, this.minecraft.font.split(Component.translatable("gui." + EpicFightMod.MODID + ".no_mining_in_combat.tooltip") {
+				}, Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
 			}
 		));
 

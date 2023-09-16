@@ -23,10 +23,10 @@ import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.skill.*;
 import yesman.epicfight.skill.ChargeableSkill;
 import yesman.epicfight.skill.Skill;
-import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.skill.SkillSlot;
+import yesman.epicfight.skill.SkillSlots;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
@@ -74,10 +74,10 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		super.onJoinWorld(entityIn, event);
 		
 		CapabilitySkill skillCapability = this.getSkillCapability();
-		skillCapability.skillContainers[SkillCategories.BASIC_ATTACK.universalOrdinal()].setSkill(EpicFightSkills.BASIC_ATTACK);
-		skillCapability.skillContainers[SkillCategories.AIR_ATTACK.universalOrdinal()].setSkill(EpicFightSkills.AIR_ATTACK);
-		skillCapability.skillContainers[SkillCategories.KNOCKDOWN_WAKEUP.universalOrdinal()].setSkill(EpicFightSkills.KNOCKDOWN_WAKEUP);
-
+		skillCapability.skillContainers[SkillSlots.BASIC_ATTACK.universalOrdinal()].setSkill(EpicFightSkills.BASIC_ATTACK);
+		skillCapability.skillContainers[SkillSlots.AIR_ATTACK.universalOrdinal()].setSkill(EpicFightSkills.AIR_ATTACK);
+		skillCapability.skillContainers[SkillSlots.KNOCKDOWN_WAKEUP.universalOrdinal()].setSkill(EpicFightSkills.KNOCKDOWN_WAKEUP);
+		
 		this.tickSinceLastAction = 0;
 		
 		this.eventListeners.addEventListener(EventType.ACTION_EVENT_SERVER, ACTION_EVENT_UUID, (playerEvent) -> {
@@ -106,6 +106,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		clientAnimator.addLivingAnimation(LivingMotions.KNEEL, Animations.BIPED_KNEEL);
 		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
 		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
+		clientAnimator.addLivingAnimation(LivingMotions.SIT, Animations.BIPED_SIT);
 		clientAnimator.addLivingAnimation(LivingMotions.FLY, Animations.BIPED_FLYING);
 		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
 		clientAnimator.addLivingAnimation(LivingMotions.JUMP, Animations.BIPED_JUMP);
@@ -270,9 +271,9 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		this.original.attackStrengthTicker = Integer.MAX_VALUE;
 		this.original.fallDistance = 0.0F;
 		this.original.onGround = false;
-		this.swapHand(shouldSwap);
+		this.setOffhandDamage(shouldSwap);
 		this.original.attack(target);
-		this.swapHand(shouldSwap);
+		this.recoverMainhandDamage(shouldSwap);
 		this.epicFightDamageSource = null;
 		this.original.fallDistance = fallDist;
 		this.original.onGround = isOnGround;
@@ -298,7 +299,6 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	
 	public float getMaxStamina() {
 		AttributeInstance maxStamina = this.original.getAttribute(EpicFightAttributes.MAX_STAMINA.get());
-		
 		return (float)(maxStamina == null ? 0 : maxStamina.getValue());
 	}
 	

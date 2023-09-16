@@ -222,20 +222,6 @@ public class StaticAnimation extends DynamicAnimation {
 		if (!super.isJointEnabled(entitypatch, layer, joint)) {
 			return false;
 		} else {
-			
-			//System.out.println(this + " " + joint);
-			
-			/**
-			if (this.getProperty(ClientAnimationProperties.MULTILAYER_ANIMATION).isPresent()) {
-				StaticAnimation multiAnimation = this.getProperty(ClientAnimationProperties.MULTILAYER_ANIMATION).get();
-				
-				if (layer == multiAnimation.getPriority()) {
-					return !multiAnimation.getProperty(ClientAnimationProperties.JOINT_MASK).map((bindModifier) -> 
-											!bindModifier.isMasked(entitypatch.getCurrentLivingMotion(), joint)).orElse(true);
-				}
-			}
-			**/
-			
 			return this.getProperty(ClientAnimationProperties.JOINT_MASK).map((bindModifier) -> 
 						!bindModifier.isMasked(entitypatch.getCurrentLivingMotion(), joint)).orElse(true);
 		}

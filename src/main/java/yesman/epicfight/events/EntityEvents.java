@@ -19,6 +19,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.entity.PartEntity;
+import net.minecraftforge.event.ItemAttributeModifierEvent;
 import net.minecraftforge.event.entity.EntityEvent;
 import net.minecraftforge.event.entity.*;
 import net.minecraftforge.event.entity.living.*;
@@ -215,8 +216,12 @@ public class EntityEvents {
 		        
 				if (absorpAmount < 0.0F) {
 					hitEntity.setHealth(hitEntity.getHealth() + absorpAmount);
-		        	
+					
 					if (attackerEntityPatch != null) {
+						if (!hitEntity.isAlive()) {
+							attackerEntityPatch.setLastAttackEntity(hitEntity);
+						}
+						
 						attackerEntityPatch.gatherDamageDealt(epicFightDamageSource, calculatedDamage);
 					}
 		        }
@@ -225,19 +230,21 @@ public class EntityEvents {
 				
 				if (event.getAmount() + trueDamage > 0.0F) {
 					if (hitHurtableEntityPatch != null) {
-						StunType stunType = StunType.NONE;
+						StunType stunType = epicFightDamageSource.getStunType();
 						float stunTime = 0.0F;
 						float knockBackAmount = 0.0F;
 						float weight = 40.0F / hitHurtableEntityPatch.getWeight();
 						float stunShield = hitHurtableEntityPatch.getStunShield();
 						
 						if (stunShield > epicFightDamageSource.getImpact()) {
-							epicFightDamageSource.setStunType(StunType.NONE);
+							if (stunType == StunType.SHORT || stunType == StunType.LONG) {
+								stunType = StunType.NONE;
+							}
 						}
 						
 						hitHurtableEntityPatch.setStunShield(stunShield - epicFightDamageSource.getImpact());
 						
-						switch (epicFightDamageSource.getStunType()) {
+						switch (stunType) {
 						case SHORT:
 							if (!hitEntity.hasEffect(EpicFightMobEffects.STUN_IMMUNITY.get()) && (hitHurtableEntityPatch.getStunShield() == 0.0F)) {
 								float totalStunTime = (0.25F + (epicFightDamageSource.getImpact()) * 0.1F) * weight;
@@ -339,7 +346,7 @@ public class EntityEvents {
 			AttackResult result = (entitypatch != null && !damageSource.isBypassInvul()) ? entitypatch.tryHurt(damageSource, event.getAmount()) : AttackResult.success(event.getAmount());
 			
 			if (attackerPatch != null) {
-				attackerPatch.setLastAttackResult(event.getEntity(), result);
+				attackerPatch.setLastAttackResult(result);
 			}
 			
 			if (!result.resultType.dealtDamage()) {
@@ -401,8 +408,8 @@ public class EntityEvents {
 						event.setCanceled(true);
 					}
 					
-					if (rayresult.getEntity() instanceof PartEntity) {
-						Entity parent = ((PartEntity<?>)rayresult.getEntity()).getParent();
+					if (rayresult.getEntity() instanceof PartEntity<?> partEntity) {
+						Entity parent = partEntity.getParent();
 						
 						if (event.getProjectile().getOwner().is(parent)) {
 							event.setCanceled(true);
@@ -410,6 +417,14 @@ public class EntityEvents {
 					}
 				}
 			}
+		}
+	}
+	
+	@SubscribeEvent
+	public static void itemAttributeModifierEvent(ItemAttributeModifierEvent event) {
+		CapabilityItem itemCap = EpicFightCapabilities.getItemStackCapability(event.getItemStack());
+		
+		if (!itemCap.isEmpty()) {
 		}
 	}
 	

@@ -157,6 +157,7 @@ public class AnimationDataReader {
 		registerJointMask("arms", JointMaskEntry.BIPED_ARMS);
 		registerJointMask("right_arms", JointMaskEntry.BIPED_RIGHT_ARMS);
 		registerJointMask("right_arms_body", JointMaskEntry.BIPED_BODY_AND_RIGHT_ARMS);
+		registerJointMask("left_arms_body", JointMaskEntry.BIPED_BODY_AND_LEFT_ARMS);
 		registerJointMask("upper_joints", JointMaskEntry.BIPED_UPPER_JOINTS);
 		registerJointMask("root_upper_joints", JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT);
 		registerJointMask("wings", JointMaskEntry.WINGS);

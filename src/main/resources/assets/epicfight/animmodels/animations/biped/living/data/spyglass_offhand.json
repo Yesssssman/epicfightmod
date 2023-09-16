@@ -6,6 +6,10 @@
 		{
 			"livingmotion":"ALL",
 			"type":"root_upper_joints"
+		},
+		{
+			"livingmotion":"SWIM",
+			"type":"left_arms_body"
 		}
 	]
 }

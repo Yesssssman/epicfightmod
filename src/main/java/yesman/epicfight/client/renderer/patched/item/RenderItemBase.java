@@ -23,7 +23,7 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 public class RenderItemBase {
 	protected final OpenMatrix4f mainhandcorrectionMatrix;
 	protected final OpenMatrix4f offhandCorrectionMatrix;
-	protected static final OpenMatrix4f BACK_COORECTION = new OpenMatrix4f().translate(0.5F, 1F, 0.1F).rotateDeg(130.0F, Vec3f.Z_AXIS).rotateDeg(100.0F, Vec3f.Y_AXIS);
+	protected static final OpenMatrix4f BACK_COORECTION = new OpenMatrix4f().translate(0.5F, 0.85F, 0.15F).rotateDeg(125.0F, Vec3f.Z_AXIS).rotateDeg(100.0F, Vec3f.Y_AXIS);
 	public static RenderEngine renderEngine;
 	
 	public RenderItemBase() {

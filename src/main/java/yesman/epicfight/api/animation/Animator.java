@@ -24,6 +24,7 @@ public abstract class Animator {
 	public Animator() {
 		// Put default variables
 		this.animationVariables.put(AttackAnimation.HIT_ENTITIES, Lists.newArrayList());
+		this.animationVariables.put(AttackAnimation.HURT_ENTITIES, Lists.newArrayList());
 	}
 	
 	public abstract void playAnimation(StaticAnimation nextAnimation, float convertTimeModifier);
