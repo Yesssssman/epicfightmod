@@ -25,6 +25,7 @@ public class ConfigurationIngame {
 	public final Option<Boolean> cameraAutoSwitch;
 	public final Option<Boolean> autoPreparation;
 	public final Option<Boolean> offBloodEffects;
+	public final Option<Boolean> noMiningInCombat;
 	public final List<Item> battleAutoSwitchItems;
 	public final List<Item> miningAutoSwitchItems;
 	public int aimHelperRealColor;
@@ -62,6 +63,7 @@ public class ConfigurationIngame {
 		this.cameraAutoSwitch = new Option<Boolean>(config.cameraAutoSwitch.get());
 		this.autoPreparation = new Option<Boolean>(config.autoPreparation.get());
 		this.offBloodEffects = new Option<Boolean>(config.offBloodEffects.get());
+		this.noMiningInCombat = new Option<Boolean>(config.noMiningInCombat.get());
 		this.battleAutoSwitchItems = Lists.newArrayList(config.battleAutoSwitchItems.get().stream().map((itemName) ->
 			ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName))).iterator()
 		);
@@ -101,6 +103,7 @@ public class ConfigurationIngame {
 		this.cameraAutoSwitch.setDefaultValue();
 		this.autoPreparation.setDefaultValue();
 		this.offBloodEffects.setDefaultValue();
+		this.noMiningInCombat.setDefaultValue();
 		this.aimHelperRealColor = ColorSlider.toColorInteger(this.aimHelperColor.getValue());
 		this.staminaBarX.setDefaultValue();
 		this.staminaBarY.setDefaultValue();
@@ -132,6 +135,7 @@ public class ConfigurationIngame {
 		config.cameraAutoSwitch.set(this.cameraAutoSwitch.getValue());
 		config.autoPreparation.set(this.autoPreparation.getValue());
 		config.offBloodEffects.set(this.offBloodEffects.getValue());
+		config.noMiningInCombat.set(this.noMiningInCombat.getValue());
 		this.aimHelperRealColor = ColorSlider.toColorInteger(this.aimHelperColor.getValue());
 		config.battleAutoSwitchItems.set(Lists.newArrayList(this.battleAutoSwitchItems.stream().map((item) -> item.getRegistryName().toString()).iterator()));
 		config.miningAutoSwitchItems.set(Lists.newArrayList(this.miningAutoSwitchItems.stream().map((item) -> item.getRegistryName().toString()).iterator()));

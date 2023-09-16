@@ -243,7 +243,8 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
         if (this.getOriginal().isUsingItem() && (useAnim == UseAnim.DRINK || useAnim == UseAnim.EAT || useAnim == UseAnim.SPYGLASS)) {
         	
         } else {
-        	if (this.getEntityState().inaction() || this.original.getVehicle() != null || (!this.original.isOnGround() && this.original.onClimbable())) {
+        	if (this.getEntityState().inaction() || (this.original.getVehicle() != null && this.original.getVehicle() instanceof LivingEntity)
+        			|| (!this.original.isOnGround() && this.original.onClimbable())) {
     	        yaw = 0;
     		} else {
     			float f = MathUtils.lerpBetween(this.prevBodyYaw, this.bodyYaw, partialTick);

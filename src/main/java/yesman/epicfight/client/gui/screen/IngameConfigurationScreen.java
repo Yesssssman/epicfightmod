@@ -43,6 +43,7 @@ public class IngameConfigurationScreen extends Screen {
 		Option<Boolean> cameraAutoSwitch = EpicFightMod.CLIENT_INGAME_CONFIG.cameraAutoSwitch;
 		Option<Boolean> autoPreparation = EpicFightMod.CLIENT_INGAME_CONFIG.autoPreparation;
 		Option<Boolean> offBlood = EpicFightMod.CLIENT_INGAME_CONFIG.offBloodEffects;
+		Option<Boolean> noMiningInCombat = EpicFightMod.CLIENT_INGAME_CONFIG.noMiningInCombat;
 		
 		int buttonHeight = -32;
 		
@@ -160,6 +161,15 @@ public class IngameConfigurationScreen extends Screen {
 			}
 		));
 		
+		Button noMiningInCombatButton = this.addRenderableWidget(new Button(this.width / 2 + 5, this.height / 4 + buttonHeight, 160, 20,
+			new TranslatableComponent("gui."+EpicFightMod.MODID+".no_mining_in_combat." + (noMiningInCombat.getValue() ? "on" : "off")), (button) -> {
+				noMiningInCombat.setValue(!noMiningInCombat.getValue());
+				button.setMessage(new TranslatableComponent("gui."+EpicFightMod.MODID+".no_mining_in_combat." + (noMiningInCombat.getValue() ? "on" : "off")));
+			}, (button, matrixStack, mouseX, mouseY) -> {
+		        this.renderTooltip(matrixStack, this.minecraft.font.split(new TranslatableComponent("gui."+EpicFightMod.MODID+".no_mining_in_combat.tooltip"), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
+			}
+		));
+		
 		buttonHeight += 30;
 		
 		this.addRenderableWidget(new ColorSlider(this.width / 2 - 150, this.height / 4 + buttonHeight, 300, 20, new TranslatableComponent("gui."+EpicFightMod.MODID+".aim_helper_color"), aimHelperColor.getValue(), EpicFightMod.CLIENT_INGAME_CONFIG.aimHelperColor));
@@ -179,6 +189,7 @@ public class IngameConfigurationScreen extends Screen {
 			cameraAutoSwitchButton.setMessage(new TranslatableComponent("gui."+EpicFightMod.MODID+".camera_auto_switch." + (cameraAutoSwitch.getValue() ? "on" : "off")));
 			autoPreparationButton.setMessage(new TranslatableComponent("gui."+EpicFightMod.MODID+".auto_preparation." + (autoPreparation.getValue() ? "on" : "off")));
 			offGoreButton.setMessage(new TranslatableComponent("gui."+EpicFightMod.MODID+".off_blood_effects." + (offBlood.getValue() ? "on" : "off")));
+			noMiningInCombatButton.setMessage(new TranslatableComponent("gui."+EpicFightMod.MODID+".no_mining_in_combat." + (noMiningInCombat.getValue() ? "on" : "off")));
 		}));
 	}
 	
