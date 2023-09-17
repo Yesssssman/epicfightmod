@@ -17,13 +17,18 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class BlendingTextureOverlay extends OverlayManager.Overlay {
 	public ResourceLocation texture;
+	private boolean isAlive = true;
 	
 	public BlendingTextureOverlay(ResourceLocation texture) {
 		this.texture = texture;
 	}
 	
+	public void remove() {
+		this.isAlive = false;
+	}
+	
 	@Override
-	public void render(int xResolution, int yResolution) {
+	public boolean render(int xResolution, int yResolution) {
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
 		RenderSystem.setShaderTexture(0, this.texture);
 		GlStateManager._enableBlend();
@@ -37,5 +42,7 @@ public class BlendingTextureOverlay extends OverlayManager.Overlay {
 	    bufferbuilder.vertex(xResolution, yResolution, 1).uv(1, 1).endVertex();
 	    bufferbuilder.vertex(xResolution, 0, 1).uv(1, 0).endVertex();
 	    tessellator.end();
+	    
+	    return !this.isAlive;
 	}
 }

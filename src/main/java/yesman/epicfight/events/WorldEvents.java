@@ -49,7 +49,8 @@ public class WorldEvents {
 			EpicFightNetworkManager.sendToClient(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.WEIGHT_PENALTY, player.level().getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY)), target);
 			EpicFightNetworkManager.sendToClient(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.DIABLE_ENTITY_UI, player.level().getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI)), target);
 			EpicFightNetworkManager.sendToClient(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.STIFF_COMBO_ATTACKS, player.level().getGameRules().getBoolean(EpicFightGamerules.STIFF_COMBO_ATTACKS)), target);
-			
+			EpicFightNetworkManager.sendToClient(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.CAN_SWITCH_COMBAT, player.level().getGameRules().getBoolean(EpicFightGamerules.CAN_SWITCH_COMBAT)), target);
+
 			if (!player.getServer().isSingleplayerOwner(player.getGameProfile())) {
 				SPDatapackSyncSkill skillParamsPacket = new SPDatapackSyncSkill(SkillManager.getParamCount(), SPDatapackSync.Type.SKILL_PARAMS);
 				ServerPlayerPatch serverplayerpatch = EpicFightCapabilities.getEntityPatch(player, ServerPlayerPatch.class);

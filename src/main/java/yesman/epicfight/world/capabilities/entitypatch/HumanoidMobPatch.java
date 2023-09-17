@@ -156,7 +156,6 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 		
 		if (hand == InteractionHand.OFF_HAND) {
 			if (!from.isEmpty()) {
-				from.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get())::removeModifier);
 				from.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_SPEED).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get())::removeModifier);
 			}
 			if (!fromCap.isEmpty()) {
@@ -166,7 +165,6 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 			}
 			
 			if (!to.isEmpty()) {
-				to.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get())::addTransientModifier);
 				to.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_SPEED).forEach(this.original.getAttribute(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get())::addTransientModifier);
 			}
 			if (!toCap.isEmpty()) {

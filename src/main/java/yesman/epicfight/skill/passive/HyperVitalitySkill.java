@@ -48,7 +48,6 @@ public class HyperVitalitySkill extends PassiveSkill {
 								container.getExecuter().consumeStamina(consumption * 0.1F);
 								container.setMaxDuration(event.getSkill().getMaxDuration());
 								container.activate();
-								
 								EpicFightNetworkManager.sendToPlayer(SPSkillExecutionFeedback.executed(container.getSlotId()), (ServerPlayer)playerpatch.getOriginal());
 							}
 						}
@@ -58,8 +57,10 @@ public class HyperVitalitySkill extends PassiveSkill {
 		}, 1);
 		
 		container.getExecuter().getEventListener().addEventListener(EventType.SKILL_CANCEL_EVENT, EVENT_UUID, (event) -> {
-			if (!container.getExecuter().isLogicalClient() && !container.getExecuter().getOriginal().isCreative() && event.getSkillContainer().getSkill().getCategory() == SkillCategories.WEAPON_INNATE) {
+			if (!container.getExecuter().isLogicalClient() && !container.getExecuter().getOriginal().isCreative()
+					&& event.getSkillContainer().getSkill().getCategory() == SkillCategories.WEAPON_INNATE && container.isActivated()) {
 				container.setResource(0.0F);
+				container.deactivate();
 				ServerPlayerPatch serverPlayerPatch = (ServerPlayerPatch)container.getExecuter();
 				this.setStackSynchronize(serverPlayerPatch, container.getStack() - 1);
 				EpicFightNetworkManager.sendToPlayer(SPSkillExecutionFeedback.executed(container.getSlotId()), serverPlayerPatch.getOriginal());

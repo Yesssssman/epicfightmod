@@ -18,6 +18,7 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -62,6 +63,8 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks);
 		
 		if (renderType != null) {
+		    this.prepareVanillaModel(entityIn, renderer.getModel(), renderer, partialTicks);
+			
 			AM mesh = this.getMesh(entitypatch);
 			this.prepareModel(mesh, entityIn, entitypatch);
 			
@@ -88,6 +91,65 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		}
 		
 		poseStack.popPose();
+	}
+	
+	// can't transform the access modifier of getBob method because of overriding
+	public float getVanillaRendererBob(E entity, LivingEntityRenderer<E, M> renderer, float partialTicks) {
+		return entity.tickCount + partialTicks;
+	}
+	
+	protected void prepareVanillaModel(E entityIn, M model, LivingEntityRenderer<E, M> renderer, float partialTicks) {
+		boolean shouldSit = entityIn.isPassenger() && (entityIn.getVehicle() != null && entityIn.getVehicle().shouldRiderSit());
+		model.riding = shouldSit;
+		model.young = entityIn.isBaby();
+		float f = Mth.rotLerp(partialTicks, entityIn.yBodyRotO, entityIn.yBodyRot);
+		float f1 = Mth.rotLerp(partialTicks, entityIn.yHeadRotO, entityIn.yHeadRot);
+		float f2 = f1 - f;
+		if (shouldSit && entityIn.getVehicle() instanceof LivingEntity) {
+			LivingEntity livingentity = (LivingEntity) entityIn.getVehicle();
+			f = Mth.rotLerp(partialTicks, livingentity.yBodyRotO, livingentity.yBodyRot);
+			f2 = f1 - f;
+			float f3 = Mth.wrapDegrees(f2);
+			if (f3 < -85.0F) {
+				f3 = -85.0F;
+			}
+
+			if (f3 >= 85.0F) {
+				f3 = 85.0F;
+			}
+
+			f = f1 - f3;
+			if (f3 * f3 > 2500.0F) {
+				f += f3 * 0.2F;
+			}
+
+			f2 = f1 - f;
+		}
+
+		float f6 = Mth.lerp(partialTicks, entityIn.xRotO, entityIn.getXRot());
+		
+		if (LivingEntityRenderer.isEntityUpsideDown(entityIn)) {
+			f6 *= -1.0F;
+			f2 *= -1.0F;
+		}
+		
+		float f7 = this.getVanillaRendererBob(entityIn, renderer, partialTicks);
+		float f8 = 0.0F;
+		float f5 = 0.0F;
+		if (!shouldSit && entityIn.isAlive()) {
+			f8 = entityIn.walkAnimation.speed(partialTicks);
+			f5 = entityIn.walkAnimation.position() - entityIn.walkAnimation.speed() * (1.0F - partialTicks);
+			if (entityIn.isBaby()) {
+				f5 *= 3.0F;
+			}
+
+			if (f8 > 1.0F) {
+				f8 = 1.0F;
+			}
+		}
+		
+		model.prepareMobModel(entityIn, f5, f8, partialTicks);
+		model.setupAnim(entityIn, f5, f8, f7, f2, f6);
 	}
 	
 	protected void prepareModel(AM mesh, E entity, T entitypatch) {

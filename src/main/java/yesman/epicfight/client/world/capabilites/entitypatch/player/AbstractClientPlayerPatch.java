@@ -6,6 +6,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.*;
@@ -64,7 +65,10 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			if (original.isFallFlying() || original.isAutoSpinAttack()) {
 				currentLivingMotion = LivingMotions.FLY;
 			} else if (original.getVehicle() != null) {
-				currentLivingMotion = LivingMotions.MOUNT;
+				if (original.getVehicle() instanceof PlayerRideableJumping)
+					currentLivingMotion = LivingMotions.MOUNT;
+				else
+					currentLivingMotion = LivingMotions.SIT;
 			} else if (original.isVisuallySwimming()) {
 				currentLivingMotion = LivingMotions.SWIM;
 			} else if (original.isSleeping()) {
@@ -228,7 +232,8 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
         if (this.getOriginal().isUsingItem() && (useAnim == UseAnim.DRINK || useAnim == UseAnim.EAT || useAnim == UseAnim.SPYGLASS)) {
         	
         } else {
-        	if (this.getEntityState().inaction() || this.original.getVehicle() != null || (!this.original.onGround() && this.original.onClimbable())) {
+        	if (this.getEntityState().inaction() || (this.original.getVehicle() != null && this.original.getVehicle() instanceof LivingEntity)
+        			|| (!this.original.onGround() && this.original.onClimbable())) {
     	        yaw = 0;
     		} else {
     			float f = MathUtils.lerpBetween(this.prevBodyYaw, this.bodyYaw, partialTick);

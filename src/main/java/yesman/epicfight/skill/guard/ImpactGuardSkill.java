@@ -119,10 +119,9 @@ public class ImpactGuardSkill extends GuardSkill {
 	@Override
 	public List<Object> getTooltipArgsOfScreen(List<Object> list) {
 		list.clear();
-		list.add(String.format("%.1f", this.damageReducer));
-
+		list.add(String.format("%.1f", 100.0F - this.damageReducer));
+		
 		StringBuilder sb = new StringBuilder();
-
 		Iterator<WeaponCategory> iter = this.advancedGuardMotions.keySet().iterator();
 
 		while (iter.hasNext()) {
@@ -134,7 +133,7 @@ public class ImpactGuardSkill extends GuardSkill {
 		}
 
         list.add(sb.toString());
-		
+        
 		return list;
 	}
 }

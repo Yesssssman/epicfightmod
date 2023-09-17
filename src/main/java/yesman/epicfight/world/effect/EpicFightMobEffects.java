@@ -27,8 +27,6 @@ public class EpicFightMobEffects {
 														 , new ResourceLocation(EpicFightMod.MODID, "textures/mob_effect/instability3.png")));
 	
 	public static void addOffhandModifier() {
-		MobEffects.DAMAGE_BOOST.addAttributeModifier(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get(), "648D7064-6A60-4F59-8ABE-C2C23A6DD7A9", 0.0D, AttributeModifier.Operation.ADDITION);
-		MobEffects.WEAKNESS.addAttributeModifier(EpicFightAttributes.OFFHAND_ATTACK_DAMAGE.get(), "22653B89-116E-49DC-9B6B-9971489B5BE5", 0.0D, AttributeModifier.Operation.ADDITION);
 		MobEffects.DIG_SPEED.addAttributeModifier(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get(), "AF8B6E3F-3328-4C0A-AA36-5BA2BB9DBEF3", 0.1D, AttributeModifier.Operation.MULTIPLY_TOTAL);
 		MobEffects.DIG_SLOWDOWN.addAttributeModifier(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get(), "55FCED67-E92A-486E-9800-B47F202C4386", -0.1D, AttributeModifier.Operation.MULTIPLY_TOTAL);
 	}

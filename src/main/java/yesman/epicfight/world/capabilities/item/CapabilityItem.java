@@ -6,7 +6,6 @@ import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvent;
@@ -78,16 +77,27 @@ public class CapabilityItem {
 		
 		Map<Attribute, AttributeModifier> attribute = this.getDamageAttributesInCondition(this.getStyle(entitypatch));
 		int index = 0;
-
+		boolean modifyIn = false;
+		
 		for (int i = 0; i < itemTooltip.size(); i++) {
 			Component textComp = itemTooltip.get(i);
 			index = i;
 			if (findComponentArgument(textComp, Attributes.ATTACK_SPEED.getDescriptionId()) != null) {
-				index = i;
+				modifyIn = true;
+				break;
 			}
 		}
-
+		
+		index++;
+		
 		if (attribute != null) {
+			if (!modifyIn) {
+				itemTooltip.add(index, Component.literal(""));
+				index++;
+				itemTooltip.add(index, Component.translatable("epicfight.gui.attribute").withStyle(ChatFormatting.GRAY));
+				index++;
+			}
+			
 			Attribute armorNegation = EpicFightAttributes.ARMOR_NEGATION.get();
 			Attribute impact = EpicFightAttributes.IMPACT.get();
 			Attribute maxStrikes = EpicFightAttributes.MAX_STRIKES.get();
@@ -302,7 +312,7 @@ public class CapabilityItem {
 	}
 	
 	public boolean availableOnHorse() {
-		return this.getMountAttackMotion() != null;
+		return true;
 	}
 	
 	public void setConfigFileAttribute(double armorNegation1, double impact1, int maxStrikes1, double armorNegation2, double impact2, int maxStrikes2) {

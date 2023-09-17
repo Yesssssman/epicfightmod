@@ -9,7 +9,6 @@ import org.joml.Quaternionf;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
-import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class TransformSheet {
@@ -197,8 +196,8 @@ public class TransformSheet {
 				prev++;
 				next++;
 			} else {
-				EpicFightMod.LOGGER.error("time exceeded keyframe length. current : " + currentTime + " max : " + this.keyframes[this.keyframes.length - 1].time());
-				(new IllegalArgumentException()).printStackTrace();
+				//EpicFightMod.LOGGER.error("time exceeded keyframe length. current : " + currentTime + " max : " + this.keyframes[this.keyframes.length - 1].time());
+				//(new IllegalArgumentException()).printStackTrace();
 			}
 		}
 		
