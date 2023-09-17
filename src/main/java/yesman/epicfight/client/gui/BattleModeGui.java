@@ -97,6 +97,7 @@ public class BattleModeGui extends ModIngameGui {
 			RenderSystem.setShaderColor(1.0F, ratio, 0.25F, 1.0F);
 			guiGraphics.blit(EntityIndicator.BATTLE_ICON, pos.x, pos.y, 118, 4, 2, 38, 237, 9, 255, 255);
 			guiGraphics.blit(EntityIndicator.BATTLE_ICON, pos.x, pos.y, (int)(118*ratio), 4, 2, 47, (int)(237*ratio), 9, 255, 255);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 			poseStack.popPose();
 		}
 		
@@ -292,7 +293,9 @@ public class BattleModeGui extends ModIngameGui {
 			int stringWidth = (this.font.width(s) - 6) / 3;
 			guiGraphics.drawString(font, s, pos.x + 25 - stringWidth, pos.y + 22, 16777215, true);
 		}
-		
+
+		// restore all color.
+		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		matStack.popPose();
 	}
 	
