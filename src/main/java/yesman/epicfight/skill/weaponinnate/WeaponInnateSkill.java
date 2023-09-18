@@ -3,12 +3,10 @@ package yesman.epicfight.skill.weaponinnate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
-import com.google.common.collect.Sets;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -16,7 +14,6 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -69,25 +66,16 @@ public abstract class WeaponInnateSkill extends Skill {
 		return list;
 	}
 	
-	protected void generateTooltipforPhase(List<Component> list, ItemStack itemstack, CapabilityItem cap, PlayerPatch<?> playerpatch, Map<AttackPhaseProperty<?>, Object> propertyMap, String title) {
-		Multimap<Attribute, AttributeModifier> attributes = itemstack.getAttributeModifiers(EquipmentSlot.MAINHAND);
-		Multimap<Attribute, AttributeModifier> capAttributes = cap.getAttributeModifiers(EquipmentSlot.MAINHAND, playerpatch);
-		double damage = playerpatch.getOriginal().getAttribute(Attributes.ATTACK_DAMAGE).getBaseValue() + EnchantmentHelper.getDamageBonus(itemstack, MobType.UNDEFINED);
-		double armorNegation = playerpatch.getOriginal().getAttribute(EpicFightAttributes.ARMOR_NEGATION.get()).getBaseValue();
-		double impact = playerpatch.getOriginal().getAttribute(EpicFightAttributes.IMPACT.get()).getBaseValue();
-		double maxStrikes = playerpatch.getOriginal().getAttribute(EpicFightAttributes.MAX_STRIKES.get()).getBaseValue();
+	protected void generateTooltipforPhase(List<Component> list, ItemStack itemstack, CapabilityItem itemcap, PlayerPatch<?> playerpatch, Map<AttackPhaseProperty<?>, Object> propertyMap, String title) {
+		Multimap<Attribute, AttributeModifier> capAttributes = itemcap.getAttributeModifiers(EquipmentSlot.MAINHAND, playerpatch);
+		double damage = playerpatch.getWeaponAttribute(Attributes.ATTACK_DAMAGE, itemstack);
+		double armorNegation = playerpatch.getWeaponAttribute(EpicFightAttributes.ARMOR_NEGATION.get(), itemstack);
+		double impact = playerpatch.getWeaponAttribute(EpicFightAttributes.IMPACT.get(), itemstack);
+		double maxStrikes = playerpatch.getWeaponAttribute(EpicFightAttributes.MAX_STRIKES.get(), itemstack);
 		ValueModifier damageModifier = ValueModifier.empty();
 		ValueModifier armorNegationModifier = ValueModifier.empty();
 		ValueModifier impactModifier = ValueModifier.empty();
 		ValueModifier maxStrikesModifier = ValueModifier.empty();
-		
-		Set<AttributeModifier> damageModifiers = Sets.newHashSet();
-		damageModifiers.addAll(playerpatch.getOriginal().getAttribute(Attributes.ATTACK_DAMAGE).getModifiers());
-		damageModifiers.addAll(attributes.get(Attributes.ATTACK_DAMAGE));
-		
-		for (AttributeModifier modifier : damageModifiers) {
-			damage += modifier.getAmount();
-		}
 		
 		for (AttributeModifier modifier : capAttributes.get(EpicFightAttributes.ARMOR_NEGATION.get())) {
 			armorNegation += modifier.getAmount();

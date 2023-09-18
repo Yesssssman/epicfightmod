@@ -58,7 +58,7 @@ public class LiechtenauerSkill extends WeaponInnateSkill {
 	@Override
 	public void onInitiate(SkillContainer container) {
 		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID, (event) -> {
-			if (container.isActivated()) {
+			if (container.isActivated() && !container.isDisabled()) {
 				if (!event.getTarget().isAlive()) {
 					this.setDurationSynchronize(event.getPlayerPatch(), Math.min(this.maxDuration, container.getRemainDuration() + this.returnDuration));
 				}
@@ -68,7 +68,7 @@ public class LiechtenauerSkill extends WeaponInnateSkill {
 		container.getExecuter().getEventListener().addEventListener(EventType.HURT_EVENT_PRE, EVENT_UUID, (event) -> {
 			int phaseLevel = event.getPlayerPatch().getEntityState().getLevel();
 			
-			if (event.getAmount() > 0.0F && container.isActivated() && phaseLevel > 0 && phaseLevel < 3 && 
+			if (event.getAmount() > 0.0F && container.isActivated() && !container.isDisabled() && phaseLevel > 0 && phaseLevel < 3 && 
 				this.canExecute(event.getPlayerPatch()) && isBlockableSource(event.getDamageSource())) {
 				DamageSource damageSource = event.getDamageSource();
 				boolean isFront = false;

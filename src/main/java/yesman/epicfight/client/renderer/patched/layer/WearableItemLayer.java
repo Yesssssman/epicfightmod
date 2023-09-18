@@ -46,12 +46,12 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		EPICFIGHT_OVERRIDING_TEXTURES.clear();
 	}
 	
-	private final boolean doNotRenderHelmet;
+	private final boolean firstPersonModel;
 	
-	public WearableItemLayer(AM mesh, boolean doNotRenderHelmet) {
+	public WearableItemLayer(AM mesh, boolean firstPersonModel) {
 		super(mesh);
 		
-		this.doNotRenderHelmet = doNotRenderHelmet;
+		this.firstPersonModel = firstPersonModel;
 	}
 	
 	private void renderArmor(PoseStack matStack, MultiBufferSource multiBufferSource, int packedLightIn, boolean hasEffect, AnimatedMesh model, Armature armature, float r, float g, float b, ResourceLocation armorTexture, OpenMatrix4f[] poses) {
@@ -68,7 +68,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 			
 			boolean chestPart = false;
 			
-			if (entitypatch.isFirstPerson()) {
+			if (entitypatch.isFirstPerson() && this.firstPersonModel) {
 				if (slot != EquipmentSlot.CHEST) {
 					continue;
 				} else {
@@ -76,7 +76,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				}
 			}
 			
-			if (slot == EquipmentSlot.HEAD && this.doNotRenderHelmet) {
+			if (slot == EquipmentSlot.HEAD && this.firstPersonModel) {
 				continue;
 			}
 			

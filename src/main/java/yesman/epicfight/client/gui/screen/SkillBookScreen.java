@@ -128,13 +128,13 @@ public class SkillBookScreen extends Screen {
 	}
 	
 	@Override
-	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-		this.render(matrixStack, mouseX, mouseY, partialTicks, false);
+	public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks) {
+		this.render(poseStack, mouseX, mouseY, partialTicks, false);
 	}
 	
-	public void render(PoseStack matrixStack, int mouseX, int mouseY, float partialTicks, boolean asBackground) {
+	public void render(PoseStack poseStack, int mouseX, int mouseY, float partialTicks, boolean asBackground) {
 		if (!asBackground) {
-			this.renderBackground(matrixStack);
+			this.renderBackground(poseStack);
 		}
 		
 		int posX = (int)(this.width - 256) / 2;
@@ -143,32 +143,32 @@ public class SkillBookScreen extends Screen {
 		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 		RenderSystem.setShaderTexture(0, BACKGROUND);
 		
-		matrixStack.pushPose();
-		matrixStack.translate(posX + 128, posY + 90, 0.0F);
-		matrixStack.scale(1.2F, 1.2F, 1.0F);
-		this.blit(matrixStack, -128, -90, 0, 0, 256, 181);
+		poseStack.pushPose();
+		poseStack.translate(posX + 128, posY + 90, 0.0F);
+		poseStack.scale(1.2F, 1.2F, 1.0F);
+		this.blit(poseStack, -128, -90, 0, 0, 256, 181);
 		
-		matrixStack.popPose();
-		matrixStack.pushPose();
+		poseStack.popPose();
+		poseStack.pushPose();
 		
-		matrixStack.translate(posX + 5, posY + 12, 0.0F);
-		matrixStack.scale(1.2F, 1.2F, 1.0F);
+		poseStack.translate(posX + 5, posY + 12, 0.0F);
+		poseStack.scale(1.2F, 1.2F, 1.0F);
 		
 		RenderSystem.setShaderTexture(0, this.skill.getSkillTexture());
 		RenderSystem.enableBlend();
-		GuiComponent.blit(matrixStack, 0, 0, 50, 50, 0, 0, 64, 64, 64, 64);
+		GuiComponent.blit(poseStack, 0, 0, 50, 50, 0, 0, 64, 64, 64, 64);
 		RenderSystem.disableBlend();
 		
-		matrixStack.popPose();
+		poseStack.popPose();
 		
 		String translationName = this.skill.getTranslationKey();
 		String skillName = new TranslatableComponent(translationName).getString();
 		int width = this.font.width(skillName);
-		this.font.draw(matrixStack, skillName, posX + 36 - width / 2, posY + 85, 0);
+		this.font.draw(poseStack, skillName, posX + 36 - width / 2, posY + 85, 0);
 		
 		String skillCategory = String.format("(%s)", new TranslatableComponent("skill." + EpicFightMod.MODID + "." + this.skill.getCategory().toString().toLowerCase() + ".category").getString());
 		width = this.font.width(skillCategory);
-		this.font.draw(matrixStack, skillCategory, posX + 36 - width / 2, posY + 100, 0);
+		this.font.draw(poseStack, skillCategory, posX + 36 - width / 2, posY + 100, 0);
 		
 		if (this.skill.getCategory() == SkillCategories.PASSIVE) {
 			PassiveSkill passiveSkill = (PassiveSkill)this.skill;
@@ -176,22 +176,22 @@ public class SkillBookScreen extends Screen {
 			
 			for (Map.Entry<Attribute, AttributeModifier> stat : passiveSkill.getModfierEntry()) {
 				String attrName = new TranslatableComponent(stat.getKey().getDescriptionId()).getString();
-				String amt = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(stat.getValue().getAmount());
-				String operator = "";
+				String amountString = "";
+				double amount = stat.getValue().getAmount();
 				
 				switch (stat.getValue().getOperation()) {
 				case ADDITION:
-					operator = "+";
+					amountString = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(amount);
 					break;
 				case MULTIPLY_BASE:
-					operator = "x";
+					amountString = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(amount * 100.0D) + "%";
 					break;
 				case MULTIPLY_TOTAL:
-					operator = "x";
+					amountString = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(amount * 100.0D) + "%";
 					break;
 				}
 				
-				this.font.draw(matrixStack, operator + amt +" "+ attrName, posX + 23 - width / 2, posY + i, 0);
+				this.font.draw(poseStack, "+" + amountString + " " + attrName, posX + 23 - width / 2, posY + i, 0);
 				i += 10;
 			}
 		}
@@ -203,16 +203,16 @@ public class SkillBookScreen extends Screen {
 			FormattedCharSequence ireorderingprocessor1 = list.get(l1);
 			
             if (ireorderingprocessor1 != null) {
-               this.font.draw(matrixStack, ireorderingprocessor1, posX + 105, height, 0);
+               this.font.draw(poseStack, ireorderingprocessor1, posX + 105, height, 0);
             }
             
             height+=10;
 		}
 		
-		super.render(matrixStack, mouseX, mouseY, partialTicks);
+		super.render(poseStack, mouseX, mouseY, partialTicks);
 		
 		if (asBackground) {
-			this.renderBackground(matrixStack);
+			this.renderBackground(poseStack);
 		}
 	}
 }

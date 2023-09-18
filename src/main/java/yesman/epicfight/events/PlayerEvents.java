@@ -7,6 +7,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.player.ArrowLooseEvent;
@@ -53,8 +54,9 @@ public class PlayerEvents {
 	public static void rightClickItemServerEvent(RightClickItem event) {
 		if (event.getSide() == LogicalSide.SERVER) {
 			ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(event.getPlayer(), ServerPlayerPatch.class);
+			ItemStack itemstack = playerpatch.getOriginal().getOffhandItem();
 			
-			if (playerpatch != null && (playerpatch.getOriginal().getOffhandItem().getUseAnimation() == UseAnim.NONE || !playerpatch.getHoldingItemCapability(InteractionHand.MAIN_HAND).getStyle(playerpatch).canUseOffhand())) {
+			if (playerpatch != null && (itemstack.getUseAnimation() == UseAnim.NONE || !playerpatch.getHoldingItemCapability(InteractionHand.MAIN_HAND).getStyle(playerpatch).canUseOffhand())) {
 				boolean canceled = playerpatch.getEventListener().triggerEvents(EventType.SERVER_ITEM_USE_EVENT, new RightClickItemEvent<>(playerpatch));
 				
 				if (playerpatch.getEntityState().movementLocked()) {
@@ -68,8 +70,7 @@ public class PlayerEvents {
 	
 	@SubscribeEvent
 	public static void itemUseStartEvent(LivingEntityUseItemEvent.Start event) {
-		if (event.getEntity() instanceof Player) {
-			Player player = (Player) event.getEntity();
+		if (event.getEntity() instanceof Player player) {
 			PlayerPatch<?> playerpatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), PlayerPatch.class);
 			InteractionHand hand = player.getItemInHand(InteractionHand.MAIN_HAND).equals(event.getItem()) ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
 			CapabilityItem itemCap = playerpatch.getHoldingItemCapability(hand);
@@ -121,8 +122,7 @@ public class PlayerEvents {
 				ClientEngine.getInstance().renderEngine.zoomOut(0);
 			}
 		} else {
-			if (event.getEntity() instanceof ServerPlayer) {
-				ServerPlayer player = (ServerPlayer) event.getEntity();
+			if (event.getEntity() instanceof ServerPlayer player) {
 				ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(player, ServerPlayerPatch.class);
 				
 				if (playerpatch != null) {

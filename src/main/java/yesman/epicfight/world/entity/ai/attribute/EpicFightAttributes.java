@@ -20,6 +20,10 @@ import yesman.epicfight.world.entity.EpicFightEntities;
 import yesman.epicfight.world.entity.WitherGhostClone;
 
 public class EpicFightAttributes {
+	static {
+		Attributes.ATTACK_DAMAGE.setSyncable(true);
+	}
+	
 	public static final DeferredRegister<Attribute> ATTRIBUTES = DeferredRegister.create(ForgeRegistries.ATTRIBUTES, EpicFightMod.MODID);
 	
     public static final RegistryObject<Attribute> MAX_STAMINA = ATTRIBUTES.register("staminar", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".staminar", 0.0D, 0.0D, 1024.0D).setSyncable(true));

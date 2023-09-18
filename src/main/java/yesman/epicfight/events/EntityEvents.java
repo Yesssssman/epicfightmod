@@ -167,7 +167,6 @@ public class EntityEvents {
 				float totalDamage = epicFightDamageSource.getDamageModifier().getTotalValue(baseDamage);
 				
 				if (trueSource instanceof LivingEntity livingEntity && epicFightDamageSource.getExtraDamages() != null) {
-					
 					for (ExtraDamageInstance extraDamage : epicFightDamageSource.getExtraDamages()) {
 						totalDamage += extraDamage.get(livingEntity, epicFightDamageSource.getHurtItem(), hitEntity, baseDamage);
 					}

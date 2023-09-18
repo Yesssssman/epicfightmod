@@ -82,7 +82,7 @@ public class ControllEngine {
 		this.keyFunctions.put(EpicFightKeyMappings.LOCK_ON, this::lockonPressed);
 		
 		try {
-			this.keyHash = (KeyBindingMap) ObfuscationReflectionHelper.findField(KeyMapping.class, "f_90810_").get(null);
+			this.keyHash = (KeyBindingMap)ObfuscationReflectionHelper.findField(KeyMapping.class, "f_90810_").get(null);
 		} catch (IllegalArgumentException | IllegalAccessException e) {
 			e.printStackTrace();
 		}

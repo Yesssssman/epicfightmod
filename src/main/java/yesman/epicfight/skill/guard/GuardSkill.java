@@ -54,7 +54,7 @@ import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 public class GuardSkill extends Skill {
-	protected static final SkillDataKey<Integer> LAST_HIT_TICK = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
+	protected static final SkillDataKey<Integer> PENALTY_RESTORE_COUNTER = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
 	protected static final SkillDataKey<Float> PENALTY = SkillDataKey.createDataKey(SkillDataManager.ValueType.FLOAT);
 	protected static final UUID EVENT_UUID = UUID.fromString("b422f7a0-f378-11eb-9a03-0242ac130003");
 	
@@ -141,7 +141,7 @@ public class GuardSkill extends Skill {
 	
 	@Override
 	public void onInitiate(SkillContainer container) {
-		container.getDataManager().registerData(LAST_HIT_TICK);
+		container.getDataManager().registerData(PENALTY_RESTORE_COUNTER);
 		container.getDataManager().registerData(PENALTY);
 		
 		container.getExecuter().getEventListener().addEventListener(EventType.CLIENT_ITEM_USE_EVENT, EVENT_UUID, (event) -> {
@@ -162,7 +162,7 @@ public class GuardSkill extends Skill {
 		
 		container.getExecuter().getEventListener().addEventListener(EventType.SERVER_ITEM_STOP_EVENT, EVENT_UUID, (event) -> {
 			ServerPlayer serverplayer = event.getPlayerPatch().getOriginal();
-			container.getDataManager().setDataSync(LAST_HIT_TICK, serverplayer.tickCount, serverplayer);
+			container.getDataManager().setDataSync(PENALTY_RESTORE_COUNTER, serverplayer.tickCount, serverplayer);
 		});
 		
 		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID, (event) -> {
@@ -320,7 +320,7 @@ public class GuardSkill extends Skill {
 			float penalty = container.getDataManager().getDataValue(PENALTY);
 			
 			if (penalty > 0) {
-				int hitTick = container.getDataManager().getDataValue(LAST_HIT_TICK);
+				int hitTick = container.getDataManager().getDataValue(PENALTY_RESTORE_COUNTER);
 				
 				if (container.getExecuter().getOriginal().tickCount - hitTick > 40) {
 					container.getDataManager().setDataSync(PENALTY, 0.0F, (ServerPlayer)container.getExecuter().getOriginal());

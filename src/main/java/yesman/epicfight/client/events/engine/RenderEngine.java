@@ -26,10 +26,8 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.item.BowItem;
@@ -506,45 +504,22 @@ public class RenderEngine {
 								
 								if (sibling instanceof TranslatableComponent translationComponent) {
 									if (translationComponent.getArgs().length > 1 && translationComponent.getArgs()[1] instanceof TranslatableComponent translatableArg) {
-										CapabilityItem itemCapability = EpicFightCapabilities.getItemStackCapabilityOr(event.getItemStack(), null);
-										
 										if (translatableArg.getKey().equals(Attributes.ATTACK_SPEED.getDescriptionId())) {
-											float weaponSpeed = (float)playerpatch.getOriginal().getAttribute(Attributes.ATTACK_SPEED).getBaseValue();
-											
-											for (AttributeModifier modifier : event.getItemStack().getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_SPEED)) {
-												weaponSpeed += modifier.getAmount();
-											}
-											
-											if (itemCapability != null) {
-												for (AttributeModifier modifier : itemCapability.getAttributeModifiers(EquipmentSlot.MAINHAND, playerpatch).get(Attributes.ATTACK_SPEED)) {
-													weaponSpeed += modifier.getAmount();
-												}
-											}
-											
+											float weaponSpeed = (float)playerpatch.getWeaponAttribute(Attributes.ATTACK_SPEED, event.getItemStack());
 											tooltip.remove(i);
-											tooltip.add(i, new TextComponent(String.format(" %.2f ", playerpatch.getModifiedAttackSpeed(cap, weaponSpeed))).append(new TranslatableComponent(Attributes.ATTACK_SPEED.getDescriptionId())));
+											tooltip.add(i, new TextComponent(String.format(" %.2f ", playerpatch.getModifiedAttackSpeed(cap, weaponSpeed)))
+																		.append(new TranslatableComponent(Attributes.ATTACK_SPEED.getDescriptionId())));
+											
 										} else if (translatableArg.getKey().equals(Attributes.ATTACK_DAMAGE.getDescriptionId())) {
-											float weaponDamage = (float)playerpatch.getOriginal().getAttribute(Attributes.ATTACK_DAMAGE).getBaseValue();
-											weaponDamage += EnchantmentHelper.getDamageBonus(event.getItemStack(), MobType.UNDEFINED);
 											
-											for (AttributeModifier modifier : playerpatch.getOriginal().getAttribute(Attributes.ATTACK_DAMAGE).getModifiers()) {
-												weaponDamage += modifier.getAmount();
-											}
-											
-											for (AttributeModifier modifier : event.getItemStack().getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE)) {
-												weaponDamage += modifier.getAmount();
-											}
-											
-											if (itemCapability != null) {
-												for (AttributeModifier modifier : itemCapability.getAttributeModifiers(EquipmentSlot.MAINHAND, playerpatch).get(Attributes.ATTACK_DAMAGE)) {
-													weaponDamage += modifier.getAmount();
-												}
-											}
-											
-											String damageFormat = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(playerpatch.getModifiedBaseDamage(weaponDamage));
+											float weaponDamage = (float)playerpatch.getWeaponAttribute(Attributes.ATTACK_DAMAGE, event.getItemStack());
+											float damageBonus = EnchantmentHelper.getDamageBonus(event.getItemStack(), MobType.UNDEFINED);
+											String damageFormat = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(playerpatch.getModifiedBaseDamage(weaponDamage) + damageBonus);
 											
 											tooltip.remove(i);
-											tooltip.add(i, new TextComponent(String.format(" %s ", damageFormat)).append(new TranslatableComponent(Attributes.ATTACK_DAMAGE.getDescriptionId())).withStyle(ChatFormatting.DARK_GREEN));
+											tooltip.add(i, new TextComponent(String.format(" %s ", damageFormat))
+																		.append(new TranslatableComponent(Attributes.ATTACK_DAMAGE.getDescriptionId()))
+																		.withStyle(ChatFormatting.DARK_GREEN));
 										}
 									}
 								}
