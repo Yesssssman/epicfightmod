@@ -18,7 +18,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
-import com.telepathicgrunt.the_bumblezone.client.rendering.BeeArmorModel;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.client.model.HumanoidModel;
