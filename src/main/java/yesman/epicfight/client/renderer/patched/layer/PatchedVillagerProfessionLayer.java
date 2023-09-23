@@ -31,13 +31,15 @@ public class PatchedVillagerProfessionLayer extends PatchedLayer<ZombieVillager,
 	}
 	
 	@Override
-	public void renderLayer(MobPatch<ZombieVillager> entitypatch, ZombieVillager entityliving, VillagerProfessionLayer<ZombieVillager, ZombieVillagerModel<ZombieVillager>> originalRenderer, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, OpenMatrix4f[] poses, float netYawHead, float pitchHead, float partialTicks) {
+	protected void renderLayer(MobPatch<ZombieVillager> entitypatch, ZombieVillager entityliving, VillagerProfessionLayer<ZombieVillager, ZombieVillagerModel<ZombieVillager>> vanillaLayer, PoseStack postStack, MultiBufferSource buffer, int packedLightIn,
+			OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
+		
 		if (!entityliving.isInvisible()) {
 			VillagerData villagerdata = ((VillagerDataHolder)entitypatch.getOriginal()).getVillagerData();
 			
-			VillagerMetaDataSection.Hat typeHat = originalRenderer.getHatData(originalRenderer.typeHatCache, "type", Registry.VILLAGER_TYPE, villagerdata.getType());
+			VillagerMetaDataSection.Hat typeHat = vanillaLayer.getHatData(vanillaLayer.typeHatCache, "type", Registry.VILLAGER_TYPE, villagerdata.getType());
 	        @SuppressWarnings("deprecation")
-	        VillagerMetaDataSection.Hat professionHat = originalRenderer.getHatData(originalRenderer.professionHatCache, "profession", Registry.VILLAGER_PROFESSION, villagerdata.getProfession());
+	        VillagerMetaDataSection.Hat professionHat = vanillaLayer.getHatData(vanillaLayer.professionHatCache, "profession", Registry.VILLAGER_PROFESSION, villagerdata.getProfession());
 	        
 	        if (!(typeHat == VillagerMetaDataSection.Hat.NONE || typeHat == VillagerMetaDataSection.Hat.PARTIAL && professionHat != VillagerMetaDataSection.Hat.FULL)
 	        		|| !entityliving.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
@@ -49,12 +51,12 @@ public class PatchedVillagerProfessionLayer extends PatchedLayer<ZombieVillager,
 				this.mesh.jacket.hidden = true;
 			}
 	        
-			VertexConsumer builder1 = bufferIn.getBuffer(EpicFightRenderTypes.triangles(RenderType.entityCutoutNoCull(originalRenderer.getResourceLocation("type", Registry.VILLAGER_TYPE.getKey(villagerdata.getType())))));
-			this.mesh.drawModelWithPose(matrixStackIn, builder1, packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, LivingEntityRenderer.getOverlayCoords(entityliving, 0.0F), entitypatch.getArmature(), poses);
+			VertexConsumer builder1 = buffer.getBuffer(EpicFightRenderTypes.triangles(RenderType.entityCutoutNoCull(vanillaLayer.getResourceLocation("type", Registry.VILLAGER_TYPE.getKey(villagerdata.getType())))));
+			this.mesh.drawModelWithPose(postStack, builder1, packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, LivingEntityRenderer.getOverlayCoords(entityliving, 0.0F), entitypatch.getArmature(), poses);
 			
 			if (villagerdata.getProfession() != VillagerProfession.NONE) {
-				VertexConsumer builder2 = bufferIn.getBuffer(EpicFightRenderTypes.triangles(RenderType.entityCutoutNoCull(originalRenderer.getResourceLocation("profession", villagerdata.getProfession().getRegistryName()))));
-				this.mesh.drawModelWithPose(matrixStackIn, builder2, packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, LivingEntityRenderer.getOverlayCoords(entityliving, 0.0F), entitypatch.getArmature(), poses);
+				VertexConsumer builder2 = buffer.getBuffer(EpicFightRenderTypes.triangles(RenderType.entityCutoutNoCull(vanillaLayer.getResourceLocation("profession", villagerdata.getProfession().getRegistryName()))));
+				this.mesh.drawModelWithPose(postStack, builder2, packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, LivingEntityRenderer.getOverlayCoords(entityliving, 0.0F), entitypatch.getArmature(), poses);
 			}
 		}
 	}

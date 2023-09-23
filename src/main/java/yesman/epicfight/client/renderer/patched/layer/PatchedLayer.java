@@ -20,12 +20,14 @@ public abstract class PatchedLayer<E extends LivingEntity, T extends LivingEntit
 		this.mesh = mesh;
 	}
 	
-	public final void renderLayer(int z, T entitypatch, E entityliving, RenderLayer<E, M> originalRenderer, PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn, OpenMatrix4f[] poses, float netYawHead, float pitchHead, float partialTicks) {
+	public final void renderLayer(int z, T entitypatch, E entityliving, RenderLayer<E, M> vanillaLayer, PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn,
+			OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 		this.initMesh();
-		this.renderLayer(entitypatch, entityliving, this.cast(originalRenderer), matrixStackIn, buffer, packedLightIn, poses, netYawHead, pitchHead, partialTicks);
+		this.renderLayer(entitypatch, entityliving, this.cast(vanillaLayer), matrixStackIn, buffer, packedLightIn, poses, bob, yRot, xRot, partialTicks);
 	}
 	
-	protected abstract void renderLayer(T entitypatch, E entityliving, R originalRenderer, PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn, OpenMatrix4f[] poses, float netYawHead, float pitchHead, float partialTicks);
+	protected abstract void renderLayer(T entitypatch, E entityliving, R vanillaLayer, PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn,
+			OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks);
 	
 	protected void initMesh() {
 		if (this.mesh != null) {

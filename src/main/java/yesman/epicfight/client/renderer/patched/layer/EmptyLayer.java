@@ -19,7 +19,6 @@ public class EmptyLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, 
 	}
 
 	@Override
-	public void renderLayer(T entitypatch, E entityliving, RenderLayer<E, M> originalRenderer, PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn, OpenMatrix4f[] poses, float netYawHead, float pitchHead, float partialTicks) {
-		
-	}
+	protected void renderLayer(T entitypatch, E entityliving, RenderLayer<E, M> originalRenderer, PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn,
+			OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {}
 }

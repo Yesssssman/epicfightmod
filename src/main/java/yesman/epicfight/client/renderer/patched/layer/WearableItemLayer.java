@@ -60,7 +60,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 	}
 	
 	@Override
-	public void renderLayer(T entitypatch, E entityliving, HumanoidArmorLayer<E, M, M> originalRenderer, PoseStack poseStack, MultiBufferSource buf, int packedLightIn, OpenMatrix4f[] poses, float netYawHead, float pitchHead, float partialTicks) {
+	public void renderLayer(T entitypatch, E entityliving, HumanoidArmorLayer<E, M, M> vanillaLayer, PoseStack poseStack, MultiBufferSource buf, int packedLightIn, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			if (slot.getType() != EquipmentSlot.Type.ARMOR) {
 				continue;
@@ -95,7 +95,17 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 					poseStack.translate(0.0D, head * 0.055D, 0.0D);
 				}
 				
-				AnimatedMesh model = this.getArmorModel(originalRenderer, entityliving, armorItem, stack, slot);
+				boolean debuggingMode = ClientEngine.getInstance().isArmorModelDebuggingMode();
+				
+				if (debuggingMode) {
+					poseStack.pushPose();
+					poseStack.scale(-1.0F, -1.0F, 1.0F);
+					poseStack.translate(1.0D, -1.501D, 0.0D);
+					vanillaLayer.render(poseStack, buf, packedLightIn, entityliving, partialTicks, head, packedLightIn, bob, yRot, xRot);
+					poseStack.popPose();
+				}
+				
+				AnimatedMesh model = this.getArmorModel(vanillaLayer, entityliving, armorItem, stack, slot, debuggingMode);
 				model.initialize();
 				
 				if (chestPart) {
@@ -122,11 +132,10 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		}
 	}
 	
-	private AnimatedMesh getArmorModel(HumanoidArmorLayer<E, M, M> originalRenderer, E entityliving, ArmorItem armorItem, ItemStack stack, EquipmentSlot slot) {
+	private AnimatedMesh getArmorModel(HumanoidArmorLayer<E, M, M> originalRenderer, E entityliving, ArmorItem armorItem, ItemStack stack, EquipmentSlot slot, boolean armorDebugging) {
 		ResourceLocation registryName = armorItem.getRegistryName();
-		boolean debuggingMode = ClientEngine.getInstance().isArmorModelDebuggingMode();
 		
-		if (ARMOR_MODELS.containsKey(registryName) && !debuggingMode) {
+		if (ARMOR_MODELS.containsKey(registryName) && !armorDebugging) {
 			return ARMOR_MODELS.get(registryName);
 		} else {
 			ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
@@ -140,10 +149,10 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				HumanoidModel<?> defaultModel = originalRenderer.getArmorModel(slot);
 				Model customModel = ForgeHooksClient.getArmorModel(entityliving, stack, slot, defaultModel);
 				
-				if (customModel == defaultModel || !(customModel instanceof HumanoidModel)) {
+				if (customModel == defaultModel || !(customModel instanceof HumanoidModel<?> humanoidModel)) {
 					model = this.mesh.getArmorModel(slot);
 				} else {
-					model = CustomModelBakery.bakeBipedCustomArmorModel((HumanoidModel<?>)customModel, armorItem, slot, debuggingMode);
+					model = CustomModelBakery.bakeHumanoidModel(humanoidModel, armorItem, slot, armorDebugging);
 				}
 			}
 			

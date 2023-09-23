@@ -205,7 +205,7 @@ public class GuardSkill extends Skill {
 							return;
 						}
 						
-						impact = ((EpicFightDamageSource)event.getDamageSource()).getImpact();
+						impact = epicfightDamageSource.getImpact();
 						knockback += Math.min(impact * 0.1F, 1.0F);
 					}
 					
@@ -250,6 +250,12 @@ public class GuardSkill extends Skill {
 	public void dealEvent(PlayerPatch<?> playerpatch, HurtEvent.Pre event, boolean advanced) {
 		event.setCanceled(true);
 		event.setResult(AttackResult.ResultType.BLOCKED);
+		
+		LivingEntityPatch<?> attackerpatch = EpicFightCapabilities.getEntityPatch(event.getDamageSource().getEntity(), LivingEntityPatch.class);
+		
+		if (attackerpatch != null) {
+			attackerpatch.setLastAttackEntity(playerpatch.getOriginal());
+		}
 		
 		Entity directEntity = event.getDamageSource().getDirectEntity();
 		LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(directEntity, LivingEntityPatch.class);

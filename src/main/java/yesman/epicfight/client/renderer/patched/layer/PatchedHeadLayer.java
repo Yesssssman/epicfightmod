@@ -26,10 +26,11 @@ public class PatchedHeadLayer<E extends LivingEntity, T extends LivingEntityPatc
 	}
 
 	@Override
-	public void renderLayer(T entitypatch, E entityliving, CustomHeadLayer<E, M> originalRenderer, PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn, OpenMatrix4f[] poses, float netYawHead, float pitchHead, float partialTicks) {
+	protected void renderLayer(T entitypatch, E entityliving, CustomHeadLayer<E, M> vanillaLayer, PoseStack postStack, MultiBufferSource buffer, int packedLightIn,
+			OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 		ItemStack itemstack = entityliving.getItemBySlot(EquipmentSlot.HEAD);
 		if (!itemstack.isEmpty()) {
-			ModelPart model = originalRenderer.getParentModel().getHead();
+			ModelPart model = vanillaLayer.getParentModel().getHead();
 			E entity = entitypatch.getOriginal();
 			OpenMatrix4f modelMatrix = new OpenMatrix4f();
 			modelMatrix.scale(new Vec3f(-1.0F, -1.0F, 1.0F)).mulFront(poses[9]);
@@ -40,18 +41,18 @@ public class PatchedHeadLayer<E extends LivingEntity, T extends LivingEntityPatc
 			model.yRot = 0;
 			model.zRot = 0;
 			OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);
-			matrixStackIn.pushPose();
+			postStack.pushPose();
 			
-			MathUtils.translateStack(matrixStackIn, modelMatrix);
-			MathUtils.rotateStack(matrixStackIn, transpose);
+			MathUtils.translateStack(postStack, modelMatrix);
+			MathUtils.rotateStack(postStack, transpose);
 			
 			if (entitypatch.getOriginal().isBaby()) {
-				matrixStackIn.translate(0.0F, -1.2F, 0.0F);
-				matrixStackIn.scale(1.6F, 1.6F, 1.6F);
+				postStack.translate(0.0F, -1.2F, 0.0F);
+				postStack.scale(1.6F, 1.6F, 1.6F);
 			}
 			
-			originalRenderer.render(matrixStackIn, buffer, packedLightIn, entity, entity.animationPosition, entity.animationSpeed, packedLightIn, entity.tickCount, netYawHead, pitchHead);
-			matrixStackIn.popPose();
+			vanillaLayer.render(postStack, buffer, packedLightIn, entity, entity.animationPosition, entity.animationSpeed, packedLightIn, entity.tickCount, yRot, xRot);
+			postStack.popPose();
 		}
 	}
 }

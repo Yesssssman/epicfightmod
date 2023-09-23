@@ -33,6 +33,8 @@ import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.skill.SkillDataManager;
 import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
+import yesman.epicfight.world.capabilities.EpicFightCapabilities;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
@@ -96,6 +98,12 @@ public class LiechtenauerSkill extends WeaponInnateSkill {
 					
 					if (damageSource.getDirectEntity() instanceof LivingEntity livingentity) {
 						knockback += EnchantmentHelper.getKnockbackBonus(livingentity) * 0.1F;
+					}
+					
+					LivingEntityPatch<?> attackerpatch = EpicFightCapabilities.getEntityPatch(event.getDamageSource().getEntity(), LivingEntityPatch.class);
+					
+					if (attackerpatch != null) {
+						attackerpatch.setLastAttackEntity(event.getPlayerPatch().getOriginal());
 					}
 					
 					event.getPlayerPatch().knockBackEntity(damageSource.getDirectEntity().position(), knockback);

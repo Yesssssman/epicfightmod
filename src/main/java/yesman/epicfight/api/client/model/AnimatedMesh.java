@@ -25,7 +25,7 @@ import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
 public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
-	public static final ModelPart<AnimatedVertexIndicator> EMPTY = new ModelPart<>(null);
+	public static final ModelPart<AnimatedVertexIndicator> EMPTY = new ModelPart<>(null, null);
 	final float[] weights;
 	
 	public AnimatedMesh(Map<String, float[]> arrayMap, AnimatedMesh parent, RenderProperties properties, Map<String, ModelPart<AnimatedVertexIndicator>> parts) {

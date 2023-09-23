@@ -25,7 +25,7 @@ public class BetaWarningMessage extends GuiComponent {
 		int width = sr.getGuiScaledWidth();
 		
 		String l1 = "Hello " + this.minecraft.player.getName().getString() + "!";
-		String l2 = "You're using Epic Fight in Beta Test";
+		String l2 = "You're using Epic Fight 18.5.7";
 		
 		Matrix4f proj = RenderSystem.getProjectionMatrix();
 		Matrix4f matrix4f = Matrix4f.orthographic(0.0F, (float)((double)sr.getWidth() / sr.getGuiScale()), 0.0F, (float)((double)sr.getHeight() / sr.getGuiScale()), 1000.0F, net.minecraftforge.client.ForgeHooksClient.getGuiFarPlane());

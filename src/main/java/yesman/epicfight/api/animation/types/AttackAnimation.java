@@ -227,6 +227,7 @@ public class AttackAnimation extends ActionAnimation {
 							EpicFightDamageSource source = this.getEpicFightDamageSource(entitypatch, hitten, phase);
 							int prevInvulTime = hitten.invulnerableTime;
 							hitten.invulnerableTime = 0;
+							
 							AttackResult attackResult = entitypatch.attack(source, hitten, phase.hand);
 							hitten.invulnerableTime = prevInvulTime;
 							
