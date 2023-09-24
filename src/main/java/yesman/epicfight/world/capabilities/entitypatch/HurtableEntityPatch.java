@@ -19,7 +19,9 @@ public abstract class HurtableEntityPatch<T extends LivingEntity> extends Entity
 	protected void serverTick(LivingUpdateEvent event) {
 		this.cancelKnockback = false;
 		
-		if (this.stunTimeReduction > 0.0F) {
+		float minStunReduction = this.getStunArmor() / (this.getStunArmor() + 20.0F);
+		
+		if (this.stunTimeReduction > minStunReduction) {
 			float stunArmor = this.getStunArmor();
 			this.stunTimeReduction -= 0.05F * (1.1F - this.stunTimeReduction * this.stunTimeReduction) * (1.0F - stunArmor / (7.5F + stunArmor));
 			this.stunTimeReduction = Math.max(0.0F, this.stunTimeReduction);

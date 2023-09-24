@@ -67,7 +67,7 @@ public class SkillBookLootModifier extends LootModifier {
 		int antiDropChance = 100 - modifier;
 		float dropChanceModifier = (antiDropChance == 0) ? Float.MAX_VALUE : dropChance / (float)antiDropChance;
 		
-		lootTableRegistryEvent.add(EntityType.ZOMBIE, LootTable.lootTable().withPool(
+		lootTableRegistryEvent.put(EntityType.ZOMBIE, LootTable.lootTable().withPool(
 			LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(LootItemRandomChanceCondition.randomChance(0.025F * dropChanceModifier))
 			.add(LootItem.lootTableItem(EpicFightItems.SKILLBOOK.get()).apply(SetSkillFunction.builder(
 					1.0F, "epicfight:berserker",
@@ -77,7 +77,7 @@ public class SkillBookLootModifier extends LootModifier {
 					1.0F, "epicfight:guard",
 					0.5F, "epicfight:endurance"
 			)))
-    	)).add(EntityType.HUSK, LootTable.lootTable().withPool(
+    	)).put(EntityType.HUSK, LootTable.lootTable().withPool(
 			LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(LootItemRandomChanceCondition.randomChance(0.025F * dropChanceModifier))
 			.add(LootItem.lootTableItem(EpicFightItems.SKILLBOOK.get()).apply(SetSkillFunction.builder(
 					1.0F, "epicfight:berserker",
@@ -87,7 +87,7 @@ public class SkillBookLootModifier extends LootModifier {
 					1.0F, "epicfight:guard",
 					0.5F, "epicfight:endurance"
 			)))
-    	)).add(EntityType.DROWNED, LootTable.lootTable().withPool(
+    	)).put(EntityType.DROWNED, LootTable.lootTable().withPool(
 			LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(LootItemRandomChanceCondition.randomChance(0.025F * dropChanceModifier))
 			.add(LootItem.lootTableItem(EpicFightItems.SKILLBOOK.get()).apply(SetSkillFunction.builder(
 					1.0F, "epicfight:berserker",
@@ -97,7 +97,7 @@ public class SkillBookLootModifier extends LootModifier {
 					1.0F, "epicfight:guard",
 					0.5F, "epicfight:endurance"
 			)))
-    	)).add(EntityType.SKELETON, LootTable.lootTable().withPool(
+    	)).put(EntityType.SKELETON, LootTable.lootTable().withPool(
 			LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(LootItemRandomChanceCondition.randomChance(0.025F * dropChanceModifier))
 			.add(LootItem.lootTableItem(EpicFightItems.SKILLBOOK.get()).apply(SetSkillFunction.builder(
 					1.0F, "epicfight:swordmaster",
@@ -107,7 +107,7 @@ public class SkillBookLootModifier extends LootModifier {
 					1.0F, "epicfight:guard",
 					0.5F, "epicfight:emergency_escape"
 			)))
-    	)).add(EntityType.STRAY, LootTable.lootTable().withPool(
+    	)).put(EntityType.STRAY, LootTable.lootTable().withPool(
 			LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(LootItemRandomChanceCondition.randomChance(0.025F * dropChanceModifier))
 			.add(LootItem.lootTableItem(EpicFightItems.SKILLBOOK.get()).apply(SetSkillFunction.builder(
 					1.0F, "epicfight:swordmaster",
@@ -117,27 +117,27 @@ public class SkillBookLootModifier extends LootModifier {
 					1.0F, "epicfight:guard",
 					0.5F, "epicfight:emergency_escape"
 			)))
-    	)).add(EntityType.SPIDER, LootTable.lootTable().withPool(
+    	)).put(EntityType.SPIDER, LootTable.lootTable().withPool(
 			LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(LootItemRandomChanceCondition.randomChance(0.025F * dropChanceModifier))
 			.add(LootItem.lootTableItem(EpicFightItems.SKILLBOOK.get()).apply(SetSkillFunction.builder(
 					"epicfight:roll",
 					"epicfight:step",
 					"epicfight:guard"
 			)))
-    	)).add(EntityType.CAVE_SPIDER, LootTable.lootTable().withPool(
+    	)).put(EntityType.CAVE_SPIDER, LootTable.lootTable().withPool(
 			LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(LootItemRandomChanceCondition.randomChance(0.025F * dropChanceModifier))
 			.add(LootItem.lootTableItem(EpicFightItems.SKILLBOOK.get()).apply(SetSkillFunction.builder(
 					"epicfight:roll",
 					"epicfight:step",
 					"epicfight:guard"
 			)))
-    	)).add(EntityType.CREEPER, LootTable.lootTable().withPool(
+    	)).put(EntityType.CREEPER, LootTable.lootTable().withPool(
 			LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(LootItemRandomChanceCondition.randomChance(0.025F * dropChanceModifier))
 			.add(LootItem.lootTableItem(EpicFightItems.SKILLBOOK.get()).apply(SetSkillFunction.builder(
 					"epicfight:hypervitality",
 					"epicfight:impact_guard"
 			)))
-    	)).add(EntityType.ENDERMAN, LootTable.lootTable().withPool(
+    	)).put(EntityType.ENDERMAN, LootTable.lootTable().withPool(
 			LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(LootItemRandomChanceCondition.randomChance(0.025F * dropChanceModifier))
 			.add(LootItem.lootTableItem(EpicFightItems.SKILLBOOK.get()).apply(SetSkillFunction.builder(
 					"epicfight:hypervitality",
@@ -147,7 +147,7 @@ public class SkillBookLootModifier extends LootModifier {
 					"epicfight:parrying",
 					"epicfight:impact_guard"
 			)))
-    	)).add(EntityType.VINDICATOR, LootTable.lootTable().withPool(
+    	)).put(EntityType.VINDICATOR, LootTable.lootTable().withPool(
 			LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(LootItemRandomChanceCondition.randomChance(0.025F * dropChanceModifier))
 			.add(LootItem.lootTableItem(EpicFightItems.SKILLBOOK.get()).apply(SetSkillFunction.builder(
 					"epicfight:hypervitality",
@@ -156,7 +156,7 @@ public class SkillBookLootModifier extends LootModifier {
 					"epicfight:step",
 					"epicfight:roll"
 			)))
-    	)).add(EntityType.PILLAGER, LootTable.lootTable().withPool(
+    	)).put(EntityType.PILLAGER, LootTable.lootTable().withPool(
 			LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(LootItemRandomChanceCondition.randomChance(0.025F * dropChanceModifier))
 			.add(LootItem.lootTableItem(EpicFightItems.SKILLBOOK.get()).apply(SetSkillFunction.builder(
 					"epicfight:hypervitality",
@@ -165,13 +165,13 @@ public class SkillBookLootModifier extends LootModifier {
 					"epicfight:step",
 					"epicfight:roll"
 			)))
-    	)).add(EntityType.WITCH, LootTable.lootTable().withPool(
+    	)).put(EntityType.WITCH, LootTable.lootTable().withPool(
 			LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(LootItemRandomChanceCondition.randomChance(0.025F * dropChanceModifier))
 			.add(LootItem.lootTableItem(EpicFightItems.SKILLBOOK.get()).apply(SetSkillFunction.builder(
 					"epicfight:forbidden_strength",
 					"epicfight:berserker"
 			)))
-    	)).add(EntityType.EVOKER, LootTable.lootTable().withPool(
+    	)).put(EntityType.EVOKER, LootTable.lootTable().withPool(
 			LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(LootItemRandomChanceCondition.randomChance(0.025F * dropChanceModifier))
 			.add(LootItem.lootTableItem(EpicFightItems.SKILLBOOK.get()).apply(SetSkillFunction.builder(
 					"epicfight:parrying",
@@ -182,7 +182,7 @@ public class SkillBookLootModifier extends LootModifier {
 					"epicfight:death_harvest",
 					"epicfight:emergency_escape"
 			)))
-    	)).add(EntityType.PIGLIN, LootTable.lootTable().withPool(
+    	)).put(EntityType.PIGLIN, LootTable.lootTable().withPool(
 			LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(LootItemRandomChanceCondition.randomChance(0.025F * dropChanceModifier))
 			.add(LootItem.lootTableItem(EpicFightItems.SKILLBOOK.get()).apply(SetSkillFunction.builder(
 					"epicfight:swordmaster",
@@ -191,7 +191,7 @@ public class SkillBookLootModifier extends LootModifier {
 					"epicfight:step",
 					"epicfight:roll"
 			)))
-    	)).add(EntityType.PIGLIN_BRUTE, LootTable.lootTable().withPool(
+    	)).put(EntityType.PIGLIN_BRUTE, LootTable.lootTable().withPool(
 			LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(LootItemRandomChanceCondition.randomChance(0.025F * dropChanceModifier))
 			.add(LootItem.lootTableItem(EpicFightItems.SKILLBOOK.get()).apply(SetSkillFunction.builder(
 					"epicfight:hypervitality",
@@ -199,7 +199,7 @@ public class SkillBookLootModifier extends LootModifier {
 					"epicfight:endurance",
 					"epicfight:impact_guard"
 			)))
-    	)).add(EntityType.ZOMBIFIED_PIGLIN, LootTable.lootTable().withPool(
+    	)).put(EntityType.ZOMBIFIED_PIGLIN, LootTable.lootTable().withPool(
 			LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(LootItemRandomChanceCondition.randomChance(0.025F * dropChanceModifier))
 			.add(LootItem.lootTableItem(EpicFightItems.SKILLBOOK.get()).apply(SetSkillFunction.builder(
 					"epicfight:berserker",
@@ -208,7 +208,7 @@ public class SkillBookLootModifier extends LootModifier {
 					"epicfight:step",
 					"epicfight:roll"
 			)))
-    	)).add(EntityType.WITHER_SKELETON, LootTable.lootTable().withPool(
+    	)).put(EntityType.WITHER_SKELETON, LootTable.lootTable().withPool(
 			LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F)).when(LootItemRandomChanceCondition.randomChance(0.025F * dropChanceModifier))
 			.add(LootItem.lootTableItem(EpicFightItems.SKILLBOOK.get()).apply(SetSkillFunction.builder(
 					1.0F, "epicfight:swordmaster",
@@ -218,17 +218,12 @@ public class SkillBookLootModifier extends LootModifier {
 					1.0F, "epicfight:roll",
 					0.75F, "epicfight:death_harvest"
 			)))
-    	)).add(EntityType.WITHER, LootTable.lootTable().withPool(
+    	)).put(EntityType.WITHER, LootTable.lootTable().withPool(
 			LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
 			.add(LootItem.lootTableItem(EpicFightItems.SKILLBOOK.get()).apply(SetSkillFunction.builder(
 					"epicfight:death_harvest"
 			)))
-    	));/**.add(EntityType.ENDER_DRAGON, LootTable.lootTable().withPool(
-			LootPool.lootPool().setRolls(ConstantValue.exactly(1.0F))
-			.add(LootItem.lootTableItem(EpicFightItems.SKILLBOOK.get()).apply(SetSkillFunction.builder(
-					"epicfight:demolishing_leap"
-			)))
-    	));**/
+    	));
 		
 		ModLoader.get().postEvent(lootTableRegistryEvent);
 		
