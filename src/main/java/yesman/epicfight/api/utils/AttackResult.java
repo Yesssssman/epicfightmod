@@ -21,16 +21,12 @@ public class AttackResult {
 		return new AttackResult(ResultType.MISSED, damage);
 	}
 	
-	public static AttackResult passed(float damage) {
-		return new AttackResult(ResultType.PASSED, 0);
-	}
-	
 	public static AttackResult of(AttackResult.ResultType resultType, float damage) {
 		return new AttackResult(resultType, damage);
 	}
 	
 	public static enum ResultType {
-		SUCCESS(true, true), MISSED(false, true), BLOCKED(false, true), PASSED(false, false);
+		SUCCESS(true, true), MISSED(false, false), BLOCKED(false, true);
 		
 		boolean dealtDamage;
 		boolean shouldCount;

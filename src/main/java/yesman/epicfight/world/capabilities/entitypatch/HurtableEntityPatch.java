@@ -1,9 +1,14 @@
 package yesman.epicfight.world.capabilities.entitypatch;
 
+import java.util.Collection;
+
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
 import yesman.epicfight.api.animation.types.EntityState;
@@ -12,19 +17,34 @@ import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
 public abstract class HurtableEntityPatch<T extends LivingEntity> extends EntityPatch<T> {
+	private boolean stunReductionDecreases;
+	protected float stunTimeReductionDefault;
 	protected float stunTimeReduction;
 	protected boolean cancelKnockback;
 	
 	@Override
 	protected void serverTick(LivingUpdateEvent event) {
 		this.cancelKnockback = false;
-		
-		float minStunReduction = this.getStunArmor() / (this.getStunArmor() + 20.0F);
-		
-		if (this.stunTimeReduction > minStunReduction) {
-			float stunArmor = this.getStunArmor();
-			this.stunTimeReduction -= 0.05F * (1.1F - this.stunTimeReduction * this.stunTimeReduction) * (1.0F - stunArmor / (7.5F + stunArmor));
-			this.stunTimeReduction = Math.max(0.0F, this.stunTimeReduction);
+		//if (this instanceof PlayerPatch) System.out.println(this.stunTimeReduction +" "+ stunTimeReductionDefault +" "+ this.stunReductionDecreases);
+		if (this.stunReductionDecreases) {
+			if (this.stunTimeReduction > this.stunTimeReductionDefault) {
+				float stunArmor = this.getStunArmor();
+				this.stunTimeReduction -= 0.05F * (1.1F - this.stunTimeReduction * this.stunTimeReduction) * (1.0F - stunArmor / (7.5F + stunArmor));
+				
+				if (this.stunTimeReduction < 0.0F) {
+					this.stunReductionDecreases = false;
+					this.stunTimeReduction = 0.0F;
+				}
+			}
+		} else {
+			if (this.stunTimeReduction < this.stunTimeReductionDefault) {
+				this.stunTimeReduction += 0.02F * (1.1F - this.stunTimeReduction * this.stunTimeReduction);
+				
+				if (this.stunTimeReduction > this.stunTimeReductionDefault) {
+					this.stunReductionDecreases = true;
+					this.stunTimeReduction = this.stunTimeReductionDefault;
+				}
+			}
 		}
 	}
 	
@@ -47,12 +67,47 @@ public abstract class HurtableEntityPatch<T extends LivingEntity> extends Entity
 	}
 	
 	public void setStunReductionOnHit() {
-		this.stunTimeReduction += Math.max((1.0F - this.stunTimeReduction) * 0.8F, 0.5F);
-		this.stunTimeReduction = Math.min(1.0F, this.stunTimeReduction);
+		//if (stunType == StunType.SHORT) {
+			
+		//}
+		
+		if (this.stunTimeReduction < this.stunTimeReductionDefault) {
+			this.stunTimeReduction += Math.max((1.0F - this.stunTimeReduction) * 0.8F, 0.5F);
+			this.stunTimeReduction = Math.min(1.0F, this.stunTimeReduction);
+			this.stunReductionDecreases = true;
+		} else {
+			if (this.stunReductionDecreases) {
+				this.stunTimeReduction -= this.stunTimeReduction * 0.8F;
+				this.stunTimeReduction = Math.max(0.0F, this.stunTimeReduction);
+				this.stunReductionDecreases = false;
+			} else {
+				this.stunReductionDecreases = true;
+			}
+		}
 	}
 	
-	public float getStunTimeTimeReduction() {
+	public float getStunReduction() {
 		return this.stunTimeReduction;
+	}
+	
+	public void setDefaultStunReduction(EquipmentSlot equipmentslot, ItemStack from, ItemStack to) {
+		Collection<AttributeModifier> modifiersToAdd = to.getAttributeModifiers(equipmentslot).get(EpicFightAttributes.STUN_ARMOR.get());
+		Collection<AttributeModifier> modifiersToRemove = from.getAttributeModifiers(equipmentslot).get(EpicFightAttributes.STUN_ARMOR.get());
+		
+		AttributeInstance tempAttr = new AttributeInstance(EpicFightAttributes.STUN_ARMOR.get(), (i)->{});
+		tempAttr.replaceFrom(this.original.getAttribute(EpicFightAttributes.STUN_ARMOR.get()));
+		
+		for (AttributeModifier modifier : modifiersToAdd) {
+			tempAttr.addTransientModifier(modifier);
+		}
+		
+		for (AttributeModifier modifier : modifiersToRemove) {
+			tempAttr.removeModifier(modifier);
+		}
+		
+		float stunArmor = (float)tempAttr.getValue();
+		this.stunReductionDecreases = stunArmor < this.getStunArmor();
+		this.stunTimeReductionDefault = stunArmor / (stunArmor + 7.5F);
 	}
 	
 	public float getStunArmor() {

@@ -175,6 +175,8 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 		}
 		
 		this.modifyLivingMotionByCurrentItem();
+		
+		super.updateHeldItem(fromCap, toCap, from, to, hand);
 	}
 	
 	public void modifyLivingMotionByCurrentItem() {

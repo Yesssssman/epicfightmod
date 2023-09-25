@@ -240,7 +240,7 @@ public class CapabilityItem {
 		return attributes;
 	}
 	
-	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot equipmentSlot, LivingEntityPatch<?> entitypatch) {
+	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot equipmentSlot, @Nullable LivingEntityPatch<?> entitypatch) {
 		Multimap<Attribute, AttributeModifier> map = HashMultimap.create();
 		
 		if (entitypatch != null) {

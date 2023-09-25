@@ -87,6 +87,16 @@ public class StaticAnimation extends DynamicAnimation {
 		this.armature = armature;
 	}
 	
+	/* Multilayer Constructor */
+	public StaticAnimation(ResourceLocation baseAnimPath, float convertTime, boolean repeatPlay, String path, Armature armature, boolean notRegisteredInAnimationManager) {
+		super(convertTime, repeatPlay);
+		
+		this.namespaceId = baseAnimPath.getNamespace().hashCode();
+		this.animationId = -1;
+		this.resourceLocation = new ResourceLocation(baseAnimPath.getNamespace(), "animmodels/animations/" + path);
+		this.armature = armature;
+	}
+	
 	public static void load(ResourceManager resourceManager, ResourceLocation rl, StaticAnimation animation) {
 		(new JsonModelLoader(resourceManager, rl)).loadStaticAnimation(animation);
 	}

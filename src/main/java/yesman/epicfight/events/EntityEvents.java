@@ -1,5 +1,7 @@
 package yesman.epicfight.events;
 
+import com.google.common.collect.Multimap;
+
 import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -14,6 +16,8 @@ import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.monster.EnderMan;
@@ -266,14 +270,16 @@ public class EntityEvents {
 						case SHORT:
 							if (!hitEntity.hasEffect(EpicFightMobEffects.STUN_IMMUNITY.get()) && (hitHurtableEntityPatch.getStunShield() == 0.0F)) {
 								float totalStunTime = (0.25F + (epicFightDamageSource.getImpact()) * 0.1F) * weight;
-								totalStunTime *= (1.0F - hitHurtableEntityPatch.getStunTimeTimeReduction());
+								totalStunTime *= (1.0F - hitHurtableEntityPatch.getStunReduction());
 								
-								if (totalStunTime >= 0.1F) {
+								if (totalStunTime >= 0.075F) {
 									stunTime = totalStunTime - 0.1F;
 									boolean flag = totalStunTime >= 0.83F;
 									stunTime = flag ? 0.83F : stunTime;
 									stunType = flag ? StunType.LONG : StunType.SHORT;
 									knockBackAmount = Math.min(flag ? epicFightDamageSource.getImpact() * 0.05F : totalStunTime, 2.0F);
+								} else {
+									stunType = StunType.NONE;
 								}
 								
 								stunTime *= 1.0F - hitEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
@@ -444,6 +450,13 @@ public class EntityEvents {
 		CapabilityItem itemCap = EpicFightCapabilities.getItemStackCapability(event.getItemStack());
 		
 		if (!itemCap.isEmpty()) {
+			Multimap<Attribute, AttributeModifier> multimap = itemCap.getAttributeModifiers(event.getSlotType(), null);
+			
+			for (Attribute key : multimap.keys()) {
+				for (AttributeModifier modifier : multimap.get(key)) {
+					event.addModifier(key, modifier);
+				}
+			}
 		}
 	}
 	
@@ -451,6 +464,12 @@ public class EntityEvents {
 	public static void equipChangeEvent(LivingEquipmentChangeEvent event) {
 		if (event.getFrom().getItem().equals(event.getTo().getItem())) {
 			return;
+		}
+		
+		HurtableEntityPatch<?> hurtableEntitypatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), HurtableEntityPatch.class);
+		
+		if (hurtableEntitypatch != null) {
+			hurtableEntitypatch.setDefaultStunReduction(event.getSlot(), event.getFrom(), event.getTo());
 		}
 		
 		LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), LivingEntityPatch.class);
