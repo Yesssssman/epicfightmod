@@ -25,23 +25,20 @@ public abstract class HurtableEntityPatch<T extends LivingEntity> extends Entity
 	@Override
 	protected void serverTick(LivingUpdateEvent event) {
 		this.cancelKnockback = false;
-		//if (this instanceof PlayerPatch) System.out.println(this.stunTimeReduction +" "+ stunTimeReductionDefault +" "+ this.stunReductionDecreases);
+		
 		if (this.stunReductionDecreases) {
-			if (this.stunTimeReduction > this.stunTimeReductionDefault) {
-				float stunArmor = this.getStunArmor();
-				this.stunTimeReduction -= 0.05F * (1.1F - this.stunTimeReduction * this.stunTimeReduction) * (1.0F - stunArmor / (7.5F + stunArmor));
-				
-				if (this.stunTimeReduction < 0.0F) {
-					this.stunReductionDecreases = false;
-					this.stunTimeReduction = 0.0F;
-				}
+			float stunArmor = this.getStunArmor();
+			this.stunTimeReduction -= 0.1F * (1.1F - this.stunTimeReduction * this.stunTimeReduction) * (1.0F - stunArmor / (7.5F + stunArmor));
+			
+			if (this.stunTimeReduction < 0.0F) {
+				this.stunReductionDecreases = false;
+				this.stunTimeReduction = 0.0F;
 			}
 		} else {
 			if (this.stunTimeReduction < this.stunTimeReductionDefault) {
 				this.stunTimeReduction += 0.02F * (1.1F - this.stunTimeReduction * this.stunTimeReduction);
 				
 				if (this.stunTimeReduction > this.stunTimeReductionDefault) {
-					this.stunReductionDecreases = true;
 					this.stunTimeReduction = this.stunTimeReductionDefault;
 				}
 			}
@@ -66,23 +63,13 @@ public abstract class HurtableEntityPatch<T extends LivingEntity> extends Entity
 	public void setStunShield(float value) {
 	}
 	
-	public void setStunReductionOnHit() {
-		//if (stunType == StunType.SHORT) {
-			
-		//}
+	public void setStunReductionOnHit(StunType stunType) {
+		this.stunReductionDecreases = true;
 		
-		if (this.stunTimeReduction < this.stunTimeReductionDefault) {
+		if (stunType != StunType.NONE) {
 			this.stunTimeReduction += Math.max((1.0F - this.stunTimeReduction) * 0.8F, 0.5F);
 			this.stunTimeReduction = Math.min(1.0F, this.stunTimeReduction);
 			this.stunReductionDecreases = true;
-		} else {
-			if (this.stunReductionDecreases) {
-				this.stunTimeReduction -= this.stunTimeReduction * 0.8F;
-				this.stunTimeReduction = Math.max(0.0F, this.stunTimeReduction);
-				this.stunReductionDecreases = false;
-			} else {
-				this.stunReductionDecreases = true;
-			}
 		}
 	}
 	
