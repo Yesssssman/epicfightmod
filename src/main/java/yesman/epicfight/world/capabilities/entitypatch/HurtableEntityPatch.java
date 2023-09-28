@@ -85,11 +85,15 @@ public abstract class HurtableEntityPatch<T extends LivingEntity> extends Entity
 		tempAttr.replaceFrom(this.original.getAttribute(EpicFightAttributes.STUN_ARMOR.get()));
 		
 		for (AttributeModifier modifier : modifiersToAdd) {
-			tempAttr.addTransientModifier(modifier);
+			if (!tempAttr.hasModifier(modifier)) {
+				tempAttr.addTransientModifier(modifier);
+			}
 		}
 		
 		for (AttributeModifier modifier : modifiersToRemove) {
-			tempAttr.removeModifier(modifier);
+			if (tempAttr.hasModifier(modifier)) {
+				tempAttr.removeModifier(modifier);
+			}
 		}
 		
 		float stunArmor = (float)tempAttr.getValue();
