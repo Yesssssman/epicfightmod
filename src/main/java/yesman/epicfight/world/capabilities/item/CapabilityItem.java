@@ -269,7 +269,7 @@ public class CapabilityItem {
     }
 	
 	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(LivingEntityPatch<?> playerpatch, InteractionHand hand) {
-		return Maps.<LivingMotion, StaticAnimation>newHashMap();
+		return Maps.newHashMap();
 	}
 	
 	public Style getStyle(LivingEntityPatch<?> entitypatch) {

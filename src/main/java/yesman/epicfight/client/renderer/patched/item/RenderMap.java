@@ -1,14 +1,20 @@
 package yesman.epicfight.client.renderer.patched.item;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ItemInHandRenderer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.block.model.ItemTransforms.TransformType;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.model.armature.HumanoidArmature;
@@ -27,8 +33,8 @@ public class RenderMap extends RenderItemBase {
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, modelMatrix);
 		TransformType transformType = isInMainhand ? TransformType.THIRD_PERSON_RIGHT_HAND : TransformType.THIRD_PERSON_LEFT_HAND;
-		/**
-		if (entitypatch.isFirstPerson()) {
+		
+		if (entitypatch.isFirstPerson() || true) {
 			Method mthd = ObfuscationReflectionHelper.findMethod(ItemInHandRenderer.class, "renderMap", PoseStack.class, MultiBufferSource.class, int.class, ItemStack.class);
 			
 			try {
@@ -37,9 +43,9 @@ public class RenderMap extends RenderItemBase {
 			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 				e.printStackTrace();
 			}
-		} else {**/
+		} else {
 			Minecraft.getInstance().getItemInHandRenderer().renderItem(entitypatch.getOriginal(), stack, transformType, !isInMainhand, poseStack, buffer, packedLight);
-		//}
+		}
 		
 		poseStack.popPose();
     }

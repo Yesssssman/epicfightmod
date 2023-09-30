@@ -160,6 +160,7 @@ public class Animations {
 	public static StaticAnimation BIPED_HOLD_SPEAR;
 	public static StaticAnimation BIPED_HOLD_DUAL_WEAPON;
 	public static StaticAnimation BIPED_HOLD_CROSSBOW;
+	public static StaticAnimation BIPED_HOLD_MAP;
 	public static StaticAnimation BIPED_WALK_GREATSWORD;
 	public static StaticAnimation BIPED_WALK_SPEAR;
 	public static StaticAnimation BIPED_WALK_UCHIGATANA_SHEATHING;
@@ -502,6 +503,8 @@ public class Animations {
 				}, BIPED_CREATIVE_FLYING_FORWARD, BIPED_CREATIVE_FLYING_BACKWARD);
 		
 		BIPED_HOLD_CROSSBOW = new StaticAnimation(true, "biped/living/hold_crossbow", biped);
+		BIPED_HOLD_MAP = new StaticAnimation(true, "biped/living/hold_map", biped);
+		
 		BIPED_RUN = new MovementAnimation(true, "biped/living/run", biped);
 		BIPED_SNEAK = new MovementAnimation(true, "biped/living/sneak", biped);
 		BIPED_SWIM = new MovementAnimation(true, "biped/living/swim", biped);

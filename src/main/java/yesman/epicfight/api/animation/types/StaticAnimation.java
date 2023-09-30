@@ -143,11 +143,11 @@ public class StaticAnimation extends DynamicAnimation {
 				int idx = 0;
 				
 				for (TrailInfo trailInfo : trailInfos) {
-					double eid = Double.longBitsToDouble(entitypatch.getOriginal().getId());
-					double modid = Double.longBitsToDouble(this.namespaceId);
-					double animid = Double.longBitsToDouble(this.animationId);
-					double jointId = Double.longBitsToDouble(this.armature.searchJointByName(trailInfo.joint).getId());
-					double index = Double.longBitsToDouble(idx++);
+					double eid = Double.longBitsToDouble((long)entitypatch.getOriginal().getId());
+					double modid = Double.longBitsToDouble((long)this.namespaceId);
+					double animid = Double.longBitsToDouble((long)this.animationId);
+					double jointId = Double.longBitsToDouble((long)this.armature.searchJointByName(trailInfo.joint).getId());
+					double index = Double.longBitsToDouble((long)idx++);
 					
 					if (trailInfo.hand != null) {
 						ItemStack stack = entitypatch.getOriginal().getItemInHand(trailInfo.hand);
@@ -161,6 +161,13 @@ public class StaticAnimation extends DynamicAnimation {
 					if (trailInfo.particle == null) {
 						continue;
 					}
+					
+					
+					//System.out.println( (int)Double.doubleToRawLongBits( Double.longBitsToDouble(-1) ) );
+					
+					//System.out.println(this.namespaceId +" "+ this.animationId);
+					//System.out.println(modid +" "+ animid);
+					//System.out.println((int)Double.doubleToLongBits(modid) +" "+ (int)Double.doubleToLongBits(animid));
 					
 					entitypatch.getOriginal().level.addParticle(trailInfo.particle, eid, modid, animid, jointId, index, 0);
 				}
