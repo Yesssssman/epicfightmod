@@ -188,6 +188,7 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	@Override
 	public float getAttackDirectionPitch() {
 		Entity attackTarget = this.getTarget();
+		
 		if (attackTarget != null) {
 			float partialTicks = EpicFightMod.isPhysicalClient() ? Minecraft.getInstance().getFrameTime() : 1.0F;
 			Vec3 target = attackTarget.getEyePosition(partialTicks);

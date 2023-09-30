@@ -58,7 +58,6 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.damagesource.StunType;
-import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributeSupplier;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.TargetIndicatorCheckEvent;
@@ -100,7 +99,6 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	@Override
 	public void onJoinWorld(T entityIn, EntityJoinWorldEvent event) {
 		super.onJoinWorld(entityIn, event);
-		this.original.getAttributes().supplier = new EpicFightAttributeSupplier(this.original.getAttributes().supplier);
 		this.initAttributes();
 	}
 	

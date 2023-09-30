@@ -27,7 +27,19 @@ public class RenderMap extends RenderItemBase {
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, modelMatrix);
 		TransformType transformType = isInMainhand ? TransformType.THIRD_PERSON_RIGHT_HAND : TransformType.THIRD_PERSON_LEFT_HAND;
-		Minecraft.getInstance().getItemInHandRenderer().renderItem(entitypatch.getOriginal(), stack, transformType, !isInMainhand, poseStack, buffer, packedLight);
+		/**
+		if (entitypatch.isFirstPerson()) {
+			Method mthd = ObfuscationReflectionHelper.findMethod(ItemInHandRenderer.class, "renderMap", PoseStack.class, MultiBufferSource.class, int.class, ItemStack.class);
+			
+			try {
+				RenderSystem.disableCull();
+				mthd.invoke(Minecraft.getInstance().getItemInHandRenderer(), poseStack, buffer, packedLight, stack);
+			} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
+				e.printStackTrace();
+			}
+		} else {**/
+			Minecraft.getInstance().getItemInHandRenderer().renderItem(entitypatch.getOriginal(), stack, transformType, !isInMainhand, poseStack, buffer, packedLight);
+		//}
 		
 		poseStack.popPose();
     }

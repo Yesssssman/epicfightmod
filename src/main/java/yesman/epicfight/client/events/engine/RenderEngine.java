@@ -92,6 +92,7 @@ import yesman.epicfight.client.renderer.patched.item.RenderBow;
 import yesman.epicfight.client.renderer.patched.item.RenderCrossbow;
 import yesman.epicfight.client.renderer.patched.item.RenderItemBase;
 import yesman.epicfight.client.renderer.patched.item.RenderKatana;
+import yesman.epicfight.client.renderer.patched.item.RenderMap;
 import yesman.epicfight.client.renderer.patched.item.RenderTrident;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.main.EpicFightMod;
@@ -178,6 +179,7 @@ public class RenderEngine {
 		RenderBow bowRenderer = new RenderBow();
 		RenderCrossbow crossbowRenderer = new RenderCrossbow();
 		RenderTrident tridentRenderer = new RenderTrident();
+		RenderMap mapRenderer = new RenderMap();
 		
 		this.itemRendererMapByInstance.clear();
 		this.itemRendererMapByInstance.put(Items.AIR, baseRenderer);
@@ -185,6 +187,7 @@ public class RenderEngine {
 		this.itemRendererMapByInstance.put(Items.SHIELD, baseRenderer);
 		this.itemRendererMapByInstance.put(Items.CROSSBOW, crossbowRenderer);
 		this.itemRendererMapByInstance.put(Items.TRIDENT, tridentRenderer);
+		this.itemRendererMapByInstance.put(Items.FILLED_MAP, mapRenderer);
 		this.itemRendererMapByInstance.put(EpicFightItems.UCHIGATANA.get(), new RenderKatana());
 		this.itemRendererMapByClass.put(BowItem.class, bowRenderer);
 		this.itemRendererMapByClass.put(CrossbowItem.class, crossbowRenderer);

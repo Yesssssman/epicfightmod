@@ -8,10 +8,10 @@ public class CreeperSwellStoppableGoal extends SwellGoal {
 	protected Creeper creeperEntity;
 	protected MobPatch<?> creeperpatch;
 	
-	public CreeperSwellStoppableGoal(MobPatch<?> creeperdata, Creeper creeperEntityIn) {
-		super(creeperEntityIn);
-		this.creeperEntity = creeperEntityIn;
-		this.creeperpatch = creeperdata;
+	public CreeperSwellStoppableGoal(MobPatch<?> creeperpatch, Creeper creeper) {
+		super(creeper);
+		this.creeperEntity = creeper;
+		this.creeperpatch = creeperpatch;
 	}
 	
 	@Override
@@ -20,9 +20,9 @@ public class CreeperSwellStoppableGoal extends SwellGoal {
     }
 	
 	@Override
-	public boolean canContinueToUse() {
-		return this.canUse();
-    }
+	public boolean requiresUpdateEveryTick() {
+		return false;
+	}
 	
 	@Override
 	public void stop() {
