@@ -76,6 +76,14 @@ public class JointMaskEntry {
 			)
 		);
 	
+	public static final List<JointMask> BIPED_LEFT_ARMS = new ArrayList<> (
+			Arrays.asList(
+				JointMask.of("Shoulder_L"), JointMask.of("Arm_L"),
+				JointMask.of("Hand_L"), JointMask.of("Elbow_L"),
+				JointMask.of("Tool_L")
+			)
+		);
+	
 	public static final List<JointMask> BIPED_BODY_AND_LEFT_ARMS = new ArrayList<> (
 			Arrays.asList(
 				JointMask.of("Shoulder_L"), JointMask.of("Arm_L"),

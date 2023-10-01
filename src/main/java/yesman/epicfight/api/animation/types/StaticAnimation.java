@@ -162,13 +162,6 @@ public class StaticAnimation extends DynamicAnimation {
 						continue;
 					}
 					
-					
-					//System.out.println( (int)Double.doubleToRawLongBits( Double.longBitsToDouble(-1) ) );
-					
-					//System.out.println(this.namespaceId +" "+ this.animationId);
-					//System.out.println(modid +" "+ animid);
-					//System.out.println((int)Double.doubleToLongBits(modid) +" "+ (int)Double.doubleToLongBits(animid));
-					
 					entitypatch.getOriginal().level.addParticle(trailInfo.particle, eid, modid, animid, jointId, index, 0);
 				}
 			});

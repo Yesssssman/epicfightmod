@@ -160,7 +160,12 @@ public class Animations {
 	public static StaticAnimation BIPED_HOLD_SPEAR;
 	public static StaticAnimation BIPED_HOLD_DUAL_WEAPON;
 	public static StaticAnimation BIPED_HOLD_CROSSBOW;
-	public static StaticAnimation BIPED_HOLD_MAP;
+	public static StaticAnimation BIPED_HOLD_MAP_TWOHAND;
+	public static StaticAnimation BIPED_HOLD_MAP_OFFHAND;
+	public static StaticAnimation BIPED_HOLD_MAP_MAINHAND;
+	public static StaticAnimation BIPED_HOLD_MAP_TWOHAND_MOVE;
+	public static StaticAnimation BIPED_HOLD_MAP_OFFHAND_MOVE;
+	public static StaticAnimation BIPED_HOLD_MAP_MAINHAND_MOVE;
 	public static StaticAnimation BIPED_WALK_GREATSWORD;
 	public static StaticAnimation BIPED_WALK_SPEAR;
 	public static StaticAnimation BIPED_WALK_UCHIGATANA_SHEATHING;
@@ -503,7 +508,13 @@ public class Animations {
 				}, BIPED_CREATIVE_FLYING_FORWARD, BIPED_CREATIVE_FLYING_BACKWARD);
 		
 		BIPED_HOLD_CROSSBOW = new StaticAnimation(true, "biped/living/hold_crossbow", biped);
-		BIPED_HOLD_MAP = new StaticAnimation(true, "biped/living/hold_map", biped);
+		BIPED_HOLD_MAP_TWOHAND = new StaticAnimation(true, "biped/living/hold_map_twohand", biped);
+		BIPED_HOLD_MAP_OFFHAND = new StaticAnimation(true, "biped/living/hold_map_offhand", biped);
+		BIPED_HOLD_MAP_MAINHAND = new StaticAnimation(true, "biped/living/hold_map_mainhand", biped);
+		
+		BIPED_HOLD_MAP_TWOHAND_MOVE = new StaticAnimation(true, "biped/living/hold_map_twohand_move", biped);
+		BIPED_HOLD_MAP_OFFHAND_MOVE = new StaticAnimation(true, "biped/living/hold_map_offhand_move", biped);
+		BIPED_HOLD_MAP_MAINHAND_MOVE = new StaticAnimation(true, "biped/living/hold_map_mainhand_move", biped);
 		
 		BIPED_RUN = new MovementAnimation(true, "biped/living/run", biped);
 		BIPED_SNEAK = new MovementAnimation(true, "biped/living/sneak", biped);
@@ -781,8 +792,8 @@ public class Animations {
 				.addProperty(AttackPhaseProperty.DAMAGE_MODIFIER, ValueModifier.multiplier(2.0F))
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(3))
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP);
-		AXE_AUTO1 = new BasicAttackAnimation(0.16F, 0.05F, 0.16F, 0.7F, null, biped.toolR, "biped/combat/axe_auto1", biped);
-		AXE_AUTO2 = new BasicAttackAnimation(0.16F, 0.05F, 0.16F, 0.85F, null, biped.toolR, "biped/combat/axe_auto2", biped);
+		AXE_AUTO1 = new BasicAttackAnimation(0.16F, 0.05F, 0.15F, 0.7F, null, biped.toolR, "biped/combat/axe_auto1", biped);
+		AXE_AUTO2 = new BasicAttackAnimation(0.16F, 0.05F, 0.15F, 0.85F, null, biped.toolR, "biped/combat/axe_auto2", biped);
 		
 		LONGSWORD_AUTO1 = new BasicAttackAnimation(0.1F, 0.25F, 0.35F, 0.5F, null, biped.toolR, "biped/combat/longsword_auto1", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);

@@ -5,11 +5,7 @@
 	[
 		{
 			"livingmotion":"ALL",
-			"type":"root_upper_joints"
-		},
-		{
-			"livingmotion":"SWIM",
-			"type":"right_arms_body"
+			"type":"right_arms"
 		}
 	]
 }
