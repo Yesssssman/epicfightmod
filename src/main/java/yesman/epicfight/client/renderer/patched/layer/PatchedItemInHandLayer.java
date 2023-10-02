@@ -29,7 +29,7 @@ public class PatchedItemInHandLayer<E extends LivingEntity, T extends LivingEnti
 	protected void renderLayer(T entitypatch, E entityliving, RenderLayer<E, M> vanillaLayer, PoseStack postStack, MultiBufferSource buffer, int packedLightIn,
 			OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 		
-		if (!(entitypatch.getArmature() instanceof HumanoidArmature)) {
+		if (!(entitypatch.getArmature() instanceof HumanoidArmature humanoidArmature)) {
 			return;
 		}
 		
@@ -44,13 +44,13 @@ public class PatchedItemInHandLayer<E extends LivingEntity, T extends LivingEnti
 				}
 			}
 			
-			renderEngine.getItemRenderer(mainHandStack.getItem()).renderItemInHand(mainHandStack, entitypatch, InteractionHand.MAIN_HAND, (HumanoidArmature)entitypatch.getArmature(), poses, buffer, postStack, packedLightIn);
+			renderEngine.getItemRenderer(mainHandStack.getItem()).renderItemInHand(mainHandStack, entitypatch, InteractionHand.MAIN_HAND, humanoidArmature, poses, buffer, postStack, packedLightIn);
 		}
 		
 		ItemStack offHandStack = entitypatch.getOriginal().getOffhandItem();
 		
 		if (entitypatch.isOffhandItemValid()) {
-			renderEngine.getItemRenderer(offHandStack.getItem()).renderItemInHand(offHandStack, entitypatch, InteractionHand.OFF_HAND, (HumanoidArmature)entitypatch.getArmature(), poses, buffer, postStack, packedLightIn);
+			renderEngine.getItemRenderer(offHandStack.getItem()).renderItemInHand(offHandStack, entitypatch, InteractionHand.OFF_HAND, humanoidArmature, poses, buffer, postStack, packedLightIn);
 		}
 	}
 }
