@@ -41,6 +41,8 @@ public class MapCapability extends CapabilityItem {
 		livingModifier.put(LivingMotions.SNEAK, holdMoveAnimation);
 		livingModifier.put(LivingMotions.SWIM, holdMoveAnimation);
 		livingModifier.put(LivingMotions.FLOAT, holdMoveAnimation);
+		livingModifier.put(LivingMotions.SIT, holdMoveAnimation);
+		livingModifier.put(LivingMotions.MOUNT, holdMoveAnimation);
 		
 		return livingModifier;
 	}

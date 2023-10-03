@@ -292,6 +292,11 @@ public class TrailParticle extends TextureSheetParticle {
 	}
 	
 	@Override
+	public boolean shouldCull() {
+        return false;
+    }
+	
+	@Override
 	public ParticleRenderType getRenderType() {
 		return EpicFightParticleRenderTypes.TRAIL;
 	}
