@@ -1,5 +1,8 @@
 package yesman.epicfight.world.entity;
 
+import java.util.Collections;
+import java.util.List;
+
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -12,6 +15,7 @@ import yesman.epicfight.api.animation.types.DodgeAnimation;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class DodgeLeft extends LivingEntity {
+	private static final List<ItemStack> EMPTY_LIST = Collections.emptyList();
 	private LivingEntityPatch<?> entitypatch;
 	
 	public DodgeLeft(EntityType<? extends LivingEntity> type, Level level) {
@@ -50,7 +54,7 @@ public class DodgeLeft extends LivingEntity {
 	
 	@Override
 	public Iterable<ItemStack> getArmorSlots() {
-		return null;
+		return EMPTY_LIST;
 	}
 
 	@Override
@@ -65,6 +69,6 @@ public class DodgeLeft extends LivingEntity {
 
 	@Override
 	public HumanoidArm getMainArm() {
-		return null;
+		return HumanoidArm.RIGHT;
 	}
 }
