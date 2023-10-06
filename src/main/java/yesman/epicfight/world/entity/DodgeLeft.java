@@ -33,6 +33,10 @@ public class DodgeLeft extends LivingEntity {
 		
 		this.setPos(x, y, z);
 		this.setBoundingBox(entitypatch.getOriginal().getBoundingBox().expandTowards(1.0D, 0.0D, 1.0D));
+		
+		if (this.getLevel().isClientSide()) {
+			this.discard();
+		}
 	}
 	
 	@Override
@@ -44,6 +48,10 @@ public class DodgeLeft extends LivingEntity {
 	
 	@Override
 	public boolean hurt(DamageSource damageSource, float amount) {
+		if (this.level.isClientSide()) {
+			return false;
+		}
+		
 		if (!DodgeAnimation.DODGEABLE_SOURCE_VALIDATOR.apply(damageSource).dealtDamage()) {
 			this.entitypatch.onDodgeSuccess(damageSource);
 		}
