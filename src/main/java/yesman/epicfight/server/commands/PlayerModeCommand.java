@@ -1,9 +1,13 @@
 package yesman.epicfight.server.commands;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Locale;
+
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContext;
-import net.minecraft.Util;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -14,10 +18,6 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch.PlayerMode;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
-
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Locale;
 
 public class PlayerModeCommand {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {

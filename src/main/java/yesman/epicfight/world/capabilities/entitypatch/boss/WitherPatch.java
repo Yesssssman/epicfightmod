@@ -1,6 +1,10 @@
 package yesman.epicfight.world.capabilities.entitypatch.boss;
 
+import java.util.EnumSet;
+import java.util.List;
+
 import com.google.common.collect.ImmutableList;
+
 import net.minecraft.commands.arguments.EntityAnchorArgument.Anchor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -18,7 +22,6 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.GameRules;
@@ -48,9 +51,6 @@ import yesman.epicfight.world.entity.DroppedNetherStar;
 import yesman.epicfight.world.entity.WitherGhostClone;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
-
-import java.util.EnumSet;
-import java.util.List;
 
 public class WitherPatch extends MobPatch<WitherBoss> {
 	private static final EntityDataAccessor<Boolean> DATA_ARMOR_ACTIVED = SynchedEntityData.defineId(WitherBoss.class, EntityDataSerializers.BOOLEAN);

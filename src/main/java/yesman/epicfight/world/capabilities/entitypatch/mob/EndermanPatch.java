@@ -1,5 +1,8 @@
 package yesman.epicfight.world.capabilities.entitypatch.mob;
 
+import java.util.EnumSet;
+import java.util.UUID;
+
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerPlayer;
@@ -43,10 +46,6 @@ import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
-
-import java.util.EnumSet;
-import java.util.Random;
-import java.util.UUID;
 
 public class EndermanPatch extends MobPatch<EnderMan> {
 	private static final UUID SPEED_MODIFIER_RAGE_UUID = UUID.fromString("dc362d1a-8424-11ec-a8a3-0242ac120002");

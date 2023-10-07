@@ -28,7 +28,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.AttackResult;
-import yesman.epicfight.api.utils.ExtendableEnumManager;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.gui.BattleModeGui;
 import yesman.epicfight.gameasset.Animations;

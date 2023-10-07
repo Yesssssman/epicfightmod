@@ -1,7 +1,6 @@
 package yesman.epicfight.skill.weaponinnate;
 
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
 import com.google.common.collect.Lists;
@@ -10,11 +9,10 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProperty;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
-import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;

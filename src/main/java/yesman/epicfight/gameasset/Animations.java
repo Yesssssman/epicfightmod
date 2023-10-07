@@ -1,7 +1,6 @@
 package yesman.epicfight.gameasset;
 
 import java.util.List;
-import java.util.Random;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
@@ -26,7 +25,6 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LightningBolt;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.DragonFireball;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Explosion;
@@ -89,7 +87,6 @@ import yesman.epicfight.api.animation.types.procedural.EnderDragonDeathAnimation
 import yesman.epicfight.api.animation.types.procedural.EnderDragonDynamicActionAnimation;
 import yesman.epicfight.api.animation.types.procedural.EnderDraonWalkAnimation;
 import yesman.epicfight.api.animation.types.procedural.IKInfo;
-import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.collider.OBBCollider;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.api.utils.HitEntityList;
@@ -129,9 +126,6 @@ import yesman.epicfight.world.damagesource.ExtraDamageInstance;
 import yesman.epicfight.world.damagesource.SourceTags;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-
-import java.util.List;
-import java.util.Set;
 
 @Mod.EventBusSubscriber(modid = EpicFightMod.MODID, bus = Bus.MOD)
 public class Animations {

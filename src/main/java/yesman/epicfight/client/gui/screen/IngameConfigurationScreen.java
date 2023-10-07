@@ -183,6 +183,7 @@ public class IngameConfigurationScreen extends Screen {
 			cameraAutoSwitchButton.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".camera_auto_switch." + (cameraAutoSwitch.getValue() ? "on" : "off")));
 			autoPreparationButton.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".auto_preparation." + (autoPreparation.getValue() ? "on" : "off")));
 			offGoreButton.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".off_blood_effect." + (offBlood.getValue() ? "on" : "off")));
+			noMiningInCombatButton.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".no_mining_in_combat." + (noMiningInCombat.getValue() ? "on" : "off")));
 		}));
 	}
 	

@@ -28,7 +28,9 @@ public class RenderShootableWeapon extends RenderItemBase {
 		
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, modelMatrix);
-		Minecraft.getInstance().gameRenderer.itemInHandRenderer.renderItem(entitypatch.getOriginal(), stack, TransformType.THIRD_PERSON_RIGHT_HAND, false, poseStack, buffer, packedLight);
+		
+		Minecraft mc = Minecraft.getInstance();
+		mc.gameRenderer.itemInHandRenderer.renderItem(entitypatch.getOriginal(), stack, TransformType.THIRD_PERSON_RIGHT_HAND, false, poseStack, buffer, packedLight);
 		poseStack.popPose();
 		
 		GlStateManager._enableDepthTest();

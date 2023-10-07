@@ -259,7 +259,6 @@ public class BattleModeGui extends GuiComponent {
 		}
         
         bufferbuilder.vertex(matStack.last().pose(), lastVertexX, lastVertexY, 0.0F).uv(lastTexX, lastTexY).endVertex();
-        
         tessellator.end();
         
         if (canUse) {

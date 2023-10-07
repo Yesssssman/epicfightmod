@@ -1,7 +1,6 @@
 package yesman.epicfight.world.capabilities.entitypatch;
 
 import java.util.Collection;
-import com.google.common.collect.Lists;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -13,12 +12,15 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -59,9 +61,6 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.TargetIndicatorCheckEvent;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
-
-import javax.annotation.Nullable;
-import java.util.List;
 
 public abstract class LivingEntityPatch<T extends LivingEntity> extends HurtableEntityPatch<T> {
 	public static final EntityDataAccessor<Float> STUN_SHIELD = new EntityDataAccessor<Float> (251, EntityDataSerializers.FLOAT);
@@ -535,11 +534,11 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		
 		if (hand == InteractionHand.MAIN_HAND) {
 			impact = (float)this.original.getAttributeValue(EpicFightAttributes.IMPACT.get());
-			i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, this.getOriginal().getMainHandItem());
+			i = this.getOriginal().getMainHandItem().getEnchantmentLevel(Enchantments.KNOCKBACK);
 		} else {
 			if (this.isOffhandItemValid()) {
 				impact = (float)this.original.getAttributeValue(EpicFightAttributes.OFFHAND_IMPACT.get());
-				i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, this.getOriginal().getOffhandItem());
+				i = this.getOriginal().getOffhandItem().getEnchantmentLevel(Enchantments.KNOCKBACK);
 			} else {
 				impact = (float)this.original.getAttribute(EpicFightAttributes.IMPACT.get()).getBaseValue();
 			}

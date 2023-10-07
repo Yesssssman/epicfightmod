@@ -1,5 +1,8 @@
 package yesman.epicfight.world.capabilities.entitypatch.player;
 
+import java.util.List;
+import java.util.Map;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -21,8 +24,6 @@ import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.network.EpicFightNetworkManager;
-import yesman.epicfight.network.server.*;
-import yesman.epicfight.skill.*;
 import yesman.epicfight.network.server.SPAddLearnedSkill;
 import yesman.epicfight.network.server.SPAddOrRemoveSkillData;
 import yesman.epicfight.network.server.SPChangeLivingMotion;
@@ -45,9 +46,6 @@ import yesman.epicfight.world.entity.eventlistener.DodgeSuccessEvent;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.SetTargetEvent;
-
-import java.util.List;
-import java.util.Map;
 
 public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	private LivingEntity attackTarget;

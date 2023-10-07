@@ -1,9 +1,15 @@
 package yesman.epicfight.client.gui.screen;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
 import net.minecraft.client.gui.components.Button;
@@ -12,7 +18,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -22,11 +27,6 @@ import yesman.epicfight.network.client.CPChangeSkill;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillSlot;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 @OnlyIn(Dist.CLIENT)
 public class SkillEditScreen extends Screen {

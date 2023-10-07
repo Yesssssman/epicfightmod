@@ -16,7 +16,6 @@ import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProperty;
 import yesman.epicfight.api.utils.math.ValueModifier;
@@ -92,7 +91,7 @@ public abstract class WeaponInnateSkill extends Skill {
 		this.getProperty(AttackPhaseProperty.IMPACT_MODIFIER, propertyMap).ifPresent(impactModifier::merge);
 		this.getProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, propertyMap).ifPresent(maxStrikesModifier::merge);
 		
-		impactModifier.merge(ValueModifier.multiplier(1.0F + EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, itemstack) * 0.12F));
+		impactModifier.merge(ValueModifier.multiplier(1.0F + itemstack.getEnchantmentLevel(Enchantments.KNOCKBACK) * 0.12F));
 		
 		Double baseDamage = Double.valueOf(damage);
 		damage = damageModifier.getTotalValue(playerpatch.getModifiedBaseDamage((float)damage));
