@@ -3,10 +3,9 @@ package yesman.epicfight.mixin;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import net.minecraft.world.damagesource.CombatTracker;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
@@ -31,17 +30,16 @@ public abstract class MixinLivingEntity {
 		}
 	}
 	
-	@Redirect(at = @At( value = "INVOKE", 
-					   target = "Lnet/minecraft/world/damagesource/CombatTracker;recordDamage(Lnet/minecraft/world/damagesource/DamageSource;FF)V"),
-		  method = "actuallyHurt(Lnet/minecraft/world/damagesource/DamageSource;F)V")
-	private void epicfight_recordDamage(CombatTracker self, DamageSource damagesource, float health, float damage) {
+	@Inject(at = @At(value = "RETURN"), method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z", cancellable = true)
+	private void epicfight_hurt(DamageSource damagesource, float amount, CallbackInfoReturnable<Boolean> info) {
+		LivingEntity self = (LivingEntity)((Object)this);
 		LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(damagesource.getEntity(), LivingEntityPatch.class);
 		
 		if (entitypatch != null) {
-			entitypatch.setLastAttackEntity(self.getMob());
+			if (info.getReturnValue()) {
+				entitypatch.setLastAttackEntity(self);
+			}
 		}
-		
-		self.recordDamage(damagesource, health, damage);
 	}
 	
 	@Inject(at = @At(value = "HEAD"), method = "push(Lnet/minecraft/world/entity/Entity;)V", cancellable = true)

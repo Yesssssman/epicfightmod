@@ -45,7 +45,8 @@ public class RenderItemBase {
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, modelMatrix);
 		TransformType transformType = isInMainhand ? TransformType.THIRD_PERSON_RIGHT_HAND : TransformType.THIRD_PERSON_LEFT_HAND;
-		Minecraft.getInstance().gameRenderer.itemInHandRenderer.renderItem(entitypatch.getOriginal(), stack, transformType, !isInMainhand, poseStack, buffer, packedLight);
+		Minecraft mc = Minecraft.getInstance();
+		mc.gameRenderer.itemInHandRenderer.renderItem(entitypatch.getOriginal(), stack, transformType, !isInMainhand, poseStack, buffer, packedLight);
 		
 		poseStack.popPose();
 	}

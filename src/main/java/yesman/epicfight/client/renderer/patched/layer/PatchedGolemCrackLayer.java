@@ -22,7 +22,6 @@ import yesman.epicfight.world.capabilities.entitypatch.mob.IronGolemPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class PatchedGolemCrackLayer extends PatchedLayer<IronGolem, IronGolemPatch, IronGolemModel<IronGolem>, IronGolemCrackinessLayer, IronGolemMesh> {
-	
 	private static final Map<IronGolem.Crackiness, ResourceLocation> CRACK_MAP = ImmutableMap.of(
 			IronGolem.Crackiness.LOW, new ResourceLocation("textures/entity/iron_golem/iron_golem_crackiness_low.png"),
 			IronGolem.Crackiness.MEDIUM, new ResourceLocation("textures/entity/iron_golem/iron_golem_crackiness_medium.png"),
@@ -33,13 +32,15 @@ public class PatchedGolemCrackLayer extends PatchedLayer<IronGolem, IronGolemPat
 	}
 	
 	@Override
-	public void renderLayer(IronGolemPatch entitypatch, IronGolem entityGolem, IronGolemCrackinessLayer originalRenderer, PoseStack matrixStackIn, MultiBufferSource bufferIn, int packedLightIn, OpenMatrix4f[] poses, float netYawHead, float pitchHead, float partialTicks) {
-		IronGolem.Crackiness crack = entityGolem.getCrackiness();
+	protected void renderLayer(IronGolemPatch entitypatch, IronGolem golementity, IronGolemCrackinessLayer vanillaLayer, PoseStack postStack, MultiBufferSource buffer, int packedLightIn,
+			OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
+		
+		IronGolem.Crackiness crack = golementity.getCrackiness();
 		
 		if (crack != IronGolem.Crackiness.NONE) {
-			VertexConsumer ivertexbuilder = bufferIn.getBuffer(EpicFightRenderTypes.triangles(RenderType.entityCutoutNoCull(CRACK_MAP.get(crack))));
+			VertexConsumer ivertexbuilder = buffer.getBuffer(EpicFightRenderTypes.triangles(RenderType.entityCutoutNoCull(CRACK_MAP.get(crack))));
 			
-			this.mesh.drawModelWithPose(matrixStackIn, ivertexbuilder, packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
+			this.mesh.drawModelWithPose(postStack, ivertexbuilder, packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
 		}
 	}
 }

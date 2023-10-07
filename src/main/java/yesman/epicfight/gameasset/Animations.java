@@ -164,6 +164,12 @@ public class Animations {
 	public static StaticAnimation BIPED_HOLD_SPEAR;
 	public static StaticAnimation BIPED_HOLD_DUAL_WEAPON;
 	public static StaticAnimation BIPED_HOLD_CROSSBOW;
+	public static StaticAnimation BIPED_HOLD_MAP_TWOHAND;
+	public static StaticAnimation BIPED_HOLD_MAP_OFFHAND;
+	public static StaticAnimation BIPED_HOLD_MAP_MAINHAND;
+	public static StaticAnimation BIPED_HOLD_MAP_TWOHAND_MOVE;
+	public static StaticAnimation BIPED_HOLD_MAP_OFFHAND_MOVE;
+	public static StaticAnimation BIPED_HOLD_MAP_MAINHAND_MOVE;
 	public static StaticAnimation BIPED_WALK_GREATSWORD;
 	public static StaticAnimation BIPED_WALK_SPEAR;
 	public static StaticAnimation BIPED_WALK_UCHIGATANA_SHEATHING;
@@ -506,6 +512,20 @@ public class Animations {
 				}, BIPED_CREATIVE_FLYING_FORWARD, BIPED_CREATIVE_FLYING_BACKWARD);
 
 		BIPED_HOLD_CROSSBOW = new StaticAnimation(true, "biped/living/hold_crossbow", biped);
+		BIPED_HOLD_MAP_TWOHAND = new StaticAnimation(true, "biped/living/hold_map_twohand", biped)
+				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
+		BIPED_HOLD_MAP_OFFHAND = new StaticAnimation(true, "biped/living/hold_map_offhand", biped)
+				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
+		BIPED_HOLD_MAP_MAINHAND = new StaticAnimation(true, "biped/living/hold_map_mainhand", biped)
+				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
+		
+		BIPED_HOLD_MAP_TWOHAND_MOVE = new StaticAnimation(true, "biped/living/hold_map_twohand_move", biped)
+				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
+		BIPED_HOLD_MAP_OFFHAND_MOVE = new StaticAnimation(true, "biped/living/hold_map_offhand_move", biped)
+				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
+		BIPED_HOLD_MAP_MAINHAND_MOVE = new StaticAnimation(true, "biped/living/hold_map_mainhand_move", biped)
+				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.MAP_ARMS_CORRECTION);
+		
 		BIPED_RUN = new MovementAnimation(true, "biped/living/run", biped);
 		BIPED_SNEAK = new MovementAnimation(true, "biped/living/sneak", biped);
 		BIPED_SWIM = new MovementAnimation(true, "biped/living/swim", biped);
@@ -783,8 +803,8 @@ public class Animations {
 				.addProperty(AttackPhaseProperty.DAMAGE_MODIFIER, ValueModifier.multiplier(2.0F))
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(3))
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP.get());
-		AXE_AUTO1 = new BasicAttackAnimation(0.16F, 0.05F, 0.16F, 0.7F, null, biped.toolR, "biped/combat/axe_auto1", biped);
-		AXE_AUTO2 = new BasicAttackAnimation(0.16F, 0.05F, 0.16F, 0.85F, null, biped.toolR, "biped/combat/axe_auto2", biped);
+		AXE_AUTO1 = new BasicAttackAnimation(0.16F, 0.05F, 0.15F, 0.7F, null, biped.toolR, "biped/combat/axe_auto1", biped);
+		AXE_AUTO2 = new BasicAttackAnimation(0.16F, 0.05F, 0.15F, 0.85F, null, biped.toolR, "biped/combat/axe_auto2", biped);
 
 		LONGSWORD_AUTO1 = new BasicAttackAnimation(0.1F, 0.25F, 0.35F, 0.5F, null, biped.toolR, "biped/combat/longsword_auto1", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
@@ -811,11 +831,11 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		TACHI_DASH = new DashAttackAnimation(0.05F, 0.3F, 0.3F, 0.4F, 1.0F, null, biped.toolR, "biped/combat/tachi_dash", biped, false)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		DAGGER_AUTO1 = new BasicAttackAnimation(0.05F, 0.05F, 0.15F, 0.2F, null, biped.toolR, "biped/combat/dagger_auto1", biped)
+		DAGGER_AUTO1 = new BasicAttackAnimation(0.05F, 0.05F, 0.15F, 0.25F, null, biped.toolR, "biped/combat/dagger_auto1", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
-		DAGGER_AUTO2 = new BasicAttackAnimation(0.05F, 0.0F, 0.1F, 0.2F, null, biped.toolR, "biped/combat/dagger_auto2", biped)
+		DAGGER_AUTO2 = new BasicAttackAnimation(0.05F, 0.0F, 0.1F, 0.25F, null, biped.toolR, "biped/combat/dagger_auto2", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
-		DAGGER_AUTO3 = new BasicAttackAnimation(0.05F, 0.2F, 0.25F, 0.5F, null, biped.toolR, "biped/combat/dagger_auto3", biped)
+		DAGGER_AUTO3 = new BasicAttackAnimation(0.05F, 0.2F, 0.25F, 0.4F, null, biped.toolR, "biped/combat/dagger_auto3", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
 		DAGGER_DASH = new DashAttackAnimation(0.05F, 0.1F, 0.2F, 0.25F, 0.6F, null, biped.toolR, "biped/combat/dagger_dash", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F)
@@ -1988,6 +2008,21 @@ public class Animations {
             }
 		};
 
+		public static final AnimationProperty.PoseModifier MAP_ARMS_CORRECTION = (self, pose, entitypatch, elapsedTime, partialTicks) -> {
+			float xRot = 50.0F - (entitypatch.getOriginal().xRotO + (entitypatch.getOriginal().getXRot() - entitypatch.getOriginal().xRotO) * partialTicks);
+			xRot = Mth.clamp(xRot, 0.0F, 50.0F);
+			
+			JointTransform shoulderL = pose.getOrDefaultTransform("Shoulder_L");
+			JointTransform shoulderR = pose.getOrDefaultTransform("Shoulder_R");
+			
+			float trans = xRot / 500.0F;
+			
+			shoulderL.jointLocal(JointTransform.getTranslation(new Vec3f(0.0F, trans, -trans)), OpenMatrix4f::mul);
+			shoulderR.jointLocal(JointTransform.getTranslation(new Vec3f(0.0F, trans, -trans)), OpenMatrix4f::mul);
+			shoulderL.frontResult(JointTransform.getRotation(Vector3f.XP.rotationDegrees(xRot)), OpenMatrix4f::mulAsOriginFront);
+			shoulderR.frontResult(JointTransform.getRotation(Vector3f.XP.rotationDegrees(xRot)), OpenMatrix4f::mulAsOriginFront);
+		};
+		
 		public static final AnimationProperty.PlaySpeedModifier CONSTANT_ONE = (self, entitypatch, speed, elapsedTime) -> 1.0F;
 		
 		public static final AnimationProperty.PlaySpeedModifier CHARGING = (self, entitypatch, speed, elapsedTime) -> {

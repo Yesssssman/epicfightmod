@@ -8,7 +8,7 @@ version="19.5.5" #mandatory
 displayName="Epic Fight" #mandatory
 #displayURL="https://www.curseforge.com/minecraft/mc-mods/epic-fight-mod" #optional
 #logoFile="epicfight.png" #optional
-#credits="METAL" #optional
+#credits="Gui Brabo(aka Metal), Nathan(aka Stel312)" #optional
 #authors="Yesman" #optional
 description='''Fight til u dead
 '''

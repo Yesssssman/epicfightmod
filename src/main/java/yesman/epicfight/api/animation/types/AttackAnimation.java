@@ -70,7 +70,7 @@ public class AttackAnimation extends ActionAnimation {
 			return 0;
 		}
 	};
-
+	
 	public AttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, @Nullable Collider collider, Joint colliderJoint, String path, Armature armature) {
 		this(convertTime, path, armature, new Phase(0.0F, antic, preDelay, contact, recovery, Float.MAX_VALUE, colliderJoint, collider));
 	}
@@ -171,7 +171,7 @@ public class AttackAnimation extends ActionAnimation {
 			Mob entity = mobpatch.getOriginal();
 			
 			if (entity.getTarget() != null && !entity.getTarget().isAlive()) {
-				entity.setTarget(null);
+				entity.setTarget((LivingEntity)null);
 			}
 		}
 	}
@@ -217,7 +217,7 @@ public class AttackAnimation extends ActionAnimation {
 			HitEntityList hitEntities = new HitEntityList(entitypatch, list, phase.getProperty(AttackPhaseProperty.HIT_PRIORITY).orElse(HitEntityList.Priority.DISTANCE));
 			int maxStrikes = this.getMaxStrikes(entitypatch, phase);
 			
-			while (entitypatch.getCurrenltyAttackedEntities().size() < maxStrikes && hitEntities.next()) {
+			while (entitypatch.getCurrenltyHurtEntities().size() < maxStrikes && hitEntities.next()) {
 				Entity hitten = hitEntities.getEntity();
 				LivingEntity trueEntity = this.getTrueEntity(hitten);
 				
@@ -227,12 +227,11 @@ public class AttackAnimation extends ActionAnimation {
 							EpicFightDamageSource source = this.getEpicFightDamageSource(entitypatch, hitten, phase);
 							int prevInvulTime = hitten.invulnerableTime;
 							hitten.invulnerableTime = 0;
+							
 							AttackResult attackResult = entitypatch.attack(source, hitten, phase.hand);
 							hitten.invulnerableTime = prevInvulTime;
 							
 							if (attackResult.resultType.dealtDamage()) {
-								entitypatch.getCurrenltyHurtEntities().add(trueEntity);
-								
 								if (entitypatch instanceof ServerPlayerPatch playerpatch) {
 									playerpatch.getEventListener().triggerEvents(EventType.DEALT_DAMAGE_EVENT_POST, new DealtDamageEvent(playerpatch, trueEntity, source, attackResult.damage));
 								}
@@ -241,8 +240,10 @@ public class AttackAnimation extends ActionAnimation {
 								this.spawnHitParticle((ServerLevel)hitten.getLevel(), entitypatch, hitten, phase);
 							}
 							
+							entitypatch.getCurrenltyAttackedEntities().add(trueEntity);
+							
 							if (attackResult.resultType.shouldCount()) {
-								entitypatch.getCurrenltyAttackedEntities().add(trueEntity);
+								entitypatch.getCurrenltyHurtEntities().add(trueEntity);
 							}
 						}
 					}

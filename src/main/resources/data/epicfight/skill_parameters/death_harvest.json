@@ -5,8 +5,8 @@
 			"attribute": "minecraft:generic.attack_damage",
 			"name": "death_harvest_skill_stat",
 			"uuid": "816118e6-b902-11ed-afa1-0242ac120002",
-			"operation": "addition",
-			"amount": 1.5
+			"operation": "multiply_total",
+			"amount": 0.15
 		}
 	]
 }

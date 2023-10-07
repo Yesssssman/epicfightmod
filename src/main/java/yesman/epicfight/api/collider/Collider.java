@@ -66,6 +66,10 @@ public abstract class Collider {
 				}
 			}
 			
+			if (e.isSpectator()) {
+				return false;
+			}
+			
 			return this.isCollide(e);
 		});
 		

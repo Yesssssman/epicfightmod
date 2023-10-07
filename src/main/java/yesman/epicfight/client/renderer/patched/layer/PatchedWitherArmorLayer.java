@@ -30,7 +30,9 @@ public class PatchedWitherArmorLayer extends PatchedLayer<WitherBoss, WitherPatc
 	}
 	
 	@Override
-	public void renderLayer(WitherPatch entitypatch, WitherBoss entityliving, WitherArmorLayer originalRenderer, PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn, OpenMatrix4f[] poses, float netYawHead, float pitchHead, float partialTicks) {
+	protected void renderLayer(WitherPatch entitypatch, WitherBoss entityliving, WitherArmorLayer vanillaLayer, PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn,
+			OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
+		
 		if (entitypatch.isArmorActivated()) {
 			float progress = (float)entityliving.tickCount + partialTicks;
 			matrixStackIn.pushPose();

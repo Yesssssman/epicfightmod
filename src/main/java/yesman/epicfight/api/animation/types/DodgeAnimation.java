@@ -52,7 +52,7 @@ public class DodgeAnimation extends ActionAnimation {
 	public void begin(LivingEntityPatch<?> entitypatch) {
 		super.begin(entitypatch);
 		
-		if (!entitypatch.isLogicalClient()) {
+		if (!entitypatch.isLogicalClient() && entitypatch != null) {
 			entitypatch.getOriginal().getLevel().addFreshEntity(new DodgeLeft(entitypatch));
 		}
 	}

@@ -87,6 +87,16 @@ public class StaticAnimation extends DynamicAnimation {
 		this.armature = armature;
 	}
 	
+	/* Multilayer Constructor */
+	public StaticAnimation(ResourceLocation baseAnimPath, float convertTime, boolean repeatPlay, String path, Armature armature, boolean notRegisteredInAnimationManager) {
+		super(convertTime, repeatPlay);
+		
+		this.namespaceId = baseAnimPath.getNamespace().hashCode();
+		this.animationId = -1;
+		this.resourceLocation = new ResourceLocation(baseAnimPath.getNamespace(), "animmodels/animations/" + path);
+		this.armature = armature;
+	}
+	
 	public static void load(ResourceManager resourceManager, ResourceLocation rl, StaticAnimation animation) {
 		(new JsonModelLoader(resourceManager, rl)).loadStaticAnimation(animation);
 	}
@@ -133,11 +143,11 @@ public class StaticAnimation extends DynamicAnimation {
 				int idx = 0;
 				
 				for (TrailInfo trailInfo : trailInfos) {
-					double eid = Double.longBitsToDouble(entitypatch.getOriginal().getId());
-					double modid = Double.longBitsToDouble(this.namespaceId);
-					double animid = Double.longBitsToDouble(this.animationId);
-					double jointId = Double.longBitsToDouble(this.armature.searchJointByName(trailInfo.joint).getId());
-					double index = Double.longBitsToDouble(idx++);
+					double eid = Double.longBitsToDouble((long)entitypatch.getOriginal().getId());
+					double modid = Double.longBitsToDouble((long)this.namespaceId);
+					double animid = Double.longBitsToDouble((long)this.animationId);
+					double jointId = Double.longBitsToDouble((long)this.armature.searchJointByName(trailInfo.joint).getId());
+					double index = Double.longBitsToDouble((long)idx++);
 					
 					if (trailInfo.hand != null) {
 						ItemStack stack = entitypatch.getOriginal().getItemInHand(trailInfo.hand);
@@ -277,7 +287,9 @@ public class StaticAnimation extends DynamicAnimation {
 	public boolean between(StaticAnimation a1, StaticAnimation a2) {
 		if (a1.getNamespaceId() != a2.getNamespaceId()) {
 			return false;
-		} else return a1.getId() <= this.getId() && a2.getId() >= this.getId();
+		} else {
+			return a1.getId() <= this.getId() && a2.getId() >= this.getId();
+		}
 	}
 	
 	public boolean in(StaticAnimation[] animations) {
