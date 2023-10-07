@@ -124,9 +124,6 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	
 	@Override
 	public void updateHeldItem(CapabilityItem fromCap, CapabilityItem toCap, ItemStack from, ItemStack to, InteractionHand hand) {
-		CapabilityItem mainHandCap = (hand == InteractionHand.MAIN_HAND) ? toCap : this.getHoldingItemCapability(InteractionHand.MAIN_HAND);
-		mainHandCap.changeWeaponInnateSkill(this, (hand == InteractionHand.MAIN_HAND) ? to : this.original.getMainHandItem());
-		
 		if (this.isChargingSkill()) {
 			Skill skill = this.chargingSkill.asSkill();
 			skill.cancelOnServer(this, null);
@@ -134,6 +131,9 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 			
 			EpicFightNetworkManager.sendToPlayer(SPSkillExecutionFeedback.expired(this.getSkill(skill).getSlotId()), this.original);
 		}
+		
+		CapabilityItem mainHandCap = (hand == InteractionHand.MAIN_HAND) ? toCap : this.getHoldingItemCapability(InteractionHand.MAIN_HAND);
+		mainHandCap.changeWeaponInnateSkill(this, (hand == InteractionHand.MAIN_HAND) ? to : this.original.getMainHandItem());
 		
 		if (hand == InteractionHand.OFF_HAND) {
 			if (!from.isEmpty()) {
@@ -164,6 +164,8 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 		}
 		
 		this.modifyLivingMotionByCurrentItem();
+		
+		super.updateHeldItem(fromCap, toCap, from, to, hand);
 	}
 	
 	public void modifyLivingMotionByCurrentItem() {

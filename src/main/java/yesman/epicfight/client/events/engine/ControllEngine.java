@@ -74,6 +74,7 @@ public class ControllEngine {
 		this.keyFunctions.put(this.options.keySwapOffhand, this::swapHandKeyPressed);
 		this.keyFunctions.put(EpicFightKeyMappings.SWITCH_MODE, this::switchModeKeyPressed);
 		this.keyFunctions.put(EpicFightKeyMappings.DODGE, this::dodgeKeyPressed);
+		this.keyFunctions.put(EpicFightKeyMappings.GUARD, this::guardPressed);
 		this.keyFunctions.put(EpicFightKeyMappings.WEAPON_INNATE_SKILL, this::weaponInnateSkillKeyPressed);
 		this.keyFunctions.put(EpicFightKeyMappings.MOVER_SKILL, this::moverKeyPressed);
 		this.keyFunctions.put(EpicFightKeyMappings.LOCK_ON, this::lockonPressed);
@@ -134,6 +135,12 @@ public class ControllEngine {
 					this.reserveKey(SkillSlots.DODGE, key);
 				}
 			}
+		}
+	}
+	
+	private void guardPressed(KeyMapping key, int action) {
+		if (action == 1) {
+			//this.playerpatch.getSkill(SkillSlots.GUARD).sendExecuteRequest(this.playerpatch, this);
 		}
 	}
 	

@@ -46,8 +46,8 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		getRenderType = ObfuscationReflectionHelper.findMethod(LivingEntityRenderer.class, "m_7225_", LivingEntity.class, boolean.class, boolean.class, boolean.class);
 	}
 	
-	private final Map<Class<?>, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>, AM>> patchedLayers = Maps.newHashMap();
-	
+	protected Map<Class<?>, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>, AM>> patchedLayers = Maps.newHashMap();
+
 	@Override
 	public void render(E entityIn, T entitypatch, LivingEntityRenderer<E, M> renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
 		super.render(entityIn, entitypatch, renderer, buffer, poseStack, packedLight, partialTicks);
@@ -164,6 +164,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
         float f1 = MathUtils.lerpBetween(entityIn.yHeadRotO, entityIn.yHeadRot, partialTicks);
         float f2 = f1 - f;
 		float f7 = entityIn.getViewXRot(partialTicks);
+		float bob = this.getVanillaRendererBob(entityIn, renderer, partialTicks);
 		
 		while (iter.hasNext()) {
 			RenderLayer<E, M> layer = iter.next();
@@ -174,13 +175,14 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 			}
 			
 			this.patchedLayers.computeIfPresent(rendererClass, (key, val) -> {
-				val.renderLayer(0, entitypatch, entityIn, layer, poseStack, buffer, packedLightIn, poses, f2, f7, partialTicks);
+				val.renderLayer(0, entitypatch, entityIn, layer, poseStack, buffer, packedLightIn, poses, bob, f2, f7, partialTicks);
 				iter.remove();
 				return val;
 			});
 		}
 		
-		OpenMatrix4f modelMatrix = new OpenMatrix4f().mulFront(poses[this.getRootJointIndex()]);
+		int rootJointId = this.getRootJointIndex();
+		OpenMatrix4f modelMatrix = new OpenMatrix4f().mulFront(poses[rootJointId]);
 		OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);
 		
 		poseStack.pushPose();
@@ -190,7 +192,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
 		
 		layers.forEach((layer) -> {
-			layer.render(poseStack, buffer, packedLightIn, entityIn, entityIn.walkAnimation.position(), entityIn.walkAnimation.speed(), partialTicks, entityIn.tickCount, f2, f7);
+			layer.render(poseStack, buffer, packedLightIn, entityIn, entityIn.walkAnimation.position(), entityIn.walkAnimation.speed(), partialTicks, bob, f2, f7);
 		});
 		
 		poseStack.popPose();

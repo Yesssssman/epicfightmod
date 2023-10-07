@@ -9,6 +9,7 @@ import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.event.entity.living.LivingEvent;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
@@ -22,6 +23,8 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.CreeperSwellStoppableGoal;
 
 public class CreeperPatch extends MobPatch<Creeper> {
+	private CreeperSwellStoppableGoal swellerGoal;
+	
 	public CreeperPatch() {
 		super(Faction.NEUTRAL);
 	}
@@ -46,7 +49,9 @@ public class CreeperPatch extends MobPatch<Creeper> {
 	@Override
 	protected void initAI() {
 		super.initAI();
-        this.original.goalSelector.addGoal(2, new CreeperSwellStoppableGoal(this, this.original));
+		
+		this.swellerGoal = new CreeperSwellStoppableGoal(this, this.original);
+        this.original.goalSelector.addGoal(2, this.swellerGoal);
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -57,7 +62,21 @@ public class CreeperPatch extends MobPatch<Creeper> {
 		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.CREEPER_DEATH);
 		clientAnimator.setCurrentMotionsAsDefault();
 	}
-
+	
+	@Override
+	public void serverTick(LivingEvent.LivingTickEvent event) {
+		super.serverTick(event);
+		
+		if (this.getEntityState().inaction()) {
+			
+			for (WrappedGoal goal : this.original.goalSelector.getAvailableGoals()) {
+				if (goal.getGoal() instanceof CreeperSwellStoppableGoal && goal.isRunning()) {
+					goal.stop();
+				}
+			}
+		}
+	}
+	
 	@Override
 	public void updateMotion(boolean considerInaction) {
 		super.commonMobUpdateMotion(considerInaction);

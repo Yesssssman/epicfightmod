@@ -54,37 +54,41 @@ public class AnimationDataReader {
 		}
 
 		assert inputstream != null;
-        Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
-        AnimationDataReader propertySetter = GsonHelper.fromJson(GSON, reader, TYPE);
+		Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
+		AnimationDataReader propertySetter = GsonHelper.fromJson(GSON, reader, TYPE);
 
-        if (propertySetter.layerInfo != null) {
-        	if (propertySetter.layerInfo.jointMaskEntry.isValid()) {
-        		animation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.layerInfo.jointMaskEntry);
-        	}
+		if (propertySetter.layerInfo != null) {
+			if (propertySetter.layerInfo.jointMaskEntry.isValid()) {
+				animation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.layerInfo.jointMaskEntry);
+			}
 
-        	animation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.layerInfo.layerType);
-        	animation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.layerInfo.priority);
-        }
-		
+			animation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.layerInfo.layerType);
+			animation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.layerInfo.priority);
+		}
+
 		if (propertySetter.multilayerInfo != null) {
-			StaticAnimation multilayerAnimation = new StaticAnimation(animation.getConvertTime(), animation.isRepeat(), String.valueOf(animation.getId()), animation.getArmature(), true);
-			
+			StaticAnimation multilayerAnimation = new StaticAnimation(animation.getLocation(), animation.getConvertTime(), animation.isRepeat(), String.valueOf(animation.getId()), animation.getArmature(), true);
+
 			if (propertySetter.multilayerInfo.jointMaskEntry.isValid()) {
 				multilayerAnimation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.multilayerInfo.jointMaskEntry);
 			}
-			
+
 			multilayerAnimation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.multilayerInfo.layerType);
 			multilayerAnimation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.multilayerInfo.priority);
 			multilayerAnimation.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, (self, entitypatch, speed, elapsedTime) -> {
-				if (entitypatch.getClientAnimator().baseLayer.animationPlayer.getAnimation().getRealAnimation() != animation) {
+				Layer baseLayer = entitypatch.getClientAnimator().baseLayer;
+
+				if (baseLayer.animationPlayer.getAnimation().getRealAnimation() != animation) {
 					return 0.0F;
 				}
-				
-				return animation.getPlaySpeed(entitypatch);
+
+				float diff = baseLayer.animationPlayer.getElapsedTime() - entitypatch.getClientAnimator().getCompositeLayer(propertySetter.multilayerInfo.priority).animationPlayer.getElapsedTime();
+
+				return diff * 20;
 			});
-			
+
 			multilayerAnimation.loadAnimation(resourceManager);
-			
+
 			animation.addProperty(ClientAnimationProperties.MULTILAYER_ANIMATION, multilayerAnimation);
 		}
 		
@@ -158,6 +162,7 @@ public class AnimationDataReader {
 		registerJointMask("arms", JointMaskEntry.BIPED_ARMS);
 		registerJointMask("right_arms", JointMaskEntry.BIPED_RIGHT_ARMS);
 		registerJointMask("right_arms_body", JointMaskEntry.BIPED_BODY_AND_RIGHT_ARMS);
+		registerJointMask("left_arms", JointMaskEntry.BIPED_LEFT_ARMS);
 		registerJointMask("left_arms_body", JointMaskEntry.BIPED_BODY_AND_LEFT_ARMS);
 		registerJointMask("upper_joints", JointMaskEntry.BIPED_UPPER_JOINTS);
 		registerJointMask("root_upper_joints", JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT);

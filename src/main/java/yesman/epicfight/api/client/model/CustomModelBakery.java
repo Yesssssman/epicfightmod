@@ -3,6 +3,7 @@ package yesman.epicfight.api.client.model;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -17,6 +18,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.client.model.geom.ModelPart.Cube;
 import net.minecraft.core.Direction;
@@ -81,9 +83,40 @@ public class CustomModelBakery {
 		out.close();
 	}
 	
-	public static AnimatedMesh bakeBipedCustomArmorModel(HumanoidModel<?> model, ArmorItem armorItem, EquipmentSlot slot, boolean debuggingMode) {
-		List<ModelPartition> boxes = Lists.newArrayList();
+	public static List<ModelPart> getAllParts(Model model) {
+		Class<?> cls = model.getClass();
+		List<Class<?>> superClasses = Lists.newArrayList();
 		
+		while (Model.class.isAssignableFrom(cls)) {
+			superClasses.add(cls);
+			cls = cls.getSuperclass();
+		}
+		
+		List<ModelPart> modelParts = Lists.newArrayList();
+		
+		for (Class<?> modelClss : superClasses) {
+			Field[] modelFields = modelClss.getDeclaredFields();
+			
+			for (Field field : modelFields) {
+				if (field.getType().isAssignableFrom(ModelPart.class)) {
+					try {
+						ModelPart modelPart = (ModelPart)field.get(model);
+						
+						if (modelPart.visible) {
+							modelParts.add(modelPart);
+						}
+					} catch(Exception e) {}
+				}
+			}
+		}
+		
+		return modelParts;
+	}
+	
+	public static AnimatedMesh bakeHumanoidModel(HumanoidModel<?> model, ArmorItem armorItem, EquipmentSlot slot, boolean debuggingMode) {
+		List<ModelPartition> boxes = Lists.newArrayList();
+		List<ModelPart> modelParts = getAllParts(model);
+
 		model.head.setRotation(0.0F, 0.0F, 0.0F);
 		model.hat.setRotation(0.0F, 0.0F, 0.0F);
 		model.body.setRotation(0.0F, 0.0F, 0.0F);
@@ -173,8 +206,8 @@ public class CustomModelBakery {
 		final ModelBaker childBaker;
 		final ModelPart part;
 		
-		private ModelPartition(ModelBaker partedBaker, ModelBaker childBaker, ModelPart modelRenderer) {
-			this.partBaker = partedBaker;
+		private ModelPartition(ModelBaker partBaker, ModelBaker childBaker, ModelPart modelRenderer) {
+			this.partBaker = partBaker;
 			this.childBaker = childBaker;
 			this.part = modelRenderer;
 		}

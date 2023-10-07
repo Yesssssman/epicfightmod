@@ -126,7 +126,7 @@ public abstract class Mesh<T extends VertexIndicator> {
 	}
 	
 	public static class RawMesh extends Mesh<VertexIndicator> {
-		public static final ModelPart<VertexIndicator> EMPTY = new ModelPart<>(null);
+		public static final ModelPart<VertexIndicator> EMPTY = new ModelPart<>(null, null);
 		
 		public RawMesh(Map<String, float[]> arrayMap, Mesh<VertexIndicator> parent, RenderProperties properties, Map<String, ModelPart<VertexIndicator>> parts) {
 			super(arrayMap, parent, properties, parts);

@@ -5,8 +5,8 @@
 			"attribute": "minecraft:generic.attack_damage",
 			"name": "forbidden_strength_skill_stat",
 			"uuid": "0cfd60ba-b900-11ed-afa1-0242ac120002",
-			"operation": "addition",
-			"amount": 0.5
+			"operation": "multiply_total",
+			"amount": 0.05
 		},
 		{
 			"attribute": "minecraft:generic.max_health",

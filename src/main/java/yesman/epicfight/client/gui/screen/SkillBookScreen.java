@@ -147,7 +147,7 @@ public class SkillBookScreen extends Screen {
 		poseStack.translate(posX + 128, posY + 90, 0.0F);
 		poseStack.scale(1.2F, 1.2F, 1.0F);
 		guiGraphics.blit(BACKGROUND, -128, -90, 0, 0, 256, 181);
-		
+
 		poseStack.popPose();
 		poseStack.pushPose();
 		
@@ -165,42 +165,52 @@ public class SkillBookScreen extends Screen {
 		String skillName = Component.translatable(translationName).getString();
 		int width = this.font.width(skillName);
 		guiGraphics.drawString(font, skillName, posX + 36 - width / 2, posY + 85, 0, false);
-		
+
 		String skillCategory = String.format("(%s)", Component.translatable("skill." + EpicFightMod.MODID + "." + this.skill.getCategory().toString().toLowerCase() + ".category").getString());
 		width = this.font.width(skillCategory);
 		guiGraphics.drawString(font, skillCategory, posX + 36 - width / 2, posY + 100, 0, false);
-		
+
 		if (this.skill.getCategory() == SkillCategories.PASSIVE) {
 			PassiveSkill passiveSkill = (PassiveSkill)this.skill;
 			int i = 135;
 			
 			for (Map.Entry<Attribute, AttributeModifier> stat : passiveSkill.getModfierEntry()) {
 				String attrName = Component.translatable(stat.getKey().getDescriptionId()).getString();
-				String amt = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(stat.getValue().getAmount());
-				String operator = switch (stat.getValue().getOperation()) {
-					case ADDITION -> "+";
-					case MULTIPLY_BASE, MULTIPLY_TOTAL -> "x";
-				};
-
-				guiGraphics.drawString(font, operator + amt +" "+ attrName, posX + 23 - width / 2, posY + i, 0, false);
+				String amountString = "";
+				double amount = stat.getValue().getAmount();
+				
+				switch (stat.getValue().getOperation()) {
+				case ADDITION:
+					amountString = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(amount);
+					break;
+				case MULTIPLY_BASE:
+					amountString = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(amount * 100.0D) + "%";
+					break;
+				case MULTIPLY_TOTAL:
+					amountString = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(amount * 100.0D) + "%";
+					break;
+				}
+				
+				guiGraphics.drawString(font, "+" + amountString + " " + attrName, posX + 23 - width / 2, posY + i, 0, false);
 				i += 10;
 			}
 		}
 		
 		List<FormattedCharSequence> list = this.font.split(Component.translatable(translationName + ".tooltip", this.skill.getTooltipArgsOfScreen(Lists.newArrayList()).toArray(new Object[0])), 150);
-
-		int height = posY + 20;
-
-		for (FormattedCharSequence ireorderingprocessor1 : list) {
-			if (ireorderingprocessor1 != null) {
+		int height = posY + 20 - Math.min((Math.max(list.size() - 10, 0) * 4), 20);
+		
+		for (int l1 = 0; l1 < list.size(); ++l1) {
+			FormattedCharSequence ireorderingprocessor1 = list.get(l1);
+			
+            if (ireorderingprocessor1 != null) {
 				guiGraphics.drawString(font, ireorderingprocessor1, posX + 105, height, 0, false);
-			}
-
-			height += 10;
+            }
+            
+            height+=10;
 		}
-		
+
 		super.render(guiGraphics, mouseX, mouseY, partialTicks);
-		
+
 		if (asBackground) {
 			this.renderBackground(guiGraphics);
 		}

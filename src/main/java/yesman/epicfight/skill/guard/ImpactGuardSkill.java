@@ -69,8 +69,14 @@ public class ImpactGuardSkill extends GuardSkill {
 		event.setAmount(isSpecialSource ? event.getAmount() * this.damageReducer * 0.01F : 0.0F);
 		event.setResult(isSpecialSource ? AttackResult.ResultType.SUCCESS : AttackResult.ResultType.BLOCKED);
 		
-		if (event.getDamageSource() instanceof EpicFightDamageSource) {
-			((EpicFightDamageSource)event.getDamageSource()).setStunType(StunType.NONE);
+		LivingEntityPatch<?> attackerpatch = EpicFightCapabilities.getEntityPatch(event.getDamageSource().getEntity(), LivingEntityPatch.class);
+		
+		if (attackerpatch != null) {
+			attackerpatch.setLastAttackEntity(playerpatch.getOriginal());
+		}
+		
+		if (event.getDamageSource() instanceof EpicFightDamageSource epicfightDamageSource) {
+			epicfightDamageSource.setStunType(StunType.NONE);
 		}
 		
 		event.setCanceled(true);

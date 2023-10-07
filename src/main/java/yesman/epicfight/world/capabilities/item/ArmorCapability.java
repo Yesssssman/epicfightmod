@@ -2,7 +2,7 @@ package yesman.epicfight.world.capabilities.item;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import net.minecraft.ChatFormatting;
+
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -36,18 +36,13 @@ public class ArmorCapability extends CapabilityItem {
 	
 	@Override
 	public void modifyItemTooltip(ItemStack stack, List<Component> itemTooltip, LivingEntityPatch<?> entitypatch) {
-		itemTooltip.add(1, Component.literal(ChatFormatting.BLUE + " +" + (int)this.weight + " ").append(Component.translatable(EpicFightAttributes.WEIGHT.get().getDescriptionId()).withStyle(ChatFormatting.BLUE)));
-
-		if (this.stunArmor > 0.0F) {
-			itemTooltip.add(1, Component.literal(ChatFormatting.BLUE + " +" + ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(this.stunArmor) + " ").append(Component.translatable(EpicFightAttributes.STUN_ARMOR.get().getDescriptionId()).withStyle(ChatFormatting.BLUE)));
-		}
 	}
 	
 	@Override
 	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot equipmentSlot, LivingEntityPatch<?> entitypatch) {
 		Multimap<Attribute, AttributeModifier> map = HashMultimap.create();
 		
-		if (entitypatch != null && equipmentSlot == this.equipmentSlot) {
+		if (equipmentSlot == this.equipmentSlot) {
 			map.put(EpicFightAttributes.WEIGHT.get(), new AttributeModifier(ARMOR_MODIFIERS[equipmentSlot.getIndex()], "Armor modifier", this.weight, Operation.ADDITION));
 			map.put(EpicFightAttributes.STUN_ARMOR.get(), new AttributeModifier(ARMOR_MODIFIERS[equipmentSlot.getIndex()], "Armor modifier", this.stunArmor, Operation.ADDITION));
 		}

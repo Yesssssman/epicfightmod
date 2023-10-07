@@ -32,18 +32,21 @@ public class BasicAttackAnimation extends AttackAnimation {
 	public BasicAttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, @Nullable Collider collider, Joint colliderJoint, String path, Armature armature) {
 		super(convertTime, antic, preDelay, contact, recovery, collider, colliderJoint, path, armature);
 		this.addProperty(ActionAnimationProperty.CANCELABLE_MOVE, true);
+		this.addProperty(ActionAnimationProperty.MOVE_VERTICAL, false);
 		this.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 	}
 	
 	public BasicAttackAnimation(float convertTime, float antic, float contact, float recovery, InteractionHand hand, @Nullable Collider collider, Joint colliderJoint, String path, Armature armature) {
 		super(convertTime, antic, antic, contact, recovery, hand, collider, colliderJoint, path, armature);
 		this.addProperty(ActionAnimationProperty.CANCELABLE_MOVE, true);
+		this.addProperty(ActionAnimationProperty.MOVE_VERTICAL, false);
 		this.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 	}
 	
 	public BasicAttackAnimation(float convertTime, String path, Armature armature, Phase... phases) {
 		super(convertTime, path, armature, phases);
 		this.addProperty(ActionAnimationProperty.CANCELABLE_MOVE, true);
+		this.addProperty(ActionAnimationProperty.MOVE_VERTICAL, false);
 		this.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 	}
 	
@@ -87,23 +90,14 @@ public class BasicAttackAnimation extends AttackAnimation {
 	public void end(LivingEntityPatch<?> entitypatch, DynamicAnimation nextAnimation, boolean isEnd) {
 		super.end(entitypatch, nextAnimation, isEnd);
 		
-		if (!isEnd && !nextAnimation.isMainFrameAnimation() && entitypatch.isLogicalClient()) {
+		boolean stiffAttack = entitypatch.getOriginal().level().getGameRules().getRule(EpicFightGamerules.STIFF_COMBO_ATTACKS).get();
+		
+		if (!isEnd && !nextAnimation.isMainFrameAnimation() && entitypatch.isLogicalClient() && !stiffAttack) {
 			float playbackSpeed = ConfigurationIngame.A_TICK * this.getPlaySpeed(entitypatch);
 			entitypatch.getClientAnimator().baseLayer.copyLayerTo(entitypatch.getClientAnimator().baseLayer.getLayer(Layer.Priority.HIGHEST), playbackSpeed);
 		}
 	}
-	/**
-	@Override
-	public EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
-		EntityState state = super.getState(entitypatch, time);
-		
-		if (!entitypatch.getOriginal().level.getGameRules().getRule(EpicFightGamerules.STIFF_COMBO_ATTACKS).get()) {
-			state.setState(EntityState.MOVEMENT_LOCKED, false);
-		}
-		
-		return state;
-	}
-	**/
+	
 	@Override
 	public TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
 		TypeFlexibleHashMap<StateFactor<?>> stateMap = super.getStatesMap(entitypatch, time);

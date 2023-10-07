@@ -26,7 +26,7 @@ public class AttackResult {
 	}
 	
 	public static enum ResultType {
-		SUCCESS(true, true), MISSED(false, true), BLOCKED(false, true);
+		SUCCESS(true, true), MISSED(false, false), BLOCKED(false, true);
 		
 		boolean dealtDamage;
 		boolean shouldCount;
