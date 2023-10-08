@@ -162,7 +162,9 @@ public class BattleModeGui extends GuiComponent {
 
 				if (skill.shouldDraw(container)) {
 					RenderSystem.enableBlend();
-					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 0.1F);
+					RenderSystem.blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA);
+					
 					skill.drawOnGui(this, container, poseStack, slotCoord.x, slotCoord.y);
 					slotCoord = alignDirection.nextPositionGetter.getNext(horBasis, verBasis, slotCoord, 24, 24);
 				}
