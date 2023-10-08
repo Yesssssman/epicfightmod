@@ -91,7 +91,9 @@ public class EpicFightMod {
     public EpicFightMod() {
     	this.animationManager = new AnimationManager();
     	instance = this;
+    	
     	ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ConfigManager.CLIENT_CONFIG);
+    	
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
     	bus.addListener(this::doClientStuff);
     	bus.addListener(this::doCommonStuff);
@@ -100,10 +102,8 @@ public class EpicFightMod {
     	bus.addListener(EpicFightAttributes::registerNewMobs);
     	bus.addListener(EpicFightAttributes::modifyExistingMobs);
     	bus.addListener(EpicFightCapabilities::registerCapabilities);
-    	//bus.addGenericListener(DataSerializerEntry.class, EpicFightDataSerializers::register);
-
-    	//bus.addGenericListener(IGlobalLootModifier.class, EpicFightDeferedRegister::registerGlobalLootModifier);
-
+    	bus.addListener(EpicFightEntities::onCommandRegistry);
+    	
     	LivingMotion.ENUM_MANAGER.loadPreemptive(LivingMotions.class);
     	SkillCategory.ENUM_MANAGER.loadPreemptive(SkillCategories.class);
     	SkillSlot.ENUM_MANAGER.loadPreemptive(SkillSlots.class);
@@ -161,7 +161,6 @@ public class EpicFightMod {
 		event.enqueueWork(ItemCapabilityProvider::registerWeaponTypesByClass);
 		event.enqueueWork(EntityPatchProvider::registerEntityPatches);
 		event.enqueueWork(EpicFightGamerules::registerRules);
-		event.enqueueWork(EpicFightEntities::registerSpawnPlacements);
 		event.enqueueWork(WeaponCapabilityPresets::register);
 		event.enqueueWork(EpicFightMobEffects::addOffhandModifier);
 		//event.enqueueWork(EpicFightLootModifiers::registerLootItemFunctionType);
