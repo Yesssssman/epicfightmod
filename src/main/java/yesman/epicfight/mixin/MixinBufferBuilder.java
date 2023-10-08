@@ -21,7 +21,6 @@ import java.nio.FloatBuffer;
 @Mixin(value = BufferBuilder.class)
 public abstract class MixinBufferBuilder {
 	@Shadow private ByteBuffer buffer;
-	//@Shadow @Final private List<BufferBuilder.DrawState> drawStates;
 	@Shadow private int renderedBufferCount;
 	@Shadow private int nextElementByte;
 	@Shadow private int vertices;
@@ -54,9 +53,6 @@ public abstract class MixinBufferBuilder {
 		}
 	}
 	
-
-
-	//@Shadow protected abstract void putSortedQuadIndices(VertexFormat.IndexType p_166787_);
 	@Redirect(method = "storeRenderedBuffer()Lcom/mojang/blaze3d/vertex/BufferBuilder$RenderedBuffer;", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/vertex/BufferBuilder;putSortedQuadIndices(Lcom/mojang/blaze3d/vertex/VertexFormat$IndexType;)V"))
 	public void epicfight_storeRenderedBuffer(BufferBuilder instance, VertexFormat.IndexType vertexformat$indextype) {
 		if (this.mode == VertexFormat.Mode.QUADS) {
@@ -88,9 +84,9 @@ public abstract class MixinBufferBuilder {
 	}
 	
 	@Shadow
-	public abstract void ensureCapacity(int size);
+	private void ensureCapacity(int size) {throw new AbstractMethodError("Shadow");}
 	@Shadow
-	public abstract IntConsumer intConsumer(int int1, VertexFormat.IndexType indexType);
+	private IntConsumer intConsumer(int int1, VertexFormat.IndexType indexType) {throw new AbstractMethodError("Shadow");}
 	
 	public Vector3f[] makeTrianglesSortingPoints() {
 		FloatBuffer floatbuffer = this.buffer.asFloatBuffer();

@@ -1,5 +1,10 @@
 package yesman.epicfight.server.commands.arguments;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -7,6 +12,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.ArgumentTypeInfos;
@@ -17,11 +24,6 @@ import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategory;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
-
 public class SkillArgument implements ArgumentType<Skill> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("spooky", "effect");
 	public static final DynamicCommandExceptionType ERROR_UNKNOWN_SKILL = new DynamicCommandExceptionType((obj) -> {
@@ -29,26 +31,15 @@ public class SkillArgument implements ArgumentType<Skill> {
 	});
 	
 	public static SkillArgument skill() {
-		return new SkillArgument(null);
+		return new SkillArgument();
 	}
 	
 	public static SkillArgument skill(SkillCategory skillCategory) {
-		return new SkillArgument(skillCategory);
+		return new SkillArgument();
 	}
 	
-	private final SkillCategory skillCategory;
-	
-	public SkillArgument() {
-		this.skillCategory = null;
-	}
-	
-	public SkillArgument(SkillCategory skillCategory) {
-		this.skillCategory = skillCategory;
-	}
-
-	//TODO fix args
 	public static void registerArgumentTypes() {
-		ArgumentTypeInfos.registerByClass(/*EpicFightMod.MODID + ":skill",*/ SkillArgument.class, SingletonArgumentInfo.contextFree(SkillArgument::skill));
+		ArgumentTypeInfos.registerByClass(SkillArgument.class, SingletonArgumentInfo.contextFree(SkillArgument::skill));
 	}
 	
 	public static Skill getSkill(CommandContext<CommandSourceStack> commandContext, String name) {
@@ -67,11 +58,18 @@ public class SkillArgument implements ArgumentType<Skill> {
 			return ERROR_UNKNOWN_SKILL.create(resourcelocation);
 		});
 	}
-
-	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> p_98438_, SuggestionsBuilder p_98439_) {
-		return SharedSuggestionProvider.suggestResource(SkillManager.getLearnableSkillNames((skillBuilder) -> skillBuilder.isLearnable() && (this.skillCategory == null || skillBuilder.hasCategory(this.skillCategory))), p_98439_);
+	
+	@Override
+	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
+		final SkillCategory skillCategory = commandContext.getNodes().get(4).getNode() instanceof LiteralCommandNode<?> literalNode ? 
+				SkillCategory.ENUM_MANAGER.get(literalNode.getLiteral()) : null;
+		
+		return SharedSuggestionProvider.suggestResource(SkillManager.getLearnableSkillNames(
+								(skillBuilder) -> skillBuilder.isLearnable() && (skillCategory == null || skillBuilder.hasCategory(skillCategory))
+							), suggestionsBuilder);
 	}
-
+	
+	@Override
 	public Collection<String> getExamples() {
 		return EXAMPLES;
 	}

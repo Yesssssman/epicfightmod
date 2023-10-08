@@ -36,10 +36,8 @@ public class SkillBookLootModifier extends LootModifier {
 	public static final Supplier<Codec<SkillBookLootModifier>> SKILL_CODEC = Suppliers.memoize(() -> RecordCodecBuilder.create(inst -> codecStart(inst).apply(inst, SkillBookLootModifier::new)));
 	public static final Map<EntityType<?>, LootTable> SKILL_LOOT_TABLE = Maps.newHashMap();
 	
-	public SkillBookLootModifier(LootItemCondition[] lootItemConditions)
-	{
+	public SkillBookLootModifier(LootItemCondition[] lootItemConditions) {
 		super(lootItemConditions);
-		//createSkillLootTable();
 	}
 	
 	/**

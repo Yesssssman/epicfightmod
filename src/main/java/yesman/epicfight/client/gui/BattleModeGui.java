@@ -6,6 +6,8 @@ import org.lwjgl.opengl.GL11;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.platform.Window;
+import com.mojang.blaze3d.platform.GlStateManager.DestFactor;
+import com.mojang.blaze3d.platform.GlStateManager.SourceFactor;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -239,6 +241,7 @@ public class BattleModeGui extends GuiComponent {
 		RenderSystem.enableBlend();
 		RenderSystem.setShaderTexture(0, container.getSkill().getSkillTexture());
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA);
 		
 		if (canUse) {
 			if (container.getStack() > 0) {

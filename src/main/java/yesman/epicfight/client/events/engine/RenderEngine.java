@@ -443,22 +443,22 @@ public class RenderEngine {
 				LocalPlayerPatch playerpatch = null;
 				float bodyRotO = 0.0F;
 				float bodyRot = 0.0F;
-
-				if (event.getPartialTick() == 1.0F && entitypatch instanceof LocalPlayerPatch) {
-					playerpatch = (LocalPlayerPatch)entitypatch;
+				
+				if (event.getPartialTick() == 1.0F && entitypatch instanceof LocalPlayerPatch localPlayerPatch) {
+					playerpatch = localPlayerPatch;
 					bodyRotO = playerpatch.prevBodyYaw;
 					bodyRot = playerpatch.getBodyYaw();
 					playerpatch.prevBodyYaw = livingentity.getYRot();
 					playerpatch.setYaw(livingentity.getYRot());
-
+					
 					event.getPoseStack().translate(0, 0.1D, 0);
 				}
-
+				
 				if (entitypatch != null && entitypatch.overrideRender()) {
 					event.setCanceled(true);
 					renderEngine.renderEntityArmatureModel(livingentity, entitypatch, event.getRenderer(), event.getMultiBufferSource(), event.getPoseStack(), event.getPackedLight(), event.getPartialTick());
 				}
-
+				
 				if (playerpatch != null) {
 					playerpatch.prevBodyYaw = bodyRotO;
 					playerpatch.setYaw(bodyRot);

@@ -23,9 +23,7 @@ import yesman.epicfight.world.item.EpicFightItems;
 
 @Mod.EventBusSubscriber(modid = EpicFightMod.MODID)
 public class EpicFightLootTables {
-
 	public static final DeferredRegister<Codec<? extends IGlobalLootModifier>> LOOT_MODIFIERS = DeferredRegister.create(ForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, "epicfight");
-
 	public static final RegistryObject<Codec<? extends IGlobalLootModifier>> SKILLS = LOOT_MODIFIERS.register("skillbook_loot_table_modifier", SkillBookLootModifier.SKILL_CODEC);
 
 	public static void registerLootItemFunctionType() {
