@@ -18,8 +18,10 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.*;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.item.*;
@@ -50,8 +52,32 @@ import yesman.epicfight.client.gui.screen.overlay.OverlayManager;
 import yesman.epicfight.client.input.EpicFightKeyMappings;
 import yesman.epicfight.client.renderer.AimHelperRenderer;
 import yesman.epicfight.client.renderer.FirstPersonRenderer;
-import yesman.epicfight.client.renderer.patched.entity.*;
-import yesman.epicfight.client.renderer.patched.item.*;
+import yesman.epicfight.client.renderer.patched.entity.PCreeperRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PDrownedRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PEnderDragonRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PEndermanRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PHoglinRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PHumanoidRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PIllagerRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PIronGolemRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PPlayerRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PRavagerRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PSpiderRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PStrayRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PVexRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PVindicatorRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PWitchRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PWitherRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PWitherSkeletonMinionRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PZombieVillagerRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PatchedEntityRenderer;
+import yesman.epicfight.client.renderer.patched.entity.WitherGhostCloneRenderer;
+import yesman.epicfight.client.renderer.patched.item.RenderBow;
+import yesman.epicfight.client.renderer.patched.item.RenderCrossbow;
+import yesman.epicfight.client.renderer.patched.item.RenderItemBase;
+import yesman.epicfight.client.renderer.patched.item.RenderKatana;
+import yesman.epicfight.client.renderer.patched.item.RenderMap;
+import yesman.epicfight.client.renderer.patched.item.RenderTrident;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.Skill;
@@ -444,15 +470,15 @@ public class RenderEngine {
 			if (event.getEntity() != null && event.getEntity().level().isClientSide) {
 				CapabilityItem cap = EpicFightCapabilities.getItemStackCapabilityOr(event.getItemStack(), null);
 				LocalPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), LocalPlayerPatch.class);
-				
+
 				if (cap != null && playerpatch != null) {
 					if (ClientEngine.getInstance().controllEngine.isKeyDown(EpicFightKeyMappings.WEAPON_INNATE_SKILL_TOOLTIP)) {
 						Skill weaponInnateSkill = cap.getInnateSkill(playerpatch, event.getItemStack());
-						
+
 						if (weaponInnateSkill != null) {
 							event.getToolTip().clear();
 							List<Component> skilltooltip = weaponInnateSkill.getTooltipOnItem(event.getItemStack(), cap, playerpatch);
-							
+
 							for (Component s : skilltooltip) {
 								event.getToolTip().add(s);
 							}
@@ -460,19 +486,25 @@ public class RenderEngine {
 					} else {
 						List<Component> tooltip = event.getToolTip();
 						cap.modifyItemTooltip(event.getItemStack(), event.getToolTip(), playerpatch);
-						
+
 						for (int i = 0; i < tooltip.size(); i++) {
 							Component textComp = tooltip.get(i);
-							
+
 							if (textComp.getSiblings().size() > 0) {
 								Component sibling = textComp.getSiblings().get(0);
-								
+
 								if (sibling instanceof MutableComponent translationComponent) {
+<<<<<<< HEAD
 									if (translationComponent.getSiblings().size() > 1 && translationComponent.getSiblings().get(1)instanceof MutableComponent) {
 										if ((translationComponent.getSiblings().get(1)).getString().equals(Attributes.ATTACK_SPEED.getDescriptionId())) {
+=======
+									if (translationComponent.getSiblings().size() > 1 && translationComponent.getSiblings().get(1) instanceof MutableComponent translatableArg) {
+										if (translatableArg.getString().equals(Attributes.ATTACK_SPEED.getDescriptionId())) {
+>>>>>>> refs/remotes/origin/1.20.1
 											float weaponSpeed = (float)playerpatch.getWeaponAttribute(Attributes.ATTACK_SPEED, event.getItemStack());
 											tooltip.remove(i);
 											tooltip.add(i, Component.literal(String.format(" %.2f ", playerpatch.getModifiedAttackSpeed(cap, weaponSpeed)))
+<<<<<<< HEAD
 																	.append(Component.translatable(Attributes.ATTACK_SPEED.getDescriptionId())));
 											
 										} else if ((translationComponent.getSiblings().get(1)).getString().equals(Attributes.ATTACK_DAMAGE.getDescriptionId())) {
@@ -481,10 +513,25 @@ public class RenderEngine {
 											float damageBonus = EnchantmentHelper.getDamageBonus(event.getItemStack(), MobType.UNDEFINED);
 											String damageFormat = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(playerpatch.getModifiedBaseDamage(weaponDamage) + damageBonus);
 											
+=======
+													.append(Component.translatable(Attributes.ATTACK_SPEED.getDescriptionId())));
+
+										} else if (translatableArg.getString().equals(Attributes.ATTACK_DAMAGE.getDescriptionId())) {
+
+											float weaponDamage = (float)playerpatch.getWeaponAttribute(Attributes.ATTACK_DAMAGE, event.getItemStack());
+											float damageBonus = EnchantmentHelper.getDamageBonus(event.getItemStack(), MobType.UNDEFINED);
+											String damageFormat = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(playerpatch.getModifiedBaseDamage(weaponDamage) + damageBonus);
+
+>>>>>>> refs/remotes/origin/1.20.1
 											tooltip.remove(i);
 											tooltip.add(i, Component.literal(String.format(" %s ", damageFormat))
+<<<<<<< HEAD
 																	.append(Component.translatable(Attributes.ATTACK_DAMAGE.getDescriptionId()))
 																	.withStyle(ChatFormatting.DARK_GREEN));
+=======
+													.append(Component.translatable(Attributes.ATTACK_DAMAGE.getDescriptionId()))
+													.withStyle(ChatFormatting.DARK_GREEN));
+>>>>>>> refs/remotes/origin/1.20.1
 										}
 									}
 								}
@@ -582,7 +629,10 @@ public class RenderEngine {
 					event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
 				renderEngine.aimHelper.doRender(event.getPoseStack(), event.getPartialTick());
 			}
+<<<<<<< HEAD
 
+=======
+>>>>>>> refs/remotes/origin/1.20.1
 			/**
 			if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_WEATHER) {
 				renderEngine.betaWarningMessage.drawMessage(event.getPoseStack());

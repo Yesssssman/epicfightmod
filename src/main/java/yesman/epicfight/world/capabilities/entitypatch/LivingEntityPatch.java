@@ -55,7 +55,6 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 import yesman.epicfight.world.damagesource.StunType;
-import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributeSupplier;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.TargetIndicatorCheckEvent;
@@ -190,7 +189,11 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	
 	public AttackResult tryHarm(Entity target, EpicFightDamageSource damagesource, float amount) {
 		LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(target, LivingEntityPatch.class);
+<<<<<<< HEAD
 		AttackResult result = (entitypatch != null) ? entitypatch.tryHurt(damagesource.cast(), amount) : AttackResult.success(amount);
+=======
+		AttackResult result = (entitypatch != null) ? entitypatch.tryHurt(damagesource, amount) : AttackResult.success(amount);
+>>>>>>> refs/remotes/origin/1.20.1
 		
 		return result;
 	}

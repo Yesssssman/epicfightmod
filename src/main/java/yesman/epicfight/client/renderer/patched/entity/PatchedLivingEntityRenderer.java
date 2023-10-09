@@ -46,8 +46,8 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		getRenderType = ObfuscationReflectionHelper.findMethod(LivingEntityRenderer.class, "m_7225_", LivingEntity.class, boolean.class, boolean.class, boolean.class);
 	}
 	
-	private final Map<Class<?>, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>, AM>> patchedLayers = Maps.newHashMap();
-	
+	protected Map<Class<?>, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>, AM>> patchedLayers = Maps.newHashMap();
+
 	@Override
 	public void render(E entityIn, T entitypatch, LivingEntityRenderer<E, M> renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
 		super.render(entityIn, entitypatch, renderer, buffer, poseStack, packedLight, partialTicks);
@@ -192,7 +192,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
 		
 		layers.forEach((layer) -> {
-			layer.render(poseStack, buffer, packedLightIn, entityIn, entityIn.walkAnimation.position(), entityIn.walkAnimation.speed(), partialTicks, entityIn.tickCount, f2, f7);
+			layer.render(poseStack, buffer, packedLightIn, entityIn, entityIn.walkAnimation.position(), entityIn.walkAnimation.speed(), partialTicks, bob, f2, f7);
 		});
 		
 		poseStack.popPose();

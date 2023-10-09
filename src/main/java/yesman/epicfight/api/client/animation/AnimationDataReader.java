@@ -54,17 +54,23 @@ public class AnimationDataReader {
 		}
 
 		assert inputstream != null;
-        Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
-        AnimationDataReader propertySetter = GsonHelper.fromJson(GSON, reader, TYPE);
+		Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
+		AnimationDataReader propertySetter = GsonHelper.fromJson(GSON, reader, TYPE);
 
-        if (propertySetter.layerInfo != null) {
-        	if (propertySetter.layerInfo.jointMaskEntry.isValid()) {
-        		animation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.layerInfo.jointMaskEntry);
-        	}
+		if (propertySetter.layerInfo != null) {
+			if (propertySetter.layerInfo.jointMaskEntry.isValid()) {
+				animation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.layerInfo.jointMaskEntry);
+			}
 
+<<<<<<< HEAD
         	animation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.layerInfo.layerType);
         	animation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.layerInfo.priority);
         }
+=======
+			animation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.layerInfo.layerType);
+			animation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.layerInfo.priority);
+		}
+>>>>>>> refs/remotes/origin/1.20.1
 
 		if (propertySetter.multilayerInfo != null) {
 			StaticAnimation multilayerAnimation = new StaticAnimation(animation.getLocation(), animation.getConvertTime(), animation.isRepeat(), String.valueOf(animation.getId()), animation.getArmature(), true);
@@ -77,13 +83,21 @@ public class AnimationDataReader {
 			multilayerAnimation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.multilayerInfo.priority);
 			multilayerAnimation.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, (self, entitypatch, speed, elapsedTime) -> {
 				Layer baseLayer = entitypatch.getClientAnimator().baseLayer;
+<<<<<<< HEAD
 				
+=======
+
+>>>>>>> refs/remotes/origin/1.20.1
 				if (baseLayer.animationPlayer.getAnimation().getRealAnimation() != animation) {
 					return 0.0F;
 				}
 
 				float diff = baseLayer.animationPlayer.getElapsedTime() - entitypatch.getClientAnimator().getCompositeLayer(propertySetter.multilayerInfo.priority).animationPlayer.getElapsedTime();
+<<<<<<< HEAD
 				
+=======
+
+>>>>>>> refs/remotes/origin/1.20.1
 				return diff * 20;
 			});
 

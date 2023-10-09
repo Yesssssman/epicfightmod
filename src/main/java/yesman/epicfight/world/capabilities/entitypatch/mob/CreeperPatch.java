@@ -23,6 +23,8 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.CreeperSwellStoppableGoal;
 
 public class CreeperPatch extends MobPatch<Creeper> {
+	private CreeperSwellStoppableGoal swellerGoal;
+	
 	public CreeperPatch() {
 		super(Faction.NEUTRAL);
 	}
@@ -48,7 +50,12 @@ public class CreeperPatch extends MobPatch<Creeper> {
 	protected void initAI() {
 		super.initAI();
 		
+<<<<<<< HEAD
         this.original.goalSelector.addGoal(2, new CreeperSwellStoppableGoal(this, this.original));
+=======
+		this.swellerGoal = new CreeperSwellStoppableGoal(this, this.original);
+        this.original.goalSelector.addGoal(2, this.swellerGoal);
+>>>>>>> refs/remotes/origin/1.20.1
 	}
 	
 	@OnlyIn(Dist.CLIENT)

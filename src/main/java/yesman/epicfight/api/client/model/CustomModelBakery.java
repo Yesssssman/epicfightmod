@@ -86,6 +86,7 @@ public class CustomModelBakery {
 	public static List<ModelPart> getAllParts(Model model) {
 		Class<?> cls = model.getClass();
 		List<Class<?>> superClasses = Lists.newArrayList();
+<<<<<<< HEAD
 		
 		while (Model.class.isAssignableFrom(cls)) {
 			superClasses.add(cls);
@@ -116,7 +117,39 @@ public class CustomModelBakery {
 	public static AnimatedMesh bakeHumanoidModel(HumanoidModel<?> model, ArmorItem armorItem, EquipmentSlot slot, boolean debuggingMode) {
 		List<ModelPartition> boxes = Lists.newArrayList();
 		List<ModelPart> modelParts = getAllParts(model);
+=======
+>>>>>>> refs/remotes/origin/1.20.1
 		
+		while (Model.class.isAssignableFrom(cls)) {
+			superClasses.add(cls);
+			cls = cls.getSuperclass();
+		}
+		
+		List<ModelPart> modelParts = Lists.newArrayList();
+		
+		for (Class<?> modelClss : superClasses) {
+			Field[] modelFields = modelClss.getDeclaredFields();
+			
+			for (Field field : modelFields) {
+				if (field.getType().isAssignableFrom(ModelPart.class)) {
+					try {
+						ModelPart modelPart = (ModelPart)field.get(model);
+						
+						if (modelPart.visible) {
+							modelParts.add(modelPart);
+						}
+					} catch(Exception e) {}
+				}
+			}
+		}
+		
+		return modelParts;
+	}
+	
+	public static AnimatedMesh bakeHumanoidModel(HumanoidModel<?> model, ArmorItem armorItem, EquipmentSlot slot, boolean debuggingMode) {
+		List<ModelPartition> boxes = Lists.newArrayList();
+		List<ModelPart> modelParts = getAllParts(model);
+
 		model.head.setRotation(0.0F, 0.0F, 0.0F);
 		model.hat.setRotation(0.0F, 0.0F, 0.0F);
 		model.body.setRotation(0.0F, 0.0F, 0.0F);

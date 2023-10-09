@@ -41,7 +41,11 @@ public class PatchedVillagerProfessionLayer extends PatchedLayer<ZombieVillager,
 			VillagerMetaDataSection.Hat typeHat = vanillaLayer.getHatData(vanillaLayer.typeHatCache, "type", BuiltInRegistries.VILLAGER_TYPE, villagerdata.getType());
 	        @SuppressWarnings("deprecation")
 	        VillagerMetaDataSection.Hat professionHat = vanillaLayer.getHatData(vanillaLayer.professionHatCache, "profession", BuiltInRegistries.VILLAGER_PROFESSION, villagerdata.getProfession());
+<<<<<<< HEAD
 	        
+=======
+
+>>>>>>> refs/remotes/origin/1.20.1
 	        if (!(typeHat == VillagerMetaDataSection.Hat.NONE || typeHat == VillagerMetaDataSection.Hat.PARTIAL && professionHat != VillagerMetaDataSection.Hat.FULL)
 	        		|| !entityliving.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
 	        	this.mesh.head.hidden = true;

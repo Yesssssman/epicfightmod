@@ -153,7 +153,11 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 	
 	private AnimatedMesh getArmorModel(HumanoidArmorLayer<E, M, M> originalRenderer, E entityliving, ArmorItem armorItem, ItemStack stack, EquipmentSlot slot, boolean armorDebugging) {
 		ResourceLocation registryName = ForgeRegistries.ITEMS.getKey(armorItem);
+<<<<<<< HEAD
 		
+=======
+
+>>>>>>> refs/remotes/origin/1.20.1
 		if (ARMOR_MODELS.containsKey(registryName) && !armorDebugging) {
 			return ARMOR_MODELS.get(registryName);
 		} else {

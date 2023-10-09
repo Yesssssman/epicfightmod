@@ -30,7 +30,11 @@ public abstract class MixinLivingEntity {
 		}
 	}
 	
+<<<<<<< HEAD
 	@Inject(at = @At(value = "RETURN"), method = "hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z", cancellable = true)
+=======
+	@Inject(at = @At(value = "RETURN"), method = "hurt", cancellable = true)
+>>>>>>> refs/remotes/origin/1.20.1
 	private void epicfight_hurt(DamageSource damagesource, float amount, CallbackInfoReturnable<Boolean> info) {
 		LivingEntity self = (LivingEntity)((Object)this);
 		LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(damagesource.getEntity(), LivingEntityPatch.class);
