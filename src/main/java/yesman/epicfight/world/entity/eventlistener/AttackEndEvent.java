@@ -10,7 +10,7 @@ public class AttackEndEvent extends PlayerEvent<ServerPlayerPatch> {
 		super(playerpatch, false);
 		this.animation = animation;
 	}
-	
+
 	public AttackAnimation getAnimation() {
 		return this.animation;
 	}

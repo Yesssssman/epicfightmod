@@ -30,6 +30,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.*;
+import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoader;
@@ -140,6 +141,7 @@ public class RenderEngine {
 		RenderBow bowRenderer = new RenderBow();
 		RenderCrossbow crossbowRenderer = new RenderCrossbow();
 		RenderTrident tridentRenderer = new RenderTrident();
+		RenderMap mapRenderer = new RenderMap();
 		
 		this.itemRendererMapByInstance.clear();
 		this.itemRendererMapByInstance.put(Items.AIR, baseRenderer);
@@ -147,6 +149,7 @@ public class RenderEngine {
 		this.itemRendererMapByInstance.put(Items.SHIELD, baseRenderer);
 		this.itemRendererMapByInstance.put(Items.CROSSBOW, crossbowRenderer);
 		this.itemRendererMapByInstance.put(Items.TRIDENT, tridentRenderer);
+		this.itemRendererMapByInstance.put(Items.FILLED_MAP, mapRenderer);
 		this.itemRendererMapByInstance.put(EpicFightItems.UCHIGATANA.get(), new RenderKatana());
 		this.itemRendererMapByClass.put(BowItem.class, bowRenderer);
 		this.itemRendererMapByClass.put(CrossbowItem.class, crossbowRenderer);
@@ -404,8 +407,8 @@ public class RenderEngine {
 				float bodyRotO = 0.0F;
 				float bodyRot = 0.0F;
 
-				if (event.getPartialTick() == 1.0F && entitypatch instanceof LocalPlayerPatch) {
-					playerpatch = (LocalPlayerPatch)entitypatch;
+				if (event.getPartialTick() == 1.0F && entitypatch instanceof LocalPlayerPatch localPlayerPatch) {
+					playerpatch = localPlayerPatch;
 					bodyRotO = playerpatch.prevBodyYaw;
 					bodyRot = playerpatch.getBodyYaw();
 					playerpatch.prevBodyYaw = livingentity.getYRot();
@@ -466,45 +469,22 @@ public class RenderEngine {
 								
 								if (sibling instanceof MutableComponent translationComponent) {
 									if (translationComponent.getSiblings().size() > 1 && translationComponent.getSiblings().get(1)instanceof MutableComponent) {
-										CapabilityItem itemCapability = EpicFightCapabilities.getItemStackCapability(event.getItemStack());
-										
 										if ((translationComponent.getSiblings().get(1)).getString().equals(Attributes.ATTACK_SPEED.getDescriptionId())) {
-											float weaponSpeed = (float)playerpatch.getOriginal().getAttribute(Attributes.ATTACK_SPEED).getBaseValue();
-											
-											for (AttributeModifier modifier : event.getItemStack().getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_SPEED)) {
-												weaponSpeed += modifier.getAmount();
-											}
-											
-											if (itemCapability != null) {
-												for (AttributeModifier modifier : itemCapability.getAttributeModifiers(EquipmentSlot.MAINHAND, playerpatch).get(Attributes.ATTACK_SPEED)) {
-													weaponSpeed += modifier.getAmount();
-												}
-											}
-											
+											float weaponSpeed = (float)playerpatch.getWeaponAttribute(Attributes.ATTACK_SPEED, event.getItemStack());
 											tooltip.remove(i);
-											tooltip.add(i, Component.literal(String.format(" %.2f ", playerpatch.getModifiedAttackSpeed(cap, weaponSpeed))).append(Component.translatable(Attributes.ATTACK_SPEED.getDescriptionId())));
+											tooltip.add(i, Component.literal(String.format(" %.2f ", playerpatch.getModifiedAttackSpeed(cap, weaponSpeed)))
+																	.append(Component.translatable(Attributes.ATTACK_SPEED.getDescriptionId())));
+											
 										} else if ((translationComponent.getSiblings().get(1)).getString().equals(Attributes.ATTACK_DAMAGE.getDescriptionId())) {
-											float weaponDamage = (float)playerpatch.getOriginal().getAttribute(Attributes.ATTACK_DAMAGE).getBaseValue();
-											weaponDamage += EnchantmentHelper.getDamageBonus(event.getItemStack(), MobType.UNDEFINED);
 											
-											for (AttributeModifier modifier : playerpatch.getOriginal().getAttribute(Attributes.ATTACK_DAMAGE).getModifiers()) {
-												weaponDamage += modifier.getAmount();
-											}
-											
-											for (AttributeModifier modifier : event.getItemStack().getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE)) {
-												weaponDamage += modifier.getAmount();
-											}
-											
-											if (itemCapability != null) {
-												for (AttributeModifier modifier : itemCapability.getAttributeModifiers(EquipmentSlot.MAINHAND, playerpatch).get(Attributes.ATTACK_DAMAGE)) {
-													weaponDamage += modifier.getAmount();
-												}
-											}
-											
-											String damageFormat = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(playerpatch.getModifiedBaseDamage(weaponDamage));
+											float weaponDamage = (float)playerpatch.getWeaponAttribute(Attributes.ATTACK_DAMAGE, event.getItemStack());
+											float damageBonus = EnchantmentHelper.getDamageBonus(event.getItemStack(), MobType.UNDEFINED);
+											String damageFormat = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(playerpatch.getModifiedBaseDamage(weaponDamage) + damageBonus);
 											
 											tooltip.remove(i);
-											tooltip.add(i, Component.literal(String.format(" %s ", damageFormat)).append(Component.translatable(Attributes.ATTACK_DAMAGE.getDescriptionId())).withStyle(ChatFormatting.DARK_GREEN));
+											tooltip.add(i, Component.literal(String.format(" %s ", damageFormat))
+																	.append(Component.translatable(Attributes.ATTACK_DAMAGE.getDescriptionId()))
+																	.withStyle(ChatFormatting.DARK_GREEN));
 										}
 									}
 								}
@@ -538,24 +518,22 @@ public class RenderEngine {
 		
 		@SubscribeEvent
 		public static void renderGameOverlayPre(RenderGuiOverlayEvent.Pre event) {
-			//if (event.getType() == RenderGameOverlayEvent.ElementType.ALL) {
-				Window window = Minecraft.getInstance().getWindow();
-				LocalPlayerPatch playerpatch = ClientEngine.getInstance().getPlayerPatch();
-				
-				if (playerpatch != null) {
-					for (SkillContainer skillContainer : playerpatch.getSkillCapability().skillContainers) {
-						if (skillContainer.getSkill() != null) {
-							skillContainer.getSkill().onScreen(playerpatch, window.getGuiScaledWidth(), window.getGuiScaledHeight());
-						}
-					}
-					
-					renderEngine.overlayManager.renderTick(window.getGuiScaledWidth(), window.getGuiScaledHeight());
-					
-					if (Minecraft.renderNames() && !(Minecraft.getInstance().screen instanceof UISetupScreen)) {
-						renderEngine.battleModeUI.renderGui(playerpatch, event.getGuiGraphics(), event.getPartialTick());
+			Window window = Minecraft.getInstance().getWindow();
+			LocalPlayerPatch playerpatch = ClientEngine.getInstance().getPlayerPatch();
+			
+			if (playerpatch != null) {
+				for (SkillContainer skillContainer : playerpatch.getSkillCapability().skillContainers) {
+					if (skillContainer.getSkill() != null) {
+						skillContainer.getSkill().onScreen(playerpatch, window.getGuiScaledWidth(), window.getGuiScaledHeight());
 					}
 				}
-			//}
+				
+				renderEngine.overlayManager.renderTick(window.getGuiScaledWidth(), window.getGuiScaledHeight());
+				
+				if (Minecraft.renderNames() && !(Minecraft.getInstance().screen instanceof UISetupScreen)) {
+					renderEngine.battleModeUI.renderGui(playerpatch, event.getGuiGraphics(), event.getPartialTick());
+				}
+			}
 		}
 		
 		@SubscribeEvent
@@ -605,9 +583,10 @@ public class RenderEngine {
 				renderEngine.aimHelper.doRender(event.getPoseStack(), event.getPartialTick());
 			}
 
+			/**
 			if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_WEATHER) {
 				renderEngine.betaWarningMessage.drawMessage(event.getPoseStack());
-			}
+			}**/
 		}
 		
 		@SuppressWarnings("unchecked")

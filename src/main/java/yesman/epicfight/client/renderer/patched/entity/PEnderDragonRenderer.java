@@ -86,7 +86,6 @@ public class PEnderDragonRenderer extends PatchedEntityRenderer<EnderDragon, End
 		}
 	}
 	
-	@SuppressWarnings("deprecation")
 	@Override
 	public void mulPoseStack(PoseStack matStack, Armature armature, EnderDragon entityIn, EnderDragonPatch entitypatch, float partialTicks) {
 		OpenMatrix4f modelMatrix;

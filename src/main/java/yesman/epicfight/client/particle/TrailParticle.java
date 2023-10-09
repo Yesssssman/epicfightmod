@@ -292,6 +292,11 @@ public class TrailParticle extends TextureSheetParticle {
 	}
 	
 	@Override
+	public boolean shouldCull() {
+        return false;
+    }
+	
+	@Override
 	public ParticleRenderType getRenderType() {
 		return EpicFightParticleRenderTypes.TRAIL;
 	}
@@ -323,11 +328,11 @@ public class TrailParticle extends TextureSheetParticle {
 		
 		@Override
 		public Particle createParticle(SimpleParticleType typeIn, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-			int eid = (int)Double.doubleToLongBits(x);
-			int modid = (int)Double.doubleToLongBits(y);
-			int animid = (int)Double.doubleToLongBits(z);
-			int jointId = (int)Double.doubleToLongBits(xSpeed);
-			int idx = (int)Double.doubleToLongBits(ySpeed);
+			int eid = (int)Double.doubleToRawLongBits(x);
+			int modid = (int)Double.doubleToRawLongBits(y);
+			int animid = (int)Double.doubleToRawLongBits(z);
+			int jointId = (int)Double.doubleToRawLongBits(xSpeed);
+			int idx = (int)Double.doubleToRawLongBits(ySpeed);
 			Entity entity = level.getEntity(eid);
 			
 			if (entity != null) {

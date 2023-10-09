@@ -71,6 +71,11 @@ public class BladeRushSkill extends WeaponInnateSkill {
 			this.resource = resource;
 			return this;
 		}
+		
+		public Builder setCreativeTab(CreativeModeTab tab) {
+			this.tab = tab;
+			return this;
+		}
 	}
 	
 	private final StaticAnimation[] comboAnimations;

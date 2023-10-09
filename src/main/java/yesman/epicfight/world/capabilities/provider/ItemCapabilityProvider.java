@@ -42,6 +42,7 @@ public class ItemCapabilityProvider implements ICapabilityProvider, NonNullSuppl
 		CAPABILITY_BY_CLASS.put(HoeItem.class, WeaponCapabilityPresets.HOE);
 		CAPABILITY_BY_CLASS.put(BowItem.class, WeaponCapabilityPresets.BOW);
 		CAPABILITY_BY_CLASS.put(CrossbowItem.class, WeaponCapabilityPresets.CROSSBOW);
+		CAPABILITY_BY_CLASS.put(MapItem.class, (item) -> MapCapability.builder());
 	}
 	
 	public static void put(Item item, CapabilityItem cap) {

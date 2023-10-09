@@ -5,7 +5,6 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 
 public class ExtraDamageInstance {
@@ -18,12 +17,12 @@ public class ExtraDamageInstance {
 		});
 	
 	public static final ExtraDamage SWEEPING_EDGE_ENCHANTMENT = new ExtraDamage((attacker, itemstack, target, baseDamage, params) -> {
-			int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SWEEPING_EDGE, itemstack);
+			int i = itemstack.getEnchantmentLevel(Enchantments.SWEEPING_EDGE);
 			float modifier = (i > 0) ? (float)i / (i + 1.0F) : 0.0F;
 			
 			return baseDamage * modifier;
 		}, (itemstack, tooltips, baseDamage, params) -> {
-			int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SWEEPING_EDGE, itemstack);
+			int i = itemstack.getEnchantmentLevel(Enchantments.SWEEPING_EDGE);
 			
 			if (i > 0) {
 				double modifier = (double)i / (i + 1.0D);

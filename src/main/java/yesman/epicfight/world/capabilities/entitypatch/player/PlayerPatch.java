@@ -1,11 +1,17 @@
 package yesman.epicfight.world.capabilities.entitypatch.player;
 
+import java.util.Collection;
+import java.util.UUID;
+
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -40,8 +46,6 @@ import yesman.epicfight.world.entity.eventlistener.ModifyBaseDamageEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
-
-import java.util.UUID;
 
 public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T> {
 	private static final UUID ACTION_EVENT_UUID = UUID.fromString("e6beeac4-77d2-11eb-9439-0242ac130002");
@@ -221,10 +225,15 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		return this.original.getCapability(EpicFightCapabilities.CAPABILITY_SKILL).orElse(CapabilitySkill.EMPTY);
 	}
 	
+	public PlayerEventListener getEventListener() {
+		return this.eventListeners;
+	}
+	
 	@Override
 	public float getModifiedBaseDamage(float baseDamage) {
 		ModifyBaseDamageEvent<PlayerPatch<?>> event = new ModifyBaseDamageEvent<>(this, baseDamage);
 		this.getEventListener().triggerEvents(EventType.MODIFY_DAMAGE_EVENT, event);
+		
 		return event.getDamage();
 	}
 	
@@ -256,8 +265,35 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		}
 	}
 	
-	public PlayerEventListener getEventListener() {
-		return this.eventListeners;
+	public double getWeaponAttribute(Attribute attribute, ItemStack itemstack) {
+		AttributeInstance attrInstance = new AttributeInstance(attribute, (ai)->{});
+		Collection<AttributeModifier> itemModifiers = itemstack.getAttributeModifiers(EquipmentSlot.MAINHAND).get(attribute);
+		double baseValue = this.original.getAttribute(attribute) == null ? attribute.getDefaultValue() : this.original.getAttribute(attribute).getBaseValue();
+		attrInstance.setBaseValue(baseValue);
+		
+		for (AttributeModifier modifier : this.original.getAttribute(attribute).getModifiers()) {
+			if (!itemModifiers.contains(modifier)) {
+				attrInstance.addTransientModifier(modifier);
+			}
+		}
+		
+		for (AttributeModifier modifier : itemModifiers) {
+			if (!attrInstance.hasModifier(modifier)) {
+				attrInstance.addTransientModifier(modifier);
+			}
+		}
+		
+		CapabilityItem itemCapability = EpicFightCapabilities.getItemStackCapabilityOr(itemstack, null);
+		
+		if (itemCapability != null) {
+			for (AttributeModifier modifier : itemCapability.getAttributeModifiers(EquipmentSlot.MAINHAND, this).get(attribute)) {
+				if (!attrInstance.hasModifier(modifier)) {
+					attrInstance.addTransientModifier(modifier);
+				}
+			}
+		}
+		
+		return attrInstance.getValue();
 	}
 	
 	@Override

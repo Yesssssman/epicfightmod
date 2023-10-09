@@ -44,7 +44,6 @@ import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 
 import java.util.EnumSet;
-import java.util.Random;
 import java.util.UUID;
 
 public class EndermanPatch extends MobPatch<EnderMan> {

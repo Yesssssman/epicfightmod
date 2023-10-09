@@ -84,8 +84,7 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 
 		MinecraftForge.EVENT_BUS.post(onBuild);
 
-		//SkillBookLootModifier.createSkillLootTable(BUILDERS.keySet()); //todo fix create SkillLootTable
-		SkillBookLootModifier.createSkillLootTable();
+		SkillBookLootModifier.createSkillLootTable(BUILDERS.keySet());
 	}
 	
 	public static Stream<CompoundTag> getDataStream() {

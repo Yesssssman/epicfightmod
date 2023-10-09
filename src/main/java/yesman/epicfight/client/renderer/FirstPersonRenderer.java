@@ -1,5 +1,7 @@
 package yesman.epicfight.client.renderer;
 
+import java.util.Iterator;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.model.PlayerModel;
@@ -14,6 +16,7 @@ import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.ElytraLayer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.PlayerItemInHandLayer;
+import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.entity.layers.SpinAttackEffectLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraftforge.api.distmarker.Dist;
@@ -22,6 +25,7 @@ import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.client.model.ModelPart;
 import yesman.epicfight.api.client.model.VertexIndicator.AnimatedVertexIndicator;
 import yesman.epicfight.api.model.Armature;
+import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.mesh.HumanoidMesh;
@@ -79,6 +83,29 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 		}
 		
 		matStackIn.popPose();
+	}
+	
+	protected void renderLayer(LivingEntityRenderer<LocalPlayer, PlayerModel<LocalPlayer>> renderer, LocalPlayerPatch entitypatch, LocalPlayer entityIn, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLightIn, float partialTicks) {
+		Iterator<RenderLayer<LocalPlayer, PlayerModel<LocalPlayer>>> iter = renderer.layers.iterator();
+		
+		float f = MathUtils.lerpBetween(entityIn.yBodyRotO, entityIn.yBodyRot, partialTicks);
+        float f1 = MathUtils.lerpBetween(entityIn.yHeadRotO, entityIn.yHeadRot, partialTicks);
+        float f2 = f1 - f;
+		float f7 = entityIn.getViewXRot(partialTicks);
+		float bob = this.getVanillaRendererBob(entityIn, renderer, partialTicks);
+		
+		while (iter.hasNext()) {
+			RenderLayer<LocalPlayer, PlayerModel<LocalPlayer>> layer = iter.next();
+			Class<?> rendererClass = layer.getClass();
+			
+			if (rendererClass.isAnonymousClass()) {
+				rendererClass = rendererClass.getSuperclass();
+			}
+			
+			if (this.patchedLayers.containsKey(rendererClass)) {
+				this.patchedLayers.get(rendererClass).renderLayer(0, entitypatch, entityIn, layer, poseStack, buffer, packedLightIn, poses, bob, f2, f7, partialTicks);
+			}
+		}
 	}
 	
 	@Override

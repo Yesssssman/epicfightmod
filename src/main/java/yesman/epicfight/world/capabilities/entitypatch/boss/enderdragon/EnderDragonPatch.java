@@ -73,7 +73,6 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 		this.currentLivingMotion = LivingMotions.FLY;
 	}
 	
-	@SuppressWarnings("deprecation")
 	@Override
 	public void onJoinWorld(EnderDragon enderdragon, EntityJoinLevelEvent event) {
 		super.onJoinWorld(enderdragon, event);

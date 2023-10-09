@@ -1,9 +1,20 @@
 package yesman.epicfight.client.gui;
 
+import java.util.List;
+
+import org.lwjgl.opengl.GL11;
+
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.platform.GlStateManager.DestFactor;
+import com.mojang.blaze3d.platform.GlStateManager.SourceFactor;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
@@ -12,17 +23,16 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.lwjgl.opengl.GL11;
 import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec2i;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.config.ClientConfig;
 import yesman.epicfight.config.ConfigurationIngame;
 import yesman.epicfight.main.EpicFightMod;
-import yesman.epicfight.skill.*;
+import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.Skill.ActivateType;
-
-import java.util.List;
+import yesman.epicfight.skill.SkillContainer;
+import yesman.epicfight.skill.SkillSlots;
 
 @OnlyIn(Dist.CLIENT)
 public class BattleModeGui extends ModIngameGui {
@@ -153,7 +163,9 @@ public class BattleModeGui extends ModIngameGui {
 
 				if (skill.shouldDraw(container)) {
 					RenderSystem.enableBlend();
-					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 0.1F);
+					RenderSystem.blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA);
+					
 					skill.drawOnGui(this, container, guiGraphics, slotCoord.x, slotCoord.y);
 					slotCoord = alignDirection.nextPositionGetter.getNext(horBasis, verBasis, slotCoord, 24, 24);
 				}
@@ -233,15 +245,16 @@ public class BattleModeGui extends ModIngameGui {
 		RenderSystem.enableBlend();
 		RenderSystem.setShaderTexture(0, container.getSkill().getSkillTexture());
 		RenderSystem.setShader(GameRenderer::getPositionTexShader);
+		RenderSystem.blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA);
 		
 		if (canUse) {
 			if (container.getStack() > 0) {
-				RenderSystem.setShaderColor(0.0F, 0.64F, 0.72F, 0.8F);
+				RenderSystem.setShaderColor(0.0F, 0.64F, 0.72F, 0.08F);
 			} else {
-				RenderSystem.setShaderColor(0.0F, 0.5F, 0.5F, 0.6F);
+				RenderSystem.setShaderColor(0.0F, 0.5F, 0.5F, 0.06F);
 			}
 		} else {
-			RenderSystem.setShaderColor(0.5F, 0.5F, 0.5F, 0.6F);
+			RenderSystem.setShaderColor(0.5F, 0.5F, 0.5F, 0.06F);
 		}
 		
 		Tesselator tessellator = Tesselator.getInstance();
@@ -253,13 +266,12 @@ public class BattleModeGui extends ModIngameGui {
 		}
         
         bufferbuilder.vertex(matStack.last().pose(), lastVertexX, lastVertexY, 0.0F).uv(lastTexX, lastTexY).endVertex();
-        
         tessellator.end();
         
         if (canUse) {
-			RenderSystem.setShaderColor(0.08F, 0.79F, 0.95F, 1.0F);
+			RenderSystem.setShaderColor(0.08F, 0.79F, 0.95F, 0.1F);
 		} else {
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 0.1F);
 		}
         
         RenderSystem.disableCull();

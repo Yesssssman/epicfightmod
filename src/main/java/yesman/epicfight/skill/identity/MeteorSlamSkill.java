@@ -10,6 +10,7 @@ import com.google.common.collect.Maps;
 
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -59,6 +60,12 @@ public class MeteorSlamSkill extends Skill {
 		@Override
 		public Builder setResource(Resource resource) {
 			this.resource = resource;
+			return this;
+		}
+		
+		@Override
+		public Builder setCreativeTab(CreativeModeTab tab) {
+			this.tab = tab;
 			return this;
 		}
 	}

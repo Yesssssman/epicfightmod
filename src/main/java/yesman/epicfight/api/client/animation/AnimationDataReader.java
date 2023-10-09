@@ -43,7 +43,7 @@ public class AnimationDataReader {
 	private final LayerInfo layerInfo;
 	private final LayerInfo multilayerInfo;
 	private final List<TrailInfo> trailInfo;
-	
+
 	public static void readAndApply(StaticAnimation animation, ResourceManager resourceManager, Resource iresource) {
 		InputStream inputstream = null;
 
@@ -65,34 +65,37 @@ public class AnimationDataReader {
         	animation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.layerInfo.layerType);
         	animation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.layerInfo.priority);
         }
-		
+
 		if (propertySetter.multilayerInfo != null) {
-			StaticAnimation multilayerAnimation = new StaticAnimation(animation.getConvertTime(), animation.isRepeat(), String.valueOf(animation.getId()), animation.getArmature(), true);
-			
+			StaticAnimation multilayerAnimation = new StaticAnimation(animation.getLocation(), animation.getConvertTime(), animation.isRepeat(), String.valueOf(animation.getId()), animation.getArmature(), true);
+
 			if (propertySetter.multilayerInfo.jointMaskEntry.isValid()) {
 				multilayerAnimation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.multilayerInfo.jointMaskEntry);
 			}
-			
+
 			multilayerAnimation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.multilayerInfo.layerType);
 			multilayerAnimation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.multilayerInfo.priority);
 			multilayerAnimation.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, (self, entitypatch, speed, elapsedTime) -> {
-				if (entitypatch.getClientAnimator().baseLayer.animationPlayer.getAnimation().getRealAnimation() != animation) {
+				Layer baseLayer = entitypatch.getClientAnimator().baseLayer;
+				
+				if (baseLayer.animationPlayer.getAnimation().getRealAnimation() != animation) {
 					return 0.0F;
 				}
+
+				float diff = baseLayer.animationPlayer.getElapsedTime() - entitypatch.getClientAnimator().getCompositeLayer(propertySetter.multilayerInfo.priority).animationPlayer.getElapsedTime();
 				
-				return animation.getPlaySpeed(entitypatch);
+				return diff * 20;
 			});
-			
+
 			multilayerAnimation.loadAnimation(resourceManager);
-			
+
 			animation.addProperty(ClientAnimationProperties.MULTILAYER_ANIMATION, multilayerAnimation);
 		}
-		
+
 		if (propertySetter.trailInfo.size() > 0) {
 			animation.addProperty(ClientAnimationProperties.TRAIL_EFFECT, propertySetter.trailInfo);
 		}
 	}
-
 	
 	private AnimationDataReader(LayerInfo compositeLayerInfo, LayerInfo layerInfo, List<TrailInfo> trailInfo) {
 		this.multilayerInfo = compositeLayerInfo;
@@ -158,6 +161,7 @@ public class AnimationDataReader {
 		registerJointMask("arms", JointMaskEntry.BIPED_ARMS);
 		registerJointMask("right_arms", JointMaskEntry.BIPED_RIGHT_ARMS);
 		registerJointMask("right_arms_body", JointMaskEntry.BIPED_BODY_AND_RIGHT_ARMS);
+		registerJointMask("left_arms", JointMaskEntry.BIPED_LEFT_ARMS);
 		registerJointMask("left_arms_body", JointMaskEntry.BIPED_BODY_AND_LEFT_ARMS);
 		registerJointMask("upper_joints", JointMaskEntry.BIPED_UPPER_JOINTS);
 		registerJointMask("root_upper_joints", JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT);

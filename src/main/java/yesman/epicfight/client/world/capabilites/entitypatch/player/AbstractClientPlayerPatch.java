@@ -116,14 +116,14 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 		}
 		
 		MinecraftForge.EVENT_BUS.post(new UpdatePlayerMotionEvent.BaseLayer(this, this.currentLivingMotion));
-		CapabilityItem activeItem = this.getHoldingItemCapability(this.original.getUsedItemHand());
+		CapabilityItem activeItemCap = this.getHoldingItemCapability(this.original.getUsedItemHand());
 		
 		if (this.original.isUsingItem()) {
 			UseAnim useAnim = this.original.getUseItem().getUseAnimation();
-			UseAnim secondUseAnim = activeItem.getUseAnimation(this);
+			UseAnim capUseAnim = activeItemCap.getUseAnimation(this);
 			
-			if (useAnim == UseAnim.BLOCK || secondUseAnim == UseAnim.BLOCK)
-				if (activeItem.getWeaponCategory() == WeaponCategories.SHIELD)
+			if (useAnim == UseAnim.BLOCK || capUseAnim == UseAnim.BLOCK)
+				if (activeItemCap.getWeaponCategory() == WeaponCategories.SHIELD)
 					currentCompositeMotion = LivingMotions.BLOCK_SHIELD;
 				else
 					currentCompositeMotion = LivingMotions.BLOCK;
@@ -149,7 +149,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			else
 				currentCompositeMotion = currentLivingMotion;
 			
-			if (this.getClientAnimator().isAiming() && currentCompositeMotion != LivingMotions.AIM && activeItem instanceof RangedWeaponCapability) {
+			if (this.getClientAnimator().isAiming() && currentCompositeMotion != LivingMotions.AIM && activeItemCap instanceof RangedWeaponCapability) {
 				this.playReboundAnimation();
 			}
 		}

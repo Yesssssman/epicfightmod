@@ -78,7 +78,7 @@ public class CapabilityItem {
 		Map<Attribute, AttributeModifier> attribute = this.getDamageAttributesInCondition(this.getStyle(entitypatch));
 		int index = 0;
 		boolean modifyIn = false;
-		
+
 		for (int i = 0; i < itemTooltip.size(); i++) {
 			Component textComp = itemTooltip.get(i);
 			index = i;
@@ -86,10 +86,26 @@ public class CapabilityItem {
 				modifyIn = true;
 				break;
 			}
+
+			/**
+			if (textComp.getSiblings().size() > 0) {
+				Component sibling = textComp.getSiblings().get(0);
+
+
+				if (sibling instanceof MutableComponent translationComponent) {
+					if (translationComponent.getSiblings().size() > 1 && translationComponent.getSiblings().get(1) instanceof MutableComponent translatableArg) {
+						if (translatableArg.getString().equals(Attributes.ATTACK_SPEED.getDescriptionId())) {
+							modifyIn = true;
+							break;
+						}
+					}
+				}
+			}
+			**/
 		}
-		
+
 		index++;
-		
+
 		if (attribute != null) {
 			if (!modifyIn) {
 				itemTooltip.add(index, Component.literal(""));
@@ -97,7 +113,7 @@ public class CapabilityItem {
 				itemTooltip.add(index, Component.translatable("epicfight.gui.attribute").withStyle(ChatFormatting.GRAY));
 				index++;
 			}
-			
+
 			Attribute armorNegation = EpicFightAttributes.ARMOR_NEGATION.get();
 			Attribute impact = EpicFightAttributes.IMPACT.get();
 			Attribute maxStrikes = EpicFightAttributes.MAX_STRIKES.get();
@@ -114,7 +130,7 @@ public class CapabilityItem {
 				double value = attribute.get(impact).getAmount() + entitypatch.getOriginal().getAttribute(impact).getBaseValue();
 
 				if (value > 0.0D) {
-					int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, itemstack);
+					int i = itemstack.getEnchantmentLevel(Enchantments.KNOCKBACK);
 					value *= (1.0F + i * 0.12F);
 					itemTooltip.add(index++, Component.literal(" ").append(Component.translatable(impact.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
 				}
@@ -156,6 +172,7 @@ public class CapabilityItem {
 				return ret;
 			}
 		}
+		
 		return null;
 	}
 
@@ -255,7 +272,7 @@ public class CapabilityItem {
 		return attributes;
 	}
 	
-	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot equipmentSlot, LivingEntityPatch<?> entitypatch) {
+	public Multimap<Attribute, AttributeModifier> getAttributeModifiers(EquipmentSlot equipmentSlot, @Nullable LivingEntityPatch<?> entitypatch) {
 		Multimap<Attribute, AttributeModifier> map = HashMultimap.create();
 		
 		if (entitypatch != null) {

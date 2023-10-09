@@ -1,11 +1,9 @@
 package yesman.epicfight.world.capabilities.projectile;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MobSpawnType;
-import net.minecraft.world.entity.SpawnGroupData;
 import net.minecraft.world.entity.SpawnPlacements;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.projectile.Projectile;
@@ -36,7 +34,7 @@ public class WitherSkullPatch extends ProjectilePatch<WitherSkull> {
 	
 	@Override
 	public boolean onProjectileImpact(ProjectileImpactEvent event) {
-		if (!(event.getRayTraceResult() instanceof EntityHitResult)) {
+		if (!(event.getRayTraceResult() instanceof EntityHitResult entityHitResult)) {
 			if (Math.random() < 0.2D) {
 				Vec3 location = event.getRayTraceResult().getLocation();
 				BlockPos blockpos = new BlockPos.MutableBlockPos(location.x, location.y, location.z);
@@ -56,7 +54,7 @@ public class WitherSkullPatch extends ProjectilePatch<WitherSkull> {
 				}
 			}
 		} else {
-			return ((EntityHitResult) event.getRayTraceResult()).getEntity() instanceof WitherSkeletonMinion;
+			return entityHitResult.getEntity() instanceof WitherSkeletonMinion;
 		}
 		
 		return false;

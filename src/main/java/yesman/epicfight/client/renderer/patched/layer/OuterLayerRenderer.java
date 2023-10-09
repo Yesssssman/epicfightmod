@@ -26,8 +26,9 @@ public class OuterLayerRenderer extends PatchedLayer<Drowned, DrownedPatch, Drow
 	}
 	
 	@Override
-	protected void renderLayer(DrownedPatch entitypatch, Drowned entityliving, DrownedOuterLayer<Drowned> originalRenderer, PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn, OpenMatrix4f[] poses, float netYawHead, float pitchHead, float partialTicks) {
-		this.mesh.drawModelWithPose(matrixStackIn, buffer.getBuffer(EpicFightRenderTypes.triangles(RenderType.entityCutoutNoCull(DROWNED_OUTER_LAYER))), packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, LivingEntityRenderer.getOverlayCoords(entityliving, 0.0F), entitypatch.getArmature(), poses);
+	protected void renderLayer(DrownedPatch entitypatch, Drowned entityliving, DrownedOuterLayer<Drowned> vanillaLayer, PoseStack poseStack, MultiBufferSource buffer, int packedLightIn,
+			OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
+		this.mesh.drawModelWithPose(poseStack, buffer.getBuffer(EpicFightRenderTypes.triangles(RenderType.entityCutoutNoCull(DROWNED_OUTER_LAYER))), packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, LivingEntityRenderer.getOverlayCoords(entityliving, 0.0F), entitypatch.getArmature(), poses);
 	}
 	
 	@Override

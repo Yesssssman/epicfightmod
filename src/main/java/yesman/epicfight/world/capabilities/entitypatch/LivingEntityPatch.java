@@ -97,7 +97,6 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	@Override
 	public void onJoinWorld(T entityIn, EntityJoinLevelEvent event) {
 		super.onJoinWorld(entityIn, event);
-		this.original.getAttributes().supplier = new EpicFightAttributeSupplier(this.original.getAttributes().supplier);
 		this.initAttributes();
 	}
 	
@@ -191,11 +190,11 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	
 	public AttackResult tryHarm(Entity target, EpicFightDamageSource damagesource, float amount) {
 		LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(target, LivingEntityPatch.class);
-		AttackResult result = (entitypatch != null) ? entitypatch.tryHurt((DamageSource)damagesource, amount) : AttackResult.success(amount);
+		AttackResult result = (entitypatch != null) ? entitypatch.tryHurt(damagesource.cast(), amount) : AttackResult.success(amount);
 		
 		return result;
 	}
-	
+
 	@Nullable
 	public EpicFightDamageSource getEpicFightDamageSource() {
 		return this.epicFightDamageSource;
@@ -209,18 +208,18 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		if (!execute) {
 			return;
 		}
-		
+
 		AttributeInstance damageAttributeInstance = this.original.getAttribute(Attributes.ATTACK_DAMAGE);
 		ItemStack mainHandItem = this.getOriginal().getMainHandItem();
 		ItemStack offHandItem = this.getOriginal().getOffhandItem();
 		Collection<AttributeModifier> modifiers = this.isOffhandItemValid() ? offHandItem.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE) : null;
 		mainHandItem.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE).forEach(damageAttributeInstance::removeModifier);
-		
+
 		if (modifiers != null) {
 			modifiers.forEach(damageAttributeInstance::addTransientModifier);
 		}
 	}
-	
+
 	/**
 	 * Set mainhand item's attribute modifiers
 	 */
@@ -228,28 +227,28 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		if (!execute) {
 			return;
 		}
-		
+
 		AttributeInstance damageAttributeInstance = this.original.getAttribute(Attributes.ATTACK_DAMAGE);
 		ItemStack mainHandItem = this.getOriginal().getMainHandItem();
 		ItemStack offHandItem = this.getOriginal().getOffhandItem();
 		Collection<AttributeModifier> modifiers = this.isOffhandItemValid() ? offHandItem.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE) : null;
-		
+
 		if (modifiers != null) {
 			modifiers.forEach(damageAttributeInstance::removeModifier);
 		}
-		
+
 		mainHandItem.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE).forEach(damageAttributeInstance::addTransientModifier);
 	}
-	
+
 	public void setLastAttackResult(AttackResult attackResult) {
 		this.lastResultType = attackResult.resultType;
 		this.lastDealDamage = attackResult.damage;
 	}
-	
+
 	public void setLastAttackEntity(Entity tryHurtEntity) {
 		this.lastTryHurtEntity = tryHurtEntity;
 	}
-	
+
 	protected boolean checkLastAttackSuccess(Entity target) {
 		boolean success = target.is(this.lastTryHurtEntity);
 		this.lastTryHurtEntity = null;
@@ -260,9 +259,9 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		
 		return success;
 	}
-	
+
 	public AttackResult attack(EpicFightDamageSource damageSource, Entity target, InteractionHand hand) {
-		return this.checkLastAttackSuccess(target) ? new AttackResult(this.lastResultType, this.lastDealDamage) : AttackResult.blocked(0.0F);
+		return this.checkLastAttackSuccess(target) ? new AttackResult(this.lastResultType, this.lastDealDamage) : AttackResult.missed(0.0F);
 	}
 	
 	public float getModifiedBaseDamage(float baseDamage) {
@@ -534,11 +533,11 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		
 		if (hand == InteractionHand.MAIN_HAND) {
 			impact = (float)this.original.getAttributeValue(EpicFightAttributes.IMPACT.get());
-			i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, this.getOriginal().getMainHandItem());
+			i = this.getOriginal().getMainHandItem().getEnchantmentLevel(Enchantments.KNOCKBACK);
 		} else {
 			if (this.isOffhandItemValid()) {
 				impact = (float)this.original.getAttributeValue(EpicFightAttributes.OFFHAND_IMPACT.get());
-				i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, this.getOriginal().getOffhandItem());
+				i = this.getOriginal().getOffhandItem().getEnchantmentLevel(Enchantments.KNOCKBACK);
 			} else {
 				impact = (float)this.original.getAttribute(EpicFightAttributes.IMPACT.get()).getBaseValue();
 			}
@@ -680,16 +679,16 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	public List<LivingEntity> getCurrenltyAttackedEntities() {
 		return this.getAnimator().getAnimationVariables(AttackAnimation.HIT_ENTITIES);
 	}
-	
+
 	public List<LivingEntity> getCurrenltyHurtEntities() {
 		return this.getAnimator().getAnimationVariables(AttackAnimation.HURT_ENTITIES);
 	}
-	
+
 	public void removeHurtEntities() {
 		this.getAnimator().getAnimationVariables(AttackAnimation.HIT_ENTITIES).clear();
 		this.getAnimator().getAnimationVariables(AttackAnimation.HURT_ENTITIES).clear();
 	}
-	
+
 	@OnlyIn(Dist.CLIENT)
 	public boolean flashTargetIndicator(LocalPlayerPatch playerpatch) {
 		TargetIndicatorCheckEvent event = new TargetIndicatorCheckEvent(playerpatch, this);

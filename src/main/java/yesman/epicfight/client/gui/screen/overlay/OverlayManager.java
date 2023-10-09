@@ -29,20 +29,20 @@ public class OverlayManager {
 		this.isGammaChanged = true;
 		this.modifiedGamma = originalGamma;
 	}
-	
+
 	public double getModifiedGamma(double originalGamma) {
 		this.originalGamma = originalGamma;
 		return this.modifiedGamma;
 	}
-	
+
 	public double getOriginalGamma() {
 		return this.originalGamma;
 	}
-	
+
 	public boolean isGammaChanged() {
 		return this.isGammaChanged;
 	}
-	
+
 	public void blendingTexture(String overlayId, ResourceLocation texture) {
 		if (Minecraft.renderNames()) {
 			this.overlays.put(overlayId, new BlendingTextureOverlay(texture));

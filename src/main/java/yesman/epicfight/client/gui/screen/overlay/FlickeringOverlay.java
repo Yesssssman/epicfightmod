@@ -31,7 +31,7 @@ public class FlickeringOverlay extends OverlayManager.Overlay {
 		if (this.time >= 0) {
 			return true;
 		}
-		
+
 		return false;
 	}
 }

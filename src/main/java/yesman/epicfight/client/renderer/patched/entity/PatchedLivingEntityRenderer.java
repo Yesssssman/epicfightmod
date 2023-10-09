@@ -164,6 +164,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
         float f1 = MathUtils.lerpBetween(entityIn.yHeadRotO, entityIn.yHeadRot, partialTicks);
         float f2 = f1 - f;
 		float f7 = entityIn.getViewXRot(partialTicks);
+		float bob = this.getVanillaRendererBob(entityIn, renderer, partialTicks);
 		
 		while (iter.hasNext()) {
 			RenderLayer<E, M> layer = iter.next();
@@ -174,13 +175,14 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 			}
 			
 			this.patchedLayers.computeIfPresent(rendererClass, (key, val) -> {
-				val.renderLayer(0, entitypatch, entityIn, layer, poseStack, buffer, packedLightIn, poses, f2, f7, partialTicks);
+				val.renderLayer(0, entitypatch, entityIn, layer, poseStack, buffer, packedLightIn, poses, bob, f2, f7, partialTicks);
 				iter.remove();
 				return val;
 			});
 		}
 		
-		OpenMatrix4f modelMatrix = new OpenMatrix4f().mulFront(poses[this.getRootJointIndex()]);
+		int rootJointId = this.getRootJointIndex();
+		OpenMatrix4f modelMatrix = new OpenMatrix4f().mulFront(poses[rootJointId]);
 		OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);
 		
 		poseStack.pushPose();

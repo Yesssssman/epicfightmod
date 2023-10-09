@@ -28,11 +28,18 @@ public class EpicFightParticleRenderTypes {
 			RenderSystem.depthMask(false);
 	        RenderSystem.setShader(GameRenderer::getParticleShader);
 			RenderSystem.setShaderTexture(0, TextureAtlas.LOCATION_PARTICLES);
+			
+			Minecraft mc = Minecraft.getInstance();
+	        mc.gameRenderer.lightTexture().turnOnLightLayer();
+			
 			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
 		}
 
 		public void end(Tesselator tesselator) {
 			tesselator.end();
+			
+			Minecraft mc = Minecraft.getInstance();
+	        mc.gameRenderer.lightTexture().turnOffLightLayer();
 	    }
 
 		@Override
@@ -51,6 +58,7 @@ public class EpicFightParticleRenderTypes {
 
 			Minecraft mc = Minecraft.getInstance();
 			mc.gameRenderer.overlayTexture().setupOverlayColor();
+	        mc.gameRenderer.lightTexture().turnOnLightLayer();
 
 			bufferBuilder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR_TEX_LIGHTMAP);
 		}
@@ -61,6 +69,7 @@ public class EpicFightParticleRenderTypes {
 
 			Minecraft mc = Minecraft.getInstance();
 			mc.gameRenderer.overlayTexture().teardownOverlayColor();
+	        mc.gameRenderer.lightTexture().turnOffLightLayer();
 		}
 
 		public String toString() {
@@ -76,11 +85,13 @@ public class EpicFightParticleRenderTypes {
 			RenderSystem.colorMask(true, true, true, true);
 			RenderSystem.depthMask(false);
 	        RenderSystem.setShader(GameRenderer::getRendertypeLightningShader);
+	        
 			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
 		}
 
 		public void end(Tesselator tesselator) {
 			tesselator.end();
+			
 			RenderSystem.depthMask(true);
 			RenderSystem.disableBlend();
 			RenderSystem.defaultBlendFunc();
@@ -101,15 +112,22 @@ public class EpicFightParticleRenderTypes {
 			RenderSystem.depthMask(true);
 	        RenderSystem.setShader(GameRenderer::getParticleShader);
 
+	        Minecraft mc = Minecraft.getInstance();
+	        mc.gameRenderer.lightTexture().turnOnLightLayer();
+	        
 			bufferBuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.PARTICLE);
 		}
 
 		public void end(Tesselator tesselator) {
 			tesselator.getBuilder().setQuadSorting(VertexSorting.DISTANCE_TO_ORIGIN);
 			tesselator.end();
+			
 			RenderSystem.disableBlend();
 			RenderSystem.defaultBlendFunc();
 			RenderSystem.enableCull();
+			
+			Minecraft mc = Minecraft.getInstance();
+	        mc.gameRenderer.lightTexture().turnOffLightLayer();
 		}
 
 		@Override
@@ -127,12 +145,14 @@ public class EpicFightParticleRenderTypes {
 			RenderSystem.depthMask(true);
 	        RenderSystem.setShader(GameRenderer::getPositionColorShader);
 //	        RenderSystem.disableTexture();
+	        
 			bufferBuilder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR);
 		}
 
 		public void end(Tesselator tesselator) {
 			tesselator.getBuilder().setQuadSorting(VertexSorting.DISTANCE_TO_ORIGIN);
 			tesselator.end();
+			
 //			RenderSystem.enableTexture();
 			RenderSystem.disableBlend();
 			RenderSystem.defaultBlendFunc();
@@ -153,16 +173,24 @@ public class EpicFightParticleRenderTypes {
 			RenderSystem.enableDepthTest();
 	        RenderSystem.setShader(GameRenderer::getPositionColorLightmapShader);
 //	        RenderSystem.disableTexture();
+	        
+	        Minecraft mc = Minecraft.getInstance();
+	        mc.gameRenderer.lightTexture().turnOnLightLayer();
+	        
 			bufferBuilder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR_LIGHTMAP);
 		}
 
 		public void end(Tesselator tesselator) {
 			tesselator.getBuilder().setQuadSorting(VertexSorting.DISTANCE_TO_ORIGIN);
 			tesselator.end();
+			
 //			RenderSystem.enableTexture();
 			RenderSystem.disableBlend();
 			RenderSystem.defaultBlendFunc();
 			RenderSystem.enableCull();
+			
+			Minecraft mc = Minecraft.getInstance();
+	        mc.gameRenderer.lightTexture().turnOffLightLayer();
 		}
 
 		@Override

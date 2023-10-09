@@ -66,25 +66,16 @@ public abstract class WeaponInnateSkill extends Skill {
 		return list;
 	}
 	
-	protected void generateTooltipforPhase(List<Component> list, ItemStack itemstack, CapabilityItem cap, PlayerPatch<?> playerpatch, Map<AttackPhaseProperty<?>, Object> propertyMap, String title) {
-		Multimap<Attribute, AttributeModifier> attributes = itemstack.getAttributeModifiers(EquipmentSlot.MAINHAND);
-		Multimap<Attribute, AttributeModifier> capAttributes = cap.getAttributeModifiers(EquipmentSlot.MAINHAND, playerpatch);
-		double damage = playerpatch.getOriginal().getAttribute(Attributes.ATTACK_DAMAGE).getBaseValue() + EnchantmentHelper.getDamageBonus(itemstack, MobType.UNDEFINED);
-		double armorNegation = playerpatch.getOriginal().getAttribute(EpicFightAttributes.ARMOR_NEGATION.get()).getBaseValue();
-		double impact = playerpatch.getOriginal().getAttribute(EpicFightAttributes.IMPACT.get()).getBaseValue();
-		double maxStrikes = playerpatch.getOriginal().getAttribute(EpicFightAttributes.MAX_STRIKES.get()).getBaseValue();
+	protected void generateTooltipforPhase(List<Component> list, ItemStack itemstack, CapabilityItem itemcap, PlayerPatch<?> playerpatch, Map<AttackPhaseProperty<?>, Object> propertyMap, String title) {
+		Multimap<Attribute, AttributeModifier> capAttributes = itemcap.getAttributeModifiers(EquipmentSlot.MAINHAND, playerpatch);
+		double damage = playerpatch.getWeaponAttribute(Attributes.ATTACK_DAMAGE, itemstack);
+		double armorNegation = playerpatch.getWeaponAttribute(EpicFightAttributes.ARMOR_NEGATION.get(), itemstack);
+		double impact = playerpatch.getWeaponAttribute(EpicFightAttributes.IMPACT.get(), itemstack);
+		double maxStrikes = playerpatch.getWeaponAttribute(EpicFightAttributes.MAX_STRIKES.get(), itemstack);
 		ValueModifier damageModifier = ValueModifier.empty();
 		ValueModifier armorNegationModifier = ValueModifier.empty();
 		ValueModifier impactModifier = ValueModifier.empty();
 		ValueModifier maxStrikesModifier = ValueModifier.empty();
-		
-		Set<AttributeModifier> damageModifiers = Sets.newHashSet();
-		damageModifiers.addAll(playerpatch.getOriginal().getAttribute(Attributes.ATTACK_DAMAGE).getModifiers());
-		damageModifiers.addAll(attributes.get(Attributes.ATTACK_DAMAGE));
-		
-		for (AttributeModifier modifier : damageModifiers) {
-			damage += modifier.getAmount();
-		}
 		
 		for (AttributeModifier modifier : capAttributes.get(EpicFightAttributes.ARMOR_NEGATION.get())) {
 			armorNegation += modifier.getAmount();
@@ -103,7 +94,7 @@ public abstract class WeaponInnateSkill extends Skill {
 		this.getProperty(AttackPhaseProperty.IMPACT_MODIFIER, propertyMap).ifPresent(impactModifier::merge);
 		this.getProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, propertyMap).ifPresent(maxStrikesModifier::merge);
 		
-		impactModifier.merge(ValueModifier.multiplier(1.0F + EnchantmentHelper.getItemEnchantmentLevel(Enchantments.KNOCKBACK, itemstack) * 0.12F));
+		impactModifier.merge(ValueModifier.multiplier(1.0F + itemstack.getEnchantmentLevel(Enchantments.KNOCKBACK) * 0.12F));
 		
 		Double baseDamage = Double.valueOf(damage);
 		damage = damageModifier.getTotalValue(playerpatch.getModifiedBaseDamage((float)damage));

@@ -6,8 +6,8 @@
 			"attribute": "minecraft:generic.attack_damage",
 			"name": "stamina_pillager_skill_stat",
 			"uuid": "20807880-fd30-11eb-9a03-0242ac130003",
-			"operation": "addition",
-			"amount": 1.0
+			"operation": "multiply_total",
+			"amount": 0.1
 		},
 		{
 			"attribute": "epicfight:staminar",

@@ -209,7 +209,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 						AttackResult attackResult = this.tryHarm(this.blockingEntity.getOriginal(), extendedSource, blockingCount);
 						
 						if (attackResult.resultType == AttackResult.ResultType.SUCCESS) {
-							this.blockingEntity.getOriginal().hurt((DamageSource)extendedSource, 4.0F);
+							this.blockingEntity.getOriginal().hurt(extendedSource.cast(), 4.0F);
 							this.blockedNow = false;
 							this.blockingEntity = null;
 						}

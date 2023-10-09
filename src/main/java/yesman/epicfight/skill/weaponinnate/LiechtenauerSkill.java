@@ -1,6 +1,10 @@
 package yesman.epicfight.skill.weaponinnate;
 
+import java.util.List;
+import java.util.UUID;
+
 import com.google.common.collect.Lists;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -28,14 +32,13 @@ import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.skill.SkillDataManager;
 import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
+import yesman.epicfight.world.capabilities.EpicFightCapabilities;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
-
-import java.util.List;
-import java.util.UUID;
 
 public class LiechtenauerSkill extends WeaponInnateSkill {
 	private static final UUID EVENT_UUID = UUID.fromString("244c57c0-a837-11eb-bcbc-0242ac130002");
@@ -56,7 +59,7 @@ public class LiechtenauerSkill extends WeaponInnateSkill {
 	@Override
 	public void onInitiate(SkillContainer container) {
 		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID, (event) -> {
-			if (container.isActivated()) {
+			if (container.isActivated() && !container.isDisabled()) {
 				if (!event.getTarget().isAlive()) {
 					this.setDurationSynchronize(event.getPlayerPatch(), Math.min(this.maxDuration, container.getRemainDuration() + this.returnDuration));
 				}
@@ -66,7 +69,7 @@ public class LiechtenauerSkill extends WeaponInnateSkill {
 		container.getExecuter().getEventListener().addEventListener(EventType.HURT_EVENT_PRE, EVENT_UUID, (event) -> {
 			int phaseLevel = event.getPlayerPatch().getEntityState().getLevel();
 			
-			if (event.getAmount() > 0.0F && container.isActivated() && phaseLevel > 0 && phaseLevel < 3 && 
+			if (event.getAmount() > 0.0F && container.isActivated() && !container.isDisabled() && phaseLevel > 0 && phaseLevel < 3 && 
 				this.canExecute(event.getPlayerPatch()) && isBlockableSource(event.getDamageSource())) {
 				DamageSource damageSource = event.getDamageSource();
 				boolean isFront = false;
@@ -94,6 +97,12 @@ public class LiechtenauerSkill extends WeaponInnateSkill {
 					
 					if (damageSource.getDirectEntity() instanceof LivingEntity livingentity) {
 						knockback += EnchantmentHelper.getKnockbackBonus(livingentity) * 0.1F;
+					}
+					
+					LivingEntityPatch<?> attackerpatch = EpicFightCapabilities.getEntityPatch(event.getDamageSource().getEntity(), LivingEntityPatch.class);
+					
+					if (attackerpatch != null) {
+						attackerpatch.setLastAttackEntity(event.getPlayerPatch().getOriginal());
 					}
 					
 					event.getPlayerPatch().knockBackEntity(damageSource.getDirectEntity().position(), knockback);

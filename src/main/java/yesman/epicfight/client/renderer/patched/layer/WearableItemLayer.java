@@ -52,13 +52,13 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		EPICFIGHT_OVERRIDING_TEXTURES.clear();
 	}
 	
-	private final boolean doNotRenderHelmet;
+	private final boolean firstPersonModel;
 	private final Function<ResourceLocation, TextureAtlasSprite> armorTrimAtlas = Minecraft.getInstance().getTextureAtlas(Sheets.ARMOR_TRIMS_SHEET);
 
-	public WearableItemLayer(AM mesh, boolean doNotRenderHelmet) {
+	public WearableItemLayer(AM mesh, boolean firstPersonModel) {
 		super(mesh);
 		
-		this.doNotRenderHelmet = doNotRenderHelmet;
+		this.firstPersonModel = firstPersonModel;
 	}
 	
 	private void renderArmor(PoseStack matStack, MultiBufferSource multiBufferSource, int packedLightIn, boolean hasEffect, AnimatedMesh model, Armature armature, float r, float g, float b, ResourceLocation armorTexture, OpenMatrix4f[] poses) {
@@ -75,7 +75,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 	}
 
 	@Override
-	public void renderLayer(T entitypatch, E entityliving, HumanoidArmorLayer<E, M, M> originalRenderer, PoseStack poseStack, MultiBufferSource buf, int packedLightIn, OpenMatrix4f[] poses, float netYawHead, float pitchHead, float partialTicks) {
+	public void renderLayer(T entitypatch, E entityliving, HumanoidArmorLayer<E, M, M> vanillaLayer, PoseStack poseStack, MultiBufferSource buf, int packedLightIn, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			if (slot.getType() != EquipmentSlot.Type.ARMOR) {
 				continue;
@@ -83,7 +83,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 			
 			boolean chestPart = false;
 			
-			if (entitypatch.isFirstPerson()) {
+			if (entitypatch.isFirstPerson() && this.firstPersonModel) {
 				if (slot != EquipmentSlot.CHEST) {
 					continue;
 				} else {
@@ -91,7 +91,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				}
 			}
 			
-			if (slot == EquipmentSlot.HEAD && this.doNotRenderHelmet) {
+			if (slot == EquipmentSlot.HEAD && this.firstPersonModel) {
 				continue;
 			}
 			
@@ -110,7 +110,17 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 					poseStack.translate(0.0D, head * 0.055D, 0.0D);
 				}
 				
-				AnimatedMesh model = this.getArmorModel(originalRenderer, entityliving, armorItem, stack, slot);
+				boolean debuggingMode = ClientEngine.getInstance().isArmorModelDebuggingMode();
+				
+				if (debuggingMode) {
+					poseStack.pushPose();
+					poseStack.scale(-1.0F, -1.0F, 1.0F);
+					poseStack.translate(1.0D, -1.501D, 0.0D);
+					vanillaLayer.render(poseStack, buf, packedLightIn, entityliving, partialTicks, head, packedLightIn, bob, yRot, xRot);
+					poseStack.popPose();
+				}
+				
+				AnimatedMesh model = this.getArmorModel(vanillaLayer, entityliving, armorItem, stack, slot, debuggingMode);
 				model.initialize();
 				
 				if (chestPart) {
@@ -141,11 +151,10 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		}
 	}
 	
-	private AnimatedMesh getArmorModel(HumanoidArmorLayer<E, M, M> originalRenderer, E entityliving, ArmorItem armorItem, ItemStack stack, EquipmentSlot slot) {
+	private AnimatedMesh getArmorModel(HumanoidArmorLayer<E, M, M> originalRenderer, E entityliving, ArmorItem armorItem, ItemStack stack, EquipmentSlot slot, boolean armorDebugging) {
 		ResourceLocation registryName = ForgeRegistries.ITEMS.getKey(armorItem);
-		boolean debuggingMode = ClientEngine.getInstance().isArmorModelDebuggingMode();
 		
-		if (ARMOR_MODELS.containsKey(registryName) && !debuggingMode) {
+		if (ARMOR_MODELS.containsKey(registryName) && !armorDebugging) {
 			return ARMOR_MODELS.get(registryName);
 		} else {
 			ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
@@ -161,10 +170,10 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				HumanoidModel<?> defaultModel = originalRenderer.getArmorModel(slot);
 				Model customModel = ForgeHooksClient.getArmorModel(entityliving, stack, slot, defaultModel);
 				
-				if (customModel == defaultModel || !(customModel instanceof HumanoidModel)) {
+				if (customModel == defaultModel || !(customModel instanceof HumanoidModel<?> humanoidModel)) {
 					model = this.mesh.getArmorModel(slot);
 				} else {
-					model = CustomModelBakery.bakeBipedCustomArmorModel((HumanoidModel<?>)customModel, armorItem, slot, debuggingMode);
+					model = CustomModelBakery.bakeHumanoidModel(humanoidModel, armorItem, slot, armorDebugging);
 				}
 			}
 			
@@ -187,6 +196,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		
 		String s1 = String.format("%s:textures/models/armor/%s_layer_%d%s.png", domain, texture, (slot == EquipmentSlot.LEGS ? 2 : 1), type == null ? "" : String.format("_%s", type));
 		s1 = ForgeHooksClient.getArmorTexture(entity, stack, s1, slot, type);
+		
 		int idx2 = s1.lastIndexOf('/');
 		String s2 = String.format("%s/epicfight/%s", s1.substring(0, idx2), s1.substring(idx2 + 1));
 		ResourceLocation resourcelocation2 = EPICFIGHT_OVERRIDING_TEXTURES.get(s2);
@@ -196,8 +206,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		} else if (!EPICFIGHT_OVERRIDING_TEXTURES.containsKey(s2)) {
 			resourcelocation2 = new ResourceLocation(s2);
 			ResourceManager rm = Minecraft.getInstance().getResourceManager();
-			if(rm.getResource(resourcelocation2).isPresent()){ //TODO double check
-			//if (rm.hasResource(resourcelocation2)) {
+			if (rm.getResource(resourcelocation2).isPresent()){
 				EPICFIGHT_OVERRIDING_TEXTURES.put(s2, resourcelocation2);
 				return resourcelocation2;
 			} else {

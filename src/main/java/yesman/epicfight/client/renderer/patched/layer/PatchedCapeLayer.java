@@ -25,7 +25,8 @@ public class PatchedCapeLayer extends PatchedLayer<AbstractClientPlayer, Abstrac
 	}
 	
 	@Override
-	protected void renderLayer(AbstractClientPlayerPatch<AbstractClientPlayer> entitypatch, AbstractClientPlayer entityliving, CapeLayer originalRenderer, PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn, OpenMatrix4f[] poses, float netYawHead, float pitchHead, float partialTicks) {
+	protected void renderLayer(AbstractClientPlayerPatch<AbstractClientPlayer> entitypatch, AbstractClientPlayer entityliving, CapeLayer vanillaLayer, PoseStack poseStack, MultiBufferSource buffer, int packedLightIn,
+			OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 		if (entityliving.isCapeLoaded() && !entityliving.isInvisible() && entityliving.isModelPartShown(PlayerModelPart.CAPE) && entityliving.getCloakTextureLocation() != null) {
 			ItemStack itemstack = entityliving.getItemBySlot(EquipmentSlot.CHEST);
 			
@@ -34,12 +35,12 @@ public class PatchedCapeLayer extends PatchedLayer<AbstractClientPlayer, Abstrac
 				modelMatrix.scale(new Vec3f(-1.0F, -1.0F, 1.0F)).mulFront(poses[8]);
 				OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);
 				
-				matrixStackIn.pushPose();
-				MathUtils.translateStack(matrixStackIn, modelMatrix);
-				MathUtils.rotateStack(matrixStackIn, transpose);
-				matrixStackIn.translate(0.0D, -0.4D, -0.025D);
-				originalRenderer.render(matrixStackIn, buffer, packedLightIn, entityliving, entityliving.walkAnimation.position(), entityliving.walkAnimation.speed(), partialTicks, entityliving.tickCount, netYawHead, pitchHead);
-				matrixStackIn.popPose();
+				poseStack.pushPose();
+				MathUtils.translateStack(poseStack, modelMatrix);
+				MathUtils.rotateStack(poseStack, transpose);
+				poseStack.translate(0.0D, -0.4D, -0.025D);
+				vanillaLayer.render(poseStack, buffer, packedLightIn, entityliving, entityliving.walkAnimation.position(), entityliving.walkAnimation.speed(), partialTicks, entityliving.tickCount, yRot, xRot);
+				poseStack.popPose();
 			}
 		}
 	}

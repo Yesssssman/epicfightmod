@@ -57,7 +57,7 @@ import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 public class GuardSkill extends Skill {
-	protected static final SkillDataKey<Integer> LAST_HIT_TICK = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
+	protected static final SkillDataKey<Integer> PENALTY_RESTORE_COUNTER = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
 	protected static final SkillDataKey<Float> PENALTY = SkillDataKey.createDataKey(SkillDataManager.ValueType.FLOAT);
 	protected static final UUID EVENT_UUID = UUID.fromString("b422f7a0-f378-11eb-9a03-0242ac130003");
 	
@@ -78,6 +78,11 @@ public class GuardSkill extends Skill {
 		
 		public Builder setResource(Resource resource) {
 			this.resource = resource;
+			return this;
+		}
+		
+		public Builder setCreativeTab(CreativeModeTab tab) {
+			this.tab = tab;
 			return this;
 		}
 		
@@ -139,7 +144,7 @@ public class GuardSkill extends Skill {
 	
 	@Override
 	public void onInitiate(SkillContainer container) {
-		container.getDataManager().registerData(LAST_HIT_TICK);
+		container.getDataManager().registerData(PENALTY_RESTORE_COUNTER);
 		container.getDataManager().registerData(PENALTY);
 		
 		container.getExecuter().getEventListener().addEventListener(EventType.CLIENT_ITEM_USE_EVENT, EVENT_UUID, (event) -> {
@@ -160,7 +165,7 @@ public class GuardSkill extends Skill {
 		
 		container.getExecuter().getEventListener().addEventListener(EventType.SERVER_ITEM_STOP_EVENT, EVENT_UUID, (event) -> {
 			ServerPlayer serverplayer = event.getPlayerPatch().getOriginal();
-			container.getDataManager().setDataSync(LAST_HIT_TICK, serverplayer.tickCount, serverplayer);
+			container.getDataManager().setDataSync(PENALTY_RESTORE_COUNTER, serverplayer.tickCount, serverplayer);
 		});
 		
 		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID, (event) -> {
@@ -203,7 +208,7 @@ public class GuardSkill extends Skill {
 							return;
 						}
 
-						impact = ((EpicFightDamageSource)event.getDamageSource()).getImpact();
+						impact = epicfightDamageSource.getImpact();
 						knockback += Math.min(impact * 0.1F, 1.0F);
 					}
 					
@@ -248,6 +253,12 @@ public class GuardSkill extends Skill {
 	public void dealEvent(PlayerPatch<?> playerpatch, HurtEvent.Pre event, boolean advanced) {
 		event.setCanceled(true);
 		event.setResult(AttackResult.ResultType.BLOCKED);
+		
+		LivingEntityPatch<?> attackerpatch = EpicFightCapabilities.getEntityPatch(event.getDamageSource().getEntity(), LivingEntityPatch.class);
+		
+		if (attackerpatch != null) {
+			attackerpatch.setLastAttackEntity(playerpatch.getOriginal());
+		}
 		
 		Entity directEntity = event.getDamageSource().getDirectEntity();
 		LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(directEntity, LivingEntityPatch.class);
@@ -318,7 +329,7 @@ public class GuardSkill extends Skill {
 			float penalty = container.getDataManager().getDataValue(PENALTY);
 			
 			if (penalty > 0) {
-				int hitTick = container.getDataManager().getDataValue(LAST_HIT_TICK);
+				int hitTick = container.getDataManager().getDataValue(PENALTY_RESTORE_COUNTER);
 				
 				if (container.getExecuter().getOriginal().tickCount - hitTick > 40) {
 					container.getDataManager().setDataSync(PENALTY, 0.0F, (ServerPlayer)container.getExecuter().getOriginal());
@@ -341,7 +352,7 @@ public class GuardSkill extends Skill {
 	
 	@Override
 	public boolean isExecutableState(PlayerPatch<?> executer) {
-		return !(executer.isUnstable() || executer.getEntityState().hurt()) && executer.getEntityState().canBasicAttack() && executer.isBattleMode();
+		return !(executer.isUnstable() || executer.getEntityState().hurt()) && executer.getEntityState().canUseSkill() && executer.isBattleMode();
 	}
 	
 	protected boolean isBlockableSource(DamageSource damageSource, boolean advanced) {

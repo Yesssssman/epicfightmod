@@ -13,6 +13,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.CreativeModeTab;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -67,6 +68,11 @@ public class RevelationSkill extends Skill {
 		
 		public Builder setResource(Resource resource) {
 			this.resource = resource;
+			return this;
+		}
+		
+		public Builder setCreativeTab(CreativeModeTab tab) {
+			this.tab = tab;
 			return this;
 		}
 		

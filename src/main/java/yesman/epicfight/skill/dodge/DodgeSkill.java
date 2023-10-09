@@ -40,7 +40,12 @@ public class DodgeSkill extends Skill {
 			this.resource = resource;
 			return this;
 		}
-
+		
+		public Builder setCreativeTab(CreativeModeTab tab) {
+			this.tab = tab;
+			return this;
+		}
+		
 		public Builder setAnimations(ResourceLocation... animations) {
 			this.animations = animations;
 			return this;

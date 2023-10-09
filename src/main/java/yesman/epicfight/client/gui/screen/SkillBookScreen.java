@@ -176,20 +176,28 @@ public class SkillBookScreen extends Screen {
 			
 			for (Map.Entry<Attribute, AttributeModifier> stat : passiveSkill.getModfierEntry()) {
 				String attrName = Component.translatable(stat.getKey().getDescriptionId()).getString();
-				String amt = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(stat.getValue().getAmount());
-				String operator = switch (stat.getValue().getOperation()) {
-					case ADDITION -> "+";
-					case MULTIPLY_BASE, MULTIPLY_TOTAL -> "x";
-				};
+				String amountString = "";
+				double amount = stat.getValue().getAmount();
+				
+				switch (stat.getValue().getOperation()) {
+				case ADDITION:
+					amountString = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(amount);
+					break;
+				case MULTIPLY_BASE:
+					amountString = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(amount * 100.0D) + "%";
+					break;
+				case MULTIPLY_TOTAL:
+					amountString = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(amount * 100.0D) + "%";
+					break;
+				}
 
-				guiGraphics.drawString(font, operator + amt +" "+ attrName, posX + 23 - width / 2, posY + i, 0, false);
+				guiGraphics.drawString(font, "+" + amountString + " " + attrName, posX + 23 - width / 2, posY + i, 0, false);
 				i += 10;
 			}
 		}
 		
 		List<FormattedCharSequence> list = this.font.split(Component.translatable(translationName + ".tooltip", this.skill.getTooltipArgsOfScreen(Lists.newArrayList()).toArray(new Object[0])), 150);
-
-		int height = posY + 20;
+		int height = posY + 20 - Math.min((Math.max(list.size() - 10, 0) * 4), 20);;
 
 		for (FormattedCharSequence ireorderingprocessor1 : list) {
 			if (ireorderingprocessor1 != null) {
