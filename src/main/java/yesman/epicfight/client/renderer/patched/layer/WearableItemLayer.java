@@ -153,21 +153,15 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 	
 	private AnimatedMesh getArmorModel(HumanoidArmorLayer<E, M, M> originalRenderer, E entityliving, ArmorItem armorItem, ItemStack stack, EquipmentSlot slot, boolean armorDebugging) {
 		ResourceLocation registryName = ForgeRegistries.ITEMS.getKey(armorItem);
-<<<<<<< HEAD
 		
-=======
-
->>>>>>> refs/remotes/origin/1.20.1
 		if (ARMOR_MODELS.containsKey(registryName) && !armorDebugging) {
 			return ARMOR_MODELS.get(registryName);
 		} else {
 			ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
 			ResourceLocation rl = new ResourceLocation(ForgeRegistries.ITEMS.getKey(armorItem).getNamespace(), "animmodels/armor/" + ForgeRegistries.ITEMS.getKey(armorItem).getPath());
 			AnimatedMesh model = null;
-			//TODO double check
-			if(resourceManager.getResource(rl).isPresent()){
-
-			//if (resourceManager.hasResource(rl)) {
+			
+			if (resourceManager.getResource(rl).isPresent()){
 				JsonModelLoader modelLoader = new JsonModelLoader(resourceManager, rl);
 				model = modelLoader.loadAnimatedMesh(AnimatedMesh::new);
 			} else {

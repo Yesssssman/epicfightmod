@@ -494,26 +494,11 @@ public class RenderEngine {
 								Component sibling = textComp.getSiblings().get(0);
 
 								if (sibling instanceof MutableComponent translationComponent) {
-<<<<<<< HEAD
-									if (translationComponent.getSiblings().size() > 1 && translationComponent.getSiblings().get(1)instanceof MutableComponent) {
-										if ((translationComponent.getSiblings().get(1)).getString().equals(Attributes.ATTACK_SPEED.getDescriptionId())) {
-=======
 									if (translationComponent.getSiblings().size() > 1 && translationComponent.getSiblings().get(1) instanceof MutableComponent translatableArg) {
 										if (translatableArg.getString().equals(Attributes.ATTACK_SPEED.getDescriptionId())) {
->>>>>>> refs/remotes/origin/1.20.1
 											float weaponSpeed = (float)playerpatch.getWeaponAttribute(Attributes.ATTACK_SPEED, event.getItemStack());
 											tooltip.remove(i);
 											tooltip.add(i, Component.literal(String.format(" %.2f ", playerpatch.getModifiedAttackSpeed(cap, weaponSpeed)))
-<<<<<<< HEAD
-																	.append(Component.translatable(Attributes.ATTACK_SPEED.getDescriptionId())));
-											
-										} else if ((translationComponent.getSiblings().get(1)).getString().equals(Attributes.ATTACK_DAMAGE.getDescriptionId())) {
-											
-											float weaponDamage = (float)playerpatch.getWeaponAttribute(Attributes.ATTACK_DAMAGE, event.getItemStack());
-											float damageBonus = EnchantmentHelper.getDamageBonus(event.getItemStack(), MobType.UNDEFINED);
-											String damageFormat = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(playerpatch.getModifiedBaseDamage(weaponDamage) + damageBonus);
-											
-=======
 													.append(Component.translatable(Attributes.ATTACK_SPEED.getDescriptionId())));
 
 										} else if (translatableArg.getString().equals(Attributes.ATTACK_DAMAGE.getDescriptionId())) {
@@ -522,16 +507,10 @@ public class RenderEngine {
 											float damageBonus = EnchantmentHelper.getDamageBonus(event.getItemStack(), MobType.UNDEFINED);
 											String damageFormat = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(playerpatch.getModifiedBaseDamage(weaponDamage) + damageBonus);
 
->>>>>>> refs/remotes/origin/1.20.1
 											tooltip.remove(i);
 											tooltip.add(i, Component.literal(String.format(" %s ", damageFormat))
-<<<<<<< HEAD
 																	.append(Component.translatable(Attributes.ATTACK_DAMAGE.getDescriptionId()))
 																	.withStyle(ChatFormatting.DARK_GREEN));
-=======
-													.append(Component.translatable(Attributes.ATTACK_DAMAGE.getDescriptionId()))
-													.withStyle(ChatFormatting.DARK_GREEN));
->>>>>>> refs/remotes/origin/1.20.1
 										}
 									}
 								}
@@ -629,10 +608,7 @@ public class RenderEngine {
 					event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
 				renderEngine.aimHelper.doRender(event.getPoseStack(), event.getPartialTick());
 			}
-<<<<<<< HEAD
-
-=======
->>>>>>> refs/remotes/origin/1.20.1
+			
 			/**
 			if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_WEATHER) {
 				renderEngine.betaWarningMessage.drawMessage(event.getPoseStack());

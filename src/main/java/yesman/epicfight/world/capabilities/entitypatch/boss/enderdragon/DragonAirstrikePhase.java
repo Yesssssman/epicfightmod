@@ -53,7 +53,6 @@ public class DragonAirstrikePhase extends PatchedDragonPhase {
 		
 		float f = (float)this.dragon.getLatencyPos(7, 1.0F)[0];
 		float f1 = (float)(this.dragon.getLatencyPos(5, 1.0F)[1] - this.dragon.getLatencyPos(10, 1.0F)[1]);
-		@SuppressWarnings("deprecation")
 		float f2 = MathUtils.rotWrap((this.dragon.getLatencyPos(5, 1.0F)[0] - this.dragon.getLatencyPos(10, 1.0F)[0]));
 		OpenMatrix4f modelMatrix = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, f1, f1, f, f, 1.0F, 1.0F, 1.0F, 1.0F).rotateDeg(-f2 * 1.5F, Vec3f.Z_AXIS);
 		mouthpos.mulFront(modelMatrix);

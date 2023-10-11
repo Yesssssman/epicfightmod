@@ -10,7 +10,6 @@ import net.minecraftforge.registries.RegistryObject;
 import yesman.epicfight.main.EpicFightMod;
 
 public class EpicFightCreativeTabs {
-
 	public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, EpicFightMod.MODID);
 
 	public static final RegistryObject<CreativeModeTab> ITEMS = TABS.register("items",
@@ -27,8 +26,8 @@ public class EpicFightCreativeTabs {
 							}
 							// expend the skill book
 							if (it == EpicFightItems.SKILLBOOK) {
-								if (it.get() instanceof SkillBookItem) {
-									((SkillBookItem) it.get()).fillItemCategory(output::accept);
+								if (it.get() instanceof SkillBookItem skillbookItem) {
+									skillbookItem.fillItemCategory(output::accept);
 								}
 								return;
 							}

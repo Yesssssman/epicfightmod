@@ -39,7 +39,7 @@ public class PlayerSkillCommand {
 			if (skillSlot.category().learnable()) {
 				addCommandBuilder
 					.then(Commands.literal(skillSlot.toString().toLowerCase(Locale.ROOT))
-					.then(Commands.argument("skill", SkillArgument.skill(skillSlot.category()))
+					.then(Commands.argument("skill", SkillArgument.skill())
 					.executes((commandContext) -> {
 						return addSkill(commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), skillSlot, SkillArgument.getSkill(commandContext, "skill"));
 					})));
@@ -49,7 +49,7 @@ public class PlayerSkillCommand {
 					.executes((commandContext) -> {
 						return removeSkill(commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), skillSlot, null);
 					})
-					.then(Commands.argument("skill", SkillArgument.skill(skillSlot.category()))
+					.then(Commands.argument("skill", SkillArgument.skill())
 					.executes((commandContext) -> {
 						return removeSkill(commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"), skillSlot, SkillArgument.getSkill(commandContext, "skill"));
 					})));
@@ -148,7 +148,7 @@ public class PlayerSkillCommand {
 				}
 			}
 		}
-
+		
 		if (i > 0) {
 			if (i == 1) {
 				commandSourceStack.sendSuccess(wrap(Component.translatable("commands.epicfight.skill.remove.success.single", skill.getDisplayName(), targets.iterator().next().getDisplayName())), true);

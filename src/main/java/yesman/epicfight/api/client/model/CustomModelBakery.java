@@ -9,6 +9,10 @@ import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -30,9 +34,6 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -86,39 +87,6 @@ public class CustomModelBakery {
 	public static List<ModelPart> getAllParts(Model model) {
 		Class<?> cls = model.getClass();
 		List<Class<?>> superClasses = Lists.newArrayList();
-<<<<<<< HEAD
-		
-		while (Model.class.isAssignableFrom(cls)) {
-			superClasses.add(cls);
-			cls = cls.getSuperclass();
-		}
-		
-		List<ModelPart> modelParts = Lists.newArrayList();
-		
-		for (Class<?> modelClss : superClasses) {
-			Field[] modelFields = modelClss.getDeclaredFields();
-			
-			for (Field field : modelFields) {
-				if (field.getType().isAssignableFrom(ModelPart.class)) {
-					try {
-						ModelPart modelPart = (ModelPart)field.get(model);
-						
-						if (modelPart.visible) {
-							modelParts.add(modelPart);
-						}
-					} catch(Exception e) {}
-				}
-			}
-		}
-		
-		return modelParts;
-	}
-	
-	public static AnimatedMesh bakeHumanoidModel(HumanoidModel<?> model, ArmorItem armorItem, EquipmentSlot slot, boolean debuggingMode) {
-		List<ModelPartition> boxes = Lists.newArrayList();
-		List<ModelPart> modelParts = getAllParts(model);
-=======
->>>>>>> refs/remotes/origin/1.20.1
 		
 		while (Model.class.isAssignableFrom(cls)) {
 			superClasses.add(cls);

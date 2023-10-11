@@ -5,6 +5,7 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import yesman.epicfight.main.EpicFightMod;
 
 public class EpicFightSounds {
 	public static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, "epicfight");
@@ -40,7 +41,7 @@ public class EpicFightSounds {
 	public static final RegistryObject<SoundEvent> ROLL = registerSound("skill.roll");
 
 	private static RegistryObject<SoundEvent> registerSound(String name) {
-		ResourceLocation res = new ResourceLocation("epicfight", name);
+		ResourceLocation res = new ResourceLocation(EpicFightMod.MODID, name);
 		return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(res));
 
 	}

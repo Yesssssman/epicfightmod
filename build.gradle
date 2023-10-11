@@ -17,11 +17,7 @@ plugins {
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin'
 
-<<<<<<< HEAD
 version = '20.5.14'
-=======
-version = '20.5.13'
->>>>>>> refs/remotes/origin/1.20.1
 group = 'yesman.epicfight'
 archivesBaseName = 'epicfight'
 

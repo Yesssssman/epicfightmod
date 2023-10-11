@@ -45,7 +45,7 @@ public class DeathHarvestOrb extends Entity {
 	public void tick() {
 		super.baseTick();
 		
-		if (!this.level().isClientSide) {
+		if (!this.level().isClientSide()) {
 			double scaleFactor = Math.pow(Math.max(0.0D, (this.tickCount - 10) / 10.0D), 2);
 			Vec3 v1 = this.dest.position().add(0.0D, this.dest.getBbHeight() * 0.5D, 0.0D).subtract(this.position()).scale(scaleFactor);
 			Vec3 v2 = this.randVec.scale(1.0D - scaleFactor);

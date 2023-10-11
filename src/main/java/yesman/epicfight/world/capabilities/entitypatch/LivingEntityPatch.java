@@ -12,12 +12,15 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -189,11 +192,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	
 	public AttackResult tryHarm(Entity target, EpicFightDamageSource damagesource, float amount) {
 		LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(target, LivingEntityPatch.class);
-<<<<<<< HEAD
-		AttackResult result = (entitypatch != null) ? entitypatch.tryHurt(damagesource.cast(), amount) : AttackResult.success(amount);
-=======
 		AttackResult result = (entitypatch != null) ? entitypatch.tryHurt(damagesource, amount) : AttackResult.success(amount);
->>>>>>> refs/remotes/origin/1.20.1
 		
 		return result;
 	}

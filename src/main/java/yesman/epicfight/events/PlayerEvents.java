@@ -55,11 +55,7 @@ public class PlayerEvents {
 		if (event.getSide() == LogicalSide.SERVER) {
 			ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), ServerPlayerPatch.class);
 			ItemStack itemstack = playerpatch.getOriginal().getOffhandItem();
-<<<<<<< HEAD
 			
-=======
-
->>>>>>> refs/remotes/origin/1.20.1
 			if (playerpatch != null && (itemstack.getUseAnimation() == UseAnim.NONE || !playerpatch.getHoldingItemCapability(InteractionHand.MAIN_HAND).getStyle(playerpatch).canUseOffhand())) {
 				boolean canceled = playerpatch.getEventListener().triggerEvents(EventType.SERVER_ITEM_USE_EVENT, new RightClickItemEvent<>(playerpatch));
 				

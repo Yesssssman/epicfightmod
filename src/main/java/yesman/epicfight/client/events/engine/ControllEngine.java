@@ -1,8 +1,15 @@
 package yesman.epicfight.client.events.engine;
 
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiConsumer;
+
+import org.lwjgl.glfw.GLFW;
+
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.InputConstants;
+
 import net.minecraft.client.KeyMapping;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.Options;
@@ -19,8 +26,6 @@ import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import yesman.epicfight.api.animation.types.BasicAttackAnimation;
-import org.lwjgl.glfw.GLFW;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.client.gui.screen.IngameConfigurationScreen;
 import yesman.epicfight.client.gui.screen.SkillEditScreen;
@@ -36,10 +41,6 @@ import yesman.epicfight.world.entity.eventlistener.MovementInputEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.SkillExecuteEvent;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
-
-import java.util.Map;
-import java.util.Set;
-import java.util.function.BiConsumer;
 
 @OnlyIn(Dist.CLIENT)
 public class ControllEngine {

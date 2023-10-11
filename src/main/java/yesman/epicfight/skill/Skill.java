@@ -37,7 +37,7 @@ public abstract class Skill {
 		protected SkillCategory category;
 		protected ActivateType activateType;
 		protected Resource resource;
-		protected CreativeModeTab tab = EpicFightCreativeTabs.ITEMS.get();
+		protected CreativeModeTab tab;
 		
 		public Builder<T> setRegistryName(ResourceLocation registryName) {
 			this.registryName = registryName;
@@ -65,7 +65,7 @@ public abstract class Skill {
 		}
 		
 		public CreativeModeTab getCreativeTab() {
-			return this.tab;
+			return this.tab == null ? EpicFightCreativeTabs.ITEMS.get() : this.tab;
 		}
 		
 		public ResourceLocation getRegistryName() {

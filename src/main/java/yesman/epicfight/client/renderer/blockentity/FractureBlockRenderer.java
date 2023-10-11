@@ -1,17 +1,16 @@
 package yesman.epicfight.client.renderer.blockentity;
 
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-import net.minecraft.client.Minecraft;
+
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
-import net.minecraft.world.level.BlockAndTintGetter;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -19,12 +18,8 @@ import net.minecraftforge.client.model.data.ModelData;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.world.level.block.entity.FractureBlockEntity;
 
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
-
 @OnlyIn(Dist.CLIENT)
 public class FractureBlockRenderer implements BlockEntityRenderer<FractureBlockEntity> {
-
 	private final BlockRenderDispatcher blockRenderDispatcher;
 
 	public FractureBlockRenderer(BlockEntityRendererProvider.Context context) {
@@ -35,14 +30,9 @@ public class FractureBlockRenderer implements BlockEntityRenderer<FractureBlockE
 	public boolean shouldRender(FractureBlockEntity p_173568_, Vec3 p_173569_) {
 		return Vec3.atCenterOf(p_173568_.getBlockPos()).closerThan(p_173569_, this.getViewDistance());
 	}
-
-	public void renderWithoutFaceLighting(BlockAndTintGetter level, BlockState blockState, BlockPos blockPos, PoseStack poseStack, VertexConsumer vertexConsumer, ModelData modelData) {
-		blockRenderDispatcher.renderBreakingTexture(blockState, blockPos.above(), level, poseStack, vertexConsumer, modelData);
-	}
 	
 	@Override
 	public void render(FractureBlockEntity blockEntity, float partialTicks, PoseStack poseStack, MultiBufferSource multiBufferSource, int lightColor, int overlayColor) {
-		Minecraft mc = Minecraft.getInstance();
 		float turnBackTime = 5.0F;
 		float lerpAmount = Mth.clamp(partialTicks * (1.0F / turnBackTime) + (turnBackTime - (blockEntity.getMaxLifeTime() - blockEntity.getLifeTime())) * (1.0F / turnBackTime), 0.0F, 1.0F);
 		Vector3f translate = blockEntity.getMaxLifeTime() > blockEntity.getLifeTime() + turnBackTime ? blockEntity.getTranslate() : MathUtils.lerpMojangVector(blockEntity.getTranslate(), new Vector3f(), lerpAmount);
@@ -58,15 +48,10 @@ public class FractureBlockRenderer implements BlockEntityRenderer<FractureBlockE
 		poseStack.translate(0.5D, 0.5D, 0.5D);
 		poseStack.mulPose(rotate);
 		poseStack.translate(translate.x(), translate.y() + bouncingAnimation, translate.z());
-		poseStack.translate(-0.5D, -0.5D, -0.5D);
-
-		this.renderWithoutFaceLighting(blockEntity.getLevel()
-								     , blockEntity.getOriginalBlockState()
-								     , blockEntity.getBlockPos()
-								     , poseStack
-								     , multiBufferSource.getBuffer(RenderType.cutout())
-								     , ModelData.EMPTY
-								     );
+		poseStack.translate(-0.5D, -0.5D, -0.5D);	
+		
+		this.blockRenderDispatcher.renderBreakingTexture(blockEntity.getOriginalBlockState(), blockEntity.getBlockPos().above(), blockEntity.getLevel(), poseStack,
+				multiBufferSource.getBuffer(RenderType.cutout()), ModelData.EMPTY);
 		
 		poseStack.popPose();
 	}

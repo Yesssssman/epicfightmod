@@ -13,7 +13,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.joml.Matrix4f;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.model.armature.HumanoidArmature;
@@ -33,7 +32,6 @@ public class RenderMap extends RenderItemBase {
 		
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, modelMatrix);
-<<<<<<< HEAD
 		
 		if (hand == InteractionHand.MAIN_HAND && entitypatch.getOriginal().getOffhandItem().isEmpty()) {
 			poseStack.scale(2.0F, 2.0F, 2.0F);
@@ -43,21 +41,6 @@ public class RenderMap extends RenderItemBase {
 		mc.gameRenderer.itemInHandRenderer.renderMap(poseStack, buffer, packedLight, stack);
 		VertexConsumer vertexconsumer = buffer.getBuffer(MAP_BACKGROUND);
 	    Matrix4f matrix4f = poseStack.last().pose();
-		
-		vertexconsumer.vertex(matrix4f, -7.0F, -7.0F, 0.0F).color(255, 255, 255, 255).uv(0.0F, 0.0F).uv2(packedLight).endVertex();
-		vertexconsumer.vertex(matrix4f, 135.0F, -7.0F, 0.0F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(packedLight).endVertex();
-		vertexconsumer.vertex(matrix4f, 135.0F, 135.0F, 0.0F).color(255, 255, 255, 255).uv(1.0F, 1.0F).uv2(packedLight).endVertex();
-		vertexconsumer.vertex(matrix4f, -7.0F, 135.0F, 0.0F).color(255, 255, 255, 255).uv(0.0F, 1.0F).uv2(packedLight).endVertex();
-=======
-
-		if (hand == InteractionHand.MAIN_HAND && entitypatch.getOriginal().getOffhandItem().isEmpty()) {
-			poseStack.scale(2.0F, 2.0F, 2.0F);
-		}
-
-		Minecraft.getInstance().gameRenderer.itemInHandRenderer.renderMap(poseStack, buffer, packedLight, stack);
-		VertexConsumer vertexconsumer = buffer.getBuffer(MAP_BACKGROUND);
-	    Matrix4f matrix4f = poseStack.last().pose();
->>>>>>> refs/remotes/origin/1.20.1
 		
 		vertexconsumer.vertex(matrix4f, -7.0F, -7.0F, 0.0F).color(255, 255, 255, 255).uv(0.0F, 0.0F).uv2(packedLight).endVertex();
 		vertexconsumer.vertex(matrix4f, 135.0F, -7.0F, 0.0F).color(255, 255, 255, 255).uv(1.0F, 0.0F).uv2(packedLight).endVertex();

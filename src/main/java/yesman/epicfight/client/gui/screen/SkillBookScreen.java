@@ -154,9 +154,8 @@ public class SkillBookScreen extends Screen {
 		poseStack.translate(posX + 5, posY + 12, 0.0F);
 		poseStack.scale(1.2F, 1.2F, 1.0F);
 		
-		RenderSystem.setShaderTexture(0, this.skill.getSkillTexture());
 		RenderSystem.enableBlend();
-		guiGraphics.blit(BACKGROUND, 0, 0, 50, 50, 0, 0, 64, 64, 64, 64);
+		guiGraphics.blit(this.skill.getSkillTexture(), 0, 0, 50, 50, 0, 0, 64, 64, 64, 64);
 		RenderSystem.disableBlend();
 		
 		poseStack.popPose();
@@ -190,30 +189,20 @@ public class SkillBookScreen extends Screen {
 					amountString = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(amount * 100.0D) + "%";
 					break;
 				}
-<<<<<<< HEAD
 
-=======
-				
->>>>>>> refs/remotes/origin/1.20.1
 				guiGraphics.drawString(font, "+" + amountString + " " + attrName, posX + 23 - width / 2, posY + i, 0, false);
 				i += 10;
 			}
 		}
 		
 		List<FormattedCharSequence> list = this.font.split(Component.translatable(translationName + ".tooltip", this.skill.getTooltipArgsOfScreen(Lists.newArrayList()).toArray(new Object[0])), 150);
-<<<<<<< HEAD
-		int height = posY + 20 - Math.min((Math.max(list.size() - 10, 0) * 4), 20);;
-
-		for (FormattedCharSequence ireorderingprocessor1 : list) {
-			if (ireorderingprocessor1 != null) {
-=======
+		
 		int height = posY + 20 - Math.min((Math.max(list.size() - 10, 0) * 4), 20);
 		
 		for (int l1 = 0; l1 < list.size(); ++l1) {
 			FormattedCharSequence ireorderingprocessor1 = list.get(l1);
 			
             if (ireorderingprocessor1 != null) {
->>>>>>> refs/remotes/origin/1.20.1
 				guiGraphics.drawString(font, ireorderingprocessor1, posX + 105, height, 0, false);
             }
             

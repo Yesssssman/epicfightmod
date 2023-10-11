@@ -536,10 +536,7 @@ public class EntityEvents {
 	
 	@SubscribeEvent
 	public static void tpEvent(EntityTeleportEvent.EnderEntity event) {
-		LivingEntity entity = event.getEntityLiving();
-		
-		if (event.getEntityLiving() instanceof EnderMan) {
-			EnderMan enderman = (EnderMan)entity;
+		if (event.getEntityLiving() instanceof EnderMan enderman) {
 			EndermanPatch endermanpatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), EndermanPatch.class);
 			
 			if (endermanpatch != null) {

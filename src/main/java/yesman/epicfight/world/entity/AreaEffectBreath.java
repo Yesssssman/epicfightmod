@@ -40,7 +40,7 @@ public class AreaEffectBreath extends AreaEffectCloud {
 	public void tick() {
 		this.move(MoverType.SELF, this.getDeltaMovement());
 		
-		if (!this.level().isClientSide) {
+		if (!this.level().isClientSide()) {
 			if (this.tickCount >= this.getDuration()) {
 				this.discard();
 				return;
