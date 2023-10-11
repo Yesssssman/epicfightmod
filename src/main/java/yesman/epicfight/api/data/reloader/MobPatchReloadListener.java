@@ -522,6 +522,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			extract.put("preset", original.get("preset"));
 		} else {
 			extract.put("model", original.get("model"));
+			extract.put("armature", original.get("armature"));
 			extract.putBoolean("isHumanoid", original.contains("isHumanoid") ? original.getBoolean("isHumanoid") : false);
 			extract.put("renderer", original.get("renderer"));
 			extract.put("faction", original.get("faction"));
