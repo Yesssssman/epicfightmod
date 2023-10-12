@@ -5,9 +5,10 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
+import yesman.epicfight.main.EpicFightMod;
 
 public class EpicFightSounds {
-	public static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, "epicfight");
+	public static final DeferredRegister<SoundEvent> SOUNDS = DeferredRegister.create(ForgeRegistries.SOUND_EVENTS, EpicFightMod.MODID);
 	public static final RegistryObject<SoundEvent> BLADE_HIT = registerSound("entity.hit.blade");
 	public static final RegistryObject<SoundEvent> BLUNT_HIT = registerSound("entity.hit.blunt");
 	public static final RegistryObject<SoundEvent> BLUNT_HIT_HARD = registerSound("entity.hit.blunt_hard");
@@ -34,20 +35,14 @@ public class EpicFightSounds {
 	public static final RegistryObject<SoundEvent> NETHER_STAR_GLITTER = registerSound("sfx.nether_star_glitter");
 	public static final RegistryObject<SoundEvent> ENTITY_MOVE = registerSound("sfx.entity_move");
 	public static final RegistryObject<SoundEvent> BIG_ENTITY_MOVE = registerSound("sfx.big_entity_move");
-
+	
 	public static final RegistryObject<SoundEvent> FORBIDDEN_STRENGTH = registerSound("skill.forbidden_strength");
 	public static final RegistryObject<SoundEvent> ROCKET_JUMP = registerSound("skill.rocket_jump");
 	public static final RegistryObject<SoundEvent> ROLL = registerSound("skill.roll");
-
+	
 	private static RegistryObject<SoundEvent> registerSound(String name) {
 		ResourceLocation res = new ResourceLocation("epicfight", name);
 		return SOUNDS.register(name, () -> new SoundEvent(res));
 
 	}
-
-	private EpicFightSounds()
-	{
-
-	}
-
 }
