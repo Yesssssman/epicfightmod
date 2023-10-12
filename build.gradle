@@ -115,7 +115,7 @@ mixin {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.20.1-47.1.44'
+    minecraft 'net.minecraftforge:forge:1.20.1-47.2.1'
     
     //implementation fg.deobf("yesman:epicfight:18.5.1")
     //implementation fg.deobf("curse.maven:mantle-74924:3829975")
