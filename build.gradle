@@ -120,8 +120,8 @@ dependencies {
     //implementation fg.deobf("yesman:epicfight:18.5.1")
     //implementation fg.deobf("curse.maven:mantle-74924:3829975")
     
-    implementation fg.deobf("localib:epicsamurai:0.0.26.2")
-    implementation fg.deobf("localib:geckolib:4.2.3")
+    //implementation fg.deobf("localib:epicsamurai:0.0.26.2")
+    //implementation fg.deobf("localib:geckolib:4.2.3")
     
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
