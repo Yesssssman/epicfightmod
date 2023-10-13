@@ -260,12 +260,13 @@ public class SkillBookLootModifier extends LootModifier {
 	 * @param context       the LootContext, identical to what is passed to loot tables
 	 * @return modified loot drops
 	 */
+	@SuppressWarnings("deprecation")
 	@Override
 	protected @NotNull ObjectArrayList<ItemStack> doApply(ObjectArrayList<ItemStack> generatedLoot, LootContext context) {
 		Entity entity = context.getParamOrNull(LootContextParams.THIS_ENTITY);
 		
 		if (entity != null && SKILL_LOOT_TABLE.containsKey(entity.getType())) {
-			SKILL_LOOT_TABLE.get(entity.getType()).getRandomItems(context, generatedLoot::add);
+			SKILL_LOOT_TABLE.get(entity.getType()).getRandomItemsRaw(context, generatedLoot::add);
 		}
 		
 		return generatedLoot;

@@ -184,14 +184,14 @@ public class BattleModeGui extends ModIngameGui {
 	}
 	
 	private void drawWeaponInnateIcon(LocalPlayerPatch playerpatch, SkillContainer container, GuiGraphics guiGraphics, float partialTicks) {
-		PoseStack matStack = guiGraphics.pose();
+		PoseStack poseStack = guiGraphics.pose();
 		Window sr = Minecraft.getInstance().getWindow();
 		int width = sr.getGuiScaledWidth();
 		int height = sr.getGuiScaledHeight();
 		Vec2i pos = this.config.getWeaponInnatePosition(width, height);
 
-		matStack.pushPose();
-		matStack.translate(0, (float)this.sliding, 0);
+		poseStack.pushPose();
+		poseStack.translate(0, (float)this.sliding, 0);
 		
 		boolean creative = playerpatch.getOriginal().isCreative();
 		boolean fullstack = creative || container.isFull();
@@ -262,10 +262,10 @@ public class BattleModeGui extends ModIngameGui {
         bufferbuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_TEX);
         
         for (int j = 0; j < vertexNum; j++) {
-        	bufferbuilder.vertex(matStack.last().pose(), pos.x + iconSize * CLOCK_POS[j].x, pos.y + iconSize * CLOCK_POS[j].y, 0.0F).uv(CLOCK_POS[j].x, CLOCK_POS[j].y).endVertex();
+        	bufferbuilder.vertex(poseStack.last().pose(), pos.x + iconSize * CLOCK_POS[j].x, pos.y + iconSize * CLOCK_POS[j].y, 0.0F).uv(CLOCK_POS[j].x, CLOCK_POS[j].y).endVertex();
 		}
         
-        bufferbuilder.vertex(matStack.last().pose(), lastVertexX, lastVertexY, 0.0F).uv(lastTexX, lastTexY).endVertex();
+        bufferbuilder.vertex(poseStack.last().pose(), lastVertexX, lastVertexY, 0.0F).uv(lastTexX, lastTexY).endVertex();
         tessellator.end();
         
         if (canUse) {
@@ -278,17 +278,19 @@ public class BattleModeGui extends ModIngameGui {
         bufferbuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_TEX);
         
         for (int j = 0; j < 2; j++) {
-        	bufferbuilder.vertex(matStack.last().pose(), pos.x + iconSize * CLOCK_POS[j].x, pos.y + iconSize * CLOCK_POS[j].y, 0.0F)
+        	bufferbuilder.vertex(poseStack.last().pose(), pos.x + iconSize * CLOCK_POS[j].x, pos.y + iconSize * CLOCK_POS[j].y, 0.0F)
         		.uv(CLOCK_POS[j].x, CLOCK_POS[j].y).endVertex();
 		}
 		
 		for (int j = CLOCK_POS.length - 1; j >= vertexNum; j--) {
-        	bufferbuilder.vertex(matStack.last().pose(), pos.x + iconSize * CLOCK_POS[j].x, pos.y + iconSize * CLOCK_POS[j].y, 0.0F)
+        	bufferbuilder.vertex(poseStack.last().pose(), pos.x + iconSize * CLOCK_POS[j].x, pos.y + iconSize * CLOCK_POS[j].y, 0.0F)
         		.uv(CLOCK_POS[j].x, CLOCK_POS[j].y).endVertex();
 		}
         
-        bufferbuilder.vertex(matStack.last().pose(), lastVertexX, lastVertexY, 0.0F).uv(lastTexX, lastTexY).endVertex();
+        bufferbuilder.vertex(poseStack.last().pose(), lastVertexX, lastVertexY, 0.0F).uv(lastTexX, lastTexY).endVertex();
         tessellator.end();
+        
+     	RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         
         if (container.isActivated() && (container.getSkill().getActivateType() == ActivateType.DURATION || container.getSkill().getActivateType() == ActivateType.DURATION_INFINITE)) {
 			String s = String.format("%.0f", container.getRemainDuration() / 20.0F);
@@ -305,10 +307,8 @@ public class BattleModeGui extends ModIngameGui {
 			int stringWidth = (this.font.width(s) - 6) / 3;
 			guiGraphics.drawString(font, s, pos.x + 25 - stringWidth, pos.y + 22, 16777215, true);
 		}
-
-		// restore all color.
-		RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-		matStack.popPose();
+		
+		poseStack.popPose();
 	}
 	
 	public void slideUp() {
