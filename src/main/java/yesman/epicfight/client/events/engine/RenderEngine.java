@@ -43,7 +43,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.CustomizeGuiOverlayEvent;
-import net.minecraftforge.client.event.RenderGuiOverlayEvent;
+import net.minecraftforge.client.event.RenderGuiEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
@@ -554,7 +554,7 @@ public class RenderEngine {
 		}
 		
 		@SubscribeEvent
-		public static void renderGameOverlayPre(RenderGuiOverlayEvent.Pre event) {
+		public static void renderGui(RenderGuiEvent.Pre event) {
 			Window window = Minecraft.getInstance().getWindow();
 			LocalPlayerPatch playerpatch = ClientEngine.getInstance().getPlayerPatch();
 			

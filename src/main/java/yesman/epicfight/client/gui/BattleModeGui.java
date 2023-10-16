@@ -162,7 +162,7 @@ public class BattleModeGui extends GuiComponent {
 
 				if (skill.shouldDraw(container)) {
 					RenderSystem.enableBlend();
-					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 0.1F);
+					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 					RenderSystem.blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA);
 					
 					skill.drawOnGui(this, container, poseStack, slotCoord.x, slotCoord.y);
@@ -247,12 +247,12 @@ public class BattleModeGui extends GuiComponent {
 		
 		if (canUse) {
 			if (container.getStack() > 0) {
-				RenderSystem.setShaderColor(0.0F, 0.64F, 0.72F, 0.08F);
+				RenderSystem.setShaderColor(0.0F, 0.64F, 0.72F, 0.8F);
 			} else {
-				RenderSystem.setShaderColor(0.0F, 0.5F, 0.5F, 0.06F);
+				RenderSystem.setShaderColor(0.0F, 0.5F, 0.5F, 0.6F);
 			}
 		} else {
-			RenderSystem.setShaderColor(0.5F, 0.5F, 0.5F, 0.06F);
+			RenderSystem.setShaderColor(0.5F, 0.5F, 0.5F, 0.6F);
 		}
 		
 		Tesselator tessellator = Tesselator.getInstance();
@@ -267,9 +267,9 @@ public class BattleModeGui extends GuiComponent {
         tessellator.end();
         
         if (canUse) {
-			RenderSystem.setShaderColor(0.08F, 0.79F, 0.95F, 0.1F);
+			RenderSystem.setShaderColor(0.08F, 0.79F, 0.95F, 1.0F);
 		} else {
-			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 0.1F);
+			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		}
         
         RenderSystem.disableCull();
