@@ -543,7 +543,7 @@ public class RenderEngine {
 		}
 		
 		@SubscribeEvent
-		public static void renderGameOverlayPre(RenderGuiOverlayEvent.Pre event) {
+		public static void renderGui(RenderGuiEvent.Pre event) {
 			Window window = Minecraft.getInstance().getWindow();
 			LocalPlayerPatch playerpatch = ClientEngine.getInstance().getPlayerPatch();
 			
