@@ -13,6 +13,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.fml.ModLoader;
+import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.forgeevent.ModelBuildEvent;
 import yesman.epicfight.api.model.Armature;
@@ -110,6 +111,12 @@ public class Armatures implements PreparableReloadListener {
 		ENTITY_TYPE_ARMATURE.put(entityType, (entitypatch) -> armature.deepCopy());
 	}
 	
+	//For preset
+	public static void registerEntityTypeArmature(EntityType<?> entityType, String presetName) {
+		EntityType<?> presetEntityType = ForgeRegistries.ENTITIES.getValue(new ResourceLocation(presetName));
+		ENTITY_TYPE_ARMATURE.put(entityType, ENTITY_TYPE_ARMATURE.get(presetEntityType));
+	}
+	
 	public static void registerEntityTypeArmature(EntityType<?> entityType, Function<EntityPatch<?>, Armature> armatureGetFunction) {
 		ENTITY_TYPE_ARMATURE.put(entityType, armatureGetFunction);
 	}
@@ -117,6 +124,10 @@ public class Armatures implements PreparableReloadListener {
 	@SuppressWarnings("unchecked")
 	public static <A extends Armature> A getArmatureFor(EntityPatch<?> patch) {
 		return (A)ENTITY_TYPE_ARMATURE.get(patch.getOriginal().getType()).apply(patch).deepCopy();
+	}
+	
+	public static Function<EntityPatch<?>, Armature> getRegistry(EntityType<?> entityType) {
+		return ENTITY_TYPE_ARMATURE.get(entityType);
 	}
 	
 	@SuppressWarnings("unchecked")
