@@ -168,13 +168,13 @@ public class MobCombatBehaviors {
 				.nextBehavior(Behavior.<EnderDragonPatch>builder().animationBehavior(Animations.DRAGON_FIREBALL).withinDistance(15.0D, 30.0D).withinAngleHorizontal(0.0F, 10.0F))
 		).newBehaviorSeries(
 			BehaviorSeries.<EnderDragonPatch>builder().weight(1000.0F).cooldown(0).canBeInterrupted(false).looping(false)
-				.nextBehavior(Behavior.<EnderDragonPatch>builder().health(0.3F, Health.Comparator.LESS_RATIO).custom((mobpatch) -> mobpatch.getOriginal().getDragonFight().getCrystalsAlive() > 0)
+				.nextBehavior(Behavior.<EnderDragonPatch>builder().health(0.3F, Health.Comparator.LESS_RATIO).custom((mobpatch) -> mobpatch.getNearbyCrystals() > 0)
 				.behavior((mobpatch) -> {
 					mobpatch.getOriginal().getPhaseManager().setPhase(PatchedPhases.CRYSTAL_LINK);
 				}))
 		).newBehaviorSeries(
 			BehaviorSeries.<EnderDragonPatch>builder().weight(10.0F).cooldown(1600).canBeInterrupted(false).looping(false)
-				.nextBehavior(Behavior.<EnderDragonPatch>builder().health(0.5F, Health.Comparator.LESS_RATIO).custom((mobpatch) -> mobpatch.getOriginal().getDragonFight().getCrystalsAlive() > 0)
+				.nextBehavior(Behavior.<EnderDragonPatch>builder().health(0.5F, Health.Comparator.LESS_RATIO).custom((mobpatch) -> mobpatch.getNearbyCrystals() > 0)
 				.behavior((mobpatch) -> {
 					mobpatch.playAnimationSynchronized(Animations.DRAGON_GROUND_TO_FLY, 0.0F);
 					mobpatch.getOriginal().getPhaseManager().setPhase(PatchedPhases.FLYING);

@@ -131,7 +131,11 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 	}
 	
 	public static class MobPatchPresetProvider extends AbstractMobPatchProvider {
-		protected Function<Entity, Supplier<EntityPatch<?>>> presetProvider;
+		protected final Function<Entity, Supplier<EntityPatch<?>>> presetProvider;
+		
+		public MobPatchPresetProvider(Function<Entity, Supplier<EntityPatch<?>>> presetProvider) {
+			this.presetProvider = presetProvider;
+		}
 		
 		@Override
 		public EntityPatch<?> get(Entity entity) {
@@ -249,12 +253,17 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			return new NullPatchProvider();
 		} else {
 			if (tag.contains("preset")) {
-				Function<Entity, Supplier<EntityPatch<?>>> preset = EntityPatchProvider.get(tag.getString("preset"));
-				MobPatchPresetProvider provider = new MobPatchPresetProvider();
-				provider.presetProvider = preset;
+				String presetName = tag.getString("preset");
+				Function<Entity, Supplier<EntityPatch<?>>> preset = EntityPatchProvider.get(presetName);
+				EntityType<?> presetEntityType = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(presetName));
+				
+				Armatures.registerEntityTypeArmature(entityType, Armatures.getRegistry(presetEntityType));
+				
+				MobPatchPresetProvider provider = new MobPatchPresetProvider(preset);
+				
 				return provider;
 			} else {
-				boolean humanoid = tag.getBoolean("isHumanoid") && tag.getBoolean("isHumanoid");
+				boolean humanoid = tag.getBoolean("isHumanoid");
 				CustomMobPatchProvider provider = humanoid ? new CustomHumanoidMobPatchProvider() : new CustomMobPatchProvider();
 				provider.attributeValues = deserializeAttributes(tag.getCompound("attributes"));
 				ResourceLocation modelLocation = new ResourceLocation(tag.getString("model"));
@@ -557,6 +566,16 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			EntityPatchProvider.putCustomEntityPatch(entityType, (entity) -> () -> MOB_PATCH_PROVIDERS.get(entity.getType()).get(entity));
 			
 			if (!disabled) {
+				if (tag.contains("preset")) {
+					Armatures.registerEntityTypeArmature(entityType, tag.getString("preset"));
+				} else {
+					Minecraft mc = Minecraft.getInstance();
+					ResourceLocation armatureLocation = new ResourceLocation(tag.getString("armature"));
+					boolean humanoid = tag.getBoolean("isHumanoid");
+					
+					Armatures.registerEntityTypeArmature(entityType, Armatures.getOrCreateArmature(mc.getResourceManager(), armatureLocation, humanoid ? Armature::new : HumanoidArmature::new));
+				}
+				
 				ClientEngine.getInstance().renderEngine.registerCustomEntityRenderer(entityType, tag.contains("preset") ? tag.getString("preset") : tag.getString("renderer"));
 			}
 		}

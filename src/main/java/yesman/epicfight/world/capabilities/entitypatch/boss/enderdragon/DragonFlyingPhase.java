@@ -56,7 +56,7 @@ public class DragonFlyingPhase extends PatchedDragonPhase {
 			
 			for (Player player : players) {
 				if (isValidTarget(player)) {
-					if (!this.executeAirstrike && this.dragon.getRandom().nextFloat() > this.dragon.getDragonFight().getCrystalsAlive() * 0.1F) {
+					if (!this.executeAirstrike && this.dragon.getRandom().nextFloat() > this.dragonpatch.getNearbyCrystals() * 0.1F) {
 						if (isInEndSpikes(player)) {
 							this.executeAirstrike = true;
 						}
@@ -87,7 +87,7 @@ public class DragonFlyingPhase extends PatchedDragonPhase {
 				--k;
 			}
 			
-			if (this.dragon.getDragonFight() != null && this.dragon.getDragonFight().getCrystalsAlive() >= 0) {
+			if (this.dragon.getDragonFight() != null && this.dragonpatch.getNearbyCrystals() >= 0) {
 				k = k % 12;
 				if (k < 0) {
 					k += 12;

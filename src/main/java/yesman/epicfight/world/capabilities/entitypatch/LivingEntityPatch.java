@@ -492,6 +492,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		return (A) this.animator;
 	}
 	
+	@OnlyIn(Dist.CLIENT)
 	public ClientAnimator getClientAnimator() {
 		return this.getAnimator();
 	}

@@ -41,6 +41,7 @@ public class SPDatapackSync {
 	
 	public static SPDatapackSync fromBytes(FriendlyByteBuf buf) {
 		SPDatapackSync msg = new SPDatapackSync(buf.readInt(), SPDatapackSync.Type.values()[buf.readInt()]);
+		
 		for (int i = 0; i < msg.count; i++) {
 			msg.tags[i] = buf.readNbt();
 		}
@@ -51,6 +52,7 @@ public class SPDatapackSync {
 	public static void toBytes(SPDatapackSync msg, FriendlyByteBuf buf) {
 		buf.writeInt(msg.count);
 		buf.writeInt(msg.type.ordinal());
+		
 		for (CompoundTag tag : msg.tags) {
 			buf.writeNbt(tag);
 		}
