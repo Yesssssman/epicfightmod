@@ -519,15 +519,15 @@ public class ControllEngine {
 		
 		@SubscribeEvent
 		public static void clientTickEndEvent(TickEvent.ClientTickEvent event) {
+			if (controllEngine.minecraft.player == null) {
+				return;
+			}
+			
 			if (event.phase == TickEvent.Phase.START) {
-				if (controllEngine.playerpatch != null) {
-					controllEngine.tick();
-				}
-			} else if (event.phase == TickEvent.Phase.END) {
-				if (Minecraft.getInstance().getConnection() != null) {
-					for (Object packet : controllEngine.packets) {
-						EpicFightNetworkManager.sendToServer(packet);
-					}
+				controllEngine.tick();
+			} else {// event.phase == TickEvent.Phase.END
+				for (Object packet : controllEngine.packets) {
+					EpicFightNetworkManager.sendToServer(packet);
 				}
 				
 				controllEngine.packets.clear();
