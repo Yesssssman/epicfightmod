@@ -39,9 +39,6 @@ import yesman.epicfight.client.renderer.patched.item.EpicFightItemProperties;
 import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.config.ConfigurationIngame;
 import yesman.epicfight.data.loot.EpicFightLootTables;
-import yesman.epicfight.events.CapabilityEvent;
-import yesman.epicfight.events.EntityEvents;
-import yesman.epicfight.events.PlayerEvents;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.gameasset.EpicFightSounds;
@@ -126,9 +123,6 @@ public class EpicFightMod {
         EpicFightSkills.registerSkills();
 		//SkillBookLootModifier.createSkillLootTable();
         MinecraftForge.EVENT_BUS.addListener(this::reloadListnerEvent);
-        MinecraftForge.EVENT_BUS.register(EntityEvents.class);
-        MinecraftForge.EVENT_BUS.register(CapabilityEvent.class);
-        MinecraftForge.EVENT_BUS.register(PlayerEvents.class);
         
         ConfigManager.loadConfig(ConfigManager.CLIENT_CONFIG, FMLPaths.CONFIGDIR.get().resolve(MODID + "-client.toml").toString());
         ConfigManager.loadConfig(ConfigManager.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve(CONFIG_FILE_PATH).toString());

@@ -71,7 +71,7 @@ public class ControllEngine {
 		Events.controllEngine = this;
 		this.minecraft = Minecraft.getInstance();
 		this.options = this.minecraft.options;
-		this.keyFunctions.put(this.options.keyAttack, this::attackKeyPressed);
+		this.keyFunctions.put(EpicFightKeyMappings.ATTACK, this::attackKeyPressed);
 		this.keyFunctions.put(this.options.keySwapOffhand, this::swapHandKeyPressed);
 		this.keyFunctions.put(EpicFightKeyMappings.SWITCH_MODE, this::switchModeKeyPressed);
 		this.keyFunctions.put(EpicFightKeyMappings.DODGE, this::dodgeKeyPressed);

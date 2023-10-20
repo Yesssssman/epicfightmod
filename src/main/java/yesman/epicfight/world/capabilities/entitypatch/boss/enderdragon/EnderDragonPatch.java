@@ -281,6 +281,10 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 		}
 	}
 	
+	public int getNearbyCrystals() {
+		return this.original.getDragonFight() != null ? this.original.getDragonFight().getCrystalsAlive() : 0;
+	}
+	
 	public void resetTipAnimations() {
 		this.tipPointAnimations.clear();
 	}
