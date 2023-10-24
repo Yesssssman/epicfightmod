@@ -112,8 +112,10 @@ public class ControllEngine {
 	private void attackKeyPressed(KeyMapping key, int action) {
 		if (action == 1 && this.playerpatch.isBattleMode() && this.currentChargingKey != key && !Minecraft.getInstance().isPaused()) {
 			//Remove key press to prevent vanilla attack
-			this.setKeyBind(key, false);
-			while (key.consumeClick());
+			if (this.options.keyAttack.getKey() == EpicFightKeyMappings.ATTACK.getKey()) {
+				this.setKeyBind(this.options.keyAttack, false);
+				while (this.options.keyAttack.consumeClick());
+			}
 			
 			if (!EpicFightKeyMappings.ATTACK.getKey().equals(EpicFightKeyMappings.WEAPON_INNATE_SKILL.getKey())) {
 				SkillSlot slot = (!this.player.onGround() && !this.player.isInWater() && this.player.getDeltaMovement().y > 0.05D) ? SkillSlots.AIR_ATTACK : SkillSlots.BASIC_ATTACK;

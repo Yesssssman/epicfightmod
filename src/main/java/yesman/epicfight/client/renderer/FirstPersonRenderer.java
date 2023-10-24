@@ -72,10 +72,11 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 			
 			mesh.lefrArm.hidden = false;
 			mesh.rightArm.hidden = false;
+			mesh.leftSleeve.hidden = false;
+			mesh.rightSleeve.hidden = false;
 			
 			mesh.drawModelWithPose(matStackIn, buffer.getBuffer(EpicFightRenderTypes.triangles(RenderType.entityCutoutNoCull(entityIn.getSkinTextureLocation()))),
 					packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
-			
 		}
 		
 		if (!entityIn.isSpectator()) {

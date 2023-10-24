@@ -72,6 +72,11 @@ public class PlayerEvents {
 	public static void itemUseStartEvent(LivingEntityUseItemEvent.Start event) {
 		if (event.getEntity() instanceof Player player) {
 			PlayerPatch<?> playerpatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), PlayerPatch.class);
+			
+			if (playerpatch == null) {
+				return;
+			}
+			
 			InteractionHand hand = player.getItemInHand(InteractionHand.MAIN_HAND).equals(event.getItem()) ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
 			CapabilityItem itemCap = playerpatch.getHoldingItemCapability(hand);
 			
