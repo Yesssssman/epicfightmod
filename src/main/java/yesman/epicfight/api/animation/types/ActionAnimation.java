@@ -5,6 +5,8 @@ import java.util.Map;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeMod;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.animation.JointTransform;
@@ -19,6 +21,7 @@ import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.TimePairList;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class ActionAnimation extends MainFrameAnimation {
@@ -224,5 +227,10 @@ public class ActionAnimation extends MainFrameAnimation {
 		});
 		
 		return move.toDoubleVector();
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public boolean shouldPlayerMove(LocalPlayerPatch playerpatch) {
+		return playerpatch.isLogicalClient();
 	}
 }
