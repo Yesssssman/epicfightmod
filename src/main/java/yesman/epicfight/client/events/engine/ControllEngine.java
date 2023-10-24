@@ -111,11 +111,34 @@ public class ControllEngine {
 	
 	private void attackKeyPressed(KeyMapping key, int action) {
 		if (action == 1 && this.playerpatch.isBattleMode() && this.currentChargingKey != key && !Minecraft.getInstance().isPaused()) {
-			this.setKeyBind(key, false);
-			while (key.consumeClick());
+			//Remove key press to prevent vanilla attack
+			if (this.options.keyAttack.getKey() == EpicFightKeyMappings.ATTACK.getKey()) {
+				this.setKeyBind(this.options.keyAttack, false);
+				while (this.options.keyAttack.consumeClick());
+			}
 			
-			if (!this.weaponInnatePressToggle) {
-				this.weaponInnatePressToggle = true;
+			if (!EpicFightKeyMappings.ATTACK.getKey().equals(EpicFightKeyMappings.WEAPON_INNATE_SKILL.getKey())) {
+				SkillSlot slot = (!this.player.isOnGround() && !this.player.isInWater() && this.player.getDeltaMovement().y > 0.05D) ? SkillSlots.AIR_ATTACK : SkillSlots.BASIC_ATTACK;
+				
+				if (this.playerpatch.getSkill(slot).sendExecuteRequest(this.playerpatch, this).isExecutable()) {
+					this.player.resetAttackStrengthTicker();
+					this.attackLightPressToggle = false;
+					this.releaseAllServedKeys();
+				} else {
+					if (!this.player.isSpectator() && slot == SkillSlots.BASIC_ATTACK) {
+						this.reserveKey(slot, EpicFightKeyMappings.ATTACK);
+					}
+				}
+				
+				this.lockHotkeys();
+				
+				this.attackLightPressToggle = false;
+				this.weaponInnatePressToggle = false;
+				this.weaponInnatePressCounter = 0;
+			} else {
+				if (!this.weaponInnatePressToggle) {
+					this.weaponInnatePressToggle = true;
+				}
 			}
 		}
 	}
@@ -162,17 +185,13 @@ public class ControllEngine {
 	
 	private void weaponInnateSkillKeyPressed(KeyMapping key, int action) {
 		if (action == 1 && this.playerpatch.isBattleMode() && this.currentChargingKey != key) {
-			if (key.getKey().getValue() != 0) {
+			if (!EpicFightKeyMappings.ATTACK.getKey().equals(EpicFightKeyMappings.WEAPON_INNATE_SKILL.getKey())) {
 				if (this.playerpatch.getSkill(SkillSlots.WEAPON_INNATE).sendExecuteRequest(this.playerpatch, this).shouldReserverKey()) {
 					if (!this.player.isSpectator()) {
 						this.reserveKey(SkillSlots.WEAPON_INNATE, key);
 					}
 				} else {
 					this.lockHotkeys();
-				}
-			} else {
-				if (this.options.keyAttack.equals(EpicFightKeyMappings.WEAPON_INNATE_SKILL)) {
-					KeyMapping.click(this.options.keyAttack.getKey());
 				}
 			}
 		}
@@ -263,16 +282,16 @@ public class ControllEngine {
 		}
 		
 		if (this.weaponInnatePressToggle) {
-			if (!this.isKeyDown(this.options.keyAttack)) {
+			if (!this.isKeyDown(EpicFightKeyMappings.WEAPON_INNATE_SKILL)) {
 				this.attackLightPressToggle = true;
 				this.weaponInnatePressToggle = false;
 				this.weaponInnatePressCounter = 0;
 			} else {
-				if (EpicFightKeyMappings.WEAPON_INNATE_SKILL.getKey().equals(this.options.keyAttack.getKey())) {
+				if (EpicFightKeyMappings.WEAPON_INNATE_SKILL.getKey().equals(EpicFightKeyMappings.ATTACK.getKey())) {
 					if (this.weaponInnatePressCounter > EpicFightMod.CLIENT_INGAME_CONFIG.longPressCount.getValue()) {
 						if (this.minecraft.hitResult.getType() == HitResult.Type.BLOCK && this.playerpatch.getTarget() == null && !EpicFightMod.CLIENT_INGAME_CONFIG.noMiningInCombat.getValue()) {
 				            this.minecraft.startAttack();
-				            this.setKeyBind(this.options.keyAttack, true);
+				            this.setKeyBind(EpicFightKeyMappings.ATTACK, true);
 						} else if (this.playerpatch.getSkill(SkillSlots.WEAPON_INNATE).sendExecuteRequest(this.playerpatch, this).shouldReserverKey()) {
 							if (!this.player.isSpectator()) {
 								this.reserveKey(SkillSlots.WEAPON_INNATE, EpicFightKeyMappings.WEAPON_INNATE_SKILL);
@@ -299,7 +318,7 @@ public class ControllEngine {
 				this.releaseAllServedKeys();
 			} else {
 				if (!this.player.isSpectator() && slot == SkillSlots.BASIC_ATTACK) {
-					this.reserveKey(slot, this.options.keyAttack);
+					this.reserveKey(slot, EpicFightKeyMappings.ATTACK);
 				}
 			}
 			
@@ -404,9 +423,9 @@ public class ControllEngine {
 	
 	public boolean isKeyDown(KeyMapping key) {
 		if (key.getKey().getType() == InputConstants.Type.KEYSYM) {
-			return GLFW.glfwGetKey(Minecraft.getInstance().getWindow().getWindow(), key.getKey().getValue()) > 0;
+			return key.isDown() || GLFW.glfwGetKey(Minecraft.getInstance().getWindow().getWindow(), key.getKey().getValue()) > 0;
 		} else if(key.getKey().getType() == InputConstants.Type.MOUSE) {
-			return GLFW.glfwGetMouseButton(Minecraft.getInstance().getWindow().getWindow(), key.getKey().getValue()) > 0;
+			return key.isDown() || GLFW.glfwGetMouseButton(Minecraft.getInstance().getWindow().getWindow(), key.getKey().getValue()) > 0;
 		} else {
 			return false;
 		}
@@ -441,9 +460,38 @@ public class ControllEngine {
 		@SubscribeEvent
 		public static void mouseEvent(InputEvent.MouseButton event) {
 			if (controllEngine.minecraft.player != null && Minecraft.getInstance().screen == null) {
-				InputConstants.Key input = InputConstants.Type.MOUSE.getOrCreate(event.getButton());
+				InputConstants.Key input = InputConstants.Type.KEYSYM.getOrCreate(event.getButton());
+				//Controllable Compat
+				InputConstants.Key inputMouse = InputConstants.Type.MOUSE.getOrCreate(event.getButton());
 
 				for (KeyMapping keybinding : controllEngine.keyHash.getAll(input)) {
+					if (controllEngine.keyFunctions.containsKey(keybinding)) {
+						controllEngine.keyFunctions.get(keybinding).accept(keybinding, event.getAction());
+					}
+				}
+				
+				for (KeyMapping keybinding : controllEngine.keyHash.getAll(inputMouse)) {
+					if (controllEngine.keyFunctions.containsKey(keybinding)) {
+						controllEngine.keyFunctions.get(keybinding).accept(keybinding, event.getAction());
+					}
+				}
+			}
+		}
+		
+		@SubscribeEvent
+		public static void keyboardEvent(InputEvent.Key event) {
+			if (controllEngine.minecraft.player != null && Minecraft.getInstance().screen == null) {
+				InputConstants.Key input = InputConstants.Type.KEYSYM.getOrCreate(event.getKey());
+				//Controllable Compat
+				InputConstants.Key inputMouse = InputConstants.Type.MOUSE.getOrCreate(event.getKey());
+				
+				for (KeyMapping keybinding : controllEngine.keyHash.getAll(input)) {
+					if (controllEngine.keyFunctions.containsKey(keybinding)) {
+						controllEngine.keyFunctions.get(keybinding).accept(keybinding, event.getAction());
+					}
+				}
+				
+				for (KeyMapping keybinding : controllEngine.keyHash.getAll(inputMouse)) {
 					if (controllEngine.keyFunctions.containsKey(keybinding)) {
 						controllEngine.keyFunctions.get(keybinding).accept(keybinding, event.getAction());
 					}
@@ -456,19 +504,6 @@ public class ControllEngine {
 			if (controllEngine.minecraft.player != null && controllEngine.playerpatch != null && controllEngine.playerpatch.getEntityState().inaction()) {
 				if (controllEngine.minecraft.screen == null) {
 					event.setCanceled(true);
-				}
-			}
-		}
-		
-		@SubscribeEvent
-		public static void keyboardEvent(InputEvent.Key event) {
-			if (controllEngine.minecraft.player != null && Minecraft.getInstance().screen == null) {
-				InputConstants.Key input = InputConstants.Type.KEYSYM.getOrCreate(event.getKey());
-
-				for (KeyMapping keybinding : controllEngine.keyHash.getAll(input)) {
-					if (controllEngine.keyFunctions.containsKey(keybinding)) {
-						controllEngine.keyFunctions.get(keybinding).accept(keybinding, event.getAction());
-					}
 				}
 			}
 		}
