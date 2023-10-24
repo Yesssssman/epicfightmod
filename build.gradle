@@ -120,8 +120,6 @@ dependencies {
     
     //implementation fg.deobf("yesman:epicfight:18.5.1")
     //implementation fg.deobf("curse.maven:mantle-74924:3829975")
-    implementation fg.deobf("local:rubidium:0.5.6")
-    implementation fg.deobf("local:spark:1.10.38")
     
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
