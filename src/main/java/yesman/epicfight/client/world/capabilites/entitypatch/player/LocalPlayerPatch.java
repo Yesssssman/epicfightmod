@@ -26,7 +26,6 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.ActionAnimation;
-import yesman.epicfight.api.animation.types.BasicAttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.math.MathUtils;
@@ -40,7 +39,6 @@ import yesman.epicfight.network.client.CPPlayAnimation;
 import yesman.epicfight.network.client.CPSetPlayerTarget;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
-import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 @OnlyIn(Dist.CLIENT)
 public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
@@ -284,14 +282,8 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		if (!this.isLogicalClient()) {
 			return false;
 		}
-
-		if (actionAnimation instanceof BasicAttackAnimation && !this.original.level.getGameRules().getRule(EpicFightGamerules.STIFF_COMBO_ATTACKS).get()) {
-			if (this.original.input.forwardImpulse != 0.0F || this.original.input.leftImpulse != 0.0F) {
-				return false;
-			}
-		}
-
-		return true;
+		
+		return actionAnimation.shouldPlayerMove(this);
 	}
 
 	@Override

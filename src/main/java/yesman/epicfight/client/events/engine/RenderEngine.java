@@ -1,14 +1,9 @@
 package yesman.epicfight.client.events.engine;
 
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
-
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Camera;
 import net.minecraft.client.CameraType;
@@ -29,25 +24,14 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
-import net.minecraft.world.item.BowItem;
-import net.minecraft.world.item.CrossbowItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
-import net.minecraft.world.item.ShieldItem;
-import net.minecraft.world.item.TridentItem;
+import net.minecraft.world.item.*;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.CustomizeGuiOverlayEvent;
-import net.minecraftforge.client.event.RenderGuiEvent;
-import net.minecraftforge.client.event.RenderHandEvent;
-import net.minecraftforge.client.event.RenderLevelStageEvent;
-import net.minecraftforge.client.event.RenderLivingEvent;
-import net.minecraftforge.client.event.ViewportEvent;
+import net.minecraftforge.client.event.*;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoader;
@@ -67,32 +51,8 @@ import yesman.epicfight.client.gui.screen.overlay.OverlayManager;
 import yesman.epicfight.client.input.EpicFightKeyMappings;
 import yesman.epicfight.client.renderer.AimHelperRenderer;
 import yesman.epicfight.client.renderer.FirstPersonRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PCreeperRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PDrownedRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PEnderDragonRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PEndermanRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PHoglinRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PHumanoidRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PIllagerRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PIronGolemRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PPlayerRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PRavagerRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PSpiderRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PStrayRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PVexRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PVindicatorRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PWitchRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PWitherRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PWitherSkeletonMinionRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PZombieVillagerRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PatchedEntityRenderer;
-import yesman.epicfight.client.renderer.patched.entity.WitherGhostCloneRenderer;
-import yesman.epicfight.client.renderer.patched.item.RenderBow;
-import yesman.epicfight.client.renderer.patched.item.RenderCrossbow;
-import yesman.epicfight.client.renderer.patched.item.RenderItemBase;
-import yesman.epicfight.client.renderer.patched.item.RenderKatana;
-import yesman.epicfight.client.renderer.patched.item.RenderMap;
-import yesman.epicfight.client.renderer.patched.item.RenderTrident;
+import yesman.epicfight.client.renderer.patched.entity.*;
+import yesman.epicfight.client.renderer.patched.item.*;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.Skill;
@@ -104,6 +64,10 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.EpicFightEntities;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 import yesman.epicfight.world.item.EpicFightItems;
+
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
 
 @SuppressWarnings("rawtypes")
 @OnlyIn(Dist.CLIENT)

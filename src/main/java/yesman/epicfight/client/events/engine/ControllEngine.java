@@ -463,13 +463,13 @@ public class ControllEngine {
 				InputConstants.Key input = InputConstants.Type.KEYSYM.getOrCreate(event.getButton());
 				//Controllable Compat
 				InputConstants.Key inputMouse = InputConstants.Type.MOUSE.getOrCreate(event.getButton());
-
+				
 				for (KeyMapping keybinding : controllEngine.keyHash.getAll(input)) {
 					if (controllEngine.keyFunctions.containsKey(keybinding)) {
 						controllEngine.keyFunctions.get(keybinding).accept(keybinding, event.getAction());
 					}
 				}
-				
+
 				for (KeyMapping keybinding : controllEngine.keyHash.getAll(inputMouse)) {
 					if (controllEngine.keyFunctions.containsKey(keybinding)) {
 						controllEngine.keyFunctions.get(keybinding).accept(keybinding, event.getAction());
@@ -496,9 +496,15 @@ public class ControllEngine {
 						controllEngine.keyFunctions.get(keybinding).accept(keybinding, event.getAction());
 					}
 				}
+				
+				for (KeyMapping keybinding : controllEngine.keyHash.getAll(inputMouse)) {
+					if (controllEngine.keyFunctions.containsKey(keybinding)) {
+						controllEngine.keyFunctions.get(keybinding).accept(keybinding, event.getAction());
+					}
+				}
 			}
 		}
-		
+
 		@SubscribeEvent
 		public static void mouseScrollEvent(InputEvent.MouseScrollingEvent event) {
 			if (controllEngine.minecraft.player != null && controllEngine.playerpatch != null && controllEngine.playerpatch.getEntityState().inaction()) {
@@ -519,16 +525,15 @@ public class ControllEngine {
 		
 		@SubscribeEvent
 		public static void clientTickEndEvent(TickEvent.ClientTickEvent event) {
+			if (controllEngine.minecraft.player == null) {
+				return;
+			}
+			
 			if (event.phase == TickEvent.Phase.START) {
-
-				if (controllEngine.playerpatch != null) {
-					controllEngine.tick();
-				}
-			} else if (event.phase == TickEvent.Phase.END) {
-				if (Minecraft.getInstance().getConnection() != null) {
-					for (Object packet : controllEngine.packets) {
-						EpicFightNetworkManager.sendToServer(packet);
-					}
+				controllEngine.tick();
+			} else {// event.phase == TickEvent.Phase.END
+				for (Object packet : controllEngine.packets) {
+					EpicFightNetworkManager.sendToServer(packet);
 				}
 				
 				controllEngine.packets.clear();

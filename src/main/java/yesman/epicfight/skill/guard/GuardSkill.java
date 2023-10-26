@@ -204,7 +204,7 @@ public class GuardSkill extends Skill {
 						if (epicfightDamageSource.hasTag(SourceTags.GUARD_PUNCTURE)) {
 							return;
 						}
-
+						
 						impact = epicfightDamageSource.getImpact();
 						knockback += Math.min(impact * 0.1F, 1.0F);
 					}

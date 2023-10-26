@@ -11,6 +11,7 @@ import yesman.epicfight.main.EpicFightMod;
 
 @Mod.EventBusSubscriber(value = Dist.CLIENT, bus=Mod.EventBusSubscriber.Bus.MOD)
 public class EpicFightKeyMappings {
+	private EpicFightKeyMappings(){}
 	public static final KeyMapping WEAPON_INNATE_SKILL_TOOLTIP = new KeyMapping("key." + EpicFightMod.MODID + ".show_tooltip", InputConstants.KEY_LSHIFT, "key." + EpicFightMod.MODID + ".gui");
 	public static final KeyMapping SWITCH_MODE = new KeyMapping("key." + EpicFightMod.MODID + ".switch_mode", InputConstants.KEY_R, "key." + EpicFightMod.MODID + ".combat");
 	public static final KeyMapping DODGE = new KeyMapping("key." + EpicFightMod.MODID + ".dodge", InputConstants.KEY_LALT, "key." + EpicFightMod.MODID + ".combat");

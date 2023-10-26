@@ -1,13 +1,9 @@
 package yesman.epicfight.gameasset;
 
-import java.util.List;
-import java.util.Set;
-
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
@@ -19,11 +15,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityDimensions;
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.entity.LightningBolt;
-import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.*;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraft.world.entity.projectile.DragonFireball;
 import net.minecraft.world.level.ClipContext;
@@ -39,13 +31,8 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
-import yesman.epicfight.api.animation.Joint;
-import yesman.epicfight.api.animation.JointTransform;
-import yesman.epicfight.api.animation.Keyframe;
-import yesman.epicfight.api.animation.LivingMotion;
-import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.Pose;
-import yesman.epicfight.api.animation.TransformSheet;
+import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.animation.property.AnimationEvent;
 import yesman.epicfight.api.animation.property.AnimationEvent.Side;
 import yesman.epicfight.api.animation.property.AnimationEvent.TimePeriodEvent;
@@ -56,37 +43,11 @@ import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimation
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.property.MoveCoordFunctions;
-import yesman.epicfight.api.animation.types.ActionAnimation;
-import yesman.epicfight.api.animation.types.AimAnimation;
-import yesman.epicfight.api.animation.types.AirSlashAnimation;
-import yesman.epicfight.api.animation.types.AttackAnimation;
+import yesman.epicfight.api.animation.types.*;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
-import yesman.epicfight.api.animation.types.BasicAttackAnimation;
-import yesman.epicfight.api.animation.types.DashAttackAnimation;
-import yesman.epicfight.api.animation.types.DodgeAnimation;
-import yesman.epicfight.api.animation.types.EntityState;
-import yesman.epicfight.api.animation.types.GuardAnimation;
-import yesman.epicfight.api.animation.types.HitAnimation;
-import yesman.epicfight.api.animation.types.InvincibleAnimation;
-import yesman.epicfight.api.animation.types.KnockdownAnimation;
-import yesman.epicfight.api.animation.types.LinkAnimation;
-import yesman.epicfight.api.animation.types.LongHitAnimation;
-import yesman.epicfight.api.animation.types.MirrorAnimation;
-import yesman.epicfight.api.animation.types.MountAttackAnimation;
-import yesman.epicfight.api.animation.types.MovementAnimation;
-import yesman.epicfight.api.animation.types.OffAnimation;
-import yesman.epicfight.api.animation.types.RangedAttackAnimation;
-import yesman.epicfight.api.animation.types.ReboundAnimation;
-import yesman.epicfight.api.animation.types.SelectiveAnimation;
-import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.animation.types.grappling.GrapplingAttackAnimation;
 import yesman.epicfight.api.animation.types.grappling.GrapplingTryAnimation;
-import yesman.epicfight.api.animation.types.procedural.EnderDragonActionAnimation;
-import yesman.epicfight.api.animation.types.procedural.EnderDragonAttackAnimation;
-import yesman.epicfight.api.animation.types.procedural.EnderDragonDeathAnimation;
-import yesman.epicfight.api.animation.types.procedural.EnderDragonDynamicActionAnimation;
-import yesman.epicfight.api.animation.types.procedural.EnderDraonWalkAnimation;
-import yesman.epicfight.api.animation.types.procedural.IKInfo;
+import yesman.epicfight.api.animation.types.procedural.*;
 import yesman.epicfight.api.collider.OBBCollider;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.api.utils.HitEntityList;
@@ -98,17 +59,7 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.ValueModifier;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.main.EpicFightMod;
-import yesman.epicfight.model.armature.CreeperArmature;
-import yesman.epicfight.model.armature.DragonArmature;
-import yesman.epicfight.model.armature.EndermanArmature;
-import yesman.epicfight.model.armature.HoglinArmature;
-import yesman.epicfight.model.armature.HumanoidArmature;
-import yesman.epicfight.model.armature.IronGolemArmature;
-import yesman.epicfight.model.armature.PiglinArmature;
-import yesman.epicfight.model.armature.RavagerArmature;
-import yesman.epicfight.model.armature.SpiderArmature;
-import yesman.epicfight.model.armature.VexArmature;
-import yesman.epicfight.model.armature.WitherArmature;
+import yesman.epicfight.model.armature.*;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.skill.SkillSlots;
@@ -126,6 +77,9 @@ import yesman.epicfight.world.damagesource.ExtraDamageInstance;
 import yesman.epicfight.world.damagesource.SourceTags;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+
+import java.util.List;
+import java.util.Set;
 
 @Mod.EventBusSubscriber(modid = EpicFightMod.MODID, bus = Bus.MOD)
 public class Animations {
@@ -799,7 +753,7 @@ public class Animations {
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP.get());
 		AXE_AUTO1 = new BasicAttackAnimation(0.16F, 0.05F, 0.15F, 0.7F, null, biped.toolR, "biped/combat/axe_auto1", biped);
 		AXE_AUTO2 = new BasicAttackAnimation(0.16F, 0.05F, 0.15F, 0.85F, null, biped.toolR, "biped/combat/axe_auto2", biped);
-
+		
 		LONGSWORD_AUTO1 = new BasicAttackAnimation(0.1F, 0.25F, 0.35F, 0.5F, null, biped.toolR, "biped/combat/longsword_auto1", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		LONGSWORD_AUTO2 = new BasicAttackAnimation(0.15F, 0.2F, 0.3F, 0.45F, null, biped.toolR, "biped/combat/longsword_auto2", biped)
@@ -845,8 +799,8 @@ public class Animations {
 		DAGGER_DUAL_AUTO3 = new BasicAttackAnimation(0.05F, 0.0F, 0.11F, 0.2F, null, biped.toolR, "biped/combat/dagger_dual_auto3", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
 		DAGGER_DUAL_AUTO4 = new BasicAttackAnimation(0.15F, "biped/combat/dagger_dual_auto4", biped,
-				  new Phase(0.0F, 0.1F, 0.1F, 0.2F, 0.2F, 0.2F, InteractionHand.OFF_HAND, biped.toolL, null)
-				, new Phase(0.2F, 0.2F, 0.3F, 0.6F, 0.6F, biped.toolR, null))
+					  new Phase(0.0F, 0.1F, 0.1F, 0.2F, 0.2F, 0.2F, InteractionHand.OFF_HAND, biped.toolL, null)
+					, new Phase(0.2F, 0.2F, 0.3F, 0.6F, 0.6F, biped.toolR, null))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
 
 		DAGGER_DUAL_DASH = new DashAttackAnimation(0.1F, 0.1F, 0.25F, 0.3F, 0.65F, ColliderPreset.DUAL_DAGGER_DASH, biped.rootJoint, "biped/combat/dagger_dual_dash", biped)

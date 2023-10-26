@@ -68,7 +68,7 @@ public class AnimationDataReader {
 
 		if (propertySetter.multilayerInfo != null) {
 			StaticAnimation multilayerAnimation = new StaticAnimation(animation.getLocation(), animation.getConvertTime(), animation.isRepeat(), String.valueOf(animation.getId()), animation.getArmature(), true);
-
+			
 			if (propertySetter.multilayerInfo.jointMaskEntry.isValid()) {
 				multilayerAnimation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.multilayerInfo.jointMaskEntry);
 			}

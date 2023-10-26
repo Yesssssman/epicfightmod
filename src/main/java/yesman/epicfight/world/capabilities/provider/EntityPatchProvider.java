@@ -1,12 +1,6 @@
 package yesman.epicfight.world.capabilities.provider;
 
-import java.util.HashMap;
-import java.util.Map;
-import java.util.function.Function;
-import java.util.function.Supplier;
-
 import com.google.common.collect.Maps;
-
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.player.RemotePlayer;
 import net.minecraft.core.Direction;
@@ -37,35 +31,16 @@ import yesman.epicfight.world.capabilities.entitypatch.GlobalMobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.boss.WitherGhostPatch;
 import yesman.epicfight.world.capabilities.entitypatch.boss.WitherPatch;
 import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.EnderDragonPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.CaveSpiderPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.CreeperPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.DrownedPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.EndermanPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.EvokerPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.HoglinPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.IronGolemPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.PiglinBrutePatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.PiglinPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.PillagerPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.RavagerPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.SkeletonPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.SpiderPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.StrayPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.VexPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.VindicatorPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.WitchPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.WitherSkeletonPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.ZoglinPatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.ZombiePatch;
-import yesman.epicfight.world.capabilities.entitypatch.mob.ZombifiedPiglinPatch;
+import yesman.epicfight.world.capabilities.entitypatch.mob.*;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
-import yesman.epicfight.world.capabilities.projectile.ArrowPatch;
-import yesman.epicfight.world.capabilities.projectile.DragonFireballPatch;
-import yesman.epicfight.world.capabilities.projectile.ProjectilePatch;
-import yesman.epicfight.world.capabilities.projectile.ThrownTridentPatch;
-import yesman.epicfight.world.capabilities.projectile.WitherSkullPatch;
+import yesman.epicfight.world.capabilities.projectile.*;
 import yesman.epicfight.world.entity.EpicFightEntities;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class EntityPatchProvider implements ICapabilityProvider, NonNullSupplier<EntityPatch<?>> {
 	private static final Map<EntityType<?>, Function<Entity, Supplier<EntityPatch<?>>>> CAPABILITIES = Maps.newHashMap();

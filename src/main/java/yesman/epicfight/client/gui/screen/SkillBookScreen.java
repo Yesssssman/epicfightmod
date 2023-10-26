@@ -196,13 +196,15 @@ public class SkillBookScreen extends Screen {
 		
 		List<FormattedCharSequence> list = this.font.split(Component.translatable(translationName + ".tooltip", this.skill.getTooltipArgsOfScreen(Lists.newArrayList()).toArray(new Object[0])), 150);
 		int height = posY + 20 - Math.min((Math.max(list.size() - 10, 0) * 4), 20);
-
-		for (FormattedCharSequence ireorderingprocessor1 : list) {
-			if (ireorderingprocessor1 != null) {
-				this.font.draw(poseStack, ireorderingprocessor1, posX + 105, height, 0);
-			}
-
-			height += 10;
+		
+		for (int l1 = 0; l1 < list.size(); ++l1) {
+			FormattedCharSequence ireorderingprocessor1 = list.get(l1);
+			
+            if (ireorderingprocessor1 != null) {
+               this.font.draw(poseStack, ireorderingprocessor1, posX + 105, height, 0);
+            }
+            
+            height+=10;
 		}
 		
 		super.render(poseStack, mouseX, mouseY, partialTicks);

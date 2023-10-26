@@ -1,10 +1,5 @@
 package yesman.epicfight.main;
 
-import java.util.function.Function;
-
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
@@ -22,11 +17,9 @@ import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
-import yesman.epicfight.api.animation.AnimationManager;
-import yesman.epicfight.api.animation.Animator;
-import yesman.epicfight.api.animation.LivingMotion;
-import yesman.epicfight.api.animation.LivingMotions;
-import yesman.epicfight.api.animation.ServerAnimator;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import yesman.epicfight.api.animation.*;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.model.ItemSkins;
 import yesman.epicfight.api.client.model.Meshes;
@@ -69,6 +62,8 @@ import yesman.epicfight.world.gamerule.EpicFightGamerules;
 import yesman.epicfight.world.item.EpicFightItems;
 import yesman.epicfight.world.level.block.EpicFightBlocks;
 import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
+
+import java.util.function.Function;
 
 @Mod("epicfight")
 public class EpicFightMod {

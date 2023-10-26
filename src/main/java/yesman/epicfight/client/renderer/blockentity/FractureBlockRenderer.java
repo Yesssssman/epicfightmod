@@ -3,7 +3,6 @@ package yesman.epicfight.client.renderer.blockentity;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Quaternion;
 import com.mojang.math.Vector3f;
-
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.block.BlockRenderDispatcher;
@@ -29,7 +28,7 @@ public class FractureBlockRenderer implements BlockEntityRenderer<FractureBlockE
 	
 	@Override
 	public boolean shouldRender(FractureBlockEntity p_173568_, Vec3 p_173569_) {
-		return Vec3.atCenterOf(p_173568_.getBlockPos()).closerThan(p_173569_, this.getViewDistance());
+		return Vec3.atCenterOf(p_173568_.getBlockPos()).closerThan(p_173569_, (double)this.getViewDistance());
 	}
 	
 	@Override

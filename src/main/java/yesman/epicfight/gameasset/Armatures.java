@@ -1,12 +1,6 @@
 package yesman.epicfight.gameasset;
 
-import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
-import java.util.function.Function;
-
 import com.google.common.collect.Maps;
-
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -19,19 +13,14 @@ import yesman.epicfight.api.forgeevent.ModelBuildEvent;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.model.JsonModelLoader;
 import yesman.epicfight.main.EpicFightMod;
-import yesman.epicfight.model.armature.CreeperArmature;
-import yesman.epicfight.model.armature.DragonArmature;
-import yesman.epicfight.model.armature.EndermanArmature;
-import yesman.epicfight.model.armature.HoglinArmature;
-import yesman.epicfight.model.armature.HumanoidArmature;
-import yesman.epicfight.model.armature.IronGolemArmature;
-import yesman.epicfight.model.armature.PiglinArmature;
-import yesman.epicfight.model.armature.RavagerArmature;
-import yesman.epicfight.model.armature.SpiderArmature;
-import yesman.epicfight.model.armature.VexArmature;
-import yesman.epicfight.model.armature.WitherArmature;
+import yesman.epicfight.model.armature.*;
 import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
 import yesman.epicfight.world.entity.EpicFightEntities;
+
+import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.function.Function;
 
 public class Armatures implements PreparableReloadListener {
 	

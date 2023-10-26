@@ -1,7 +1,5 @@
 package yesman.epicfight.world.capabilities.entitypatch;
 
-import java.util.Collection;
-
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -17,6 +15,8 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributeSupplier;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+
+import java.util.Collection;
 
 public abstract class HurtableEntityPatch<T extends LivingEntity> extends EntityPatch<T> {
 	private boolean stunReductionDecreases;

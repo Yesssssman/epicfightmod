@@ -1,7 +1,5 @@
 package yesman.epicfight.world.capabilities.entitypatch.mob;
 
-import java.util.Set;
-
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.SwellGoal;
@@ -21,6 +19,8 @@ import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.CreeperSwellStoppableGoal;
+
+import java.util.Set;
 
 public class CreeperPatch extends MobPatch<Creeper> {
 	private CreeperSwellStoppableGoal swellerGoal;

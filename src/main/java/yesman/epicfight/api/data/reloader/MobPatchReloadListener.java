@@ -1,13 +1,5 @@
 package yesman.epicfight.api.data.reloader;
 
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
-
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -16,14 +8,9 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
-
 import io.netty.util.internal.StringUtil;
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.nbt.TagParser;
+import net.minecraft.nbt.*;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -46,12 +33,7 @@ import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.model.armature.HumanoidArmature;
 import yesman.epicfight.network.server.SPDatapackSync;
-import yesman.epicfight.world.capabilities.entitypatch.CustomHumanoidMobPatch;
-import yesman.epicfight.world.capabilities.entitypatch.CustomMobPatch;
-import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
-import yesman.epicfight.world.capabilities.entitypatch.Faction;
-import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
-import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
+import yesman.epicfight.world.capabilities.entitypatch.*;
 import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.capabilities.provider.EntityPatchProvider;
@@ -61,6 +43,14 @@ import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors.Behavior;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors.BehaviorPredicate;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors.BehaviorSeries;
+
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 	private static final Gson GSON = (new GsonBuilder()).create();
@@ -263,7 +253,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 				
 				return provider;
 			} else {
-				boolean humanoid = tag.getBoolean("isHumanoid") && tag.getBoolean("isHumanoid");
+				boolean humanoid = tag.getBoolean("isHumanoid");
 				CustomMobPatchProvider provider = humanoid ? new CustomHumanoidMobPatchProvider() : new CustomMobPatchProvider();
 				provider.attributeValues = deserializeAttributes(tag.getCompound("attributes"));
 				ResourceLocation modelLocation = new ResourceLocation(tag.getString("model"));
@@ -529,7 +519,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		} else {
 			extract.put("model", original.get("model"));
 			extract.put("armature", original.get("armature"));
-			extract.putBoolean("isHumanoid", original.contains("isHumanoid") && original.getBoolean("isHumanoid"));
+			extract.putBoolean("isHumanoid", original.contains("isHumanoid") ? original.getBoolean("isHumanoid") : false);
 			extract.put("renderer", original.get("renderer"));
 			extract.put("faction", original.get("faction"));
 			extract.put("default_livingmotions", original.get("default_livingmotions"));
