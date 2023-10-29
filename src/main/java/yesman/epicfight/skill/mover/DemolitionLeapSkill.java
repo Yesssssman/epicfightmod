@@ -34,7 +34,7 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 	private static final SkillDataKey<Boolean> PROTECT_NEXT_FALL = SkillDataKey.createDataKey(SkillDataManager.ValueType.BOOLEAN);
 	private static final UUID EVENT_UUID = UUID.fromString("3d142bf4-0dcd-11ee-be56-0242ac120002");
 	
-	public static Skill.Builder<DemolitionLeapSkill> createChargeJumpBuilder() {
+	public static Skill.Builder<DemolitionLeapSkill> createDemolitionLeapBuilder() {
 		return (new Builder<DemolitionLeapSkill>())
 					.setCategory(SkillCategories.MOVER)
 					.setResource(Resource.STAMINA);

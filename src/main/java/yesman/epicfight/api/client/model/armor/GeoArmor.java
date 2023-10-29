@@ -1,237 +1,196 @@
-package yesman.epicfight.api.client.model;
+package yesman.epicfight.api.client.model.armor;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Matrix4f;
 import com.mojang.math.Vector3f;
 import com.mojang.math.Vector4f;
 
-import net.minecraft.SharedConstants;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.ModelPart.Cube;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.registries.ForgeRegistries;
+import software.bernie.geckolib3.core.IAnimatable;
+import software.bernie.geckolib3.core.processor.IBone;
+import software.bernie.geckolib3.geo.render.built.GeoBone;
+import software.bernie.geckolib3.geo.render.built.GeoCube;
+import software.bernie.geckolib3.geo.render.built.GeoQuad;
+import software.bernie.geckolib3.geo.render.built.GeoVertex;
+import software.bernie.geckolib3.renderers.geo.GeoArmorRenderer;
+import software.bernie.geckolib3.util.RenderUtils;
+import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.Meshes;
+import yesman.epicfight.api.client.model.SingleVertex;
 import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec3f;
-import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
-public class CustomModelBakery {
+public class GeoArmor extends ArmorModelTransformer {
+	static final PartTransformer<GeoCube> HEAD = new SimpleBaker("head", 9);
+	static final PartTransformer<GeoCube> LEFT_FEET = new SimpleBaker("leftBoots", 5);
+	static final PartTransformer<GeoCube> RIGHT_FEET = new SimpleBaker("rightBoots", 2);
+	static final PartTransformer<GeoCube> LEFT_ARM = new Limb("leftArm", 16, 17, 19, 1.1875F, false);
+	static final PartTransformer<GeoCube> LEFT_ARM_CHILD = new SimpleSeparateBaker("leftArm", 16, 17, 1.1875F);
+	static final PartTransformer<GeoCube> RIGHT_ARM = new Limb("rightArm", 11, 12, 14, 1.1875F, false);
+	static final PartTransformer<GeoCube> RIGHT_ARM_CHILD = new SimpleSeparateBaker("rightArm", 11, 12, 1.1875F);
+	static final PartTransformer<GeoCube> LEFT_LEG = new Limb("leftLeg", 4, 5, 6, 0.375F, true);
+	static final PartTransformer<GeoCube> LEFT_LEG_CHILD = new SimpleSeparateBaker("leftLeg", 4, 5, 0.375F);
+	static final PartTransformer<GeoCube> RIGHT_LEG = new Limb("rightLeg", 1, 2, 3, 0.375F, true);
+	static final PartTransformer<GeoCube> RIGHT_LEG_CHILD = new SimpleSeparateBaker("rightLeg", 1, 2, 0.375F);
+	static final PartTransformer<GeoCube> CHEST = new Chest("chest");
+	static final PartTransformer<GeoCube> CHEST_CHILD = new SimpleSeparateBaker("chest", 8, 7, 1.125F);
+	
 	static int indexCount = 0;
 	
-	static final Map<ResourceLocation, AnimatedMesh> BAKED_MODELS = Maps.newHashMap();
-	static final ModelBaker HEAD = new SimpleBaker("head", 9);
-	static final ModelBaker LEFT_FEET = new SimpleBaker("leftBoots", 5);
-	static final ModelBaker RIGHT_FEET = new SimpleBaker("rightBoots", 2);
-	static final ModelBaker LEFT_ARM = new Limb("leftArm", 16, 17, 19, 19.0F, false);
-	static final ModelBaker LEFT_ARM_CHILD = new SimpleSeparateBaker("leftArm", 16, 17, 19.0F);
-	static final ModelBaker RIGHT_ARM = new Limb("rightArm", 11, 12, 14, 19.0F, false);
-	static final ModelBaker RIGHT_ARM_CHILD = new SimpleSeparateBaker("rightArm", 11, 12, 19.0F);
-	static final ModelBaker LEFT_LEG = new Limb("leftLeg", 4, 5, 6, 6.0F, true);
-	static final ModelBaker LEFT_LEG_CHILD = new SimpleSeparateBaker("leftLeg", 4, 5, 6.0F);
-	static final ModelBaker RIGHT_LEG = new Limb("rightLeg", 1, 2, 3, 6.0F, true);
-	static final ModelBaker RIGHT_LEG_CHILD = new SimpleSeparateBaker("rightLeg", 1, 2, 6.0F);
-	static final ModelBaker CHEST = new Chest("chest");
-	static final ModelBaker CHEST_CHILD = new SimpleSeparateBaker("chest", 8, 7, 18.0F);
-	
-	public static void exportModels(File resourcePackDirectory) throws IOException {
-		File zipFile = new File(resourcePackDirectory, "epicfight_custom_armors.zip");
-		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFile));
+	@OnlyIn(Dist.CLIENT)
+	static class GeoModelPartition {
+		final PartTransformer<GeoCube> partTransformer;
+		final PartTransformer<GeoCube> partChildTransformer;
+		final IBone geoBone;
 		
-		for (Map.Entry<ResourceLocation, AnimatedMesh> entry : BAKED_MODELS.entrySet()) {
-			ZipEntry zipEntry = new ZipEntry(String.format("assets/%s/%s", entry.getKey().getNamespace(), entry.getKey().getPath()));
-			Gson gson = new GsonBuilder().create();
-			out.putNextEntry(zipEntry);
-			out.write(gson.toJson(entry.getValue().toJsonObject()).getBytes());
-			out.closeEntry();
-			EpicFightMod.LOGGER.info("Exported custom armor model : " + entry.getKey());
+		private GeoModelPartition(PartTransformer<GeoCube> partTransformer, PartTransformer<GeoCube> partChildTransformer, IBone geoBone) {
+			this.partTransformer = partTransformer;
+			this.partChildTransformer = partChildTransformer;
+			this.geoBone = geoBone;
 		}
-		
-		ZipEntry zipEntry = new ZipEntry("pack.mcmeta");
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		JsonObject root = new JsonObject();
-		JsonObject pack = new JsonObject();
-		pack.addProperty("description", "epicfight_custom_armor_models");
-		pack.addProperty("pack_format", PackType.CLIENT_RESOURCES.getVersion(SharedConstants.getCurrentVersion()));
-		root.add("pack", pack);
-		out.putNextEntry(zipEntry);
-		out.write(gson.toJson(root).getBytes());
-		out.closeEntry();
-		out.close();
 	}
 	
-	public static List<ModelPart> getAllParts(Model model) {
-		Class<?> cls = model.getClass();
-		List<Class<?>> superClasses = Lists.newArrayList();
-		
-		while (Model.class.isAssignableFrom(cls)) {
-			superClasses.add(cls);
-			cls = cls.getSuperclass();
+	public AnimatedMesh transformModel(HumanoidModel<?> model, ArmorItem armorItem, EquipmentSlot slot, boolean debuggingMode) {
+		if (!(armorItem instanceof IAnimatable) || !(model instanceof GeoArmorRenderer<?>)) {
+			return null;
 		}
 		
-		List<ModelPart> modelParts = Lists.newArrayList();
+		GeoArmorRenderer<?> geoModel = (GeoArmorRenderer<?>)model;
+		List<GeoModelPartition> boxes = Lists.newArrayList();
 		
-		for (Class<?> modelClss : superClasses) {
-			Field[] modelFields = modelClss.getDeclaredFields();
-			
-			for (Field field : modelFields) {
-				if (field.getType().isAssignableFrom(ModelPart.class)) {
-					try {
-						ModelPart modelPart = (ModelPart)field.get(model);
-						
-						if (modelPart.visible) {
-							modelParts.add(modelPart);
-						}
-					} catch(Exception e) {}
-				}
-			}
-		}
+		IBone headBone = geoModel.getGeoModelProvider().getBone(geoModel.headBone);
+		IBone bodyBone = geoModel.getGeoModelProvider().getBone(geoModel.bodyBone);
+		IBone rightArmBone = geoModel.getGeoModelProvider().getBone(geoModel.rightArmBone);
+		IBone leftArmBone = geoModel.getGeoModelProvider().getBone(geoModel.leftArmBone);
+		IBone rightLegBone = geoModel.getGeoModelProvider().getBone(geoModel.rightLegBone);
+		IBone leftLegBone = geoModel.getGeoModelProvider().getBone(geoModel.leftLegBone);
+		IBone rightBootBone = geoModel.getGeoModelProvider().getBone(geoModel.rightBootBone);
+		IBone leftBootBone = geoModel.getGeoModelProvider().getBone(geoModel.leftBootBone);
 		
-		return modelParts;
-	}
-	
-	public static AnimatedMesh bakeHumanoidModel(HumanoidModel<?> model, ArmorItem armorItem, EquipmentSlot slot, boolean debuggingMode) {
-		List<ModelPartition> boxes = Lists.newArrayList();
-		List<ModelPart> modelParts = getAllParts(model);
+		headBone.setRotationX(0);
+		headBone.setRotationY(0);
+		headBone.setRotationZ(0);
 		
-		model.head.setRotation(0.0F, 0.0F, 0.0F);
-		model.hat.setRotation(0.0F, 0.0F, 0.0F);
-		model.body.setRotation(0.0F, 0.0F, 0.0F);
-	    model.rightArm.setRotation(0.0F, 0.0F, 0.0F);
-	    model.leftArm.setRotation(0.0F, 0.0F, 0.0F);
-	    model.rightLeg.setRotation(0.0F, 0.0F, 0.0F);
-	    model.leftLeg.setRotation(0.0F, 0.0F, 0.0F);
+		bodyBone.setRotationX(0);
+		bodyBone.setRotationY(0);
+		bodyBone.setRotationZ(0);
+		
+		rightArmBone.setRotationX(0);
+		rightArmBone.setRotationY(0);
+		rightArmBone.setRotationZ(0);
+		
+		leftArmBone.setRotationX(0);
+		leftArmBone.setRotationY(0);
+		leftArmBone.setRotationZ(0);
+		
+		rightLegBone.setRotationX(0);
+		rightLegBone.setRotationY(0);
+		rightLegBone.setRotationZ(0);
+		
+		leftLegBone.setRotationX(0);
+		leftLegBone.setRotationY(0);
+		leftLegBone.setRotationZ(0);
+		
+		rightBootBone.setRotationX(0);
+		rightBootBone.setRotationY(0);
+		rightBootBone.setRotationZ(0);
+		
+		leftBootBone.setRotationX(0);
+		leftBootBone.setRotationY(0);
+		leftBootBone.setRotationZ(0);
 		
 		switch (slot) {
 		case HEAD:
-			boxes.add(new ModelPartition(HEAD, HEAD, model.head));
-			boxes.add(new ModelPartition(HEAD, HEAD, model.hat));
+			boxes.add(new GeoModelPartition(HEAD, HEAD, headBone));
 			break;
 		case CHEST:
-			boxes.add(new ModelPartition(CHEST, CHEST_CHILD, model.body));
-			boxes.add(new ModelPartition(RIGHT_ARM, RIGHT_ARM_CHILD, model.rightArm));
-			boxes.add(new ModelPartition(LEFT_ARM, LEFT_ARM_CHILD, model.leftArm));
+			boxes.add(new GeoModelPartition(CHEST, CHEST_CHILD, bodyBone));
+			boxes.add(new GeoModelPartition(RIGHT_ARM, RIGHT_ARM_CHILD, rightArmBone));
+			boxes.add(new GeoModelPartition(LEFT_ARM, LEFT_ARM_CHILD, leftArmBone));
 			break;
 		case LEGS:
-			boxes.add(new ModelPartition(CHEST, CHEST_CHILD, model.body));
-			boxes.add(new ModelPartition(LEFT_LEG, LEFT_LEG_CHILD, model.leftLeg));
-			boxes.add(new ModelPartition(RIGHT_LEG, RIGHT_LEG_CHILD, model.rightLeg));
+			boxes.add(new GeoModelPartition(CHEST, CHEST_CHILD, bodyBone));
+			boxes.add(new GeoModelPartition(LEFT_LEG, LEFT_LEG_CHILD, leftLegBone));
+			boxes.add(new GeoModelPartition(RIGHT_LEG, RIGHT_LEG_CHILD, rightLegBone));
 			break;
 		case FEET:
-			boxes.add(new ModelPartition(LEFT_FEET, LEFT_FEET, model.leftLeg));
-			boxes.add(new ModelPartition(RIGHT_FEET, RIGHT_FEET, model.rightLeg));
+			boxes.add(new GeoModelPartition(LEFT_FEET, LEFT_FEET, leftBootBone));
+			boxes.add(new GeoModelPartition(RIGHT_FEET, RIGHT_FEET, rightBootBone));
 			break;
 		default:
 			return null;
 		}
 		
-		ResourceLocation rl = new ResourceLocation(armorItem.getRegistryName().getNamespace(), "armor/" + armorItem.getRegistryName().getPath());
+		ResourceLocation rl = new ResourceLocation(ForgeRegistries.ITEMS.getKey(armorItem).getNamespace(), "armor/" + ForgeRegistries.ITEMS.getKey(armorItem).getPath());
 		AnimatedMesh armorModelMesh = bakeMeshFromCubes(boxes, debuggingMode);
 		Meshes.addMesh(rl, armorModelMesh);
-		
-		BAKED_MODELS.put(armorItem.getRegistryName(), armorModelMesh);
 		
 		return armorModelMesh;
 	}
 	
-	private static AnimatedMesh bakeMeshFromCubes(List<ModelPartition> partitions, boolean debuggingMode) {
+	private static AnimatedMesh bakeMeshFromCubes(List<GeoModelPartition> partitions, boolean debuggingMode) {
 		List<SingleVertex> vertices = Lists.newArrayList();
 		Map<String, List<Integer>> indices = Maps.newHashMap();
 		PoseStack poseStack = new PoseStack();
 		indexCount = 0;
-		poseStack.mulPose(Vector3f.YP.rotationDegrees(180.0F));
-		poseStack.mulPose(Vector3f.XP.rotationDegrees(180.0F));
-		poseStack.translate(0, -24, 0);
 		
-		for (ModelPartition modelpartition : partitions) {
-			bake(poseStack, modelpartition, modelpartition.part, modelpartition.partBaker, vertices, indices, debuggingMode);
+		for (GeoModelPartition modelpartition : partitions) {
+			if (modelpartition.geoBone instanceof GeoBone geoBone) {
+				bake(poseStack, modelpartition, geoBone, modelpartition.partTransformer, vertices, indices, debuggingMode);
+			}
 		}
 		
 		return SingleVertex.loadVertexInformation(vertices, indices);
 	}
 	
-	private static void bake(PoseStack poseStack, ModelPartition modelpartition, ModelPart part, ModelBaker partBaker, List<SingleVertex> vertices, Map<String, List<Integer>> indices, boolean debuggingMode) {
+	private static void bake(PoseStack poseStack, GeoModelPartition modelpartition, GeoBone geoBone, PartTransformer<GeoCube> partBaker, List<SingleVertex> vertices, Map<String, List<Integer>> indices, boolean debuggingMode) {
+		if (geoBone == null) {
+			return;
+		}
+		
 		poseStack.pushPose();
-		poseStack.translate(part.x, part.y, part.z);
 		
-		if (part.zRot != 0.0F) {
-			poseStack.mulPose(Vector3f.ZP.rotation(part.zRot));
+		if (!geoBone.isHidden()) {
+			RenderUtils.prepMatrixForBone(poseStack, geoBone);
+			
+			for (GeoCube cube : geoBone.childCubes) {
+				poseStack.pushPose();
+				
+				RenderUtils.translateToPivotPoint(poseStack, cube);
+				RenderUtils.rotateMatrixAroundCube(poseStack, cube);
+				RenderUtils.translateAwayFromPivotPoint(poseStack, cube);
+				
+				partBaker.bakeCube(poseStack, cube, vertices, indices);
+				poseStack.popPose();
+			}
 		}
 		
-		if (part.yRot != 0.0F) {
-			poseStack.mulPose(Vector3f.YP.rotation(part.yRot));
-		}
-		
-		if (part.xRot != 0.0F) {
-			poseStack.mulPose(Vector3f.XP.rotation(part.xRot));
-		}
-		
-		for (ModelPart.Cube cube : part.cubes) {
-			partBaker.bakeCube(poseStack, cube, vertices, indices);
-		}
-		
-		for (ModelPart childParts : part.children.values()) {
-			bake(poseStack, modelpartition, childParts, modelpartition.childBaker, vertices, indices, debuggingMode);
+		if (!geoBone.childBonesAreHiddenToo()) {
+			for (GeoBone childParts : geoBone.childBones) {
+				bake(poseStack, modelpartition, childParts, modelpartition.partChildTransformer, vertices, indices, debuggingMode);
+			}
 		}
 		
 		poseStack.popPose();
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class ModelPartition {
-		final ModelBaker partBaker;
-		final ModelBaker childBaker;
-		final ModelPart part;
-		
-		private ModelPartition(ModelBaker partBaker, ModelBaker childBaker, ModelPart modelRenderer) {
-			this.partBaker = partBaker;
-			this.childBaker = childBaker;
-			this.part = modelRenderer;
-		}
-	}
-	
-	@OnlyIn(Dist.CLIENT)
-	abstract static class ModelBaker {
-		final String partName;
-		
-		public ModelBaker(String partName) {
-			this.partName = partName;
-		}
-		
-		void putIndexCount(Map<String, List<Integer>> indices, int value) {
-			List<Integer> list = indices.computeIfAbsent(this.partName, (key) -> Lists.newArrayList());
-			
-			for (int i = 0; i < 3; i++) {
-				list.add(value);
-			}
-		}
-		
-		public abstract void bakeCube(PoseStack poseStack, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices);
-	}
-	
-	@OnlyIn(Dist.CLIENT)
-	static class SimpleBaker extends ModelBaker {
+	static class SimpleBaker extends PartTransformer<GeoCube> {
 		final int jointId;
 		
 		public SimpleBaker(String partName, int jointId) {
@@ -239,18 +198,23 @@ public class CustomModelBakery {
 			this.jointId = jointId;
 		}
 		
-		public void bakeCube(PoseStack poseStack, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
-			for (ModelPart.Polygon quad : cube.polygons) {
+		public void bakeCube(PoseStack poseStack, GeoCube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
+			for (GeoQuad quad : cube.quads) {
+				if (quad == null) {
+					continue;
+				}
+				
 				Vector3f norm = quad.normal.copy();
 				norm.transform(poseStack.last().normal());
 				
-				for (ModelPart.Vertex vertex : quad.vertices) {
-					Vector4f pos = new Vector4f(vertex.pos);
+				for (GeoVertex vertex : quad.vertices) {
+					Vector4f pos = new Vector4f(vertex.position);
 					pos.transform(poseStack.last().pose());
+					
 					vertices.add(new SingleVertex()
-						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
+						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z())/*.scale(0.0625F)*/)
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
-						.setTextureCoordinate(new Vec2f(vertex.u, vertex.v))
+						.setTextureCoordinate(new Vec2f(vertex.textureU, vertex.textureV))
 						.setEffectiveJointIDs(new Vec3f(this.jointId, 0, 0))
 						.setEffectiveJointWeights(new Vec3f(1.0F, 0.0F, 0.0F))
 						.setEffectiveJointNumber(1)
@@ -269,7 +233,7 @@ public class CustomModelBakery {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class SimpleSeparateBaker extends ModelBaker {
+	static class SimpleSeparateBaker extends PartTransformer<GeoCube> {
 		final SimpleBaker upperBaker;
 		final SimpleBaker lowerBaker;
 		final float yClipCoord;
@@ -282,8 +246,8 @@ public class CustomModelBakery {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
-			Vector4f cubeCenter = new Vector4f(cube.minX + (cube.maxX - cube.minX) * 0.5F, cube.minY + (cube.maxY - cube.minY) * 0.5F, cube.minZ + (cube.maxZ - cube.minZ) * 0.5F, 1.0F);
+		public void bakeCube(PoseStack poseStack, GeoCube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
+			Vector4f cubeCenter = new Vector4f((float)cube.pivot.x(), (float)cube.pivot.y(), (float)cube.pivot.z(), 1.0F);
 			cubeCenter.transform(poseStack.last().pose());
 			
 			if (cubeCenter.y() > this.yClipCoord) {
@@ -295,7 +259,7 @@ public class CustomModelBakery {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class Chest extends ModelBaker {
+	static class Chest extends PartTransformer<GeoCube> {
 		static final float X_PLANE = 0.0F;
 		static final VertexWeight[] WEIGHT_ALONG_Y = { new VertexWeight(13.6666F, 0.230F, 0.770F), new VertexWeight(15.8333F, 0.254F, 0.746F), new VertexWeight(18.0F, 0.5F, 0.5F), new VertexWeight(20.1666F, 0.744F, 0.256F), new VertexWeight(22.3333F, 0.770F, 0.230F)};
 		
@@ -304,11 +268,11 @@ public class CustomModelBakery {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
-			List<AnimatedPolygon> xClipPolygons = Lists.<AnimatedPolygon>newArrayList();
-			List<AnimatedPolygon> xyClipPolygons = Lists.<AnimatedPolygon>newArrayList();
+		public void bakeCube(PoseStack poseStack, GeoCube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
+			List<AnimatedPolygon> xClipPolygons = Lists.newArrayList();
+			List<AnimatedPolygon> xyClipPolygons = Lists.newArrayList();
 			
-			for (ModelPart.Polygon polygon : cube.polygons) {
+			for (GeoQuad polygon : cube.quads) {
 				Matrix4f matrix = poseStack.last().pose();
 				
 				ModelPart.Vertex pos0 = getTranslatedVertex(polygon.vertices[0], matrix);
@@ -358,7 +322,7 @@ public class CustomModelBakery {
 				AnimatedVertex pos3 = upsideDown ? polygon.animatedVertexPositions[1] : polygon.animatedVertexPositions[3];
 				Direction direction = getDirectionFromVector(polygon.normal);
 				List<VertexWeight> vertexWeights = getMiddleYClipWeights(pos1.pos.y(), pos2.pos.y());
-				List<AnimatedVertex> animatedVertices = Lists.<AnimatedVertex>newArrayList();
+				List<AnimatedVertex> animatedVertices = Lists.newArrayList();
 				animatedVertices.add(pos0);
 				animatedVertices.add(pos1);
 				
@@ -409,7 +373,7 @@ public class CustomModelBakery {
 					}
 					
 					vertices.add(new SingleVertex()
-						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
+						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
 						.setTextureCoordinate(new Vec2f(vertex.u, vertex.v))
 						.setEffectiveJointIDs(new Vec3f(joint1, joint2, 0))
@@ -447,7 +411,7 @@ public class CustomModelBakery {
 		}
 		
 		static List<VertexWeight> getMiddleYClipWeights(float minY, float maxY) {
-			List<VertexWeight> cutYs = Lists.<VertexWeight>newArrayList();
+			List<VertexWeight> cutYs = Lists.newArrayList();
 			for (VertexWeight vertexWeight : WEIGHT_ALONG_Y) {
 				if (vertexWeight.yClipCoord > minY && maxY >= vertexWeight.yClipCoord) {
 					cutYs.add(vertexWeight);
@@ -470,7 +434,7 @@ public class CustomModelBakery {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class Limb extends ModelBaker {
+	static class Limb extends PartTransformer<GeoCube> {
 		final int upperJoint;
 		final int lowerJoint;
 		final int middleJoint;
@@ -487,10 +451,10 @@ public class CustomModelBakery {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
-			List<AnimatedPolygon> polygons = Lists.<AnimatedPolygon>newArrayList();
+		public void bakeCube(PoseStack poseStack, GeoCube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
+			List<AnimatedPolygon> polygons = Lists.newArrayList();
 			
-			for (ModelPart.Polygon quad : cube.polygons) {
+			for (GeoQuad quad : cube.quads) {
 				Matrix4f matrix = poseStack.last().pose();
 				ModelPart.Vertex pos0 = getTranslatedVertex(quad.vertices[0], matrix);
 				ModelPart.Vertex pos1 = getTranslatedVertex(quad.vertices[1], matrix);
@@ -567,8 +531,9 @@ public class CustomModelBakery {
 				
 				for (AnimatedVertex vertex : quad.animatedVertexPositions) {
 					Vector4f pos = new Vector4f(vertex.pos);
+					
 					vertices.add(new SingleVertex()
-						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
+						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
 						.setTextureCoordinate(new Vec2f(vertex.u, vertex.v))
 						.setEffectiveJointIDs(new Vec3f(vertex.jointId.getX(), 0, 0))
@@ -599,11 +564,11 @@ public class CustomModelBakery {
 		return null;
 	}
 	
-	static ModelPart.Vertex getTranslatedVertex(ModelPart.Vertex original, Matrix4f matrix) {
-		Vector4f translatedPosition = new Vector4f(original.pos);
+	static ModelPart.Vertex getTranslatedVertex(GeoVertex original, Matrix4f matrix) {
+		Vector4f translatedPosition = new Vector4f(original.position);
 		translatedPosition.transform(matrix);
 		
-		return new ModelPart.Vertex(translatedPosition.x(), translatedPosition.y(), translatedPosition.z(), original.u, original.v);
+		return new ModelPart.Vertex(translatedPosition.x(), translatedPosition.y(), translatedPosition.z(), original.textureU, original.textureV);
 	}
 	
 	@OnlyIn(Dist.CLIENT)

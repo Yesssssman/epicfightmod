@@ -27,7 +27,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.ForgeHooksClient;
 import yesman.epicfight.api.client.model.AnimatedMesh;
-import yesman.epicfight.api.client.model.CustomModelBakery;
+import yesman.epicfight.api.client.model.armor.CustomModelBakery;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.model.JsonModelLoader;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -121,6 +121,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 					float r = (float) (i >> 16 & 255) / 255.0F;
 					float g = (float) (i >> 8 & 255) / 255.0F;
 					float b = (float) (i & 255) / 255.0F;
+					
 					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, model, entitypatch.getArmature(), r, g, b, this.getArmorTexture(stack, entityliving, slot, null), poses);
 					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, model, entitypatch.getArmature(), 1.0F, 1.0F, 1.0F, this.getArmorTexture(stack, entityliving, slot, "overlay"), poses);
 				} else {
@@ -152,7 +153,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				if (customModel == defaultModel || !(customModel instanceof HumanoidModel<?> humanoidModel)) {
 					model = this.mesh.getArmorModel(slot);
 				} else {
-					model = CustomModelBakery.bakeHumanoidModel(humanoidModel, armorItem, slot, armorDebugging);
+					model = CustomModelBakery.bake(humanoidModel, armorItem, slot, armorDebugging);
 				}
 			}
 			
