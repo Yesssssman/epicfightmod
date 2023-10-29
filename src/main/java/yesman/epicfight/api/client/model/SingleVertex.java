@@ -10,7 +10,6 @@ import com.google.common.collect.Maps;
 
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.client.model.Mesh.RenderProperties;
 import yesman.epicfight.api.client.model.VertexIndicator.AnimatedVertexIndicator;
 import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -78,12 +77,16 @@ public class SingleVertex {
 	}
 	
 	public static AnimatedMesh loadVertexInformation(List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
-		List<Float> positions = Lists.<Float>newArrayList();
-		List<Float> normals = Lists.<Float>newArrayList();
-		List<Float> texCoords = Lists.<Float>newArrayList();
-		List<Integer> animationIndices = Lists.<Integer>newArrayList();
-		List<Float> jointWeights = Lists.<Float>newArrayList();
-		List<Integer> affectCountList = Lists.<Integer>newArrayList();
+		return loadVertexInformationWithRenderProperty(vertices, indices, Mesh.RenderProperties.builder());
+	}
+	
+	public static AnimatedMesh loadVertexInformationWithRenderProperty(List<SingleVertex> vertices, Map<String, List<Integer>> indices, Mesh.RenderProperties.Builder builder) {
+		List<Float> positions = Lists.newArrayList();
+		List<Float> normals = Lists.newArrayList();
+		List<Float> texCoords = Lists.newArrayList();
+		List<Integer> animationIndices = Lists.newArrayList();
+		List<Float> jointWeights = Lists.newArrayList();
+		List<Integer> affectCountList = Lists.newArrayList();
 		
 		for (int i = 0; i < vertices.size(); i++) {
 			SingleVertex vertex = vertices.get(i);
@@ -144,10 +147,10 @@ public class SingleVertex {
 			meshMap.put(e.getKey(), new ModelPart<AnimatedVertexIndicator>(VertexIndicator.createAnimated(ArrayUtils.toPrimitive(e.getValue().toArray(new Integer[0])), affectJointCounts, animationIndexList)));
 		}
 		
-		return new AnimatedMesh(arrayMap, null, RenderProperties.DEFAULT, meshMap);
+		return new AnimatedMesh(arrayMap, null, builder.build(), meshMap);
 	}
 	
 	public enum State {
-		EMPTY, EQUAL, DIFFERENT;
+		EMPTY, EQUAL, DIFFERENT
 	}
 }

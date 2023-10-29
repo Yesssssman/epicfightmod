@@ -74,8 +74,8 @@ public class ActionAnimation extends MainFrameAnimation {
 	@Override
 	public void linkTick(LivingEntityPatch<?> entitypatch, DynamicAnimation linkAnimation) {
 		this.move(entitypatch, linkAnimation);
-	};
-	
+	}
+
 	protected void move(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
 		if (!this.validateMovement(entitypatch, animation)) {
 			return;

@@ -29,6 +29,7 @@ import software.bernie.geckolib3.geo.render.built.GeoVertex;
 import software.bernie.geckolib3.renderers.geo.GeoArmorRenderer;
 import software.bernie.geckolib3.util.RenderUtils;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.Mesh;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.client.model.SingleVertex;
 import yesman.epicfight.api.utils.math.Vec2f;
@@ -65,12 +66,13 @@ public class GeoArmor extends ArmorModelTransformer {
 		}
 	}
 	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	public AnimatedMesh transformModel(HumanoidModel<?> model, ArmorItem armorItem, EquipmentSlot slot, boolean debuggingMode) {
 		if (!(armorItem instanceof IAnimatable) || !(model instanceof GeoArmorRenderer<?>)) {
 			return null;
 		}
 		
-		GeoArmorRenderer<?> geoModel = (GeoArmorRenderer<?>)model;
+		GeoArmorRenderer geoModel = (GeoArmorRenderer)model;
 		List<GeoModelPartition> boxes = Lists.newArrayList();
 		
 		IBone headBone = geoModel.getGeoModelProvider().getBone(geoModel.headBone);
@@ -136,14 +138,17 @@ public class GeoArmor extends ArmorModelTransformer {
 			return null;
 		}
 		
+		Mesh.RenderProperties.Builder propertyBuilder = Mesh.RenderProperties.builder();
+		propertyBuilder.customTexturePath(geoModel.getTextureLocation((ArmorItem & IAnimatable)armorItem).toString());
+		
 		ResourceLocation rl = new ResourceLocation(ForgeRegistries.ITEMS.getKey(armorItem).getNamespace(), "armor/" + ForgeRegistries.ITEMS.getKey(armorItem).getPath());
-		AnimatedMesh armorModelMesh = bakeMeshFromCubes(boxes, debuggingMode);
+		AnimatedMesh armorModelMesh = bakeMeshFromCubes(boxes, propertyBuilder, debuggingMode);
 		Meshes.addMesh(rl, armorModelMesh);
 		
 		return armorModelMesh;
 	}
 	
-	private static AnimatedMesh bakeMeshFromCubes(List<GeoModelPartition> partitions, boolean debuggingMode) {
+	private static AnimatedMesh bakeMeshFromCubes(List<GeoModelPartition> partitions, Mesh.RenderProperties.Builder propertyBuilder, boolean debuggingMode) {
 		List<SingleVertex> vertices = Lists.newArrayList();
 		Map<String, List<Integer>> indices = Maps.newHashMap();
 		PoseStack poseStack = new PoseStack();
@@ -155,7 +160,7 @@ public class GeoArmor extends ArmorModelTransformer {
 			}
 		}
 		
-		return SingleVertex.loadVertexInformation(vertices, indices);
+		return SingleVertex.loadVertexInformationWithRenderProperty(vertices, indices, propertyBuilder);
 	}
 	
 	private static void bake(PoseStack poseStack, GeoModelPartition modelpartition, GeoBone geoBone, PartTransformer<GeoCube> partBaker, List<SingleVertex> vertices, Map<String, List<Integer>> indices, boolean debuggingMode) {

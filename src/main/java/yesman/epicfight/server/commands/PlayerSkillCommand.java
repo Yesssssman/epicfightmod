@@ -82,8 +82,6 @@ public class PlayerSkillCommand {
 			i++;
 		}
 		
-		//System.out.println(i);
-		
 		if (i > 0) {
 			if (i == 1) {
 				commandSourceStack.sendSuccess(new TranslatableComponent("commands.epicfight.skill.clear.success.single", targets.iterator().next().getDisplayName()), true);
