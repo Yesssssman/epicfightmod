@@ -1,5 +1,7 @@
 package yesman.epicfight.client.world.capabilites.entitypatch.player;
 
+import java.util.UUID;
+
 import net.minecraft.client.CameraType;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.LocalPlayer;
@@ -24,7 +26,6 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.ActionAnimation;
-import yesman.epicfight.api.animation.types.BasicAttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.math.MathUtils;
@@ -38,8 +39,6 @@ import yesman.epicfight.network.client.CPPlayAnimation;
 import yesman.epicfight.network.client.CPSetPlayerTarget;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
-
-import java.util.UUID;
 
 @OnlyIn(Dist.CLIENT)
 public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
