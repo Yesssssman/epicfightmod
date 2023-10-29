@@ -21,6 +21,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.client.model.SingleVertex;
@@ -92,11 +93,9 @@ public class VanillaArmor extends ArmorModelTransformer {
 			return null;
 		}
 		
-		ResourceLocation rl = new ResourceLocation(armorItem.getRegistryName().getNamespace(), "armor/" + armorItem.getRegistryName().getPath());
+		ResourceLocation rl = new ResourceLocation(ForgeRegistries.ITEMS.getKey(armorItem).getNamespace(), "armor/" + ForgeRegistries.ITEMS.getKey(armorItem).getPath());
 		AnimatedMesh armorModelMesh = bakeMeshFromCubes(boxes, debuggingMode);
 		Meshes.addMesh(rl, armorModelMesh);
-		
-		//BAKED_MODELS.put(armorItem.getRegistryName(), armorModelMesh);
 		
 		return armorModelMesh;
 	}
