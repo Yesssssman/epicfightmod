@@ -187,6 +187,12 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 		vertices.add("vindices", arrayToJsonObject(vIndices, 1));
 		root.add("vertices", vertices);
 		
+		if (this.renderProperties != null) {
+			JsonObject renderProperties = new JsonObject();
+			renderProperties.add("texture_path", renderProperties);
+			root.add("render_properties", renderProperties);
+		}
+		
 		return root;
 	}
 	

@@ -17,12 +17,16 @@ import org.joml.Vector4f;
 @OnlyIn(Dist.CLIENT)
 public abstract class Mesh<T extends VertexIndicator> {
 	public static class RenderProperties {
-		public static final RenderProperties DEFAULT = RenderProperties.builder().build();
-		
+		final String customTexturePath;
 		final boolean isTransparent;
 		
 		public RenderProperties(Builder builder) {
+			this.customTexturePath = builder.customTexturePath;
 			this.isTransparent = builder.isTransparent;
+		}
+		
+		public String customTexturePath() {
+			return this.customTexturePath;
 		}
 		
 		public boolean isTransparent() {
@@ -35,6 +39,12 @@ public abstract class Mesh<T extends VertexIndicator> {
 		
 		public static class Builder {
 			boolean isTransparent = false;
+			String customTexturePath = null;;
+			
+			public RenderProperties.Builder customTexturePath(String path) {
+				this.customTexturePath = path;
+				return this;
+			}
 			
 			public RenderProperties.Builder transparency(boolean isTransparent) {
 				this.isTransparent = isTransparent;
@@ -53,14 +63,14 @@ public abstract class Mesh<T extends VertexIndicator> {
 	
 	final int totalVertices;
 	final Map<String, ModelPart<T>> parts;
-	final RenderProperties properties;
+	final RenderProperties renderProperties;
 	
-	public Mesh(Map<String, float[]> arrayMap, Mesh<T> parent, RenderProperties properties, Map<String, ModelPart<T>> parts) {
+	public Mesh(Map<String, float[]> arrayMap, Mesh<T> parent, RenderProperties renderProperties, Map<String, ModelPart<T>> parts) {
 		this.positions = (parent == null) ? arrayMap.get("positions") : parent.positions;
 		this.normals = (parent == null) ? arrayMap.get("normals") : parent.normals;
 		this.uvs = (parent == null) ? arrayMap.get("uvs") : parent.uvs;
 		this.parts = (parent == null) ? parts : parent.parts;
-		this.properties = properties;
+		this.renderProperties = renderProperties;
 		
 		int totalV = 0;
 		
@@ -83,6 +93,10 @@ public abstract class Mesh<T extends VertexIndicator> {
 	
 	public Collection<ModelPart<T>> getAllParts() {
 		return this.parts.values();
+	}
+	
+	public RenderProperties getRenderProperty() {
+		return this.renderProperties;
 	}
 	
 	public void initialize() {

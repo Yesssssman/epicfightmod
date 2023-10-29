@@ -19,6 +19,7 @@ import yesman.epicfight.api.client.animation.property.JointMaskEntry;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
+import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.config.ConfigurationIngame;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
@@ -147,6 +148,19 @@ public class BasicAttackAnimation extends AttackAnimation {
 	
 	@Override
 	public boolean isBasicAttackAnimation() {
+		return true;
+	}
+	
+	@Override
+	public boolean shouldPlayerMove(LocalPlayerPatch playerpatch) {
+		if (playerpatch.isLogicalClient()) {
+			if (!playerpatch.getOriginal().level().getGameRules().getRule(EpicFightGamerules.STIFF_COMBO_ATTACKS).get()) {
+				if (playerpatch.getOriginal().input.forwardImpulse != 0.0F || playerpatch.getOriginal().input.leftImpulse != 0.0F) {
+					return false;
+				}
+			}
+		}
+		
 		return true;
 	}
 }

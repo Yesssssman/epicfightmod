@@ -1,13 +1,8 @@
-package yesman.epicfight.api.client.model;
+package yesman.epicfight.api.client.model.armor;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
 
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
@@ -15,73 +10,98 @@ import org.joml.Vector4f;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.SharedConstants;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
-import net.minecraft.client.model.geom.ModelPart.Cube;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
+import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.Meshes;
+import yesman.epicfight.api.client.model.SingleVertex;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec3f;
-import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
-public class CustomModelBakery {
+public class VanillaArmor extends ArmorModelTransformer {
+	static final PartTransformer<ModelPart.Cube> HEAD = new SimpleTransformer("head", 9);
+	static final PartTransformer<ModelPart.Cube> LEFT_FEET = new SimpleTransformer("leftBoots", 5);
+	static final PartTransformer<ModelPart.Cube> RIGHT_FEET = new SimpleTransformer("rightBoots", 2);
+	static final PartTransformer<ModelPart.Cube> LEFT_ARM = new LimbPartTransformer("leftArm", 16, 17, 19, 19.0F, false);
+	static final PartTransformer<ModelPart.Cube> LEFT_ARM_CHILD = new UpDownTransformer("leftArm", 16, 17, 19.0F);
+	static final PartTransformer<ModelPart.Cube> RIGHT_ARM = new LimbPartTransformer("rightArm", 11, 12, 14, 19.0F, false);
+	static final PartTransformer<ModelPart.Cube> RIGHT_ARM_CHILD = new UpDownTransformer("rightArm", 11, 12, 19.0F);
+	static final PartTransformer<ModelPart.Cube> LEFT_LEG = new LimbPartTransformer("leftLeg", 4, 5, 6, 6.0F, true);
+	static final PartTransformer<ModelPart.Cube> LEFT_LEG_CHILD = new UpDownTransformer("leftLeg", 4, 5, 6.0F);
+	static final PartTransformer<ModelPart.Cube> RIGHT_LEG = new LimbPartTransformer("rightLeg", 1, 2, 3, 6.0F, true);
+	static final PartTransformer<ModelPart.Cube> RIGHT_LEG_CHILD = new UpDownTransformer("rightLeg", 1, 2, 6.0F);
+	static final PartTransformer<ModelPart.Cube> CHEST = new ChestPartTransformer("chest");
+	static final PartTransformer<ModelPart.Cube> CHEST_CHILD = new UpDownTransformer("chest", 8, 7, 18.0F);
+	
 	static int indexCount = 0;
 	
-	static final Map<ResourceLocation, AnimatedMesh> BAKED_MODELS = Maps.newHashMap();
-	static final ModelBaker HEAD = new SimpleBaker("head", 9);
-	static final ModelBaker LEFT_FEET = new SimpleBaker("leftBoots", 5);
-	static final ModelBaker RIGHT_FEET = new SimpleBaker("rightBoots", 2);
-	static final ModelBaker LEFT_ARM = new Limb("leftArm", 16, 17, 19, 19.0F, false);
-	static final ModelBaker LEFT_ARM_CHILD = new SimpleSeparateBaker("leftArm", 16, 17, 19.0F);
-	static final ModelBaker RIGHT_ARM = new Limb("rightArm", 11, 12, 14, 19.0F, false);
-	static final ModelBaker RIGHT_ARM_CHILD = new SimpleSeparateBaker("rightArm", 11, 12, 19.0F);
-	static final ModelBaker LEFT_LEG = new Limb("leftLeg", 4, 5, 6, 6.0F, true);
-	static final ModelBaker LEFT_LEG_CHILD = new SimpleSeparateBaker("leftLeg", 4, 5, 6.0F);
-	static final ModelBaker RIGHT_LEG = new Limb("rightLeg", 1, 2, 3, 6.0F, true);
-	static final ModelBaker RIGHT_LEG_CHILD = new SimpleSeparateBaker("rightLeg", 1, 2, 6.0F);
-	static final ModelBaker CHEST = new Chest("chest");
-	static final ModelBaker CHEST_CHILD = new SimpleSeparateBaker("chest", 8, 7, 18.0F);
-	
-	public static void exportModels(File resourcePackDirectory) throws IOException {
-		File zipFile = new File(resourcePackDirectory, "epicfight_custom_armors.zip");
-		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFile));
+	static class VanillaModelPartition {
+		final PartTransformer<ModelPart.Cube> partTransformer;
+		final PartTransformer<ModelPart.Cube> partChildTransformer;
+		final ModelPart modelPart;
 		
-		for (Map.Entry<ResourceLocation, AnimatedMesh> entry : BAKED_MODELS.entrySet()) {
-			ZipEntry zipEntry = new ZipEntry(String.format("assets/%s/%s", entry.getKey().getNamespace(), entry.getKey().getPath()));
-			Gson gson = new GsonBuilder().create();
-			out.putNextEntry(zipEntry);
-			out.write(gson.toJson(entry.getValue().toJsonObject()).getBytes());
-			out.closeEntry();
-			EpicFightMod.LOGGER.info("Exported custom armor model : " + entry.getKey());
+		private VanillaModelPartition(PartTransformer<ModelPart.Cube> partTransformer, PartTransformer<ModelPart.Cube> partChildTransformer, ModelPart modelPart) {
+			this.partTransformer = partTransformer;
+			this.partChildTransformer = partChildTransformer;
+			this.modelPart = modelPart;
+		}
+	}
+	
+	public AnimatedMesh transformModel(HumanoidModel<?> model, ArmorItem armorItem, EquipmentSlot slot, boolean debuggingMode) {
+		List<VanillaModelPartition> boxes = Lists.newArrayList();
+		//List<ModelPart> modelParts = getAllParts(model);
+		
+		model.head.setRotation(0.0F, 0.0F, 0.0F);
+		model.hat.setRotation(0.0F, 0.0F, 0.0F);
+		model.body.setRotation(0.0F, 0.0F, 0.0F);
+	    model.rightArm.setRotation(0.0F, 0.0F, 0.0F);
+	    model.leftArm.setRotation(0.0F, 0.0F, 0.0F);
+	    model.rightLeg.setRotation(0.0F, 0.0F, 0.0F);
+	    model.leftLeg.setRotation(0.0F, 0.0F, 0.0F);
+		
+		switch (slot) {
+		case HEAD:
+			boxes.add(new VanillaModelPartition(HEAD, HEAD, model.head));
+			boxes.add(new VanillaModelPartition(HEAD, HEAD, model.hat));
+			break;
+		case CHEST:
+			boxes.add(new VanillaModelPartition(CHEST, CHEST_CHILD, model.body));
+			boxes.add(new VanillaModelPartition(RIGHT_ARM, RIGHT_ARM_CHILD, model.rightArm));
+			boxes.add(new VanillaModelPartition(LEFT_ARM, LEFT_ARM_CHILD, model.leftArm));
+			break;
+		case LEGS:
+			boxes.add(new VanillaModelPartition(CHEST, CHEST_CHILD, model.body));
+			boxes.add(new VanillaModelPartition(LEFT_LEG, LEFT_LEG_CHILD, model.leftLeg));
+			boxes.add(new VanillaModelPartition(RIGHT_LEG, RIGHT_LEG_CHILD, model.rightLeg));
+			break;
+		case FEET:
+			boxes.add(new VanillaModelPartition(LEFT_FEET, LEFT_FEET, model.leftLeg));
+			boxes.add(new VanillaModelPartition(RIGHT_FEET, RIGHT_FEET, model.rightLeg));
+			break;
+		default:
+			return null;
 		}
 		
-		ZipEntry zipEntry = new ZipEntry("pack.mcmeta");
-		Gson gson = new GsonBuilder().setPrettyPrinting().create();
-		JsonObject root = new JsonObject();
-		JsonObject pack = new JsonObject();
-		pack.addProperty("description", "epicfight_custom_armor_models");
-		pack.addProperty("pack_format", SharedConstants.getCurrentVersion().getPackVersion(PackType.CLIENT_RESOURCES));
-		root.add("pack", pack);
-		out.putNextEntry(zipEntry);
-		out.write(gson.toJson(root).getBytes());
-		out.closeEntry();
-		out.close();
+		ResourceLocation rl = new ResourceLocation(ForgeRegistries.ITEMS.getKey(armorItem).getNamespace(), "armor/" + ForgeRegistries.ITEMS.getKey(armorItem).getPath());
+		AnimatedMesh armorModelMesh = bakeMeshFromCubes(boxes, debuggingMode);
+		Meshes.addMesh(rl, armorModelMesh);
+		
+		//BAKED_MODELS.put(armorItem.getRegistryName(), armorModelMesh);
+		
+		return armorModelMesh;
 	}
 	
 	public static List<ModelPart> getAllParts(Model model) {
@@ -100,6 +120,7 @@ public class CustomModelBakery {
 			
 			for (Field field : modelFields) {
 				if (field.getType().isAssignableFrom(ModelPart.class)) {
+					field.setAccessible(true);
 					try {
 						ModelPart modelPart = (ModelPart)field.get(model);
 						
@@ -114,51 +135,7 @@ public class CustomModelBakery {
 		return modelParts;
 	}
 	
-	public static AnimatedMesh bakeHumanoidModel(HumanoidModel<?> model, ArmorItem armorItem, EquipmentSlot slot, boolean debuggingMode) {
-		List<ModelPartition> boxes = Lists.newArrayList();
-		List<ModelPart> modelParts = getAllParts(model);
-
-		model.head.setRotation(0.0F, 0.0F, 0.0F);
-		model.hat.setRotation(0.0F, 0.0F, 0.0F);
-		model.body.setRotation(0.0F, 0.0F, 0.0F);
-	    model.rightArm.setRotation(0.0F, 0.0F, 0.0F);
-	    model.leftArm.setRotation(0.0F, 0.0F, 0.0F);
-	    model.rightLeg.setRotation(0.0F, 0.0F, 0.0F);
-	    model.leftLeg.setRotation(0.0F, 0.0F, 0.0F);
-		
-		switch (slot) {
-		case HEAD:
-			boxes.add(new ModelPartition(HEAD, HEAD, model.head));
-			boxes.add(new ModelPartition(HEAD, HEAD, model.hat));
-			break;
-		case CHEST:
-			boxes.add(new ModelPartition(CHEST, CHEST_CHILD, model.body));
-			boxes.add(new ModelPartition(RIGHT_ARM, RIGHT_ARM_CHILD, model.rightArm));
-			boxes.add(new ModelPartition(LEFT_ARM, LEFT_ARM_CHILD, model.leftArm));
-			break;
-		case LEGS:
-			boxes.add(new ModelPartition(CHEST, CHEST_CHILD, model.body));
-			boxes.add(new ModelPartition(LEFT_LEG, LEFT_LEG_CHILD, model.leftLeg));
-			boxes.add(new ModelPartition(RIGHT_LEG, RIGHT_LEG_CHILD, model.rightLeg));
-			break;
-		case FEET:
-			boxes.add(new ModelPartition(LEFT_FEET, LEFT_FEET, model.leftLeg));
-			boxes.add(new ModelPartition(RIGHT_FEET, RIGHT_FEET, model.rightLeg));
-			break;
-		default:
-			return null;
-		}
-		
-		ResourceLocation rl = new ResourceLocation(ForgeRegistries.ITEMS.getKey(armorItem).getNamespace(), "armor/" + ForgeRegistries.ITEMS.getKey(armorItem).getPath());
-		AnimatedMesh armorModelMesh = bakeMeshFromCubes(boxes, debuggingMode);
-		Meshes.addMesh(rl, armorModelMesh);
-		
-		BAKED_MODELS.put(ForgeRegistries.ITEMS.getKey(armorItem), armorModelMesh);
-		
-		return armorModelMesh;
-	}
-	
-	private static AnimatedMesh bakeMeshFromCubes(List<ModelPartition> partitions, boolean debuggingMode) {
+	private static AnimatedMesh bakeMeshFromCubes(List<VanillaModelPartition> partitions, boolean debuggingMode) {
 		List<SingleVertex> vertices = Lists.newArrayList();
 		Map<String, List<Integer>> indices = Maps.newHashMap();
 		PoseStack poseStack = new PoseStack();
@@ -167,14 +144,14 @@ public class CustomModelBakery {
 		poseStack.mulPose(QuaternionUtils.XP.rotationDegrees(180.0F));
 		poseStack.translate(0, -24, 0);
 		
-		for (ModelPartition modelpartition : partitions) {
-			bake(poseStack, modelpartition, modelpartition.part, modelpartition.partBaker, vertices, indices, debuggingMode);
+		for (VanillaModelPartition modelpartition : partitions) {
+			bake(poseStack, modelpartition, modelpartition.modelPart, modelpartition.partTransformer, vertices, indices, debuggingMode);
 		}
 		
 		return SingleVertex.loadVertexInformation(vertices, indices);
 	}
 	
-	private static void bake(PoseStack poseStack, ModelPartition modelpartition, ModelPart part, ModelBaker partBaker, List<SingleVertex> vertices, Map<String, List<Integer>> indices, boolean debuggingMode) {
+	private static void bake(PoseStack poseStack, VanillaModelPartition modelpartition, ModelPart part, PartTransformer<ModelPart.Cube> partBaker, List<SingleVertex> vertices, Map<String, List<Integer>> indices, boolean debuggingMode) {
 		poseStack.pushPose();
 		poseStack.translate(part.x, part.y, part.z);
 		
@@ -195,49 +172,17 @@ public class CustomModelBakery {
 		}
 		
 		for (ModelPart childParts : part.children.values()) {
-			bake(poseStack, modelpartition, childParts, modelpartition.childBaker, vertices, indices, debuggingMode);
+			bake(poseStack, modelpartition, childParts, modelpartition.partChildTransformer, vertices, indices, debuggingMode);
 		}
 		
 		poseStack.popPose();
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class ModelPartition {
-		final ModelBaker partBaker;
-		final ModelBaker childBaker;
-		final ModelPart part;
-		
-		private ModelPartition(ModelBaker partBaker, ModelBaker childBaker, ModelPart modelRenderer) {
-			this.partBaker = partBaker;
-			this.childBaker = childBaker;
-			this.part = modelRenderer;
-		}
-	}
-	
-	@OnlyIn(Dist.CLIENT)
-	abstract static class ModelBaker {
-		final String partName;
-		
-		public ModelBaker(String partName) {
-			this.partName = partName;
-		}
-		
-		void putIndexCount(Map<String, List<Integer>> indices, int value) {
-			List<Integer> list = indices.computeIfAbsent(this.partName, (key) -> Lists.newArrayList());
-			
-			for (int i = 0; i < 3; i++) {
-				list.add(value);
-			}
-		}
-		
-		public abstract void bakeCube(PoseStack poseStack, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices);
-	}
-	
-	@OnlyIn(Dist.CLIENT)
-	static class SimpleBaker extends ModelBaker {
+	static class SimpleTransformer extends PartTransformer<ModelPart.Cube> {
 		final int jointId;
 		
-		public SimpleBaker(String partName, int jointId) {
+		public SimpleTransformer(String partName, int jointId) {
 			super(partName);
 			this.jointId = jointId;
 		}
@@ -248,7 +193,7 @@ public class CustomModelBakery {
 				norm.mul(poseStack.last().normal());
 				
 				for (ModelPart.Vertex vertex : quad.vertices) {
-					Vector4f pos = new Vector4f(vertex.pos, 1);
+					Vector4f pos = new Vector4f(vertex.pos, 1.0F);
 					pos.mul(poseStack.last().pose());
 					vertices.add(new SingleVertex()
 						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
@@ -272,44 +217,44 @@ public class CustomModelBakery {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class SimpleSeparateBaker extends ModelBaker {
-		final SimpleBaker upperBaker;
-		final SimpleBaker lowerBaker;
+	static class UpDownTransformer extends PartTransformer<ModelPart.Cube> {
+		final SimpleTransformer upperPartTransformer;
+		final SimpleTransformer lowerPartTransformer;
 		final float yClipCoord;
 		
-		public SimpleSeparateBaker(String partName, int upperJoint, int lowerJoint, float yClipCoord) {
+		public UpDownTransformer(String partName, int upperJoint, int lowerJoint, float yBasis) {
 			super(partName);
-			this.upperBaker = new SimpleBaker(partName + "Upper", upperJoint);
-			this.lowerBaker = new SimpleBaker(partName + "Lower", lowerJoint);
-			this.yClipCoord = yClipCoord;
+			this.upperPartTransformer = new SimpleTransformer(partName + "Upper", upperJoint);
+			this.lowerPartTransformer = new SimpleTransformer(partName + "Lower", lowerJoint);
+			this.yClipCoord = yBasis;
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
+		public void bakeCube(PoseStack poseStack, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
 			Vector4f cubeCenter = new Vector4f(cube.minX + (cube.maxX - cube.minX) * 0.5F, cube.minY + (cube.maxY - cube.minY) * 0.5F, cube.minZ + (cube.maxZ - cube.minZ) * 0.5F, 1.0F);
 			cubeCenter.mul(poseStack.last().pose());
 			
 			if (cubeCenter.y() > this.yClipCoord) {
-				this.upperBaker.bakeCube(poseStack, cube, vertices, indices);
+				this.upperPartTransformer.bakeCube(poseStack, cube, vertices, indices);
 			} else {
-				this.lowerBaker.bakeCube(poseStack, cube, vertices, indices);
+				this.lowerPartTransformer.bakeCube(poseStack, cube, vertices, indices);
 			}
 		}
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class Chest extends ModelBaker {
+	static class ChestPartTransformer extends PartTransformer<ModelPart.Cube> {
 		static final float X_PLANE = 0.0F;
 		static final VertexWeight[] WEIGHT_ALONG_Y = { new VertexWeight(13.6666F, 0.230F, 0.770F), new VertexWeight(15.8333F, 0.254F, 0.746F), new VertexWeight(18.0F, 0.5F, 0.5F), new VertexWeight(20.1666F, 0.744F, 0.256F), new VertexWeight(22.3333F, 0.770F, 0.230F)};
 		
-		public Chest(String partName) {
+		public ChestPartTransformer(String partName) {
 			super(partName);
 		}
 		
 		@Override
 		public void bakeCube(PoseStack poseStack, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
-			List<AnimatedPolygon> xClipPolygons = Lists.newArrayList();
-			List<AnimatedPolygon> xyClipPolygons = Lists.newArrayList();
+			List<AnimatedPolygon> xClipPolygons = Lists.<AnimatedPolygon>newArrayList();
+			List<AnimatedPolygon> xyClipPolygons = Lists.<AnimatedPolygon>newArrayList();
 			
 			for (ModelPart.Polygon polygon : cube.polygons) {
 				Matrix4f matrix = poseStack.last().pose();
@@ -361,7 +306,7 @@ public class CustomModelBakery {
 				AnimatedVertex pos3 = upsideDown ? polygon.animatedVertexPositions[1] : polygon.animatedVertexPositions[3];
 				Direction direction = getDirectionFromVector(polygon.normal);
 				List<VertexWeight> vertexWeights = getMiddleYClipWeights(pos1.pos.y(), pos2.pos.y());
-				List<AnimatedVertex> animatedVertices = Lists.newArrayList();
+				List<AnimatedVertex> animatedVertices = Lists.<AnimatedVertex>newArrayList();
 				animatedVertices.add(pos0);
 				animatedVertices.add(pos1);
 				
@@ -399,7 +344,7 @@ public class CustomModelBakery {
 				norm.mul(poseStack.last().normal());
 				
 				for (AnimatedVertex vertex : polygon.animatedVertexPositions) {
-					Vector4f pos = new Vector4f(vertex.pos, 1);
+					Vector4f pos = new Vector4f(vertex.pos, 1.0F);
 					float weight1 = vertex.weight.x;
 					float weight2 = vertex.weight.y;
 					int joint1 = vertex.jointId.getX();
@@ -449,16 +394,6 @@ public class CustomModelBakery {
 			return new VertexWeight(y, 1.0F, 0.0F);
 		}
 		
-		static List<VertexWeight> getMiddleYClipWeights(float minY, float maxY) {
-			List<VertexWeight> cutYs = Lists.newArrayList();
-			for (VertexWeight vertexWeight : WEIGHT_ALONG_Y) {
-				if (vertexWeight.yClipCoord > minY && maxY >= vertexWeight.yClipCoord) {
-					cutYs.add(vertexWeight);
-				}
-			}
-			return cutYs;
-		}
-		
 		static class VertexWeight {
 			final float yClipCoord;
 			final float chestWeight;
@@ -470,17 +405,27 @@ public class CustomModelBakery {
 				this.torsoWeight = torsoWeight;
 			}
 		}
+		
+		static List<VertexWeight> getMiddleYClipWeights(float minY, float maxY) {
+			List<VertexWeight> cutYs = Lists.<VertexWeight>newArrayList();
+			for (VertexWeight vertexWeight : WEIGHT_ALONG_Y) {
+				if (vertexWeight.yClipCoord > minY && maxY >= vertexWeight.yClipCoord) {
+					cutYs.add(vertexWeight);
+				}
+			}
+			return cutYs;
+		}
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class Limb extends ModelBaker {
+	static class LimbPartTransformer extends PartTransformer<ModelPart.Cube> {
 		final int upperJoint;
 		final int lowerJoint;
 		final int middleJoint;
 		final float yClipCoord;
 		final boolean bendInFront;
 		
-		public Limb(String partName, int upperJoint, int lowerJoint, int middleJoint, float yClipCoord, boolean bendInFront) {
+		public LimbPartTransformer(String partName, int upperJoint, int lowerJoint, int middleJoint, float yClipCoord, boolean bendInFront) {
 			super(partName);
 			this.upperJoint = upperJoint;
 			this.lowerJoint = lowerJoint;
@@ -491,7 +436,7 @@ public class CustomModelBakery {
 		
 		@Override
 		public void bakeCube(PoseStack poseStack, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
-			List<AnimatedPolygon> polygons = Lists.newArrayList();
+			List<AnimatedPolygon> polygons = Lists.<AnimatedPolygon>newArrayList();
 			
 			for (ModelPart.Polygon quad : cube.polygons) {
 				Matrix4f matrix = poseStack.last().pose();
@@ -569,7 +514,7 @@ public class CustomModelBakery {
 				norm.mul(poseStack.last().normal());
 				
 				for (AnimatedVertex vertex : quad.animatedVertexPositions) {
-					Vector4f pos = new Vector4f(vertex.pos, 1);
+					Vector4f pos = new Vector4f(vertex.pos, 1.0F);
 					vertices.add(new SingleVertex()
 						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
@@ -603,7 +548,7 @@ public class CustomModelBakery {
 	}
 	
 	static ModelPart.Vertex getTranslatedVertex(ModelPart.Vertex original, Matrix4f matrix) {
-		Vector4f translatedPosition = new Vector4f(original.pos, 1);
+		Vector4f translatedPosition = new Vector4f(original.pos, 1.0F);
 		translatedPosition.mul(matrix);
 		
 		return new ModelPart.Vertex(translatedPosition.x(), translatedPosition.y(), translatedPosition.z(), original.u, original.v);

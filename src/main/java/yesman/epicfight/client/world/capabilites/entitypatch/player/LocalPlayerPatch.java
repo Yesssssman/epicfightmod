@@ -38,7 +38,6 @@ import yesman.epicfight.network.client.CPPlayAnimation;
 import yesman.epicfight.network.client.CPSetPlayerTarget;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
-import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 import java.util.UUID;
 
@@ -284,14 +283,8 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		if (!this.isLogicalClient()) {
 			return false;
 		}
-
-		if (actionAnimation instanceof BasicAttackAnimation && !this.original.level().getGameRules().getRule(EpicFightGamerules.STIFF_COMBO_ATTACKS).get()) {
-			if (this.original.input.forwardImpulse != 0.0F || this.original.input.leftImpulse != 0.0F) {
-				return false;
-			}
-		}
-
-		return true;
+		
+		return actionAnimation.shouldPlayerMove(this);
 	}
 
 	@Override

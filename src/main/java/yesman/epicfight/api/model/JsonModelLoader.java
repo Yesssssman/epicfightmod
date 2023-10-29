@@ -84,9 +84,19 @@ public class JsonModelLoader {
 		JsonObject properties = this.rootJson.getAsJsonObject("render_properties");
 		
 		if (properties != null) {
-			return AnimatedMesh.RenderProperties.builder().transparency(properties.has("transparent") && properties.get("transparent").getAsBoolean()).build();
+			AnimatedMesh.RenderProperties.Builder builder = AnimatedMesh.RenderProperties.builder();
+			
+			if (properties.has("transparent")) {
+				builder.transparency(properties.get("transparent").getAsBoolean());
+			}
+			
+			if (properties.has("texture_path")) {
+				builder.customTexturePath(properties.get("texture_path").getAsString());
+			}
+			
+			return builder.build();
 		} else {
-			return AnimatedMesh.RenderProperties.DEFAULT;
+			return AnimatedMesh.RenderProperties.builder().build();
 		}
 	}
 	

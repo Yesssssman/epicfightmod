@@ -275,9 +275,11 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 				if (EpicFightMod.isPhysicalClient()) {
 					Minecraft mc = Minecraft.getInstance();
 					Meshes.getOrCreateAnimatedMesh(mc.getResourceManager(), modelLocation, humanoid ? AnimatedMesh::new : HumanoidMesh::new);
-					Armatures.registerEntityTypeArmature(entityType, Armatures.getOrCreateArmature(mc.getResourceManager(), armatureLocation, humanoid ? Armature::new : HumanoidArmature::new));
+					Armature armature = Armatures.getOrCreateArmature(mc.getResourceManager(), armatureLocation, humanoid ? Armature::new : HumanoidArmature::new);
+					Armatures.registerEntityTypeArmature(entityType, armature);
 				} else {
-					Armatures.registerEntityTypeArmature(entityType, Armatures.getOrCreateArmature(null, armatureLocation, humanoid ? Armature::new : HumanoidArmature::new));
+					Armature armature = Armatures.getOrCreateArmature(null, armatureLocation, humanoid ? Armature::new : HumanoidArmature::new);
+					Armatures.registerEntityTypeArmature(entityType, armature);
 				}
 				
 				provider.defaultAnimations = deserializeDefaultAnimations(tag.getCompound("default_livingmotions"));
@@ -571,10 +573,12 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 				} else {
 					Minecraft mc = Minecraft.getInstance();
 					ResourceLocation armatureLocation = new ResourceLocation(tag.getString("armature"));
-					boolean humanoid = tag.getBoolean("isHumanoid");
+					armatureLocation = new ResourceLocation(armatureLocation.getNamespace(), "animmodels/" + armatureLocation.getPath() + ".json");
 					
-					Armatures.registerEntityTypeArmature(entityType, Armatures.getOrCreateArmature(mc.getResourceManager(), armatureLocation, humanoid ? Armature::new : HumanoidArmature::new));
-				}
+					boolean humanoid = tag.getBoolean("isHumanoid");
+					Armature armature = Armatures.getOrCreateArmature(mc.getResourceManager(), armatureLocation, humanoid ? Armature::new : HumanoidArmature::new);
+					
+					Armatures.registerEntityTypeArmature(entityType, armature);				}
 				
 				ClientEngine.getInstance().renderEngine.registerCustomEntityRenderer(entityType, tag.contains("preset") ? tag.getString("preset") : tag.getString("renderer"));
 			}

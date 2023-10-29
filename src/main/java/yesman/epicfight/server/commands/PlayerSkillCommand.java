@@ -1,5 +1,6 @@
 package yesman.epicfight.server.commands;
 
+import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
@@ -57,8 +58,12 @@ public class PlayerSkillCommand {
 		}
 		
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("skill").requires((commandSourceStack) -> commandSourceStack.hasPermission(2))
-			.then(Commands.literal("clear")
-			.then(Commands.argument("targets", EntityArgument.players())))
+			.then(Commands.literal("clear").executes((commandContext) -> {
+				return clearSkill(commandContext.getSource(), ImmutableList.of(commandContext.getSource().getPlayerOrException()));
+			})
+			.then(Commands.argument("targets", EntityArgument.players()).executes((commandContext) -> {
+				return clearSkill(commandContext.getSource(), EntityArgument.getPlayers(commandContext, "targets"));
+			})))
 			.then(Commands.literal("add")
 			.then(addCommandBuilder))
 			.then(Commands.literal("remove")

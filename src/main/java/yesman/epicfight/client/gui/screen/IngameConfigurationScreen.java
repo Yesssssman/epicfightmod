@@ -10,7 +10,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.client.model.CustomModelBakery;
+import yesman.epicfight.api.client.model.armor.CustomModelBakery;
 import yesman.epicfight.client.gui.widget.ColorSlider;
 import yesman.epicfight.client.gui.widget.BasicButton;
 import yesman.epicfight.client.gui.widget.RewindableButton;
