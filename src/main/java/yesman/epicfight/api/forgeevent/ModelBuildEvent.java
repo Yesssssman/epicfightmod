@@ -21,11 +21,9 @@ import yesman.epicfight.gameasset.Armatures.ArmatureContructor;
 
 public abstract class ModelBuildEvent<T> extends Event implements IModBusEvent {
 	protected final ResourceManager resourceManager;
-	protected final Map<ResourceLocation, T> registerMap;
 	
 	public ModelBuildEvent(ResourceManager resourceManager, Map<ResourceLocation, T> registerMap) {
 		this.resourceManager = resourceManager;
-		this.registerMap = registerMap;
 	}
 	
 	public static class ArmatureBuild extends ModelBuildEvent<Armature> {
