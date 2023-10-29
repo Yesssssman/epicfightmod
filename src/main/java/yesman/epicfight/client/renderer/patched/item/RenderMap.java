@@ -35,8 +35,10 @@ public class RenderMap extends RenderItemBase {
 		if (hand == InteractionHand.MAIN_HAND && entitypatch.getOriginal().getOffhandItem().isEmpty()) {
 			poseStack.scale(2.0F, 2.0F, 2.0F);
 		}
-
-		Minecraft.getInstance().gameRenderer.itemInHandRenderer.renderMap(poseStack, buffer, packedLight, stack);
+		
+		Minecraft mc = Minecraft.getInstance();
+		
+		mc.gameRenderer.itemInHandRenderer.renderMap(poseStack, buffer, packedLight, stack);
 		VertexConsumer vertexconsumer = buffer.getBuffer(MAP_BACKGROUND);
 	    Matrix4f matrix4f = poseStack.last().pose();
 		
