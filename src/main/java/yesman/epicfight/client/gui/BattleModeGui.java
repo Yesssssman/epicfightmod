@@ -163,7 +163,7 @@ public class BattleModeGui extends ModIngameGui {
 
 				if (skill.shouldDraw(container)) {
 					RenderSystem.enableBlend();
-					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 0.1F);
+					RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 					RenderSystem.blendFunc(SourceFactor.SRC_ALPHA, DestFactor.ONE_MINUS_SRC_ALPHA);
 					
 					skill.drawOnGui(this, container, guiGraphics, slotCoord.x, slotCoord.y);
