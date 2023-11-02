@@ -23,7 +23,7 @@ body:
   - type: checkboxes
     id: checkbox4
     attributes:
-      label: Is this suggestion related to another mod? (i.e: add animations for X mod)
+      label: "Is this suggestion related to another mod? (i.e: add animations for X mod)"
       description: "Please note that most suggestions regarding other mods will most likely get denied as its always up to us to fix it."
       options:
         - label: "This is related to other mods."
