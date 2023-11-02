@@ -8,7 +8,7 @@ body:
     id: checkbox1
     attributes:
       label: Have you checked if there's any simmilar suggestions ?
-      description: Please check this if your suggestion has already been requested by some other user.
+      description: "Please check this if your suggestion has already been requested by some other user."
       options:
         - label: I checked there are no similar suggestions that have been reported.
           required: true
@@ -24,7 +24,7 @@ body:
     id: checkbox4
     attributes:
       label: Is this suggestion related to another mod? (i.e: add animations for "X" mod)
-      description: Please note that most suggestions regarding other mods will most likely get denied as its always up to us to fix it.
+      description: "Please note that most suggestions regarding other mods will most likely get denied as its always up to us to fix it."
       options:
         - label: "This is related to other mods."
           required: false
@@ -32,7 +32,7 @@ body:
     id: specify-mod
     attributes:
       label: The mod
-      description: Please specify the mod you want us to take a look at.
+      description: "Please specify the mod you want us to take a look at."
       placeholder: Mod name or URL.
     validations:
       required: false
@@ -40,7 +40,7 @@ body:
     id: mc-version
     attributes:
       label: Minecraft Version
-      description: Minecraft Version
+      description: "Minecraft Version"
       options:
         - 1.16.5
         - 1.18.2
