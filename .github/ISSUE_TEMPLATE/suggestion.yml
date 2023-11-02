@@ -2,8 +2,7 @@ name: Suggestion
 description: Make any suggestion to us
 title: "[Suggestion]: "
 labels: [enhancement]
-assignees: 
-- octocat
+assignees: - octocat
 body:
   - type: checkboxes
     id: checkbox1
