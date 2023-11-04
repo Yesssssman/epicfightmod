@@ -5,12 +5,14 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import org.apache.commons.compress.utils.Lists;
 
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -33,6 +35,7 @@ public class CustomModelBakery {
 	static final Map<ResourceLocation, AnimatedMesh> BAKED_MODELS = Maps.newHashMap();
 	static final List<ArmorModelTransformer> MODEL_TRANSFORMERS = Lists.newArrayList();
 	static final ArmorModelTransformer VANILLA_TRANSFORMER = new VanillaArmor();
+	static final Set<ArmorItem> EXCEPTIONAL_MODELS = Sets.newHashSet();
 	
 	static {
 		if (ModList.get().isLoaded("geckolib3")) {
@@ -69,16 +72,20 @@ public class CustomModelBakery {
 	public static AnimatedMesh bake(HumanoidModel<?> armorModel, ArmorItem armorItem, EquipmentSlot slot, boolean debuggingMode) {
 		AnimatedMesh animatedArmorModel = null;
 		
-		for (ArmorModelTransformer modelTransformer : MODEL_TRANSFORMERS) {
-			animatedArmorModel = modelTransformer.transformModel(armorModel, armorItem, slot, debuggingMode);
-			
-			if (animatedArmorModel != null) {
-				break;
+		if (!EXCEPTIONAL_MODELS.contains(armorItem)) {
+			for (ArmorModelTransformer modelTransformer : MODEL_TRANSFORMERS) {
+				try {
+					animatedArmorModel = modelTransformer.transformModel(armorModel, armorItem, slot, debuggingMode);
+				} catch (Exception e) {
+					EpicFightMod.LOGGER.warn("Can't transform the model of " + ForgeRegistries.ITEMS.getKey(armorItem) + " because of :");
+					e.printStackTrace();
+					EXCEPTIONAL_MODELS.add(armorItem);
+				}
+				
+				if (animatedArmorModel != null) {
+					break;
+				}
 			}
-		}
-		
-		if (animatedArmorModel == null) {
-			animatedArmorModel = VANILLA_TRANSFORMER.transformModel(armorModel, armorItem, slot, debuggingMode);
 		}
 		
 		BAKED_MODELS.put(ForgeRegistries.ITEMS.getKey(armorItem), animatedArmorModel);

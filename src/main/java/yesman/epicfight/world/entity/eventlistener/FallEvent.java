@@ -12,6 +12,6 @@ public class FallEvent extends PlayerEvent<PlayerPatch<?>> {
 	}
 
 	public PlayerFlyableFallEvent getForgeEvent() {
-		return forgeEvent;
+		return this.forgeEvent;
 	}
 }
