@@ -40,7 +40,7 @@ public class HumanoidMesh extends AnimatedMesh {
 		this.rightPants = this.getOrLogException(parts, "rightPants");
 	}
 	
-	public AnimatedMesh getArmorModel(EquipmentSlot slot) {
+	public AnimatedMesh getHumanoidArmorModel(EquipmentSlot slot) {
 		switch (slot) {
 		case HEAD:
 			return Meshes.HELMET;

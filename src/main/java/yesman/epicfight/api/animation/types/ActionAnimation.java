@@ -54,7 +54,7 @@ public class ActionAnimation extends MainFrameAnimation {
 		entitypatch.cancelAnyAction();
 		
 		if (entitypatch.shouldMoveOnCurrentSide(this)) {
-			if (this.getProperty(ActionAnimationProperty.STOP_MOVEMENT).orElse(false)) {
+			if (this.getProperty(ActionAnimationProperty.STOP_MOVEMENT).orElse(false) && entitypatch.shouldMoveOnCurrentSide(this)) {
 				entitypatch.getOriginal().setDeltaMovement(0.0D, entitypatch.getOriginal().getDeltaMovement().y, 0.0D);
 			}
 			
