@@ -66,16 +66,14 @@ public class AnimationDataReader {
 			
 			multilayerAnimation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.multilayerInfo.layerType);
 			multilayerAnimation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.multilayerInfo.priority);
-			multilayerAnimation.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, (self, entitypatch, speed, elapsedTime) -> {
+			multilayerAnimation.addProperty(StaticAnimationProperty.ELAPSED_TIME_MODIFIER, (self, entitypatch, speed, elapsedTime) -> {
 				Layer baseLayer = entitypatch.getClientAnimator().baseLayer;
 				
 				if (baseLayer.animationPlayer.getAnimation().getRealAnimation() != animation) {
-					return 0.0F;
+					return elapsedTime;
 				}
 				
-				float diff = baseLayer.animationPlayer.getElapsedTime() - entitypatch.getClientAnimator().getCompositeLayer(propertySetter.multilayerInfo.priority).animationPlayer.getElapsedTime();
-				
-				return diff * 20;
+				return baseLayer.animationPlayer.getElapsedTime();
 			});
 			
 			multilayerAnimation.loadAnimation(resourceManager);
