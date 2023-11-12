@@ -54,15 +54,15 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		this.firstPersonModel = firstPersonModel;
 	}
 	
-	private void renderArmor(PoseStack matStack, MultiBufferSource multiBufferSource, int packedLightIn, boolean hasEffect, AnimatedMesh model, Armature armature
-							, float r, float g, float b, ResourceLocation armorTexture, OpenMatrix4f[] poses) {
+	private void renderArmor(PoseStack matStack, MultiBufferSource multiBufferSource, int packedLightIn, boolean hasEffect, AnimatedMesh model, Armature armature,
+								float r, float g, float b, ResourceLocation armorTexture, OpenMatrix4f[] poses) {
 		VertexConsumer vertexConsumer = EpicFightRenderTypes.getArmorFoilBufferTriangles(multiBufferSource, RenderType.armorCutoutNoCull(armorTexture), false, hasEffect);
 		model.drawModelWithPose(matStack, vertexConsumer, packedLightIn, r, g, b, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
 	}
 	
 	@Override
-	public void renderLayer(T entitypatch, E entityliving, HumanoidArmorLayer<E, M, M> vanillaLayer, PoseStack poseStack, MultiBufferSource buf, int packedLightIn
-							, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
+	public void renderLayer(T entitypatch, E entityliving, HumanoidArmorLayer<E, M, M> vanillaLayer, PoseStack poseStack, MultiBufferSource buf, int packedLightIn,
+								OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			if (slot.getType() != EquipmentSlot.Type.ARMOR) {
 				continue;

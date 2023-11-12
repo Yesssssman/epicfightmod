@@ -19,20 +19,14 @@ public abstract class ArmorModelTransformer {
 	protected abstract AnimatedMesh transformModel(HumanoidModel<?> model, ArmorItem armorItem, EquipmentSlot slot, boolean debuggingMode);
 	
 	public static abstract class PartTransformer<T> {
-		final String partName;
-		
-		public PartTransformer(String partName) {
-			this.partName = partName;
-		}
-		
-		void putIndexCount(Map<String, List<Integer>> indices, int value) {
-			List<Integer> list = indices.computeIfAbsent(this.partName, (key) -> Lists.newArrayList());
+		void putIndexCount(Map<String, List<Integer>> indices, String partName, int value) {
+			List<Integer> list = indices.computeIfAbsent(partName, (key) -> Lists.newArrayList());
 			
 			for (int i = 0; i < 3; i++) {
 				list.add(value);
 			}
 		}
 		
-		public abstract void bakeCube(PoseStack poseStack, T cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices);
+		public abstract void bakeCube(PoseStack poseStack, String partName, T cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices);
 	}
 }
