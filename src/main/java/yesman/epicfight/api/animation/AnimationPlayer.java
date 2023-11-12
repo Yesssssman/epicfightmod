@@ -31,7 +31,7 @@ public class AnimationPlayer {
 		
 		this.elapsedTime += ConfigurationIngame.A_TICK * playbackSpeed * (this.isReversed() && this.getAnimation().canBePlayedReverse() ? -1.0F : 1.0F);
 		
-		PlaybackTimeModifier playTimeModifier = this.getAnimation().getRealAnimation().getProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER).orElse(null);
+		PlaybackTimeModifier playTimeModifier = this.getAnimation().getRealAnimation().getProperty(StaticAnimationProperty.ELAPSED_TIME_MODIFIER).orElse(null);
 		
 		if (playTimeModifier != null) {
 			this.elapsedTime = playTimeModifier.modify(this.getAnimation(), entitypatch, playbackSpeed, this.elapsedTime);

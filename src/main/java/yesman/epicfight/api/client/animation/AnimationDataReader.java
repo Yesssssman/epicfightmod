@@ -73,6 +73,10 @@ public class AnimationDataReader {
 					return elapsedTime;
 				}
 				
+				if (!self.isStaticAnimation() && baseLayer.animationPlayer.getAnimation().isStaticAnimation()) {
+					return elapsedTime  + speed;
+				}
+				
 				return baseLayer.animationPlayer.getElapsedTime();
 			});
 			
