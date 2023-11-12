@@ -2019,9 +2019,9 @@ public class Animations {
 			shoulderR.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(xRot)), OpenMatrix4f::mulAsOriginFront);
 		};
 		
-		public static final AnimationProperty.PlaySpeedModifier CONSTANT_ONE = (self, entitypatch, speed, elapsedTime) -> 1.0F;
+		public static final AnimationProperty.PlaybackTimeModifier CONSTANT_ONE = (self, entitypatch, speed, elapsedTime) -> 1.0F;
 		
-		public static final AnimationProperty.PlaySpeedModifier CHARGING = (self, entitypatch, speed, elapsedTime) -> {
+		public static final AnimationProperty.PlaybackTimeModifier CHARGING = (self, entitypatch, speed, elapsedTime) -> {
 			if (self instanceof LinkAnimation) {
 				return 1.0F;
 			} else {

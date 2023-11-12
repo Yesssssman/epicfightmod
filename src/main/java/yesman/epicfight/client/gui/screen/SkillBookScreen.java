@@ -68,7 +68,7 @@ public class SkillBookScreen extends Screen {
 		boolean isUsing = thisSkill != null;
 		boolean condition = this.skill.getPriorSkill() == null || priorSkill != null;
 		BasicButton.OnTooltip tooltip = BasicButton.NO_TOOLTIP;
-
+		
 		if (!isUsing) {
 			if (condition) {
 				if (thisSkill != null) {

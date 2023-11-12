@@ -189,7 +189,8 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 		
 		if (this.renderProperties != null) {
 			JsonObject renderProperties = new JsonObject();
-			renderProperties.add("texture_path", renderProperties);
+			renderProperties.addProperty("texture_path", this.renderProperties.getCustomTexturePath());
+			
 			root.add("render_properties", renderProperties);
 		}
 		

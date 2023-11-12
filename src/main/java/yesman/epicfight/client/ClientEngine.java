@@ -47,6 +47,16 @@ public class ClientEngine {
 		return EpicFightCapabilities.getEntityPatch(this.minecraft.player, LocalPlayerPatch.class);
 	}
 	
+	public boolean isBattleMode() {
+		LocalPlayerPatch localPlayerPatch = EpicFightCapabilities.getEntityPatch(this.minecraft.player, LocalPlayerPatch.class);
+		
+		if (localPlayerPatch == null) {
+			return false;
+		}
+		
+		return localPlayerPatch.isBattleMode();
+	}
+	
 	public void turnOnTriangleDrawingMode(PoseStack stack) {
 		this.triangleDrawingMode = true;
 		stack.pushPose();

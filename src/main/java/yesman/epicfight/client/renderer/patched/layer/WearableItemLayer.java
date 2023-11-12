@@ -123,6 +123,12 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				}
 				
 				AnimatedMesh armorMesh = this.getArmorModel(vanillaLayer, entityliving, armorItem, stack, slot, debuggingMode);
+				
+				if (armorMesh == null) {
+					poseStack.popPose();
+					return;
+				}
+				
 				armorMesh.initialize();
 				
 				if (chestPart) {
@@ -172,7 +178,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				Model customModel = ForgeHooksClient.getArmorModel(entityliving, stack, slot, defaultModel);
 				
 				if (customModel == defaultModel || !(customModel instanceof HumanoidModel<?> humanoidModel)) {
-					model = this.mesh.getArmorModel(slot);
+					model = this.mesh.getHumanoidArmorModel(slot);
 				} else {
 					model = CustomModelBakery.bake(humanoidModel, armorItem, slot, armorDebugging);
 				}
@@ -214,8 +220,8 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 			}
 		}
 		
-		if (armorMesh.getRenderProperty() != null && armorMesh.getRenderProperty().customTexturePath() != null) {
-			s1 = armorMesh.getRenderProperty().customTexturePath();
+		if (armorMesh.getRenderProperty() != null && armorMesh.getRenderProperty().getCustomTexturePath() != null) {
+			s1 = armorMesh.getRenderProperty().getCustomTexturePath();
 		}
 		
 		ResourceLocation resourcelocation = HumanoidArmorLayer.ARMOR_LOCATION_CACHE.get(s1);

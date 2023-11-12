@@ -13,7 +13,8 @@ public class PiglinMesh extends HumanoidMesh {
 		super(arrayMap, parent, properties, parts);
 	}
 	
-	public AnimatedMesh getArmorModel(EquipmentSlot slot) {
+	@Override
+	public AnimatedMesh getHumanoidArmorModel(EquipmentSlot slot) {
 		switch (slot) {
 		case HEAD:
 			return Meshes.HELMET_PIGLIN;
