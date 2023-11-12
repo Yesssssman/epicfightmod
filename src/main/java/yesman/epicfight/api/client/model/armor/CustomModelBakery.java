@@ -86,6 +86,10 @@ public class CustomModelBakery {
 					break;
 				}
 			}
+			
+			if (animatedArmorModel == null) {
+				animatedArmorModel = VANILLA_TRANSFORMER.transformModel(armorModel, armorItem, slot, debuggingMode);
+			}
 		}
 		
 		BAKED_MODELS.put(ForgeRegistries.ITEMS.getKey(armorItem), animatedArmorModel);
