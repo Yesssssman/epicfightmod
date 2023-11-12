@@ -58,13 +58,11 @@ public class Pose {
 	}
 	
 	public String toString() {
-		String str = "[";
+		String str = "";
 		
 		for (Map.Entry<String, JointTransform> entry : this.jointTransformData.entrySet()) {
-			str += String.format("%s{ %s, %s }, ", entry.getKey(), entry.getValue().translation().toString(), entry.getValue().rotation().toString());
+			str += String.format("%s{%s, %s}, ", entry.getKey(), entry.getValue().translation().toString(), entry.getValue().rotation().toString()) + "\n";
 		}
-		
-		str += "]";
 		
 		return str;
 	}

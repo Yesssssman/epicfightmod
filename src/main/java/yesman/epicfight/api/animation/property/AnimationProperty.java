@@ -54,7 +54,12 @@ public abstract class AnimationProperty<T> {
 		/**
 		 * You can modify the playback speed of the animation.
 		 */
-		public static final StaticAnimationProperty<PlaySpeedModifier> PLAY_SPEED_MODIFIER = new StaticAnimationProperty<PlaySpeedModifier> ();
+		public static final StaticAnimationProperty<PlaybackTimeModifier> PLAY_SPEED_MODIFIER = new StaticAnimationProperty<PlaybackTimeModifier> ();
+		
+		/**
+		 * You can modify the playback speed of the animation.
+		 */
+		public static final StaticAnimationProperty<PlaybackTimeModifier> ELAPSED_TIME_MODIFIER = new StaticAnimationProperty<PlaybackTimeModifier> ();
 		
 		/**
 		 * This property will be called both in client and server when modifying the pose
@@ -168,8 +173,8 @@ public abstract class AnimationProperty<T> {
 	}
 	
 	@FunctionalInterface
-	public interface PlaySpeedModifier {
-		float modify(DynamicAnimation self, LivingEntityPatch<?> entitypatch, float speed, float elapsedTime);
+	public interface PlaybackTimeModifier {
+		public float modify(DynamicAnimation self, LivingEntityPatch<?> entitypatch, float speed, float elapsedTime);
 	}
 	
 	public static class AttackPhaseProperty<T> extends AnimationProperty<T> {

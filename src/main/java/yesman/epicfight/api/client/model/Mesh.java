@@ -24,7 +24,7 @@ public abstract class Mesh<T extends VertexIndicator> {
 			this.isTransparent = builder.isTransparent;
 		}
 		
-		public String customTexturePath() {
+		public String getCustomTexturePath() {
 			return this.customTexturePath;
 		}
 		

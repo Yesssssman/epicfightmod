@@ -284,13 +284,16 @@ public class JsonModelLoader {
 		JsonArray array = this.rootJson.get("animation").getAsJsonArray();
 		boolean action = animation instanceof ActionAnimation;
 		boolean attack = animation instanceof AttackAnimation;
+		boolean noTransformData = !action && !attack && FMLEnvironment.dist == Dist.DEDICATED_SERVER;
 		boolean root = true;
 		Armature armature = animation.getArmature();
 		
-		if (!action && !attack && (FMLEnvironment.dist == Dist.DEDICATED_SERVER)) {
+		/**
+		if (!action && !attack) {
+			if (FMLEnvironment.dist == Dist.DEDICATED_SERVER) {
 				return;
-
-		}
+			}
+		}**/
 		
 		Set<String> allowedJoints = Sets.newLinkedHashSet();
 		
@@ -383,7 +386,11 @@ public class JsonModelLoader {
 			}
 			
 			TransformSheet sheet = getTransformSheet(times, transforms, OpenMatrix4f.invert(joint.getLocalTrasnform(), null), root);
-			animation.addSheet(name, sheet);
+			
+			if (!noTransformData) {
+				animation.addSheet(name, sheet);
+			}
+			
 			animation.setTotalTime(times[times.length - 1]);
 			root = false;
 		}

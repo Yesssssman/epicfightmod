@@ -19,6 +19,8 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -30,31 +32,26 @@ import yesman.epicfight.api.utils.math.Vec3f;
 
 @OnlyIn(Dist.CLIENT)
 public class VanillaArmor extends ArmorModelTransformer {
-	static final PartTransformer<ModelPart.Cube> HEAD = new SimpleTransformer("head", 9);
-	static final PartTransformer<ModelPart.Cube> LEFT_FEET = new SimpleTransformer("leftBoots", 5);
-	static final PartTransformer<ModelPart.Cube> RIGHT_FEET = new SimpleTransformer("rightBoots", 2);
-	static final PartTransformer<ModelPart.Cube> LEFT_ARM = new LimbPartTransformer("leftArm", 16, 17, 19, 19.0F, false);
-	static final PartTransformer<ModelPart.Cube> LEFT_ARM_CHILD = new UpDownTransformer("leftArm", 16, 17, 19.0F);
-	static final PartTransformer<ModelPart.Cube> RIGHT_ARM = new LimbPartTransformer("rightArm", 11, 12, 14, 19.0F, false);
-	static final PartTransformer<ModelPart.Cube> RIGHT_ARM_CHILD = new UpDownTransformer("rightArm", 11, 12, 19.0F);
-	static final PartTransformer<ModelPart.Cube> LEFT_LEG = new LimbPartTransformer("leftLeg", 4, 5, 6, 6.0F, true);
-	static final PartTransformer<ModelPart.Cube> LEFT_LEG_CHILD = new UpDownTransformer("leftLeg", 4, 5, 6.0F);
-	static final PartTransformer<ModelPart.Cube> RIGHT_LEG = new LimbPartTransformer("rightLeg", 1, 2, 3, 6.0F, true);
-	static final PartTransformer<ModelPart.Cube> RIGHT_LEG_CHILD = new UpDownTransformer("rightLeg", 1, 2, 6.0F);
-	static final PartTransformer<ModelPart.Cube> CHEST = new ChestPartTransformer("chest");
-	static final PartTransformer<ModelPart.Cube> CHEST_CHILD = new UpDownTransformer("chest", 8, 7, 18.0F);
+	static final PartTransformer<ModelPart.Cube> HEAD = new SimpleTransformer(9);
+	static final PartTransformer<ModelPart.Cube> LEFT_FEET = new SimpleTransformer(5);
+	static final PartTransformer<ModelPart.Cube> RIGHT_FEET = new SimpleTransformer(2);
+	static final PartTransformer<ModelPart.Cube> LEFT_ARM = new LimbPartTransformer(16, 17, 19, 19.0F, false, AABB.ofSize(new Vec3(-6.0D, 18.0D, 0), 4.0D, 12.0D, 4.0D));
+	static final PartTransformer<ModelPart.Cube> RIGHT_ARM = new LimbPartTransformer(11, 12, 14, 19.0F, false, AABB.ofSize(new Vec3(6.0D, 18.0D, 0), 4.0D, 12.0D, 4.0D));
+	static final PartTransformer<ModelPart.Cube> LEFT_LEG = new LimbPartTransformer(4, 5, 6, 6.0F, true, AABB.ofSize(new Vec3(-2.0D, 6.0D, 0), 4.0D, 12.0D, 4.0D));
+	static final PartTransformer<ModelPart.Cube> RIGHT_LEG = new LimbPartTransformer(1, 2, 3, 6.0F, true, AABB.ofSize(new Vec3(2.0D, 6.0D, 0), 4.0D, 12.0D, 4.0D));
+	static final PartTransformer<ModelPart.Cube> CHEST = new ChestPartTransformer(8, 7, 18.0F, AABB.ofSize(new Vec3(0, 18.0D, 0), 8.0D, 12.0D, 4.0D));
 	
 	static int indexCount = 0;
 	
 	static class VanillaModelPartition {
 		final PartTransformer<ModelPart.Cube> partTransformer;
-		final PartTransformer<ModelPart.Cube> partChildTransformer;
 		final ModelPart modelPart;
+		final String partName;
 		
-		private VanillaModelPartition(PartTransformer<ModelPart.Cube> partTransformer, PartTransformer<ModelPart.Cube> partChildTransformer, ModelPart modelPart) {
+		private VanillaModelPartition(PartTransformer<ModelPart.Cube> partTransformer, ModelPart modelPart, String partName) {
 			this.partTransformer = partTransformer;
-			this.partChildTransformer = partChildTransformer;
 			this.modelPart = modelPart;
+			this.partName = partName;
 		}
 	}
 	
@@ -72,22 +69,22 @@ public class VanillaArmor extends ArmorModelTransformer {
 		
 		switch (slot) {
 		case HEAD:
-			boxes.add(new VanillaModelPartition(HEAD, HEAD, model.head));
-			boxes.add(new VanillaModelPartition(HEAD, HEAD, model.hat));
+			boxes.add(new VanillaModelPartition(HEAD, model.head, "head"));
+			boxes.add(new VanillaModelPartition(HEAD, model.hat, "hat"));
 			break;
 		case CHEST:
-			boxes.add(new VanillaModelPartition(CHEST, CHEST_CHILD, model.body));
-			boxes.add(new VanillaModelPartition(RIGHT_ARM, RIGHT_ARM_CHILD, model.rightArm));
-			boxes.add(new VanillaModelPartition(LEFT_ARM, LEFT_ARM_CHILD, model.leftArm));
+			boxes.add(new VanillaModelPartition(CHEST, model.body, "body"));
+			boxes.add(new VanillaModelPartition(RIGHT_ARM, model.rightArm, "rightArm"));
+			boxes.add(new VanillaModelPartition(LEFT_ARM, model.leftArm, "leftArm"));
 			break;
 		case LEGS:
-			boxes.add(new VanillaModelPartition(CHEST, CHEST_CHILD, model.body));
-			boxes.add(new VanillaModelPartition(LEFT_LEG, LEFT_LEG_CHILD, model.leftLeg));
-			boxes.add(new VanillaModelPartition(RIGHT_LEG, RIGHT_LEG_CHILD, model.rightLeg));
+			boxes.add(new VanillaModelPartition(CHEST, model.body, "body"));
+			boxes.add(new VanillaModelPartition(LEFT_LEG, model.leftLeg, "leftLeg"));
+			boxes.add(new VanillaModelPartition(RIGHT_LEG, model.rightLeg, "rightLeg"));
 			break;
 		case FEET:
-			boxes.add(new VanillaModelPartition(LEFT_FEET, LEFT_FEET, model.leftLeg));
-			boxes.add(new VanillaModelPartition(RIGHT_FEET, RIGHT_FEET, model.rightLeg));
+			boxes.add(new VanillaModelPartition(LEFT_FEET, model.leftLeg, "leftLeg"));
+			boxes.add(new VanillaModelPartition(RIGHT_FEET, model.rightLeg, "rightLeg"));
 			break;
 		default:
 			return null;
@@ -141,13 +138,13 @@ public class VanillaArmor extends ArmorModelTransformer {
 		poseStack.translate(0, -24, 0);
 		
 		for (VanillaModelPartition modelpartition : partitions) {
-			bake(poseStack, modelpartition, modelpartition.modelPart, modelpartition.partTransformer, vertices, indices, debuggingMode);
+			bake(poseStack, modelpartition.partName, modelpartition, modelpartition.modelPart, vertices, indices, debuggingMode);
 		}
 		
 		return SingleVertex.loadVertexInformation(vertices, indices);
 	}
 	
-	private static void bake(PoseStack poseStack, VanillaModelPartition modelpartition, ModelPart part, PartTransformer<ModelPart.Cube> partBaker, List<SingleVertex> vertices, Map<String, List<Integer>> indices, boolean debuggingMode) {
+	private static void bake(PoseStack poseStack, String partName, VanillaModelPartition modelpartition, ModelPart part, List<SingleVertex> vertices, Map<String, List<Integer>> indices, boolean debuggingMode) {
 		poseStack.pushPose();
 		poseStack.translate(part.x, part.y, part.z);
 		
@@ -164,11 +161,11 @@ public class VanillaArmor extends ArmorModelTransformer {
 		}
 		
 		for (ModelPart.Cube cube : part.cubes) {
-			partBaker.bakeCube(poseStack, cube, vertices, indices);
+			modelpartition.partTransformer.bakeCube(poseStack, partName, cube, vertices, indices);
 		}
 		
-		for (ModelPart childParts : part.children.values()) {
-			bake(poseStack, modelpartition, childParts, modelpartition.partChildTransformer, vertices, indices, debuggingMode);
+		for (Map.Entry<String, ModelPart> child : part.children.entrySet()) {
+			bake(poseStack, child.getKey(), modelpartition, child.getValue(), vertices, indices, debuggingMode);
 		}
 		
 		poseStack.popPose();
@@ -178,12 +175,11 @@ public class VanillaArmor extends ArmorModelTransformer {
 	static class SimpleTransformer extends PartTransformer<ModelPart.Cube> {
 		final int jointId;
 		
-		public SimpleTransformer(String partName, int jointId) {
-			super(partName);
+		public SimpleTransformer(int jointId) {
 			this.jointId = jointId;
 		}
 		
-		public void bakeCube(PoseStack poseStack, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
+		public void bakeCube(PoseStack poseStack, String partName, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
 			for (ModelPart.Polygon quad : cube.polygons) {
 				Vector3f norm = quad.normal.copy();
 				norm.transform(poseStack.last().normal());
@@ -201,39 +197,13 @@ public class VanillaArmor extends ArmorModelTransformer {
 					);
 				}
 				
-				putIndexCount(indices, indexCount);
-				putIndexCount(indices, indexCount + 1);
-				putIndexCount(indices, indexCount + 3);
-				putIndexCount(indices, indexCount + 3);
-				putIndexCount(indices, indexCount + 1);
-				putIndexCount(indices, indexCount + 2);
+				putIndexCount(indices, partName, indexCount);
+				putIndexCount(indices, partName, indexCount + 1);
+				putIndexCount(indices, partName, indexCount + 3);
+				putIndexCount(indices, partName, indexCount + 3);
+				putIndexCount(indices, partName, indexCount + 1);
+				putIndexCount(indices, partName, indexCount + 2);
 				indexCount+=4;
-			}
-		}
-	}
-	
-	@OnlyIn(Dist.CLIENT)
-	static class UpDownTransformer extends PartTransformer<ModelPart.Cube> {
-		final SimpleTransformer upperPartTransformer;
-		final SimpleTransformer lowerPartTransformer;
-		final float yClipCoord;
-		
-		public UpDownTransformer(String partName, int upperJoint, int lowerJoint, float yBasis) {
-			super(partName);
-			this.upperPartTransformer = new SimpleTransformer(partName + "Upper", upperJoint);
-			this.lowerPartTransformer = new SimpleTransformer(partName + "Lower", lowerJoint);
-			this.yClipCoord = yBasis;
-		}
-		
-		@Override
-		public void bakeCube(PoseStack poseStack, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
-			Vector4f cubeCenter = new Vector4f(cube.minX + (cube.maxX - cube.minX) * 0.5F, cube.minY + (cube.maxY - cube.minY) * 0.5F, cube.minZ + (cube.maxZ - cube.minZ) * 0.5F, 1.0F);
-			cubeCenter.transform(poseStack.last().pose());
-			
-			if (cubeCenter.y() > this.yClipCoord) {
-				this.upperPartTransformer.bakeCube(poseStack, cube, vertices, indices);
-			} else {
-				this.lowerPartTransformer.bakeCube(poseStack, cube, vertices, indices);
 			}
 		}
 	}
@@ -242,19 +212,37 @@ public class VanillaArmor extends ArmorModelTransformer {
 	static class ChestPartTransformer extends PartTransformer<ModelPart.Cube> {
 		static final float X_PLANE = 0.0F;
 		static final VertexWeight[] WEIGHT_ALONG_Y = { new VertexWeight(13.6666F, 0.230F, 0.770F), new VertexWeight(15.8333F, 0.254F, 0.746F), new VertexWeight(18.0F, 0.5F, 0.5F), new VertexWeight(20.1666F, 0.744F, 0.256F), new VertexWeight(22.3333F, 0.770F, 0.230F)};
+		final SimpleTransformer upperAttachmentTransformer;
+		final SimpleTransformer lowerAttachmentTransformer;
+		final AABB noneAttachmentArea;
+		final float yClipCoord;
 		
-		public ChestPartTransformer(String partName) {
-			super(partName);
+		public ChestPartTransformer(int upperJoint, int lowerJoint, float yBasis, AABB noneAttachmentArea) {
+			this.noneAttachmentArea = noneAttachmentArea;
+			this.upperAttachmentTransformer = new SimpleTransformer(upperJoint);
+			this.lowerAttachmentTransformer = new SimpleTransformer(lowerJoint);
+			this.yClipCoord = yBasis;
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
-			List<AnimatedPolygon> xClipPolygons = Lists.<AnimatedPolygon>newArrayList();
-			List<AnimatedPolygon> xyClipPolygons = Lists.<AnimatedPolygon>newArrayList();
+		public void bakeCube(PoseStack poseStack, String partName, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
+			Vec3 centerOfCube = getCenterOfCube(poseStack, cube);
+			
+			if (!this.noneAttachmentArea.contains(centerOfCube)) {
+				if (centerOfCube.y < this.yClipCoord) {
+					this.lowerAttachmentTransformer.bakeCube(poseStack, partName, cube, vertices, indices);
+				} else {
+					this.upperAttachmentTransformer.bakeCube(poseStack, partName, cube, vertices, indices);
+				}
+				
+				return;
+			}
+			
+			List<AnimatedPolygon> xClipPolygons = Lists.newArrayList();
+			List<AnimatedPolygon> xyClipPolygons = Lists.newArrayList();
 			
 			for (ModelPart.Polygon polygon : cube.polygons) {
 				Matrix4f matrix = poseStack.last().pose();
-				
 				ModelPart.Vertex pos0 = getTranslatedVertex(polygon.vertices[0], matrix);
 				ModelPart.Vertex pos1 = getTranslatedVertex(polygon.vertices[1], matrix);
 				ModelPart.Vertex pos2 = getTranslatedVertex(polygon.vertices[2], matrix);
@@ -310,8 +298,10 @@ public class VanillaArmor extends ArmorModelTransformer {
 					for (VertexWeight vertexWeight : vertexWeights) {
 						float distance = pos2.pos.y() - pos1.pos.y();
 						float textureV = pos1.v + (pos2.v - pos1.v) * ((vertexWeight.yClipCoord - pos1.pos.y()) / distance);
-						ModelPart.Vertex pos4 = new ModelPart.Vertex(pos0.pos.x(), vertexWeight.yClipCoord, pos0.pos.z(), pos0.u, textureV);
-						ModelPart.Vertex pos5 = new ModelPart.Vertex(pos1.pos.x(), vertexWeight.yClipCoord, pos1.pos.z(), pos1.u, textureV);
+						Vector3f clipPos1 = getClipPoint(pos1.pos, pos2.pos, vertexWeight.yClipCoord);
+						Vector3f clipPos2 = getClipPoint(pos0.pos, pos3.pos, vertexWeight.yClipCoord);
+						ModelPart.Vertex pos4 = new ModelPart.Vertex(clipPos2, pos0.u, textureV);
+						ModelPart.Vertex pos5 = new ModelPart.Vertex(clipPos1, pos1.u, textureV);
 						animatedVertices.add(new AnimatedVertex(pos4, 8, 7, 0, vertexWeight.chestWeight, vertexWeight.torsoWeight, 0));
 						animatedVertices.add(new AnimatedVertex(pos5, 8, 7, 0, vertexWeight.chestWeight, vertexWeight.torsoWeight, 0));
 					}
@@ -362,12 +352,12 @@ public class VanillaArmor extends ArmorModelTransformer {
 					);
 				}
 				
-				putIndexCount(indices, indexCount);
-				putIndexCount(indices, indexCount + 1);
-				putIndexCount(indices, indexCount + 3);
-				putIndexCount(indices, indexCount + 3);
-				putIndexCount(indices, indexCount + 1);
-				putIndexCount(indices, indexCount + 2);
+				putIndexCount(indices, partName, indexCount);
+				putIndexCount(indices, partName, indexCount + 1);
+				putIndexCount(indices, partName, indexCount + 3);
+				putIndexCount(indices, partName, indexCount + 3);
+				putIndexCount(indices, partName, indexCount + 1);
+				putIndexCount(indices, partName, indexCount + 2);
 				indexCount+=4;
 			}
 		}
@@ -418,21 +408,38 @@ public class VanillaArmor extends ArmorModelTransformer {
 		final int upperJoint;
 		final int lowerJoint;
 		final int middleJoint;
-		final float yClipCoord;
 		final boolean bendInFront;
+		final SimpleTransformer upperAttachmentTransformer;
+		final SimpleTransformer lowerAttachmentTransformer;
+		final AABB noneAttachmentArea;
+		final float yClipCoord;
 		
-		public LimbPartTransformer(String partName, int upperJoint, int lowerJoint, int middleJoint, float yClipCoord, boolean bendInFront) {
-			super(partName);
+		public LimbPartTransformer(int upperJoint, int lowerJoint, int middleJoint, float yClipCoord, boolean bendInFront, AABB noneAttachmentArea) {
 			this.upperJoint = upperJoint;
 			this.lowerJoint = lowerJoint;
 			this.middleJoint = middleJoint;
-			this.yClipCoord = yClipCoord;
 			this.bendInFront = bendInFront;
+			this.upperAttachmentTransformer = new SimpleTransformer(upperJoint);
+			this.lowerAttachmentTransformer = new SimpleTransformer(lowerJoint);
+			this.noneAttachmentArea = noneAttachmentArea;
+			this.yClipCoord = yClipCoord;
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
-			List<AnimatedPolygon> polygons = Lists.<AnimatedPolygon>newArrayList();
+		public void bakeCube(PoseStack poseStack, String partName, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
+			Vec3 centerOfCube = getCenterOfCube(poseStack, cube);
+			
+			if (!this.noneAttachmentArea.contains(centerOfCube)) {
+				if (centerOfCube.y < this.yClipCoord) {
+					this.lowerAttachmentTransformer.bakeCube(poseStack, partName, cube, vertices, indices);
+				} else {
+					this.upperAttachmentTransformer.bakeCube(poseStack, partName, cube, vertices, indices);
+				}
+				
+				return;
+			}
+			
+			List<AnimatedPolygon> polygons = Lists.newArrayList();
 			
 			for (ModelPart.Polygon quad : cube.polygons) {
 				Matrix4f matrix = poseStack.last().pose();
@@ -445,8 +452,10 @@ public class VanillaArmor extends ArmorModelTransformer {
 				if (pos1.pos.y() > this.yClipCoord != pos2.pos.y() > this.yClipCoord) {
 					float distance = pos2.pos.y() - pos1.pos.y();
 					float textureV = pos1.v + (pos2.v - pos1.v) * ((this.yClipCoord - pos1.pos.y()) / distance);
-					ModelPart.Vertex pos4 = new ModelPart.Vertex(pos0.pos.x(), this.yClipCoord, pos0.pos.z(), pos0.u, textureV);
-					ModelPart.Vertex pos5 = new ModelPart.Vertex(pos1.pos.x(), this.yClipCoord, pos1.pos.z(), pos1.u, textureV);
+					Vector3f clipPos1 = getClipPoint(pos1.pos, pos2.pos, this.yClipCoord);
+					Vector3f clipPos2 = getClipPoint(pos0.pos, pos3.pos, this.yClipCoord);
+					ModelPart.Vertex pos4 = new ModelPart.Vertex(clipPos2, pos0.u, textureV);
+					ModelPart.Vertex pos5 = new ModelPart.Vertex(clipPos1, pos1.u, textureV);
 					
 					int upperId, lowerId;
 					if (distance > 0) {
@@ -521,12 +530,12 @@ public class VanillaArmor extends ArmorModelTransformer {
 					);
 				}
 				
-				putIndexCount(indices, indexCount);
-				putIndexCount(indices, indexCount + 1);
-				putIndexCount(indices, indexCount + 3);
-				putIndexCount(indices, indexCount + 3);
-				putIndexCount(indices, indexCount + 1);
-				putIndexCount(indices, indexCount + 2);
+				putIndexCount(indices, partName, indexCount);
+				putIndexCount(indices, partName, indexCount + 1);
+				putIndexCount(indices, partName, indexCount + 3);
+				putIndexCount(indices, partName, indexCount + 3);
+				putIndexCount(indices, partName, indexCount + 1);
+				putIndexCount(indices, partName, indexCount + 2);
 				indexCount+=4;
 			}
 		}
@@ -541,6 +550,61 @@ public class VanillaArmor extends ArmorModelTransformer {
 		}
 		
 		return null;
+	}
+	
+	static Vec3 getCenterOfCube(PoseStack poseStack, ModelPart.Cube cube) {
+		double minX = Double.MAX_VALUE;
+		double minY = Double.MAX_VALUE;
+		double minZ = Double.MAX_VALUE;
+		double maxX = Double.MIN_VALUE;
+		double maxY = Double.MIN_VALUE;
+		double maxZ = Double.MIN_VALUE;
+		
+		Matrix4f matrix = poseStack.last().pose();
+		
+		for (ModelPart.Polygon quad : cube.polygons) {
+			for (ModelPart.Vertex v : quad.vertices) {
+				Vector4f translatedPosition = new Vector4f(v.pos);
+				translatedPosition.transform(matrix);
+				
+				if (minX > translatedPosition.x()) {
+					minX = translatedPosition.x();
+				}
+				
+				if (minY > translatedPosition.y()) {
+					minY = translatedPosition.y();
+				}
+				
+				if (minZ > translatedPosition.z()) {
+					minZ = translatedPosition.z();
+				}
+				
+				if (maxX < translatedPosition.x()) {
+					maxX = translatedPosition.x();
+				}
+				
+				if (maxY < translatedPosition.y()) {
+					maxY = translatedPosition.y();
+				}
+				
+				if (maxZ < translatedPosition.z()) {
+					maxZ = translatedPosition.z();
+				}
+			}
+		}
+		
+		return new Vec3(minX + (maxX - minX) * 0.5D, minY + (maxY - minY) * 0.5D, minZ + (maxZ - minZ) * 0.5D);
+	}
+	
+	static Vector3f getClipPoint(Vector3f pos1, Vector3f pos2, float yClip) {
+		Vector3f direct = pos2.copy();
+		direct.sub(pos1);
+		direct.mul((yClip - pos1.y()) / (pos2.y() - pos1.y()));
+		
+		Vector3f clipPoint = pos1.copy();
+		clipPoint.add(direct);
+		
+		return clipPoint;
 	}
 	
 	static ModelPart.Vertex getTranslatedVertex(ModelPart.Vertex original, Matrix4f matrix) {

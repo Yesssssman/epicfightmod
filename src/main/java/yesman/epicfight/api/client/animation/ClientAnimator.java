@@ -87,7 +87,6 @@ public class ClientAnimator extends Animator {
 			EntityState state = this.getEntityState();
 			
 			if (!state.inaction()) {
-				layer.paused = false;
 				layer.playLivingAnimation(animation, this.entitypatch);
 			}
 		}
@@ -100,7 +99,6 @@ public class ClientAnimator extends Animator {
 					EntityState state = getEntityState();
 					
 					if (!state.inaction()) {
-						layer.paused = false;
 						layer.playLivingAnimation(multilayerAnimation, this.entitypatch);
 					}
 				}
@@ -153,6 +151,11 @@ public class ClientAnimator extends Animator {
 			this.baseLayer.playAnimation(this.getLivingMotion(this.entitypatch.currentLivingMotion), this.entitypatch, 0.0F);
 		}
 		
+		/* Layer debug
+		for (Layer layer : this.getAllLayers()) {
+			System.out.println(layer);
+		}
+		System.out.println();*/
 		if (!this.compareCompositeMotion(this.entitypatch.currentCompositeMotion)) {
 			/* Turns off the composite motion's layer */
 			this.getCompositeLayer(this.getCompositeLivingMotion(this.currentCompositeMotion).getPriority()).off(this.entitypatch);

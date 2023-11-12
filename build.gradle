@@ -18,7 +18,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin'
 
 
-version = '19.5.16'
+version = '18.5.17'
 group = 'yesman.epicfight'
 archivesBaseName = 'epicfight'
 
@@ -120,6 +120,7 @@ dependencies {
     
     //implementation fg.deobf("local:epicfight:18.5.1")
     //implementation fg.deobf("curse.maven:mantle-74924:3829975")
+    implementation fg.deobf("local:geckolib:0.57")
     
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }

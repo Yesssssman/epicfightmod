@@ -54,15 +54,15 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		this.firstPersonModel = firstPersonModel;
 	}
 	
-	private void renderArmor(PoseStack matStack, MultiBufferSource multiBufferSource, int packedLightIn, boolean hasEffect, AnimatedMesh model, Armature armature
-							, float r, float g, float b, ResourceLocation armorTexture, OpenMatrix4f[] poses) {
+	private void renderArmor(PoseStack matStack, MultiBufferSource multiBufferSource, int packedLightIn, boolean hasEffect, AnimatedMesh model, Armature armature,
+								float r, float g, float b, ResourceLocation armorTexture, OpenMatrix4f[] poses) {
 		VertexConsumer vertexConsumer = EpicFightRenderTypes.getArmorFoilBufferTriangles(multiBufferSource, RenderType.armorCutoutNoCull(armorTexture), false, hasEffect);
 		model.drawModelWithPose(matStack, vertexConsumer, packedLightIn, r, g, b, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
 	}
 	
 	@Override
-	public void renderLayer(T entitypatch, E entityliving, HumanoidArmorLayer<E, M, M> vanillaLayer, PoseStack poseStack, MultiBufferSource buf, int packedLightIn
-							, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
+	public void renderLayer(T entitypatch, E entityliving, HumanoidArmorLayer<E, M, M> vanillaLayer, PoseStack poseStack, MultiBufferSource buf, int packedLightIn,
+								OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			if (slot.getType() != EquipmentSlot.Type.ARMOR) {
 				continue;
@@ -108,6 +108,12 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				}
 				
 				AnimatedMesh armorMesh = this.getArmorModel(vanillaLayer, entityliving, armorItem, stack, slot, debuggingMode);
+				
+				if (armorMesh == null) {
+					poseStack.popPose();
+					return;
+				}
+				
 				armorMesh.initialize();
 				
 				if (chestPart) {
@@ -123,7 +129,6 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 					float r = (float) (i >> 16 & 255) / 255.0F;
 					float g = (float) (i >> 8 & 255) / 255.0F;
 					float b = (float) (i & 255) / 255.0F;
-					
 					
 					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, armorMesh, entitypatch.getArmature(), r, g, b, this.getArmorTexture(stack, entityliving, armorMesh, slot, null), poses);
 					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, armorMesh, entitypatch.getArmature(), 1.0F, 1.0F, 1.0F, this.getArmorTexture(stack, entityliving, armorMesh, slot, "overlay"), poses);
@@ -156,7 +161,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				Model customModel = ForgeHooksClient.getArmorModel(entityliving, stack, slot, defaultModel);
 				
 				if (customModel == defaultModel || !(customModel instanceof HumanoidModel<?> humanoidModel)) {
-					model = this.mesh.getArmorModel(slot);
+					model = this.mesh.getHumanoidArmorModel(slot);
 				} else {
 					model = CustomModelBakery.bake(humanoidModel, armorItem, slot, armorDebugging);
 				}
@@ -198,8 +203,8 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 			}
 		}
 		
-		if (armorMesh.getRenderProperty() != null && armorMesh.getRenderProperty().customTexturePath() != null) {
-			s1 = armorMesh.getRenderProperty().customTexturePath();
+		if (armorMesh.getRenderProperty() != null && armorMesh.getRenderProperty().getCustomTexturePath() != null) {
+			s1 = armorMesh.getRenderProperty().getCustomTexturePath();
 		}
 		
 		ResourceLocation resourcelocation = HumanoidArmorLayer.ARMOR_LOCATION_CACHE.get(s1);
