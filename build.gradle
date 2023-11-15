@@ -14,7 +14,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 apply plugin: 'org.spongepowered.mixin'
 
-version = '16.6.4'
+version = '16.6.5'
 group = 'com.yesman.epicfight'
 archivesBaseName = 'epicfight'
 

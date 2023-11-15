@@ -1,22 +1,23 @@
 modLoader="javafml" #mandatory
 loaderVersion="[36,)" #mandatory This is typically bumped every Minecraft version by Forge. See our download page for lists of versions.
-license="MIT License"
-#issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/" #optional
+license="GNU GENERAL PUBLIC LICENSE"
+issueTrackerURL="https://github.com/Yesssssman/epicfightmod/issues" #optional
+
 [[mods]] #mandatory
 modId="epicfight" #mandatory
-version="16.6.4" #mandatory
+version="16.6.5" #mandatory
 displayName="Epic Fight" #mandatory
-#displayURL="https://change.me.to.your.mods.homepage.example.invalid/" #optional
-#logoFile="examplemod.png" #optional
-#credits="Thanks for this example mod goes to Java" #optional
-#authors="Love, Cheese and small house plants" #optional
-description='''
+displayURL="https://www.curseforge.com/minecraft/mc-mods/epic-fight-mod" #optional
+logoFile="icon.png" #optional
+credits="Metal" #optional
+authors="Yesman" #optional
+description='''Epic Fight adds complex game mechanics and fighting styles to your gameplay. With a pinch of soulslike combat and unique animation handling that adds bends to minecraft, Epic Fight will spice up your gameplay to a whole other level and allow for great new challanges along the way. You'll be facing a new take on minecraft's combat where all entities have new and challenging fighting mechanics.
 '''
 
 [[dependencies.epicfight]] #optional
     modId="forge" #mandatory
     mandatory=true #mandatory
-    versionRange="[36,)" #mandatory
+    versionRange="[36.2.39,)" #mandatory
     ordering="NONE"
     side="BOTH"
 [[dependencies.epicfight]]
