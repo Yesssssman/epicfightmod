@@ -120,10 +120,8 @@ public class EpicFightMod {
         EpicFightBlockEntities.BLOCK_ENTITIES.register(bus);
 		EpicFightLootTables.LOOT_MODIFIERS.register(bus);
 		EpicFightSounds.SOUNDS.register(bus);
-		//SkillArgument.SKILLS.register(bus);
 		EpicFightDataSerializers.VEC.register(bus);
         EpicFightSkills.registerSkills();
-		//SkillBookLootModifier.createSkillLootTable();
         MinecraftForge.EVENT_BUS.addListener(this::reloadListnerEvent);
         
         ConfigManager.loadConfig(ConfigManager.CLIENT_CONFIG, FMLPaths.CONFIGDIR.get().resolve(MODID + "-client.toml").toString());
@@ -134,7 +132,6 @@ public class EpicFightMod {
 	private void doClientStuff(final FMLClientSetupEvent event) {
 		CLIENT_INGAME_CONFIG = new ConfigurationIngame();
     	new ClientEngine();
-		//IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
     	
         this.animatorProvider = ClientAnimator::getAnimator;
 		EntityPatchProvider.registerEntityPatchesClient();

@@ -115,10 +115,11 @@ mixin {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.20.1-47.2.1'
+    minecraft 'net.minecraftforge:forge:1.20.1-47.2.6'
     
     //implementation fg.deobf("yesman:epicfight:18.5.1")
     //implementation fg.deobf("curse.maven:mantle-74924:3829975")
+    //implementation fg.deobf("curse.maven:geckolib-388172:4822252")
     
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }

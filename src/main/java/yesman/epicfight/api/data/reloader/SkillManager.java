@@ -74,9 +74,15 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 	
 	public static <T extends Skill, B extends Skill.Builder<T>> void register(Function<B, T> constructor, B builder, String modid, String name) {
 		ResourceLocation registryName = new ResourceLocation(modid, name);
-		BUILDERS.put(registryName, Pair.of(builder.setRegistryName(registryName), constructor));
 		
-		EpicFightMod.LOGGER.info("register skill " + registryName);
+		try {
+			Pair<? extends Skill.Builder<?>, Function<? extends Skill.Builder<?>, ? extends Skill>> pair = Pair.of(builder.setRegistryName(registryName), constructor);
+			BUILDERS.put(registryName, pair);
+		} catch(Exception e) {
+			e.printStackTrace();
+		}
+		
+		EpicFightMod.LOGGER.info("register skill " + registryName + " DEBUG: " + BUILDERS.containsKey(registryName));
 	}
 	
 	public static void buildAll() {
@@ -139,9 +145,9 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 
 			SKILLS.get(new ResourceLocation(tag.getString("id"))).setParams(tag);
 		}
-
+		
 		LocalPlayerPatch localplayerpatch = ClientEngine.getInstance().getPlayerPatch();
-
+		
 		if (localplayerpatch != null) {
 			for (String skillName : packet.getLearnedSkills()) {
 				localplayerpatch.getSkillCapability().addLearnedSkill(SkillManager.getSkill(skillName));

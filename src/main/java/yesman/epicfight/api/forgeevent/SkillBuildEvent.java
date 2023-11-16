@@ -7,6 +7,7 @@ import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.Event;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.Skill;
 
 public class SkillBuildEvent extends Event {
@@ -28,8 +29,17 @@ public class SkillBuildEvent extends Event {
 			Pair<B, Function<B, T>> pair = (Pair<B, Function<B, T>>) (Object)this.builders.get(registryName);
 			
 			if (pair == null) {
-				Exception e = new IllegalArgumentException("Can't find the skill " + registryName + " in the registry");
-				e.printStackTrace();
+				if (this.builders.containsKey(registryName)) {
+					EpicFightMod.LOGGER.error("Invalid builder registered for skill " + registryName);
+				} else {
+					EpicFightMod.LOGGER.error("Can't find the skill " + registryName + " in the registry. Here's all registered skills.");
+					
+					for (Map.Entry<ResourceLocation, Pair<? extends Skill.Builder<?>, Function<? extends Skill.Builder<?>, ? extends Skill>>> rl : this.builders.entrySet()) {
+						EpicFightMod.LOGGER.error(rl);
+					}
+				}
+				
+				throw new IllegalStateException("Illegal skill registry: " + registryName);
 			}
 			
 			T skill = pair.getSecond().apply(pair.getFirst());
