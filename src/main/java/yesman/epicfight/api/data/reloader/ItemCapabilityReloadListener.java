@@ -64,7 +64,7 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 				Item item = ForgeRegistries.ITEMS.getValue(registryName);
 				
 				if (item == null) {
-					EpicFightMod.LOGGER.warn("Tried to add a capabiltiy for item " + registryName + ", but it's not exist!");
+					EpicFightMod.LOGGER.warn("Tried to add a capability for item " + registryName + ", but it doesn't exist!");
 					return;
 				}
 				
@@ -76,14 +76,19 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 					e.printStackTrace();
 				}
 				
-				if (str[0].equals("armors")) {
-					CapabilityItem capability = deserializeArmor(item, nbt);
-					ItemCapabilityProvider.put(item, capability);
-					CAPABILITY_ARMOR_DATA_MAP.put(item, nbt);
-				} else if (str[0].equals("weapons")) {
-					CapabilityItem capability = deserializeWeapon(item, nbt, null);
-					ItemCapabilityProvider.put(item, capability);
-					CAPABILITY_WEAPON_DATA_MAP.put(item, nbt);
+				try {
+					if (str[0].equals("armors")) {
+						CapabilityItem capability = deserializeArmor(item, nbt);
+						ItemCapabilityProvider.put(item, capability);
+						CAPABILITY_ARMOR_DATA_MAP.put(item, nbt);
+					} else if (str[0].equals("weapons")) {
+						CapabilityItem capability = deserializeWeapon(item, nbt, null);
+						ItemCapabilityProvider.put(item, capability);
+						CAPABILITY_WEAPON_DATA_MAP.put(item, nbt);
+					}
+				} catch (Exception e) {
+					EpicFightMod.LOGGER.warn("Error while deserializing datapack for " + registryName);
+					e.printStackTrace();
 				}
 			}
 		}
@@ -159,7 +164,7 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 			
 			if (tag.contains("collider") && builder instanceof WeaponCapability.Builder) {
 				CompoundTag colliderTag = tag.getCompound("collider");
-				Collider collider = deserializeCollider(item, colliderTag);
+				Collider collider = deserializeCollider(colliderTag);
 				((WeaponCapability.Builder)builder).collider(collider);
 			}
 			
@@ -191,12 +196,11 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 		return modifierMap;
 	}
 	
-	private static Collider deserializeCollider(Item item, CompoundTag tag) {
+	public static Collider deserializeCollider(CompoundTag tag) {
 		int number = tag.getInt("number");
 		
 		if (number < 1) {
-			EpicFightMod.LOGGER.warn("Datapack deserialization error: the number of colliders must bigger than 0! " + item);
-			return null;
+			throw new IllegalArgumentException("Datapack deserialization error: the number of colliders must bigger than 0!");
 		}
 		
 		ListTag sizeVector = tag.getList("size", 6);
@@ -211,8 +215,7 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 		double centerZ = centerVector.getDouble(2);
 		
 		if (sizeX < 0 || sizeY < 0 || sizeZ < 0) {
-			EpicFightMod.LOGGER.warn("Datapack deserialization error: the size of the collider must be non-negative! " + item);
-			return null;
+			throw new IllegalArgumentException("Datapack deserialization error: the size of the collider must be non-negative value!");
 		}
 		
 		if (number == 1) {

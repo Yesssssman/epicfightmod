@@ -156,7 +156,6 @@ public class EpicFightMod {
 		event.enqueueWork(EpicFightGamerules::registerRules);
 		event.enqueueWork(WeaponCapabilityPresets::register);
 		event.enqueueWork(EpicFightMobEffects::addOffhandModifier);
-		//event.enqueueWork(EpicFightLootModifiers::registerLootItemFunctionType);
     }
 	
 	private void registerClientReloadListnerEvent(final RegisterClientReloadListenersEvent event) {
@@ -168,8 +167,10 @@ public class EpicFightMod {
 	
 	private void reloadListnerEvent(final AddReloadListenerEvent event) {
 		event.addListener(new SkillManager());
+		event.addListener(new WeaponCapabilityPresets());
 		event.addListener(new ItemCapabilityReloadListener());
 		event.addListener(new MobPatchReloadListener());
+		
 	}
 	
 	public static Animator getAnimator(LivingEntityPatch<?> entitypatch) {

@@ -29,7 +29,7 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 			}
 		}
 		
-		throw new IllegalArgumentException("Unable to find animation. id: " + animationId + ", namespcae hash: " + namespaceId);
+		throw new IllegalArgumentException("Can't find animation. id: " + animationId + ", namespcae hash: " + namespaceId);
 	}
 	
 	public StaticAnimation findAnimationByPath(String resourceLocation) {
@@ -39,7 +39,7 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 			return this.animationByName.get(rl);
 		}
 		
-		throw new IllegalArgumentException("Unable to find animation: " + rl);
+		throw new IllegalArgumentException("Can't find animation named: " + rl);
 	}
 	
 	public void registerAnimations() {

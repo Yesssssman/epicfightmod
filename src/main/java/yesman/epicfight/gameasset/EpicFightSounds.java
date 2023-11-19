@@ -45,10 +45,4 @@ public class EpicFightSounds {
 		return SOUNDS.register(name, () -> SoundEvent.createVariableRangeEvent(res));
 
 	}
-
-	private EpicFightSounds()
-	{
-
-	}
-
 }

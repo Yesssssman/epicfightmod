@@ -61,7 +61,7 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 		if (SKILLS.containsKey(rl)) {
 			return SKILLS.get(rl);
 		} else {
-			return null;
+			throw new IllegalArgumentException("Can't find skill named: " + name);
 		}
 	}
 	
@@ -78,18 +78,25 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 		try {
 			Pair<? extends Skill.Builder<?>, Function<? extends Skill.Builder<?>, ? extends Skill>> pair = Pair.of(builder.setRegistryName(registryName), constructor);
 			BUILDERS.put(registryName, pair);
-		} catch(Exception e) {
+			
+			if (!BUILDERS.containsKey(registryName)) {
+				EpicFightMod.LOGGER.error("Failed to register skill " + registryName + ".");
+				EpicFightMod.LOGGER.error("Mod Id: " + modid);
+				
+				T instance = constructor.apply(builder);
+				
+				EpicFightMod.LOGGER.error("Skill instance: " + instance.getClass().getCanonicalName());
+			}
+		} catch (Exception e) {
 			e.printStackTrace();
 		}
 		
-		EpicFightMod.LOGGER.info("register skill " + registryName + " DEBUG: " + BUILDERS.containsKey(registryName));
+		EpicFightMod.LOGGER.info("register skill " + registryName);
 	}
 	
 	public static void buildAll() {
 		SkillBuildEvent onBuild = new SkillBuildEvent(BUILDERS, SKILLS, LEARNABLE_SKILLS);
-
 		MinecraftForge.EVENT_BUS.post(onBuild);
-
 		SkillBookLootModifier.createSkillLootTable(BUILDERS.keySet());
 	}
 	

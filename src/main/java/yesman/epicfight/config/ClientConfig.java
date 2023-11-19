@@ -60,7 +60,7 @@ public class ClientConfig {
 		this.cameraAutoSwitch = config.define("ingame.camera_auto_switch", () -> false);
 		this.autoPreparation = config.define("ingame.auto_preparation", () -> false);
 		this.offBloodEffects = config.define("ingame.off_gore", () -> false);
-		this.noMiningInCombat = config.define("ingame.no_mining_in_combat", () -> false);
+		this.noMiningInCombat = config.define("ingame.no_mining_in_combat", () -> true);
 		
 		this.battleAutoSwitchItems = config.defineList("ingame.battle_autoswitch_items", Lists.newArrayList(), (element) -> {
 			if (element instanceof String str) {

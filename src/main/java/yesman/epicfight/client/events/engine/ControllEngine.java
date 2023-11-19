@@ -463,16 +463,16 @@ public class ControllEngine {
 				InputConstants.Key input = InputConstants.Type.KEYSYM.getOrCreate(event.getButton());
 				//Controllable Compat
 				InputConstants.Key inputMouse = InputConstants.Type.MOUSE.getOrCreate(event.getButton());
-
-				for (KeyMapping keybinding : controllEngine.keyHash.getAll(input)) {
-					if (controllEngine.keyFunctions.containsKey(keybinding)) {
-						controllEngine.keyFunctions.get(keybinding).accept(keybinding, event.getAction());
+				
+				for (KeyMapping keyMapping : controllEngine.keyHash.getAll(input)) {
+					if (controllEngine.keyFunctions.containsKey(keyMapping)) {
+						controllEngine.keyFunctions.get(keyMapping).accept(keyMapping, event.getAction());
 					}
 				}
 				
-				for (KeyMapping keybinding : controllEngine.keyHash.getAll(inputMouse)) {
-					if (controllEngine.keyFunctions.containsKey(keybinding)) {
-						controllEngine.keyFunctions.get(keybinding).accept(keybinding, event.getAction());
+				for (KeyMapping keyMapping : controllEngine.keyHash.getAll(inputMouse)) {
+					if (controllEngine.keyFunctions.containsKey(keyMapping)) {
+						controllEngine.keyFunctions.get(keyMapping).accept(keyMapping, event.getAction());
 					}
 				}
 			}
@@ -485,15 +485,15 @@ public class ControllEngine {
 				//Controllable Compat
 				InputConstants.Key inputMouse = InputConstants.Type.MOUSE.getOrCreate(event.getKey());
 
-				for (KeyMapping keybinding : controllEngine.keyHash.getAll(input)) {
-					if (controllEngine.keyFunctions.containsKey(keybinding)) {
-						controllEngine.keyFunctions.get(keybinding).accept(keybinding, event.getAction());
+				for (KeyMapping keyMapping : controllEngine.keyHash.getAll(input)) {
+					if (controllEngine.keyFunctions.containsKey(keyMapping)) {
+						controllEngine.keyFunctions.get(keyMapping).accept(keyMapping, event.getAction());
 					}
 				}
 				
-				for (KeyMapping keybinding : controllEngine.keyHash.getAll(inputMouse)) {
-					if (controllEngine.keyFunctions.containsKey(keybinding)) {
-						controllEngine.keyFunctions.get(keybinding).accept(keybinding, event.getAction());
+				for (KeyMapping keyMapping : controllEngine.keyHash.getAll(inputMouse)) {
+					if (controllEngine.keyFunctions.containsKey(keyMapping)) {
+						controllEngine.keyFunctions.get(keyMapping).accept(keyMapping, event.getAction());
 					}
 				}
 			}

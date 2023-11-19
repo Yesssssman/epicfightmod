@@ -1,0 +1,72 @@
+{
+	"category": "sword",
+	"hit_sound": "epicfight:entity.hit.blunt",
+	"swing_sound": "epicfight:entity.weapon.whoosh",
+	"styles":
+	{
+		"if":
+		[
+			{
+				"condition": "epicfight:offhand_category",
+				"predicate": {
+					"category": "sword"
+				},
+				"style": "two_hand"
+			}
+		],
+		"else": "one_hand"
+	},
+	"collider":
+    {
+        "number": 3,
+        "center": [0.0, 0.0, -0.75],
+        "size": [0.4, 0.4, 0.8]
+    },
+    "combos":
+    {
+    	"one_hand":
+    	[
+			"epicfight:biped/combat/sword_auto1",
+			"epicfight:biped/combat/sword_auto2",
+			"epicfight:biped/combat/sword_auto3",
+			"epicfight:biped/combat/sword_dash",
+			"epicfight:biped/combat/sword_airslash"
+    	],
+    	"two_hand":
+    	[
+			"epicfight:biped/combat/sword_dual_auto1",
+			"epicfight:biped/combat/sword_dual_auto2",
+			"epicfight:biped/combat/sword_dual_auto3",
+			"epicfight:biped/combat/sword_dual_dash",
+			"epicfight:biped/combat/sword_dual_airslash"
+    	],
+    	"mount":
+    	[
+    		"epicfight:biped/combat/sword_mount_attack"
+    	]
+    },
+    "innate_skills":
+    {
+    	"one_hand": "epicfight:sweeping_edge",
+    	"two_hand": "epicfight:dancing_edge"
+    },
+    "livingmotion_modifier": {
+    	"one_hand":
+    	{
+    		"block": "epicfight:biped/skill/guard_sword"
+    	},
+    	"two_hand":
+    	{
+    		"block": "epicfight:biped/skill/guard_dualsword",
+    		"idle": "epicfight:biped/living/hold_dual",
+    		"kneel": "epicfight:biped/living/hold_dual",
+    		"walk": "epicfight:biped/living/hold_dual",
+    		"chase": "epicfight:biped/living/hold_dual",
+    		"run": "epicfight:biped/living/run_dual",
+    		"sneak": "epicfight:biped/living/hold_dual",
+    		"swim": "epicfight:biped/living/hold_dual",
+    		"float": "epicfight:biped/living/hold_dual",
+    		"fall": "epicfight:biped/living/hold_dual"
+    	}
+    }
+}
