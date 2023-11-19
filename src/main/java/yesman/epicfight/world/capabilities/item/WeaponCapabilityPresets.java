@@ -26,7 +26,7 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
-@SuppressWarnings("deprecation") // getLevel
+@SuppressWarnings("deprecation")
 public class WeaponCapabilityPresets {
 	public static final Function<Item, CapabilityItem.Builder> AXE = (item) -> {
 		CapabilityItem.Builder builder = WeaponCapability.builder()
@@ -122,9 +122,9 @@ public class WeaponCapabilityPresets {
 			.weaponCombinationPredicator((entitypatch) -> EpicFightCapabilities.getItemStackCapability(entitypatch.getOriginal().getOffhandItem()).weaponCategory == WeaponCategories.SWORD);
 		
 		if (item instanceof TieredItem tieredItem) {
-			//int harvestLevel = tieredItem.getTier().getLevel();
-			//builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.5D + 0.2D * harvestLevel)));
-			//builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.MAX_STRIKES.get(), EpicFightAttributes.getMaxStrikesModifier(1)));
+			int harvestLevel = tieredItem.getTier().getLevel();
+			builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.IMPACT.get(), EpicFightAttributes.getImpactModifier(0.5D + 0.2D * harvestLevel)));
+			builder.addStyleAttibutes(CapabilityItem.Styles.COMMON, Pair.of(EpicFightAttributes.MAX_STRIKES.get(), EpicFightAttributes.getMaxStrikesModifier(1)));
 			builder.hitSound(tieredItem.getTier() == Tiers.WOOD ? EpicFightSounds.BLUNT_HIT : EpicFightSounds.BLADE_HIT);
 			builder.hitParticle(tieredItem.getTier() == Tiers.WOOD ? EpicFightParticles.HIT_BLUNT.get() : EpicFightParticles.HIT_BLADE.get());
 		}
@@ -319,7 +319,7 @@ public class WeaponCapabilityPresets {
 			.newStyleCombo(Styles.ONE_HAND, Animations.FIST_AUTO1, Animations.FIST_AUTO2, Animations.FIST_AUTO3, Animations.FIST_DASH, Animations.FIST_AIR_SLASH)
 			.innateSkill(Styles.ONE_HAND, (itemstack) -> EpicFightSkills.RELENTLESS_COMBO)
 			.category(WeaponCategories.FIST)
-			.constructor(KnuckleCapability::new);
+			.constructor(GloveCapability::new);
 	
 	public static final Function<Item, CapabilityItem.Builder> BOW =  (item) -> RangedWeaponCapability.builder()
 			.addAnimationsModifier(LivingMotions.IDLE, Animations.BIPED_IDLE)
