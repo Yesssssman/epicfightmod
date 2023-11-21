@@ -67,6 +67,8 @@ public class StaticAnimation extends DynamicAnimation {
 		this.namespaceId = animationManager.getNamespaceHash();
 		this.animationId = animationManager.getIdCounter();
 		
+		EpicFightMod.LOGGER.info("Assigned animation id " + this.animationId + " to " + path);
+		
 		int colon = path.indexOf(':');
 		String modid = (colon == -1) ? animationManager.getModid() : path.substring(0, colon);
 		String folderPath = (colon == -1) ? path : path.substring(colon + 1);
@@ -119,8 +121,11 @@ public class StaticAnimation extends DynamicAnimation {
 			load(resourceManager, path, this);
 			
 			this.jointTransforms = animation.jointTransforms;
-		} catch (NumberFormatException e) {
+		} catch (NumberFormatException numberFormatException) {
 			load(resourceManager, this);
+		} catch (Exception others) {
+			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
+			others.printStackTrace();
 		}
 		
 		this.onLoaded();

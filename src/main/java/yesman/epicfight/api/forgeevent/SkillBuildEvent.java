@@ -30,12 +30,12 @@ public class SkillBuildEvent extends Event {
 			
 			if (pair == null) {
 				if (this.builders.containsKey(registryName)) {
-					EpicFightMod.LOGGER.error("Invalid builder registered for skill " + registryName);
+					EpicFightMod.LOGGER.warn("Invalid builder registered for skill " + registryName);
 				} else {
-					EpicFightMod.LOGGER.error("Can't find the skill " + registryName + " in the registry. Here's all registered skills.");
+					EpicFightMod.LOGGER.warn("Can't find the skill " + registryName + " in the registry. Here's all registered skills.");
 					
 					for (Map.Entry<ResourceLocation, Pair<? extends Skill.Builder<?>, Function<? extends Skill.Builder<?>, ? extends Skill>>> rl : this.builders.entrySet()) {
-						EpicFightMod.LOGGER.error(rl);
+						EpicFightMod.LOGGER.warn(rl);
 					}
 				}
 				

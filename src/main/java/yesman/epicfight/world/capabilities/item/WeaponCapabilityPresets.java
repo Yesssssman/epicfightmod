@@ -4,8 +4,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import org.apache.commons.compress.utils.Lists;
-
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -390,8 +389,6 @@ public class WeaponCapabilityPresets extends SimpleJsonResourceReloadListener {
 	
 	@Override
 	protected void apply(Map<ResourceLocation, JsonElement> packEntry, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-		System.out.println("weapon preset read");
-		
 		for (Map.Entry<ResourceLocation, JsonElement> entry : packEntry.entrySet()) {
 			CompoundTag nbt = null;
 			
@@ -403,9 +400,6 @@ public class WeaponCapabilityPresets extends SimpleJsonResourceReloadListener {
 			
 			try {
 				WeaponCapability.Builder builder = deserializeWeaponCapabilityBuilder(nbt);
-				
-				System.out.println("deserialize " + entry.getKey().getPath());
-				
 				PRESETS.put(entry.getKey().getPath(), (itemstack) -> builder);
 				TAGMAP.add(nbt);
 			} catch (Exception e) {

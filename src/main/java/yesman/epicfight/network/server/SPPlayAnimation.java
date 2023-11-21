@@ -31,9 +31,9 @@ public class SPPlayAnimation {
 		this(animation.getNamespaceId(), animation.getId(), entityId, convertTimeModifier);
 	}
 	
-	public SPPlayAnimation(int namespaceId, int animation, int entityId, float convertTimeModifier) {
+	public SPPlayAnimation(int namespaceId, int animationId, int entityId, float convertTimeModifier) {
 		this.namespaceId = namespaceId;
-		this.animationId = animation;
+		this.animationId = animationId;
 		this.entityId = entityId;
 		this.convertTimeModifier = convertTimeModifier;
 	}

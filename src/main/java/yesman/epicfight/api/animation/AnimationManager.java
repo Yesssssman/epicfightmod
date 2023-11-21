@@ -50,6 +50,7 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 		ModLoader.get().postEvent(new AnimationRegistryEvent(registryMap));
 		
 		registryMap.entrySet().forEach((entry) -> {
+			EpicFightMod.LOGGER.info("Start animation registration of " + entry.getKey());
 			this.modid = entry.getKey();
 			this.namespaceHash = this.modid.hashCode();
 			this.animationById.put(this.namespaceHash, Maps.newHashMap());
