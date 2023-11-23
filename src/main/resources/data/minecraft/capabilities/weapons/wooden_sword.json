@@ -9,5 +9,5 @@
 	},
 	"hit_particle":"blunt",
 	"hit_sound":"entity.hit.blunt",
-	"type":"sword"
+	"type":"epicfight:sword"
 }

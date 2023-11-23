@@ -55,8 +55,8 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.Style;
-import yesman.epicfight.world.capabilities.item.WeaponCapabilityPresets;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
+import yesman.epicfight.world.capabilities.item.WeaponTypeManager;
 import yesman.epicfight.world.capabilities.provider.EntityPatchProvider;
 import yesman.epicfight.world.capabilities.provider.ItemCapabilityProvider;
 import yesman.epicfight.world.damagesource.SourceTag;
@@ -154,7 +154,7 @@ public class EpicFightMod {
 		event.enqueueWork(ItemCapabilityProvider::registerWeaponTypesByClass);
 		event.enqueueWork(EntityPatchProvider::registerEntityPatches);
 		event.enqueueWork(EpicFightGamerules::registerRules);
-		event.enqueueWork(WeaponCapabilityPresets::register);
+		event.enqueueWork(WeaponTypeManager::registerDefaultWeaponTypes);
 		event.enqueueWork(EpicFightMobEffects::addOffhandModifier);
     }
 	
@@ -167,7 +167,7 @@ public class EpicFightMod {
 	
 	private void reloadListnerEvent(final AddReloadListenerEvent event) {
 		event.addListener(new SkillManager());
-		event.addListener(new WeaponCapabilityPresets());
+		event.addListener(new WeaponTypeManager());
 		event.addListener(new ItemCapabilityReloadListener());
 		event.addListener(new MobPatchReloadListener());
 		

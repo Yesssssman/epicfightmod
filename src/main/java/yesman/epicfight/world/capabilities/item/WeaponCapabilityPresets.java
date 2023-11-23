@@ -1,41 +1,18 @@
 package yesman.epicfight.world.capabilities.item;
 
-import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonElement;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
-import net.minecraft.nbt.TagParser;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
-import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TieredItem;
 import net.minecraft.world.item.Tiers;
-import net.minecraftforge.fml.ModLoader;
-import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
-import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
-import yesman.epicfight.api.data.reloader.SkillManager;
-import yesman.epicfight.api.forgeevent.WeaponCapabilityPresetRegistryEvent;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.ColliderPreset;
 import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.gameasset.EpicFightSounds;
-import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.skill.BattojutsuPassive;
 import yesman.epicfight.skill.SkillSlots;
@@ -46,7 +23,7 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
 @SuppressWarnings("deprecation") // getLevel
-public class WeaponCapabilityPresets extends SimpleJsonResourceReloadListener {
+public class WeaponCapabilityPresets {
 	public static final Function<Item, CapabilityItem.Builder> AXE = (item) -> {
 		CapabilityItem.Builder builder = WeaponCapability.builder()
 			.category(WeaponCategories.AXE)
@@ -69,6 +46,7 @@ public class WeaponCapabilityPresets extends SimpleJsonResourceReloadListener {
 		
 		return builder;
 	};
+	
 	public static final Function<Item, CapabilityItem.Builder> HOE = (item) -> {
 		WeaponCapability.Builder builder = WeaponCapability.builder()
 			.category(WeaponCategories.HOE)
@@ -83,6 +61,7 @@ public class WeaponCapabilityPresets extends SimpleJsonResourceReloadListener {
 		
 		return builder;
 	};
+	
 	public static final Function<Item, CapabilityItem.Builder> PICKAXE = (item) -> {
 		WeaponCapability.Builder builder = WeaponCapability.builder()
 			.category(WeaponCategories.PICKAXE)
@@ -103,6 +82,7 @@ public class WeaponCapabilityPresets extends SimpleJsonResourceReloadListener {
 		
 		return builder;
 	};
+	
 	public static final Function<Item, CapabilityItem.Builder> SHOVEL = (item) -> {
 		WeaponCapability.Builder builder = WeaponCapability.builder()
 			.category(WeaponCategories.SHOVEL)
@@ -117,6 +97,7 @@ public class WeaponCapabilityPresets extends SimpleJsonResourceReloadListener {
 		
 		return builder;
 	};
+	
 	public static final Function<Item, CapabilityItem.Builder> SWORD = (item) -> {
 		WeaponCapability.Builder builder = WeaponCapability.builder()
 			.category(WeaponCategories.SWORD)
@@ -148,7 +129,7 @@ public class WeaponCapabilityPresets extends SimpleJsonResourceReloadListener {
 		return builder;
 	};
 	public static final Function<Item, CapabilityItem.Builder> SPEAR = (item) ->
-			WeaponCapability.builder()
+		WeaponCapability.builder()
 			.category(WeaponCategories.SPEAR)
 			.styleProvider((playerpatch) -> (playerpatch.getHoldingItemCapability(InteractionHand.OFF_HAND).getWeaponCategory() == WeaponCategories.SHIELD) ? 
 					Styles.ONE_HAND : Styles.TWO_HAND)
@@ -169,7 +150,7 @@ public class WeaponCapabilityPresets extends SimpleJsonResourceReloadListener {
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.SPEAR_GUARD);
 
 	public static final Function<Item, CapabilityItem.Builder> GREATSWORD = (item) ->
-			WeaponCapability.builder()
+		WeaponCapability.builder()
 			.category(WeaponCategories.GREATSWORD)
 			.styleProvider((playerpatch) -> Styles.TWO_HAND)
 			.collider(ColliderPreset.GREATSWORD)
@@ -191,7 +172,8 @@ public class WeaponCapabilityPresets extends SimpleJsonResourceReloadListener {
 	    	.livingMotionModifier(Styles.TWO_HAND, LivingMotions.CREATIVE_IDLE, Animations.BIPED_HOLD_GREATSWORD)
 	    	.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.GREATSWORD_GUARD);
 
-	public static final Function<Item, CapabilityItem.Builder> UCHIGATANA = (item) -> WeaponCapability.builder()
+	public static final Function<Item, CapabilityItem.Builder> UCHIGATANA = (item) ->
+		WeaponCapability.builder()
 			.category(WeaponCategories.UCHIGATANA)
 			.styleProvider((entitypatch) -> {
 				if (entitypatch instanceof PlayerPatch<?> playerpatch && (playerpatch.getSkill(SkillSlots.WEAPON_PASSIVE).getDataManager().hasData(BattojutsuPassive.SHEATH) &&
@@ -230,7 +212,7 @@ public class WeaponCapabilityPresets extends SimpleJsonResourceReloadListener {
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.UCHIGATANA_GUARD);
 
 	public static final Function<Item, CapabilityItem.Builder> TACHI = (item) ->
-			WeaponCapability.builder()
+		WeaponCapability.builder()
 			.category(WeaponCategories.TACHI)
 			.styleProvider((playerpatch) -> Styles.TWO_HAND)
 			.collider(ColliderPreset.TACHI)
@@ -250,7 +232,8 @@ public class WeaponCapabilityPresets extends SimpleJsonResourceReloadListener {
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.FALL, Animations.BIPED_HOLD_TACHI)
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.LONGSWORD_GUARD);
 
-	public static final Function<Item, CapabilityItem.Builder> LONGSWORD = (item) -> WeaponCapability.builder()
+	public static final Function<Item, CapabilityItem.Builder> LONGSWORD = (item) ->
+		WeaponCapability.builder()
 			.category(WeaponCategories.LONGSWORD)
 			.styleProvider((playerpatch) -> {
 				if (playerpatch.getHoldingItemCapability(InteractionHand.OFF_HAND).getWeaponCategory() == WeaponCategories.SHIELD) {
@@ -290,8 +273,9 @@ public class WeaponCapabilityPresets extends SimpleJsonResourceReloadListener {
 			.livingMotionModifier(Styles.ONE_HAND, LivingMotions.BLOCK, Animations.SWORD_GUARD)
 			.livingMotionModifier(Styles.TWO_HAND, LivingMotions.BLOCK, Animations.LONGSWORD_GUARD)
 			.livingMotionModifier(Styles.OCHS, LivingMotions.BLOCK, Animations.LONGSWORD_GUARD);
+	
 	public static final Function<Item, CapabilityItem.Builder> DAGGER = (item) ->
-			WeaponCapability.builder()
+		WeaponCapability.builder()
 			.category(WeaponCategories.DAGGER)
 			.styleProvider((playerpatch) -> playerpatch.getHoldingItemCapability(InteractionHand.OFF_HAND).getWeaponCategory() == WeaponCategories.DAGGER ? Styles.TWO_HAND : Styles.ONE_HAND)
 			.hitSound(EpicFightSounds.BLADE_HIT.get())
@@ -349,112 +333,4 @@ public class WeaponCapabilityPresets extends SimpleJsonResourceReloadListener {
 	public static final Function<Item, CapabilityItem.Builder> SHIELD = (item) -> CapabilityItem.builder()
 			.constructor(ShieldCapability::new)
 			.category(WeaponCategories.SHIELD);
-	
-	private static final Map<String, Function<Item, CapabilityItem.Builder>> PRESETS = Maps.newHashMap();
-	
-	public static void register() {
-		Map<String, Function<Item, CapabilityItem.Builder>> typeEntry = Maps.newHashMap();
-		typeEntry.put("axe", AXE);
-		typeEntry.put("fist", FIST);
-		typeEntry.put("hoe", HOE);
-		typeEntry.put("pickaxe", PICKAXE);
-		typeEntry.put("shovel", SHOVEL);
-		typeEntry.put("sword", SWORD);
-		typeEntry.put("spear", SPEAR);
-		typeEntry.put("greatsword", GREATSWORD);
-		typeEntry.put("uchigatana", UCHIGATANA);
-		typeEntry.put("tachi", TACHI);
-		typeEntry.put("longsword", LONGSWORD);
-		typeEntry.put("dagger", DAGGER);
-		typeEntry.put("bow", BOW);
-		typeEntry.put("crossbow", CROSSBOW);
-		typeEntry.put("trident", TRIDENT);
-		typeEntry.put("shield", SHIELD);
-		
-		WeaponCapabilityPresetRegistryEvent weaponCapabilityPresetRegistryEvent = new WeaponCapabilityPresetRegistryEvent(typeEntry);
-		ModLoader.get().postEvent(weaponCapabilityPresetRegistryEvent);
-		weaponCapabilityPresetRegistryEvent.getTypeEntry().forEach(PRESETS::put);
-	}
-	
-	public static Function<Item, CapabilityItem.Builder> get(String typeName) {
-		return PRESETS.get(typeName);
-	}
-	
-	private static final Gson GSON = (new GsonBuilder()).create();
-	private static final List<CompoundTag> TAGMAP = Lists.newArrayList();
-	
-	public WeaponCapabilityPresets() {
-		super(GSON, "capabilities/weapons/types");
-	}
-	
-	@Override
-	protected void apply(Map<ResourceLocation, JsonElement> packEntry, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-		for (Map.Entry<ResourceLocation, JsonElement> entry : packEntry.entrySet()) {
-			CompoundTag nbt = null;
-			
-			try {
-				nbt = TagParser.parseTag(entry.getValue().toString());
-			} catch (CommandSyntaxException e) {
-				e.printStackTrace();
-			}
-			
-			try {
-				WeaponCapability.Builder builder = deserializeWeaponCapabilityBuilder(nbt);
-				PRESETS.put(entry.getKey().getPath(), (itemstack) -> builder);
-				TAGMAP.add(nbt);
-			} catch (Exception e) {
-				EpicFightMod.LOGGER.warn("Error while deserializing datapack for " + entry.getKey());
-				e.printStackTrace();
-			}
-		}
-	}
-	
-	private static WeaponCapability.Builder deserializeWeaponCapabilityBuilder(CompoundTag tag) {
-		WeaponCapability.Builder builder = WeaponCapability.builder();
-		builder.category(WeaponCategory.ENUM_MANAGER.get(tag.getString("category")));
-		builder.collider(ItemCapabilityReloadListener.deserializeCollider(tag.getCompound("collider")));
-		
-		CompoundTag combosTag = tag.getCompound("combos");
-		
-		for (String key : combosTag.getAllKeys()) {
-			Style style = Style.ENUM_MANAGER.get(key);
-			ListTag comboAnimations = combosTag.getList(key, Tag.TAG_STRING);
-			StaticAnimation[] animArray = new StaticAnimation[comboAnimations.size()];
-			
-			for (int i = 0; i < comboAnimations.size(); i++) {
-				animArray[i] = EpicFightMod.getInstance().animationManager.findAnimationByPath(comboAnimations.getString(i));
-			}
-			
-			builder.newStyleCombo(style, animArray);
-		}
-		
-		CompoundTag innateSkillsTag = tag.getCompound("innate_skills");
-		
-		for (String key : innateSkillsTag.getAllKeys()) {
-			Style style = Style.ENUM_MANAGER.get(key);
-			
-			builder.innateSkill(style, (itemstack) -> SkillManager.getSkill(innateSkillsTag.getString(key)));
-		}
-		
-		CompoundTag livingmotionModifierTag = tag.getCompound("livingmotion_modifier");
-		
-		for (String sStyle : livingmotionModifierTag.getAllKeys()) {
-			Style style = Style.ENUM_MANAGER.get(sStyle);
-			CompoundTag styleAnimationTag = livingmotionModifierTag.getCompound(sStyle);
-			
-			for (String sLivingmotion : styleAnimationTag.getAllKeys()) {
-				LivingMotion livingmotion = LivingMotion.ENUM_MANAGER.get(sLivingmotion);
-				StaticAnimation animation = EpicFightMod.getInstance().animationManager.findAnimationByPath(styleAnimationTag.getString(sLivingmotion));
-				
-				builder.livingMotionModifier(style, livingmotion, animation);
-			}
-		}
-		
-		
-		WeaponCapability.Builder builderx = WeaponCapability.builder()
-				.styleProvider((playerpatch) -> playerpatch.getHoldingItemCapability(InteractionHand.OFF_HAND).getWeaponCategory() == WeaponCategories.SWORD ? Styles.TWO_HAND : Styles.ONE_HAND)
-				.weaponCombinationPredicator((entitypatch) -> EpicFightCapabilities.getItemStackCapability(entitypatch.getOriginal().getOffhandItem()).getWeaponCategory() == WeaponCategories.SWORD);
-		
-		return builder;
-	}
 }

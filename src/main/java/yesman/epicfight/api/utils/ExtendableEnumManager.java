@@ -25,7 +25,7 @@ public class ExtendableEnumManager<T> {
 			Method m = targetClss.getMethod("values");
 			m.invoke(null);
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			EpicFightMod.LOGGER.warn("Error when loading extendable enum " + targetClss);
+			EpicFightMod.LOGGER.warn("Error while loading extendable enum " + targetClss);
 			e.printStackTrace();
 		}
 	}
@@ -35,7 +35,7 @@ public class ExtendableEnumManager<T> {
 		String enumName = value.toString().toLowerCase(Locale.ROOT);
 		
 		if (this.enumMapByName.containsKey(enumName)) {
-			throw new IllegalArgumentException("Enum name " + enumName + " already exists");
+			throw new IllegalArgumentException("Enum name " + enumName + " already exists in " + this.namespace);
 		}
 		
 		this.enumMapByOrdinal.put(lastOrdinal, value);
@@ -46,11 +46,21 @@ public class ExtendableEnumManager<T> {
 	}
 	
 	public T get(int id) {
+		if (!this.enumMapByOrdinal.containsKey(id)) {
+			throw new IllegalArgumentException("Enum id " + id + " does not exist in " + this.namespace);
+		}
+		
 		return this.enumMapByOrdinal.get(id);
 	}
 	
 	public T get(String name) {
-		return this.enumMapByName.get(name.toLowerCase(Locale.ROOT));
+		String key = name.toLowerCase(Locale.ROOT);
+		
+		if (!this.enumMapByName.containsKey(key)) {
+			throw new IllegalArgumentException("Enum name " + key + " does not exist in " + this.namespace);
+		}
+		
+		return this.enumMapByName.get(key);
 	}
 	
 	public Collection<T> universalValues() {

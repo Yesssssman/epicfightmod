@@ -1,10 +1,11 @@
 {
 	"category": "sword",
+	"hit_particle": "epicfight:entity.hit.blunt",
 	"hit_sound": "epicfight:entity.hit.blunt",
-	"swing_sound": "epicfight:entity.weapon.whoosh",
+	"swing_sound": "epicfight:entity.weapon.whoosh_hard",
 	"styles":
 	{
-		"if":
+		"cases":
 		[
 			{
 				"condition": "epicfight:offhand_category",
@@ -14,7 +15,14 @@
 				"style": "two_hand"
 			}
 		],
-		"else": "one_hand"
+		"default": "one_hand"
+	},
+	"offhand_item_compatible_predicate":
+	{
+		"condition": "epicfight:offhand_category",
+		"predicate": {
+			"category": "sword"
+		}
 	},
 	"collider":
     {
