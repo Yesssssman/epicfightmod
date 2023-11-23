@@ -80,8 +80,13 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 			BUILDERS.put(registryName, pair);
 			
 			if (!BUILDERS.containsKey(registryName)) {
-				T instance = constructor.apply(builder);
-				throw new IllegalStateException("Failed to register skill " + modid + ":" + registryName + " (Type: " + instance.getClass().getCanonicalName() + ")");
+				EpicFightMod.LOGGER.warn("Registry Name: " + registryName + " " + pair + " current state of BUILDERS registry:");
+				
+				for (Map.Entry<ResourceLocation, Pair<? extends Skill.Builder<?>, Function<? extends Skill.Builder<?>, ? extends Skill>>> entry : BUILDERS.entrySet()) {
+					System.out.println(entry.getKey() +" "+ entry.getValue());
+				}
+				
+				throw new IllegalStateException("Failed to register skill " + modid + ":" + registryName);
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
