@@ -40,7 +40,8 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 	private static final Map<ResourceLocation, Skill> SKILLS = Maps.newHashMap();
 	private static final Map<ResourceLocation, Skill> LEARNABLE_SKILLS = Maps.newHashMap();
 	private static final Map<ResourceLocation, CompoundTag> PARAMETER_MAP = Maps.newHashMap();
-	private static final Map<ResourceLocation, Pair<? extends Skill.Builder<?>, Function<? extends Skill.Builder<?>, ? extends Skill>>> BUILDERS = Maps.newHashMap();
+	private static final Map<ResourceLocation, Pair<? extends Skill.Builder<?>, Function<? extends Skill.Builder<?>, ? extends Skill>>> BUILDERS = Maps.newConcurrentMap();
+	
 	private static final Gson GSON = (new GsonBuilder()).create();
 	private static final Random RANDOM = new Random();
 	private static int LAST_PICK = 0;
@@ -78,21 +79,11 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 		try {
 			Pair<? extends Skill.Builder<?>, Function<? extends Skill.Builder<?>, ? extends Skill>> pair = Pair.of(builder.setRegistryName(registryName), constructor);
 			BUILDERS.put(registryName, pair);
-			
-			if (!BUILDERS.containsKey(registryName)) {
-				EpicFightMod.LOGGER.warn("Registry Name: " + registryName + " " + pair + " current state of BUILDERS registry:");
-				
-				for (Map.Entry<ResourceLocation, Pair<? extends Skill.Builder<?>, Function<? extends Skill.Builder<?>, ? extends Skill>>> entry : BUILDERS.entrySet()) {
-					System.out.println(entry.getKey() +" "+ entry.getValue());
-				}
-				
-				throw new IllegalStateException("Failed to register skill " + modid + ":" + registryName);
-			}
+			EpicFightMod.LOGGER.info("Registered skill " + modid + ":" + registryName);
 		} catch (Exception e) {
 			e.printStackTrace();
+			throw new IllegalStateException("Failed to register skill " + modid + ":" + registryName);
 		}
-		
-		EpicFightMod.LOGGER.info("Registered skill " + modid + ":" + registryName);
 	}
 	
 	public static void buildAll() {
@@ -137,6 +128,8 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 				PARAMETER_MAP.put(entry.getKey(), tag);
 			} else {
 				EpicFightMod.LOGGER.warn("Skill " + entry.getKey() + " not exists");
+				
+				System.out.println(BUILDERS.containsKey(entry.getKey()) + " is empty but what about the concurrent map? " + BUILDERS.containsKey(entry.getKey()));
 			}
 		}
 	}
