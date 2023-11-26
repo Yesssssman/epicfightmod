@@ -743,14 +743,14 @@ public class Animations {
 					}
 				}, Side.CLIENT));
 		BIPED_PHANTOM_ASCENT_BACKWARD = new ActionAnimation(0.05F, 0.7F, "biped/skill/phantom_ascent_backward", biped)
-				.addStateRemoveOld(EntityState.MOVEMENT_LOCKED, true)
+				.addStateRemoveOld(EntityState.MOVEMENT_LOCKED, false)
 				.newTimePair(0.0F, 0.5F)
 				.addStateRemoveOld(EntityState.INACTION, true)
 				.addEvents(StaticAnimationProperty.ON_BEGIN_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
 					Vec3 pos = entitypatch.getOriginal().position();
 					
 					entitypatch.playSound(EpicFightSounds.ROLL, 0, 0);
-					entitypatch.getOriginal().level.addAlwaysVisibleParticle(EpicFightParticles.AIR_BURST.get(), pos.x, pos.y, pos.z, 0, -1, 2);
+					entitypatch.getOriginal().level.addAlwaysVisibleParticle(EpicFightParticles.AIR_BURST.get(), pos.x, pos.y + entitypatch.getOriginal().getBbHeight() * 0.5D, pos.z, 0, -1, 2);
 				}, Side.CLIENT))
 				.addEvents(StaticAnimationProperty.ON_END_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
 					if (entitypatch instanceof PlayerPatch playerpatch) {
