@@ -11,7 +11,7 @@ import net.minecraft.world.item.crafting.Ingredient;
 public enum EpicFightItemTier implements Tier {
 	UCHIGATANA(4, 1625, 9.0F, 6.0F, 22, () -> {
 	      return Ingredient.of(Items.NETHERITE_INGOT);
-	}), KNUCKLE(4, 255, 9.0F, 0.0F, 16, () -> {
+	}), GLOVE(4, 255, 9.0F, 0.0F, 16, () -> {
 	      return Ingredient.of(Items.IRON_INGOT);
 	});
 
@@ -22,7 +22,7 @@ public enum EpicFightItemTier implements Tier {
 	private final int enchantability;
 	private final LazyLoadedValue<Ingredient> repairMaterial;
 
-	EpicFightItemTier(int harvestLevelIn, int maxUsesIn, float efficiencyIn, float attackDamageIn, int enchantabilityIn, Supplier<Ingredient> repairMaterialIn) {
+	private EpicFightItemTier(int harvestLevelIn, int maxUsesIn, float efficiencyIn, float attackDamageIn, int enchantabilityIn, Supplier<Ingredient> repairMaterialIn) {
 		this.harvestLevel = harvestLevelIn;
 		this.maxUses = maxUsesIn;
 		this.efficiency = efficiencyIn;

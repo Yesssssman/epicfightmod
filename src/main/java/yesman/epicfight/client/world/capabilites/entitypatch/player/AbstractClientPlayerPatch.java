@@ -57,7 +57,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	public void updateMotion(boolean considerInaction) {
 		if (this.original.getHealth() <= 0.0F) {
 			currentLivingMotion = LivingMotions.DEATH;
-		} else if (this.state.movementLocked() && considerInaction) {
+		} else if (!this.state.updateLivingMotion() && considerInaction) {
 			currentLivingMotion = LivingMotions.INACTION;
 		} else {
 			ClientAnimator animator = this.getClientAnimator();
@@ -162,7 +162,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 		this.prevYaw = this.modelYRot;
 		this.prevBodyYaw = this.bodyYaw;
 		
-		if (this.getEntityState().inaction()) {
+		if (!this.getEntityState().updateLivingMotion()) {
 			this.original.yBodyRot = this.original.getYRot();
 		}
 		

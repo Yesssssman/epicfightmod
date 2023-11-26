@@ -298,7 +298,7 @@ public class WeaponCapabilityPresets {
 			.newStyleCombo(Styles.ONE_HAND, Animations.FIST_AUTO1, Animations.FIST_AUTO2, Animations.FIST_AUTO3, Animations.FIST_DASH, Animations.FIST_AIR_SLASH)
 			.innateSkill(Styles.ONE_HAND, (itemstack) -> EpicFightSkills.RELENTLESS_COMBO)
 			.category(WeaponCategories.FIST)
-			.constructor(KnuckleCapability::new);
+			.constructor(GloveCapability::new);
 	
 	public static final Function<Item, CapabilityItem.Builder> BOW =  (item) -> RangedWeaponCapability.builder()
 			.addAnimationsModifier(LivingMotions.IDLE, Animations.BIPED_IDLE)

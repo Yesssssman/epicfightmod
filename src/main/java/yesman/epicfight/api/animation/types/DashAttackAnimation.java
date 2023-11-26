@@ -50,6 +50,7 @@ public class DashAttackAnimation extends AttackAnimation {
 			.addState(EntityState.CAN_BASIC_ATTACK, false)
 			.newTimePair(phase.start, phase.recovery)
 			.addState(EntityState.MOVEMENT_LOCKED, true)
+			.addState(EntityState.UPDATE_LIVING_MOTION, false)
 			.newTimePair(phase.start, phase.end)
 			.addState(EntityState.INACTION, true)
 			.newTimePair(phase.antic, phase.end)
