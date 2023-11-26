@@ -261,7 +261,7 @@
 	"skill.epicfight.demolition_leap": "Demolition Leap",
 	"skill.epicfight.demolition_leap.tooltip": "Gather energy to launch yourself into a targeted direction, reducing next fall damage by 50%.",
 	"skill.epicfight.phantom_ascent": "Phantom Ascent",
-	"skill.epicfight.phantom_ascent.tooltip": "Allows you to jump %s times in the air.",
+	"skill.epicfight.phantom_ascent.tooltip": "Allows you to jump %d times more in the air.",
 	"skill.epicfight.passive.category": "Passive Skill",
 	"skill.epicfight.dodge.category": "Dodge Skill",
 	"skill.epicfight.guard.category": "Guard Skill",

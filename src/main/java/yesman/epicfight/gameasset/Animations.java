@@ -728,8 +728,9 @@ public class Animations {
 				.addStateRemoveOld(EntityState.CAN_SKILL_EXECUTION, true);
 		BIPED_DEMOLITION_LEAP = new ActionAnimation(0.05F, 0.45F, "biped/skill/demolition_leap", biped);
 		BIPED_PHANTOM_ASCENT_FORWARD = new ActionAnimation(0.05F, 0.7F, "biped/skill/phantom_ascent_forward", biped)
-				//.newTimePair(0.0F, 0.7F)
 				.addStateRemoveOld(EntityState.MOVEMENT_LOCKED, false)
+				.newTimePair(0.0F, 0.5F)
+				.addStateRemoveOld(EntityState.INACTION, true)
 				.addEvents(StaticAnimationProperty.ON_BEGIN_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
 					Vec3 pos = entitypatch.getOriginal().position();
 					
@@ -742,8 +743,9 @@ public class Animations {
 					}
 				}, Side.CLIENT));
 		BIPED_PHANTOM_ASCENT_BACKWARD = new ActionAnimation(0.05F, 0.7F, "biped/skill/phantom_ascent_backward", biped)
-				//.newTimePair(0.0F, 0.7F)
 				.addStateRemoveOld(EntityState.MOVEMENT_LOCKED, true)
+				.newTimePair(0.0F, 0.5F)
+				.addStateRemoveOld(EntityState.INACTION, true)
 				.addEvents(StaticAnimationProperty.ON_BEGIN_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
 					Vec3 pos = entitypatch.getOriginal().position();
 					

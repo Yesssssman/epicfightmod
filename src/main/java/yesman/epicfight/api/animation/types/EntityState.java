@@ -35,7 +35,7 @@ public class EntityState {
 	public static final StateFactor<Boolean> INACTION = new StateFactor<>("inaction", false);
 	public static final StateFactor<Boolean> KNOCKDOWN = new StateFactor<>("knockdown", false);
 	public static final StateFactor<Boolean> LOCKON_ROTATE = new StateFactor<>("lockonRotate", false);
-	public static final StateFactor<Boolean> UPDATE_LIVING_MOTION = new StateFactor<>("updateLivingMotion", false);
+	public static final StateFactor<Boolean> UPDATE_LIVING_MOTION = new StateFactor<>("updateLivingMotion", true);
 	public static final StateFactor<Integer> HURT_LEVEL = new StateFactor<>("hurtLevel", 0);
 	public static final StateFactor<Integer> PHASE_LEVEL = new StateFactor<>("phaseLevel", 0);
 	public static final StateFactor<Function<DamageSource, AttackResult.ResultType>> ATTACK_RESULT = new StateFactor<>("attackResultModifier", (damagesource) -> AttackResult.ResultType.SUCCESS);

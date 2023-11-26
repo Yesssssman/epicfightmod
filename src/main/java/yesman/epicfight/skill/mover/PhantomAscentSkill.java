@@ -1,5 +1,6 @@
 package yesman.epicfight.skill.mover;
 
+import java.util.List;
 import java.util.UUID;
 
 import net.minecraft.client.Minecraft;
@@ -7,6 +8,8 @@ import net.minecraft.client.player.Input;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -24,7 +27,7 @@ public class PhantomAscentSkill extends Skill {
 	private static final SkillDataKey<Boolean> JUMP_KEY_PRESSED_LAST_TIME = SkillDataKey.createDataKey(SkillDataManager.ValueType.BOOLEAN);
 	private static final SkillDataKey<Integer> JUMP_COUNT = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
 	private final StaticAnimation[] animations = new StaticAnimation[2];
-	private int maxJumpAmount;
+	private int extraJumps;
 	
 	public PhantomAscentSkill(Builder<? extends Skill> builder) {
 		super(builder);
@@ -36,7 +39,7 @@ public class PhantomAscentSkill extends Skill {
 	@Override
 	public void setParams(CompoundTag parameters) {
 		super.setParams(parameters);
-		this.maxJumpAmount = parameters.getInt("jump_amount");
+		this.extraJumps = parameters.getInt("extra_jumps");
 		this.consumption = 0.2F;
 	}
 	
@@ -49,7 +52,7 @@ public class PhantomAscentSkill extends Skill {
 		container.getDataManager().registerData(JUMP_COUNT);
 		
 		listener.addEventListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID, (event) -> {
-			if (event.getPlayerPatch().getOriginal().getAbilities().flying) {
+			if (event.getPlayerPatch().getOriginal().getAbilities().flying || event.getPlayerPatch().getEntityState().inaction()) {
 				return;
 			}
 			
@@ -65,9 +68,14 @@ public class PhantomAscentSkill extends Skill {
 				int jumpCounter = container.getDataManager().getDataValue(JUMP_COUNT);
 				
 				if (jumpCounter > 0 || !event.getPlayerPatch().getOriginal().isOnGround()) {
-					if (jumpCounter < this.maxJumpAmount) {
+					if (jumpCounter < (this.extraJumps + 1)) {
 						container.setResource(0.0F);
-						container.getDataManager().setDataF(JUMP_COUNT, (v) -> v + 1);
+						
+						if (jumpCounter == 0 && !event.getPlayerPatch().getOriginal().isOnGround()) {
+							container.getDataManager().setData(JUMP_COUNT, 2);
+						} else {
+							container.getDataManager().setDataF(JUMP_COUNT, (v) -> v + 1);
+						}
 						
 						Input input = event.getMovementInput();
 						input.tick(false);
@@ -79,14 +87,13 @@ public class PhantomAscentSkill extends Skill {
 						int vertic = forward + backward;
 						int horizon = left + right;
 						int degree = -(90 * horizon * (1 - Math.abs(vertic)) + 45 * vertic * horizon);
-						
 						int scale = forward == 0 && backward == 0 && left == 0 && right == 0 ? 0 : (vertic < 0 ? -1 : 1);
 						Vec3 forwardHorizontal = Vec3.directionFromRotation(new Vec2(0, container.getExecuter().getOriginal().getViewYRot(1.0F)));
 						Vec3 jumpDir = OpenMatrix4f.transform(OpenMatrix4f.createRotatorDeg(-degree, Vec3f.Y_AXIS), forwardHorizontal.scale(0.15D * scale));
 						Vec3 deltaMove = container.getExecuter().getOriginal().getDeltaMovement();
-						
 						container.getExecuter().getOriginal().setDeltaMovement(deltaMove.x + jumpDir.x, 0.6D, deltaMove.z + jumpDir.z);
-						container.getExecuter().playAnimationSynchronized(this.animations[vertic < 0 ? 1 : 0], 0.0F);
+						
+						event.getPlayerPatch().playAnimationClientPreemptive(this.animations[vertic < 0 ? 1 : 0], 0.0F);
 						event.getPlayerPatch().changeModelYRot(degree);
 					};
 				} else {
@@ -115,5 +122,13 @@ public class PhantomAscentSkill extends Skill {
 	@Override
 	public boolean canExecute(PlayerPatch<?> executer) {
 		return false;
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	@Override
+	public List<Object> getTooltipArgsOfScreen(List<Object> list) {
+		list.add(this.extraJumps);
+		
+		return list;
 	}
 }

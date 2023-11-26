@@ -202,6 +202,11 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		ClientEngine.getInstance().renderEngine.zoomOut(40);
 	}
 	
+	public void playAnimationClientPreemptive(StaticAnimation animation, float convertTimeModifier) {
+		this.animator.playAnimation(animation, convertTimeModifier);
+		EpicFightNetworkManager.sendToServer(new CPPlayAnimation(animation.getNamespaceId(), animation.getId(), convertTimeModifier, false, false));
+	}
+	
 	@Override
 	public void playAnimationSynchronized(StaticAnimation animation, float convertTimeModifier, AnimationPacketProvider packetProvider) {
 		EpicFightNetworkManager.sendToServer(new CPPlayAnimation(animation.getNamespaceId(), animation.getId(), convertTimeModifier, false, true));
@@ -355,7 +360,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 				Vec3 playerPosition = this.original.position();
 				Vec3 targetPosition = this.rayTarget.position();
 				Vec3 toTarget = targetPosition.subtract(playerPosition);
-				float yaw = (float)MathUtils.getYRotOfVector(toTarget);
+				float yaw = (float)MathUtils.getYRotOfVector(toTarget); 
 				float pitch = (float)MathUtils.getXRotOfVector(toTarget);
 				this.original.setYRot(yaw);
 				this.original.setXRot(pitch);
