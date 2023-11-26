@@ -41,7 +41,6 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 	private static final Map<ResourceLocation, Skill> LEARNABLE_SKILLS = Maps.newHashMap();
 	private static final Map<ResourceLocation, CompoundTag> PARAMETER_MAP = Maps.newHashMap();
 	private static final Map<ResourceLocation, Pair<? extends Skill.Builder<?>, Function<? extends Skill.Builder<?>, ? extends Skill>>> BUILDERS = Maps.newConcurrentMap();
-	
 	private static final Gson GSON = (new GsonBuilder()).create();
 	private static final Random RANDOM = new Random();
 	private static int LAST_PICK = 0;

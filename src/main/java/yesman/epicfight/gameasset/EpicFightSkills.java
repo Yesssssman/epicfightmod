@@ -28,6 +28,7 @@ import yesman.epicfight.skill.guard.ParryingSkill;
 import yesman.epicfight.skill.identity.RevelationSkill;
 import yesman.epicfight.skill.identity.MeteorSlamSkill;
 import yesman.epicfight.skill.mover.DemolitionLeapSkill;
+import yesman.epicfight.skill.mover.PhantomAscentSkill;
 import yesman.epicfight.skill.passive.BerserkerSkill;
 import yesman.epicfight.skill.passive.DeathHarvestSkill;
 import yesman.epicfight.skill.passive.EmergencyEscapeSkill;
@@ -102,6 +103,7 @@ public class EpicFightSkills {
 	public static Skill REVELATION;
 	/** Mover skills **/
 	public static Skill DEMOLITION_LEAP;
+	public static Skill PHANTOM_ASCENT;
 	
 	public static void registerSkills() {
 		SkillManager.register(BasicAttack::new, BasicAttack.createBasicAttackBuilder(), EpicFightMod.MODID, "basic_attack");
@@ -146,6 +148,7 @@ public class EpicFightSkills {
 		SkillManager.register(RevelationSkill::new, RevelationSkill.createRevelationSkillBuilder(), EpicFightMod.MODID, "revelation");
 		
 		SkillManager.register(DemolitionLeapSkill::new, Skill.createMoverBuilder().setActivateType(ActivateType.CHARGING), EpicFightMod.MODID, "demolition_leap");
+		SkillManager.register(PhantomAscentSkill::new, Skill.createMoverBuilder().setResource(Resource.COOLDOWN), EpicFightMod.MODID, "phantom_ascent");
 	}
 	
 	@SubscribeEvent
@@ -159,10 +162,10 @@ public class EpicFightSkills {
 		GUARD = onBuild.build(EpicFightMod.MODID, "guard");
 		PARRYING = onBuild.build(EpicFightMod.MODID, "parrying");
 		IMPACT_GUARD = onBuild.build(EpicFightMod.MODID, "impact_guard");
-			BERSERKER = onBuild.build(EpicFightMod.MODID, "berserker");
+		
+		BERSERKER = onBuild.build(EpicFightMod.MODID, "berserker");
 		DEATH_HARVEST = onBuild.build(EpicFightMod.MODID, "death_harvest");
 		EMERGENCY_ESCAPE = onBuild.build(EpicFightMod.MODID, "emergency_escape");
-
 		ENDURANCE = onBuild.build(EpicFightMod.MODID, "endurance");
 		FORBIDDEN_STRENGTH = onBuild.build(EpicFightMod.MODID, "forbidden_strength");
 		HYPERVITALITY = onBuild.build(EpicFightMod.MODID, "hypervitality");
@@ -174,6 +177,7 @@ public class EpicFightSkills {
 		REVELATION = onBuild.build(EpicFightMod.MODID, "revelation");
 		
 		DEMOLITION_LEAP = onBuild.build(EpicFightMod.MODID, "demolition_leap");
+		PHANTOM_ASCENT = onBuild.build(EpicFightMod.MODID, "phantom_ascent");
 		
 		WeaponInnateSkill sweepingEdge = onBuild.build(EpicFightMod.MODID, "sweeping_edge");
 		sweepingEdge.newProperty()
@@ -296,7 +300,7 @@ public class EpicFightSkills {
 					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(SourceTags.WEAPON_INNATE, SourceTags.GUARD_PUNCTURE))
 					.registerPropertiesToAnimation();
 		SHARP_STAB = sharpStab;
-
+		
 		LIECHTENAUER = onBuild.build(EpicFightMod.MODID, "liechtenauer");
 		
 		WeaponInnateSkill eviscerate = onBuild.build(EpicFightMod.MODID, "eviscerate");

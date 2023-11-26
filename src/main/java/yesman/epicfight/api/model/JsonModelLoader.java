@@ -288,12 +288,6 @@ public class JsonModelLoader {
 		boolean root = true;
 		Armature armature = animation.getArmature();
 		
-		/**
-		if (!action && !attack && (FMLEnvironment.dist == Dist.DEDICATED_SERVER)) {
-				return;
-
-		}**/
-		
 		Set<String> allowedJoints = Sets.newLinkedHashSet();
 		
 		if (attack) {

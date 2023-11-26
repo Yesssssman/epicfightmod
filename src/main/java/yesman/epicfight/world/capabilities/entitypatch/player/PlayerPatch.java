@@ -17,7 +17,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
-import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
+import net.minecraftforge.event.entity.living.LivingFallEvent;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -447,7 +447,8 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	public void openSkillBook(ItemStack itemstack, InteractionHand hand) {
 	}
 	
-	public void onFall(PlayerFlyableFallEvent event) {
+	@Override
+	public void onFall(LivingFallEvent event) {
 		FallEvent fallEvent = new FallEvent(this, event);
 		
 		this.getEventListener().triggerEvents(EventType.FALL_EVENT, fallEvent);

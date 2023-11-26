@@ -66,6 +66,7 @@ public class BasicAttackAnimation extends AttackAnimation {
 			.addState(EntityState.CAN_SKILL_EXECUTION, false)
 			.newTimePair(phase.start, phase.recovery)
 			.addState(EntityState.MOVEMENT_LOCKED, true)
+			.addState(EntityState.UPDATE_LIVING_MOTION, false)
 			.addState(EntityState.CAN_BASIC_ATTACK, false)
 			.newTimePair(phase.start, phase.end)
 			.addState(EntityState.INACTION, true)
@@ -105,6 +106,7 @@ public class BasicAttackAnimation extends AttackAnimation {
 		
 		if (!entitypatch.getOriginal().level().getGameRules().getRule(EpicFightGamerules.STIFF_COMBO_ATTACKS).get()) {
 			stateMap.put(EntityState.MOVEMENT_LOCKED, (Object)false);
+			stateMap.put(EntityState.UPDATE_LIVING_MOTION, (Object)true);
 		}
 		
 		return stateMap;

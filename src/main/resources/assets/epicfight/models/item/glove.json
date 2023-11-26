@@ -1,8 +1,8 @@
 {
 	"credit": "End_Rage waz here",
 	"textures": {
-		"0": "epicfight:item/knuckles",
-		"particle": "epicfight:item/knuckles"
+		"0": "epicfight:item/glove",
+		"particle": "epicfight:item/glove"
 	},
 	"elements": [
 		{

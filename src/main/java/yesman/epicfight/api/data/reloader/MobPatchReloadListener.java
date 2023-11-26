@@ -531,7 +531,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		} else {
 			extract.put("model", original.get("model"));
 			extract.put("armature", original.get("armature"));
-			extract.putBoolean("isHumanoid", original.contains("isHumanoid") && original.getBoolean("isHumanoid"));
+			extract.putBoolean("isHumanoid", original.contains("isHumanoid") ? original.getBoolean("isHumanoid") : false);
 			extract.put("renderer", original.get("renderer"));
 			extract.put("faction", original.get("faction"));
 			extract.put("default_livingmotions", original.get("default_livingmotions"));
@@ -578,7 +578,8 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 					boolean humanoid = tag.getBoolean("isHumanoid");
 					Armature armature = Armatures.getOrCreateArmature(mc.getResourceManager(), armatureLocation, humanoid ? Armature::new : HumanoidArmature::new);
 					
-					Armatures.registerEntityTypeArmature(entityType, armature);				}
+					Armatures.registerEntityTypeArmature(entityType, armature);
+				}
 				
 				ClientEngine.getInstance().renderEngine.registerCustomEntityRenderer(entityType, tag.contains("preset") ? tag.getString("preset") : tag.getString("renderer"));
 			}

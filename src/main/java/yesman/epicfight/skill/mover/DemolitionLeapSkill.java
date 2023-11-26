@@ -33,7 +33,6 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 	private static final SkillDataKey<Boolean> PROTECT_NEXT_FALL = SkillDataKey.createDataKey(SkillDataManager.ValueType.BOOLEAN);
 	private static final UUID EVENT_UUID = UUID.fromString("3d142bf4-0dcd-11ee-be56-0242ac120002");
-	
 	private final StaticAnimation chargingAnimation;
 	private final StaticAnimation shootAnimation;
 	

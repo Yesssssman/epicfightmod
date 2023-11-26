@@ -6,8 +6,10 @@ import io.netty.buffer.Unpooled;
 import net.minecraft.client.player.Input;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.types.EntityState;
@@ -72,7 +74,8 @@ public class DodgeSkill extends Skill {
 	@Override
 	public FriendlyByteBuf gatherArguments(LocalPlayerPatch executer, ControllEngine controllEngine) {
 		Input input = executer.getOriginal().input;
-		input.tick(false, 0f);
+		float pulse = Mth.clamp(0.3F + EnchantmentHelper.getSneakingSpeedBonus(executer.getOriginal()), 0.0F, 1.0F);
+		input.tick(false, pulse);
 		
         int forward = input.up ? 1 : 0;
         int backward = input.down ? -1 : 0;

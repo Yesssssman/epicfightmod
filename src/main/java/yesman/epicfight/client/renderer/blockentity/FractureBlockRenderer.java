@@ -21,7 +21,7 @@ import yesman.epicfight.world.level.block.entity.FractureBlockEntity;
 @OnlyIn(Dist.CLIENT)
 public class FractureBlockRenderer implements BlockEntityRenderer<FractureBlockEntity> {
 	private final BlockRenderDispatcher blockRenderDispatcher;
-
+	
 	public FractureBlockRenderer(BlockEntityRendererProvider.Context context) {
 		this.blockRenderDispatcher = context.getBlockRenderDispatcher();
 	}

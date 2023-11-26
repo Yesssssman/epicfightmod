@@ -42,7 +42,7 @@ public class EpicFightItems {
 	public static final RegistryObject<Item> DIAMOND_DAGGER = ITEMS.register("diamond_dagger", () -> new DaggerItem(new Item.Properties(), Tiers.DIAMOND));
 	public static final RegistryObject<Item> NETHERITE_DAGGER = ITEMS.register("netherite_dagger", () -> new DaggerItem(new Item.Properties().fireResistant(), Tiers.NETHERITE));
 	
-	public static final RegistryObject<Item> KNUCKLE = ITEMS.register("knuckle", () -> new KnuckleItem(new Item.Properties(), EpicFightItemTier.KNUCKLE));
+	public static final RegistryObject<Item> GLOVE = ITEMS.register("glove", () -> new GloveItem(new Item.Properties(), EpicFightItemTier.GLOVE));
 	public static final RegistryObject<Item> BOKKEN = ITEMS.register("bokken", () -> new SwordItem(Tiers.WOOD, 3, -2.4F, new Item.Properties()));
 	
 	public static final RegistryObject<Item> STRAY_HAT = ITEMS.register("stray_hat", () -> new ArmorItem(EpicFightArmorMaterials.STRAY_CLOTH, ArmorItem.Type.HELMET, new Item.Properties()));

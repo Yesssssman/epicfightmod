@@ -36,6 +36,7 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.client.CPChangePlayerMode;
 import yesman.epicfight.network.client.CPPlayAnimation;
+import yesman.epicfight.network.client.CPRotateEntityModelYRot;
 import yesman.epicfight.network.client.CPSetPlayerTarget;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
@@ -202,6 +203,11 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		ClientEngine.getInstance().renderEngine.zoomOut(40);
 	}
 	
+	public void playAnimationClientPreemptive(StaticAnimation animation, float convertTimeModifier) {
+		this.animator.playAnimation(animation, convertTimeModifier);
+		EpicFightNetworkManager.sendToServer(new CPPlayAnimation(animation.getNamespaceId(), animation.getId(), convertTimeModifier, false, false));
+	}
+	
 	@Override
 	public void playAnimationSynchronized(StaticAnimation animation, float convertTimeModifier, AnimationPacketProvider packetProvider) {
 		EpicFightNetworkManager.sendToServer(new CPPlayAnimation(animation.getNamespaceId(), animation.getId(), convertTimeModifier, false, true));
@@ -343,13 +349,19 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	}
 	
 	@Override
+	public void changeModelYRot(float amount) {
+		super.changeModelYRot(amount);
+		EpicFightNetworkManager.sendToServer(new CPRotateEntityModelYRot(amount));
+	}
+	
+	@Override
 	public void correctRotation() {
 		if (this.targetLockedOn) {
 			if (this.rayTarget != null && !this.rayTarget.isRemoved()) {
 				Vec3 playerPosition = this.original.position();
 				Vec3 targetPosition = this.rayTarget.position();
 				Vec3 toTarget = targetPosition.subtract(playerPosition);
-				float yaw = (float)MathUtils.getYRotOfVector(toTarget);
+				float yaw = (float)MathUtils.getYRotOfVector(toTarget); 
 				float pitch = (float)MathUtils.getXRotOfVector(toTarget);
 				this.original.setYRot(yaw);
 				this.original.setXRot(pitch);
