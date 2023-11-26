@@ -46,7 +46,8 @@ public class EpicFightLootTables {
     				"epicfight:swordmaster",
     				"epicfight:guard",
     				"epicfight:step",
-    				"epicfight:roll"
+    				"epicfight:roll",
+    				"epicfight:phantom_ascent"
     			)).when(LootItemRandomChanceCondition.randomChance(dropChanceModifier)))
     		.build());
     		
@@ -64,7 +65,8 @@ public class EpicFightLootTables {
     				"epicfight:swordmaster",
     				"epicfight:guard",
     				"epicfight:step",
-    				"epicfight:roll"
+    				"epicfight:roll",
+    				"epicfight:phantom_ascent"
         		))).when(LootItemRandomChanceCondition.randomChance(dropChanceModifier))
         	.build());
     		
@@ -124,7 +126,8 @@ public class EpicFightLootTables {
     				"epicfight:swordmaster",
     				"epicfight:guard",
     				"epicfight:step",
-    				"epicfight:roll"
+    				"epicfight:roll",
+    				"epicfight:phantom_ascent"
         		))).when(LootItemRandomChanceCondition.randomChance(dropChanceModifier * 0.3F))
         	.build());
     	}
@@ -154,7 +157,8 @@ public class EpicFightLootTables {
     				"epicfight:forbidden_strength",
     				"epicfight:guard",
     				"epicfight:step",
-    				"epicfight:roll"
+    				"epicfight:roll",
+    				"epicfight:phantom_ascent"
     			))).when(LootItemRandomChanceCondition.randomChance(dropChanceModifier * 0.3F))
     		.build());
     	}
@@ -170,7 +174,8 @@ public class EpicFightLootTables {
     				"epicfight:forbidden_strength",
     				"epicfight:guard",
     				"epicfight:step",
-    				"epicfight:roll"
+    				"epicfight:roll",
+    				"epicfight:phantom_ascent"
     			))).when(LootItemRandomChanceCondition.randomChance(dropChanceModifier * 0.3F))
     		.build());
     	}
@@ -186,7 +191,8 @@ public class EpicFightLootTables {
     				"epicfight:forbidden_strength",
     				"epicfight:guard",
     				"epicfight:step",
-    				"epicfight:roll"
+    				"epicfight:roll",
+    				"epicfight:phantom_ascent"
     			))).when(LootItemRandomChanceCondition.randomChance(dropChanceModifier * 0.3F))
     		.build());
     	}
