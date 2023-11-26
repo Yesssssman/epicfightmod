@@ -18,7 +18,7 @@ apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin'
 
 
-version = '18.5.17'
+version = '18.5.18'
 group = 'yesman.epicfight'
 archivesBaseName = 'epicfight'
 
@@ -116,11 +116,11 @@ mixin {
 }
 
 dependencies {
-    minecraft 'net.minecraftforge:forge:1.18.2-40.2.10'
+    minecraft 'net.minecraftforge:forge:1.18.2-40.2.14'
     
-    //implementation fg.deobf("local:epicfight:18.5.1")
     //implementation fg.deobf("curse.maven:mantle-74924:3829975")
-    implementation fg.deobf("local:geckolib:0.57")
+    implementation fg.deobf("curse.maven:geckolib-388172:4181370")
+    //implementation fg.deobf("local:epicsamurai:0.0.2")
     
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }

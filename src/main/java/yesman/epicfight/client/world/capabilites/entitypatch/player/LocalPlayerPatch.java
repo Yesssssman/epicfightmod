@@ -36,6 +36,7 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.client.CPChangePlayerMode;
 import yesman.epicfight.network.client.CPPlayAnimation;
+import yesman.epicfight.network.client.CPRotateEntityModelYRot;
 import yesman.epicfight.network.client.CPSetPlayerTarget;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
@@ -339,6 +340,12 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		
 		this.original.setXRot(this.lockOnXRot);
 		this.original.setYRot(this.lockOnYRot);
+	}
+	
+	@Override
+	public void changeModelYRot(float amount) {
+		super.changeModelYRot(amount);
+		EpicFightNetworkManager.sendToServer(new CPRotateEntityModelYRot(amount));
 	}
 	
 	@Override

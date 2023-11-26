@@ -12,8 +12,6 @@ import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.gameasset.Animations;
-import yesman.epicfight.network.EpicFightNetworkManager;
-import yesman.epicfight.network.client.CPRotateEntityModelYRot;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.entity.DodgeLeft;
 
@@ -37,6 +35,7 @@ public class DodgeAnimation extends ActionAnimation {
 			.newTimePair(0.0F, delayTime)
 			.addState(EntityState.TURNING_LOCKED, true)
 			.addState(EntityState.MOVEMENT_LOCKED, true)
+			.addState(EntityState.UPDATE_LIVING_MOTION, false)
 			.addState(EntityState.CAN_BASIC_ATTACK, false)
 			.addState(EntityState.CAN_SKILL_EXECUTION, false)
 			.addState(EntityState.INACTION, true)
@@ -63,7 +62,6 @@ public class DodgeAnimation extends ActionAnimation {
 		
 		if (entitypatch.isLogicalClient() && entitypatch instanceof LocalPlayerPatch localPlayerPatch) {
 			localPlayerPatch.changeModelYRot(0);
-			EpicFightNetworkManager.sendToServer(new CPRotateEntityModelYRot(0));
 		}
 	}
 }

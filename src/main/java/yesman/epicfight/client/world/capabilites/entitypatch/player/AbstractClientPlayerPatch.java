@@ -61,7 +61,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	public void updateMotion(boolean considerInaction) {
 		if (this.original.getHealth() <= 0.0F) {
 			currentLivingMotion = LivingMotions.DEATH;
-		} else if (this.state.movementLocked() && considerInaction) {
+		} else if (this.state.updateLivingMotion() && considerInaction) {
 			currentLivingMotion = LivingMotions.INACTION;
 		} else {
 			ClientAnimator animator = this.getClientAnimator();

@@ -581,13 +581,13 @@ public class EntityEvents {
 			entitypatch.onFall(event);
 		}
 	}
-
+	
 	@SubscribeEvent
 	public static void playerFallEvent(PlayerFlyableFallEvent event) {
 		PlayerPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), PlayerPatch.class);
 		
 		if (entitypatch != null) {
-			entitypatch.onFall(event);
+			entitypatch.onFall(new LivingFallEvent(event.getEntityLiving(), event.getDistance(), event.getMultiplier()));
 		}
 	}
 }

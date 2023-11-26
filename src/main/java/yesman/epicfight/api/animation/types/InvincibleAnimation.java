@@ -11,6 +11,7 @@ public class InvincibleAnimation extends ActionAnimation {
 			.newTimePair(0.0F, Float.MAX_VALUE)
 			.addState(EntityState.TURNING_LOCKED, true)
 			.addState(EntityState.MOVEMENT_LOCKED, true)
+			.addState(EntityState.UPDATE_LIVING_MOTION, false)
 			.addState(EntityState.CAN_BASIC_ATTACK, false)
 			.addState(EntityState.CAN_SKILL_EXECUTION, true)
 			.addState(EntityState.INACTION, true)
