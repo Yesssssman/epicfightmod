@@ -27,6 +27,7 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 public class PhantomAscentSkill extends Skill {
 	private static final UUID EVENT_UUID = UUID.fromString("051a9bb2-7541-11ee-b962-0242ac120002");
 	private static final SkillDataKey<Boolean> JUMP_KEY_PRESSED_LAST_TIME = SkillDataKey.createDataKey(SkillDataManager.ValueType.BOOLEAN);
+	private static final SkillDataKey<Boolean> PROTECT_NEXT_FALL = SkillDataKey.createDataKey(SkillDataManager.ValueType.BOOLEAN);
 	private static final SkillDataKey<Integer> JUMP_COUNT = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
 	private final StaticAnimation[] animations = new StaticAnimation[2];
 	private int extraJumps;
@@ -51,10 +52,15 @@ public class PhantomAscentSkill extends Skill {
 		
 		PlayerEventListener listener = container.getExecuter().getEventListener();
 		container.getDataManager().registerData(JUMP_KEY_PRESSED_LAST_TIME);
+		container.getDataManager().registerData(PROTECT_NEXT_FALL);
 		container.getDataManager().registerData(JUMP_COUNT);
 		
 		listener.addEventListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID, (event) -> {
 			if (event.getPlayerPatch().getOriginal().getAbilities().flying || event.getPlayerPatch().getEntityState().inaction()) {
+				return;
+			}
+			
+			if (event.getPlayerPatch().getOriginal().getVehicle() != null || !event.getPlayerPatch().isBattleMode()) {
 				return;
 			}
 			
@@ -79,7 +85,10 @@ public class PhantomAscentSkill extends Skill {
 							container.getDataManager().setDataF(JUMP_COUNT, (v) -> v + 1);
 						}
 						
+						container.getDataManager().setDataSync(PROTECT_NEXT_FALL, true, event.getPlayerPatch().getOriginal());
+						
 						Input input = event.getMovementInput();
+						
 						float pulse = Mth.clamp(0.3F + EnchantmentHelper.getSneakingSpeedBonus(container.getExecuter().getOriginal()), 0.0F, 1.0F);
 						input.tick(false, pulse);
 						
@@ -107,9 +116,24 @@ public class PhantomAscentSkill extends Skill {
 			container.getDataManager().setData(JUMP_KEY_PRESSED_LAST_TIME, jumpPressed);
 		});
 		
+		listener.addEventListener(EventType.HURT_EVENT_PRE, EVENT_UUID, (event) -> {
+			if (event.getDamageSource().isFall() && container.getDataManager().getDataValue(PROTECT_NEXT_FALL)) { // This not synced
+				float damage = event.getAmount();
+				
+				if (damage < 2.5F) {
+					event.setAmount(0.0F);
+					event.setCanceled(true);
+					//System.out.println("shit " + event.getResult().hashCode() + " " + event.getAmount());
+				}
+				
+				container.getDataManager().setData(PROTECT_NEXT_FALL, false);
+			}
+		}, 1);
+		
 		listener.addEventListener(EventType.FALL_EVENT, EVENT_UUID, (event) -> {
+			container.getDataManager().setData(JUMP_COUNT, 0);
+			
 			if (event.getPlayerPatch().isLogicalClient()) {
-				container.getDataManager().setData(JUMP_COUNT, 0);
 				container.getDataManager().setData(JUMP_KEY_PRESSED_LAST_TIME, false);
 			}
 		});
@@ -119,6 +143,7 @@ public class PhantomAscentSkill extends Skill {
 	public void onRemoved(SkillContainer container) {
 		PlayerEventListener listener = container.getExecuter().getEventListener();
 		listener.removeListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID);
+		listener.removeListener(EventType.HURT_EVENT_PRE, EVENT_UUID);
 		listener.removeListener(EventType.FALL_EVENT, EVENT_UUID);
 	}
 	

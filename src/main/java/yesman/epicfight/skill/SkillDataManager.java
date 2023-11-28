@@ -6,10 +6,14 @@ import java.util.function.Function;
 
 import com.google.common.collect.Maps;
 
+import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.network.EpicFightNetworkManager;
+import yesman.epicfight.network.client.CPModifySkillData;
 import yesman.epicfight.network.server.SPAddOrRemoveSkillData;
 import yesman.epicfight.network.server.SPModifySkillData;
 import yesman.epicfight.skill.SkillDataManager.Data.BooleanData;
@@ -75,22 +79,38 @@ public class SkillDataManager {
 	
 	public <T> void setDataSync(SkillDataKey<T> key, T data, ServerPlayer player) {
 		this.setData(key, data);
-		SPModifySkillData msg2 = new SPModifySkillData(key, this.slotIndex, data, player.getId());
-		EpicFightNetworkManager.sendToPlayer(msg2, player);
-		
-		if (key.shouldSyncAllClients()) {
-			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(msg2, player);
-		}
+		this.syncData(key, player);
 	}
 	
 	public <T> void setDataSyncF(SkillDataKey<T> key, Function<T, T> dataManipulator, ServerPlayer player) {
 		this.setDataF(key, dataManipulator);
-		SPModifySkillData msg2 = new SPModifySkillData(key, this.slotIndex, this.getDataValue(key), player.getId());
-		EpicFightNetworkManager.sendToPlayer(msg2, player);
+		SPModifySkillData msg = new SPModifySkillData(key, this.slotIndex, this.getDataValue(key), player.getId());
+		EpicFightNetworkManager.sendToPlayer(msg, player);
 		
 		if (key.shouldSyncAllClients()) {
-			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(msg2, player);
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(msg, player);
 		}
+	}
+	
+	public <T> void syncData(SkillDataKey<T> key, ServerPlayer player) {
+		SPModifySkillData msg = new SPModifySkillData(key, this.slotIndex, this.getDataValue(key), player.getId());
+		EpicFightNetworkManager.sendToPlayer(msg, player);
+		
+		if (key.shouldSyncAllClients()) {
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(msg, player);
+		}
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public <T> void syncData(SkillDataKey<T> key, LocalPlayer player) {
+		CPModifySkillData msg = new CPModifySkillData(key, this.slotIndex, this.getDataValue(key));
+		EpicFightNetworkManager.sendToServer(msg);
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public <T> void setDataSync(SkillDataKey<T> key, T data, LocalPlayer player) {
+		this.setData(key, data);
+		this.syncData(key, player);
 	}
 	
 	public <T> T getDataValue(SkillDataKey<T> key) {

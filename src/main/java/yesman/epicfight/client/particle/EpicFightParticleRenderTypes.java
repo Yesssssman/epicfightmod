@@ -105,6 +105,9 @@ public class EpicFightParticleRenderTypes {
 		public void begin(BufferBuilder bufferBuilder, TextureManager textureManager) {
 			RenderSystem.enableBlend();
 			RenderSystem.disableCull();
+			
+			Minecraft.getInstance().gameRenderer.lightTexture().turnOnLightLayer();
+			
 		    RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
 			RenderSystem.enableDepthTest();
 			RenderSystem.depthMask(true);
