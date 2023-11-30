@@ -10,6 +10,7 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -54,11 +55,8 @@ public class PhantomAscentSkill extends Skill {
 		container.getDataManager().registerData(JUMP_COUNT);
 		
 		listener.addEventListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID, (event) -> {
-			if (event.getPlayerPatch().getOriginal().getAbilities().flying || event.getPlayerPatch().getEntityState().inaction()) {
-				return;
-			}
-			
-			if (event.getPlayerPatch().getOriginal().getVehicle() != null || !event.getPlayerPatch().isBattleMode()) {
+			if (event.getPlayerPatch().getOriginal().getVehicle() != null || !event.getPlayerPatch().isBattleMode() || event.getPlayerPatch().getOriginal().getAbilities().flying 
+					|| event.getPlayerPatch().isChargingSkill() || event.getPlayerPatch().getEntityState().inaction()) {
 				return;
 			}
 			
@@ -73,11 +71,11 @@ public class PhantomAscentSkill extends Skill {
 				
 				int jumpCounter = container.getDataManager().getDataValue(JUMP_COUNT);
 				
-				if (jumpCounter > 0 || !event.getPlayerPatch().getOriginal().isOnGround()) {
+				if (jumpCounter > 0 || event.getPlayerPatch().currentLivingMotion == LivingMotions.FALL) {
 					if (jumpCounter < (this.extraJumps + 1)) {
 						container.setResource(0.0F);
 						
-						if (jumpCounter == 0 && !event.getPlayerPatch().getOriginal().isOnGround()) {
+						if (jumpCounter == 0 && event.getPlayerPatch().currentLivingMotion == LivingMotions.FALL) {
 							container.getDataManager().setData(JUMP_COUNT, 2);
 						} else {
 							container.getDataManager().setDataF(JUMP_COUNT, (v) -> v + 1);
@@ -119,7 +117,6 @@ public class PhantomAscentSkill extends Skill {
 				if (damage < 2.5F) {
 					event.setAmount(0.0F);
 					event.setCanceled(true);
-					//System.out.println("shit " + event.getResult().hashCode() + " " + event.getAmount());
 				}
 				
 				container.getDataManager().setData(PROTECT_NEXT_FALL, false);
