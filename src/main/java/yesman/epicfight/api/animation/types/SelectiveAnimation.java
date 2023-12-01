@@ -3,8 +3,11 @@ package yesman.epicfight.api.animation.types;
 import java.util.function.Function;
 
 import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.property.AnimationEvent;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
+import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap.TypeKey;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -18,6 +21,9 @@ public class SelectiveAnimation extends StaticAnimation {
 	private final Function<LivingEntityPatch<?>, Integer> selector;
 	private final StaticAnimation[] animations;
 	
+	/**
+	 * WARNING: All animations should have same priority and layer type
+	 */
 	public SelectiveAnimation(Function<LivingEntityPatch<?>, Integer> selector, StaticAnimation... animations) {
 		super(0.15F, false, "", null);
 		
@@ -64,5 +70,17 @@ public class SelectiveAnimation extends StaticAnimation {
 				
 			}, AnimationEvent.Side.BOTH));
 		}
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	@Override
+	public Layer.Priority getPriority() {
+		return this.animations[0].getPriority();
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	@Override
+	public Layer.LayerType getLayerType() {
+		return this.animations[0].getLayerType();
 	}
 }

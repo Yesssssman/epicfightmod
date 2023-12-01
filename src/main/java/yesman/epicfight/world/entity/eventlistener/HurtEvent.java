@@ -11,8 +11,8 @@ public abstract class HurtEvent<T> extends PlayerEvent<ServerPlayerPatch> {
 	private boolean parried;
 	private AttackResult.ResultType result;
 	
-	private HurtEvent(ServerPlayerPatch playerpatch, T damageSource, float amount, boolean cancelable) {
-		super(playerpatch, cancelable);
+	private HurtEvent(ServerPlayerPatch playerpatch, T damageSource, float amount, boolean cancellable) {
+		super(playerpatch, cancellable);
 		this.damageSource = damageSource;
 		this.amount = amount;
 		this.parried = false;
