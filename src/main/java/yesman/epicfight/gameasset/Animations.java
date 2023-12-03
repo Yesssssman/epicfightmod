@@ -101,6 +101,8 @@ public class Animations {
 	public static StaticAnimation BIPED_SIT;
 	public static StaticAnimation BIPED_JUMP;
 	public static StaticAnimation BIPED_DEATH;
+	public static StaticAnimation BIPED_DIG_MAINHAND;
+	public static StaticAnimation BIPED_DIG_OFFHAND;
 	public static StaticAnimation BIPED_DIG;
 	public static StaticAnimation BIPED_RUN_SPEAR;
 	public static StaticAnimation BIPED_HOLD_GREATSWORD;
@@ -484,7 +486,9 @@ public class Animations {
 		BIPED_FALL = new StaticAnimation(true, "biped/living/fall", biped);
 		BIPED_MOUNT = new StaticAnimation(true, "biped/living/mount", biped);
 		BIPED_SIT = new StaticAnimation(true, "biped/living/sit", biped);
-		BIPED_DIG = new StaticAnimation(0.11F, true, "biped/living/dig", biped);
+		BIPED_DIG_MAINHAND = new StaticAnimation(0.11F, true, "biped/living/dig", biped);
+		BIPED_DIG_OFFHAND = new StaticAnimation(0.11F, true, "biped/living/dig_offhand", biped);
+		BIPED_DIG = new SelectiveAnimation((entitypatch) -> entitypatch.getOriginal().swingingArm == InteractionHand.OFF_HAND ? 1 : 0, BIPED_DIG_MAINHAND, BIPED_DIG_OFFHAND);
 		BIPED_BOW_AIM = new AimAnimation(false, "biped/combat/bow_aim_mid", "biped/combat/bow_aim_up", "biped/combat/bow_aim_down", "biped/combat/bow_aim_lying", biped);
 		BIPED_BOW_SHOT = new ReboundAnimation(0.04F, false, "biped/combat/bow_shot_mid", "biped/combat/bow_shot_up", "biped/combat/bow_shot_down", "biped/combat/bow_shot_lying", biped);
 		BIPED_DRINK = new MirrorAnimation(0.35F, true, "biped/living/drink", "biped/living/drink_offhand", biped);

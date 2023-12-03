@@ -151,11 +151,13 @@ public class ClientAnimator extends Animator {
 			this.baseLayer.playAnimation(this.getLivingMotion(this.entitypatch.currentLivingMotion), this.entitypatch, 0.0F);
 		}
 		
-		/* Layer debug
+		// Layer debug
+		/**
 		for (Layer layer : this.getAllLayers()) {
 			System.out.println(layer);
 		}
-		System.out.println();*/
+		System.out.println();
+		**/
 		if (!this.compareCompositeMotion(this.entitypatch.currentCompositeMotion)) {
 			/* Turns off the composite motion's layer */
 			this.getCompositeLayer(this.getCompositeLivingMotion(this.currentCompositeMotion).getPriority()).off(this.entitypatch);
