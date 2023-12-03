@@ -3,27 +3,23 @@ package yesman.epicfight.api.client.model;
 import java.util.Collection;
 import java.util.Map;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
-
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
+
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.main.EpicFightMod;
+
 @OnlyIn(Dist.CLIENT)
 public abstract class Mesh<T extends VertexIndicator> {
 	public static class RenderProperties {
-		final String customTexturePath;
-		final boolean isTransparent;
-		
-		public RenderProperties(Builder builder) {
-			this.customTexturePath = builder.customTexturePath;
-			this.isTransparent = builder.isTransparent;
-		}
+		protected String customTexturePath;
+		protected boolean isTransparent;
 		
 		public String getCustomTexturePath() {
 			return this.customTexturePath;
@@ -33,27 +29,18 @@ public abstract class Mesh<T extends VertexIndicator> {
 			return this.isTransparent;
 		}
 		
-		public static RenderProperties.Builder builder() {
-			return new Builder();
+		public RenderProperties customTexturePath(String path) {
+			this.customTexturePath = path;
+			return this;
 		}
 		
-		public static class Builder {
-			boolean isTransparent = false;
-			String customTexturePath = null;
-			
-			public RenderProperties.Builder customTexturePath(String path) {
-				this.customTexturePath = path;
-				return this;
-			}
-			
-			public RenderProperties.Builder transparency(boolean isTransparent) {
-				this.isTransparent = isTransparent;
-				return this;
-			}
-			
-			public RenderProperties build() {
-				return new RenderProperties(this);
-			}
+		public RenderProperties transparency(boolean isTransparent) {
+			this.isTransparent = isTransparent;
+			return this;
+		}
+		
+		public static RenderProperties create() {
+			return new RenderProperties();
 		}
 	}
 	
@@ -148,7 +135,7 @@ public abstract class Mesh<T extends VertexIndicator> {
 		
 		protected ModelPart<VertexIndicator> getOrLogException(Map<String, ModelPart<VertexIndicator>> parts, String name) {
 			if (!parts.containsKey(name)) {
-				//EpicFightMod.LOGGER.info("Cannot find the mesh part named " + name + " in " + this.getClass().getCanonicalName());
+				EpicFightMod.LOGGER.debug("Can not find the mesh part named " + name + " in " + this.getClass().getCanonicalName());
 				return EMPTY;
 			}
 			

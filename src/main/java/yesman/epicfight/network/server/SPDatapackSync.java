@@ -8,6 +8,7 @@ import net.minecraftforge.network.NetworkEvent;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 import yesman.epicfight.api.data.reloader.SkillManager;
+import yesman.epicfight.world.capabilities.item.WeaponTypeReloadListener;
 
 public class SPDatapackSync {
 	protected int count;
@@ -64,8 +65,10 @@ public class SPDatapackSync {
 				MobPatchReloadListener.processServerPacket(msg);
 			} else if (msg.getType() == Type.SKILL_PARAMS) {
 				SkillManager.processServerPacket((SPDatapackSyncSkill)msg);
-			} else {
+			} else if (msg.getType() == Type.WEAPON) {
 				ItemCapabilityReloadListener.processServerPacket(msg);
+			} else if (msg.getType() == Type.WEAPON_TYPE) {
+				WeaponTypeReloadListener.processServerPacket(msg);
 			}
 		});
 		
@@ -73,6 +76,6 @@ public class SPDatapackSync {
 	}
 	
 	public enum Type {
-		ARMOR, WEAPON, MOB, SKILL_PARAMS
+		ARMOR, WEAPON, MOB, SKILL_PARAMS, WEAPON_TYPE
 	}
 }

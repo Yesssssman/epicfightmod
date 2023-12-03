@@ -127,8 +127,6 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 				PARAMETER_MAP.put(entry.getKey(), tag);
 			} else {
 				EpicFightMod.LOGGER.warn("Skill " + entry.getKey() + " not exists");
-				
-				System.out.println(BUILDERS.containsKey(entry.getKey()) + " is empty but what about the concurrent map? " + BUILDERS.containsKey(entry.getKey()));
 			}
 		}
 	}

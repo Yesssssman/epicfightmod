@@ -25,7 +25,6 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.main.EpicFightMod;
@@ -37,10 +36,8 @@ public class CustomModelBakery {
 	static final ArmorModelTransformer VANILLA_TRANSFORMER = new VanillaArmor();
 	static final Set<ArmorItem> EXCEPTIONAL_MODELS = Sets.newHashSet();
 	
-	static {
-		if (ModList.get().isLoaded("geckolib")) {
-			MODEL_TRANSFORMERS.add(new GeoArmor());
-		}
+	public static void registerNewTransformer(ArmorModelTransformer transformer) {
+		MODEL_TRANSFORMERS.add(transformer);
 	}
 	
 	public static void exportModels(File resourcePackDirectory) throws IOException {

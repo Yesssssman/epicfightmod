@@ -2,6 +2,7 @@ package yesman.epicfight.world.capabilities.item;
 
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
@@ -20,6 +21,8 @@ import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Item;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.animation.LivingMotion;
@@ -30,9 +33,10 @@ import yesman.epicfight.api.forgeevent.WeaponCapabilityPresetRegistryEvent;
 import yesman.epicfight.data.conditions.Condition.ConditionBuilder;
 import yesman.epicfight.data.conditions.LivingEntityCondition;
 import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.network.server.SPDatapackSync;
 import yesman.epicfight.particle.HitParticleType;
 
-public class WeaponTypeManager extends SimpleJsonResourceReloadListener {
+public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 	public static void registerDefaultWeaponTypes() {
 		Map<ResourceLocation, Function<Item, CapabilityItem.Builder>> typeEntry = Maps.newHashMap();
 		typeEntry.put(new ResourceLocation(EpicFightMod.MODID, "axe"), WeaponCapabilityPresets.AXE);
@@ -61,7 +65,7 @@ public class WeaponTypeManager extends SimpleJsonResourceReloadListener {
 	private static final Map<ResourceLocation, Function<Item, CapabilityItem.Builder>> PRESETS = Maps.newHashMap();
 	private static final Map<ResourceLocation, CompoundTag> TAGMAP = Maps.newHashMap();
 	
-	public WeaponTypeManager() {
+	public WeaponTypeReloadListener() {
 		super(GSON, "capabilities/weapons/types");
 	}
 	
@@ -107,7 +111,7 @@ public class WeaponTypeManager extends SimpleJsonResourceReloadListener {
 			ParticleType<?> particleType = ForgeRegistries.PARTICLE_TYPES.getValue(new ResourceLocation(tag.getString("hit_particle")));
 			
 			if (particleType == null) {
-				EpicFightMod.LOGGER.warn("Can't find swing sound " + tag.getString("hit_particle"));
+				EpicFightMod.LOGGER.warn("Can't find particle type " + tag.getString("hit_particle"));
 			} else if (!(particleType instanceof HitParticleType)) {
 				EpicFightMod.LOGGER.warn(tag.getString("hit_particle") + " is not a hit particle type");
 			} else {
@@ -191,5 +195,29 @@ public class WeaponTypeManager extends SimpleJsonResourceReloadListener {
 		builder.weaponCombinationPredicator(ConditionBuilder.builder(LivingEntityCondition.get(new ResourceLocation(offhandValidatorTag.getString("condition")))).setTag(offhandValidatorTag.getCompound("predicate")).build()::predicate);
 		
 		return builder;
+	}
+	
+	public static int getTagCount() {
+		return TAGMAP.size();
+	}
+	
+	public static Stream<CompoundTag> getWeaponTypeDataStream() {
+		Stream<CompoundTag> tagStream = TAGMAP.entrySet().stream().map((entry) -> {
+			entry.getValue().putString("registry_name", entry.getKey().toString());
+			return entry.getValue();
+		});
+		return tagStream;
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public static void processServerPacket(SPDatapackSync packet) {
+		if (packet.getType() == SPDatapackSync.Type.WEAPON_TYPE) {
+			PRESETS.clear();
+			registerDefaultWeaponTypes();
+			
+			for (CompoundTag tag : packet.getTags()) {
+				PRESETS.put(new ResourceLocation(tag.getString("registry_name")), (itemstack) -> deserializeWeaponCapabilityBuilder(tag));
+			}
+		}
 	}
 }

@@ -18,21 +18,22 @@ import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.extensions.common.IClientItemExtensions;
 import net.minecraftforge.registries.ForgeRegistries;
 import software.bernie.geckolib.animatable.GeoItem;
 import software.bernie.geckolib.cache.object.GeoBone;
 import software.bernie.geckolib.cache.object.GeoCube;
 import software.bernie.geckolib.cache.object.GeoQuad;
 import software.bernie.geckolib.cache.object.GeoVertex;
+import software.bernie.geckolib.core.animatable.GeoAnimatable;
 import software.bernie.geckolib.renderer.GeoArmorRenderer;
 import software.bernie.geckolib.util.RenderUtils;
+import yesman.epicfight.api.client.forgeevent.AnimatedArmorTextureEvent;
 import yesman.epicfight.api.client.model.AnimatedMesh;
-import yesman.epicfight.api.client.model.Mesh;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.client.model.SingleVertex;
 import yesman.epicfight.api.utils.math.Vec2f;
@@ -61,7 +62,20 @@ public class GeoArmor extends ArmorModelTransformer {
 		}
 	}
 	
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings("unchecked")
+	public static void getGeoArmorTexturePath(AnimatedArmorTextureEvent event) {
+		IClientItemExtensions customRenderProperties = IClientItemExtensions.of(event.getItemstack());
+		
+		if (customRenderProperties != null) {
+			HumanoidModel<?> extensionRenderer = customRenderProperties.getHumanoidArmorModel(event.getLivingEntity(), event.getItemstack(), event.getEquipmentSlot(), event.getOriginalModel());
+			
+			if (extensionRenderer instanceof GeoArmorRenderer geoArmorRenderer && event.getItemstack().getItem() instanceof GeoAnimatable geoAnimatable) {
+				event.setResultLocation(geoArmorRenderer.getTextureLocation(geoAnimatable));
+			}
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
 	public AnimatedMesh transformModel(HumanoidModel<?> model, ArmorItem armorItem, EquipmentSlot slot, boolean debuggingMode) {
 		if (!(armorItem instanceof GeoItem) || !(model instanceof GeoArmorRenderer<?>)) {
 			return null;
@@ -149,17 +163,14 @@ public class GeoArmor extends ArmorModelTransformer {
 			return null;
 		}
 		
-		Mesh.RenderProperties.Builder propertyBuilder = Mesh.RenderProperties.builder();
-		propertyBuilder.customTexturePath(geoModel.getTextureLocation((Item & GeoItem)armorItem).toString());
-		
 		ResourceLocation rl = new ResourceLocation(ForgeRegistries.ITEMS.getKey(armorItem).getNamespace(), "armor/" + ForgeRegistries.ITEMS.getKey(armorItem).getPath());
-		AnimatedMesh armorModelMesh = bakeMeshFromCubes(boxes, propertyBuilder, debuggingMode);
+		AnimatedMesh armorModelMesh = bakeMeshFromCubes(boxes, debuggingMode);
 		Meshes.addMesh(rl, armorModelMesh);
 		
 		return armorModelMesh;
 	}
 	
-	private static AnimatedMesh bakeMeshFromCubes(List<GeoModelPartition> partitions, Mesh.RenderProperties.Builder propertyBuilder, boolean debuggingMode) {
+	private static AnimatedMesh bakeMeshFromCubes(List<GeoModelPartition> partitions, boolean debuggingMode) {
 		List<SingleVertex> vertices = Lists.newArrayList();
 		Map<String, List<Integer>> indices = Maps.newHashMap();
 		PoseStack poseStack = new PoseStack();
@@ -169,7 +180,7 @@ public class GeoArmor extends ArmorModelTransformer {
 			bake(poseStack, modelpartition, modelpartition.geoBone, vertices, indices, debuggingMode);
 		}
 		
-		return SingleVertex.loadVertexInformationWithRenderProperty(vertices, indices, propertyBuilder);
+		return SingleVertex.loadVertexInformation(vertices, indices);
 	}
 	
 	private static void bake(PoseStack poseStack, GeoModelPartition modelpartition, GeoBone geoBone, List<SingleVertex> vertices, Map<String, List<Integer>> indices, boolean debuggingMode) {

@@ -77,10 +77,6 @@ public class SingleVertex {
 	}
 	
 	public static AnimatedMesh loadVertexInformation(List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
-		return loadVertexInformationWithRenderProperty(vertices, indices, Mesh.RenderProperties.builder());
-	}
-	
-	public static AnimatedMesh loadVertexInformationWithRenderProperty(List<SingleVertex> vertices, Map<String, List<Integer>> indices, Mesh.RenderProperties.Builder builder) {
 		List<Float> positions = Lists.newArrayList();
 		List<Float> normals = Lists.newArrayList();
 		List<Float> texCoords = Lists.newArrayList();
@@ -147,7 +143,7 @@ public class SingleVertex {
 			meshMap.put(e.getKey(), new ModelPart<AnimatedVertexIndicator>(VertexIndicator.createAnimated(ArrayUtils.toPrimitive(e.getValue().toArray(new Integer[0])), affectJointCounts, animationIndexList)));
 		}
 		
-		return new AnimatedMesh(arrayMap, null, builder.build(), meshMap);
+		return new AnimatedMesh(arrayMap, null, Mesh.RenderProperties.create(), meshMap);
 	}
 	
 	public enum State {

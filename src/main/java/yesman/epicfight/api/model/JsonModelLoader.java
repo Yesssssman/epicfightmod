@@ -67,7 +67,7 @@ public class JsonModelLoader {
 			} else {
 				this.resourceManager = resourceManager;
 				Resource resource = resourceManager.getResource(resourceLocation).get();
-
+				
 				//TODO Double check
 				JsonReader in = new JsonReader(new InputStreamReader(resource.open(), StandardCharsets.UTF_8));
 				in.setLenient(true);
@@ -82,22 +82,21 @@ public class JsonModelLoader {
 	@OnlyIn(Dist.CLIENT)
 	public AnimatedMesh.RenderProperties getRenderProperties() {
 		JsonObject properties = this.rootJson.getAsJsonObject("render_properties");
+		AnimatedMesh.RenderProperties renderProperties = AnimatedMesh.RenderProperties.create();
 		
 		if (properties != null) {
-			AnimatedMesh.RenderProperties.Builder builder = AnimatedMesh.RenderProperties.builder();
-			
 			if (properties.has("transparent")) {
-				builder.transparency(properties.get("transparent").getAsBoolean());
+				renderProperties.transparency(properties.get("transparent").getAsBoolean());
 			}
 			
 			if (properties.has("texture_path")) {
-				builder.customTexturePath(properties.get("texture_path").getAsString());
+				renderProperties.customTexturePath(properties.get("texture_path").getAsString());
 			}
 			
-			return builder.build();
-		} else {
-			return AnimatedMesh.RenderProperties.builder().build();
+			return renderProperties;
 		}
+		
+		return renderProperties;
 	}
 	
 	@OnlyIn(Dist.CLIENT)

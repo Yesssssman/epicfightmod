@@ -24,6 +24,7 @@ import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
+import yesman.epicfight.world.capabilities.item.WeaponTypeReloadListener;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
@@ -50,7 +51,7 @@ public class WorldEvents {
 			EpicFightNetworkManager.sendToClient(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.DIABLE_ENTITY_UI, player.level().getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI)), target);
 			EpicFightNetworkManager.sendToClient(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.STIFF_COMBO_ATTACKS, player.level().getGameRules().getBoolean(EpicFightGamerules.STIFF_COMBO_ATTACKS)), target);
 			EpicFightNetworkManager.sendToClient(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.CAN_SWITCH_COMBAT, player.level().getGameRules().getBoolean(EpicFightGamerules.CAN_SWITCH_COMBAT)), target);
-
+			
 			if (!player.getServer().isSingleplayerOwner(player.getGameProfile())) {
 				SPDatapackSyncSkill skillParamsPacket = new SPDatapackSyncSkill(SkillManager.getParamCount(), SPDatapackSync.Type.SKILL_PARAMS);
 				ServerPlayerPatch serverplayerpatch = EpicFightCapabilities.getEntityPatch(player, ServerPlayerPatch.class);
@@ -77,14 +78,17 @@ public class WorldEvents {
 			SPDatapackSync armorPacket = new SPDatapackSync(ItemCapabilityReloadListener.armorCount(), SPDatapackSync.Type.ARMOR);
 			SPDatapackSync weaponPacket = new SPDatapackSync(ItemCapabilityReloadListener.weaponCount(), SPDatapackSync.Type.WEAPON);
 			SPDatapackSync mobPatchPacket = new SPDatapackSync(MobPatchReloadListener.getTagCount(), SPDatapackSync.Type.MOB);
+			SPDatapackSync weaponTypePacket = new SPDatapackSync(WeaponTypeReloadListener.getTagCount(), SPDatapackSync.Type.WEAPON_TYPE);
 			
 			ItemCapabilityReloadListener.getArmorDataStream().forEach(armorPacket::write);
 			ItemCapabilityReloadListener.getWeaponDataStream().forEach(weaponPacket::write);
 			MobPatchReloadListener.getDataStream().forEach(mobPatchPacket::write);
+			WeaponTypeReloadListener.getWeaponTypeDataStream().forEach(weaponTypePacket::write);
 			
 			EpicFightNetworkManager.sendToClient(armorPacket, target);
 			EpicFightNetworkManager.sendToClient(weaponPacket, target);
 			EpicFightNetworkManager.sendToClient(mobPatchPacket, target);
+			EpicFightNetworkManager.sendToClient(weaponTypePacket, target);
 		}
     }
 }

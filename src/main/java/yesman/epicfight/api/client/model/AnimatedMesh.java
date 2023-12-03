@@ -37,10 +37,7 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 	@Override
 	protected ModelPart<AnimatedVertexIndicator> getOrLogException(Map<String, ModelPart<AnimatedVertexIndicator>> parts, String name) {
 		if (!parts.containsKey(name)) {
-			if (EpicFightMod.LOGGER.isDebugEnabled()) {
-				EpicFightMod.LOGGER.debug("Cannot find the mesh part named " + name + " in " + this.getClass().getCanonicalName());
-			}
-			
+			EpicFightMod.LOGGER.debug("Cannot find the mesh part named " + name + " in " + this.getClass().getCanonicalName());
 			return EMPTY;
 		}
 		
@@ -190,7 +187,7 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 		if (this.renderProperties != null) {
 			JsonObject renderProperties = new JsonObject();
 			renderProperties.addProperty("texture_path", this.renderProperties.getCustomTexturePath());
-			
+			renderProperties.addProperty("transparent", this.renderProperties.isTransparent());
 			root.add("render_properties", renderProperties);
 		}
 		

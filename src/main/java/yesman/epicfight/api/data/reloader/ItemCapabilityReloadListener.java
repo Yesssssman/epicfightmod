@@ -39,7 +39,7 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.capabilities.item.TagBasedSeparativeCapability;
 import yesman.epicfight.world.capabilities.item.WeaponCapability;
-import yesman.epicfight.world.capabilities.item.WeaponTypeManager;
+import yesman.epicfight.world.capabilities.item.WeaponTypeReloadListener;
 import yesman.epicfight.world.capabilities.provider.ItemCapabilityProvider;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
@@ -115,7 +115,7 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 		if (tag.contains("variations")) {
 			ListTag jsonArray = tag.getList("variations", 10);
 			List<Pair<Predicate<ItemStack>, CapabilityItem>> list = Lists.newArrayList();
-			CapabilityItem.Builder innerDefaultCapabilityBuilder = tag.contains("type") ? WeaponTypeManager.get(tag.getString("type")).apply(item) : CapabilityItem.builder();
+			CapabilityItem.Builder innerDefaultCapabilityBuilder = tag.contains("type") ? WeaponTypeReloadListener.get(tag.getString("type")).apply(item) : CapabilityItem.builder();
 			
 			for (Tag jsonElement : jsonArray) {
 				CompoundTag innerTag = ((CompoundTag)jsonElement);
@@ -148,7 +148,7 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 			
 			capability = new TagBasedSeparativeCapability(list, innerDefaultCapabilityBuilder.build());
 		} else {
-			CapabilityItem.Builder builder = tag.contains("type") ? WeaponTypeManager.get(tag.getString("type")).apply(item) : CapabilityItem.builder();
+			CapabilityItem.Builder builder = tag.contains("type") ? WeaponTypeReloadListener.get(tag.getString("type")).apply(item) : CapabilityItem.builder();
 			
 			if (tag.contains("attributes")) {
 				CompoundTag attributes = tag.getCompound("attributes");
@@ -291,6 +291,4 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 			ItemCapabilityProvider.addDefaultItems();
 		}
 	}
-	
-	
 }
