@@ -100,7 +100,7 @@ public class PhantomAscentSkill extends Skill {
 						Vec3 forwardHorizontal = Vec3.directionFromRotation(new Vec2(0, container.getExecuter().getOriginal().getViewYRot(1.0F)));
 						Vec3 jumpDir = OpenMatrix4f.transform(OpenMatrix4f.createRotatorDeg(-degree, Vec3f.Y_AXIS), forwardHorizontal.scale(0.15D * scale));
 						Vec3 deltaMove = container.getExecuter().getOriginal().getDeltaMovement();
-						container.getExecuter().getOriginal().setDeltaMovement(deltaMove.x + jumpDir.x, 0.6D, deltaMove.z + jumpDir.z);
+						container.getExecuter().getOriginal().setDeltaMovement(deltaMove.x + jumpDir.x, 0.6D + container.getExecuter().getOriginal().getJumpBoostPower(), deltaMove.z + jumpDir.z);
 						
 						event.getPlayerPatch().playAnimationClientPreemptive(this.animations[vertic < 0 ? 1 : 0], 0.0F);
 						event.getPlayerPatch().changeModelYRot(degree);
