@@ -37,6 +37,7 @@ import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.gui.screen.IngameConfigurationScreen;
 import yesman.epicfight.client.renderer.patched.item.EpicFightItemProperties;
+import yesman.epicfight.compat.AzureLibArmorCompat;
 import yesman.epicfight.compat.AzureLibCompat;
 import yesman.epicfight.compat.GeckolibCompat;
 import yesman.epicfight.compat.ICompatModule;
@@ -139,6 +140,10 @@ public class EpicFightMod {
         if (ModList.get().isLoaded("azurelib")) {
         	ICompatModule.loadCompatModule(AzureLibCompat.class);
         }
+
+		if (ModList.get().isLoaded("azurelibarmor")) {
+			ICompatModule.loadCompatModule(AzureLibArmorCompat.class);
+		}
 	}
     
 	private void doClientStuff(final FMLClientSetupEvent event) {
