@@ -42,6 +42,7 @@ import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
+import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 import java.util.EnumSet;
 import java.util.UUID;
@@ -64,7 +65,7 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 	@Override
 	public void onJoinWorld(EnderMan enderman, EntityJoinLevelEvent event) {
 		if (enderman.level().dimension() == Level.END) {
-			if (enderman.position().horizontalDistanceSqr() < 40000) {
+			if (enderman.level().getGameRules().getBoolean(EpicFightGamerules.NO_MOBS_IN_BOSSFIGHT) && enderman.position().horizontalDistanceSqr() < 40000) {
 				event.setCanceled(true);
 			}
 		}

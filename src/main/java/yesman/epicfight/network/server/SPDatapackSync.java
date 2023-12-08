@@ -67,6 +67,8 @@ public class SPDatapackSync {
 				SkillManager.processServerPacket((SPDatapackSyncSkill)msg);
 			} else if (msg.getType() == Type.WEAPON) {
 				ItemCapabilityReloadListener.processServerPacket(msg);
+			} else if (msg.getType() == Type.ARMOR) {
+				ItemCapabilityReloadListener.processServerPacket(msg);
 			} else if (msg.getType() == Type.WEAPON_TYPE) {
 				WeaponTypeReloadListener.processServerPacket(msg);
 			}

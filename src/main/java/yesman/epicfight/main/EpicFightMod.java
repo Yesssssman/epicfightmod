@@ -13,6 +13,7 @@ import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -131,9 +132,11 @@ public class EpicFightMod {
         ConfigManager.loadConfig(ConfigManager.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve(CONFIG_FILE_PATH).toString());
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory(IngameConfigurationScreen::new));
         
-        if (ModList.get().isLoaded("geckolib")) {
-        	ICompatModule.loadCompatModule(GeckolibCompat.class);
-        }
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+        	if (ModList.get().isLoaded("geckolib")) {
+            	ICompatModule.loadCompatModuleClient(GeckolibCompat.class);
+            }
+        });
 	}
     
 	private void doClientStuff(final FMLClientSetupEvent event) {
@@ -177,7 +180,6 @@ public class EpicFightMod {
 		event.addListener(new WeaponTypeReloadListener());
 		event.addListener(new ItemCapabilityReloadListener());
 		event.addListener(new MobPatchReloadListener());
-		
 	}
 	
 	public static Animator getAnimator(LivingEntityPatch<?> entitypatch) {

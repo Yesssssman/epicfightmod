@@ -162,10 +162,10 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 				}
 			}
 			
-			if (tag.contains("collider") && builder instanceof WeaponCapability.Builder) {
+			if (tag.contains("collider") && builder instanceof WeaponCapability.Builder weaponCapBuilder) {
 				CompoundTag colliderTag = tag.getCompound("collider");
 				Collider collider = deserializeCollider(colliderTag);
-				((WeaponCapability.Builder)builder).collider(collider);
+				weaponCapBuilder.collider(collider);
 			}
 			
 			capability = builder.build();
