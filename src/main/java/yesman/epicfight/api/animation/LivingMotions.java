@@ -11,6 +11,6 @@ public enum LivingMotions implements LivingMotion {
 	}
 	
 	public int universalOrdinal() {
-		return id;
+		return this.id;
 	}
 }

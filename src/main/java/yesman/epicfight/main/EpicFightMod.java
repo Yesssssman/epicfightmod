@@ -20,6 +20,7 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -63,8 +64,6 @@ import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.capabilities.item.WeaponTypeReloadListener;
 import yesman.epicfight.world.capabilities.provider.EntityPatchProvider;
 import yesman.epicfight.world.capabilities.provider.ItemCapabilityProvider;
-import yesman.epicfight.world.damagesource.SourceTag;
-import yesman.epicfight.world.damagesource.SourceTags;
 import yesman.epicfight.world.effect.EpicFightMobEffects;
 import yesman.epicfight.world.effect.EpicFightPotions;
 import yesman.epicfight.world.entity.EpicFightEntities;
@@ -97,6 +96,8 @@ public class EpicFightMod {
     	ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ConfigManager.CLIENT_CONFIG);
     	
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+		
+		bus.addListener(this::constructMod);
     	bus.addListener(this::doClientStuff);
     	bus.addListener(this::doCommonStuff);
     	bus.addListener(this::doServerStuff);
@@ -106,12 +107,11 @@ public class EpicFightMod {
     	bus.addListener(EpicFightCapabilities::registerCapabilities);
     	bus.addListener(EpicFightEntities::onSpawnPlacementRegister);
     	
-    	LivingMotion.ENUM_MANAGER.loadPreemptive(LivingMotions.class);
-    	SkillCategory.ENUM_MANAGER.loadPreemptive(SkillCategories.class);
-    	SkillSlot.ENUM_MANAGER.loadPreemptive(SkillSlots.class);
-    	Style.ENUM_MANAGER.loadPreemptive(Styles.class);
-    	WeaponCategory.ENUM_MANAGER.loadPreemptive(WeaponCategories.class);
-    	SourceTag.ENUM_MANAGER.loadPreemptive(SourceTags.class);
+    	LivingMotion.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, LivingMotions.class);
+    	SkillCategory.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, SkillCategories.class);
+    	SkillSlot.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, SkillSlots.class);
+    	Style.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, Styles.class);
+    	WeaponCategory.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, WeaponCategories.class);
     	
     	EpicFightMobEffects.EFFECTS.register(bus);
     	EpicFightPotions.POTIONS.register(bus);
@@ -138,6 +138,14 @@ public class EpicFightMod {
             }
         });
 	}
+    
+    private void constructMod(final FMLConstructModEvent event) {
+    	LivingMotion.ENUM_MANAGER.loadEnum();
+    	SkillCategory.ENUM_MANAGER.loadEnum();
+    	SkillSlot.ENUM_MANAGER.loadEnum();
+    	Style.ENUM_MANAGER.loadEnum();
+    	WeaponCategory.ENUM_MANAGER.loadEnum();
+    }
     
 	private void doClientStuff(final FMLClientSetupEvent event) {
 		CLIENT_INGAME_CONFIG = new ConfigurationIngame();
