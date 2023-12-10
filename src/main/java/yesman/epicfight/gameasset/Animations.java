@@ -3,6 +3,8 @@ package yesman.epicfight.gameasset;
 import java.util.List;
 import java.util.Set;
 
+import org.joml.Quaternionf;
+
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 
@@ -121,12 +123,10 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.damagesource.EpicFightDamageSources;
+import yesman.epicfight.world.damagesource.EpicFightDamageType;
 import yesman.epicfight.world.damagesource.ExtraDamageInstance;
-import yesman.epicfight.world.damagesource.SourceTags;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-
-import org.joml.Quaternionf;
 
 @Mod.EventBusSubscriber(modid = EpicFightMod.MODID, bus = Bus.MOD)
 public class Animations {
@@ -783,7 +783,7 @@ public class Animations {
 		GREATSWORD_AUTO2 = new BasicAttackAnimation(0.1F, 0.5F, 0.65F, 1.5F, null, biped.toolR, "biped/combat/greatsword_auto2", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.0F);
 		GREATSWORD_DASH = new DashAttackAnimation(0.2F, 0.2F, 0.35F, 0.6F, 1.2F, null, biped.toolR, "biped/combat/greatsword_dash", biped, false)
-				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(SourceTags.FINISHER))
+				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.FINISHER))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.0F)
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, false)
 				.addEvents(TimeStampedEvent.create(0.4F, Animations.ReusableSources.FRACTURE_GROUND_SIMPLE, Side.CLIENT).params(new Vec3f(0.0F, -0.24F, -2.0F), Armatures.BIPED.toolR, 1.1D, 0.55F));
@@ -903,10 +903,10 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
 		SPEAR_ONEHAND_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.4F, null, biped.toolR, "biped/combat/spear_onehand_airslash", biped);
 		SPEAR_TWOHAND_AIR_SLASH = new AirSlashAnimation(0.1F, 0.25F, 0.36F, 0.6F, null, biped.toolR, "biped/combat/spear_twohand_airslash", biped)
-				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(SourceTags.FINISHER));
+				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.FINISHER));
 		LONGSWORD_AIR_SLASH = new AirSlashAnimation(0.1F, 0.3F, 0.41F, 0.5F, null, biped.toolR, "biped/combat/longsword_airslash", biped);
 		GREATSWORD_AIR_SLASH = new AirSlashAnimation(0.1F, 0.5F, 0.55F, 0.71F, 0.75F, false, null, biped.toolR, "biped/combat/greatsword_airslash", biped)
-				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(SourceTags.FINISHER));
+				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.FINISHER));
 		FIST_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.4F, null, biped.toolR, "biped/combat/fist_airslash", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 4.0F);
 		DAGGER_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.45F, null, biped.toolR, "biped/combat/dagger_airslash", biped)
@@ -1025,7 +1025,7 @@ public class Animations {
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH.get())
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT)
 				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLUNT_HIT.get())
-				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(SourceTags.COUNTER))
+				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.COUNTER))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.NEUTRALIZE)
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.setter(1))
 				.addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.setter(0.5F))
@@ -1039,7 +1039,7 @@ public class Animations {
 				.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH.get())
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT)
 				.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLUNT_HIT.get())
-				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(SourceTags.COUNTER))
+				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.COUNTER))
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.NEUTRALIZE)
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.setter(1))
 				.addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.setter(0.5F))
@@ -1327,7 +1327,7 @@ public class Animations {
 		GOLEM_ATTACK1 = new AttackAnimation(0.2F, 0.1F, 0.15F, 0.25F, 0.9F, ColliderPreset.HEAD, ironGolem.head, "iron_golem/attack1", ironGolem)
 				.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN);
 		GOLEM_ATTACK2 = new AttackAnimation(0.34F, 0.1F, 0.4F, 0.6F, 1.3F, ColliderPreset.GOLEM_SMASHDOWN, ironGolem.LA4, "iron_golem/attack2", ironGolem)
-				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(SourceTags.FINISHER));
+				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.FINISHER));
 		GOLEM_ATTACK3 = new AttackAnimation(0.16F, 0.4F, 0.4F, 0.5F, 0.9F, ColliderPreset.GOLEM_SWING_ARM, ironGolem.RA4, "iron_golem/attack3", ironGolem)
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 		GOLEM_ATTACK4 = new AttackAnimation(0.16F, 0.4F, 0.4F, 0.5F, 0.9F, ColliderPreset.GOLEM_SWING_ARM, ironGolem.LA4, "iron_golem/attack4", ironGolem)
@@ -1779,7 +1779,7 @@ public class Animations {
 				.addProperty(ActionAnimationProperty.IS_DEATH_ANIMATION, true);
 		
 		BLADE_RUSH_EXECUTE_BIPED = new GrapplingAttackAnimation(0.5F, 1.5F, "biped/skill/blade_rush_execute", biped)
-				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(SourceTags.EXECUTION))
+				.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.EXECUTION))
 				.addProperty(ActionAnimationProperty.COORD_UPDATE_TIME, TimePairList.create(0.0F, 0.5F))
 				.addProperty(ActionAnimationProperty.NO_GRAVITY_TIME, TimePairList.create(0.0F, 0.95F))
 				.addEvents(

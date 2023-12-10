@@ -1,5 +1,7 @@
 package yesman.epicfight.world.capabilities.projectile;
 
+import java.util.List;
+
 import io.netty.buffer.ByteBuf;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -22,9 +24,11 @@ import yesman.epicfight.skill.weaponinnate.EverlastingAllegiance;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
-import yesman.epicfight.world.damagesource.*;
-
-import java.util.List;
+import yesman.epicfight.world.damagesource.EpicFightDamageSource;
+import yesman.epicfight.world.damagesource.EpicFightDamageSources;
+import yesman.epicfight.world.damagesource.EpicFightDamageType;
+import yesman.epicfight.world.damagesource.ExtraDamageInstance;
+import yesman.epicfight.world.damagesource.StunType;
 
 public class ThrownTridentPatch extends ProjectilePatch<ThrownTrident> {
 	private boolean innateActivated;
@@ -96,7 +100,7 @@ public class ThrownTridentPatch extends ProjectilePatch<ThrownTrident> {
 				EpicFightDamageSources damageSources = EpicFightDamageSources.of(this.original.level());
 				EpicFightDamageSource source = damageSources.trident(this.original.getOwner(), this.original)
 						.setStunType(StunType.HOLD)
-						.addTag(SourceTags.WEAPON_INNATE)
+						.addRuntimeTag(EpicFightDamageType.WEAPON_INNATE)
 						.addExtraDamage(ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create())
 						.setDamageModifier(ValueModifier.multiplier(1.4F))
 						.setArmorNegation(30.0F);

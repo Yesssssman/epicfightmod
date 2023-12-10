@@ -1,8 +1,13 @@
 package yesman.epicfight.skill.weaponinnate;
 
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -20,12 +25,8 @@ import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
-import yesman.epicfight.world.damagesource.SourceTags;
+import yesman.epicfight.world.damagesource.EpicFightDamageType;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
-
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
 
 public class GuillotineAxeSkill extends SimpleWeaponInnateSkill {
 	private static final UUID EVENT_UUID = UUID.fromString("b84e577a-c653-11ed-afa1-0242ac120002");
@@ -48,7 +49,7 @@ public class GuillotineAxeSkill extends SimpleWeaponInnateSkill {
 				
 				if (health < executionHealth) {
 					if (event.getDamageSource() != null) {
-						event.getDamageSource().addTag(SourceTags.EXECUTION);
+						event.getDamageSource().addRuntimeTag(EpicFightDamageType.EXECUTION);
 					}
 				}
 			}

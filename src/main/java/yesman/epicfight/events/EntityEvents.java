@@ -70,8 +70,8 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.projectile.ProjectilePatch;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.damagesource.EpicFightDamageSources;
+import yesman.epicfight.world.damagesource.EpicFightDamageType;
 import yesman.epicfight.world.damagesource.ExtraDamageInstance;
-import yesman.epicfight.world.damagesource.SourceTags;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.effect.EpicFightMobEffects;
 import yesman.epicfight.world.entity.eventlistener.DealtDamageEvent;
@@ -187,7 +187,7 @@ public class EntityEvents {
 				
 				float trueDamage = totalDamage * epicFightDamageSource.getArmorNegation() * 0.01F;
 				
-				if (epicFightDamageSource.hasTag(SourceTags.EXECUTION)) {
+				if (epicFightDamageSource.is(EpicFightDamageType.EXECUTION)) {
 					trueDamage = Float.MAX_VALUE;
 					
 					if (hitLivingEntityPatch != null) {

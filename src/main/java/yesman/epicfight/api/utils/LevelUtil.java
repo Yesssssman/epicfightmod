@@ -5,6 +5,9 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 import com.google.common.collect.Lists;
 
 import net.minecraft.client.Minecraft;
@@ -25,21 +28,18 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.utils.math.Vec2i;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
+import yesman.epicfight.api.utils.math.Vec2i;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPFracture;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.world.damagesource.EpicFightDamageSources;
-import yesman.epicfight.world.damagesource.SourceTags;
+import yesman.epicfight.world.damagesource.EpicFightDamageType;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.level.block.FractureBlock;
 import yesman.epicfight.world.level.block.FractureBlockState;
-
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
 
 public class LevelUtil {
 	private static final Vec3 IMPACT_DIRECTION = new Vec3(0.0D, -1.0D, 0.0D);
@@ -237,7 +237,7 @@ public class LevelUtil {
 					entity.hurt(damageSources.shockwave(caster)
 										     .setAnimation(Animations.DUMMY_ANIMATION)
 									         .setInitialPosition(center)
-						                     .addTag(SourceTags.FINISHER)
+						                     .addRuntimeTag(EpicFightDamageType.FINISHER)
 						                     .setStunType(StunType.KNOCKDOWN)
 											 .addRuntimeTag(DamageTypes.EXPLOSION)
 							,damage);
