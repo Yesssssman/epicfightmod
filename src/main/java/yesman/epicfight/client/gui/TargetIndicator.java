@@ -21,7 +21,7 @@ import org.joml.Matrix4f;
 public class TargetIndicator extends EntityIndicator {
 	@Override
 	public boolean shouldDraw(LivingEntity entityIn, @Nullable LivingEntityPatch<?> entitypatch, LocalPlayerPatch playerpatch) {
-		if (!EpicFightMod.CLIENT_INGAME_CONFIG.showTargetIndicator.getValue()) {
+		if (!EpicFightMod.CLIENT_CONFIGS.showTargetIndicator.getValue()) {
 			return false;
 		} else {
 			if (playerpatch != null && entityIn != playerpatch.getTarget()) {

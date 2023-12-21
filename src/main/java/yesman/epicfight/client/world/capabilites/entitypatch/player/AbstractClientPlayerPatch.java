@@ -207,7 +207,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	
 	@Override
 	public boolean overrideRender() {
-		return this.isBattleMode() || !EpicFightMod.CLIENT_INGAME_CONFIG.filterAnimation.getValue();
+		return this.isBattleMode() || !EpicFightMod.CLIENT_CONFIGS.filterAnimation.getValue();
 	}
 	
 	@Override

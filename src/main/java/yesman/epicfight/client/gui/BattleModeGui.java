@@ -27,7 +27,7 @@ import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec2i;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.config.ClientConfig;
-import yesman.epicfight.config.ConfigurationIngame;
+import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.Skill.ActivateType;
@@ -49,13 +49,13 @@ public class BattleModeGui extends ModIngameGui {
 	private int sliding;
 	private boolean slidingToggle;
 	private final List<SkillContainer> skillIcons = Lists.newLinkedList();
-	private final ConfigurationIngame config;
+	private final EpicFightOptions config;
 
 	public BattleModeGui(Minecraft minecraft) {
 		this.sliding = 29;
 		this.slidingToggle = false;
 		this.font = minecraft.font;
-		this.config = EpicFightMod.CLIENT_INGAME_CONFIG;
+		this.config = EpicFightMod.CLIENT_CONFIGS;
 	}
 	
 	public void renderGui(LocalPlayerPatch playerpatch, GuiGraphics guiGraphics, float partialTicks) {

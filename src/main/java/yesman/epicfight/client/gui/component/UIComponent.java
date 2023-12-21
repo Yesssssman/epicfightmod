@@ -1,4 +1,4 @@
-package yesman.epicfight.client.gui.widget;
+package yesman.epicfight.client.gui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
@@ -16,13 +16,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.math.Vec2i;
+import yesman.epicfight.client.gui.component.UIComponentPop.PassivesUIComponentPop;
 import yesman.epicfight.client.gui.screen.UISetupScreen;
-import yesman.epicfight.client.gui.widget.UIComponentPop.PassivesUIComponentPop;
 import yesman.epicfight.config.ClientConfig;
 import yesman.epicfight.config.ClientConfig.AlignDirection;
 import yesman.epicfight.config.ClientConfig.HorizontalBasis;
 import yesman.epicfight.config.ClientConfig.VerticalBasis;
-import yesman.epicfight.config.Option;
+import yesman.epicfight.config.OptionHandler;
 
 @OnlyIn(Dist.CLIENT)
 public class UIComponent extends BasicButton {
@@ -40,14 +40,14 @@ public class UIComponent extends BasicButton {
 	protected float b;
 	private double pressX;
 	private double pressY;
-	public final Option<Integer> xCoord;
-	public final Option<Integer> yCoord;
-	public final Option<HorizontalBasis> horizontalBasis;
-	public final Option<VerticalBasis> verticalBasis;
+	public final OptionHandler<Integer> xCoord;
+	public final OptionHandler<Integer> yCoord;
+	public final OptionHandler<HorizontalBasis> horizontalBasis;
+	public final OptionHandler<VerticalBasis> verticalBasis;
 	
 	public UIComponentPop<?> popupScreen;
 	
-	public UIComponent(int x, int y, Option<Integer> xCoord, Option<Integer> yCoord, Option<HorizontalBasis> horizontalBasis, Option<VerticalBasis> verticalBasis
+	public UIComponent(int x, int y, OptionHandler<Integer> xCoord, OptionHandler<Integer> yCoord, OptionHandler<HorizontalBasis> horizontalBasis, OptionHandler<VerticalBasis> verticalBasis
 			, int width, int height, int texU, int texV, int texW, int texH, int resolutionDivW, int resolutionDivH, int r, int g, int b
 			, UISetupScreen parentScreen, ResourceLocation texture) {
 		
@@ -217,10 +217,10 @@ public class UIComponent extends BasicButton {
 	
 	@OnlyIn(Dist.CLIENT)
 	public static class PassiveUIComponent extends UIComponent {
-		public final Option<AlignDirection> alignDirection;
+		public final OptionHandler<AlignDirection> alignDirection;
 		protected final ResourceLocation texture2;
 		
-		public PassiveUIComponent(int x, int y, Option<Integer> xCoord, Option<Integer> yCoord, Option<HorizontalBasis> horizontalBasis, Option<VerticalBasis> verticalBasis, Option<AlignDirection> alignDirection
+		public PassiveUIComponent(int x, int y, OptionHandler<Integer> xCoord, OptionHandler<Integer> yCoord, OptionHandler<HorizontalBasis> horizontalBasis, OptionHandler<VerticalBasis> verticalBasis, OptionHandler<AlignDirection> alignDirection
 				, int width, int height, int texU, int texV, int texW, int texH, int resolutionDivW, int resolutionDivH, int r, int g, int b, UISetupScreen parentScreen, ResourceLocation texture, ResourceLocation texture2) {
 			super(x, y, xCoord, yCoord, horizontalBasis, verticalBasis, width, height, texU, texV, texW, texH, resolutionDivW, resolutionDivH, r, g, b, parentScreen, texture);
 		

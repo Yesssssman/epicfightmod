@@ -96,6 +96,10 @@
 	"gamerule.globalStun": "Enable Global Hitstun",
 	"gamerule.canSwitchCombat": "Enable switching between Battle/Mining mode",
 	
+	"gui.epicfight.configurations": "Epic Fight Configurations",
+	"gui.epicfight.graphic_options": "Epic Fight Graphics",
+	"gui.epicfight.control_options": "Epic Fight Controls",
+	
 	"gui.epicfight.skill_edit": "Skills",
 	"gui.epicfight.filter_animation.on": "Filter Animation: ON",
 	"gui.epicfight.filter_animation.off": "Filter Animation: OFF",
@@ -143,6 +147,15 @@
 	"gui.epicfight.select_slot_tooltip": "Choose the slot to apply the skill.",
 	
 	"gui.epicfight.save": "Save",
+	"gui.epicfight.export": "Export",
+	
+	"gui.epicfight.button.graphics": "Graphics",
+	"gui.epicfight.button.controls": "Controls",
+	"gui.epicfight.button.datapack_edit": "Datapack Edit",
+	
+	"gui.epicfight.tab.datapack.weapon_type": "Weapon Type",
+	"gui.epicfight.tab.datapack.item_capability": "Item Capability",
+	"gui.epicfight.tab.datapack.mob_patch": "Mob Patch",
 	
 	"item.epicfight.bokken": "Bokken",
 	"item.epicfight.uchigatana": "Uchigatana",

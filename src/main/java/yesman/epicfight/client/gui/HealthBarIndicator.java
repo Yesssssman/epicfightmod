@@ -32,7 +32,7 @@ import org.joml.Matrix4f;
 public class HealthBarIndicator extends EntityIndicator {
 	@Override
 	public boolean shouldDraw(LivingEntity entityIn, @Nullable LivingEntityPatch<?> entitypatch, LocalPlayerPatch playerpatch) {
-		ClientConfig.HealthBarShowOptions option = EpicFightMod.CLIENT_INGAME_CONFIG.healthBarShowOption.getValue();
+		ClientConfig.HealthBarShowOptions option = EpicFightMod.CLIENT_CONFIGS.healthBarShowOption.getValue();
 		Minecraft mc = Minecraft.getInstance();
 		
 		if (option == ClientConfig.HealthBarShowOptions.NONE) {

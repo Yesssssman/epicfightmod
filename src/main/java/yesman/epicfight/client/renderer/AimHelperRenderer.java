@@ -23,7 +23,7 @@ import yesman.epicfight.main.EpicFightMod;
 @OnlyIn(Dist.CLIENT)
 public class AimHelperRenderer {
 	public void doRender(PoseStack matStackIn, float partialTicks) {
-		if (!EpicFightMod.CLIENT_INGAME_CONFIG.enableAimHelperPointer.getValue()) {
+		if (!EpicFightMod.CLIENT_CONFIGS.enableAimHelperPointer.getValue()) {
 			return;
 		}
 		
@@ -43,7 +43,7 @@ public class AimHelperRenderer {
 		
 		Matrix4f matrix = matStackIn.last().pose();
 		
-		int color = EpicFightMod.CLIENT_INGAME_CONFIG.aimHelperRealColor;
+		int color = EpicFightMod.CLIENT_CONFIGS.aimHelperRealColor;
 		float f1 = (float)(color >> 16 & 255) / 255.0F;
 		float f2 = (float)(color >> 8 & 255) / 255.0F;
 		float f3 = (float)(color & 255) / 255.0F;

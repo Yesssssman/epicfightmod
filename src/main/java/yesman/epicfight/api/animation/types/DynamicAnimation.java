@@ -19,7 +19,7 @@ import yesman.epicfight.api.animation.types.EntityState.StateFactor;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
-import yesman.epicfight.config.ConfigurationIngame;
+import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -30,7 +30,7 @@ public abstract class DynamicAnimation {
 	protected float totalTime = 0.0F;
 	
 	public DynamicAnimation() {
-		this(ConfigurationIngame.GENERAL_ANIMATION_CONVERT_TIME, false);
+		this(EpicFightOptions.GENERAL_ANIMATION_CONVERT_TIME, false);
 	}
 	
 	public DynamicAnimation(float convertTime, boolean isRepeat) {

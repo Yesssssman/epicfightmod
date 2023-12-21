@@ -6,15 +6,15 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.client.gui.widget.UIComponent;
-import yesman.epicfight.client.gui.widget.UIComponent.PassiveUIComponent;
-import yesman.epicfight.config.ConfigurationIngame;
+import yesman.epicfight.client.gui.component.UIComponent;
+import yesman.epicfight.client.gui.component.UIComponent.PassiveUIComponent;
+import yesman.epicfight.config.EpicFightOptions;
 import net.minecraft.network.chat.Component;
 import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
 public class UISetupScreen extends Screen {
-	private final ConfigurationIngame config;
+	private final EpicFightOptions config;
 	protected final Screen parentScreen;
 	private UIComponent draggingButton;
 
@@ -22,7 +22,7 @@ public class UISetupScreen extends Screen {
 		super(Component.literal(EpicFightMod.MODID + ".gui.configuration.ui_setup"));
 		
 		this.parentScreen = parentScreen;
-		this.config = EpicFightMod.CLIENT_INGAME_CONFIG;
+		this.config = EpicFightMod.CLIENT_CONFIGS;
 	}
 
 	@Override

@@ -231,7 +231,7 @@ public class ControllEngine {
 					input.jumping = true;
 				}
 			} else {
-				if (this.moverPressCounter > EpicFightMod.CLIENT_INGAME_CONFIG.longPressCount.getValue()) {
+				if (this.moverPressCounter > EpicFightMod.CLIENT_CONFIGS.longPressCount.getValue()) {
 					SkillContainer skill = this.playerpatch.getSkill(SkillSlots.MOVER);
 					skill.sendExecuteRequest(this.playerpatch, this);
 					
@@ -288,8 +288,8 @@ public class ControllEngine {
 				this.weaponInnatePressCounter = 0;
 			} else {
 				if (EpicFightKeyMappings.WEAPON_INNATE_SKILL.getKey().equals(EpicFightKeyMappings.ATTACK.getKey())) {
-					if (this.weaponInnatePressCounter > EpicFightMod.CLIENT_INGAME_CONFIG.longPressCount.getValue()) {
-						if (this.minecraft.hitResult.getType() == HitResult.Type.BLOCK && this.playerpatch.getTarget() == null && !EpicFightMod.CLIENT_INGAME_CONFIG.noMiningInCombat.getValue()) {
+					if (this.weaponInnatePressCounter > EpicFightMod.CLIENT_CONFIGS.longPressCount.getValue()) {
+						if (this.minecraft.hitResult.getType() == HitResult.Type.BLOCK && this.playerpatch.getTarget() == null && !EpicFightMod.CLIENT_CONFIGS.noMiningInCombat.getValue()) {
 				            this.minecraft.startAttack();
 				            this.setKeyBind(EpicFightKeyMappings.ATTACK, true);
 						} else if (this.playerpatch.getSkill(SkillSlots.WEAPON_INNATE).sendExecuteRequest(this.playerpatch, this).shouldReserverKey()) {
@@ -341,7 +341,7 @@ public class ControllEngine {
 				this.sneakPressToggle = false;
 				this.sneakPressCounter = 0;
 			} else {
-				if (this.sneakPressCounter > EpicFightMod.CLIENT_INGAME_CONFIG.longPressCount.getValue()) {
+				if (this.sneakPressCounter > EpicFightMod.CLIENT_CONFIGS.longPressCount.getValue()) {
 					this.sneakPressToggle = false;
 					this.sneakPressCounter = 0;
 				} else {
