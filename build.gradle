@@ -120,6 +120,8 @@ dependencies {
     
     //implementation fg.deobf("local:epcfight:20.x.x")
     implementation fg.deobf("curse.maven:geckolib-388172:4822252")
+    implementation fg.deobf("curse.maven:azurelib-817423:4906772")
+    implementation fg.deobf("curse.maven:azurelibarmor-912767:4866792")
     
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }

@@ -39,6 +39,8 @@ import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.gui.screen.IngameConfigurationScreen;
 import yesman.epicfight.client.renderer.patched.item.EpicFightItemProperties;
+import yesman.epicfight.compat.AzureLibArmorCompat;
+import yesman.epicfight.compat.AzureLibCompat;
 import yesman.epicfight.compat.GeckolibCompat;
 import yesman.epicfight.compat.ICompatModule;
 import yesman.epicfight.config.ConfigManager;
@@ -135,7 +137,15 @@ public class EpicFightMod {
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
         	if (ModList.get().isLoaded("geckolib")) {
             	ICompatModule.loadCompatModuleClient(GeckolibCompat.class);
-            }
+          }
+          
+          if (ModList.get().isLoaded("azurelib")) {
+            ICompatModule.loadCompatModule(AzureLibCompat.class);
+          }
+          
+          if (ModList.get().isLoaded("azurelibarmor")) {
+            ICompatModule.loadCompatModule(AzureLibArmorCompat.class);
+          }
         });
 	}
     
