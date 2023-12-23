@@ -2,6 +2,7 @@ package yesman.epicfight.main;
 
 import java.util.function.Function;
 
+import net.minecraftforge.fml.ModList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -39,6 +40,8 @@ import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.gui.screen.IngameConfigurationScreen;
 import yesman.epicfight.client.input.EpicFightKeyMappings;
 import yesman.epicfight.client.renderer.patched.item.EpicFightItemProperties;
+import yesman.epicfight.compat.AzureLibCompat;
+import yesman.epicfight.compat.ICompatModule;
 import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.config.ConfigurationIngame;
 import yesman.epicfight.data.loot.EpicFightLootModifiers;
@@ -125,7 +128,11 @@ public class EpicFightMod {
         ConfigManager.loadConfig(ConfigManager.CLIENT_CONFIG, FMLPaths.CONFIGDIR.get().resolve(MODID + "-client.toml").toString());
         ConfigManager.loadConfig(ConfigManager.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve(CONFIG_FILE_PATH).toString());
         ModLoadingContext.get().registerExtensionPoint(ConfigGuiHandler.ConfigGuiFactory.class, () -> new ConfigGuiHandler.ConfigGuiFactory(IngameConfigurationScreen::new));
-    }
+
+		if (ModList.get().isLoaded("azurelib")) {
+			ICompatModule.loadCompatModule(AzureLibCompat.class);
+		}
+	}
     
 	private void doClientStuff(final FMLClientSetupEvent event) {
 		CLIENT_INGAME_CONFIG = new ConfigurationIngame();
