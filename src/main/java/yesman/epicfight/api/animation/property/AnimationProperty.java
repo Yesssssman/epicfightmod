@@ -5,6 +5,8 @@ import java.util.Set;
 import java.util.function.Function;
 
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.tags.TagKey;
+import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.RegistryObject;
 import yesman.epicfight.api.animation.Pose;
@@ -21,7 +23,6 @@ import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.skill.BasicAttack;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.damagesource.ExtraDamageInstance;
-import yesman.epicfight.world.damagesource.SourceTag;
 import yesman.epicfight.world.damagesource.StunType;
 
 public abstract class AnimationProperty<T> {
@@ -188,7 +189,7 @@ public abstract class AnimationProperty<T> {
 		public static final AttackPhaseProperty<SoundEvent> HIT_SOUND = new AttackPhaseProperty<SoundEvent> ();
 		public static final AttackPhaseProperty<RegistryObject<HitParticleType>> PARTICLE = new AttackPhaseProperty<RegistryObject<HitParticleType>> ();
 		public static final AttackPhaseProperty<Priority> HIT_PRIORITY = new AttackPhaseProperty<Priority> ();
-		public static final AttackPhaseProperty<Set<SourceTag>> SOURCE_TAG = new AttackPhaseProperty<Set<SourceTag>> ();
+		public static final AttackPhaseProperty<Set<TagKey<DamageType>>> SOURCE_TAG = new AttackPhaseProperty<Set<TagKey<DamageType>>> ();
 		public static final AttackPhaseProperty<Function<LivingEntityPatch<?>, Vec3>> SOURCE_LOCATION_PROVIDER = new AttackPhaseProperty<Function<LivingEntityPatch<?>, Vec3>> ();
 	}
 }

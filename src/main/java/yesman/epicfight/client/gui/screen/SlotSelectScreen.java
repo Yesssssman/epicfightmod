@@ -7,7 +7,7 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import yesman.epicfight.client.gui.widget.BasicButton;
+import yesman.epicfight.client.gui.component.BasicButton;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.SkillContainer;
 

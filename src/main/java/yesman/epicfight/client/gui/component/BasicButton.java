@@ -1,4 +1,4 @@
-package yesman.epicfight.client.gui.widget;
+package yesman.epicfight.client.gui.component;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;

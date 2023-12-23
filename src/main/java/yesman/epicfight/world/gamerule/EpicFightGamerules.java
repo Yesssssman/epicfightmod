@@ -15,6 +15,7 @@ public class EpicFightGamerules {
 	public static GameRules.Key<GameRules.BooleanValue> GLOBAL_STUN;
 	public static GameRules.Key<GameRules.BooleanValue> CAN_SWITCH_COMBAT;
 	public static GameRules.Key<GameRules.BooleanValue> STIFF_COMBO_ATTACKS;
+	public static GameRules.Key<GameRules.BooleanValue> NO_MOBS_IN_BOSSFIGHT;
 	
 	public static void registerRules() {
 		DO_VANILLA_ATTACK = GameRules.register("doVanillaAttack", GameRules.Category.PLAYER, GameRules.BooleanValue.create(ConfigManager.DO_VANILLA_ATTACK.get()));
@@ -36,5 +37,7 @@ public class EpicFightGamerules {
 		STIFF_COMBO_ATTACKS = GameRules.register("stiffComboAttacks", GameRules.Category.PLAYER, GameRules.BooleanValue.create(ConfigManager.STIFF_COMBO_ATTACKS.get(), (server, value) -> {
 			EpicFightNetworkManager.sendToAll(new SPChangeGamerule(SynchronizedGameRules.STIFF_COMBO_ATTACKS, value.get()));
 		}));
+		
+		NO_MOBS_IN_BOSSFIGHT = GameRules.register("noMobsInBossfight", GameRules.Category.SPAWNING, GameRules.BooleanValue.create(ConfigManager.NO_MOBS_IN_BOSSFIGHT.get()));
 	}
 }

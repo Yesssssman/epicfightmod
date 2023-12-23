@@ -1,4 +1,4 @@
-package yesman.epicfight.client.gui.widget;
+package yesman.epicfight.client.gui.component;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.components.Button;
@@ -7,11 +7,11 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class RewindableButton extends BasicButton {
+public class RewindableButton extends Button {
 	protected final Button.OnPress onRewindPress;
 	
-	public RewindableButton(int x, int y, int width, int height, Component title, OnPress pressedAction, OnPress rewindPressedAction, OnTooltip onTooltip) {
-		super(x, y, width, height, title, pressedAction, onTooltip);
+	public RewindableButton(int x, int y, int width, int height, Component title, OnPress pressedAction, OnPress rewindPressedAction) {
+		super(x, y, width, height, title, pressedAction, Button.DEFAULT_NARRATION);
 		this.onRewindPress = rewindPressedAction;
 	}
 	

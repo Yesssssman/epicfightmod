@@ -1,10 +1,10 @@
 package yesman.epicfight.config;
 
-public class Option<T> {
+public class OptionHandler<T> {
 	protected final T defaultOption;
 	protected T option;
 	
-	public Option(T defaultOption) {
+	public OptionHandler(T defaultOption) {
 		this.defaultOption = defaultOption;
 		this.option = defaultOption;
 	}
@@ -21,11 +21,11 @@ public class Option<T> {
 		this.option = this.defaultOption;
 	}
 	
-	public static class IntegerOption extends Option<Integer> {
+	public static class IntegerOptionHandler extends OptionHandler<Integer> {
 		private final int minValue;
 		private final int maxValue;
 		
-		public IntegerOption(Integer defaultOption, int minValue, int maxValue) {
+		public IntegerOptionHandler(Integer defaultOption, int minValue, int maxValue) {
 			super(defaultOption);
 			this.minValue = minValue;
 			this.maxValue = maxValue;
@@ -43,11 +43,11 @@ public class Option<T> {
 		}
 	}
 	
-	public static class DoubleOption extends Option<Double> {
+	public static class DoubleOptionHandler extends OptionHandler<Double> {
 		private final double minValue;
 		private final double maxValue;
 		
-		public DoubleOption(Double defaultOption, double minValue, double maxValue) {
+		public DoubleOptionHandler(Double defaultOption, double minValue, double maxValue) {
 			super(defaultOption);
 			this.minValue = minValue;
 			this.maxValue = maxValue;

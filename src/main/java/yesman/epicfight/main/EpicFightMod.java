@@ -13,12 +13,14 @@ import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.FMLConstructModEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
@@ -42,7 +44,7 @@ import yesman.epicfight.compat.AzureLibCompat;
 import yesman.epicfight.compat.GeckolibCompat;
 import yesman.epicfight.compat.ICompatModule;
 import yesman.epicfight.config.ConfigManager;
-import yesman.epicfight.config.ConfigurationIngame;
+import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.data.loot.EpicFightLootTables;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.gameasset.EpicFightSkills;
@@ -64,8 +66,6 @@ import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.capabilities.item.WeaponTypeReloadListener;
 import yesman.epicfight.world.capabilities.provider.EntityPatchProvider;
 import yesman.epicfight.world.capabilities.provider.ItemCapabilityProvider;
-import yesman.epicfight.world.damagesource.SourceTag;
-import yesman.epicfight.world.damagesource.SourceTags;
 import yesman.epicfight.world.effect.EpicFightMobEffects;
 import yesman.epicfight.world.effect.EpicFightPotions;
 import yesman.epicfight.world.entity.EpicFightEntities;
@@ -81,7 +81,7 @@ public class EpicFightMod {
 	public static final String MODID = "epicfight";
 	public static final String CONFIG_FILE_PATH = EpicFightMod.MODID + ".toml";
 	public static final Logger LOGGER = LogManager.getLogger(MODID);
-	public static ConfigurationIngame CLIENT_INGAME_CONFIG;
+	public static EpicFightOptions CLIENT_CONFIGS;
 	private static EpicFightMod instance;
 	
 	public static EpicFightMod getInstance() {
@@ -98,6 +98,8 @@ public class EpicFightMod {
     	ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ConfigManager.CLIENT_CONFIG);
     	
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+		
+		bus.addListener(this::constructMod);
     	bus.addListener(this::doClientStuff);
     	bus.addListener(this::doCommonStuff);
     	bus.addListener(this::doServerStuff);
@@ -107,12 +109,11 @@ public class EpicFightMod {
     	bus.addListener(EpicFightCapabilities::registerCapabilities);
     	bus.addListener(EpicFightEntities::onSpawnPlacementRegister);
     	
-    	LivingMotion.ENUM_MANAGER.loadPreemptive(LivingMotions.class);
-    	SkillCategory.ENUM_MANAGER.loadPreemptive(SkillCategories.class);
-    	SkillSlot.ENUM_MANAGER.loadPreemptive(SkillSlots.class);
-    	Style.ENUM_MANAGER.loadPreemptive(Styles.class);
-    	WeaponCategory.ENUM_MANAGER.loadPreemptive(WeaponCategories.class);
-    	SourceTag.ENUM_MANAGER.loadPreemptive(SourceTags.class);
+    	LivingMotion.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, LivingMotions.class);
+    	SkillCategory.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, SkillCategories.class);
+    	SkillSlot.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, SkillSlots.class);
+    	Style.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, Styles.class);
+    	WeaponCategory.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, WeaponCategories.class);
     	
     	EpicFightMobEffects.EFFECTS.register(bus);
     	EpicFightPotions.POTIONS.register(bus);
@@ -133,21 +134,31 @@ public class EpicFightMod {
         ConfigManager.loadConfig(ConfigManager.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve(CONFIG_FILE_PATH).toString());
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory(IngameConfigurationScreen::new));
         
-        if (ModList.get().isLoaded("geckolib")) {
-        	ICompatModule.loadCompatModule(GeckolibCompat.class);
-        }
-
-        if (ModList.get().isLoaded("azurelib")) {
-        	ICompatModule.loadCompatModule(AzureLibCompat.class);
-        }
-
-		if (ModList.get().isLoaded("azurelibarmor")) {
-			ICompatModule.loadCompatModule(AzureLibArmorCompat.class);
-		}
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+        	if (ModList.get().isLoaded("geckolib")) {
+            	ICompatModule.loadCompatModuleClient(GeckolibCompat.class);
+          }
+          
+          if (ModList.get().isLoaded("azurelib")) {
+            ICompatModule.loadCompatModule(AzureLibCompat.class);
+          }
+          
+          if (ModList.get().isLoaded("azurelibarmor")) {
+            ICompatModule.loadCompatModule(AzureLibArmorCompat.class);
+          }
+        });
 	}
     
+    private void constructMod(final FMLConstructModEvent event) {
+    	LivingMotion.ENUM_MANAGER.loadEnum();
+    	SkillCategory.ENUM_MANAGER.loadEnum();
+    	SkillSlot.ENUM_MANAGER.loadEnum();
+    	Style.ENUM_MANAGER.loadEnum();
+    	WeaponCategory.ENUM_MANAGER.loadEnum();
+    }
+    
 	private void doClientStuff(final FMLClientSetupEvent event) {
-		CLIENT_INGAME_CONFIG = new ConfigurationIngame();
+		CLIENT_CONFIGS = new EpicFightOptions();
     	new ClientEngine();
     	
         this.animatorProvider = ClientAnimator::getAnimator;
@@ -187,7 +198,6 @@ public class EpicFightMod {
 		event.addListener(new WeaponTypeReloadListener());
 		event.addListener(new ItemCapabilityReloadListener());
 		event.addListener(new MobPatchReloadListener());
-		
 	}
 	
 	public static Animator getAnimator(LivingEntityPatch<?> entitypatch) {

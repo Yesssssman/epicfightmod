@@ -11,6 +11,5 @@ public class DamageSourceElements {
 	float impact = 0.5F;
 	float armorNegation = 0.0F;
 	StunType stunType = StunType.SHORT;
-	Set<SourceTag> sourceTag;
 	Set<ExtraDamageInstance> extraDamages;
 }

@@ -217,9 +217,9 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	public void updateHeldItem(CapabilityItem mainHandCap, CapabilityItem offHandCap) {
 		super.updateHeldItem(mainHandCap, offHandCap);
 		
-		if (EpicFightMod.CLIENT_INGAME_CONFIG.battleAutoSwitchItems.contains(this.original.getMainHandItem().getItem())) {
+		if (EpicFightMod.CLIENT_CONFIGS.battleAutoSwitchItems.contains(this.original.getMainHandItem().getItem())) {
 			this.toBattleMode(true);
-		} else if (EpicFightMod.CLIENT_INGAME_CONFIG.miningAutoSwitchItems.contains(this.original.getMainHandItem().getItem())) {
+		} else if (EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems.contains(this.original.getMainHandItem().getItem())) {
 			this.toMiningMode(true);
 		}
 	}
@@ -228,7 +228,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	public AttackResult tryHurt(DamageSource damageSource, float amount) {
 		AttackResult result = super.tryHurt(damageSource, amount);
 		
-		if (EpicFightMod.CLIENT_INGAME_CONFIG.autoPreparation.getValue() && result.resultType == AttackResult.ResultType.SUCCESS && !this.isBattleMode()) {
+		if (EpicFightMod.CLIENT_CONFIGS.autoPreparation.getValue() && result.resultType == AttackResult.ResultType.SUCCESS && !this.isBattleMode()) {
 			this.toBattleMode(true);
 		}
 		
@@ -244,7 +244,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	public void toMiningMode(boolean synchronize) {
 		if (this.playerMode != PlayerMode.MINING) {
 			ClientEngine.getInstance().renderEngine.downSlideSkillUI();
-			if (EpicFightMod.CLIENT_INGAME_CONFIG.cameraAutoSwitch.getValue()) {
+			if (EpicFightMod.CLIENT_CONFIGS.cameraAutoSwitch.getValue()) {
 				this.minecraft.options.setCameraType(CameraType.FIRST_PERSON);
 			}
 			
@@ -261,7 +261,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		if (this.playerMode != PlayerMode.BATTLE) {
 			ClientEngine.getInstance().renderEngine.upSlideSkillUI();
 			
-			if (EpicFightMod.CLIENT_INGAME_CONFIG.cameraAutoSwitch.getValue()) {
+			if (EpicFightMod.CLIENT_CONFIGS.cameraAutoSwitch.getValue()) {
 				this.minecraft.options.setCameraType(CameraType.THIRD_PERSON_BACK);
 			}
 			

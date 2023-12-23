@@ -1,4 +1,4 @@
-package yesman.epicfight.client.gui.widget;
+package yesman.epicfight.client.gui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -14,12 +14,12 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.phys.Vec2;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.client.gui.widget.UIComponent.PassiveUIComponent;
+import yesman.epicfight.client.gui.component.UIComponent.PassiveUIComponent;
 import yesman.epicfight.config.ClientConfig;
 import yesman.epicfight.config.ClientConfig.AlignDirection;
 import yesman.epicfight.config.ClientConfig.HorizontalBasis;
 import yesman.epicfight.config.ClientConfig.VerticalBasis;
-import yesman.epicfight.config.Option;
+import yesman.epicfight.config.OptionHandler;
 import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
@@ -191,11 +191,11 @@ public class UIComponentPop<T extends UIComponent> extends Screen implements Con
 		
 		public static class AlignButton extends BasicButton {
 			private static final ResourceLocation BATTLE_ICONS = new ResourceLocation(EpicFightMod.MODID, "textures/gui/battle_icons.png");
-			private final Option<HorizontalBasis> horBasis;
-			private final Option<VerticalBasis> verBasis;
-			private final Option<AlignDirection> alignDirection;
+			private final OptionHandler<HorizontalBasis> horBasis;
+			private final OptionHandler<VerticalBasis> verBasis;
+			private final OptionHandler<AlignDirection> alignDirection;
 			
-			public AlignButton(int x, int y, int width, int height, Option<HorizontalBasis> horBasis, Option<VerticalBasis> verBasis, Option<AlignDirection> alignDirection, OnPress onpress) {
+			public AlignButton(int x, int y, int width, int height, OptionHandler<HorizontalBasis> horBasis, OptionHandler<VerticalBasis> verBasis, OptionHandler<AlignDirection> alignDirection, OnPress onpress) {
 				super(x, y, width, height, Component.literal(""), onpress);
 				
 				this.horBasis = horBasis;

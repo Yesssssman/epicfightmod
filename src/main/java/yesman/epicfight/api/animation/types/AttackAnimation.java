@@ -314,7 +314,7 @@ public class AttackAnimation extends ActionAnimation {
 		});
 		
 		phase.getProperty(AttackPhaseProperty.SOURCE_TAG).ifPresent((opt) -> {
-			opt.forEach(extendedSource::addTag);
+			opt.forEach(extendedSource::addRuntimeTag);
 		});
 		
 		phase.getProperty(AttackPhaseProperty.EXTRA_DAMAGE).ifPresent((opt) -> {

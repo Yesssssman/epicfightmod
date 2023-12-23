@@ -1,7 +1,7 @@
 package yesman.epicfight.api.animation.types;
 
 import yesman.epicfight.api.model.Armature;
-import yesman.epicfight.config.ConfigurationIngame;
+import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class ReboundAnimation extends AimAnimation {
@@ -18,7 +18,7 @@ public class ReboundAnimation extends AimAnimation {
 	}
 	
 	public ReboundAnimation(boolean repeatPlay, String path1, String path2, String path3, String path4, Armature armature) {
-		this(ConfigurationIngame.GENERAL_ANIMATION_CONVERT_TIME, repeatPlay, path1, path2, path3, path4, armature);
+		this(EpicFightOptions.GENERAL_ANIMATION_CONVERT_TIME, repeatPlay, path1, path2, path3, path4, armature);
 	}
 	
 	@Override

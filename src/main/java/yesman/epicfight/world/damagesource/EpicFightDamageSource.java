@@ -18,7 +18,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 public class EpicFightDamageSource extends DamageSource {
-
 	private DamageSourceElements damageSourceElements = new DamageSourceElements();
 	private HashSet<TagKey<DamageType>> runtimeTags = new HashSet<>();
 	private HashSet<ResourceKey<DamageType>> runtimeTypes = new HashSet<>();
@@ -83,27 +82,7 @@ public class EpicFightDamageSource extends DamageSource {
 	public StunType getStunType() {
 		return this.getDamageSourceElements().stunType;
 	}
-
-	public EpicFightDamageSource addTag(SourceTag tag) {
-		if (this.getDamageSourceElements().sourceTag == null) {
-			this.getDamageSourceElements().sourceTag = Sets.newHashSet();
-		}
-
-		this.getDamageSourceElements().sourceTag.add(tag);
-
-		return this;
-	}
-
-	public boolean hasTag(SourceTag tag) {
-		Set<SourceTag> tags = this.getDamageSourceElements().sourceTag;
-
-		if (tags != null) {
-			return tags.contains(tag);
-		}
-
-		return false;
-	}
-
+	
 	public EpicFightDamageSource addExtraDamage(ExtraDamageInstance extraDamage) {
 		if (this.getDamageSourceElements().extraDamages == null) {
 			this.getDamageSourceElements().extraDamages = Sets.newHashSet();
@@ -148,12 +127,12 @@ public class EpicFightDamageSource extends DamageSource {
 
 	@Override
 	public boolean is(TagKey<DamageType> type) {
-		return runtimeTags.contains(type) || super.is(type);
+		return this.runtimeTags.contains(type) || super.is(type);
 	}
 
 	@Override
 	public boolean is(ResourceKey<DamageType> type) {
-		return runtimeTypes.contains(type) || super.is(type);
+		return this.runtimeTypes.contains(type) || super.is(type);
 	}
 
 	public EpicFightDamageSource addRuntimeTag(TagKey<DamageType> type) {

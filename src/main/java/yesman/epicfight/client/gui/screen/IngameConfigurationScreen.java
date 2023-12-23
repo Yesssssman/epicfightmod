@@ -1,48 +1,57 @@
 package yesman.epicfight.client.gui.screen;
 
-import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.client.model.armor.CustomModelBakery;
-import yesman.epicfight.client.gui.widget.ColorSlider;
-import yesman.epicfight.client.gui.widget.BasicButton;
-import yesman.epicfight.client.gui.widget.RewindableButton;
-import yesman.epicfight.config.ClientConfig;
-import yesman.epicfight.config.Option;
+import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.main.EpicFightMod;
-
-import java.io.File;
-import java.io.IOException;
 
 @OnlyIn(Dist.CLIENT)
 public class IngameConfigurationScreen extends Screen {
 	protected final Screen parentScreen;
 	
 	public IngameConfigurationScreen(Minecraft mc, Screen screen) {
-		super(Component.literal(EpicFightMod.MODID + ".gui.configuration"));
+		super(Component.translatable("gui." + EpicFightMod.MODID + ".configurations"));
 		this.parentScreen = screen;
 	}
 	
 	@Override
 	protected void init() {
-		Option<ClientConfig.HealthBarShowOptions> showHealthIndicator = EpicFightMod.CLIENT_INGAME_CONFIG.healthBarShowOption;
-		Option<Boolean> showTargetIndicator = EpicFightMod.CLIENT_INGAME_CONFIG.showTargetIndicator;
+		EpicFightOptions configs = EpicFightMod.CLIENT_CONFIGS;
+		
+		this.addRenderableWidget(Button.builder(Component.translatable("gui." + EpicFightMod.MODID + ".button.graphics"), (button) -> {
+			Minecraft.getInstance().setScreen(new EpicFightGraphicOptionScreen(this, configs));
+		}).pos(this.width / 2 - 165, 42).size(160, 20).build());
+		
+		this.addRenderableWidget(Button.builder(Component.translatable("gui." + EpicFightMod.MODID + ".button.controls"), (button) -> {
+			Minecraft.getInstance().setScreen(new EpicFightControlOptionScreen(this, configs));
+		}).pos(this.width / 2 + 5, 42).size(160, 20).build());
+		
+		this.addRenderableWidget(Button.builder(Component.translatable("gui." + EpicFightMod.MODID + ".button.datapack_edit"), (button) -> {
+			Minecraft.getInstance().setScreen(new DatapackEditScreen(this));
+		}).pos(this.width / 2 - 165, 68).size(160, 20).build());
+		
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {
+			this.minecraft.setScreen(this.parentScreen);
+		}).bounds(this.width / 2 - 100, this.height - 40, 200, 20).build());
+		
+		/**
+		Option<ClientConfig.HealthBarShowOptions> showHealthIndicator = EpicFightMod.CLIENT_CONFIGS.healthBarShowOption;
+		Option<Boolean> showTargetIndicator = EpicFightMod.CLIENT_CONFIGS.showTargetIndicator;
 
-		Option<Boolean> filterAnimation = EpicFightMod.CLIENT_INGAME_CONFIG.filterAnimation;
-		Option<Integer> longPressCounter = EpicFightMod.CLIENT_INGAME_CONFIG.longPressCount;
-		Option<Boolean> enableAimHelper = EpicFightMod.CLIENT_INGAME_CONFIG.enableAimHelperPointer;
-		Option<Double> aimHelperColor = EpicFightMod.CLIENT_INGAME_CONFIG.aimHelperColor;
-		Option<Boolean> cameraAutoSwitch = EpicFightMod.CLIENT_INGAME_CONFIG.cameraAutoSwitch;
-		Option<Boolean> autoPreparation = EpicFightMod.CLIENT_INGAME_CONFIG.autoPreparation;
-		Option<Boolean> offBlood = EpicFightMod.CLIENT_INGAME_CONFIG.offBloodEffects;
-		Option<Boolean> noMiningInCombat = EpicFightMod.CLIENT_INGAME_CONFIG.noMiningInCombat;
+		Option<Boolean> filterAnimation = EpicFightMod.CLIENT_CONFIGS.filterAnimation;
+		Option<Integer> longPressCounter = EpicFightMod.CLIENT_CONFIGS.longPressCount;
+		Option<Boolean> enableAimHelper = EpicFightMod.CLIENT_CONFIGS.enableAimHelperPointer;
+		Option<Double> aimHelperColor = EpicFightMod.CLIENT_CONFIGS.aimHelperColor;
+		Option<Boolean> cameraAutoSwitch = EpicFightMod.CLIENT_CONFIGS.cameraAutoSwitch;
+		Option<Boolean> autoPreparation = EpicFightMod.CLIENT_CONFIGS.autoPreparation;
+		Option<Boolean> offBlood = EpicFightMod.CLIENT_CONFIGS.offBloodEffects;
+		Option<Boolean> noMiningInCombat = EpicFightMod.CLIENT_CONFIGS.noMiningInCombat;
 		
 		int buttonHeight = -32;
 
@@ -137,6 +146,7 @@ public class IngameConfigurationScreen extends Screen {
 			File resourcePackDirectory = Minecraft.getInstance().getResourcePackDirectory().toFile();
 			try {
 				CustomModelBakery.exportModels(resourcePackDirectory);
+				
 				Util.getPlatform().openFile(resourcePackDirectory);
 			} catch (IOException e) {
 				EpicFightMod.LOGGER.info("Failed to export custom armor models");
@@ -167,15 +177,15 @@ public class IngameConfigurationScreen extends Screen {
 		
 		buttonHeight += 30;
 
-		this.addRenderableWidget(new ColorSlider(this.width / 2 - 150, this.height / 4 + buttonHeight, 300, 20, Component.translatable("gui."+EpicFightMod.MODID+".aim_helper_color"), aimHelperColor.getValue(), EpicFightMod.CLIENT_INGAME_CONFIG.aimHelperColor));
+		this.addRenderableWidget(new ColorSlider(this.width / 2 - 150, this.height / 4 + buttonHeight, 300, 20, Component.translatable("gui."+EpicFightMod.MODID+".aim_helper_color"), aimHelperColor.getValue(), EpicFightMod.CLIENT_CONFIGS.aimHelperColor));
 
 		this.addRenderableWidget(new BasicButton(this.width / 2 + 90, this.height / 4 + 150, 48, 20, CommonComponents.GUI_DONE, (button) -> {
-			EpicFightMod.CLIENT_INGAME_CONFIG.save();
+			EpicFightMod.CLIENT_CONFIGS.save();
 			this.onClose();
 		}));
 		
 		this.addRenderableWidget(new BasicButton(this.width / 2 + 140, this.height / 4 + 150, 48, 20, Component.translatable("controls.reset"), (button) -> {
-			EpicFightMod.CLIENT_INGAME_CONFIG.resetSettings();
+			EpicFightMod.CLIENT_CONFIGS.resetSettings();
 			filterAnimationButton.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".filter_animation." + (filterAnimation.getValue() ? "on" : "off")));
 			longPressCounterButton.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".long_press_counter", (ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(longPressCounter.getValue()))));
 			health_barShowOptionButton.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".health_bar_show_option." + showHealthIndicator.getValue().toString()));
@@ -185,12 +195,13 @@ public class IngameConfigurationScreen extends Screen {
 			autoPreparationButton.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".auto_preparation." + (autoPreparation.getValue() ? "on" : "off")));
 			offGoreButton.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".off_blood_effect." + (offBlood.getValue() ? "on" : "off")));
 			noMiningInCombatButton.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".no_mining_in_combat." + (noMiningInCombat.getValue() ? "on" : "off")));
-		}));
+		}));**/
 	}
 	
 	@Override
 	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		this.renderDirtBackground(guiGraphics);
+		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 15, 16777215);
 		super.render(guiGraphics, mouseX, mouseY, partialTicks);
 	}
 	

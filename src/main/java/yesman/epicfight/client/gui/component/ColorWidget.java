@@ -1,4 +1,4 @@
-package yesman.epicfight.client.gui.widget;
+package yesman.epicfight.client.gui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -12,14 +12,14 @@ import net.minecraft.util.Mth;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
-import yesman.epicfight.config.Option.DoubleOption;
+import yesman.epicfight.config.OptionHandler.DoubleOptionHandler;
 
 @OnlyIn(Dist.CLIENT)
-public class ColorSlider extends AbstractSliderButton {
+public class ColorWidget extends AbstractSliderButton {
 	private static final int[] COLOR_ARRAY = { 0xFFFF0000, 0xFFFFFF00, 0xFF00FF00, 0xFF00FFFF, 0xFF0000FF, 0xFFFF00FF, 0xFFFF0000 };
-	private final DoubleOption colorOption;
+	private final DoubleOptionHandler colorOption;
 	
-	public ColorSlider(int x, int y, int width, int height, Component message, double defaultValue, DoubleOption option) {
+	public ColorWidget(int x, int y, int width, int height, Component message, double defaultValue, DoubleOptionHandler option) {
 		super(x, y, width, height, message, defaultValue);
 		this.colorOption = option;
 	}
