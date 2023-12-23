@@ -120,6 +120,7 @@ dependencies {
     
     //implementation fg.deobf("curse.maven:mantle-74924:3829975")
     implementation fg.deobf("curse.maven:geckolib-388172:4407241")
+    implementation fg.deobf("curse.maven:azurelib-817423:4852298")
     //implementation fg.deobf("local:epicsamurai:0.0.2")
     
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'

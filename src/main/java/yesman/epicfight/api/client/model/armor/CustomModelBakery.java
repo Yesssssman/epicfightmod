@@ -42,6 +42,9 @@ public class CustomModelBakery {
 			MODEL_TRANSFORMERS.add(new GeoArmor());
 		}
 	}
+	public static void registerNewTransformer(ArmorModelTransformer transformer) {
+		MODEL_TRANSFORMERS.add(transformer);
+	}
 	
 	public static void exportModels(File resourcePackDirectory) throws IOException {
 		File zipFile = new File(resourcePackDirectory, "epicfight_custom_armors.zip");
