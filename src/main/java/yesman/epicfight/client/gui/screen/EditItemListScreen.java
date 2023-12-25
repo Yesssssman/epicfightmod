@@ -1,6 +1,7 @@
 package yesman.epicfight.client.gui.screen;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
@@ -21,6 +22,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.client.gui.component.BasicButton;
 
 import java.util.List;
+import java.util.Set;
 
 @OnlyIn(Dist.CLIENT)
 public class EditItemListScreen extends Screen {
@@ -328,6 +330,8 @@ public class EditItemListScreen extends Screen {
 	}
 	
 	class ItemButton extends BasicButton {
+		private static final Set<Item> UNRENDERABLES = Sets.newHashSet();
+		
 		private final ItemStack itemStack;
 		private final IPressableExtended pressedAction;
 		
@@ -353,7 +357,13 @@ public class EditItemListScreen extends Screen {
 			}
 			
 			try {
-				guiGraphics.renderItem(this.itemStack, this.getX(), this.getY());
+				try {
+					if (!UNRENDERABLES.contains(this.itemStack.getItem())) {
+						guiGraphics.renderItem(this.itemStack, this.getX(), this.getY());
+					}
+				} catch (Exception e) {
+					UNRENDERABLES.add(this.itemStack.getItem());
+				}
 			} catch (Throwable e) {
 			}
 		}

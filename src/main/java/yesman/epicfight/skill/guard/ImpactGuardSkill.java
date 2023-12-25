@@ -26,6 +26,7 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
+import yesman.epicfight.world.damagesource.EpicFightDamageType;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 
@@ -85,7 +86,7 @@ public class ImpactGuardSkill extends GuardSkill {
 		
 		if (advanced) {
 			LivingEntity original = playerpatch.getOriginal();
-			EpicFightParticles.AIR_BURST.get().spawnParticleWithArgument(((ServerLevel)original.level()), original, directEntity);
+			EpicFightParticles.AIR_BURST.get().spawnParticleWithArgument(((ServerLevel)original.level()), null, null, original, directEntity);
 		}
 		
 		if (entitypatch != null) {
@@ -95,7 +96,14 @@ public class ImpactGuardSkill extends GuardSkill {
 	
 	@Override
 	protected boolean isBlockableSource(DamageSource damageSource, boolean advanced) {
-		return !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && (!damageSource.is(DamageTypeTags.BYPASSES_ARMOR) && !damageSource.is(DamageTypeTags.IS_PROJECTILE) && !damageSource.is(DamageTypeTags.IS_EXPLOSION) && !damageSource.is(DamageTypes.MAGIC) && !damageSource.is(DamageTypeTags.IS_FIRE) || advanced);
+		return !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)
+				&& !damageSource.is(EpicFightDamageType.PARTIAL_DAMAGE)
+				&& (!damageSource.is(DamageTypeTags.BYPASSES_ARMOR)
+					&& !damageSource.is(DamageTypeTags.IS_PROJECTILE)
+					&& !damageSource.is(DamageTypeTags.IS_EXPLOSION)
+					&& !damageSource.is(DamageTypes.MAGIC) 
+					&& !damageSource.is(DamageTypeTags.IS_FIRE)
+					|| advanced);
 	}
 	
 	@Override

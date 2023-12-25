@@ -24,8 +24,8 @@ public class AirBurstParticle extends TexturedCustomModelParticle {
 		this.lifetime = zd < 0.0D ? 2 : (int)zd;
 		this.pitch = (float)xd;
 		this.pitchO = (float)xd;
-		this.yaw = (float)-yd;
-		this.yawO = (float)-yd;
+		this.yaw = (float)yd;
+		this.yawO = (float)yd;
 	}
 	
 	@Override

@@ -1,8 +1,12 @@
 package yesman.epicfight.client.gui.screen;
 
+import java.util.List;
+import java.util.Set;
+
 import com.google.common.collect.Lists;
+import com.google.common.collect.Sets;
+
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
@@ -17,8 +21,6 @@ import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.client.gui.component.BasicButton;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.provider.ItemCapabilityProvider;
-
-import java.util.List;
 
 @OnlyIn(Dist.CLIENT)
 public class EditSwitchingItemScreen extends Screen {
@@ -35,14 +37,14 @@ public class EditSwitchingItemScreen extends Screen {
 	@Override
 	protected void init() {
 		if (this.battleAutoSwitchItems == null) {
-			this.battleAutoSwitchItems = new EditSwitchingItemScreen.RegisteredItemList(this.minecraft, 200, this.height,
+			this.battleAutoSwitchItems = new EditSwitchingItemScreen.RegisteredItemList(200, this.height,
 				 Component.translatable(EpicFightMod.MODID+".gui.to_battle_mode"), EpicFightMod.CLIENT_CONFIGS.battleAutoSwitchItems);
 		} else {
 			this.battleAutoSwitchItems.resize(200, this.height);
 		}
-
+		
 		if (this.miningAutoSwitchItems == null) {
-			this.miningAutoSwitchItems = new EditSwitchingItemScreen.RegisteredItemList(this.minecraft, 200, this.height,
+			this.miningAutoSwitchItems = new EditSwitchingItemScreen.RegisteredItemList(200, this.height,
 				 Component.translatable(EpicFightMod.MODID+".gui.to_mining_mode"), EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems);
 		} else {
 			this.miningAutoSwitchItems.resize(200, this.height);
@@ -74,6 +76,7 @@ public class EditSwitchingItemScreen extends Screen {
 		this.miningAutoSwitchItems.render(guiGraphics, mouseX, mouseY, partialTicks);
 		super.render(guiGraphics, mouseX, mouseY, partialTicks);
 		guiGraphics.drawCenteredString(this.font, this.title, this.width / 2, 16, 16777215);
+		
 		if (this.deferredTooltip != null) {
 			this.deferredTooltip.run();
 			this.deferredTooltip = null;
@@ -89,22 +92,22 @@ public class EditSwitchingItemScreen extends Screen {
 	class RegisteredItemList extends ObjectSelectionList<EditSwitchingItemScreen.RegisteredItemList.ItemEntry> {
 		private final Component title;
 
-		public RegisteredItemList(Minecraft mcIn, int width, int height, Component title, List<Item> saved) {
-			super(mcIn, width, height, 32, height - 50, 22);
+		public RegisteredItemList(int width, int height, Component title, List<Item> saved) {
+			super(EditSwitchingItemScreen.this.minecraft, width, height, 32, height - 50, 22);
 			this.title = title;
 			this.setRenderHeader(true, (int)(9.0F * 1.5F));
-
+			
 			if (this.getSelected() != null) {
 				this.centerScrollOn(this.getSelected());
 			}
-
+			
 			this.addEntry(new ButtonInEntry());
-
+			
 			for (Item item : saved) {
 				this.addEntry(new ItemEntry(item.getDefaultInstance()));
 			}
 		}
-
+		
 		public void resize(int width, int height) {
 			this.width = width;
 			this.height = height;
@@ -150,6 +153,7 @@ public class EditSwitchingItemScreen extends Screen {
 
 		@OnlyIn(Dist.CLIENT)
 		class ItemEntry extends ObjectSelectionList.Entry<EditSwitchingItemScreen.RegisteredItemList.ItemEntry> {
+			private static final Set<Item> UNRENDERABLES = Sets.newHashSet();
 			private final ItemStack itemStack;
 
 			public ItemEntry(ItemStack itemStack) {
@@ -159,14 +163,17 @@ public class EditSwitchingItemScreen extends Screen {
 			@Override
 			public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
 				try {
-					guiGraphics.renderItem(itemStack, left + 4, top + 1);
+					if (!UNRENDERABLES.contains(this.itemStack.getItem())) {
+						guiGraphics.renderItem(this.itemStack, left + 4, top + 1);
+					}
 				} catch (Exception e) {
+					UNRENDERABLES.add(this.itemStack.getItem());
 				}
-
-				Component Component = itemStack.getHoverName();
+				
+				Component Component = this.itemStack.getHoverName();
 				guiGraphics.drawString(RegisteredItemList.this.minecraft.font, Component, left + 30, top + 5, 16777215, false);
 			}
-
+			
 			@Override
 			public boolean mouseClicked(double mouseX, double mouseY, int button) {
 				if (button == 0) {
@@ -271,17 +278,17 @@ public class EditSwitchingItemScreen extends Screen {
 			public boolean mouseClicked(double mouseX, double mouseY, int button) {
 				if (button == 0) {
 					if (this.addItemButton.isMouseOver(mouseX, mouseY)) {
-						this.addItemButton.playDownSound(Minecraft.getInstance().getSoundManager());
+						this.addItemButton.playDownSound(EditSwitchingItemScreen.this.minecraft.getSoundManager());
 						this.addItemButton.onPress();
 					}
 					
 					if (this.removeAllButton.isMouseOver(mouseX, mouseY)) {
-						this.removeAllButton.playDownSound(Minecraft.getInstance().getSoundManager());
+						this.removeAllButton.playDownSound(EditSwitchingItemScreen.this.minecraft.getSoundManager());
 						this.removeAllButton.onPress();
 					}
 					
 					if (this.automaticRegisterButton.isMouseOver(mouseX, mouseY)) {
-						this.automaticRegisterButton.playDownSound(Minecraft.getInstance().getSoundManager());
+						this.automaticRegisterButton.playDownSound(EditSwitchingItemScreen.this.minecraft.getSoundManager());
 						this.automaticRegisterButton.onPress();
 					}
 				}

@@ -134,19 +134,19 @@ public class EpicFightMod {
         ConfigManager.loadConfig(ConfigManager.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve(CONFIG_FILE_PATH).toString());
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory(IngameConfigurationScreen::new));
         
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-        	if (ModList.get().isLoaded("geckolib")) {
-            	ICompatModule.loadCompatModuleClient(GeckolibCompat.class);
-          }
-          
-          if (ModList.get().isLoaded("azurelib")) {
-            ICompatModule.loadCompatModule(AzureLibCompat.class);
-          }
-          
-          if (ModList.get().isLoaded("azurelibarmor")) {
-            ICompatModule.loadCompatModule(AzureLibArmorCompat.class);
-          }
-        });
+		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+			if (ModList.get().isLoaded("geckolib")) {
+				ICompatModule.loadCompatModuleClient(GeckolibCompat.class);
+			}
+			
+			if (ModList.get().isLoaded("azurelib")) {
+				ICompatModule.loadCompatModule(AzureLibCompat.class);
+			}
+			
+			if (ModList.get().isLoaded("azurelibarmor")) {
+				ICompatModule.loadCompatModule(AzureLibArmorCompat.class);
+			}
+		});
 	}
     
     private void constructMod(final FMLConstructModEvent event) {

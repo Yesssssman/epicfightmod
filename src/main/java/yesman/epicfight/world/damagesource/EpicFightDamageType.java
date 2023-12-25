@@ -7,7 +7,6 @@ import net.minecraft.world.damagesource.DamageType;
 import yesman.epicfight.main.EpicFightMod;
 
 public interface EpicFightDamageType {
-	
 	/**
 	 * Decides if damage source can hurt the entity that is lying on ground
 	 */
@@ -32,6 +31,11 @@ public interface EpicFightDamageType {
 	 * Decides if damage source can ignore guard
 	 */
 	TagKey<DamageType> GUARD_PUNCTURE = create("guard_puncture");
+	
+	/**
+	 * This tag means if the damage source is part of the other damage source
+	 */
+	TagKey<DamageType> PARTIAL_DAMAGE = create("partial_damage");
 	
 	private static TagKey<DamageType> create(String tagName) {
 		return TagKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(EpicFightMod.MODID, tagName));

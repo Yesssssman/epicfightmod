@@ -1,12 +1,19 @@
 package yesman.epicfight.client.gui.screen;
 
+import java.util.List;
+import java.util.function.Supplier;
+
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.ContainerObjectSelectionList;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.tabs.GridLayoutTab;
 import net.minecraft.client.gui.components.tabs.TabManager;
 import net.minecraft.client.gui.components.tabs.TabNavigationBar;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.worldselection.CreateWorldScreen;
@@ -16,6 +23,8 @@ import net.minecraft.util.Mth;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.world.capabilities.entitypatch.CustomMobPatch;
+import yesman.epicfight.world.capabilities.item.CapabilityItem;
 
 @OnlyIn(Dist.CLIENT)
 public class DatapackEditScreen extends Screen {
@@ -23,18 +32,25 @@ public class DatapackEditScreen extends Screen {
 	
 	private GridLayout bottomButtons;
 	private TabNavigationBar tabNavigationBar;
+	//private File datapackFile;
+	protected final Screen lastScreen;
 	private final TabManager tabManager = new TabManager(this::addRenderableWidget, (p_267853_) -> {
 		this.removeWidget(p_267853_);
 	});
-	protected final Screen lastScreen;
 	
 	public DatapackEditScreen(Screen parentScreen) {
 		super(Component.translatable("gui." + EpicFightMod.MODID + ".datapack_edit"));
+		
 		this.lastScreen = parentScreen;
 	}
 	
 	@Override
 	protected void init() {
+		//this.packItemList = new PackItemList(130, this.height - 40, 35, this.height - 45, 26);
+		//this.packItemList.setLeftPos(8);
+		
+		//this.addRenderableWidget(this.packItemList);
+		
 		this.tabNavigationBar = TabNavigationBar.builder(this.tabManager, this.width).addTabs(new DatapackEditScreen.WeaponTypeTab(), new DatapackEditScreen.ItemCapabilityTab(), new DatapackEditScreen.MobPatchTab()).build();
 		this.tabNavigationBar.selectTab(0, false);
 		
@@ -59,6 +75,9 @@ public class DatapackEditScreen extends Screen {
 	
 	@Override
 	public void repositionElements() {
+		//this.packItemList.updateSize(130, this.height - 40, 35, this.height - 45);
+		//this.packItemList.setLeftPos(8);
+		
 		if (this.tabNavigationBar != null && this.bottomButtons != null) {
 			this.tabNavigationBar.setWidth(this.width);
 			this.tabNavigationBar.arrangeElements();
@@ -95,22 +114,81 @@ public class DatapackEditScreen extends Screen {
 		super.render(guiGraphics, mouseX, mouseY, partialTick);
 	}
 	
+	public class PackItemList<T> extends ContainerObjectSelectionList<PackItemEntry<T>> {
+		Supplier<T> supplier;
+		T packItem;
+		
+		public PackItemList(int width, int height, int y0, int y1, int itemHeight, Supplier<T> supplier) {
+			super(DatapackEditScreen.this.minecraft, width, height, y0, y1, itemHeight);
+			
+			this.supplier = supplier;
+			
+			this.addEntry(new PackItemEntry<>(Button.builder(Component.literal("+"), (button) -> {
+				this.children().add(this.children().size() - 1, this.createNewItem());
+			}).pos((this.x1 - this.x0) / 2 - 2, 0).size(20, 20).build(), (T)null));
+		}
+		
+		private PackItemEntry<T> createNewItem() {
+			return new PackItemEntry<>( Button.builder(title, (button) -> {}).build(), this.supplier.get() );
+		}
+	}
+	
+	public class PackItemEntry<T> extends ContainerObjectSelectionList.Entry<DatapackEditScreen.PackItemEntry<T>> {
+		private AbstractWidget button;
+		private T item;
+		
+		public PackItemEntry(AbstractWidget button, T item) {
+			this.button = button;
+			this.item = item;
+		}
+		
+		@Override
+		public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
+			//System.out.println(left);
+			
+			//this.button.setX(left);
+			this.button.setY(top);
+			this.button.render(guiGraphics, mouseX, mouseY, partialTicks);
+		}
+		
+		@Override
+		public List<? extends GuiEventListener> children() {
+			return List.of(this.button);
+		}
+		
+		@Override
+		public List<? extends NarratableEntry> narratables() {
+			return List.of(this.button);
+		}
+	}
+	
+	private static class DatapackTab<T> extends GridLayoutTab {
+		private PackItemList<T> packItemList;
+		//private 
+		
+		public DatapackTab(Component title) {
+			super(title);
+			
+			GridLayout.RowHelper gridlayout$rowhelper = this.layout.rowSpacing(8).createRowHelper(1);
+		}
+	}
+	
 	@OnlyIn(Dist.CLIENT)
-	class WeaponTypeTab extends GridLayoutTab {
+	class WeaponTypeTab extends DatapackTab<CapabilityItem.Builder> {
 		public WeaponTypeTab() {
 			super(Component.translatable("gui." + EpicFightMod.MODID + ".tab.datapack.weapon_type"));
 		}
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	class ItemCapabilityTab extends GridLayoutTab {
+	class ItemCapabilityTab extends DatapackTab<CapabilityItem> {
 		public ItemCapabilityTab() {
 			super(Component.translatable("gui." + EpicFightMod.MODID + ".tab.datapack.item_capability"));
 		}
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	class MobPatchTab extends GridLayoutTab {
+	class MobPatchTab extends DatapackTab<CustomMobPatch<?>> {
 		public MobPatchTab() {
 			super(Component.translatable("gui." + EpicFightMod.MODID + ".tab.datapack.mob_patch"));
 		}

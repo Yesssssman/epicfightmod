@@ -6,7 +6,6 @@ import net.minecraft.commands.arguments.EntityAnchorArgument;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.DamageSource;
@@ -159,7 +158,7 @@ public class EntityEvents {
 				baseDamage = attackerEntityPatch.getModifiedBaseDamage(baseDamage);
 			}
 			
-			if (epicFightDamageSource != null) {
+			if (epicFightDamageSource != null && !epicFightDamageSource.is(EpicFightDamageType.PARTIAL_DAMAGE)) {
 				LivingEntity hitEntity = event.getEntity();
 				
 				if (attackerEntityPatch instanceof ServerPlayerPatch playerpatch) {
@@ -352,7 +351,9 @@ public class EntityEvents {
 		if (event.getEntity().getHealth() > 0.0F) {
 			LivingEntityPatch<?> attackerPatch = EpicFightCapabilities.getEntityPatch(event.getSource().getEntity(), LivingEntityPatch.class);
 			
-			if (event.getSource().isIndirect() && event.getSource().getDirectEntity() != null) {
+			if (event.getSource() instanceof EpicFightDamageSource efDamageSource) {
+				damageSource = efDamageSource;
+			} else if (event.getSource().isIndirect() && event.getSource().getDirectEntity() != null) {
 				ProjectilePatch<?> projectilepatch = EpicFightCapabilities.getEntityPatch(event.getSource().getDirectEntity(), ProjectilePatch.class);
 				
 				if (projectilepatch != null) {
@@ -366,7 +367,7 @@ public class EntityEvents {
 				damageSource = event.getSource();
 			}
 			
-			AttackResult result = (entitypatch != null && !damageSource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) ? entitypatch.tryHurt(damageSource, event.getAmount()) : AttackResult.success(event.getAmount());
+			AttackResult result = entitypatch != null ? entitypatch.tryHurt(damageSource, event.getAmount()) : AttackResult.success(event.getAmount());
 			
 			if (attackerPatch != null) {
 				attackerPatch.setLastAttackResult(result);
@@ -376,8 +377,8 @@ public class EntityEvents {
 				event.setCanceled(true);
 			} else if (event.getAmount() != result.damage) {
 				EpicFightDamageSource deflictedDamage = EpicFightDamageSources.copy(damageSource);
-				deflictedDamage.addRuntimeTag(DamageTypeTags.BYPASSES_INVULNERABILITY);
-
+				deflictedDamage.addRuntimeTag(EpicFightDamageType.PARTIAL_DAMAGE);
+				
 				event.setCanceled(true);
 				event.getEntity().hurt(deflictedDamage, result.damage);
 			}

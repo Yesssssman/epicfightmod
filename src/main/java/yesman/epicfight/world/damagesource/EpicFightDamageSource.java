@@ -21,7 +21,6 @@ public class EpicFightDamageSource extends DamageSource {
 	private DamageSourceElements damageSourceElements = new DamageSourceElements();
 	private HashSet<TagKey<DamageType>> runtimeTags = new HashSet<>();
 	private HashSet<ResourceKey<DamageType>> runtimeTypes = new HashSet<>();
-
 	private StaticAnimation animation;
 	private Vec3 initialPosition;
 
@@ -113,18 +112,16 @@ public class EpicFightDamageSource extends DamageSource {
 		}
 		return false;
 	}
-
-
+	
 	public EpicFightDamageSource setAnimation(StaticAnimation animation) {
 		this.animation = animation;
 		return this;
 	}
-
+	
 	public StaticAnimation getAnimation() {
 		return animation;
 	}
-
-
+	
 	@Override
 	public boolean is(TagKey<DamageType> type) {
 		return this.runtimeTags.contains(type) || super.is(type);
@@ -134,7 +131,7 @@ public class EpicFightDamageSource extends DamageSource {
 	public boolean is(ResourceKey<DamageType> type) {
 		return this.runtimeTypes.contains(type) || super.is(type);
 	}
-
+	
 	public EpicFightDamageSource addRuntimeTag(TagKey<DamageType> type) {
 		this.runtimeTags.add(type);
 		return this;
