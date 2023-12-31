@@ -4,9 +4,15 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.compress.utils.Lists;
+
+import net.minecraft.ResourceLocationException;
+import net.minecraft.client.OptionInstance;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.tabs.GridLayoutTab;
@@ -126,34 +132,52 @@ public class DatapackEditScreen extends Screen {
 	}
 	
 	class DatapackTab<T> extends GridLayoutTab {
-		private PackItemList packItemList;
-		private InputComponentsList inputComponentsList;
-		private final IForgeRegistry<T> registry;
+		protected PackItemList packItemList;
+		protected InputComponentsList inputComponentsList;
+		protected final IForgeRegistry<T> registry;
 		
 		@SuppressWarnings("unchecked")
 		public DatapackTab(Component title, @Nullable IForgeRegistry<T> registry) {
 			super(title);
 			
+			ScreenRectangle screenRect = DatapackEditScreen.this.getRectangle();
+			
 			this.registry = registry;
-			this.packItemList = new PackItemList(0, 0, 0, 0, 26);
+			this.packItemList = new PackItemList(150, screenRect.height(), screenRect.top() + 14, screenRect.height() + 7, 26);
 			this.packItemList.setRenderTopAndBottom(false);
-			this.inputComponentsList = new InputComponentsList(0, 0, 0, 0, 26);
+			this.packItemList.setLeftPos(8);
+			
+			this.inputComponentsList = new InputComponentsList(screenRect.width() - 172, screenRect.height(), screenRect.top() + 14, screenRect.height() + 7, 26);
 			this.inputComponentsList.setRenderTopAndBottom(false);
+			this.inputComponentsList.setLeftPos(164);
 			
 			GridLayout.RowHelper gridlayout$rowhelper = this.layout.rowSpacing(2).createRowHelper(2);
 			
 			gridlayout$rowhelper.addChild(Button.builder(Component.literal("+"), (button) -> {
 				if (registry != null) {
 					DatapackEditScreen.this.minecraft.setScreen(new SelectRegistryScreen<>(DatapackEditScreen.this, registry, (selItem) -> {
-						this.packItemList.addNewEntry(selItem);
+						PackItemList.PackItemEntry entry = this.packItemList.addEntry(selItem);
+						this.packItemList.enableEditBox(entry);
 					}));
 				} else {
-					this.packItemList.addNewEntry((T)new ResourceLocation(EpicFightMod.MODID + ":"));
+					PackItemList.PackItemEntry entry = this.packItemList.addEntry((T)new ResourceLocation(EpicFightMod.MODID + ":"));
+					this.packItemList.enableEditBox(entry);
 				}
 			}).pos(0, 0).size(12, 12).build());
 			
 			gridlayout$rowhelper.addChild(Button.builder(Component.literal("x"), (button) -> {
-				this.packItemList.children().remove(this.packItemList.getSelected());
+				int removeIdx = this.packItemList.children().indexOf(this.packItemList.getSelected());
+				
+				if (removeIdx > 0) {
+					removeIdx--;
+				}
+				
+				this.packItemList.removeEntry(this.packItemList.getSelected());
+				this.packItemList.disableEditBox();
+				
+				if (removeIdx > -1) {
+					this.packItemList.setSelected(this.packItemList.children().get(removeIdx));
+				}
 			}).pos(0, 0).size(12, 12).build());
 		}
 		
@@ -174,13 +198,50 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.setLeftPos(164);
 		}
 		
+		@Override
+		public void tick() {
+			this.packItemList.editBox.tick();
+		}
+
 		class PackItemList extends ObjectSelectionList<PackItemList.PackItemEntry> {
+			private EditBox editBox;
+			private PackItemEntry editingEntry;
+			
 			public PackItemList(int width, int height, int y0, int y1, int itemHeight) {
 				super(DatapackEditScreen.this.minecraft, width, height, y0, y1, itemHeight);
+				
+				this.editBox = new EditBox(DatapackEditScreen.this.minecraft.font, 0, 0, 144, 20, Component.literal(""));
+				this.editBox.setEditable(true);
 			}
 			
-			public int addNewEntry(T packItem) {
-				return this.addEntry(new PackItemEntry(packItem));
+			public PackItemEntry addEntry(T packItem) {
+				PackItemEntry newItem = new PackItemEntry(packItem);
+				this.addEntry(newItem);
+				
+				return newItem;
+			}
+			
+			private void enableEditBox(PackItemList.PackItemEntry entry) {
+				this.setSelected(entry);
+				this.editBox.setResponder(entry::setName);
+				this.editBox.setValue(entry.name);
+				this.editingEntry = entry;
+				
+				DatapackEditScreen.this.setFocused(this.editBox);
+			}
+			
+			private void disableEditBox() {
+				this.editingEntry = null;
+			}
+			
+			@Override
+			public boolean removeEntry(PackItemList.PackItemEntry packItem) {
+				if (this.editingEntry == packItem) {
+					this.editingEntry = null;
+					this.disableEditBox();
+				}
+				
+				return super.removeEntry(packItem);
 			}
 			
 			@Override
@@ -194,8 +255,8 @@ public class DatapackEditScreen extends Screen {
 			}
 			
 			class PackItemEntry extends ObjectSelectionList.Entry<PackItemList.PackItemEntry> {
-				private final T item;
-				private final String name;
+				private T item;
+				private String name;
 				
 				public PackItemEntry(T item) {
 					this.item = item;
@@ -204,7 +265,12 @@ public class DatapackEditScreen extends Screen {
 				
 				@Override
 				public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
-					guiGraphics.drawString(DatapackEditScreen.this.minecraft.font, this.name, left + 2, top + 5, 16777215, false);
+					guiGraphics.drawString(DatapackEditScreen.this.minecraft.font, this.name, left + 2, top + 7, 16777215, false);
+					
+					if (PackItemList.this.editingEntry == this) {
+						PackItemList.this.editBox.setPosition(left + 1, top + 1);
+						PackItemList.this.editBox.render(guiGraphics, mouseX, mouseY, partialTicks);
+					}
 				}
 				
 				@Override
@@ -215,8 +281,23 @@ public class DatapackEditScreen extends Screen {
 				@Override
 				public boolean mouseClicked(double mouseX, double mouseY, int button) {
 					if (button == 0) {
+						boolean returnVal = true;
+						
+						if (DatapackTab.this.registry == null) {
+							if (PackItemList.this.getSelected() == this) {
+								if (PackItemList.this.editingEntry == null) {
+									PackItemList.this.enableEditBox(this);
+									returnVal = false;
+								} else {
+									PackItemList.this.disableEditBox();
+								}
+							} else {
+								PackItemList.this.disableEditBox();
+							}
+						}
+						
 						PackItemList.this.setSelected(this);
-						return true;
+						return returnVal;
 					} else {
 						return false;
 					}
@@ -229,10 +310,29 @@ public class DatapackEditScreen extends Screen {
 						return DatapackTab.this.registry.getKey(item).toString();
 					}
 				}
+				
+				@SuppressWarnings("unchecked")
+				private void setName(String name) {
+					ResourceLocation rl;
+					
+					try {
+						rl = new ResourceLocation(name);
+					} catch (ResourceLocationException e) {
+						int colonPos = name.indexOf(":");
+						String namespace = colonPos < 0 ? "minecraft" : name.substring(0, colonPos).replaceAll("[^a-z0-9/._-]", "");
+						String path = name.substring(colonPos < 0 ? 0 : colonPos, name.length()).replaceAll("[^a-z0-9/._-]", "");
+						rl = new ResourceLocation(namespace, path);
+					}
+					
+					this.name = rl.toString();
+					this.item = (T) rl;
+				}
 			}
 		}
 		
 		class InputComponentsList extends ContainerObjectSelectionList<InputComponentsList.InputComponentsEntry> {
+			private InputComponentsList.InputComponentsEntry lastEntry;
+			
 			public InputComponentsList(int width, int height, int y0, int y1, int itemHeight) {
 				super(DatapackEditScreen.this.minecraft, width, height, y0, y1, itemHeight);
 			}
@@ -241,26 +341,52 @@ public class DatapackEditScreen extends Screen {
 			public int getRowWidth() {
 				return this.width;
 			}
-
+			
 			@Override
 			protected int getScrollbarPosition() {
 				return this.x1 - 6;
 			}
 			
+			public void addComponentInThisLine(AbstractWidget inputWidget, int spacing) {
+				int xPos;
+				
+				if (this.lastEntry.children.size() == 0) {
+					xPos = this.x0 + spacing;
+				} else {
+					AbstractWidget lastWidget = this.lastEntry.children.get(this.lastEntry.children.size());
+					xPos = lastWidget.getX() + lastWidget.getWidth() + spacing;
+				}
+				
+				inputWidget.setX(xPos);
+				
+				this.lastEntry.children.add(inputWidget);
+			}
+			
+			public void newLine() {
+				this.lastEntry = new InputComponentsList.InputComponentsEntry();
+				
+				this.addEntry(this.lastEntry);
+			}
+			
 			class InputComponentsEntry extends ContainerObjectSelectionList.Entry<InputComponentsList.InputComponentsEntry> {
+				final List<AbstractWidget> children = Lists.newArrayList();
+				
 				@Override
 				public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
-					
+					for (AbstractWidget widget : this.children) {
+						widget.setY(top);
+						widget.render(guiGraphics, mouseX, mouseY, partialTicks);
+					}
 				}
 				
 				@Override
 				public List<? extends GuiEventListener> children() {
-					return null;
+					return this.children;
 				}
 				
 				@Override
 				public List<? extends NarratableEntry> narratables() {
-					return null;
+					return this.children;
 				}
 			}
 		}
@@ -270,6 +396,9 @@ public class DatapackEditScreen extends Screen {
 	class WeaponTypeTab extends DatapackTab<ResourceLocation> {
 		public WeaponTypeTab() {
 			super(Component.translatable("gui." + EpicFightMod.MODID + ".tab.datapack.weapon_type"), null);
+			
+			this.inputComponentsList.newLine();
+			this.inputComponentsList.addComponentInThisLine(Button.builder(Component.literal("a"), (button) -> {}).size(20, 20).build(), 0);
 		}
 	}
 	
