@@ -741,7 +741,7 @@ public class Animations {
 					entitypatch.getOriginal().level().addAlwaysVisibleParticle(EpicFightParticles.AIR_BURST.get(), pos.x, pos.y + entitypatch.getOriginal().getBbHeight() * 0.5D, pos.z, 0, -1, 2);
 				}, Side.CLIENT))
 				.addEvents(StaticAnimationProperty.ON_END_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
-					if (entitypatch instanceof PlayerPatch playerpatch) {
+					if (entitypatch instanceof PlayerPatch<?> playerpatch) {
 						playerpatch.changeModelYRot(0);
 					}
 				}, Side.CLIENT));
@@ -756,7 +756,7 @@ public class Animations {
 					entitypatch.getOriginal().level().addAlwaysVisibleParticle(EpicFightParticles.AIR_BURST.get(), pos.x, pos.y + entitypatch.getOriginal().getBbHeight() * 0.5D, pos.z, 0, -1, 2);
 				}, Side.CLIENT))
 				.addEvents(StaticAnimationProperty.ON_END_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
-					if (entitypatch instanceof PlayerPatch playerpatch) {
+					if (entitypatch instanceof PlayerPatch<?> playerpatch) {
 						playerpatch.changeModelYRot(0);
 					}
 				}, Side.CLIENT));
