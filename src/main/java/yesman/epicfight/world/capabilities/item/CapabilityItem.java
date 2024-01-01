@@ -350,10 +350,6 @@ public class CapabilityItem {
 		}
 	}
 	
-	public enum HoldingOption {
-		TWO_HANDED, MAINHAND_ONLY, ONE_HANDED
-	}
-	
 	public enum Styles implements Style {
 		COMMON(true), ONE_HAND(true), TWO_HAND(false), MOUNT(true), RANGED(false), SHEATH(false), OCHS(false);
 		

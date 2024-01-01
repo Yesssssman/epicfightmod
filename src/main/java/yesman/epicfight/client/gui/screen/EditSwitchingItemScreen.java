@@ -170,8 +170,8 @@ public class EditSwitchingItemScreen extends Screen {
 					UNRENDERABLES.add(this.itemStack.getItem());
 				}
 				
-				Component Component = this.itemStack.getHoverName();
-				guiGraphics.drawString(RegisteredItemList.this.minecraft.font, Component, left + 30, top + 5, 16777215, false);
+				Component component = this.itemStack.getHoverName();
+				guiGraphics.drawString(RegisteredItemList.this.minecraft.font, component, left + 30, top + 5, 16777215, false);
 			}
 			
 			@Override
