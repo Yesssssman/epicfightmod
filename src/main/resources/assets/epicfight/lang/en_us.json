@@ -157,6 +157,8 @@
 	"gui.epicfight.tab.datapack.item_capability": "Item Capability",
 	"gui.epicfight.tab.datapack.mob_patch": "Mob Patch",
 	
+	"gui.epicfight.select": "%s Registry List",
+	
 	"item.epicfight.bokken": "Bokken",
 	"item.epicfight.uchigatana": "Uchigatana",
 	"item.epicfight.stray_hat": "Stray Hat",

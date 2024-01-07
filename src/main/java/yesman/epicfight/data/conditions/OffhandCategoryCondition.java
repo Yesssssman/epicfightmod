@@ -1,8 +1,7 @@
-package yesman.epicfight.data.conditions.weapontype;
+package yesman.epicfight.data.conditions;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
-import yesman.epicfight.data.conditions.LivingEntityCondition;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
 

@@ -69,4 +69,27 @@ public class ParseUtil {
 		
 		return new AttributeModifier(UUID.fromString(tag.getString("uuid")), tag.getString("name"), tag.getDouble("amount"), operation);
 	}
+	
+	public static String makeFirstLetterToUpper(String s) {
+		StringBuilder sb = new StringBuilder();
+		boolean upperNext = true;
+		
+		s = s.toLowerCase(Locale.ROOT);
+		
+		for (String sElement : s.split("")) {
+			if (upperNext) {
+				sElement = sElement.toUpperCase(Locale.ROOT);
+				upperNext = false;
+			}
+			
+			if ("_".equals(sElement)) {
+				upperNext = true;
+				sb.append(" ");
+			} else {
+				sb.append(sElement);
+			}
+		}
+		
+		return sb.toString();
+	}
 }
