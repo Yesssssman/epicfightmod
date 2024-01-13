@@ -41,7 +41,7 @@ public class EpicFightSkillsCategory implements IRecipeCategory<SkillCategories>
 
 	@Override
 	public void setRecipe(IRecipeLayoutBuilder builder, SkillCategories recipe, IFocusGroup focuses) {
-		// TODO Auto-generated method stub
+		// TODO Auto-generated method stub test 
 		
 	}
 	
