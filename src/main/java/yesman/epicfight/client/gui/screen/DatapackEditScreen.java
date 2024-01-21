@@ -8,14 +8,10 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.compress.utils.Lists;
 
-import net.minecraft.ResourceLocationException;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
-import net.minecraft.client.gui.components.EditBox;
-import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.components.tabs.GridLayoutTab;
 import net.minecraft.client.gui.components.tabs.Tab;
@@ -39,10 +35,13 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.client.gui.component.ComboBox;
+import yesman.epicfight.client.gui.component.Grid;
 import yesman.epicfight.client.gui.component.PopupBox;
 import yesman.epicfight.client.gui.component.PopupBox.SoundPopupBox;
+import yesman.epicfight.client.gui.component.ResizableButton;
 import yesman.epicfight.client.gui.component.ResizableComponent;
-import yesman.epicfight.client.gui.component.ResizableComponent.HorizontalSizingOption;
+import yesman.epicfight.client.gui.component.ResizableComponent.HorizontalSizing;
+import yesman.epicfight.client.gui.component.ResizableEditBox;
 import yesman.epicfight.client.gui.component.Static;
 import yesman.epicfight.client.gui.screen.DatapackEditScreen.DatapackTab.InputComponentsList.InputComponentsEntry;
 import yesman.epicfight.main.EpicFightMod;
@@ -62,14 +61,18 @@ public class DatapackEditScreen extends Screen {
 		@Override
 		public void setCurrentTab(Tab tab, boolean playSound) {
 			if (this.getCurrentTab() instanceof DatapackTab<?> datapackTab) {
-				DatapackEditScreen.this.removeWidget(datapackTab.packItemList);
+				DatapackEditScreen.this.removeWidget(datapackTab.grid);
+				datapackTab.grid.getRowEditButtons().forEach(DatapackEditScreen.this::removeWidget);
+				
 				DatapackEditScreen.this.removeWidget(datapackTab.inputComponentsList);
 			}
 			
 			super.setCurrentTab(tab, playSound);
 			
 			if (tab instanceof DatapackTab<?> datapackTab) {
-				DatapackEditScreen.this.addRenderableWidget(datapackTab.packItemList);
+				DatapackEditScreen.this.addRenderableWidget(datapackTab.grid);
+				datapackTab.grid.getRowEditButtons().forEach(DatapackEditScreen.this::addRenderableWidget);
+				
 				DatapackEditScreen.this.addRenderableWidget(datapackTab.inputComponentsList);
 			}
 		}
@@ -135,7 +138,16 @@ public class DatapackEditScreen extends Screen {
 			return true;
 		}
 	}
-
+	
+	@Override
+	public void setFocused(@Nullable GuiEventListener target) {
+		if (this.getFocused() == target) {
+			return;
+		}
+		
+		super.setFocused(target);
+	}
+	
 	@Override
 	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
 		this.renderBackground(guiGraphics);
@@ -145,212 +157,70 @@ public class DatapackEditScreen extends Screen {
 	
 	@OnlyIn(Dist.CLIENT)
 	class DatapackTab<T> extends GridLayoutTab {
-		protected PackItemList packItemList;
+		protected Grid grid;
 		protected InputComponentsList inputComponentsList;
 		protected final IForgeRegistry<T> registry;
 		
-		@SuppressWarnings("unchecked")
 		public DatapackTab(Component title, @Nullable IForgeRegistry<T> registry) {
 			super(title);
 			
 			ScreenRectangle screenRect = DatapackEditScreen.this.getRectangle();
 			
-			this.registry = registry;
-			this.packItemList = new PackItemList(150, screenRect.height(), screenRect.top() + 14, screenRect.height() + 7, 26);
-			this.packItemList.setRenderTopAndBottom(false);
-			this.packItemList.setLeftPos(8);
-			
-			this.inputComponentsList = new InputComponentsList(screenRect.width() - 172, screenRect.height(), screenRect.top() + 14, screenRect.height() + 7, 30);
-			this.inputComponentsList.setRenderTopAndBottom(false);
-			this.inputComponentsList.setLeftPos(164);
+			this.grid = Grid.builder(DatapackEditScreen.this)
+							.pos(8, screenRect.top() + 14)
+							.size(150, screenRect.height() - screenRect.top() - 7)
+							.rowHeight(26)
+							.rowEditable(true)
+							.transparentBackground(true)
+							.addEditboxColumn("pack_item", EpicFightMod.MODID + ":", true, 150)
+							.onAddPress((grid, button) -> {
+								if (registry != null) {
+									DatapackEditScreen.this.minecraft.setScreen(new SelectFromRegistryScreen<>(DatapackEditScreen.this, registry, (selItem) -> {
+										int rowposition = grid.addRow();
+										grid.setGridFocus(rowposition, "pack_item");
+									}));
+								} else {
+									int rowposition = grid.addRowWithDefaultValues("pack_item", EpicFightMod.MODID + ":");
+									grid.setGridFocus(rowposition, "pack_item");
+								}
+								
+								DatapackEditScreen.this.setFocused(grid);
+							})
+							.OnRemovePress((grid, button) -> {
+								int rowposition = grid.removeRow();
+								
+								if (rowposition >= 0) {
+									grid.setSelected(rowposition);
+								}
+							})
+							.buttonHorizontalSizing(HorizontalSizing.LEFT_WIDTH)
+							.build();
 			
 			GridLayout.RowHelper gridlayout$rowhelper = this.layout.rowSpacing(2).createRowHelper(2);
 			
-			gridlayout$rowhelper.addChild(Button.builder(Component.literal("+"), (button) -> {
-				if (registry != null) {
-					DatapackEditScreen.this.minecraft.setScreen(new SelectFromRegistryScreen<>(DatapackEditScreen.this, registry, (selItem) -> {
-						PackItemList.PackItemEntry entry = this.packItemList.addEntry(selItem);
-						this.packItemList.enableEditBox(entry);
-					}));
-				} else {
-					PackItemList.PackItemEntry entry = this.packItemList.addEntry((T)new ResourceLocation(EpicFightMod.MODID + ":"));
-					this.packItemList.enableEditBox(entry);
-				}
-			}).pos(0, 0).size(12, 12).build());
+			this.grid.getRowEditButtons().forEach(gridlayout$rowhelper::addChild);
 			
-			gridlayout$rowhelper.addChild(Button.builder(Component.literal("x"), (button) -> {
-				int removeIdx = this.packItemList.children().indexOf(this.packItemList.getSelected());
-				
-				boolean removed = this.packItemList.removeEntry(this.packItemList.getSelected());
-				this.packItemList.disableEditBox();
-				
-				if (removed) {
-					removeIdx--;
-				}
-				
-				if (removeIdx > -1) {
-					this.packItemList.setSelected(this.packItemList.children().get(removeIdx));
-				}
-			}).pos(0, 0).size(12, 12).build());
+			this.registry = registry;
+			this.inputComponentsList = new InputComponentsList(screenRect.width() - 172, screenRect.height(), screenRect.top() + 14, screenRect.height() + 7, 30);
+			this.inputComponentsList.setRenderTopAndBottom(false);
+			this.inputComponentsList.setLeftPos(164);
 		}
 		
 		@Override
 		public void doLayout(ScreenRectangle screenRectangle) {
 			this.layout.arrangeElements();
-			this.layout.setX(132);
 			this.layout.setY(screenRectangle.top());
 			
-			this.packItemList.setRenderTopAndBottom(false);
-			this.inputComponentsList.setRenderTopAndBottom(false);
-			
-			this.packItemList.updateSize(150, screenRectangle.height(), screenRectangle.top() + 14, screenRectangle.height() + 7);
+			this.grid.updateSize(150, screenRectangle.height(), screenRectangle.top() + 14, screenRectangle.height() + 7);
 			this.inputComponentsList.updateSize(screenRectangle.width() - 172, screenRectangle.height(), screenRectangle.top() + 14, screenRectangle.height() + 7);
 			
-			this.packItemList.setLeftPos(8);
+			this.grid.setLeftPos(8);
 			this.inputComponentsList.setLeftPos(164);
 		}
 		
 		@Override
 		public void tick() {
-			this.packItemList.editBox.tick();
-		}
-		
-		@OnlyIn(Dist.CLIENT)
-		class PackItemList extends ObjectSelectionList<PackItemList.PackItemEntry> {
-			private EditBox editBox;
-			private PackItemEntry editingEntry;
-			
-			public PackItemList(int width, int height, int y0, int y1, int itemHeight) {
-				super(DatapackEditScreen.this.minecraft, width, height, y0, y1, itemHeight);
-				
-				this.editBox = new EditBox(DatapackEditScreen.this.minecraft.font, 0, 0, 144, 20, Component.literal(""));
-				this.editBox.setEditable(true);
-			}
-			
-			public PackItemEntry addEntry(T packItem) {
-				PackItemEntry newItem = new PackItemEntry(packItem);
-				this.addEntry(newItem);
-				
-				return newItem;
-			}
-			
-			private void enableEditBox(PackItemList.PackItemEntry entry) {
-				this.setSelected(entry);
-				
-				if (DatapackTab.this.registry != null) {
-					return;
-				}
-				
-				this.editBox.setResponder(entry::setName);
-				this.editBox.setValue(entry.name);
-				this.editingEntry = entry;
-				
-				DatapackEditScreen.this.setFocused(this.editBox);
-			}
-			
-			private void disableEditBox() {
-				if (DatapackTab.this.registry != null) {
-					return;
-				}
-				
-				this.editingEntry = null;
-			}
-			
-			@Override
-			public boolean removeEntry(PackItemList.PackItemEntry packItem) {
-				if (this.editingEntry == packItem) {
-					this.editingEntry = null;
-					this.disableEditBox();
-				}
-				
-				return super.removeEntry(packItem);
-			}
-			
-			@Override
-			public int getRowWidth() {
-				return this.width;
-			}
-
-			@Override
-			protected int getScrollbarPosition() {
-				return this.x1 - 6;
-			}
-			
-			@OnlyIn(Dist.CLIENT)
-			class PackItemEntry extends ObjectSelectionList.Entry<PackItemList.PackItemEntry> {
-				private T item;
-				private String name;
-				
-				public PackItemEntry(T item) {
-					this.item = item;
-					this.name = this.getRegistryName(item);
-				}
-				
-				@Override
-				public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
-					guiGraphics.drawString(DatapackEditScreen.this.minecraft.font, this.name, left + 2, top + 7, 16777215, false);
-					
-					if (PackItemList.this.editingEntry == this) {
-						PackItemList.this.editBox.setPosition(left + 1, top + 1);
-						PackItemList.this.editBox.render(guiGraphics, mouseX, mouseY, partialTicks);
-					}
-				}
-				
-				@Override
-				public Component getNarration() {
-					return Component.translatable("narrator.select");
-				}
-				
-				@Override
-				public boolean mouseClicked(double mouseX, double mouseY, int button) {
-					if (button == 0) {
-						boolean returnVal = true;
-						
-						if (DatapackTab.this.registry == null) {
-							if (PackItemList.this.getSelected() == this) {
-								if (PackItemList.this.editingEntry == null) {
-									PackItemList.this.enableEditBox(this);
-									returnVal = false;
-								} else {
-									PackItemList.this.disableEditBox();
-								}
-							} else {
-								PackItemList.this.disableEditBox();
-							}
-						}
-						
-						PackItemList.this.setSelected(this);
-						return returnVal;
-					} else {
-						return false;
-					}
-				}
-				
-				private String getRegistryName(T item) {
-					if (item instanceof ResourceLocation resourcelocation) {
-						return resourcelocation.toString();
-					} else {
-						return DatapackTab.this.registry.getKey(item).toString();
-					}
-				}
-				
-				@SuppressWarnings("unchecked")
-				private void setName(String name) {
-					ResourceLocation rl;
-					
-					try {
-						rl = new ResourceLocation(name);
-					} catch (ResourceLocationException e) {
-						int colonPos = name.indexOf(":");
-						String namespace = colonPos < 0 ? "minecraft" : name.substring(0, colonPos).replaceAll("[^a-z0-9/._-]", "");
-						String path = name.substring(colonPos < 0 ? 0 : colonPos, name.length()).replaceAll("[^a-z0-9/._-]", "");
-						rl = new ResourceLocation(namespace, path);
-					}
-					
-					this.name = rl.toString();
-					this.item = (T) rl;
-				}
-			}
+			this.grid.tick();
 		}
 		
 		@OnlyIn(Dist.CLIENT)
@@ -377,14 +247,14 @@ public class DatapackEditScreen extends Screen {
 				if (this.lastEntry.children.size() == 0) {
 					xPos = this.x0;
 				} else {
-					AbstractWidget lastWidget = this.lastEntry.children.get(this.lastEntry.children.size() - 1);
+					ResizableComponent lastWidget = this.lastEntry.children.get(this.lastEntry.children.size() - 1);
 					xPos = lastWidget.getX() + lastWidget.getWidth();
 				}
 				
 				return xPos + spacing;
 			}
 			
-			public void addComponentCurrentRow(AbstractWidget inputWidget) {
+			public void addComponentCurrentRow(ResizableComponent inputWidget) {
 				this.lastEntry.children.add(inputWidget);
 			}
 			
@@ -402,13 +272,19 @@ public class DatapackEditScreen extends Screen {
 					int k1 = this.getRowBottom(i);
 					
 					if (k1 >= this.y0 && j1 <= this.y1) {
-						if (entry.getChildAt(x, y).filter((component) -> component.mouseClicked(x, y, button)).isPresent()) {
-							return true;
+						if (entry.getChildAt(x, y).filter((component) -> {
+								if (component.mouseClicked(x, y, button)) {
+									DatapackEditScreen.this.setFocused(component);
+									return true;
+								}
+								return false;
+							}).isPresent()) {
+							return false;
 						}
 					}
 				}
 				
-				return super.mouseClicked(x, y, button);
+				return false;
 			}
 			
 			@Override
@@ -430,7 +306,7 @@ public class DatapackEditScreen extends Screen {
 			
 			@OnlyIn(Dist.CLIENT)
 			class InputComponentsEntry extends ContainerObjectSelectionList.Entry<InputComponentsList.InputComponentsEntry> {
-				final List<AbstractWidget> children = Lists.newArrayList();
+				final List<ResizableComponent> children = Lists.newArrayList();
 				
 				@Override
 				public Optional<GuiEventListener> getChildAt(double x, double y) {
@@ -445,8 +321,8 @@ public class DatapackEditScreen extends Screen {
 
 				@Override
 				public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
-					for (AbstractWidget widget : this.children) {
-						widget.setY(top + InputComponentsList.this.itemHeight / 2 - widget.getHeight() / 2);
+					for (ResizableComponent widget : this.children) {
+						widget.relocateY(top + InputComponentsList.this.itemHeight / 2 - widget.getHeight() / 2);
 						widget.render(guiGraphics, mouseX, mouseY, partialTicks);
 					}
 				}
@@ -473,71 +349,102 @@ public class DatapackEditScreen extends Screen {
 			Font font = DatapackEditScreen.this.font;
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, Component.translatable("Category")));
-			this.inputComponentsList.addComponentCurrentRow(new ComboBox<>(parentScreen, this.inputComponentsList.nextStart(5), 124, 100, 15, HorizontalSizingOption.LEFT_WIDTH, null, 8,
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("Category")));
+			this.inputComponentsList.addComponentCurrentRow(new ComboBox<>(parentScreen, parentScreen.getMinecraft().font, this.inputComponentsList.nextStart(5), 124, 100, 15, HorizontalSizing.LEFT_WIDTH, null, 8,
 																			Component.translatable("datapack_edit.weapon_type.category"),
 																			new ArrayList<>(WeaponCategory.ENUM_MANAGER.universalValues()), (e) -> ParseUtil.makeFirstLetterToUpper(e.toString())));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, Component.translatable("Hit Particle")));
-			this.inputComponentsList.addComponentCurrentRow(new PopupBox<>(parentScreen, font, this.inputComponentsList.nextStart(5), 30, 130, 15, HorizontalSizingOption.LEFT_RIGHT, null,
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("Hit Particle")));
+			this.inputComponentsList.addComponentCurrentRow(new PopupBox<>(parentScreen, font, this.inputComponentsList.nextStart(5), 30, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 																			Component.translatable("datapack_edit.weapon_type.hit_particle"), ForgeRegistries.PARTICLE_TYPES));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, Component.translatable("Hit Sound")));
-			this.inputComponentsList.addComponentCurrentRow(new SoundPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 30, 130, 15, HorizontalSizingOption.LEFT_RIGHT, null,
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("Hit Sound")));
+			this.inputComponentsList.addComponentCurrentRow(new SoundPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 30, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 																			Component.translatable("datapack_edit.weapon_type.hit_sound")));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, Component.translatable("Swing Sound")));
-			this.inputComponentsList.addComponentCurrentRow(new SoundPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 30, 130, 15, HorizontalSizingOption.LEFT_RIGHT, null,
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("Swing Sound")));
+			this.inputComponentsList.addComponentCurrentRow(new SoundPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 30, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 																			Component.translatable("datapack_edit.weapon_type.swing_sound")));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, Component.translatable("Styles")));
-			this.inputComponentsList.addComponentCurrentRow(Button.builder(Component.literal("..."), (button) -> {}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("Styles")));
+			this.inputComponentsList.addComponentCurrentRow(ResizableButton.builder(Component.literal("..."), (button) -> {}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, Component.translatable("Offhand Validator")));
-			this.inputComponentsList.addComponentCurrentRow(Button.builder(Component.literal("..."), (button) -> {}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("Offhand Validator")));
+			this.inputComponentsList.addComponentCurrentRow(ResizableButton.builder(Component.literal("..."), (button) -> {}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, Component.translatable("Collider")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("Collider")));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 0, 40, 15, Component.translatable("Count")));
-			this.inputComponentsList.addComponentCurrentRow(new EditBox(font, this.inputComponentsList.nextStart(5), 0, 40, 15, Component.translatable("datapack_edit.weapon_type.number_of_colliders")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 0, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("Count")));
+			this.inputComponentsList.addComponentCurrentRow(new ResizableEditBox(font, this.inputComponentsList.nextStart(5), 0, 40, 15, Component.translatable("datapack_edit.weapon_type.number_of_colliders"), HorizontalSizing.LEFT_WIDTH, null));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 0, 40, 15, Component.translatable("Center")));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 0, 8, 15, Component.literal("X: ")));
-			this.inputComponentsList.addComponentCurrentRow(new EditBox(font, this.inputComponentsList.nextStart(5), 0, 30, 15, Component.translatable("datapack_edit.weapon_type.center.x")));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 0, 8, 15, Component.literal("Y: ")));
-			this.inputComponentsList.addComponentCurrentRow(new EditBox(font, this.inputComponentsList.nextStart(5), 0, 30, 15, Component.translatable("datapack_edit.weapon_type.center.y")));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 0, 8, 15, Component.literal("Z: ")));
-			this.inputComponentsList.addComponentCurrentRow(new EditBox(font, this.inputComponentsList.nextStart(5), 0, 30, 15, Component.translatable("datapack_edit.weapon_type.center.z")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 0, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("Center")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 0, 8, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
+			this.inputComponentsList.addComponentCurrentRow(new ResizableEditBox(font, this.inputComponentsList.nextStart(5), 0, 30, 15, Component.translatable("datapack_edit.weapon_type.center.x"), HorizontalSizing.LEFT_WIDTH, null));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 0, 8, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
+			this.inputComponentsList.addComponentCurrentRow(new ResizableEditBox(font, this.inputComponentsList.nextStart(5), 0, 30, 15, Component.translatable("datapack_edit.weapon_type.center.y"), HorizontalSizing.LEFT_WIDTH, null));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 0, 8, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
+			this.inputComponentsList.addComponentCurrentRow(new ResizableEditBox(font, this.inputComponentsList.nextStart(5), 0, 30, 15, Component.translatable("datapack_edit.weapon_type.center.z"), HorizontalSizing.LEFT_WIDTH, null));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 0, 40, 15, Component.translatable("Size")));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 0, 8, 15, Component.literal("X: ")));
-			this.inputComponentsList.addComponentCurrentRow(new EditBox(font, this.inputComponentsList.nextStart(5), 0, 30, 15, Component.translatable("datapack_edit.weapon_type.size.x")));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 0, 8, 15, Component.literal("Y: ")));
-			this.inputComponentsList.addComponentCurrentRow(new EditBox(font, this.inputComponentsList.nextStart(5), 0, 30, 15, Component.translatable("datapack_edit.weapon_type.size.y")));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 0, 8, 15, Component.literal("Z: ")));
-			this.inputComponentsList.addComponentCurrentRow(new EditBox(font, this.inputComponentsList.nextStart(5), 0, 30, 15, Component.translatable("datapack_edit.weapon_type.size.z")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 0, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("Size")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 0, 8, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
+			this.inputComponentsList.addComponentCurrentRow(new ResizableEditBox(font, this.inputComponentsList.nextStart(5), 0, 30, 15, Component.translatable("datapack_edit.weapon_type.size.x"), HorizontalSizing.LEFT_WIDTH, null));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 0, 8, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
+			this.inputComponentsList.addComponentCurrentRow(new ResizableEditBox(font, this.inputComponentsList.nextStart(5), 0, 30, 15, Component.translatable("datapack_edit.weapon_type.size.y"), HorizontalSizing.LEFT_WIDTH, null));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 0, 8, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
+			this.inputComponentsList.addComponentCurrentRow(new ResizableEditBox(font, this.inputComponentsList.nextStart(5), 0, 30, 15, Component.translatable("datapack_edit.weapon_type.size.z"), HorizontalSizing.LEFT_WIDTH, null));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, Component.translatable("Combos")));
-			this.inputComponentsList.addComponentCurrentRow(Button.builder(Component.literal("..."), (button) -> {}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("Combos")));
+			this.inputComponentsList.addComponentCurrentRow(ResizableButton.builder(Component.literal("..."), (button) -> {}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+			
+			Grid skillsGrid = Grid.builder(DatapackEditScreen.this)
+					.size(30, 90)
+					.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
+					.rowHeight(26)
+					.rowEditable(true)
+					.transparentBackground(false)
+					.addEditboxColumn("pack_item", EpicFightMod.MODID + ":", true, 150)
+					.onAddPress((grid, button) -> {
+						int rowposition = grid.addRowWithDefaultValues("pack_item", EpicFightMod.MODID + ":");
+						grid.setGridFocus(rowposition, "pack_item");
+						DatapackEditScreen.this.setFocused(grid);
+					})
+					.OnRemovePress((grid, button) -> {
+						int rowposition = grid.removeRow();
+						
+						if (rowposition >= 0) {
+							grid.setSelected(rowposition);
+						}
+					})
+					.buttonHorizontalSizing(HorizontalSizing.WIDTH_RIGHT)
+					.build();
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, Component.translatable("Innate Skill")));
-			this.inputComponentsList.addComponentCurrentRow(new PopupBox<>(parentScreen, font, this.inputComponentsList.nextStart(5), 30, 130, 15, HorizontalSizingOption.LEFT_RIGHT, null,
-					Component.translatable("datapack_edit.weapon_type.innate_skill"), ForgeRegistries.PARTICLE_TYPES));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("Innate Skill")));
+			
+			for (ResizableButton button : skillsGrid.getRowEditButtons()) {
+				this.inputComponentsList.addComponentCurrentRow(button);
+			}
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, Component.translatable("Living Animations")));
-			this.inputComponentsList.addComponentCurrentRow(Button.builder(Component.literal("..."), (button) -> {}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+			this.inputComponentsList.newRow();
+			
+			skillsGrid.setX(this.inputComponentsList.nextStart(5));
+			this.inputComponentsList.addComponentCurrentRow(skillsGrid);
+			
+			this.inputComponentsList.newRow();
+			this.inputComponentsList.newRow();
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("Living Animations")));
+			this.inputComponentsList.addComponentCurrentRow(ResizableButton.builder(Component.literal("..."), (button) -> {}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 		}
 		
 		@SuppressWarnings("rawtypes")

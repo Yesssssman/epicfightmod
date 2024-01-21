@@ -1,11 +1,15 @@
 package yesman.epicfight.client.gui.component;
 
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.events.GuiEventListener;
+import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
-public interface ResizableComponent {
+@OnlyIn(Dist.CLIENT)
+public interface ResizableComponent extends GuiEventListener, NarratableEntry {
 	default void resize(ScreenRectangle screenRectangle) {
-		//System.out.println(this.getX1() +" "+ this.getX2() +" "+ this.getY1() +" "+ this.getY2() +" "+ this.getVerticalSizingOption() +" "+ this.getHorizontalSizingOption() );
-		
 		if (this.getHorizontalSizingOption() != null) {
 			this.getHorizontalSizingOption().resizeFunction.resize(this, screenRectangle, this.getX1(), this.getX2());
 		}
@@ -15,19 +19,22 @@ public interface ResizableComponent {
 		}
 	}
 	
-	void setX(int x);
-	void setY(int y);
-	void setWidth(int width);
-	void setHeight(int height);
+	default void relocateX(int x) {
+		this.setX(x);
+	}
+	
+	default void relocateY(int y) {
+		this.setY(y);
+	}
 	
 	int getX1();
 	int getX2();
 	int getY1();
 	int getY2();
-	HorizontalSizingOption getHorizontalSizingOption();
-	VerticalSizingOption getVerticalSizingOption();
+	HorizontalSizing getHorizontalSizingOption();
+	VerticalSizing getVerticalSizingOption();
 	
-	public static enum HorizontalSizingOption {
+	public static enum HorizontalSizing {
 		LEFT_WIDTH((component, screenRectangle, v1, v2) -> {
 			component.setX(v1);
 			component.setWidth(v2);
@@ -36,7 +43,6 @@ public interface ResizableComponent {
 			int width = Math.max(end - v1, 0);
 			component.setX(v1);
 			component.setWidth(width);
-			//System.out.println(v1 +" "+ v2 + " " + end +" "+ width);
 		}), WIDTH_RIGHT((component, screenRectangle, v1, v2) -> {
 			int end = screenRectangle.right() - v2;
 			int start = Math.max(end - v1, 0);
@@ -46,12 +52,12 @@ public interface ResizableComponent {
 		
 		ResizeFunction resizeFunction;
 		
-		HorizontalSizingOption(ResizeFunction resizeFunction) {
+		HorizontalSizing(ResizeFunction resizeFunction) {
 			this.resizeFunction = resizeFunction;
 		}
 	}
 	
-	public static enum VerticalSizingOption {
+	public static enum VerticalSizing {
 		TOP_HEIGHT((component, screenRectangle, v1, v2) -> {
 			component.setY(v1);
 			component.setHeight(v2);
@@ -69,7 +75,7 @@ public interface ResizableComponent {
 		
 		ResizeFunction resizeFunction;
 		
-		VerticalSizingOption(ResizeFunction resizeFunction) {
+		VerticalSizing(ResizeFunction resizeFunction) {
 			this.resizeFunction = resizeFunction;
 		}
 	}
@@ -78,4 +84,18 @@ public interface ResizableComponent {
 	interface ResizeFunction {
 		public void resize(ResizableComponent component, ScreenRectangle screenRectangle, int v1, int v2);
 	}
+	
+	/*****************************************
+	 *        Vanilla Widget Functions       *
+	 *****************************************/
+	void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks);
+	
+	int getX();
+	int getY();
+	int getWidth();
+	int getHeight();
+	void setX(int x);
+	void setY(int y);
+	void setWidth(int width);
+	void setHeight(int height);
 }

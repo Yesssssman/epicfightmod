@@ -17,6 +17,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.api.utils.LevelUtil;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategories;
@@ -156,7 +157,9 @@ public class MeteorSlamSkill extends Skill {
 		});
 		
 		listener.addEventListener(EventType.FALL_EVENT, EVENT_UUID, (event) -> {
-			container.getDataManager().setData(PROTECT_NEXT_FALL, false);
+			if (LevelUtil.calculateLivingEntityFallDamage(event.getForgeEvent().getEntity(), event.getForgeEvent().getDamageMultiplier(), event.getForgeEvent().getDistance()) == 0) {
+				container.getDataManager().setData(PROTECT_NEXT_FALL, false);
+			}
 		});
 	}
 	

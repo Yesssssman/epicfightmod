@@ -16,7 +16,11 @@ import net.minecraft.client.particle.TerrainParticle;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.sounds.SoundSource;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.util.Mth;
 import net.minecraft.world.damagesource.DamageTypes;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.GameRules;
@@ -42,6 +46,22 @@ import yesman.epicfight.world.level.block.FractureBlock;
 import yesman.epicfight.world.level.block.FractureBlockState;
 
 public class LevelUtil {
+	/**
+	 * {@link LivingEntity#calculateFallDamage} Calculates the fall damage instead of the vanilla method because it's protected
+	 */
+	public static int calculateLivingEntityFallDamage(LivingEntity livingEntity, float distance, float modifier) {
+		if (livingEntity.getType().is(EntityTypeTags.FALL_DAMAGE_IMMUNE)) {
+			return 0;
+		} else {
+			MobEffectInstance mobeffectinstance = livingEntity.getEffect(MobEffects.JUMP);
+			float f = mobeffectinstance == null ? 0.0F : (float) (mobeffectinstance.getAmplifier() + 1);
+			return Mth.ceil((distance - 3.0F - f) * modifier);
+		}
+	}
+	
+	/**
+	 * Slam code
+	 */
 	private static final Vec3 IMPACT_DIRECTION = new Vec3(0.0D, -1.0D, 0.0D);
 	
 	public static void spreadShockwave(Level level, Vec3 center, Vec3 direction, double length, int edgeX, int edgeZ, List<Entity> entityBeingHit) {
@@ -275,4 +295,7 @@ public class LevelUtil {
 		
 		return 0 < u && u < 1 && 0 < v && v < 1;
 	}
+	/**
+	 * Slam code ends
+	 */
 }

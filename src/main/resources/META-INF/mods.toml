@@ -16,7 +16,7 @@ description='''Fight til u dead
 [[dependencies.epicfight]] #optional
     modId="forge" #mandatory
     mandatory=true #mandatory
-    versionRange="[47.2.16,)" #mandatory
+    versionRange="[47.2.20,)" #mandatory
     ordering="NONE"
     side="BOTH"
 [[dependencies.epicfight]]

@@ -24,6 +24,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 import yesman.epicfight.client.gui.screen.SelectFromRegistryScreen;
 import yesman.epicfight.main.EpicFightMod;
 
+@OnlyIn(Dist.CLIENT)
 public class PopupBox<T> extends AbstractWidget implements ResizableComponent {
 	public static final ResourceLocation POPUP_ICON = new ResourceLocation(EpicFightMod.MODID, "textures/gui/popup_icon.png");
 	
@@ -35,13 +36,13 @@ public class PopupBox<T> extends AbstractWidget implements ResizableComponent {
 	protected T item;
 	protected String itemDisplayName;
 	
-	public PopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizingOption horizontal, VerticalSizingOption vertical, Component title, IForgeRegistry<T> registry) {
+	public PopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, IForgeRegistry<T> registry) {
 		this(owner, font, x1, x2, y1, y2, horizontal, vertical, title, registry, (item) -> {
 			return registry.containsValue(item) ? registry.getKey(item).toString() : item.toString();
 		});
 	}
 	
-	public PopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizingOption horizontal, VerticalSizingOption vertical, Component title, IForgeRegistry<T> registry, Function<T, String> displayStringMapper) {
+	public PopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, IForgeRegistry<T> registry, Function<T, String> displayStringMapper) {
 		super(x1, x2, y1, y2, title);
 		
 		this.owner = owner;
@@ -95,8 +96,8 @@ public class PopupBox<T> extends AbstractWidget implements ResizableComponent {
 		guiGraphics.fill(this.getX() - 1, this.getY() - 1, this.getX() + this.width + 1, this.getY() + this.height + 1, outlineColor);
 		guiGraphics.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, -16777216);
 		
-		String splitted = StringUtil.isNullOrEmpty(this.itemDisplayName) ? "" : this.font.plainSubstrByWidth(this.itemDisplayName, this.width - 16);
-		guiGraphics.drawString(this.font, splitted, this.getX() + 4, this.getY() + this.height / 2 - this.font.lineHeight / 2 + 1, 16777215, false);
+		String correctedString = StringUtil.isNullOrEmpty(this.itemDisplayName) ? "" : this.font.plainSubstrByWidth(this.itemDisplayName, this.width - 16);
+		guiGraphics.drawString(this.font, correctedString, this.getX() + 4, this.getY() + this.height / 2 - this.font.lineHeight / 2 + 1, 16777215, false);
 		
 		RenderSystem.enableBlend();
 		this.renderTexture(guiGraphics, POPUP_ICON, this.getX() + this.width - this.height, this.getY(), 0, 0, 0, this.height, this.height, 16, 16);
@@ -116,7 +117,7 @@ public class PopupBox<T> extends AbstractWidget implements ResizableComponent {
 	
 	@OnlyIn(Dist.CLIENT)
 	public static class SoundPopupBox extends PopupBox<SoundEvent> {
-		public SoundPopupBox(Screen owner, Font font, int x, int y, int width, int height, HorizontalSizingOption horizontal, VerticalSizingOption vertical, Component title) {
+		public SoundPopupBox(Screen owner, Font font, int x, int y, int width, int height, HorizontalSizing horizontal, VerticalSizing vertical, Component title) {
 			super(owner, font, x, y, width, height, horizontal, vertical, title, ForgeRegistries.SOUND_EVENTS);
 		}
 		
@@ -135,8 +136,8 @@ public class PopupBox<T> extends AbstractWidget implements ResizableComponent {
 	private final int x2;
 	private final int y1;
 	private final int y2;
-	private final HorizontalSizingOption horizontalSizingOption;
-	private final VerticalSizingOption verticalSizingOption;
+	private final HorizontalSizing horizontalSizingOption;
+	private final VerticalSizing verticalSizingOption;
 	
 	@Override
 	public int getX1() {
@@ -159,12 +160,12 @@ public class PopupBox<T> extends AbstractWidget implements ResizableComponent {
 	}
 
 	@Override
-	public HorizontalSizingOption getHorizontalSizingOption() {
+	public HorizontalSizing getHorizontalSizingOption() {
 		return this.horizontalSizingOption;
 	}
 
 	@Override
-	public VerticalSizingOption getVerticalSizingOption() {
+	public VerticalSizing getVerticalSizingOption() {
 		return this.verticalSizingOption;
 	}
 }

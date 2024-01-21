@@ -92,4 +92,8 @@ public class ParseUtil {
 		
 		return sb.toString();
 	}
+	
+	public static String toStringNvl(Object obj) {
+		return obj == null ? "" : obj.toString();
+	}
 }

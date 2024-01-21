@@ -24,10 +24,10 @@ public class ComboBox<T> extends AbstractWidget implements ResizableComponent {
 	
 	private boolean listOpened;
 	
-	public ComboBox(Screen parent, int x1, int x2, int y1, int y2, HorizontalSizingOption horizontal, VerticalSizingOption vertical, int maxRows, Component title, List<T> items, Function<T, String> displayStringMapper) {
+	public ComboBox(Screen parent, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, int maxRows, Component title, List<T> items, Function<T, String> displayStringMapper) {
 		super(x1, x2, y1, y2, title);
 		
-		this.font = parent.getMinecraft().font;
+		this.font = font;
 		this.rows = maxRows;
 		
 		this.comboItemList = new ComboItemList(parent.getMinecraft(), maxRows, 15);
@@ -130,7 +130,9 @@ public class ComboBox<T> extends AbstractWidget implements ResizableComponent {
 		guiGraphics.fill(this.getX() - 1, this.getY() - 1, this.getX() + this.width + 1, this.getY() + this.height + 1, outlineColor);
 		guiGraphics.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, -16777216);
 		
-		guiGraphics.drawString(this.font, Component.literal(this.comboItemList.getSelected() == null ? "" : this.comboItemList.getSelected().displayName), this.getX() + 4, this.getY() + this.height / 2 - this.font.lineHeight / 2 + 1, 16777215, false);
+		String correctedString = this.font.plainSubstrByWidth(this.comboItemList.getSelected() == null ? "" : this.comboItemList.getSelected().displayName, this.width - 10);
+		
+		guiGraphics.drawString(this.font, Component.literal(correctedString), this.getX() + 4, this.getY() + this.height / 2 - this.font.lineHeight / 2 + 1, 16777215, false);
 		guiGraphics.drawString(this.font, Component.literal("▼"), this.getX() + this.width - 8, this.getY() + this.height / 2 - this.font.lineHeight / 2 + 1, 16777215, false);
 		
 		if (this.listOpened) {
@@ -214,6 +216,10 @@ public class ComboBox<T> extends AbstractWidget implements ResizableComponent {
 			public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
 				guiGraphics.drawString(ComboBox.this.font, this.displayName, left + 2, top + 1, 16777215, false);
 			}
+			
+			public T getItem() {
+				return this.item;
+			}
 		}
 	}
 	
@@ -224,8 +230,8 @@ public class ComboBox<T> extends AbstractWidget implements ResizableComponent {
 	private final int x2;
 	private final int y1;
 	private final int y2;
-	private final HorizontalSizingOption horizontalSizingOption;
-	private final VerticalSizingOption verticalSizingOption;
+	private final HorizontalSizing horizontalSizingOption;
+	private final VerticalSizing verticalSizingOption;
 	
 	@Override
 	public int getX1() {
@@ -248,12 +254,12 @@ public class ComboBox<T> extends AbstractWidget implements ResizableComponent {
 	}
 
 	@Override
-	public HorizontalSizingOption getHorizontalSizingOption() {
+	public HorizontalSizing getHorizontalSizingOption() {
 		return this.horizontalSizingOption;
 	}
 
 	@Override
-	public VerticalSizingOption getVerticalSizingOption() {
+	public VerticalSizing getVerticalSizingOption() {
 		return this.verticalSizingOption;
 	}
 }

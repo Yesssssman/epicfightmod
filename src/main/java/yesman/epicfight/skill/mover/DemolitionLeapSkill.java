@@ -60,16 +60,18 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 				float damage = event.getAmount();
 				event.setAmount(damage * 0.5F);
 				event.setCanceled(true);
-
+				
 				container.getDataManager().setData(PROTECT_NEXT_FALL, false);
 			}
 		}, 1);
-
+		
 		listener.addEventListener(EventType.FALL_EVENT, EVENT_UUID, (event) -> {
-			container.getDataManager().setData(PROTECT_NEXT_FALL, false);
+			if (LevelUtil.calculateLivingEntityFallDamage(event.getForgeEvent().getEntity(), event.getForgeEvent().getDamageMultiplier(), event.getForgeEvent().getDistance()) == 0) {
+				container.getDataManager().setData(PROTECT_NEXT_FALL, false);
+			}
 		});
 	}
-	
+
 	@Override
 	public void onRemoved(SkillContainer container) {
 		super.onRemoved(container);

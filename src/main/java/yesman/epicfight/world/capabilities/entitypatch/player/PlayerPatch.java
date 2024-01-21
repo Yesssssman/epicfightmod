@@ -518,6 +518,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 				case LONG -> Animations.BIPED_HIT_LONG;
 				case SHORT, HOLD -> Animations.BIPED_HIT_SHORT;
 				case KNOCKDOWN -> Animations.BIPED_KNOCKDOWN;
+				case NEUTRALIZE -> Animations.BIPED_COMMON_NEUTRALIZED;
 				case FALL -> Animations.BIPED_LANDING;
 				case NONE -> null;
 				default -> null;

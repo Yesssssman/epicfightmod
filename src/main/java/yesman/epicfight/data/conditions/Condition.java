@@ -1,15 +1,21 @@
 package yesman.epicfight.data.conditions;
 
+import java.util.Map;
+import java.util.Set;
+
 import com.google.common.base.Function;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public interface Condition<T> {
-	public abstract void read(CompoundTag tag);
+	public void read(CompoundTag tag);
+	public CompoundTag serializePredicate();
+	public boolean predicate(T target);
 	
-	public abstract CompoundTag serializePredicate();
-	
-	public abstract boolean predicate(T target);
+	@OnlyIn(Dist.CLIENT)
+	public Set<Map.Entry<String, Object>> getAcceptingParameters();
 	
 	public static class ConditionBuilder<T extends Condition<?>> {
 		final Function<CompoundTag, T> constructor;
