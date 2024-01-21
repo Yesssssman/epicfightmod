@@ -68,6 +68,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	public static final EntityDataAccessor<Integer> EXECUTION_RESISTANCE = new EntityDataAccessor<Integer> (254, EntityDataSerializers.INT);
 	public static final EntityDataAccessor<Boolean> AIRBORNE = new EntityDataAccessor<Boolean> (250, EntityDataSerializers.BOOLEAN);
 	
+	private ItemStack tempOffhandHolder = ItemStack.EMPTY;
 	private ResultType lastResultType;
 	private float lastDealDamage;
 	protected Entity lastTryHurtEntity;
@@ -209,13 +210,27 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		if (!execute) {
 			return;
 		}
-
-		AttributeInstance damageAttributeInstance = this.original.getAttribute(Attributes.ATTACK_DAMAGE);
+		
 		ItemStack mainHandItem = this.getOriginal().getMainHandItem();
-		ItemStack offHandItem = this.getOriginal().getOffhandItem();
+		ItemStack offHandItem = this.isOffhandItemValid() ? this.getOriginal().getOffhandItem() : ItemStack.EMPTY;
+		
+		if (!this.isOffhandItemValid()) {
+			this.tempOffhandHolder = this.getOriginal().getOffhandItem();
+		}
+		
+		/**
+		 * Swap hand items to decrease durability
+		 */
+		this.getOriginal().setItemInHand(InteractionHand.MAIN_HAND, offHandItem);
+		this.getOriginal().setItemInHand(InteractionHand.OFF_HAND, mainHandItem);
+		
+		/**
+		 * Swap hand item attributes  forcely because they don't relected as soon as LivingEntity#setItemInHand is called
+		 */
+		AttributeInstance damageAttributeInstance = this.original.getAttribute(Attributes.ATTACK_DAMAGE);
 		Collection<AttributeModifier> modifiers = this.isOffhandItemValid() ? offHandItem.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE) : null;
 		mainHandItem.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE).forEach(damageAttributeInstance::removeModifier);
-
+		
 		if (modifiers != null) {
 			modifiers.forEach(damageAttributeInstance::addTransientModifier);
 		}
@@ -228,17 +243,25 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		if (!execute) {
 			return;
 		}
-
-		AttributeInstance damageAttributeInstance = this.original.getAttribute(Attributes.ATTACK_DAMAGE);
-		ItemStack mainHandItem = this.getOriginal().getMainHandItem();
+		
+		ItemStack mainHandItem = this.tempOffhandHolder.isEmpty() ? this.getOriginal().getMainHandItem() : this.tempOffhandHolder;
 		ItemStack offHandItem = this.getOriginal().getOffhandItem();
-		Collection<AttributeModifier> modifiers = this.isOffhandItemValid() ? offHandItem.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE) : null;
-
+		
+		this.getOriginal().setItemInHand(InteractionHand.MAIN_HAND, offHandItem);
+		this.getOriginal().setItemInHand(InteractionHand.OFF_HAND, mainHandItem);
+		
+		if (!this.tempOffhandHolder.isEmpty()) {
+			this.tempOffhandHolder = ItemStack.EMPTY;
+		}
+		
+		AttributeInstance damageAttributeInstance = this.original.getAttribute(Attributes.ATTACK_DAMAGE);
+		Collection<AttributeModifier> modifiers = mainHandItem.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE);
+		
 		if (modifiers != null) {
 			modifiers.forEach(damageAttributeInstance::removeModifier);
 		}
-
-		mainHandItem.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE).forEach(damageAttributeInstance::addTransientModifier);
+		
+		offHandItem.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE).forEach(damageAttributeInstance::addTransientModifier);
 	}
 
 	public void setLastAttackResult(AttackResult attackResult) {
