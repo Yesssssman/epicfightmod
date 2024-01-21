@@ -39,7 +39,7 @@ public class EpicFightGraphicOptionScreen extends EpicFightOptionSubScreen {
 		OptionHandler<Boolean> filterAnimation = this.config.filterAnimation;
 		OptionHandler<Boolean> enableAimHelper = this.config.enableAimHelperPointer;
 		OptionHandler<Double> aimHelperColor = this.config.aimHelperColor;
-		OptionHandler<Boolean> offBloodEffects = this.config.offBloodEffects;
+		OptionHandler<Boolean> bloodEffects = this.config.bloodEffects;
 		
 		int buttonHeight = -32;
 		
@@ -71,10 +71,10 @@ public class EpicFightGraphicOptionScreen extends EpicFightOptionSubScreen {
 		
 		buttonHeight+=24;
 		
-		Button offBloodEffectButton = Button.builder(Component.translatable("gui."+EpicFightMod.MODID+".off_blood_effects." + (offBloodEffects.getValue() ? "on" : "off")), (button) -> {
-			offBloodEffects.setValue(!offBloodEffects.getValue());
-			button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".off_blood_effects." + (offBloodEffects.getValue() ? "on" : "off")));
-		}).pos(this.width / 2 - 165, this.height / 4 - 8).size(160, 20).tooltip(Tooltip.create(Component.translatable("gui."+EpicFightMod.MODID+".off_blood_effects.tooltip"))).build();
+		Button bloodEffectsButton = Button.builder(Component.translatable("gui."+EpicFightMod.MODID+".blood_effects." + (bloodEffects.getValue() ? "on" : "off")), (button) -> {
+			bloodEffects.setValue(!bloodEffects.getValue());
+			button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".blood_effects." + (bloodEffects.getValue() ? "on" : "off")));
+		}).pos(this.width / 2 - 165, this.height / 4 - 8).size(160, 20).tooltip(Tooltip.create(Component.translatable("gui."+EpicFightMod.MODID+".blood_effects.tooltip"))).build();
 		
 		Button exportCustomArmors = Button.builder(Component.translatable("gui."+EpicFightMod.MODID+".export_custom_armor"), (button) -> {
 			File resourcePackDirectory = Minecraft.getInstance().getResourcePackDirectory().toFile();
@@ -88,7 +88,7 @@ public class EpicFightGraphicOptionScreen extends EpicFightOptionSubScreen {
 			}
 		}).pos(this.width / 2 + 5, this.height / 4 + buttonHeight).size(160, 20).tooltip(Tooltip.create(Component.translatable("gui."+EpicFightMod.MODID+".export_custom_armor.tooltip"))).build();
 		
-		this.optionsList.addSmall(offBloodEffectButton, exportCustomArmors);
+		this.optionsList.addSmall(bloodEffectsButton, exportCustomArmors);
 		
 		buttonHeight += 24;
 

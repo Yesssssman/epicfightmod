@@ -37,7 +37,7 @@ public class CutParticle extends HitParticle {
 	    
 		@Override
 		public Particle createParticle(SimpleParticleType typeIn, ClientLevel worldIn, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-			if (!EpicFightMod.CLIENT_CONFIGS.offBloodEffects.getValue()) {
+			if (!EpicFightMod.CLIENT_CONFIGS.bloodEffects.getValue()) {
 				return null;
 			}
 			

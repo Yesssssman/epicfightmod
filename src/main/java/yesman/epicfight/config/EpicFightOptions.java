@@ -23,7 +23,7 @@ public class EpicFightOptions {
 	public final OptionHandler<Boolean> enableAimHelperPointer;
 	public final OptionHandler<Boolean> cameraAutoSwitch;
 	public final OptionHandler<Boolean> autoPreparation;
-	public final OptionHandler<Boolean> offBloodEffects;
+	public final OptionHandler<Boolean> bloodEffects;
 	public final OptionHandler<Boolean> noMiningInCombat;
 	public final List<Item> battleAutoSwitchItems;
 	public final List<Item> miningAutoSwitchItems;
@@ -61,7 +61,7 @@ public class EpicFightOptions {
 		this.aimHelperRealColor = ColorWidget.toColorInteger(config.aimHelperColor.get());
 		this.cameraAutoSwitch = new OptionHandler<Boolean>(config.cameraAutoSwitch.get());
 		this.autoPreparation = new OptionHandler<Boolean>(config.autoPreparation.get());
-		this.offBloodEffects = new OptionHandler<Boolean>(config.offBloodEffects.get());
+		this.bloodEffects = new OptionHandler<Boolean>(config.bloodEffects.get());
 		this.noMiningInCombat = new OptionHandler<Boolean>(config.noMiningInCombat.get());
 		this.battleAutoSwitchItems = Lists.newArrayList(config.battleAutoSwitchItems.get().stream().map((itemName) ->
 			ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName))).iterator()
@@ -101,7 +101,7 @@ public class EpicFightOptions {
 		this.enableAimHelperPointer.setDefaultValue();
 		this.cameraAutoSwitch.setDefaultValue();
 		this.autoPreparation.setDefaultValue();
-		this.offBloodEffects.setDefaultValue();
+		this.bloodEffects.setDefaultValue();
 		this.noMiningInCombat.setDefaultValue();
 		this.aimHelperRealColor = ColorWidget.toColorInteger(this.aimHelperColor.getValue());
 		this.staminaBarX.setDefaultValue();
@@ -133,7 +133,7 @@ public class EpicFightOptions {
 		config.enableAimHelper.set(this.enableAimHelperPointer.getValue());
 		config.cameraAutoSwitch.set(this.cameraAutoSwitch.getValue());
 		config.autoPreparation.set(this.autoPreparation.getValue());
-		config.offBloodEffects.set(this.offBloodEffects.getValue());
+		config.bloodEffects.set(this.bloodEffects.getValue());
 		config.noMiningInCombat.set(this.noMiningInCombat.getValue());
 		this.aimHelperRealColor = ColorWidget.toColorInteger(this.aimHelperColor.getValue());
 		config.battleAutoSwitchItems.set(Lists.newArrayList(this.battleAutoSwitchItems.stream().map((item) -> ForgeRegistries.ITEMS.getKey(item).toString()).iterator()));

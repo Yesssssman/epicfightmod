@@ -20,7 +20,7 @@ public class ClientConfig {
 	public final BooleanValue enableAimHelper;
 	public final BooleanValue cameraAutoSwitch;
 	public final BooleanValue autoPreparation;
-	public final BooleanValue offBloodEffects;
+	public final BooleanValue bloodEffects;
 	public final BooleanValue noMiningInCombat;
 	
 	public final ConfigValue<List<? extends String>> battleAutoSwitchItems;
@@ -59,7 +59,7 @@ public class ClientConfig {
 		this.enableAimHelper = config.define("ingame.enable_laser_pointer", () -> true);
 		this.cameraAutoSwitch = config.define("ingame.camera_auto_switch", () -> false);
 		this.autoPreparation = config.define("ingame.auto_preparation", () -> false);
-		this.offBloodEffects = config.define("ingame.off_gore", () -> false);
+		this.bloodEffects = config.define("ingame.blood_effects", () -> true);
 		this.noMiningInCombat = config.define("ingame.no_mining_in_combat", () -> true);
 		
 		this.battleAutoSwitchItems = config.defineList("ingame.battle_autoswitch_items", Lists.newArrayList(), (element) -> {

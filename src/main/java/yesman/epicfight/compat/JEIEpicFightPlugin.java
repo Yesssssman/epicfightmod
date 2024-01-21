@@ -10,7 +10,6 @@ import yesman.epicfight.main.EpicFightMod;
 
 @JeiPlugin
 public class JEIEpicFightPlugin implements IModPlugin{
-
 	@Override
 	public ResourceLocation getPluginUid() {
 		return new ResourceLocation(EpicFightMod.MODID, "jei_plugin");

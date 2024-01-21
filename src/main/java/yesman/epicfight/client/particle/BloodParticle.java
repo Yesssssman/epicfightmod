@@ -44,14 +44,17 @@ public class BloodParticle extends TextureSheetParticle {
 			BloodParticle particle = new BloodParticle(worldIn, x, y, z, xSpeed, ySpeed, zSpeed);
 			Random random = new Random();
 			particle.move(0, 0.5F, 0);
+			
 			float mass = random.nextFloat() + 0.2F;
 			particle.lifetime = 10 + (int)(mass * 10.0F);
 			particle.gravity = mass * 4.0F;
 			particle.yd = (0.9F - mass) * 0.4F;
 			particle.setSize(mass, mass);
 			particle.pickSprite(this.spriteSet);
-			float yellow = EpicFightMod.CLIENT_CONFIGS.offBloodEffects.getValue() ? 0.0F : Mth.clamp(random.nextFloat(), 0.6F, 0.4F);
-			particle.setColor(Mth.clamp(random.nextFloat(), 0.6F, 0.4F), yellow, 0.0F);
+			
+			float green = EpicFightMod.CLIENT_CONFIGS.bloodEffects.getValue() ? 0.0F : Mth.clamp(random.nextFloat(), 0.6F, 0.4F);
+			particle.setColor(Mth.clamp(random.nextFloat(), 0.6F, 0.4F), green, 0.0F);
+			
 			return particle;
 		}
 	}
