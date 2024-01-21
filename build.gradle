@@ -109,6 +109,12 @@ repositories {
             includeGroup "curse.maven"
         }
     }
+    
+    maven {
+    	// location of the maven that hosts JEI files since January 2023
+    	name = "Jared's maven"
+   		url = "https://maven.blamejared.com/"
+  	}
 }
 
 mixin {
@@ -122,6 +128,13 @@ dependencies {
     implementation fg.deobf("curse.maven:geckolib-388172:4822252")
     implementation fg.deobf("curse.maven:azurelib-817423:4906772")
     implementation fg.deobf("curse.maven:azurelibarmor-912767:4866792")
+    
+    	// compile against the JEI API but do not include it at runtime
+  	compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"))
+ 	compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}"))
+  		// at runtime, use the full JEI jar for Forge
+  	runtimeOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}"))
+    
     
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }

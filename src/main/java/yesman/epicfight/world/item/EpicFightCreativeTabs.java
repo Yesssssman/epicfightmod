@@ -2,6 +2,7 @@ package yesman.epicfight.world.item;
 
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraft.world.item.ItemStack;
@@ -17,6 +18,8 @@ public class EpicFightCreativeTabs {
 					.title(Component.translatable("itemGroup.epicfight.items"))
 					.icon(() -> new ItemStack(EpicFightItems.SKILLBOOK.get()))
 					.withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
+					.withBackgroundLocation(new ResourceLocation(EpicFightMod.MODID, "textures/gui/container/epicfight_creative_tab.png"))
+					.hideTitle()
 					.displayItems((params, output) -> {
 						EpicFightItems.ITEMS.getEntries().forEach(it -> {
 							// FIXME: bad implement, maybe based protocol better yet.

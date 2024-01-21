@@ -54,7 +54,7 @@ public class ClientConfig {
 		this.longPressCountConfig = config.defineInRange("ingame.long_press_count", 2, 1, 10);
 		this.healthBarShowOption = config.defineEnum("ingame.health_bar_show_option", HealthBarShowOptions.HURT);
 		this.showTargetIndicator = config.define("ingame.show_target_indicator", () -> true);
-		this.filterAnimation = config.define("ingame.filter_animation", () -> true);
+		this.filterAnimation = config.define("ingame.filter_animation", () -> false);
 		this.aimHelperColor = config.defineInRange("ingame.laser_pointer_color", 0.328125D, 0.0D, 1.0D);
 		this.enableAimHelper = config.define("ingame.enable_laser_pointer", () -> true);
 		this.cameraAutoSwitch = config.define("ingame.camera_auto_switch", () -> false);
