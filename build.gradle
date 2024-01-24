@@ -17,7 +17,7 @@ plugins {
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.spongepowered.mixin'
 
-version = '20.6.4'
+version = '20.6.5'
 
 group = 'yesman.epicfight'
 archivesBaseName = 'epicfight'
