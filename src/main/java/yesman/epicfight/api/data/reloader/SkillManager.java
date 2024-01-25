@@ -61,6 +61,7 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 		if (SKILLS.containsKey(rl)) {
 			return SKILLS.get(rl);
 		} else {
+			EpicFightMod.LOGGER.debug("Can't find skill named: " + name);
 			return null;
 		}
 	}
