@@ -126,7 +126,7 @@ public class PhantomAscentSkill extends Skill {
 				
 				container.getDataManager().setData(PROTECT_NEXT_FALL, false);
 			}
-		}, 1);
+		});
 		
 		listener.addEventListener(EventType.FALL_EVENT, EVENT_UUID, (event) -> {
 			container.getDataManager().setData(JUMP_COUNT, 0);
@@ -140,6 +140,7 @@ public class PhantomAscentSkill extends Skill {
 	@Override
 	public void onRemoved(SkillContainer container) {
 		PlayerEventListener listener = container.getExecuter().getEventListener();
+		
 		listener.removeListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID);
 		listener.removeListener(EventType.HURT_EVENT_PRE, EVENT_UUID);
 		listener.removeListener(EventType.FALL_EVENT, EVENT_UUID);
