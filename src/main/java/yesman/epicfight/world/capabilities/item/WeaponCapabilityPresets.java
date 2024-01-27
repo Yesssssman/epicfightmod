@@ -358,6 +358,10 @@ public class WeaponCapabilityPresets {
 	}
 	
 	public static Function<Item, CapabilityItem.Builder> get(String typeName) {
+		if (!PRESETS.containsKey(typeName)) {
+			throw new IllegalArgumentException("Can't find weapon type: " + typeName);
+		}
+		
 		return PRESETS.get(typeName);
 	}
 }
