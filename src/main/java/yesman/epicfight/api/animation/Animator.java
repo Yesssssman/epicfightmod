@@ -3,8 +3,11 @@ package yesman.epicfight.api.animation;
 import java.util.Map;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.datafixers.util.Pair;
 
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
@@ -34,7 +37,8 @@ public abstract class Animator {
 	public abstract void reserveAnimation(StaticAnimation nextAnimation);
 	public abstract EntityState getEntityState();
 	/** Give a null value as a parameter to get an animation that is highest priority on client **/
-	public abstract AnimationPlayer getPlayerFor(DynamicAnimation playingAnimation);
+	public abstract AnimationPlayer getPlayerFor(@Nullable DynamicAnimation playingAnimation);
+	public abstract <T> Pair<AnimationPlayer, T> findFor(Class<T> animationType);
 	public abstract void init();
 	public abstract void poseTick();
 	

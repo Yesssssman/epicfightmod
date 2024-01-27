@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import com.mojang.datafixers.util.Pair;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
@@ -32,6 +34,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
+import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
@@ -696,6 +699,15 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	@Override
 	public EntityState getEntityState() {
 		return this.state;
+	}
+	
+	public InteractionHand getAttackingHand() {
+		Pair<AnimationPlayer, AttackAnimation> layerInfo = this.getAnimator().findFor(AttackAnimation.class);
+		
+		if (layerInfo != null) {
+			return layerInfo.getSecond().getPhaseByTime(layerInfo.getFirst().getElapsedTime()).hand;
+		}		
+		return null;
 	}
 	
 	public LivingMotion getCurrentLivingMotion() {

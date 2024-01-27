@@ -331,6 +331,18 @@ public class ClientAnimator extends Animator {
 		return this.baseLayer.animationPlayer;
 	}
 	
+	@SuppressWarnings("unchecked")
+	@Override
+	public <T> Pair<AnimationPlayer, T> findFor(Class<T> animationType) {
+		for (Layer layer : this.baseLayer.compositeLayers.values()) {
+			if (animationType.isAssignableFrom(layer.animationPlayer.getAnimation().getClass())) {
+				return Pair.of(layer.animationPlayer, (T)layer.animationPlayer.getAnimation());
+			}
+		}
+		
+		return animationType.isAssignableFrom(this.baseLayer.animationPlayer.getAnimation().getClass()) ? Pair.of(this.baseLayer.animationPlayer, (T)this.baseLayer.animationPlayer.getAnimation()) : null;
+	}
+	
 	public LivingEntityPatch<?> getOwner() {
 		return this.entitypatch;
 	}

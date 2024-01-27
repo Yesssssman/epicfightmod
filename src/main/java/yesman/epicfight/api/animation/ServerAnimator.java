@@ -1,5 +1,7 @@
 package yesman.epicfight.api.animation;
 
+import com.mojang.datafixers.util.Pair;
+
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.LinkAnimation;
@@ -94,6 +96,12 @@ public class ServerAnimator extends Animator {
 	@Override
 	public AnimationPlayer getPlayerFor(DynamicAnimation playingAnimation) {
 		return this.animationPlayer;
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T> Pair<AnimationPlayer, T> findFor(Class<T> animationType) {
+		return animationType.isAssignableFrom(this.animationPlayer.getAnimation().getClass()) ? Pair.of(this.animationPlayer, (T)this.animationPlayer.getAnimation()) : null;
 	}
 	
 	@Override

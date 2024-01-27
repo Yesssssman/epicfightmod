@@ -43,30 +43,38 @@ public class WorldEvents {
 	
 	@SubscribeEvent
 	public static void onDatapackSync(final OnDatapackSyncEvent event) {
-		ServerPlayer player = event.getPlayer();
-		PacketDistributor.PacketTarget target = (player == null) ? PacketDistributor.ALL.noArg() : PacketDistributor.PLAYER.with(() -> player);
-		
-		if (player != null) {
-			EpicFightNetworkManager.sendToClient(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.WEIGHT_PENALTY, player.level().getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY)), target);
-			EpicFightNetworkManager.sendToClient(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.DIABLE_ENTITY_UI, player.level().getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI)), target);
-			EpicFightNetworkManager.sendToClient(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.STIFF_COMBO_ATTACKS, player.level().getGameRules().getBoolean(EpicFightGamerules.STIFF_COMBO_ATTACKS)), target);
-			EpicFightNetworkManager.sendToClient(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.CAN_SWITCH_COMBAT, player.level().getGameRules().getBoolean(EpicFightGamerules.CAN_SWITCH_COMBAT)), target);
+		if (event.getPlayer() != null) {
+			EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.WEIGHT_PENALTY, event.getPlayer().level().getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY)), event.getPlayer());
+			EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.DIABLE_ENTITY_UI, event.getPlayer().level().getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI)), event.getPlayer());
+			EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.STIFF_COMBO_ATTACKS, event.getPlayer().level().getGameRules().getBoolean(EpicFightGamerules.STIFF_COMBO_ATTACKS)), event.getPlayer());
+			EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.CAN_SWITCH_COMBAT, event.getPlayer().level().getGameRules().getBoolean(EpicFightGamerules.CAN_SWITCH_COMBAT)), event.getPlayer());
+			
+			synchronizeWorldData(event.getPlayer());
+		} else {
+			event.getPlayerList().getPlayers().forEach(WorldEvents::synchronizeWorldData);
 		}
+    }
+	
+	private static void synchronizeWorldData(ServerPlayer player) {
+		PacketDistributor.PacketTarget target = (player == null) ? PacketDistributor.ALL.noArg() : PacketDistributor.PLAYER.with(() -> player);
 		
 		if (player == null || !player.getServer().isSingleplayerOwner(player.getGameProfile())) {
 			SPDatapackSyncSkill skillParamsPacket = new SPDatapackSyncSkill(SkillManager.getParamCount(), SPDatapackSync.Type.SKILL_PARAMS);
-			ServerPlayerPatch serverplayerpatch = EpicFightCapabilities.getEntityPatch(player, ServerPlayerPatch.class);
-			CapabilitySkill skillCapability = serverplayerpatch.getSkillCapability();
 			
-			for (SkillContainer skill : skillCapability.skillContainers) {
-				if (skill.getSkill() != null && skill.getSkill().getCategory().shouldSynchronize()) {
-					skillParamsPacket.putSlotSkill(skill.getSlot(), skill.getSkill());
+			if (player != null) {
+				ServerPlayerPatch serverplayerpatch = EpicFightCapabilities.getEntityPatch(player, ServerPlayerPatch.class);
+				CapabilitySkill skillCapability = serverplayerpatch.getSkillCapability();
+				
+				for (SkillContainer skill : skillCapability.skillContainers) {
+					if (skill.getSkill() != null && skill.getSkill().getCategory().shouldSynchronize()) {
+						skillParamsPacket.putSlotSkill(skill.getSlot(), skill.getSkill());
+					}
 				}
-			}
-			
-			for (SkillCategory category : SkillCategory.ENUM_MANAGER.universalValues()) {
-				if (skillCapability.hasCategory(category)) {
-					skillParamsPacket.addLearnedSkill(Lists.newArrayList(skillCapability.getLearnedSkills(category).stream().map((skill) -> skill.toString()).iterator()));
+				
+				for (SkillCategory category : SkillCategory.ENUM_MANAGER.universalValues()) {
+					if (skillCapability.hasCategory(category)) {
+						skillParamsPacket.addLearnedSkill(Lists.newArrayList(skillCapability.getLearnedSkills(category).stream().map((skill) -> skill.toString()).iterator()));
+					}
 				}
 			}
 			
@@ -88,5 +96,5 @@ public class WorldEvents {
 			EpicFightNetworkManager.sendToClient(mobPatchPacket, target);
 			EpicFightNetworkManager.sendToClient(weaponTypePacket, target);
 		}
-    }
+	}
 }
