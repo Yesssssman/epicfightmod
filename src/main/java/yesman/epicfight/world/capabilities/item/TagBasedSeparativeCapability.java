@@ -12,7 +12,7 @@ public class TagBasedSeparativeCapability extends CapabilityItem {
 	private final CapabilityItem defaultCapability;
 	
 	public TagBasedSeparativeCapability(List<Pair<Predicate<ItemStack>, CapabilityItem>> variations, CapabilityItem defaultCapability) {
-		super(CapabilityItem.builder().category(WeaponCategories.NOT_WEAON));
+		super(CapabilityItem.builder().category(WeaponCategories.NOT_WEAPON));
 		this.variations = variations;
 		this.defaultCapability = defaultCapability;
 	}
