@@ -33,7 +33,7 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.server.SPDatapackSyncSkill;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategories;
-import yesman.epicfight.skill.SkillSlot;
+import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 
 public class SkillManager extends SimpleJsonResourceReloadListener {
@@ -130,28 +130,32 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 	@OnlyIn(Dist.CLIENT)
 	public static void processServerPacket(SPDatapackSyncSkill packet) {
 		SkillManager.buildAll();
-
+		
 		for (CompoundTag tag : packet.getTags()) {
 			if (!SKILLS.containsKey(new ResourceLocation(tag.getString("id")))) {
 				EpicFightMod.LOGGER.warn("Failed to syncronize Datapack for skill: " + tag.getString("id"));
 				continue;
 			}
-
+			
 			SKILLS.get(new ResourceLocation(tag.getString("id"))).setParams(tag);
 		}
-
+		
 		LocalPlayerPatch localplayerpatch = ClientEngine.getInstance().getPlayerPatch();
-
+		
 		if (localplayerpatch != null) {
+			CapabilitySkill skillCapability = localplayerpatch.getSkillCapability();
+			
 			for (String skillName : packet.getLearnedSkills()) {
-				localplayerpatch.getSkillCapability().addLearnedSkill(SkillManager.getSkill(skillName));
-			}
-
-			for (Map.Entry<SkillSlot, String> skillsBySlotEntry : packet.getSkillsBySlot().entrySet()) {
-				localplayerpatch.getSkill(skillsBySlotEntry.getKey()).setSkill(SkillManager.getSkill(skillsBySlotEntry.getValue()));
+				skillCapability.addLearnedSkill(SkillManager.getSkill(skillName));
 			}
 			
-			CapabilitySkill skillCapability = localplayerpatch.getSkillCapability();
+			for (SkillContainer skill : skillCapability.skillContainers) {
+				if (skill.getSkill() != null) {
+					// Reload skill
+					skill.setSkill(SkillManager.getSkill(skill.getSkill().toString()), true);
+				}
+			}
+			
 			skillCapability.skillContainers[SkillCategories.BASIC_ATTACK.universalOrdinal()].setSkill(EpicFightSkills.BASIC_ATTACK);
 			skillCapability.skillContainers[SkillCategories.AIR_ATTACK.universalOrdinal()].setSkill(EpicFightSkills.AIR_ATTACK);
 			skillCapability.skillContainers[SkillCategories.KNOCKDOWN_WAKEUP.universalOrdinal()].setSkill(EpicFightSkills.KNOCKDOWN_WAKEUP);
