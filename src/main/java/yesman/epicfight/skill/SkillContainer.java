@@ -46,7 +46,11 @@ public class SkillContainer {
 	}
 	
 	public boolean setSkill(Skill skill) {
-		if (this.containingSkill == skill) {
+		return this.setSkill(skill, false);
+	}
+	
+	public boolean setSkill(Skill skill, boolean initialize) {
+		if (this.containingSkill == skill && !initialize) {
 			return false;
 		}
 		
@@ -69,6 +73,10 @@ public class SkillContainer {
 		}
 		
 		this.stack = 0;
+		
+		if (initialize) {
+			this.setDisabled(false);
+		}
 		
 		return true;
 	}
