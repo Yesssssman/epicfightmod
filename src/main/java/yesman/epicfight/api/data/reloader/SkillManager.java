@@ -149,9 +149,8 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 
 			for (Map.Entry<SkillSlot, String> skillsBySlotEntry : packet.getSkillsBySlot().entrySet()) {
 				localplayerpatch.getSkill(skillsBySlotEntry.getKey()).setSkill(SkillManager.getSkill(skillsBySlotEntry.getValue()));
-				localplayerpatch.getSkill(skillsBySlotEntry.getKey()).setDisabled(false);
 			}
-
+			
 			CapabilitySkill skillCapability = localplayerpatch.getSkillCapability();
 			skillCapability.skillContainers[SkillCategories.BASIC_ATTACK.universalOrdinal()].setSkill(EpicFightSkills.BASIC_ATTACK);
 			skillCapability.skillContainers[SkillCategories.AIR_ATTACK.universalOrdinal()].setSkill(EpicFightSkills.AIR_ATTACK);
