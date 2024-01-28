@@ -2,7 +2,7 @@ package yesman.epicfight.client.events.engine;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
 
 import org.lwjgl.glfw.GLFW;
 
@@ -44,7 +44,7 @@ import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 @OnlyIn(Dist.CLIENT)
 public class ControllEngine {
-	private final Map<KeyMapping, BiConsumer<KeyMapping, Integer>> keyFunctions = Maps.newHashMap();
+	private final Map<KeyMapping, BiFunction<KeyMapping, Integer, Boolean>> keyFunctions = Maps.newHashMap();
 	private final Set<Object> packets = Sets.newHashSet();
 	private final Minecraft minecraft;
 	private LocalPlayer player;
@@ -109,14 +109,8 @@ public class ControllEngine {
 		return !playerState.turningLocked() || this.player.jumpableVehicle() != null;
 	}
 	
-	private void attackKeyPressed(KeyMapping key, int action) {
+	private boolean attackKeyPressed(KeyMapping key, int action) {
 		if (action == 1 && this.playerpatch.isBattleMode() && this.currentChargingKey != key && !Minecraft.getInstance().isPaused()) {
-			//Remove key press to prevent vanilla attack
-			if (this.options.keyAttack.getKey() == EpicFightKeyMappings.ATTACK.getKey()) {
-				this.setKeyBind(this.options.keyAttack, false);
-				while (this.options.keyAttack.consumeClick());
-			}
-			
 			if (!EpicFightKeyMappings.ATTACK.getKey().equals(EpicFightKeyMappings.WEAPON_INNATE_SKILL.getKey())) {
 				SkillSlot slot = (!this.player.onGround() && !this.player.isInWater() && this.player.getDeltaMovement().y > 0.05D) ? SkillSlots.AIR_ATTACK : SkillSlots.BASIC_ATTACK;
 				
@@ -131,7 +125,6 @@ public class ControllEngine {
 				}
 				
 				this.lockHotkeys();
-				
 				this.attackLightPressToggle = false;
 				this.weaponInnatePressToggle = false;
 				this.weaponInnatePressCounter = 0;
@@ -140,10 +133,17 @@ public class ControllEngine {
 					this.weaponInnatePressToggle = true;
 				}
 			}
+			
+			//Disable vanilla attack
+			if (this.options.keyAttack.getKey() == EpicFightKeyMappings.ATTACK.getKey()) {
+				return true;
+			}
 		}
+		
+		return false;
 	}
 	
-	private void dodgeKeyPressed(KeyMapping key, int action) {
+	private boolean dodgeKeyPressed(KeyMapping key, int action) {
 		if (action == 1 && this.playerpatch.isBattleMode() && this.currentChargingKey != key) {
 			if (key.getKey().getValue() == this.options.keyShift.getKey().getValue()) {
 				if (this.player.getVehicle() == null) {
@@ -160,30 +160,38 @@ public class ControllEngine {
 				}
 			}
 		}
+		
+		return false;
 	}
 	
-	private void guardPressed(KeyMapping key, int action) {
+	private boolean guardPressed(KeyMapping key, int action) {
 		if (action == 1) {
 			//this.playerpatch.getSkill(SkillSlots.GUARD).sendExecuteRequest(this.playerpatch, this);
 		}
+		
+		return false;
 	}
 	
-	private void swapHandKeyPressed(KeyMapping key, int action) {
+	private boolean swapHandKeyPressed(KeyMapping key, int action) {
 		if (this.playerpatch.getEntityState().inaction() || (!this.playerpatch.getHoldingItemCapability(InteractionHand.MAIN_HAND).canBePlacedOffhand())) {
 			while (key.consumeClick()) {}
 			this.setKeyBind(key, false);
 		}
+		
+		return false;
 	}
 	
-	private void switchModeKeyPressed(KeyMapping key, int action) {
+	private boolean switchModeKeyPressed(KeyMapping key, int action) {
 		if (action == 1) {
 			if (this.playerpatch.getOriginal().level().getGameRules().getBoolean(EpicFightGamerules.CAN_SWITCH_COMBAT)) {
 				this.playerpatch.toggleMode();
 			}
 		}
+		
+		return false;
 	}
 	
-	private void weaponInnateSkillKeyPressed(KeyMapping key, int action) {
+	private boolean weaponInnateSkillKeyPressed(KeyMapping key, int action) {
 		if (action == 1 && this.playerpatch.isBattleMode() && this.currentChargingKey != key) {
 			if (!EpicFightKeyMappings.ATTACK.getKey().equals(EpicFightKeyMappings.WEAPON_INNATE_SKILL.getKey())) {
 				if (this.playerpatch.getSkill(SkillSlots.WEAPON_INNATE).sendExecuteRequest(this.playerpatch, this).shouldReserverKey()) {
@@ -195,9 +203,11 @@ public class ControllEngine {
 				}
 			}
 		}
+		
+		return false;
 	}
 	
-	private void moverKeyPressed(KeyMapping key, int action) {
+	private boolean moverKeyPressed(KeyMapping key, int action) {
 		if (action == 1 && this.playerpatch.isBattleMode() && !this.playerpatch.isChargingSkill()) {
 			if (key.getKey().getValue() == this.options.keyJump.getKey().getValue()) {
 				SkillContainer skillContainer = this.playerpatch.getSkill(SkillSlots.MOVER);
@@ -213,12 +223,16 @@ public class ControllEngine {
 				skill.sendExecuteRequest(this.playerpatch, this);
 			}
 		}
+		
+		return false;
 	}
 
-	private void lockonPressed(KeyMapping key, int action) {
+	private boolean lockonPressed(KeyMapping key, int action) {
 		if (action == 1) {
 			this.playerpatch.toggleLockOn();
 		}
+		
+		return false;
 	}
 	
 	private void inputTick(Input input) {
@@ -314,7 +328,6 @@ public class ControllEngine {
 			
 			if (this.playerpatch.getSkill(slot).sendExecuteRequest(this.playerpatch, this).isExecutable()) {
 				this.player.resetAttackStrengthTicker();
-				this.attackLightPressToggle = false;
 				this.releaseAllServedKeys();
 			} else {
 				if (!this.player.isSpectator() && slot == SkillSlots.BASIC_ATTACK) {
@@ -458,23 +471,27 @@ public class ControllEngine {
 		static ControllEngine controllEngine;
 		
 		@SubscribeEvent
-		public static void mouseEvent(InputEvent.MouseButton event) {
+		public static void mouseEvent(InputEvent.MouseButton.Pre event) {
 			if (controllEngine.minecraft.player != null && Minecraft.getInstance().screen == null) {
 				InputConstants.Key input = InputConstants.Type.KEYSYM.getOrCreate(event.getButton());
 				//Controllable Compat
 				InputConstants.Key inputMouse = InputConstants.Type.MOUSE.getOrCreate(event.getButton());
 				
+				boolean canceled = false;
+				
 				for (KeyMapping keyMapping : controllEngine.keyHash.getAll(input)) {
 					if (controllEngine.keyFunctions.containsKey(keyMapping)) {
-						controllEngine.keyFunctions.get(keyMapping).accept(keyMapping, event.getAction());
+						canceled |= controllEngine.keyFunctions.get(keyMapping).apply(keyMapping, event.getAction());
 					}
 				}
 				
 				for (KeyMapping keyMapping : controllEngine.keyHash.getAll(inputMouse)) {
 					if (controllEngine.keyFunctions.containsKey(keyMapping)) {
-						controllEngine.keyFunctions.get(keyMapping).accept(keyMapping, event.getAction());
+						canceled |= controllEngine.keyFunctions.get(keyMapping).apply(keyMapping, event.getAction());
 					}
 				}
+				
+				event.setCanceled(canceled);
 			}
 		}
 		
@@ -484,16 +501,16 @@ public class ControllEngine {
 				InputConstants.Key input = InputConstants.Type.KEYSYM.getOrCreate(event.getKey());
 				//Controllable Compat
 				InputConstants.Key inputMouse = InputConstants.Type.MOUSE.getOrCreate(event.getKey());
-
+				
 				for (KeyMapping keyMapping : controllEngine.keyHash.getAll(input)) {
 					if (controllEngine.keyFunctions.containsKey(keyMapping)) {
-						controllEngine.keyFunctions.get(keyMapping).accept(keyMapping, event.getAction());
+						controllEngine.keyFunctions.get(keyMapping).apply(keyMapping, event.getAction());
 					}
 				}
 				
 				for (KeyMapping keyMapping : controllEngine.keyHash.getAll(inputMouse)) {
 					if (controllEngine.keyFunctions.containsKey(keyMapping)) {
-						controllEngine.keyFunctions.get(keyMapping).accept(keyMapping, event.getAction());
+						controllEngine.keyFunctions.get(keyMapping).apply(keyMapping, event.getAction());
 					}
 				}
 			}
