@@ -46,6 +46,6 @@ public class OffhandCategoryCondition extends LivingEntityCondition {
 	@Override
 	@OnlyIn(Dist.CLIENT)
 	public Set<Map.Entry<String, Object>> getAcceptingParameters() {
-		return ImmutableMap.of("category", (Object)WeaponCategories.NOT_WEAON).entrySet();
+		return ImmutableMap.of("category", (Object)WeaponCategories.NOT_WEAPON).entrySet();
 	}
 }
