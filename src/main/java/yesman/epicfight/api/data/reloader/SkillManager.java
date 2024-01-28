@@ -33,7 +33,7 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.server.SPDatapackSyncSkill;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategories;
-import yesman.epicfight.skill.SkillSlot;
+import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 
 public class SkillManager extends SimpleJsonResourceReloadListener {
@@ -143,16 +143,19 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 		LocalPlayerPatch localplayerpatch = ClientEngine.getInstance().getPlayerPatch();
 		
 		if (localplayerpatch != null) {
-			for (String skillName : packet.getLearnedSkills()) {
-				localplayerpatch.getSkillCapability().addLearnedSkill(SkillManager.getSkill(skillName));
-			}
-			
-			for (Map.Entry<SkillSlot, String> skillsBySlotEntry : packet.getSkillsBySlot().entrySet()) {
-				localplayerpatch.getSkill(skillsBySlotEntry.getKey()).setSkill(SkillManager.getSkill(skillsBySlotEntry.getValue()));
-				localplayerpatch.getSkill(skillsBySlotEntry.getKey()).setDisabled(false);
-			}
-			
 			CapabilitySkill skillCapability = localplayerpatch.getSkillCapability();
+			
+			for (String skillName : packet.getLearnedSkills()) {
+				skillCapability.addLearnedSkill(SkillManager.getSkill(skillName));
+			}
+			
+			for (SkillContainer skill : skillCapability.skillContainers) {
+				if (skill.getSkill() != null) {
+					// Reload skill
+					skill.setSkill(SkillManager.getSkill(skill.getSkill().toString()), true);
+				}
+			}
+			
 			skillCapability.skillContainers[SkillCategories.BASIC_ATTACK.universalOrdinal()].setSkill(EpicFightSkills.BASIC_ATTACK);
 			skillCapability.skillContainers[SkillCategories.AIR_ATTACK.universalOrdinal()].setSkill(EpicFightSkills.AIR_ATTACK);
 			skillCapability.skillContainers[SkillCategories.KNOCKDOWN_WAKEUP.universalOrdinal()].setSkill(EpicFightSkills.KNOCKDOWN_WAKEUP);
