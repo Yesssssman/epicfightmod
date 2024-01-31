@@ -46,6 +46,17 @@ body:
     validations:
       required: false
   - type: dropdown
+    id: server-type
+    attributes:
+      label: Server Mode
+      description: Server Mode
+      options:
+        - SinglePlayer
+        - Dedicated Server
+        - Lan Server
+    validations:
+      required: true
+  - type: dropdown
     id: mc-version
     attributes:
       label: Minecraft Version
