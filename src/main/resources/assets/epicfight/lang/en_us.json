@@ -285,5 +285,20 @@
 	"skill.epicfight.identity.category": "Identity Skill",
 	"skill.epicfight.mover.category": "Mobility Skill",
 	
+	"epicfight.tip.weight": "Weight shortens stun, raises skill stamina use, and slows attack speed, especially on fast items.",
+	"epicfight.tip.stun_armor": "Stun Armor extends the time between stuns, boosting overall resilience and defense.",
+	"epicfight.tip.knockback": "The Knockback enchantment functions to amplify the stun duration upon impact.",
+	"epicfight.tip.two_hand_weapon": "Two-handed weapons can't be used in the offhand, limiting them to single-handed or dual-wielded options.",
+	"epicfight.tip.skill_books": "Skills are found in dungeon books or sporadically drop from hostile mobs, categorized into Dodge, Guard, Mobility, Revelation, and Passive.",
+	"epicfight.tip.sweeping_edge": "Sweeping Edge enchantment increases special attack damage in proportion to its level:: level 1 by 50%, level 2 by 67%, and level 3 by 75%.",
+	"epicfight.tip.sharpness": "The Sharpness enchantment augments the damage inflicted by every type of attack.",
+	"epicfight.tip.impact": "Impact increases the total stun time for the target hit.",
+	"epicfight.tip.blocking": "While blocking a hit, you get stunned for a short time.",
+	"epicfight.tip.parrying": "To learn the Parrying skill, you must first acquire the Guard skill.",
+	"epicfight.tip.death_harvest": "Death Harvest allows you to refill weapon charge on innate skill kills, based on weapon damage and enemies defeated",
+	"epicfight.tip.demolition_leap": "To acquire Demolition Leap, you must defeat the Ender Dragon.",
+	"epicfight.tip.temples": "Uchigatanas, akin to skill books, can be discovered in Desert Temples or Jungle Temples. These rare weapons are not craftable.",
+	"epicfight.tip.combat_mode": "Switch between mining and combat modes by pressing it's default key, 'R'.",
+	
 	"beta_warning": "The current version of Epic Fight is a closed beta and contains some experimental functions that may not working properly or stop your game. If you don't want to use this mod, delete it from your mod list."
 }
