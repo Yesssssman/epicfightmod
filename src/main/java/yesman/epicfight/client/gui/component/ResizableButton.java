@@ -50,7 +50,7 @@ public class ResizableButton extends Button implements ResizableComponent {
 	public int getY2() {
 		return this.y2;
 	}
-
+	
 	@Override
 	public HorizontalSizing getHorizontalSizingOption() {
 		return this.horizontalSizingOption;

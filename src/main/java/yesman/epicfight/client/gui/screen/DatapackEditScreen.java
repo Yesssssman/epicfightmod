@@ -62,8 +62,6 @@ public class DatapackEditScreen extends Screen {
 		public void setCurrentTab(Tab tab, boolean playSound) {
 			if (this.getCurrentTab() instanceof DatapackTab<?> datapackTab) {
 				DatapackEditScreen.this.removeWidget(datapackTab.grid);
-				datapackTab.grid.getRowEditButtons().forEach(DatapackEditScreen.this::removeWidget);
-				
 				DatapackEditScreen.this.removeWidget(datapackTab.inputComponentsList);
 			}
 			
@@ -71,8 +69,6 @@ public class DatapackEditScreen extends Screen {
 			
 			if (tab instanceof DatapackTab<?> datapackTab) {
 				DatapackEditScreen.this.addRenderableWidget(datapackTab.grid);
-				datapackTab.grid.getRowEditButtons().forEach(DatapackEditScreen.this::addRenderableWidget);
-				
 				DatapackEditScreen.this.addRenderableWidget(datapackTab.inputComponentsList);
 			}
 		}
@@ -167,8 +163,8 @@ public class DatapackEditScreen extends Screen {
 			ScreenRectangle screenRect = DatapackEditScreen.this.getRectangle();
 			
 			this.grid = Grid.builder(DatapackEditScreen.this)
-							.pos(8, screenRect.top() + 14)
-							.size(150, screenRect.height() - screenRect.top() - 7)
+							.xy1(8, screenRect.top() + 14)
+							.xy2(150, screenRect.height() - screenRect.top() - 7)
 							.rowHeight(26)
 							.rowEditable(true)
 							.transparentBackground(true)
@@ -186,7 +182,7 @@ public class DatapackEditScreen extends Screen {
 								
 								DatapackEditScreen.this.setFocused(grid);
 							})
-							.OnRemovePress((grid, button) -> {
+							.onRemovePress((grid, button) -> {
 								int rowposition = grid.removeRow();
 								
 								if (rowposition >= 0) {
@@ -195,10 +191,6 @@ public class DatapackEditScreen extends Screen {
 							})
 							.buttonHorizontalSizing(HorizontalSizing.LEFT_WIDTH)
 							.build();
-			
-			GridLayout.RowHelper gridlayout$rowhelper = this.layout.rowSpacing(2).createRowHelper(2);
-			
-			this.grid.getRowEditButtons().forEach(gridlayout$rowhelper::addChild);
 			
 			this.registry = registry;
 			this.inputComponentsList = new InputComponentsList(screenRect.width() - 172, screenRect.height(), screenRect.top() + 14, screenRect.height() + 7, 30);
@@ -266,6 +258,10 @@ public class DatapackEditScreen extends Screen {
 			
 			@Override
 			public boolean mouseClicked(double x, double y, int button) {
+				if (!this.isMouseOver(x, y)) {
+					return false;
+				}
+				
 				for (int i = 0; i < this.children().size(); i++) {
 					InputComponentsEntry entry = this.children().get(i);
 					int j1 = this.getRowTop(i);
@@ -323,6 +319,7 @@ public class DatapackEditScreen extends Screen {
 				public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
 					for (ResizableComponent widget : this.children) {
 						widget.relocateY(top + InputComponentsList.this.itemHeight / 2 - widget.getHeight() / 2);
+						
 						widget.render(guiGraphics, mouseX, mouseY, partialTicks);
 					}
 				}
@@ -406,8 +403,14 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("Combos")));
 			this.inputComponentsList.addComponentCurrentRow(ResizableButton.builder(Component.literal("..."), (button) -> {}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
-			Grid skillsGrid = Grid.builder(DatapackEditScreen.this)
-					.size(30, 90)
+			this.inputComponentsList.newRow();
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("Innate Skill")));
+			this.inputComponentsList.newRow();
+			this.inputComponentsList.newRow();
+			
+			this.inputComponentsList.addComponentCurrentRow(Grid.builder(DatapackEditScreen.this)
+					.xy1(this.inputComponentsList.nextStart(5), 0)
+					.xy2(20, 90)
 					.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
 					.rowHeight(26)
 					.rowEditable(true)
@@ -418,7 +421,7 @@ public class DatapackEditScreen extends Screen {
 						grid.setGridFocus(rowposition, "pack_item");
 						DatapackEditScreen.this.setFocused(grid);
 					})
-					.OnRemovePress((grid, button) -> {
+					.onRemovePress((grid, button) -> {
 						int rowposition = grid.removeRow();
 						
 						if (rowposition >= 0) {
@@ -426,20 +429,7 @@ public class DatapackEditScreen extends Screen {
 						}
 					})
 					.buttonHorizontalSizing(HorizontalSizing.WIDTH_RIGHT)
-					.build();
-			
-			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 0, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("Innate Skill")));
-			
-			for (ResizableButton button : skillsGrid.getRowEditButtons()) {
-				this.inputComponentsList.addComponentCurrentRow(button);
-			}
-			
-			this.inputComponentsList.newRow();
-			this.inputComponentsList.newRow();
-			
-			skillsGrid.setX(this.inputComponentsList.nextStart(5));
-			this.inputComponentsList.addComponentCurrentRow(skillsGrid);
+					.build());
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.newRow();

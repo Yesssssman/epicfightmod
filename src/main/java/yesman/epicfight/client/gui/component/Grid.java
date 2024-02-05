@@ -20,6 +20,7 @@ import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
@@ -33,28 +34,31 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements ResizableComp
 	private final Map<String, Column<?>> columns = Maps.newHashMap();
 	private final List<ResizableButton> rowEditButtons = Lists.newArrayList();
 	private final boolean transparentBackground;
-	
 	private AbstractWidget editingWidget;
 	private Column<?> editingColumn;
 	private int rowpostition;
 	
 	public Grid(GridBuilder gb) {
-		super(gb.minecraft, gb.width, gb.height, gb.y, gb.y + gb.height, gb.rowHeight);
+		super(gb.minecraft, gb.x2, gb.y2, gb.y1, gb.y1 + gb.y2, gb.rowHeight);
 		
 		this.owner = gb.owner;
 		this.transparentBackground = gb.transparentBackground;
 		this.horizontalSizingOption = gb.horizontalSizing;
 		this.verticalSizingOption = gb.verticalSizing;
 		
+		this.xParam1 = gb.x1;
+		this.yParam1 = gb.y1;
+		this.xParam2 = gb.x2;
+		this.yParam2 = gb.y2;
+		
+		this.resize(gb.minecraft.screen.getRectangle());
+		
 		gb.columns.entrySet().stream().map((entry) -> {
-			entry.getValue().size = (int)(entry.getValue().size * (gb.width / (float)gb.sizeTotal));
+			entry.getValue().size = (int)(entry.getValue().size * (this.width / (float)gb.sizeTotal));
 			return Pair.of(entry.getKey(), entry.getValue());
 		}).forEach((pair) -> this.columns.put(pair.getFirst(), pair.getSecond()));
 		
-		this.xParam = gb.width;
-		this.yParam = gb.height;
-		
-		this.setLeftPos(gb.x);
+		this.setLeftPos(gb.x1);
 		this.setRenderTopAndBottom(false);
 		
 		if (gb.rowEditable) {
@@ -201,6 +205,19 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements ResizableComp
 	}
 	
 	@Override
+	public void resize(ScreenRectangle screenRectangle) {
+		if (this.getHorizontalSizingOption() != null) {
+			this.getHorizontalSizingOption().resizeFunction.resize(this, screenRectangle, this.getX1(), this.getX2());
+		}
+		
+		if (this.getVerticalSizingOption() != null) {
+			this.getVerticalSizingOption().resizeFunction.resize(this, screenRectangle, this.getY1(), this.getY2());
+		}
+		
+		this.getRowEditButtons().forEach(button -> button.resize(screenRectangle));
+	}
+	
+	@Override
 	public void updateSize(int width, int height, int y0, int y1) {
 		this.width = width;
 		this.height = height;
@@ -255,6 +272,8 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements ResizableComp
 	
 	@Override
 	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		this.rowEditButtons.forEach((button) -> button.render(guiGraphics, mouseX, mouseY, partialTicks));
+		
 		int color = this.isFocused() ? -1 : -6250336;
 		
 		guiGraphics.fill(this.x0, this.y0, this.x1, this.y1, color);
@@ -265,7 +284,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements ResizableComp
 			guiGraphics.pose().translate(0, 0, 1);
 			
 			this.editingWidget.setY(this.getRowTop(this.rowpostition) + 2);
-			this.editingWidget.render(guiGraphics, mouseX, mouseY, partialTicks);
+			//this.editingWidget.render(guiGraphics, mouseX, mouseY, partialTicks);
 			guiGraphics.pose().popPose();
 		}
 	}
@@ -301,7 +320,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements ResizableComp
 	@Override
 	protected void renderItem(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks, int rowPosition, int rowLeft, int rowTop, int rowRight, int itemHeight) {
 		Row row = this.getEntry(rowPosition);
-		
+		//System.out.println(rowLeft +" "+ rowRight);
 		if (this.isSelectedItem(rowPosition)) {
 			guiGraphics.pose().pushPose();
 			guiGraphics.pose().translate(0, 0, 1);
@@ -319,7 +338,20 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements ResizableComp
 	}
 	
 	@Override
+	public boolean isMouseOver(double x, double y) {
+		double y0 = this.rowEditButtons.size() > 0 ? this.y0 - 12 : this.y0;
+		
+		return y >= y0 && y <= (double)this.y1 && x >= (double)this.x0 && x <= (double)this.x1;
+	}
+	
+	@Override
 	public boolean mouseClicked(double x, double y, int button) {
+		for (Button editButton : this.rowEditButtons) {
+			if (editButton.mouseClicked(x, y, button)) {
+				return true;
+			}
+		}
+		
 		if (!this.isMouseOver(x, y)) {
 			return false;
 		}
@@ -476,10 +508,10 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements ResizableComp
 		private final Minecraft minecraft;
 		private final Screen owner;
 		private final Map<String, Column<?>> columns = Maps.newLinkedHashMap();
-		private int x;
-		private int y;
-		private int width;
-		private int height;
+		private int x1;
+		private int y1;
+		private int x2;
+		private int y2;
 		private int rowHeight;
 		private int sizeTotal;
 		private boolean rowEditable;
@@ -516,15 +548,15 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements ResizableComp
 			return this;
 		}
 		
-		public GridBuilder pos(int x, int y) {
-			this.x = x;
-			this.y = y;
+		public GridBuilder xy1(int x1, int y1) {
+			this.x1 = x1;
+			this.y1 = y1;
 			return this;
 		}
 		
-		public GridBuilder size(int width, int height) {
-			this.width = width;
-			this.height = height;
+		public GridBuilder xy2(int x2, int y2) {
+			this.x2 = x2;
+			this.y2 = y2;
 			return this;
 		}
 		
@@ -548,7 +580,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements ResizableComp
 			return this;
 		}
 		
-		public GridBuilder OnRemovePress(BiConsumer<Grid, Button> OnRemovePress) {
+		public GridBuilder onRemovePress(BiConsumer<Grid, Button> OnRemovePress) {
 			this.onRemovePress = OnRemovePress;
 			return this;
 		}
@@ -646,8 +678,10 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements ResizableComp
 	/*******************************************************************
 	 * @ResizableComponent                                             *
 	 *******************************************************************/
-	private final int xParam;
-	private final int yParam;
+	private final int xParam1;
+	private final int yParam1;
+	private final int xParam2;
+	private final int yParam2;
 	private final HorizontalSizing horizontalSizingOption;
 	private final VerticalSizing verticalSizingOption;
 	
@@ -711,22 +745,22 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements ResizableComp
 	
 	@Override
 	public int getX1() {
-		return this.x0;
+		return this.xParam1;
 	}
 
 	@Override
 	public int getX2() {
-		return this.xParam;
+		return this.xParam2;
 	}
 
 	@Override
 	public int getY1() {
-		return this.y0;
+		return this.yParam1;
 	}
 
 	@Override
 	public int getY2() {
-		return this.yParam;
+		return this.yParam2;
 	}
 
 	@Override
