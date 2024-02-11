@@ -40,8 +40,7 @@ import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillContainer;
-import yesman.epicfight.skill.SkillDataManager;
-import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
+import yesman.epicfight.skill.SkillDataKeys;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
@@ -55,8 +54,6 @@ import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 public class GuardSkill extends Skill {
-	protected static final SkillDataKey<Integer> PENALTY_RESTORE_COUNTER = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
-	protected static final SkillDataKey<Float> PENALTY = SkillDataKey.createDataKey(SkillDataManager.ValueType.FLOAT);
 	protected static final UUID EVENT_UUID = UUID.fromString("b422f7a0-f378-11eb-9a03-0242ac130003");
 	
 	public static class Builder extends Skill.Builder<GuardSkill> {
@@ -142,9 +139,6 @@ public class GuardSkill extends Skill {
 	
 	@Override
 	public void onInitiate(SkillContainer container) {
-		container.getDataManager().registerData(PENALTY_RESTORE_COUNTER);
-		container.getDataManager().registerData(PENALTY);
-		
 		container.getExecuter().getEventListener().addEventListener(EventType.CLIENT_ITEM_USE_EVENT, EVENT_UUID, (event) -> {
 			CapabilityItem itemCapability = event.getPlayerPatch().getHoldingItemCapability(InteractionHand.MAIN_HAND);
 			
@@ -163,11 +157,11 @@ public class GuardSkill extends Skill {
 		
 		container.getExecuter().getEventListener().addEventListener(EventType.SERVER_ITEM_STOP_EVENT, EVENT_UUID, (event) -> {
 			ServerPlayer serverplayer = event.getPlayerPatch().getOriginal();
-			container.getDataManager().setDataSync(PENALTY_RESTORE_COUNTER, serverplayer.tickCount, serverplayer);
+			container.getDataManager().setDataSync(SkillDataKeys.PENALTY_RESTORE_COUNTER.get(), serverplayer.tickCount, serverplayer);
 		});
 		
 		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID, (event) -> {
-			container.getDataManager().setDataSync(PENALTY, 0.0F, event.getPlayerPatch().getOriginal());
+			container.getDataManager().setDataSync(SkillDataKeys.PENALTY.get(), 0.0F, event.getPlayerPatch().getOriginal());
 		});
 		
 		container.getExecuter().getEventListener().addEventListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID, (event) -> {
@@ -230,11 +224,11 @@ public class GuardSkill extends Skill {
 				knockback += EnchantmentHelper.getKnockbackBonus(livingEntity) * 0.1F;
 			}
 			
-			float penalty = container.getDataManager().getDataValue(PENALTY) + this.getPenalizer(itemCapability);
+			float penalty = container.getDataManager().getDataValue(SkillDataKeys.PENALTY.get()) + this.getPenalizer(itemCapability);
 			float consumeAmount = penalty * impact;
 			event.getPlayerPatch().knockBackEntity(damageSource.getDirectEntity().position(), knockback);
 			event.getPlayerPatch().consumeStaminaAlways(consumeAmount);
-			container.getDataManager().setDataSync(PENALTY, penalty, event.getPlayerPatch().getOriginal());
+			container.getDataManager().setDataSync(SkillDataKeys.PENALTY.get(), penalty, event.getPlayerPatch().getOriginal());
 			BlockType blockType = event.getPlayerPatch().hasStamina(0.0F) ? BlockType.GUARD : BlockType.GUARD_BREAK;
 			StaticAnimation animation = this.getGuardMotion(event.getPlayerPatch(), itemCapability, blockType);
 			
@@ -326,13 +320,13 @@ public class GuardSkill extends Skill {
 		super.updateContainer(container);
 		
 		if (!container.getExecuter().isLogicalClient() && !container.getExecuter().getOriginal().isUsingItem()) {
-			float penalty = container.getDataManager().getDataValue(PENALTY);
+			float penalty = container.getDataManager().getDataValue(SkillDataKeys.PENALTY.get());
 			
 			if (penalty > 0) {
-				int hitTick = container.getDataManager().getDataValue(PENALTY_RESTORE_COUNTER);
+				int hitTick = container.getDataManager().getDataValue(SkillDataKeys.PENALTY_RESTORE_COUNTER.get());
 				
 				if (container.getExecuter().getOriginal().tickCount - hitTick > 40) {
-					container.getDataManager().setDataSync(PENALTY, 0.0F, (ServerPlayer)container.getExecuter().getOriginal());
+					container.getDataManager().setDataSync(SkillDataKeys.PENALTY.get(), 0.0F, (ServerPlayer)container.getExecuter().getOriginal());
 				}
 			}
 		} else {
@@ -385,7 +379,7 @@ public class GuardSkill extends Skill {
 	
 	@OnlyIn(Dist.CLIENT)
 	public boolean shouldDraw(SkillContainer container) {
-		return container.getDataManager().getDataValue(PENALTY) > 0.0F;
+		return container.getDataManager().getDataValue(SkillDataKeys.PENALTY.get()) > 0.0F;
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -395,7 +389,7 @@ public class GuardSkill extends Skill {
 		poseStack.pushPose();
 		poseStack.translate(0, (float)gui.getSlidingProgression(), 0);
 		guiGraphics.blit(EpicFightSkills.GUARD.getSkillTexture(), (int)x, (int)y, 24, 24, 0, 0, 1, 1, 1, 1);
-		guiGraphics.drawString(gui.font, String.format("x%.1f", container.getDataManager().getDataValue(PENALTY)), x, y + 6, 16777215, true);
+		guiGraphics.drawString(gui.font, String.format("x%.1f", container.getDataManager().getDataValue(SkillDataKeys.PENALTY.get())), x, y + 6, 16777215, true);
 		poseStack.popPose();
 	}
 	

@@ -14,8 +14,7 @@ import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerP
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillContainer;
-import yesman.epicfight.skill.SkillDataManager;
-import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
+import yesman.epicfight.skill.SkillDataKeys;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
@@ -23,14 +22,12 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.projectile.ThrownTridentPatch;
 
 public class EverlastingAllegiance extends WeaponInnateSkill {
-	private static final SkillDataKey<Integer> THROWN_TRIDENT_ENTITY_ID = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
-	
 	public static void setThrownTridentEntityId(ServerPlayer serverPlayer, SkillContainer skillContainer, int entityId) {
-		skillContainer.getDataManager().setDataSync(THROWN_TRIDENT_ENTITY_ID, entityId, serverPlayer);
+		skillContainer.getDataManager().setDataSync(SkillDataKeys.THROWN_TRIDENT_ENTITY_ID.get(), entityId, serverPlayer);
 	}
 	
 	public static int getThrownTridentEntityId(SkillContainer skillContainer) {
-		return skillContainer.getDataManager().getDataValue(THROWN_TRIDENT_ENTITY_ID);
+		return skillContainer.getDataManager().getDataValue(SkillDataKeys.THROWN_TRIDENT_ENTITY_ID.get());
 	}
 	
 	private final StaticAnimation callingAnimation;
@@ -43,13 +40,13 @@ public class EverlastingAllegiance extends WeaponInnateSkill {
 	
 	@Override
 	public void onInitiate(SkillContainer container) {
-		container.getDataManager().registerData(THROWN_TRIDENT_ENTITY_ID);
-		container.getDataManager().setData(THROWN_TRIDENT_ENTITY_ID, -1);
+		container.getDataManager().registerData(SkillDataKeys.THROWN_TRIDENT_ENTITY_ID.get());
+		container.getDataManager().setData(SkillDataKeys.THROWN_TRIDENT_ENTITY_ID.get(), -1);
 	}
 	
 	@Override
 	public boolean checkExecuteCondition(PlayerPatch<?> executer) {
-		return executer.getSkill(this).getDataManager().getDataValue(THROWN_TRIDENT_ENTITY_ID) >= 0;
+		return executer.getSkill(this).getDataManager().getDataValue(SkillDataKeys.THROWN_TRIDENT_ENTITY_ID.get()) >= 0;
 	}
 	
 	@Override
@@ -61,7 +58,7 @@ public class EverlastingAllegiance extends WeaponInnateSkill {
 	public void executeOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
 		super.executeOnServer(executer, args);
 		
-		if (executer.getOriginal().level().getEntity(executer.getSkill(this).getDataManager().getDataValue(THROWN_TRIDENT_ENTITY_ID)) instanceof ThrownTrident trident) {
+		if (executer.getOriginal().level().getEntity(executer.getSkill(this).getDataManager().getDataValue(SkillDataKeys.THROWN_TRIDENT_ENTITY_ID.get())) instanceof ThrownTrident trident) {
 			ThrownTridentPatch tridentPatch = EpicFightCapabilities.getEntityPatch(trident, ThrownTridentPatch.class);
 			tridentPatch.recalledBySkill();
 			executer.playAnimationSynchronized(this.callingAnimation, 0.0F);
@@ -75,7 +72,7 @@ public class EverlastingAllegiance extends WeaponInnateSkill {
 	public void cancelOnClient(LocalPlayerPatch executer, FriendlyByteBuf args) {
 		super.cancelOnClient(executer, args);
 		
-		if (executer.getOriginal().level().getEntity(executer.getSkill(this).getDataManager().getDataValue(THROWN_TRIDENT_ENTITY_ID)) instanceof ThrownTrident trident) {
+		if (executer.getOriginal().level().getEntity(executer.getSkill(this).getDataManager().getDataValue(SkillDataKeys.THROWN_TRIDENT_ENTITY_ID.get())) instanceof ThrownTrident trident) {
 			ThrownTridentPatch tridentPatch = EpicFightCapabilities.getEntityPatch(trident, ThrownTridentPatch.class);
 			tridentPatch.recalledBySkill();
 		}
@@ -85,7 +82,7 @@ public class EverlastingAllegiance extends WeaponInnateSkill {
 	public void updateContainer(SkillContainer container) {
 		super.updateContainer(container);
 		
-		int thrownTrident = container.getDataManager().getDataValue(THROWN_TRIDENT_ENTITY_ID);
+		int thrownTrident = container.getDataManager().getDataValue(SkillDataKeys.THROWN_TRIDENT_ENTITY_ID.get());
 		
 		if (container.isDisabled() && thrownTrident >= 0) {
 			container.setDisabled(false);

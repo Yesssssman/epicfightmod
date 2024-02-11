@@ -6,26 +6,26 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkEvent;
+import yesman.epicfight.skill.SkillDataKey;
 import yesman.epicfight.skill.SkillDataManager;
-import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class SPAddOrRemoveSkillData {
-	private AddRemove type;
+	private AddRemove workType;
 	private Object value;
 	private int slot;
 	private int keyId;
 	private int entityId;
 	
 	public SPAddOrRemoveSkillData() {
-		this.type = null;
+		this.workType = null;
 	}
 	
 	public SPAddOrRemoveSkillData(SkillDataKey<?> key, int slot, Object value, AddRemove type, int entityId) {
 		this.keyId = key.getId();
 		this.slot = slot;
-		this.type = type;
+		this.workType = type;
 		this.value = value;
 		this.entityId = entityId;
 	}
@@ -33,16 +33,16 @@ public class SPAddOrRemoveSkillData {
 	public static SPAddOrRemoveSkillData fromBytes(FriendlyByteBuf buf) {
 		int id = buf.readInt();
 		int slot = buf.readInt();
-		Object value = SkillDataKey.findById(id).getValueType().readFromBuffer(buf);
+		Object value = SkillDataKey.byId(id).readFromBuffer(buf);
 		
-		return new SPAddOrRemoveSkillData(SkillDataKey.findById(id), slot, value, AddRemove.values()[buf.readInt()], buf.readInt());
+		return new SPAddOrRemoveSkillData(SkillDataKey.byId(id), slot, value, AddRemove.values()[buf.readInt()], buf.readInt());
 	}
 	
 	public static void toBytes(SPAddOrRemoveSkillData msg, FriendlyByteBuf buf) {
 		buf.writeInt(msg.keyId);
 		buf.writeInt(msg.slot);
-		SkillDataKey.findById(msg.keyId).getValueType().writeToBuffer(buf, msg.value);
-		buf.writeInt(msg.type.ordinal());
+		SkillDataKey.byId(msg.keyId).writeToBuffer(buf, msg.value);
+		buf.writeInt(msg.workType.ordinal());
 		buf.writeInt(msg.entityId);
 	}
 	
@@ -54,9 +54,9 @@ public class SPAddOrRemoveSkillData {
 			
 			if (entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null) instanceof PlayerPatch<?> playerpatch) {
 				SkillDataManager dataManager = playerpatch.getSkill(msg.slot).getDataManager();
-				SkillDataKey<?> dataKey = SkillDataKey.findById(msg.keyId);
+				SkillDataKey<?> dataKey = SkillDataKey.byId(msg.keyId);
 				
-				if (msg.type == AddRemove.ADD) {
+				if (msg.workType == AddRemove.ADD) {
 					dataManager.registerData(dataKey);
 					dataManager.setDataRawtype(dataKey, msg.value);
 				} else {

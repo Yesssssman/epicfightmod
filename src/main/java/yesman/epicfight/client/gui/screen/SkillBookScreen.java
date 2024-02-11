@@ -66,7 +66,7 @@ public class SkillBookScreen extends Screen {
 		SkillContainer priorSkill = this.skill == null ? null : this.playerpatch.getSkill(this.skill.getPriorSkill());
 		
 		boolean isUsing = thisSkill != null;
-		boolean condition = this.skill.getPriorSkill() == null || priorSkill != null;
+		boolean condition = this.skill == null ? false : this.skill.getPriorSkill() == null || priorSkill != null;
 		BasicButton.OnTooltip tooltip = BasicButton.NO_TOOLTIP;
 		
 		if (!isUsing) {

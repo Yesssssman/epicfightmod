@@ -22,8 +22,8 @@ import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillContainer;
+import yesman.epicfight.skill.SkillDataKeys;
 import yesman.epicfight.skill.SkillDataManager;
-import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
@@ -33,9 +33,7 @@ import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 public class ParryingSkill extends GuardSkill {
-	private static final SkillDataKey<Integer> LAST_ACTIVE = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
 	private static final int PARRY_WINDOW = 8;
-	public static final SkillDataKey<Integer> PARRY_MOTION_COUNTER = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
 	
 	public static GuardSkill.Builder createActiveGuardBuilder() {
 		return GuardSkill.createGuardBuilder()
@@ -58,9 +56,6 @@ public class ParryingSkill extends GuardSkill {
 	public void onInitiate(SkillContainer container) {
 		super.onInitiate(container);
 		
-		container.getDataManager().registerData(LAST_ACTIVE);
-		container.getDataManager().registerData(PARRY_MOTION_COUNTER);
-		
 		container.getExecuter().getEventListener().addEventListener(EventType.SERVER_ITEM_USE_EVENT, EVENT_UUID, (event) -> {
 			CapabilityItem itemCapability = event.getPlayerPatch().getHoldingItemCapability(InteractionHand.MAIN_HAND);
 			
@@ -68,10 +63,10 @@ public class ParryingSkill extends GuardSkill {
 				event.getPlayerPatch().getOriginal().startUsingItem(InteractionHand.MAIN_HAND);
 			}
 			
-			int lastActive = container.getDataManager().getDataValue(LAST_ACTIVE);
+			int lastActive = container.getDataManager().getDataValue(SkillDataKeys.LAST_ACTIVE.get());
 			
 			if (event.getPlayerPatch().getOriginal().tickCount - lastActive > PARRY_WINDOW * 2) {
-				container.getDataManager().setData(LAST_ACTIVE, event.getPlayerPatch().getOriginal().tickCount);
+				container.getDataManager().setData(SkillDataKeys.LAST_ACTIVE.get(), event.getPlayerPatch().getOriginal().tickCount);
 			}
 		});
 	}
@@ -88,8 +83,8 @@ public class ParryingSkill extends GuardSkill {
 			
 			if (this.isBlockableSource(damageSource, true)) {
 				ServerPlayer playerentity = event.getPlayerPatch().getOriginal();
-				boolean successParrying = playerentity.tickCount - container.getDataManager().getDataValue(LAST_ACTIVE) < PARRY_WINDOW;
-				float penalty = container.getDataManager().getDataValue(PENALTY);
+				boolean successParrying = playerentity.tickCount - container.getDataManager().getDataValue(SkillDataKeys.LAST_ACTIVE.get()) < PARRY_WINDOW;
+				float penalty = container.getDataManager().getDataValue(SkillDataKeys.PENALTY.get());
 				event.getPlayerPatch().playSound(EpicFightSounds.CLASH.get(), -0.05F, 0.1F);
 				EpicFightParticles.HIT_BLUNT.get().spawnParticleWithArgument(((ServerLevel)playerentity.level()), HitParticleType.FRONT_OF_EYES, HitParticleType.ZERO, playerentity, damageSource.getDirectEntity());
 				
@@ -99,7 +94,7 @@ public class ParryingSkill extends GuardSkill {
 					knockback *= 0.4F;
 				} else {
 					penalty += this.getPenalizer(itemCapability);
-					container.getDataManager().setDataSync(PENALTY, penalty, playerentity);
+					container.getDataManager().setDataSync(SkillDataKeys.PENALTY.get(), penalty, playerentity);
 				}
 				
 				if (damageSource.getDirectEntity() instanceof LivingEntity livingentity) {
@@ -148,8 +143,8 @@ public class ParryingSkill extends GuardSkill {
 			
 			if (motions != null) {
 				SkillDataManager dataManager = playerpatch.getSkill(this).getDataManager();
-				int motionCounter = dataManager.getDataValue(PARRY_MOTION_COUNTER);
-				dataManager.setDataF(PARRY_MOTION_COUNTER, (v) -> v + 1);
+				int motionCounter = dataManager.getDataValue(SkillDataKeys.PARRY_MOTION_COUNTER.get());
+				dataManager.setDataF(SkillDataKeys.PARRY_MOTION_COUNTER.get(), (v) -> v + 1);
 				motionCounter %= motions.length;
 				
 				return motions[motionCounter];

@@ -22,8 +22,7 @@ import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.skill.ChargeableSkill;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillContainer;
-import yesman.epicfight.skill.SkillDataManager;
-import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
+import yesman.epicfight.skill.SkillDataKeys;
 import yesman.epicfight.skill.SkillSlots;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
@@ -31,7 +30,7 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
-	private static final SkillDataKey<Boolean> PROTECT_NEXT_FALL = SkillDataKey.createDataKey(SkillDataManager.ValueType.BOOLEAN);
+	
 	private static final UUID EVENT_UUID = UUID.fromString("3d142bf4-0dcd-11ee-be56-0242ac120002");
 	private final StaticAnimation chargingAnimation;
 	private final StaticAnimation shootAnimation;
@@ -45,7 +44,7 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 	
 	@Override
 	public void onInitiate(SkillContainer container) {
-		container.getDataManager().registerData(PROTECT_NEXT_FALL);
+		container.getDataManager().registerData(SkillDataKeys.LEAP_PROTECT_NEXT_FALL.get());
 
 		PlayerEventListener listener = container.getExecuter().getEventListener();
 		
@@ -56,18 +55,18 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 		});
 
 		listener.addEventListener(EventType.HURT_EVENT_PRE, EVENT_UUID, (event) -> {
-			if (event.getDamageSource().is(DamageTypeTags.IS_FALL) && container.getDataManager().getDataValue(PROTECT_NEXT_FALL)) {
+			if (event.getDamageSource().is(DamageTypeTags.IS_FALL) && container.getDataManager().getDataValue(SkillDataKeys.LEAP_PROTECT_NEXT_FALL.get())) {
 				float damage = event.getAmount();
 				event.setAmount(damage * 0.5F);
 				event.setCanceled(true);
 				
-				container.getDataManager().setData(PROTECT_NEXT_FALL, false);
+				container.getDataManager().setData(SkillDataKeys.LEAP_PROTECT_NEXT_FALL.get(), false);
 			}
 		}, 1);
 		
 		listener.addEventListener(EventType.FALL_EVENT, EVENT_UUID, (event) -> {
 			if (LevelUtil.calculateLivingEntityFallDamage(event.getForgeEvent().getEntity(), event.getForgeEvent().getDamageMultiplier(), event.getForgeEvent().getDistance()) == 0) {
-				container.getDataManager().setData(PROTECT_NEXT_FALL, false);
+				container.getDataManager().setData(SkillDataKeys.LEAP_PROTECT_NEXT_FALL.get(), false);
 			}
 		});
 	}
@@ -145,7 +144,7 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 
 			caster.playAnimationSynchronized(this.shootAnimation, 0.0F);
 			feedbackPacket.getBuffer().writeInt(accumulatedTicks);
-			skillContainer.getDataManager().setData(PROTECT_NEXT_FALL, true);
+			skillContainer.getDataManager().setData(SkillDataKeys.LEAP_PROTECT_NEXT_FALL.get(), true);
 		}
 	}
 	

@@ -64,7 +64,7 @@ public class SkillContainer {
 		
 		this.containingSkill = skill;
 		this.resetValues();
-		this.skillDataManager.reset();
+		this.skillDataManager.clearData();
 		
 		if (skill != null) {
 			skill.onInitiate(this);

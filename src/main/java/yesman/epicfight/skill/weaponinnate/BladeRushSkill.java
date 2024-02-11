@@ -25,8 +25,7 @@ import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillContainer;
-import yesman.epicfight.skill.SkillDataManager;
-import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
+import yesman.epicfight.skill.SkillDataKeys;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
@@ -46,7 +45,6 @@ public class BladeRushSkill extends WeaponInnateSkill {
 				.putTryAnimation(EntityType.CREEPER, Animations.BLADE_RUSH_TRY);
 	}
 	
-	private static final SkillDataKey<Integer> COMBO_COUNT = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
 	private static final UUID EVENT_UUID = UUID.fromString("444a1a6a-c2f1-11eb-8529-0242ac130003");
 	
 	public static class Builder extends Skill.Builder<BladeRushSkill> {
@@ -103,7 +101,6 @@ public class BladeRushSkill extends WeaponInnateSkill {
 	public void onInitiate(SkillContainer container) {
 		super.onInitiate(container);
 		
-		container.getDataManager().registerData(COMBO_COUNT);
 		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID, (event) -> {
 			if (event.getDamageSource().getAnimation().between(Animations.BLADE_RUSH_COMBO1, Animations.BLADE_RUSH_COMBO3) && event.getTarget().isAlive() && this.tryAnimations.containsKey(event.getTarget().getType())) {
 				MobEffectInstance effectInstance = event.getTarget().getEffect(EpicFightMobEffects.INSTABILITY.get());
@@ -136,11 +133,11 @@ public class BladeRushSkill extends WeaponInnateSkill {
 		}
 		
 		if (execute) {
-			executer.getSkill(this).getDataManager().setData(COMBO_COUNT, 0);
+			executer.getSkill(this).getDataManager().setData(SkillDataKeys.BLADE_RUSH_COMBO_COUNT.get(), 0);
 			executer.playAnimationSynchronized(Animations.BLADE_RUSH_TRY, 0);
 		} else {
-			int animationId = executer.getSkill(this).getDataManager().getDataValue(COMBO_COUNT);
-			executer.getSkill(this).getDataManager().setDataF(COMBO_COUNT, (v) -> (v + 1) % this.comboAnimations.length);
+			int animationId = executer.getSkill(this).getDataManager().getDataValue(SkillDataKeys.BLADE_RUSH_COMBO_COUNT.get());
+			executer.getSkill(this).getDataManager().setDataF(SkillDataKeys.BLADE_RUSH_COMBO_COUNT.get(), (v) -> (v + 1) % this.comboAnimations.length);
 			executer.playAnimationSynchronized(this.comboAnimations[animationId], 0);
 		}
 		

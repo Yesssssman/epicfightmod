@@ -21,8 +21,7 @@ import yesman.epicfight.network.server.SPSkillExecutionFeedback;
 import yesman.epicfight.skill.ChargeableSkill;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillContainer;
-import yesman.epicfight.skill.SkillDataManager;
-import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
+import yesman.epicfight.skill.SkillDataKeys;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
@@ -30,11 +29,11 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 public class SteelWhirlwindSkill extends WeaponInnateSkill implements ChargeableSkill {
-	private static final SkillDataKey<Integer> CHARGING_POWER = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER, true);
+	
 	private static final UUID EVENT_UUID = UUID.fromString("d2d057cc-f30f-11ed-a05b-0242ac120003");
 	
 	public static int getChargingPower(SkillContainer skillContainer) {
-		return skillContainer.getDataManager().getDataValue(CHARGING_POWER);
+		return skillContainer.getDataManager().getDataValue(SkillDataKeys.CHARGING_POWER.get());
 	}
 	
 	private final StaticAnimation chargingAnimation;
@@ -49,7 +48,7 @@ public class SteelWhirlwindSkill extends WeaponInnateSkill implements Chargeable
 	
 	@Override
 	public void onInitiate(SkillContainer container) {
-		container.getDataManager().registerData(CHARGING_POWER);
+		container.getDataManager().registerData(SkillDataKeys.CHARGING_POWER.get());
 		
 		PlayerEventListener listener = container.getExecuter().getEventListener();
 		
@@ -110,7 +109,7 @@ public class SteelWhirlwindSkill extends WeaponInnateSkill implements Chargeable
 	
 	@Override
 	public void castSkill(ServerPlayerPatch caster, SkillContainer skillContainer, int chargingTicks, SPSkillExecutionFeedback feedbackPacket, boolean onMaxTick) {
-		caster.getSkill(this).getDataManager().setDataSync(CHARGING_POWER, chargingTicks, caster.getOriginal());
+		caster.getSkill(this).getDataManager().setDataSync(SkillDataKeys.CHARGING_POWER.get(), chargingTicks, caster.getOriginal());
 		caster.playAnimationSynchronized(this.attackAnimation, 0.0F);
 		this.cancelOnServer(caster, null);
 	}

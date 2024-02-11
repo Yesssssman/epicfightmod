@@ -1,7 +1,7 @@
 package yesman.epicfight.skill.weaponinnate;
 
 import net.minecraft.network.FriendlyByteBuf;
-import yesman.epicfight.skill.BattojutsuPassive;
+import yesman.epicfight.skill.SkillDataKeys;
 import yesman.epicfight.skill.SkillSlots;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
@@ -12,7 +12,7 @@ public class BattojutsuSkill extends ConditionalWeaponInnateSkill {
 	
 	@Override
 	public void executeOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
-		boolean isSheathed = executer.getSkill(SkillSlots.WEAPON_PASSIVE).getDataManager().getDataValue(BattojutsuPassive.SHEATH);
+		boolean isSheathed = executer.getSkill(SkillSlots.WEAPON_PASSIVE).getDataManager().getDataValue(SkillDataKeys.SHEATH.get());
 		
 		if (isSheathed) {
 			executer.playAnimationSynchronized(this.attackAnimations[this.getAnimationInCondition(executer)], -0.694F);

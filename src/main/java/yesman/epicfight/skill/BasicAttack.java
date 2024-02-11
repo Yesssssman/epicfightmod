@@ -12,17 +12,15 @@ import net.minecraft.world.entity.player.Player;
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.eventlistener.BasicAttackEvent;
 import yesman.epicfight.world.entity.eventlistener.ComboCounterHandleEvent;
-import yesman.epicfight.world.entity.eventlistener.SkillConsumeEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
+import yesman.epicfight.world.entity.eventlistener.SkillConsumeEvent;
 
 public class BasicAttack extends Skill {
-	private static final SkillDataKey<Integer> COMBO_COUNTER = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
 	private static final UUID EVENT_UUID = UUID.fromString("a42e0198-fdbc-11eb-9a03-0242ac130003");
 	
 	public static Skill.Builder<BasicAttack> createBasicAttackBuilder() {
@@ -30,10 +28,10 @@ public class BasicAttack extends Skill {
 	}
 	
 	public static void setComboCounterWithEvent(ComboCounterHandleEvent.Causal reason, ServerPlayerPatch playerpatch, SkillContainer container, StaticAnimation causalAnimation, int value) {
-		int prevValue = container.getDataManager().getDataValue(COMBO_COUNTER);
+		int prevValue = container.getDataManager().getDataValue(SkillDataKeys.COMBO_COUNTER.get());
 		ComboCounterHandleEvent comboResetEvent = new ComboCounterHandleEvent(reason, playerpatch, causalAnimation, prevValue, value);
 		container.getExecuter().getEventListener().triggerEvents(EventType.COMBO_COUNTER_HANDLE_EVENT, comboResetEvent);
-		container.getDataManager().setData(COMBO_COUNTER, comboResetEvent.getNextValue());
+		container.getDataManager().setData(SkillDataKeys.COMBO_COUNTER.get(), comboResetEvent.getNextValue());
 	}
 	
 	public BasicAttack(Builder<? extends Skill> builder) {
@@ -42,8 +40,6 @@ public class BasicAttack extends Skill {
 	
 	@Override
 	public void onInitiate(SkillContainer container) {
-		container.getDataManager().registerData(COMBO_COUNTER);
-		
 		container.getExecuter().getEventListener().addEventListener(EventType.ACTION_EVENT_SERVER, EVENT_UUID, (event) -> {
 			if (!event.getAnimation().isBasicAttackAnimation() && event.getAnimation().getProperty(ActionAnimationProperty.RESET_PLAYER_COMBO_COUNTER).orElse(true)) {
 				CapabilityItem item = event.getPlayerPatch().getHoldingItemCapability(InteractionHand.MAIN_HAND);
@@ -86,7 +82,7 @@ public class BasicAttack extends Skill {
 		ServerPlayer player = executer.getOriginal();
 		SkillContainer skillContainer = executer.getSkill(this);
 		SkillDataManager dataManager = skillContainer.getDataManager();
-		int comboCounter = dataManager.getDataValue(COMBO_COUNTER);
+		int comboCounter = dataManager.getDataValue(SkillDataKeys.COMBO_COUNTER.get());
 		
 		if (player.isPassenger()) {
 			Entity entity = player.getVehicle();
@@ -122,7 +118,7 @@ public class BasicAttack extends Skill {
 	
 	@Override
 	public void updateContainer(SkillContainer container) {
-		if (!container.getExecuter().isLogicalClient() && container.getExecuter().getTickSinceLastAction() > 16 && container.getDataManager().getDataValue(COMBO_COUNTER) > 0) {
+		if (!container.getExecuter().isLogicalClient() && container.getExecuter().getTickSinceLastAction() > 16 && container.getDataManager().getDataValue(SkillDataKeys.COMBO_COUNTER.get()) > 0) {
 			setComboCounterWithEvent(ComboCounterHandleEvent.Causal.TIME_EXPIRED_RESET, (ServerPlayerPatch)container.getExecuter(), container, null, 0);
 		}
 	}

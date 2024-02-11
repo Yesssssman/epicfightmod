@@ -27,8 +27,7 @@ import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillContainer;
-import yesman.epicfight.skill.SkillDataManager;
-import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
+import yesman.epicfight.skill.SkillDataKeys;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
@@ -82,7 +81,6 @@ public class RevelationSkill extends Skill {
 		}
 	}
 	
-	protected static final SkillDataKey<Integer> STACKS = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
 	protected final Map<WeaponCategory, BiFunction<CapabilityItem, PlayerPatch<?>, StaticAnimation>> motions;
 	protected final Map<EntityType<?>, Integer> maxRevelationStacks = Maps.newHashMap();
 	protected int blockStack;
@@ -122,8 +120,6 @@ public class RevelationSkill extends Skill {
 	
 	@Override
 	public void onInitiate(SkillContainer container) {
-		container.getDataManager().registerData(STACKS);
-		
 		PlayerEventListener listener = container.getExecuter().getEventListener();
 		
 		listener.addEventListener(EventType.SKILL_EXECUTE_EVENT, EVENT_UUID, (event) -> {
@@ -148,14 +144,14 @@ public class RevelationSkill extends Skill {
 		});
 		
 		listener.addEventListener(EventType.SET_TARGET_EVENT, EVENT_UUID, (event) -> {
-			container.getDataManager().setDataSync(STACKS, 0, event.getPlayerPatch().getOriginal());
+			container.getDataManager().setDataSync(SkillDataKeys.STACKS.get(), 0, event.getPlayerPatch().getOriginal());
 		});
 		
 		listener.addEventListener(EventType.DODGE_SUCCESS_EVENT, EVENT_UUID, (event) -> {
 			LivingEntity target = container.getExecuter().getTarget();
 			
 			if (target != null && target.is(event.getDamageSource().getDirectEntity())) {
-				this.checkStackAndActivate(container, event.getPlayerPatch(), target, container.getDataManager().getDataValue(STACKS), this.dodgeStack);
+				this.checkStackAndActivate(container, event.getPlayerPatch(), target, container.getDataManager().getDataValue(SkillDataKeys.STACKS.get()), this.dodgeStack);
 			}
 			
 		}, -1);
@@ -167,7 +163,7 @@ public class RevelationSkill extends Skill {
 				if (target != null && target.is(event.getDamageSource().getDirectEntity())) {
 					int stacks = event.isParried() ? this.parryStack : this.blockStack;
 					
-					this.checkStackAndActivate(container, event.getPlayerPatch(), target, container.getDataManager().getDataValue(STACKS), stacks);
+					this.checkStackAndActivate(container, event.getPlayerPatch(), target, container.getDataManager().getDataValue(SkillDataKeys.STACKS.get()), stacks);
 				}
 			}
 		}, -1);
@@ -204,13 +200,13 @@ public class RevelationSkill extends Skill {
 		int plusStack = stacks + addStacks;
 		
 		if (plusStack < maxStackSize) {
-			container.getDataManager().setDataSync(STACKS, plusStack, playerpatch.getOriginal());
+			container.getDataManager().setDataSync(SkillDataKeys.STACKS.get(), plusStack, playerpatch.getOriginal());
 		} else {
 			if (!container.isActivated()) {
 				this.setDurationSynchronize(playerpatch, this.maxDuration);
 			}
 			
-			container.getDataManager().setDataSync(STACKS, 0, playerpatch.getOriginal());
+			container.getDataManager().setDataSync(SkillDataKeys.STACKS.get(), 0, playerpatch.getOriginal());
 		}
 	}
 	
@@ -229,7 +225,7 @@ public class RevelationSkill extends Skill {
 		poseStack.translate(0, (float)gui.getSlidingProgression(), 0);
 		guiGraphics.blit(this.getSkillTexture(), (int)x, (int)y, 24, 24, 0, 0, 1, 1, 1, 1);
 		int stacks = container.getRemainDuration() > 0 ? 0 : this.maxRevelationStacks.getOrDefault(container.getExecuter().getTarget().getType(), this.defaultRevelationStacks)
-																- container.getDataManager().getDataValue(STACKS);
+																- container.getDataManager().getDataValue(SkillDataKeys.STACKS.get());
 		guiGraphics.drawString(gui.font, String.format("%d", stacks), x + 18, y + 14, 16777215, true);
 		poseStack.popPose();
 	}

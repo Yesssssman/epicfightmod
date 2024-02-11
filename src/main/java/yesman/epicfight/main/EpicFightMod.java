@@ -55,6 +55,7 @@ import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.server.commands.arguments.SkillArgument;
 import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
+import yesman.epicfight.skill.SkillDataKey;
 import yesman.epicfight.skill.SkillSlot;
 import yesman.epicfight.skill.SkillSlots;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
@@ -75,6 +76,22 @@ import yesman.epicfight.world.item.EpicFightCreativeTabs;
 import yesman.epicfight.world.item.EpicFightItems;
 import yesman.epicfight.world.level.block.EpicFightBlocks;
 import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
+
+/**
+ *  Known issues
+ *  
+ *  1. armor resource packs are not reloaded in 1.19.2
+
+	2. make all version to use resource location format for weapon type in datapack
+	
+	3. Wrathful Thunder doesn't stun the entity and unable to guard
+	
+	4. attack , speed bonus are not applied to tooltip (also check the real value)
+	
+	5. Rushing Tempo doesn't work if server requires any resource packs
+ * @author yesman
+ *
+ */
 
 @Mod("epicfight")
 public class EpicFightMod {
@@ -108,6 +125,7 @@ public class EpicFightMod {
     	bus.addListener(EpicFightAttributes::modifyExistingMobs);
     	bus.addListener(EpicFightCapabilities::registerCapabilities);
     	bus.addListener(EpicFightEntities::onSpawnPlacementRegister);
+    	bus.addListener(SkillDataKey.Registry::createRegistry);
     	
     	LivingMotion.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, LivingMotions.class);
     	SkillCategory.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, SkillCategories.class);

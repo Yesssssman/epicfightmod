@@ -1,5 +1,8 @@
 package yesman.epicfight.world.capabilities.entitypatch.player;
 
+import java.util.List;
+import java.util.Map;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -32,7 +35,7 @@ import yesman.epicfight.skill.ChargeableSkill;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillContainer;
-import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
+import yesman.epicfight.skill.SkillDataKey;
 import yesman.epicfight.skill.SkillSlots;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
@@ -43,9 +46,6 @@ import yesman.epicfight.world.entity.eventlistener.DodgeSuccessEvent;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.SetTargetEvent;
-
-import java.util.List;
-import java.util.Map;
 
 public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	private LivingEntity attackTarget;
@@ -82,7 +82,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 		
 		for (SkillContainer container : this.getSkillCapability().skillContainers) {
 			for (SkillDataKey<?> key : container.getDataManager().keySet()) {
-				if (key.shouldSyncAllClients()) {
+				if (key.syncronizeTrackingPlayers()) {
 					EpicFightNetworkManager.sendToPlayer(
 							new SPAddOrRemoveSkillData(key, container.getSlot().universalOrdinal(), container.getDataManager().getDataValue(key), SPAddOrRemoveSkillData.AddRemove.ADD, this.original.getId()),
 							trackingPlayer);

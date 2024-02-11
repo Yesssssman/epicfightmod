@@ -10,15 +10,13 @@ import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillContainer;
-import yesman.epicfight.skill.SkillDataManager;
-import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
+import yesman.epicfight.skill.SkillDataKeys;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 public class GraspingSpireSkill extends WeaponInnateSkill {
-	private static final SkillDataKey<Integer> LAST_HIT_COUNT = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
 	private static final UUID EVENT_UUID = UUID.fromString("3fa26bbc-d14e-11ed-afa1-0242ac120002");
 	
 	private final AttackAnimation first;
@@ -34,18 +32,16 @@ public class GraspingSpireSkill extends WeaponInnateSkill {
 	public void onInitiate(SkillContainer container) {
 		super.onInitiate(container);
 		
-		container.getDataManager().registerData(LAST_HIT_COUNT);
-		
 		container.getExecuter().getEventListener().addEventListener(EventType.ATTACK_ANIMATION_END_EVENT, EVENT_UUID, (event) -> {
 			if (this.first.equals(event.getAnimation())) {
-				container.getDataManager().setDataSync(LAST_HIT_COUNT, event.getPlayerPatch().getCurrenltyHurtEntities().size(), event.getPlayerPatch().getOriginal());
+				container.getDataManager().setDataSync(SkillDataKeys.LAST_HIT_COUNT.get(), event.getPlayerPatch().getCurrenltyHurtEntities().size(), event.getPlayerPatch().getOriginal());
 			}
 		});
 		
 		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_PRE, EVENT_UUID, (event) -> {
 			if (this.second.equals(event.getDamageSource().getAnimation())) {
 				float impact = event.getDamageSource().getImpact();
-				event.getDamageSource().setImpact(impact + container.getDataManager().getDataValue(LAST_HIT_COUNT) * 0.4F);
+				event.getDamageSource().setImpact(impact + container.getDataManager().getDataValue(SkillDataKeys.LAST_HIT_COUNT.get()) * 0.4F);
 			}
 		});
 	}

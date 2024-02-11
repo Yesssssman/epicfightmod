@@ -30,8 +30,6 @@ import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillContainer;
-import yesman.epicfight.skill.SkillDataManager;
-import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
@@ -42,8 +40,6 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 
 public class LiechtenauerSkill extends WeaponInnateSkill {
 	private static final UUID EVENT_UUID = UUID.fromString("244c57c0-a837-11eb-bcbc-0242ac130002");
-	public static final SkillDataKey<Integer> STANCE_ORDINAL = SkillDataKey.createDataKey(SkillDataManager.ValueType.INTEGER);
-	
 	private int returnDuration;
 	
 	public LiechtenauerSkill(Builder<? extends Skill> builder) {

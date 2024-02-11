@@ -6,8 +6,8 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkEvent;
+import yesman.epicfight.skill.SkillDataKey;
 import yesman.epicfight.skill.SkillDataManager;
-import yesman.epicfight.skill.SkillDataManager.SkillDataKey;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
@@ -32,16 +32,16 @@ public class SPModifySkillData {
 		int id = buf.readInt();
 		int slot = buf.readInt();
 		int entityId = buf.readInt();
-		Object value = SkillDataKey.findById(id).getValueType().readFromBuffer(buf);
+		Object value = SkillDataKey.byId(id).readFromBuffer(buf);
 		
-		return new SPModifySkillData(SkillDataKey.findById(id), slot, value, entityId);
+		return new SPModifySkillData(SkillDataKey.byId(id), slot, value, entityId);
 	}
 	
 	public static void toBytes(SPModifySkillData msg, FriendlyByteBuf buf) {
 		buf.writeInt(msg.keyId);
 		buf.writeInt(msg.slot);
 		buf.writeInt(msg.entityId);
-		SkillDataKey.findById(msg.keyId).getValueType().writeToBuffer(buf, msg.value);
+		SkillDataKey.byId(msg.keyId).writeToBuffer(buf, msg.value);
 	}
 	
 	@SuppressWarnings("deprecation")
@@ -52,7 +52,7 @@ public class SPModifySkillData {
 			
 			if (entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null) instanceof PlayerPatch<?> playerpatch) {
 				SkillDataManager dataManager = playerpatch.getSkill(msg.slot).getDataManager();
-				SkillDataKey<?> dataKey = SkillDataKey.findById(msg.keyId);
+				SkillDataKey<?> dataKey = SkillDataKey.byId(msg.keyId);
 				dataManager.setDataRawtype(dataKey, msg.value);
 			}
 		});
