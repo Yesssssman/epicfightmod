@@ -77,7 +77,7 @@ public class PhantomAscentSkill extends Skill {
 							container.getDataManager().setDataF(SkillDataKeys.JUMP_COUNT.get(), (v) -> v + 1);
 						}
 						
-						container.getDataManager().setDataSync(SkillDataKeys.PA_PROTECT_NEXT_FALL.get(), true, event.getPlayerPatch().getOriginal());
+						container.getDataManager().setDataSync(SkillDataKeys.PROTECT_NEXT_FALL.get(), true, event.getPlayerPatch().getOriginal());
 						
 						Input input = event.getMovementInput();
 						float f = Mth.clamp(0.3F + EnchantmentHelper.getSneakingSpeedBonus(container.getExecuter().getOriginal()), 0.0F, 1.0F);
@@ -109,7 +109,7 @@ public class PhantomAscentSkill extends Skill {
 		});
 		
 		listener.addEventListener(EventType.HURT_EVENT_PRE, EVENT_UUID, (event) -> {
-			if (event.getDamageSource().is(DamageTypeTags.IS_FALL) && container.getDataManager().getDataValue(SkillDataKeys.PA_PROTECT_NEXT_FALL.get())) { // This is not synced
+			if (event.getDamageSource().is(DamageTypeTags.IS_FALL) && container.getDataManager().getDataValue(SkillDataKeys.PROTECT_NEXT_FALL.get())) { // This is not synced
 				float damage = event.getAmount();
 				
 				if (damage < 2.5F) {
@@ -117,7 +117,7 @@ public class PhantomAscentSkill extends Skill {
 					event.setCanceled(true);
 				}
 				
-				container.getDataManager().setData(SkillDataKeys.PA_PROTECT_NEXT_FALL.get(), false);
+				container.getDataManager().setData(SkillDataKeys.PROTECT_NEXT_FALL.get(), false);
 			}
 		});
 		

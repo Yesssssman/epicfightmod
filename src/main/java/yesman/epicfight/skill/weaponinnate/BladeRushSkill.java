@@ -133,11 +133,11 @@ public class BladeRushSkill extends WeaponInnateSkill {
 		}
 		
 		if (execute) {
-			executer.getSkill(this).getDataManager().setData(SkillDataKeys.BLADE_RUSH_COMBO_COUNT.get(), 0);
+			executer.getSkill(this).getDataManager().setData(SkillDataKeys.COMBO_COUNTER.get(), 0);
 			executer.playAnimationSynchronized(Animations.BLADE_RUSH_TRY, 0);
 		} else {
-			int animationId = executer.getSkill(this).getDataManager().getDataValue(SkillDataKeys.BLADE_RUSH_COMBO_COUNT.get());
-			executer.getSkill(this).getDataManager().setDataF(SkillDataKeys.BLADE_RUSH_COMBO_COUNT.get(), (v) -> (v + 1) % this.comboAnimations.length);
+			int animationId = executer.getSkill(this).getDataManager().getDataValue(SkillDataKeys.COMBO_COUNTER.get());
+			executer.getSkill(this).getDataManager().setDataF(SkillDataKeys.COMBO_COUNTER.get(), (v) -> (v + 1) % this.comboAnimations.length);
 			executer.playAnimationSynchronized(this.comboAnimations[animationId], 0);
 		}
 		

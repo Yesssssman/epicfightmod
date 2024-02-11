@@ -132,7 +132,7 @@ public class MeteorSlamSkill extends Skill {
 					if (distance > this.minDistance) {
 						container.getExecuter().playAnimationSynchronized(slamAnimation, 0.0F);
 						container.getDataManager().setDataSync(SkillDataKeys.FALL_DISTANCE.get(), (float)distance, serverPlayerPatch.getOriginal());
-						container.getDataManager().setData(SkillDataKeys.SLAM_PROTECT_NEXT_FALL.get(), true);
+						container.getDataManager().setData(SkillDataKeys.PROTECT_NEXT_FALL.get(), true);
 						event.setCanceled(true);
 					}
 				}
@@ -140,19 +140,19 @@ public class MeteorSlamSkill extends Skill {
 		});
 		
 		listener.addEventListener(EventType.HURT_EVENT_PRE, EVENT_UUID, (event) -> {
-			if (event.getDamageSource().is(DamageTypeTags.IS_FALL) && container.getDataManager().getDataValue(SkillDataKeys.SLAM_PROTECT_NEXT_FALL.get())) {
+			if (event.getDamageSource().is(DamageTypeTags.IS_FALL) && container.getDataManager().getDataValue(SkillDataKeys.PROTECT_NEXT_FALL.get())) {
 				float stamina = container.getExecuter().getStamina();
 				float damage = event.getAmount();
 				event.setAmount(damage - stamina);
 				event.setCanceled(true);
 				container.getExecuter().setStamina(stamina - damage);
-				container.getDataManager().setData(SkillDataKeys.SLAM_PROTECT_NEXT_FALL.get(), false);
+				container.getDataManager().setData(SkillDataKeys.PROTECT_NEXT_FALL.get(), false);
 			}
 		});
 		
 		listener.addEventListener(EventType.FALL_EVENT, EVENT_UUID, (event) -> {
 			if (LevelUtil.calculateLivingEntityFallDamage(event.getForgeEvent().getEntity(), event.getForgeEvent().getDamageMultiplier(), event.getForgeEvent().getDistance()) == 0) {
-				container.getDataManager().setData(SkillDataKeys.SLAM_PROTECT_NEXT_FALL.get(), false);
+				container.getDataManager().setData(SkillDataKeys.PROTECT_NEXT_FALL.get(), false);
 			}
 		});
 	}

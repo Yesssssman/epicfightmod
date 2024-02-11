@@ -44,8 +44,6 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 	
 	@Override
 	public void onInitiate(SkillContainer container) {
-		container.getDataManager().registerData(SkillDataKeys.LEAP_PROTECT_NEXT_FALL.get());
-
 		PlayerEventListener listener = container.getExecuter().getEventListener();
 		
 		listener.addEventListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID, (event) -> {
@@ -55,18 +53,18 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 		});
 
 		listener.addEventListener(EventType.HURT_EVENT_PRE, EVENT_UUID, (event) -> {
-			if (event.getDamageSource().is(DamageTypeTags.IS_FALL) && container.getDataManager().getDataValue(SkillDataKeys.LEAP_PROTECT_NEXT_FALL.get())) {
+			if (event.getDamageSource().is(DamageTypeTags.IS_FALL) && container.getDataManager().getDataValue(SkillDataKeys.PROTECT_NEXT_FALL.get())) {
 				float damage = event.getAmount();
 				event.setAmount(damage * 0.5F);
 				event.setCanceled(true);
 				
-				container.getDataManager().setData(SkillDataKeys.LEAP_PROTECT_NEXT_FALL.get(), false);
+				container.getDataManager().setData(SkillDataKeys.PROTECT_NEXT_FALL.get(), false);
 			}
 		}, 1);
 		
 		listener.addEventListener(EventType.FALL_EVENT, EVENT_UUID, (event) -> {
 			if (LevelUtil.calculateLivingEntityFallDamage(event.getForgeEvent().getEntity(), event.getForgeEvent().getDamageMultiplier(), event.getForgeEvent().getDistance()) == 0) {
-				container.getDataManager().setData(SkillDataKeys.LEAP_PROTECT_NEXT_FALL.get(), false);
+				container.getDataManager().setData(SkillDataKeys.PROTECT_NEXT_FALL.get(), false);
 			}
 		});
 	}
@@ -144,7 +142,7 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 
 			caster.playAnimationSynchronized(this.shootAnimation, 0.0F);
 			feedbackPacket.getBuffer().writeInt(accumulatedTicks);
-			skillContainer.getDataManager().setData(SkillDataKeys.LEAP_PROTECT_NEXT_FALL.get(), true);
+			skillContainer.getDataManager().setData(SkillDataKeys.PROTECT_NEXT_FALL.get(), true);
 		}
 	}
 	

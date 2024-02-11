@@ -40,8 +40,6 @@ public class EverlastingAllegiance extends WeaponInnateSkill {
 	
 	@Override
 	public void onInitiate(SkillContainer container) {
-		container.getDataManager().registerData(SkillDataKeys.THROWN_TRIDENT_ENTITY_ID.get());
-		container.getDataManager().setData(SkillDataKeys.THROWN_TRIDENT_ENTITY_ID.get(), -1);
 	}
 	
 	@Override

@@ -1,21 +1,48 @@
 package yesman.epicfight.skill;
 
+import java.util.Map;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
+import org.jetbrains.annotations.Nullable;
+
 import io.netty.buffer.ByteBuf;
-import net.minecraft.core.IdMapper;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistry.CreateCallback;
-import net.minecraftforge.registries.IForgeRegistryInternal;
-import net.minecraftforge.registries.NewRegistryEvent;
-import net.minecraftforge.registries.RegistryBuilder;
-import net.minecraftforge.registries.RegistryManager;
+import net.minecraftforge.registries.ForgeRegistries.Keys;
 import yesman.epicfight.main.EpicFightMod;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistryInternal;
+import net.minecraftforge.registries.RegistryManager;
 
 public class SkillDataKey<T> {
+	private static class SkillDataKeyCallbacks implements IForgeRegistry.AddCallback<SkillDataKey<?>>, IForgeRegistry.ClearCallback<SkillDataKey<?>>, IForgeRegistry.CreateCallback<SkillDataKey<?>> {
+		private static final ResourceLocation CLASS_TO_DATA_KEYS = new ResourceLocation(EpicFightMod.MODID, "classtodatakeys");
+		static final SkillDataKeyCallbacks INSTANCE = new SkillDataKeyCallbacks();
+		
+		@Override
+		public void onAdd(IForgeRegistryInternal<SkillDataKey<?>> owner, RegistryManager stage, int id, ResourceKey<SkillDataKey<?>> key, SkillDataKey<?> item, @Nullable SkillDataKey<?> oldItem) {
+			
+		}
+		
+		@Override
+		public void onClear(IForgeRegistryInternal<SkillDataKey<?>> owner, RegistryManager stage) {
+			owner.getSlaveMap(CLASS_TO_DATA_KEYS, Map.class).clear();
+		}
+		
+		@Override
+		public void onCreate(IForgeRegistryInternal<SkillDataKey<?>> owner, RegistryManager stage) {
+			Map<?, ?> map = stage.getRegistry(Keys.BLOCKS).getSlaveMap(CLASS_TO_DATA_KEYS, Map.class);
+			owner.setSlaveMap(CLASS_TO_DATA_KEYS, map);
+		}
+	}
+	
+	public static SkillDataKeyCallbacks getCallBack() {
+		return SkillDataKeyCallbacks.INSTANCE;
+	}
+	
+	/**
 	public static class Registry {
 		private static final ResourceLocation DATA_KEY_TO_ID = new ResourceLocation(EpicFightMod.MODID, "datakeytoid");
 		
@@ -45,21 +72,21 @@ public class SkillDataKey<T> {
 			REGISTRY = event.create(registryBuilder).get();
 			SKILL_DATA_KEY_ID = REGISTRY.getSlaveMap(DATA_KEY_TO_ID, IdMapper.class);
 		}
+	}**/
+	
+	public static SkillDataKey<Integer> createIntKey(int defaultValue, boolean syncronizeTrackingPlayers, Class<?>... skillClass) {
+		return createSkillDataKey((buffer, val) -> buffer.writeInt(val), (buffer) -> buffer.readInt(), defaultValue, syncronizeTrackingPlayers, skillClass);
 	}
 	
-	public static SkillDataKey<Integer> createIntKey(Class<?> skillClass, int defaultValue, boolean syncronizeTrackingPlayers) {
-		return createSkillDataKey(skillClass, (buffer, val) -> buffer.writeInt(val), (buffer) -> buffer.readInt(), defaultValue, syncronizeTrackingPlayers);
+	public static SkillDataKey<Float> createFloatDataKey(float defaultValue, boolean syncronizeTrackingPlayers, Class<?>... skillClass) {
+		return createSkillDataKey((buffer, val) -> buffer.writeFloat(val), (buffer) -> buffer.readFloat(), defaultValue, syncronizeTrackingPlayers, skillClass);
 	}
 	
-	public static SkillDataKey<Float> createFloatDataKey(Class<?> skillClass, float defaultValue, boolean syncronizeTrackingPlayers) {
-		return createSkillDataKey(skillClass, (buffer, val) -> buffer.writeFloat(val), (buffer) -> buffer.readFloat(), defaultValue, syncronizeTrackingPlayers);
+	public static SkillDataKey<Boolean> createBooleanKey(boolean defaultValue, boolean syncronizeTrackingPlayers, Class<?>... skillClass) {
+		return createSkillDataKey((buffer, val) -> buffer.writeBoolean(val), (buffer) -> buffer.readBoolean(), defaultValue, syncronizeTrackingPlayers, skillClass);
 	}
 	
-	public static SkillDataKey<Boolean> createBooleanKey(Class<?> skillClass, boolean defaultValue, boolean syncronizeTrackingPlayers) {
-		return createSkillDataKey(skillClass, (buffer, val) -> buffer.writeBoolean(val), (buffer) -> buffer.readBoolean(), defaultValue, syncronizeTrackingPlayers);
-	}
-	
-	public static <T> SkillDataKey<T> createSkillDataKey(Class<?> skillClass, BiConsumer<ByteBuf, T> encoder, Function<ByteBuf, T> decoder, T defaultValue, boolean syncronizeTrackingPlayers) {
+	public static <T> SkillDataKey<T> createSkillDataKey(BiConsumer<ByteBuf, T> encoder, Function<ByteBuf, T> decoder, T defaultValue, boolean syncronizeTrackingPlayers, Class<?>... skillClass) {
 		return new SkillDataKey<T>(encoder, decoder, defaultValue, syncronizeTrackingPlayers);
 	}
 	
