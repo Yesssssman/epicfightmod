@@ -29,7 +29,6 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 public class SteelWhirlwindSkill extends WeaponInnateSkill implements ChargeableSkill {
-	
 	private static final UUID EVENT_UUID = UUID.fromString("d2d057cc-f30f-11ed-a05b-0242ac120003");
 	
 	public static int getChargingPower(SkillContainer skillContainer) {
@@ -48,8 +47,6 @@ public class SteelWhirlwindSkill extends WeaponInnateSkill implements Chargeable
 	
 	@Override
 	public void onInitiate(SkillContainer container) {
-		container.getDataManager().registerData(SkillDataKeys.CHARGING_POWER.get());
-		
 		PlayerEventListener listener = container.getExecuter().getEventListener();
 		
 		listener.addEventListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID, (event) -> {

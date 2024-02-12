@@ -53,6 +53,7 @@ public class SPModifySkillData {
 			if (entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null) instanceof PlayerPatch<?> playerpatch) {
 				SkillDataManager dataManager = playerpatch.getSkill(msg.slot).getDataManager();
 				SkillDataKey<?> dataKey = SkillDataKey.byId(msg.keyId);
+				
 				dataManager.setDataRawtype(dataKey, msg.value);
 			}
 		});

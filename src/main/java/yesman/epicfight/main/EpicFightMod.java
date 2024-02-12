@@ -55,7 +55,7 @@ import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.server.commands.arguments.SkillArgument;
 import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
-import yesman.epicfight.skill.SkillDataKey;
+import yesman.epicfight.skill.SkillDataKeys;
 import yesman.epicfight.skill.SkillSlot;
 import yesman.epicfight.skill.SkillSlots;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
@@ -125,7 +125,6 @@ public class EpicFightMod {
     	bus.addListener(EpicFightAttributes::modifyExistingMobs);
     	bus.addListener(EpicFightCapabilities::registerCapabilities);
     	bus.addListener(EpicFightEntities::onSpawnPlacementRegister);
-    	bus.addListener(SkillDataKey.Registry::createRegistry);
     	
     	LivingMotion.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, LivingMotions.class);
     	SkillCategory.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, SkillCategories.class);
@@ -145,6 +144,7 @@ public class EpicFightMod {
 		EpicFightLootTables.LOOT_MODIFIERS.register(bus);
 		EpicFightSounds.SOUNDS.register(bus);
 		EpicFightDataSerializers.VEC.register(bus);
+		SkillDataKeys.DATA_KEYS.register(bus);
         EpicFightSkills.registerSkills();
         MinecraftForge.EVENT_BUS.addListener(this::reloadListnerEvent);
         

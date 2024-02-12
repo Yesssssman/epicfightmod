@@ -1,78 +1,78 @@
 package yesman.epicfight.skill;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 
-import org.jetbrains.annotations.Nullable;
+import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 
 import io.netty.buffer.ByteBuf;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
+import net.minecraft.core.IdMapper;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries.Keys;
-import yesman.epicfight.main.EpicFightMod;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryInternal;
 import net.minecraftforge.registries.RegistryManager;
+import yesman.epicfight.main.EpicFightMod;
 
 public class SkillDataKey<T> {
-	private static class SkillDataKeyCallbacks implements IForgeRegistry.AddCallback<SkillDataKey<?>>, IForgeRegistry.ClearCallback<SkillDataKey<?>>, IForgeRegistry.CreateCallback<SkillDataKey<?>> {
-		private static final ResourceLocation CLASS_TO_DATA_KEYS = new ResourceLocation(EpicFightMod.MODID, "classtodatakeys");
+	private static final HashMultimap<Class<?>, SkillDataKey<?>> SKILL_DATA_KEYS = HashMultimap.create();
+	private static final ResourceLocation CLASS_TO_DATA_KEYS = new ResourceLocation(EpicFightMod.MODID, "classtodatakeys");
+	private static final ResourceLocation DATA_KEY_TO_ID = new ResourceLocation(EpicFightMod.MODID, "datakeytoid");
+	
+	private static class SkillDataKeyCallbacks implements IForgeRegistry.BakeCallback<SkillDataKey<?>>, IForgeRegistry.ClearCallback<SkillDataKey<?>>, IForgeRegistry.CreateCallback<SkillDataKey<?>> {
 		static final SkillDataKeyCallbacks INSTANCE = new SkillDataKeyCallbacks();
 		
 		@Override
-		public void onAdd(IForgeRegistryInternal<SkillDataKey<?>> owner, RegistryManager stage, int id, ResourceKey<SkillDataKey<?>> key, SkillDataKey<?> item, @Nullable SkillDataKey<?> oldItem) {
+		@SuppressWarnings("unchecked")
+        public void onBake(IForgeRegistryInternal<SkillDataKey<?>> owner, RegistryManager stage) {
+            IdMapper<SkillDataKey<?>> skillDataKeyMap = owner.getSlaveMap(DATA_KEY_TO_ID, IdMapper.class);
+            
+			for (SkillDataKey<?> block : owner) {
+				skillDataKeyMap.add(block);
+			}
+            
+			Map<Class<?>, Set<SkillDataKey<?>>> skillDataKeys = owner.getSlaveMap(CLASS_TO_DATA_KEYS, Map.class);
 			
-		}
+			for (Class<?> key : SKILL_DATA_KEYS.keySet()) {
+				if (SKILL_DATA_KEYS.containsKey(key)) {
+					Set<SkillDataKey<?>> dataKeySet = Sets.newHashSet();
+					dataKeySet.addAll(SKILL_DATA_KEYS.get(key));
+					skillDataKeys.put(key, dataKeySet);
+				}
+				
+				Class<?> superKey = key.getSuperclass();
+				
+				while (superKey != null) {
+					if (SKILL_DATA_KEYS.containsKey(superKey)) {
+						Set<SkillDataKey<?>> dataKeySet = skillDataKeys.get(key);
+						dataKeySet.addAll(SKILL_DATA_KEYS.get(superKey));
+					}
+					
+					superKey = superKey.getSuperclass();
+				}
+			}
+			
+			SKILL_DATA_KEYS.clear();
+        }
 		
 		@Override
 		public void onClear(IForgeRegistryInternal<SkillDataKey<?>> owner, RegistryManager stage) {
-			owner.getSlaveMap(CLASS_TO_DATA_KEYS, Map.class).clear();
+			//owner.getSlaveMap(CLASS_TO_DATA_KEYS, Map.class).clear();
 		}
 		
 		@Override
 		public void onCreate(IForgeRegistryInternal<SkillDataKey<?>> owner, RegistryManager stage) {
-			Map<?, ?> map = stage.getRegistry(Keys.BLOCKS).getSlaveMap(CLASS_TO_DATA_KEYS, Map.class);
-			owner.setSlaveMap(CLASS_TO_DATA_KEYS, map);
+			owner.setSlaveMap(CLASS_TO_DATA_KEYS, Maps.newHashMap());
+			owner.setSlaveMap(DATA_KEY_TO_ID, new IdMapper<SkillDataKey<?>> (owner.getKeys().size()));
 		}
 	}
 	
 	public static SkillDataKeyCallbacks getCallBack() {
 		return SkillDataKeyCallbacks.INSTANCE;
 	}
-	
-	/**
-	public static class Registry {
-		private static final ResourceLocation DATA_KEY_TO_ID = new ResourceLocation(EpicFightMod.MODID, "datakeytoid");
-		
-		
-		private static IdMapper<SkillDataKey<?>> SKILL_DATA_KEY_ID;
-		private static IForgeRegistry<SkillDataKey<?>> REGISTRY;
-		
-		@SuppressWarnings("unchecked")
-		public static void createRegistry(final NewRegistryEvent event) {
-			RegistryBuilder<SkillDataKey<?>> registryBuilder = RegistryBuilder.of(new ResourceLocation(EpicFightMod.MODID, "skill_data_key"));
-			registryBuilder.onCreate(new CreateCallback<SkillDataKey<?>> () {
-				@Override
-				public void onCreate(IForgeRegistryInternal<SkillDataKey<?>> owner, RegistryManager stage) {
-					final IdMapper<BlockState> idMap = new IdMapper<>()
-		            {
-		                @Override
-		                public int getId(BlockState key)
-		                {
-		                    return this.tToId.containsKey(key) ? this.tToId.getInt(key) : -1;
-		                }
-		            };
-		            
-					owner.setSlaveMap(DATA_KEY_TO_ID, idMap);
-				}
-			});
-			
-			REGISTRY = event.create(registryBuilder).get();
-			SKILL_DATA_KEY_ID = REGISTRY.getSlaveMap(DATA_KEY_TO_ID, IdMapper.class);
-		}
-	}**/
 	
 	public static SkillDataKey<Integer> createIntKey(int defaultValue, boolean syncronizeTrackingPlayers, Class<?>... skillClass) {
 		return createSkillDataKey((buffer, val) -> buffer.writeInt(val), (buffer) -> buffer.readInt(), defaultValue, syncronizeTrackingPlayers, skillClass);
@@ -87,12 +87,28 @@ public class SkillDataKey<T> {
 	}
 	
 	public static <T> SkillDataKey<T> createSkillDataKey(BiConsumer<ByteBuf, T> encoder, Function<ByteBuf, T> decoder, T defaultValue, boolean syncronizeTrackingPlayers, Class<?>... skillClass) {
-		return new SkillDataKey<T>(encoder, decoder, defaultValue, syncronizeTrackingPlayers);
+		SkillDataKey<T> key = new SkillDataKey<T>(encoder, decoder, defaultValue, syncronizeTrackingPlayers);
+		
+		for (Class<?> cls : skillClass) {
+			SKILL_DATA_KEYS.put(cls, key);
+		}
+		
+		return key;
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static IdMapper<SkillDataKey<?>> getIdMap() {
+		return SkillDataKeys.REGISTRY.get().getSlaveMap(DATA_KEY_TO_ID, IdMapper.class);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static Map<Class<?>, Set<SkillDataKey<?>>> getSkillDataKeyMap() {
+		return SkillDataKeys.REGISTRY.get().getSlaveMap(CLASS_TO_DATA_KEYS, Map.class);
 	}
 	
 	@SuppressWarnings("unchecked")
 	public static SkillDataKey<Object> byId(int id) {
-		return (SkillDataKey<Object>)Registry.SKILL_DATA_KEY_ID.byId(id);
+		return (SkillDataKey<Object>)getIdMap().byId(id);
 	}
 	
 	private final BiConsumer<ByteBuf, T> encoder;
@@ -120,7 +136,7 @@ public class SkillDataKey<T> {
 	}
 	
 	public int getId() {
-		return Registry.SKILL_DATA_KEY_ID.getId(this);
+		return getIdMap().getId(this);
 	}
 	
 	public boolean syncronizeTrackingPlayers() {

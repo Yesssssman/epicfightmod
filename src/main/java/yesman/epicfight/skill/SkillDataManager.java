@@ -27,6 +27,10 @@ public class SkillDataManager {
 	}
 	
 	public <T> void registerData(SkillDataKey<T> key) {
+		if (this.hasData(key)) {
+			throw new IllegalStateException("Skill dat key " + key + " already registered!");
+		}
+		
 		this.data.put(key, key.defaultValue());
 		
 		if (key.syncronizeTrackingPlayers() && !this.container.getExecuter().isLogicalClient()) {
@@ -59,7 +63,7 @@ public class SkillDataManager {
 	 */
 	@Deprecated
 	public void setDataRawtype(SkillDataKey<?> key, Object data) {
-		this.data.computeIfPresent(key, (theKey, val) -> val);
+		this.data.computeIfPresent(key, (theKey, val) -> data);
 	}
 	
 	public <T> void setData(SkillDataKey<T> key, T data) {
