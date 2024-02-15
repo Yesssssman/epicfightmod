@@ -12,9 +12,11 @@ import com.google.common.collect.Sets;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.core.IdMapper;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryInternal;
 import net.minecraftforge.registries.RegistryManager;
+import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.main.EpicFightMod;
 
 public class SkillDataKey<T> {
@@ -78,12 +80,32 @@ public class SkillDataKey<T> {
 		return createSkillDataKey((buffer, val) -> buffer.writeInt(val), (buffer) -> buffer.readInt(), defaultValue, syncronizeTrackingPlayers, skillClass);
 	}
 	
-	public static SkillDataKey<Float> createFloatDataKey(float defaultValue, boolean syncronizeTrackingPlayers, Class<?>... skillClass) {
+	public static SkillDataKey<Float> createFloatKey(float defaultValue, boolean syncronizeTrackingPlayers, Class<?>... skillClass) {
 		return createSkillDataKey((buffer, val) -> buffer.writeFloat(val), (buffer) -> buffer.readFloat(), defaultValue, syncronizeTrackingPlayers, skillClass);
+	}
+	
+	public static SkillDataKey<Double> createDoubleKey(double defaultValue, boolean syncronizeTrackingPlayers, Class<?>... skillClass) {
+		return createSkillDataKey((buffer, val) -> buffer.writeDouble(val), (buffer) -> buffer.readDouble(), defaultValue, syncronizeTrackingPlayers, skillClass);
 	}
 	
 	public static SkillDataKey<Boolean> createBooleanKey(boolean defaultValue, boolean syncronizeTrackingPlayers, Class<?>... skillClass) {
 		return createSkillDataKey((buffer, val) -> buffer.writeBoolean(val), (buffer) -> buffer.readBoolean(), defaultValue, syncronizeTrackingPlayers, skillClass);
+	}
+	
+	public static SkillDataKey<Vec3f> createVector3fKey(Vec3f defaultValue, boolean syncronizeTrackingPlayers, Class<?>... skillClass) {
+		return createSkillDataKey((buffer, val) -> {
+				buffer.writeFloat(val.x);
+				buffer.writeFloat(val.y);
+				buffer.writeFloat(val.z);
+			}, (buffer) -> new Vec3f(buffer.readFloat(), buffer.readFloat(), buffer.readFloat()), defaultValue, syncronizeTrackingPlayers, skillClass);
+	}
+	
+	public static SkillDataKey<Vec3> createVector3dKey(Vec3 defaultValue, boolean syncronizeTrackingPlayers, Class<?>... skillClass) {
+		return createSkillDataKey((buffer, val) -> {
+				buffer.writeDouble(val.x);
+				buffer.writeDouble(val.y);
+				buffer.writeDouble(val.z);
+			}, (buffer) -> new Vec3(buffer.readDouble(), buffer.readDouble(), buffer.readDouble()), defaultValue, syncronizeTrackingPlayers, skillClass);
 	}
 	
 	public static <T> SkillDataKey<T> createSkillDataKey(BiConsumer<ByteBuf, T> encoder, Function<ByteBuf, T> decoder, T defaultValue, boolean syncronizeTrackingPlayers, Class<?>... skillClass) {
