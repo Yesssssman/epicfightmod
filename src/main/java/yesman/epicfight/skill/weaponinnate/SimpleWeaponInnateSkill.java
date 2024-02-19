@@ -6,9 +6,9 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import yesman.epicfight.api.animation.AnimationProvider.AttackAnimationProvider;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
-import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategories;
@@ -46,17 +46,17 @@ public class SimpleWeaponInnateSkill extends WeaponInnateSkill {
 		return (new Builder()).setCategory(SkillCategories.WEAPON_INNATE).setResource(Resource.WEAPON_INNATE_ENERGY);
 	}
 	
-	protected final StaticAnimation attackAnimation;
+	protected AttackAnimationProvider attackAnimation;
 	
 	public SimpleWeaponInnateSkill(Builder builder) {
 		super(builder);
 		
-		this.attackAnimation = EpicFightMod.getInstance().animationManager.findAnimationByPath(builder.attackAnimation.toString());
+		this.attackAnimation = () -> (AttackAnimation)EpicFightMod.getInstance().animationManager.findAnimationByPath(builder.attackAnimation.toString());
 	}
 	
 	@Override
 	public void executeOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
-		executer.playAnimationSynchronized(this.attackAnimation, 0);
+		executer.playAnimationSynchronized(this.attackAnimation.get(), 0);
 		super.executeOnServer(executer, args);
 	}
 	
@@ -70,7 +70,7 @@ public class SimpleWeaponInnateSkill extends WeaponInnateSkill {
 	
 	@Override
 	public WeaponInnateSkill registerPropertiesToAnimation() {
-		AttackAnimation anim = (AttackAnimation)this.attackAnimation;
+		AttackAnimation anim = this.attackAnimation.get();
 		
 		for (Phase phase : anim.phases) {
 			phase.addProperties(this.properties.get(0).entrySet());

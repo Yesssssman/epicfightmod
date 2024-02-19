@@ -1,4 +1,4 @@
-package yesman.epicfight.data.conditions;
+package yesman.epicfight.data.conditions.entity;
 
 import java.util.Map;
 import java.util.Set;

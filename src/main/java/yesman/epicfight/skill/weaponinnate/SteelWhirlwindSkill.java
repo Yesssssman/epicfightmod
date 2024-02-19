@@ -9,9 +9,9 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
-import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.events.engine.ControllEngine;
 import yesman.epicfight.client.input.EpicFightKeyMappings;
@@ -35,14 +35,14 @@ public class SteelWhirlwindSkill extends WeaponInnateSkill implements Chargeable
 		return skillContainer.getDataManager().getDataValue(SkillDataKeys.CHARGING_POWER.get());
 	}
 	
-	private final StaticAnimation chargingAnimation;
-	private final StaticAnimation attackAnimation;
+	private AnimationProvider chargingAnimation;
+	private AnimationProvider attackAnimation;
 	
 	public SteelWhirlwindSkill(Builder<? extends Skill> builder) {
 		super(builder);
 		
-		this.chargingAnimation = Animations.STEEL_WHIRLWIND_CHARGING;
-		this.attackAnimation = Animations.STEEL_WHIRLWIND;
+		this.chargingAnimation = () -> Animations.STEEL_WHIRLWIND_CHARGING;
+		this.attackAnimation = () -> Animations.STEEL_WHIRLWIND;
 	}
 	
 	@Override
@@ -97,7 +97,7 @@ public class SteelWhirlwindSkill extends WeaponInnateSkill implements Chargeable
 	
 	@Override
 	public void startCharging(PlayerPatch<?> caster) {
-		caster.playAnimationSynchronized(this.chargingAnimation, 0.0F);
+		caster.playAnimationSynchronized(this.chargingAnimation.get(), 0.0F);
 	}
 	
 	@Override
@@ -107,7 +107,7 @@ public class SteelWhirlwindSkill extends WeaponInnateSkill implements Chargeable
 	@Override
 	public void castSkill(ServerPlayerPatch caster, SkillContainer skillContainer, int chargingTicks, SPSkillExecutionFeedback feedbackPacket, boolean onMaxTick) {
 		caster.getSkill(this).getDataManager().setDataSync(SkillDataKeys.CHARGING_POWER.get(), chargingTicks, caster.getOriginal());
-		caster.playAnimationSynchronized(this.attackAnimation, 0.0F);
+		caster.playAnimationSynchronized(this.attackAnimation.get(), 0.0F);
 		this.cancelOnServer(caster, null);
 	}
 	

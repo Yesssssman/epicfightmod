@@ -101,6 +101,10 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 		return tagStream;
 	}
 	
+	public static void reloadAllSkillsAnimations() {
+		SKILLS.values().forEach((skill) -> skill.registerPropertiesToAnimation());
+	}
+	
 	public static int getParamCount() {
 		return PARAMETER_MAP.size();
 	}

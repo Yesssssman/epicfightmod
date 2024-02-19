@@ -9,7 +9,7 @@ import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.skill.Skill;
@@ -30,12 +30,12 @@ public class EverlastingAllegiance extends WeaponInnateSkill {
 		return skillContainer.getDataManager().getDataValue(SkillDataKeys.THROWN_TRIDENT_ENTITY_ID.get());
 	}
 	
-	private final StaticAnimation callingAnimation;
+	private AnimationProvider callingAnimation;
 	
 	public EverlastingAllegiance(Builder<? extends Skill> builder) {
 		super(builder);
 		
-		this.callingAnimation = Animations.EVERLASTING_ALLEGIANCE_CALL;
+		this.callingAnimation = () -> Animations.EVERLASTING_ALLEGIANCE_CALL;
 	}
 	
 	@Override
@@ -59,7 +59,7 @@ public class EverlastingAllegiance extends WeaponInnateSkill {
 		if (executer.getOriginal().level().getEntity(executer.getSkill(this).getDataManager().getDataValue(SkillDataKeys.THROWN_TRIDENT_ENTITY_ID.get())) instanceof ThrownTrident trident) {
 			ThrownTridentPatch tridentPatch = EpicFightCapabilities.getEntityPatch(trident, ThrownTridentPatch.class);
 			tridentPatch.recalledBySkill();
-			executer.playAnimationSynchronized(this.callingAnimation, 0.0F);
+			executer.playAnimationSynchronized(this.callingAnimation.get(), 0.0F);
 			
 			this.cancelOnServer(executer, args);
 		}

@@ -13,11 +13,11 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.LivingMotions;
-import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
-import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.skill.SkillDataKeys;
@@ -27,14 +27,14 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 
 public class PhantomAscentSkill extends Skill {
 	private static final UUID EVENT_UUID = UUID.fromString("051a9bb2-7541-11ee-b962-0242ac120002");
-	private final StaticAnimation[] animations = new StaticAnimation[2];
+	private final AnimationProvider[] animations = new AnimationProvider[2];
 	private int extraJumps;
 	
 	public PhantomAscentSkill(Builder<? extends Skill> builder) {
 		super(builder);
 		
-		this.animations[0] = EpicFightMod.getInstance().animationManager.findAnimationByPath("epicfight:biped/skill/phantom_ascent_forward");
-		this.animations[1] = EpicFightMod.getInstance().animationManager.findAnimationByPath("epicfight:biped/skill/phantom_ascent_backward");
+		this.animations[0] = () -> Animations.BIPED_PHANTOM_ASCENT_FORWARD;
+		this.animations[1] = () -> Animations.BIPED_PHANTOM_ASCENT_BACKWARD;
 	}
 	
 	@Override
@@ -97,7 +97,7 @@ public class PhantomAscentSkill extends Skill {
 						
 						container.getExecuter().getOriginal().setDeltaMovement(deltaMove.x + jumpDir.x, 0.6D + container.getExecuter().getOriginal().getJumpBoostPower(), deltaMove.z + jumpDir.z);
 						
-						event.getPlayerPatch().playAnimationClientPreemptive(this.animations[vertic < 0 ? 1 : 0], 0.0F);
+						event.getPlayerPatch().playAnimationClientPreemptive(this.animations[vertic < 0 ? 1 : 0].get(), 0.0F);
 						event.getPlayerPatch().changeModelYRot(degree);
 					};
 				} else {

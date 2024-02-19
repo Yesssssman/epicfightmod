@@ -1,9 +1,14 @@
 package yesman.epicfight.client.events.engine;
 
+import java.util.List;
+import java.util.Map;
+import java.util.function.Supplier;
+
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Camera;
 import net.minecraft.client.CameraType;
@@ -15,6 +20,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -24,14 +30,24 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.BowItem;
+import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ShieldItem;
+import net.minecraft.world.item.TridentItem;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.*;
+import net.minecraftforge.client.event.CustomizeGuiOverlayEvent;
+import net.minecraftforge.client.event.RenderGuiEvent;
+import net.minecraftforge.client.event.RenderHandEvent;
+import net.minecraftforge.client.event.RenderLevelStageEvent;
+import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -89,10 +105,6 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.EpicFightEntities;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 import yesman.epicfight.world.item.EpicFightItems;
-
-import java.util.List;
-import java.util.Map;
-import java.util.function.Supplier;
 
 @SuppressWarnings("rawtypes")
 @OnlyIn(Dist.CLIENT)
@@ -470,7 +482,7 @@ public class RenderEngine {
 			if (event.getEntity() != null && event.getEntity().level().isClientSide) {
 				CapabilityItem cap = EpicFightCapabilities.getItemStackCapabilityOr(event.getItemStack(), null);
 				LocalPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), LocalPlayerPatch.class);
-
+				
 				if (cap != null && playerpatch != null) {
 					if (ClientEngine.getInstance().controllEngine.isKeyDown(EpicFightKeyMappings.WEAPON_INNATE_SKILL_TOOLTIP)) {
 						Skill weaponInnateSkill = cap.getInnateSkill(playerpatch, event.getItemStack());
@@ -486,31 +498,33 @@ public class RenderEngine {
 					} else {
 						List<Component> tooltip = event.getToolTip();
 						cap.modifyItemTooltip(event.getItemStack(), event.getToolTip(), playerpatch);
-
+						
 						for (int i = 0; i < tooltip.size(); i++) {
 							Component textComp = tooltip.get(i);
-
+							
 							if (textComp.getSiblings().size() > 0) {
 								Component sibling = textComp.getSiblings().get(0);
-
-								if (sibling instanceof MutableComponent translationComponent) {
-									if (translationComponent.getSiblings().size() > 1 && translationComponent.getSiblings().get(1) instanceof MutableComponent translatableArg) {
-										if (translatableArg.getString().equals(Attributes.ATTACK_SPEED.getDescriptionId())) {
-											float weaponSpeed = (float)playerpatch.getWeaponAttribute(Attributes.ATTACK_SPEED, event.getItemStack());
-											tooltip.remove(i);
-											tooltip.add(i, Component.literal(String.format(" %.2f ", playerpatch.getModifiedAttackSpeed(cap, weaponSpeed)))
-													.append(Component.translatable(Attributes.ATTACK_SPEED.getDescriptionId())));
-
-										} else if (translatableArg.getString().equals(Attributes.ATTACK_DAMAGE.getDescriptionId())) {
-
-											float weaponDamage = (float)playerpatch.getWeaponAttribute(Attributes.ATTACK_DAMAGE, event.getItemStack());
-											float damageBonus = EnchantmentHelper.getDamageBonus(event.getItemStack(), MobType.UNDEFINED);
-											String damageFormat = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(playerpatch.getModifiedBaseDamage(weaponDamage) + damageBonus);
-
-											tooltip.remove(i);
-											tooltip.add(i, Component.literal(String.format(" %s ", damageFormat))
-																	.append(Component.translatable(Attributes.ATTACK_DAMAGE.getDescriptionId()))
-																	.withStyle(ChatFormatting.DARK_GREEN));
+								
+								if (sibling instanceof MutableComponent mutableComponent && mutableComponent.getContents() instanceof TranslatableContents translatableContent) {
+									if (translatableContent.getArgs().length > 1 && translatableContent.getArgs()[1] instanceof MutableComponent mutableComponent$2) {
+										if (mutableComponent$2.getContents() instanceof TranslatableContents translatableContent$2) {
+											if (translatableContent$2.getKey().equals(Attributes.ATTACK_SPEED.getDescriptionId())) {
+												float weaponSpeed = (float)playerpatch.getWeaponAttribute(Attributes.ATTACK_SPEED, event.getItemStack());
+												tooltip.remove(i);
+												tooltip.add(i, Component.literal(String.format(" %.2f ", playerpatch.getModifiedAttackSpeed(cap, weaponSpeed)))
+														.append(Component.translatable(Attributes.ATTACK_SPEED.getDescriptionId())));
+												
+											} else if (translatableContent$2.getKey().equals(Attributes.ATTACK_DAMAGE.getDescriptionId())) {
+												
+												float weaponDamage = (float)playerpatch.getWeaponAttribute(Attributes.ATTACK_DAMAGE, event.getItemStack());
+												float damageBonus = EnchantmentHelper.getDamageBonus(event.getItemStack(), MobType.UNDEFINED);
+												String damageFormat = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(playerpatch.getModifiedBaseDamage(weaponDamage) + damageBonus);
+												
+												tooltip.remove(i);
+												tooltip.add(i, Component.literal(String.format(" %s ", damageFormat))
+																		.append(Component.translatable(Attributes.ATTACK_DAMAGE.getDescriptionId()))
+																		.withStyle(ChatFormatting.DARK_GREEN));
+											}
 										}
 									}
 								}

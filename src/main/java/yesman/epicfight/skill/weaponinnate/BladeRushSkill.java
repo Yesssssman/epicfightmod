@@ -3,6 +3,9 @@ package yesman.epicfight.skill.weaponinnate;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Supplier;
+
+import org.apache.commons.compress.utils.Lists;
 
 import com.google.common.collect.Maps;
 
@@ -16,11 +19,13 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.client.events.engine.ControllEngine;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.gameasset.Animations;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
@@ -76,16 +81,15 @@ public class BladeRushSkill extends WeaponInnateSkill {
 		}
 	}
 	
-	private final StaticAnimation[] comboAnimations;
+	private final AnimationProvider[] comboAnimations = new AnimationProvider[3];
 	private final Map<EntityType<?>, StaticAnimation> tryAnimations;
 	
 	public BladeRushSkill(Builder builder) {
 		super(builder);
 		
-		this.comboAnimations = new StaticAnimation[3];
-		this.comboAnimations[0] = Animations.BLADE_RUSH_COMBO1;
-		this.comboAnimations[1] = Animations.BLADE_RUSH_COMBO2;
-		this.comboAnimations[2] = Animations.BLADE_RUSH_COMBO3;
+		this.comboAnimations[0] = () -> Animations.BLADE_RUSH_COMBO1;
+		this.comboAnimations[1] = () -> Animations.BLADE_RUSH_COMBO2;
+		this.comboAnimations[2] = () -> Animations.BLADE_RUSH_COMBO3;
 		this.tryAnimations = builder.tryAnimations;
 	}
 	
@@ -138,7 +142,7 @@ public class BladeRushSkill extends WeaponInnateSkill {
 		} else {
 			int animationId = executer.getSkill(this).getDataManager().getDataValue(SkillDataKeys.COMBO_COUNTER.get());
 			executer.getSkill(this).getDataManager().setDataF(SkillDataKeys.COMBO_COUNTER.get(), (v) -> (v + 1) % this.comboAnimations.length);
-			executer.playAnimationSynchronized(this.comboAnimations[animationId], 0);
+			executer.playAnimationSynchronized(this.comboAnimations[animationId].get(), 0);
 		}
 		
 		super.executeOnServer(executer, args);

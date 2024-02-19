@@ -7,7 +7,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.utils.LevelUtil;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.events.engine.ControllEngine;
@@ -32,14 +32,14 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 	
 	private static final UUID EVENT_UUID = UUID.fromString("3d142bf4-0dcd-11ee-be56-0242ac120002");
-	private final StaticAnimation chargingAnimation;
-	private final StaticAnimation shootAnimation;
+	private AnimationProvider chargingAnimation;
+	private AnimationProvider shootAnimation;
 	
 	public DemolitionLeapSkill(Builder<? extends Skill> builder) {
 		super(builder);
 		
-		this.chargingAnimation = Animations.BIPED_DEMOLITION_LEAP_CHARGING;
-		this.shootAnimation = Animations.BIPED_DEMOLITION_LEAP;
+		this.chargingAnimation = () -> Animations.BIPED_DEMOLITION_LEAP_CHARGING;
+		this.shootAnimation = () -> Animations.BIPED_DEMOLITION_LEAP;
 	}
 	
 	@Override
@@ -115,10 +115,10 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 
 	@Override
 	public void startCharging(PlayerPatch<?> caster) {
-		caster.getAnimator().playAnimation(this.chargingAnimation, 0.0F);
+		caster.getAnimator().playAnimation(this.chargingAnimation.get(), 0.0F);
 
 		if (!caster.isLogicalClient()) {
-			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(new SPPlayAnimation(this.chargingAnimation, 0.0F, caster), caster.getOriginal());
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(new SPPlayAnimation(this.chargingAnimation.get(), 0.0F, caster), caster.getOriginal());
 		}
 	}
 
@@ -140,7 +140,7 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 			Vec3 entityEyepos = caster.getOriginal().getEyePosition();
 			EpicFightParticles.AIR_BURST.get().spawnParticleWithArgument(caster.getOriginal().serverLevel(), entityEyepos.x, entityEyepos.y, entityEyepos.z, 0.0D, 0.0D, 2 + 0.05D * chargingTicks);
 
-			caster.playAnimationSynchronized(this.shootAnimation, 0.0F);
+			caster.playAnimationSynchronized(this.shootAnimation.get(), 0.0F);
 			feedbackPacket.getBuffer().writeInt(accumulatedTicks);
 			skillContainer.getDataManager().setData(SkillDataKeys.PROTECT_NEXT_FALL.get(), true);
 		}

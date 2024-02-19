@@ -31,7 +31,8 @@ import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
 import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.api.forgeevent.WeaponCapabilityPresetRegistryEvent;
 import yesman.epicfight.data.conditions.Condition.ConditionBuilder;
-import yesman.epicfight.data.conditions.LivingEntityCondition;
+import yesman.epicfight.data.conditions.EpicFightConditions;
+import yesman.epicfight.data.conditions.entity.LivingEntityCondition;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.server.SPDatapackSync;
 import yesman.epicfight.particle.HitParticleType;
@@ -183,7 +184,9 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 		for (Tag caseTag : stylesTag.getList("cases", Tag.TAG_COMPOUND)) {
 			CompoundTag caseCompTag = (CompoundTag)caseTag;
 			
-			LivingEntityCondition condition = ConditionBuilder.builder(LivingEntityCondition.get(new ResourceLocation(caseCompTag.getString("condition")))).setTag(caseCompTag.getCompound("predicate")).build();
+			Function<CompoundTag, LivingEntityCondition> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(caseCompTag.getString("condition")));
+			LivingEntityCondition condition = ConditionBuilder.builder(conditionProvider).setTag(caseCompTag.getCompound("predicate")).build();
+			
 			Style style = Style.ENUM_MANAGER.get(caseCompTag.getString("style"));
 			styleEntry.putNewEntry(condition, style);
 		}
@@ -192,7 +195,9 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 		builder.styleProvider(styleEntry::getStyle);
 		
 		CompoundTag offhandValidatorTag = tag.getCompound("offhand_item_compatible_predicate");
-		builder.weaponCombinationPredicator(ConditionBuilder.builder(LivingEntityCondition.get(new ResourceLocation(offhandValidatorTag.getString("condition")))).setTag(offhandValidatorTag.getCompound("predicate")).build()::predicate);
+		
+		Function<CompoundTag, LivingEntityCondition> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(offhandValidatorTag.getString("condition")));
+		builder.weaponCombinationPredicator(ConditionBuilder.builder(conditionProvider).setTag(offhandValidatorTag.getCompound("predicate")).build()::predicate);
 		
 		return builder;
 	}
@@ -209,6 +214,10 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 		return tagStream;
 	}
 	
+	public static void clear() {
+		PRESETS.clear();
+	}
+	
 	@OnlyIn(Dist.CLIENT)
 	public static void processServerPacket(SPDatapackSync packet) {
 		if (packet.getType() == SPDatapackSync.Type.WEAPON_TYPE) {
@@ -218,6 +227,8 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 			for (CompoundTag tag : packet.getTags()) {
 				PRESETS.put(new ResourceLocation(tag.getString("registry_name")), (itemstack) -> deserializeWeaponCapabilityBuilder(tag));
 			}
+			
+			ItemCapabilityReloadListener.weaponTypeProcessedCheck();
 		}
 	}
 }

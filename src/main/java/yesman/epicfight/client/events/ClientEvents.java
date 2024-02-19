@@ -1,6 +1,7 @@
 package yesman.epicfight.client.events;
 
 import com.mojang.datafixers.util.Pair;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
 import net.minecraft.resources.ResourceLocation;
@@ -21,6 +22,7 @@ import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerP
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
+import yesman.epicfight.world.capabilities.item.WeaponTypeReloadListener;
 import yesman.epicfight.world.capabilities.provider.EntityPatchProvider;
 import yesman.epicfight.world.capabilities.provider.ItemCapabilityProvider;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
@@ -135,6 +137,8 @@ public class ClientEvents {
 			ItemCapabilityReloadListener.reset();
 			ItemCapabilityProvider.clear();
 			EntityPatchProvider.clear();
+			WeaponTypeReloadListener.clear();
+			
 			ClientEngine.getInstance().renderEngine.battleModeUI.reset();
 			ClientEngine.getInstance().renderEngine.clearCustomEntityRenerer();
 		}

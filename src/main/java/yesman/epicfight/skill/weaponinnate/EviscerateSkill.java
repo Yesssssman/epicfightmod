@@ -7,8 +7,8 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.types.AttackAnimation;
-import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillContainer;
@@ -19,13 +19,13 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 
 public class EviscerateSkill extends WeaponInnateSkill {
 	private static final UUID EVENT_UUID = UUID.fromString("f082557a-b2f9-11eb-8529-0242ac130003");
-	private final StaticAnimation first;
-	private final StaticAnimation second;
+	private AnimationProvider first;
+	private AnimationProvider second;
 	
 	public EviscerateSkill(Builder<? extends Skill> builder) {
 		super(builder);
-		this.first = Animations.EVISCERATE_FIRST;
-		this.second = Animations.EVISCERATE_SECOND;
+		this.first = () -> Animations.EVISCERATE_FIRST;
+		this.second = () -> Animations.EVISCERATE_SECOND;
 	}
 	
 	@Override
@@ -36,10 +36,10 @@ public class EviscerateSkill extends WeaponInnateSkill {
 				List<LivingEntity> hurtEntities = event.getPlayerPatch().getCurrenltyHurtEntities();
 				
 				if (hurtEntities.size() > 0 && hurtEntities.get(0).isAlive()) {
-					event.getPlayerPatch().reserveAnimation(this.second);
+					event.getPlayerPatch().reserveAnimation(this.second.get());
 					event.getPlayerPatch().getServerAnimator().getPlayerFor(null).reset();
 					event.getPlayerPatch().getCurrenltyHurtEntities().clear();
-					this.second.tick(event.getPlayerPatch());
+					this.second.get().tick(event.getPlayerPatch());
 				}
 			}
 		});
@@ -52,7 +52,7 @@ public class EviscerateSkill extends WeaponInnateSkill {
 	
 	@Override
 	public void executeOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
-		executer.playAnimationSynchronized(this.first, 0);
+		executer.playAnimationSynchronized(this.first.get(), 0);
 		super.executeOnServer(executer, args);
 	}
 	

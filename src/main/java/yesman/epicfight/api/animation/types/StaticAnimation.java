@@ -42,6 +42,7 @@ public class StaticAnimation extends DynamicAnimation {
 	protected final Map<AnimationProperty<?>, Object> properties = Maps.newHashMap();
 	protected final StateSpectrum.Blueprint stateSpectrumBlueprint = new StateSpectrum.Blueprint();
 	protected final ResourceLocation resourceLocation;
+	protected final ResourceLocation registryName;
 	protected final Armature armature;
 	protected final int namespaceId;
 	protected final int animationId;
@@ -53,6 +54,7 @@ public class StaticAnimation extends DynamicAnimation {
 		this.namespaceId = -1;
 		this.animationId = -1;
 		this.resourceLocation = null;
+		this.registryName = null;
 		this.armature = null;
 	}
 	
@@ -75,6 +77,7 @@ public class StaticAnimation extends DynamicAnimation {
 		
 		animationManager.getIdMap().put(this.animationId, this);
 		this.resourceLocation = new ResourceLocation(modid, "animmodels/animations/" + folderPath);
+		this.registryName = new ResourceLocation(modid, folderPath);
 		animationManager.getNameMap().put(new ResourceLocation(animationManager.getModid(), folderPath), this);
 		this.armature = armature;
 	}
@@ -85,7 +88,13 @@ public class StaticAnimation extends DynamicAnimation {
 		AnimationManager animationManager = EpicFightMod.getInstance().animationManager;
 		this.namespaceId = animationManager.getModid().hashCode();
 		this.animationId = -1;
-		this.resourceLocation = new ResourceLocation(animationManager.getModid(), "animmodels/animations/" + path);
+		
+		int colon = path.indexOf(':');
+		String modid = (colon == -1) ? animationManager.getModid() : path.substring(0, colon);
+		String folderPath = (colon == -1) ? path : path.substring(colon + 1);
+		
+		this.resourceLocation = new ResourceLocation(modid, "animmodels/animations/" + folderPath);
+		this.registryName = new ResourceLocation(modid, folderPath);
 		this.armature = armature;
 	}
 	
@@ -96,6 +105,7 @@ public class StaticAnimation extends DynamicAnimation {
 		this.namespaceId = baseAnimPath.getNamespace().hashCode();
 		this.animationId = -1;
 		this.resourceLocation = new ResourceLocation(baseAnimPath.getNamespace(), "animmodels/animations/" + path);
+		this.registryName = new ResourceLocation(baseAnimPath.getNamespace(), path);
 		this.armature = armature;
 	}
 	
@@ -309,6 +319,11 @@ public class StaticAnimation extends DynamicAnimation {
 	
 	public ResourceLocation getLocation() {
 		return this.resourceLocation;
+	}
+	
+	@Override
+	public ResourceLocation getRegistryName() {
+		return this.registryName;
 	}
 	
 	public Armature getArmature() {

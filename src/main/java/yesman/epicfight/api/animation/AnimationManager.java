@@ -1,6 +1,9 @@
 package yesman.epicfight.api.animation;
 
+import java.util.Map;
+
 import com.google.common.collect.Maps;
+
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
@@ -8,10 +11,9 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraftforge.fml.ModLoader;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.AnimationDataReader;
+import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.main.EpicFightMod;
-
-import java.util.Map;
 
 public class AnimationManager extends SimplePreparableReloadListener<Map<Integer, Map<Integer, StaticAnimation>>> {
 	private final Map<Integer, Map<Integer, StaticAnimation>> animationById = Maps.newHashMap();
@@ -92,6 +94,8 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 				animation.loadAnimation(resourceManager);
 			});
 		});
+		
+		SkillManager.reloadAllSkillsAnimations();
 	}
 	
 	private void setAnimationProperties(ResourceManager resourceManager, StaticAnimation animation) {
@@ -110,6 +114,10 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 				AnimationDataReader.readAndApply(animation, resourceManager, resourceManager.getResource(dataLocation).get());
 			}
 		}
+	}
+	
+	public StaticAnimation refreshAnimation(StaticAnimation oldAnimation) {
+		return this.animationByName.get(oldAnimation.getRegistryName());
 	}
 	
 	public String getModid() {

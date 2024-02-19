@@ -11,6 +11,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -19,6 +20,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.EntityType;
@@ -1944,6 +1946,7 @@ public class Animations {
 				
 				int i = (int)phase.getProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER).orElse(ValueModifier.setter(3)).getTotalValue(0);
 				float damage = phase.getProperty(AttackPhaseProperty.DAMAGE_MODIFIER).orElse(ValueModifier.setter(8.0F)).getTotalValue(0);
+				
 				LivingEntity original = entitypatch.getOriginal();
 				ServerLevel level = (ServerLevel)original.level();
 				float total = damage + ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create().get(original, original.getItemInHand(InteractionHand.MAIN_HAND), null, damage);
@@ -1963,10 +1966,12 @@ public class Animations {
 					lightningbolt.moveTo(Vec3.atBottomCenterOf(blockpos));
 					lightningbolt.setDamage(0.0F);
 					lightningbolt.setCause(entitypatch instanceof ServerPlayerPatch serverPlayerPatch ? serverPlayerPatch.getOriginal() : null);
-					e.hurt(attackAnimation.getEpicFightDamageSource(e.level().damageSources().lightningBolt(), entitypatch, e, phase)
-														.setHurtItem(entitypatch.getOriginal().getItemInHand(InteractionHand.MAIN_HAND)), total);
+					
+					DamageSource dmgSource = new DamageSource(e.level().registryAccess().registryOrThrow(Registries.DAMAGE_TYPE).getHolderOrThrow(DamageTypes.LIGHTNING_BOLT), entitypatch.getOriginal());
+					EpicFightDamageSource damageSource = attackAnimation.getEpicFightDamageSource(dmgSource, entitypatch, e, phase).setHurtItem(entitypatch.getOriginal().getItemInHand(InteractionHand.MAIN_HAND));
+					e.hurt(damageSource, total);
 					e.thunderHit(level, lightningbolt);
-
+					
 					level.addFreshEntity(lightningbolt);
 				}
 				

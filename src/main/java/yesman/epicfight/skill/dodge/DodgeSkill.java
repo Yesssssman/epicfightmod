@@ -70,6 +70,15 @@ public class DodgeSkill extends Skill {
 		}
 	}
 	
+	@Override
+	public Skill registerPropertiesToAnimation() {
+		for (int i = 0; i < this.animations.length; i++) {
+			this.animations[i] = EpicFightMod.getInstance().animationManager.refreshAnimation(this.animations[i]);
+		}
+		
+		return this;
+	}
+	
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public FriendlyByteBuf gatherArguments(LocalPlayerPatch executer, ControllEngine controllEngine) {

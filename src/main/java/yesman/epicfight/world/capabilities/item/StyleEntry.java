@@ -5,7 +5,7 @@ import java.util.List;
 import com.google.common.collect.Lists;
 import com.mojang.datafixers.util.Pair;
 
-import yesman.epicfight.data.conditions.LivingEntityCondition;
+import yesman.epicfight.data.conditions.entity.LivingEntityCondition;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class StyleEntry {

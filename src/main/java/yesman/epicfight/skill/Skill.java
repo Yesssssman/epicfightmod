@@ -421,6 +421,10 @@ public abstract class Skill {
 		return null;
 	}
 	
+	public Skill registerPropertiesToAnimation() {
+		return this;
+	}
+	
 	@OnlyIn(Dist.CLIENT)
 	public void onScreen(LocalPlayerPatch playerpatch, float resolutionX, float resolutionY) {
 		

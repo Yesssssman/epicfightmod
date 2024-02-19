@@ -157,6 +157,4 @@ public abstract class WeaponInnateSkill extends Skill {
 		
 		return this;
 	}
-	
-	public abstract WeaponInnateSkill registerPropertiesToAnimation();
 }

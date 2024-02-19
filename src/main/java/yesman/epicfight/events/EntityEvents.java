@@ -157,7 +157,7 @@ public class EntityEvents {
 				epicFightDamageSource = attackerEntityPatch.getEpicFightDamageSource();
 				baseDamage = attackerEntityPatch.getModifiedBaseDamage(baseDamage);
 			}
-			
+            
 			if (epicFightDamageSource != null && !epicFightDamageSource.is(EpicFightDamageType.PARTIAL_DAMAGE)) {
 				LivingEntity hitEntity = event.getEntity();
 				
@@ -461,10 +461,6 @@ public class EntityEvents {
 	
 	@SubscribeEvent
 	public static void equipChangeEvent(LivingEquipmentChangeEvent event) {
-		if (event.getFrom().getItem().equals(event.getTo().getItem())) {
-			return;
-		}
-		
 		HurtableEntityPatch<?> hurtableEntitypatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), HurtableEntityPatch.class);
 		
 		if (hurtableEntitypatch != null) {

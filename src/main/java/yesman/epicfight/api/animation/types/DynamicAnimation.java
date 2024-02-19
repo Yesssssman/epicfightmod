@@ -7,6 +7,7 @@ import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationPlayer;
@@ -21,6 +22,7 @@ import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.gameasset.Animations;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public abstract class DynamicAnimation {
@@ -168,6 +170,10 @@ public abstract class DynamicAnimation {
 	
 	public int getNamespaceId() {
 		return -1;
+	}
+	
+	public ResourceLocation getRegistryName() {
+		return new ResourceLocation(EpicFightMod.MODID, "");
 	}
 	
 	public int getId() {

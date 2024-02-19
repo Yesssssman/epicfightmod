@@ -97,9 +97,9 @@ public class WorldEvents {
 		MobPatchReloadListener.getDataStream().forEach(mobPatchPacket::write);
 		WeaponTypeReloadListener.getWeaponTypeDataStream().forEach(weaponTypePacket::write);
 		
+		EpicFightNetworkManager.sendToPlayer(weaponTypePacket, player);
 		EpicFightNetworkManager.sendToPlayer(armorPacket, player);
 		EpicFightNetworkManager.sendToPlayer(weaponPacket, player);
 		EpicFightNetworkManager.sendToPlayer(mobPatchPacket, player);
-		EpicFightNetworkManager.sendToPlayer(weaponTypePacket, player);
 	}
 }

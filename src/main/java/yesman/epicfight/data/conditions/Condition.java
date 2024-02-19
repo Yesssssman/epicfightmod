@@ -2,8 +2,7 @@ package yesman.epicfight.data.conditions;
 
 import java.util.Map;
 import java.util.Set;
-
-import com.google.common.base.Function;
+import java.util.function.Function;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.api.distmarker.Dist;
