@@ -10,6 +10,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import yesman.epicfight.api.animation.AnimationProvider;
+import yesman.epicfight.api.animation.AnimationProvider.AttackAnimationProvider;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
 import yesman.epicfight.client.ClientEngine;
@@ -36,13 +37,13 @@ public class SteelWhirlwindSkill extends WeaponInnateSkill implements Chargeable
 	}
 	
 	private AnimationProvider chargingAnimation;
-	private AnimationProvider attackAnimation;
+	private AttackAnimationProvider attackAnimation;
 	
 	public SteelWhirlwindSkill(Builder<? extends Skill> builder) {
 		super(builder);
 		
 		this.chargingAnimation = () -> Animations.STEEL_WHIRLWIND_CHARGING;
-		this.attackAnimation = () -> Animations.STEEL_WHIRLWIND;
+		this.attackAnimation = () -> (AttackAnimation)Animations.STEEL_WHIRLWIND;
 	}
 	
 	@Override
@@ -71,7 +72,7 @@ public class SteelWhirlwindSkill extends WeaponInnateSkill implements Chargeable
 	
 	@Override
 	public WeaponInnateSkill registerPropertiesToAnimation() {
-		AttackAnimation anim = (AttackAnimation)this.attackAnimation;
+		AttackAnimation anim = this.attackAnimation.get();
 		
 		for (Phase phase : anim.phases) {
 			phase.addProperties(this.properties.get(0).entrySet());

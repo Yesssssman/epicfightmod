@@ -24,7 +24,7 @@ public class WrathfulLightingSkill extends SimpleWeaponInnateSkill {
 	
 	@Override
 	public WeaponInnateSkill registerPropertiesToAnimation() {
-		AttackAnimation anim = ((AttackAnimation)this.attackAnimation);
+		AttackAnimation anim = this.attackAnimation.get();
 		
 		for (Phase phase : anim.phases) {
 			phase.addProperties(this.properties.get(0).entrySet());
