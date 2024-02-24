@@ -111,6 +111,10 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 		}
 	}
 	
+	public StaticAnimation refreshAnimation(StaticAnimation oldAnimation) {
+		return this.animationByName.get(oldAnimation.getRegistryName());
+	}
+	
 	public String getModid() {
 		return this.modid;
 	}

@@ -79,6 +79,10 @@ public class ConditionalWeaponInnateSkill extends WeaponInnateSkill {
 	
 	@Override
 	public WeaponInnateSkill registerPropertiesToAnimation() {
+		for (int i = 0; i < this.attackAnimations.length; i++) {
+			this.attackAnimations[i] = EpicFightMod.getInstance().animationManager.refreshAnimation(this.attackAnimations[i]);
+		}
+		
 		for (StaticAnimation animation : this.attackAnimations) {
 			AttackAnimation anim = ((AttackAnimation)animation);
 			for (Phase phase : anim.phases) {
