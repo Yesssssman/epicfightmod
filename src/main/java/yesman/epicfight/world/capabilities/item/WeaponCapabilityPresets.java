@@ -6,6 +6,7 @@ import java.util.function.Function;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.TieredItem;
@@ -379,10 +380,12 @@ public class WeaponCapabilityPresets {
 	}
 	
 	public static Function<Item, CapabilityItem.Builder> get(String typeName) {
-		if (!PRESETS.containsKey(typeName)) {
+		ResourceLocation rl = new ResourceLocation(typeName);
+		
+		if (!PRESETS.containsKey(rl.getPath())) {
 			throw new IllegalArgumentException("Can't find weapon type: " + typeName);
 		}
 		
-		return PRESETS.get(typeName);
+		return PRESETS.get(rl.getPath());
 	}
 }
