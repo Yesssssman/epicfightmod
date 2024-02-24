@@ -9,6 +9,7 @@ import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.registries.RegistryObject;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.guard.GuardSkill;
+import yesman.epicfight.skill.guard.ImpactGuardSkill;
 import yesman.epicfight.skill.guard.ParryingSkill;
 import yesman.epicfight.skill.identity.MeteorSlamSkill;
 import yesman.epicfight.skill.identity.RevelationSkill;
@@ -29,7 +30,7 @@ public class SkillDataKeys {
 	public static final RegistryObject<SkillDataKey<Integer>> COMBO_COUNTER = DATA_KEYS.register("combo_counter", () -> SkillDataKey.createIntKey(0, false, BasicAttack.class, BladeRushSkill.class));
 	public static final RegistryObject<SkillDataKey<Boolean>> SHEATH = DATA_KEYS.register("sheath", () -> SkillDataKey.createBooleanKey(false, false, BattojutsuPassive.class));
 	public static final RegistryObject<SkillDataKey<Integer>> PENALTY_RESTORE_COUNTER = DATA_KEYS.register("penalty_restore_counter", () -> SkillDataKey.createIntKey(0, false, GuardSkill.class));
-	public static final RegistryObject<SkillDataKey<Float>> PENALTY = DATA_KEYS.register("penalty", () -> SkillDataKey.createFloatKey(0.0F, false, GuardSkill.class));
+	public static final RegistryObject<SkillDataKey<Float>> PENALTY = DATA_KEYS.register("penalty", () -> SkillDataKey.createFloatKey(0.0F, false, GuardSkill.class, ImpactGuardSkill.class));
 	public static final RegistryObject<SkillDataKey<Integer>> LAST_ACTIVE = DATA_KEYS.register("last_active", () -> SkillDataKey.createIntKey(0, false, ParryingSkill.class));
 	public static final RegistryObject<SkillDataKey<Integer>> PARRY_MOTION_COUNTER = DATA_KEYS.register("parry_motion_counter", () -> SkillDataKey.createIntKey(0, false, ParryingSkill.class));
 	public static final RegistryObject<SkillDataKey<Float>> FALL_DISTANCE = DATA_KEYS.register("fall_distance", () -> SkillDataKey.createFloatKey(0.0F, false, MeteorSlamSkill.class));

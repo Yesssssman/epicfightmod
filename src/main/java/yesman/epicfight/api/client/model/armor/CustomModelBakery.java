@@ -45,7 +45,7 @@ public class CustomModelBakery {
 		ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFile));
 		
 		for (Map.Entry<ResourceLocation, AnimatedMesh> entry : BAKED_MODELS.entrySet()) {
-			ZipEntry zipEntry = new ZipEntry(String.format("assets/%s/%s", entry.getKey().getNamespace(), entry.getKey().getPath()));
+			ZipEntry zipEntry = new ZipEntry(String.format("assets/%s/animmodels/armor/%s.json", entry.getKey().getNamespace(), entry.getKey().getPath()));
 			Gson gson = new GsonBuilder().create();
 			out.putNextEntry(zipEntry);
 			out.write(gson.toJson(entry.getValue().toJsonObject()).getBytes());

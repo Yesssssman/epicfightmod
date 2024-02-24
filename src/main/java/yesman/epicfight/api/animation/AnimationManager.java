@@ -1,14 +1,19 @@
 package yesman.epicfight.api.animation;
 
 import java.util.Map;
+import java.util.function.Supplier;
 
 import com.google.common.collect.Maps;
 
+import net.minecraft.core.IdMapper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraftforge.fml.ModLoader;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistryInternal;
+import net.minecraftforge.registries.RegistryManager;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.AnimationDataReader;
 import yesman.epicfight.api.data.reloader.SkillManager;
@@ -18,6 +23,11 @@ import yesman.epicfight.main.EpicFightMod;
 public class AnimationManager extends SimplePreparableReloadListener<Map<Integer, Map<Integer, StaticAnimation>>> {
 	private final Map<Integer, Map<Integer, StaticAnimation>> animationById = Maps.newHashMap();
 	private final Map<ResourceLocation, StaticAnimation> animationByName = Maps.newHashMap();
+	/*
+	 * Note: The above registries will be replaced to below Forge registries
+	 */
+	private IForgeRegistry<StaticAnimation> animationRegistry;
+	private IdMapper<StaticAnimation> animationIdMap;
 	private String modid;
 	private int namespaceHash;
 	private int counter = 0;
@@ -138,5 +148,35 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 	
 	public Map<ResourceLocation, StaticAnimation> getNameMap() {
 		return this.animationByName;
+	}
+	
+	public static AnimationRegistryCallbacks getCallBack() {
+		return AnimationRegistryCallbacks.INSTANCE;
+	}
+	
+	private static class AnimationRegistryCallbacks implements IForgeRegistry.BakeCallback<StaticAnimation>, IForgeRegistry.CreateCallback<StaticAnimation> {
+		private static final AnimationRegistryCallbacks INSTANCE = new AnimationRegistryCallbacks();
+		private static final ResourceLocation ANIMATION_ID_MAP = new ResourceLocation(EpicFightMod.MODID, "animationidmap");
+		
+		@Override
+		@SuppressWarnings("unchecked")
+        public void onBake(IForgeRegistryInternal<StaticAnimation> owner, RegistryManager stage) {
+            IdMapper<StaticAnimation> animationIdMap = owner.getSlaveMap(ANIMATION_ID_MAP, IdMapper.class);
+            
+			for (StaticAnimation animation : owner) {
+				animationIdMap.add(animation);
+			}
+        }
+		
+		@Override
+		public void onCreate(IForgeRegistryInternal<StaticAnimation> owner, RegistryManager stage) {
+			IdMapper<StaticAnimation> animationIdMap = new IdMapper<StaticAnimation> (owner.getKeys().size());
+			owner.setSlaveMap(ANIMATION_ID_MAP, animationIdMap);
+			EpicFightMod.getInstance().animationManager.animationIdMap = animationIdMap;
+		}
+	}
+	
+	public void onRegistryCreated(Supplier<IForgeRegistry<StaticAnimation>> animationRegistry) {
+		this.animationRegistry = animationRegistry.get();
 	}
 }

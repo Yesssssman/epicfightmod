@@ -24,7 +24,7 @@ public class SkillDataKey<T> {
 	private static final ResourceLocation CLASS_TO_DATA_KEYS = new ResourceLocation(EpicFightMod.MODID, "classtodatakeys");
 	private static final ResourceLocation DATA_KEY_TO_ID = new ResourceLocation(EpicFightMod.MODID, "datakeytoid");
 	
-	private static class SkillDataKeyCallbacks implements IForgeRegistry.BakeCallback<SkillDataKey<?>>, IForgeRegistry.ClearCallback<SkillDataKey<?>>, IForgeRegistry.CreateCallback<SkillDataKey<?>> {
+	private static class SkillDataKeyCallbacks implements IForgeRegistry.BakeCallback<SkillDataKey<?>>, IForgeRegistry.CreateCallback<SkillDataKey<?>> {
 		static final SkillDataKeyCallbacks INSTANCE = new SkillDataKeyCallbacks();
 		
 		@Override
@@ -39,18 +39,16 @@ public class SkillDataKey<T> {
 			Map<Class<?>, Set<SkillDataKey<?>>> skillDataKeys = owner.getSlaveMap(CLASS_TO_DATA_KEYS, Map.class);
 			
 			for (Class<?> key : SKILL_DATA_KEYS.keySet()) {
-				if (SKILL_DATA_KEYS.containsKey(key)) {
-					Set<SkillDataKey<?>> dataKeySet = Sets.newHashSet();
-					dataKeySet.addAll(SKILL_DATA_KEYS.get(key));
-					skillDataKeys.put(key, dataKeySet);
-				}
+				Set<SkillDataKey<?>> dataKeySet = Sets.newHashSet();
+				dataKeySet.addAll(SKILL_DATA_KEYS.get(key));
+				skillDataKeys.put(key, dataKeySet);
 				
 				Class<?> superKey = key.getSuperclass();
 				
 				while (superKey != null) {
 					if (SKILL_DATA_KEYS.containsKey(superKey)) {
-						Set<SkillDataKey<?>> dataKeySet = skillDataKeys.get(key);
-						dataKeySet.addAll(SKILL_DATA_KEYS.get(superKey));
+						Set<SkillDataKey<?>> dataKeySet$2 = skillDataKeys.get(key);
+						dataKeySet$2.addAll(SKILL_DATA_KEYS.get(superKey));
 					}
 					
 					superKey = superKey.getSuperclass();
@@ -59,11 +57,6 @@ public class SkillDataKey<T> {
 			
 			SKILL_DATA_KEYS.clear();
         }
-		
-		@Override
-		public void onClear(IForgeRegistryInternal<SkillDataKey<?>> owner, RegistryManager stage) {
-			//owner.getSlaveMap(CLASS_TO_DATA_KEYS, Map.class).clear();
-		}
 		
 		@Override
 		public void onCreate(IForgeRegistryInternal<SkillDataKey<?>> owner, RegistryManager stage) {

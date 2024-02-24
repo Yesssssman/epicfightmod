@@ -1,6 +1,7 @@
 package yesman.epicfight.main;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,12 +26,15 @@ import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
+import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.NewRegistryEvent;
+import net.minecraftforge.registries.RegistryBuilder;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.ServerAnimator;
+import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.model.ItemSkins;
 import yesman.epicfight.api.client.model.Meshes;
@@ -82,21 +86,19 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 /**
  *  Known issues
  *  
- *  1. armor resource packs are not reloaded in 1.19.2
-
-	2. make all version to use resource location format for weapon type in datapack
-	
-	3. Wrathful Thunder doesn't stun the entity and unable to guard (solved)
-	
-	4. attack , speed bonus are not applied to tooltip (solved)
-	
-	5. Rushing Tempo doesn't work if server requires any resource packs (solved)
-	
-	6. Fixed weapon type datapack loading issue in dedicated server
+ *  1. armor resource packs are not reloaded in 1.19.2 (Need to test, path and .json extend)
+ *  
+ *	2. make all version to use resource location format for weapon type in datapack (solved)
+ *	
+ *	3. Wrathful Thunder doesn't stun the entity and unable to guard (solved)
+ *	
+ *	4. attack , speed bonus are not applied to tooltip (solved)
+ *	
+ *	5. Rushing Tempo doesn't work if server requires any resource packs (solved)
+ *	
+ *	6. Fixed weapon type datapack loading issue in dedicated server
  * @author yesman
- *
  */
-
 @Mod("epicfight")
 public class EpicFightMod {
 	public static final String MODID = "epicfight";
@@ -175,7 +177,11 @@ public class EpicFightMod {
 	}
     
     private void event(NewRegistryEvent event) {
-    	//System.out.println( EpicFightConditions.REGISTRY.get() );
+    	RegistryBuilder<StaticAnimation> registryBuilder = RegistryBuilder.of(MODID + "animation");
+    	registryBuilder.addCallback(AnimationManager.getCallBack());
+    	
+    	Supplier<IForgeRegistry<StaticAnimation>> animationRegistry = event.create(registryBuilder);
+    	this.animationManager.onRegistryCreated(animationRegistry);
     }
     
     private void constructMod(final FMLConstructModEvent event) {
