@@ -31,11 +31,11 @@ public class IngameConfigurationScreen extends Screen {
 		this.addRenderableWidget(Button.builder(Component.translatable("gui." + EpicFightMod.MODID + ".button.controls"), (button) -> {
 			Minecraft.getInstance().setScreen(new EpicFightControlOptionScreen(this, configs));
 		}).pos(this.width / 2 + 5, 42).size(160, 20).build());
-		
+		/**
 		this.addRenderableWidget(Button.builder(Component.translatable("gui." + EpicFightMod.MODID + ".button.datapack_edit"), (button) -> {
 			Minecraft.getInstance().setScreen(new DatapackEditScreen(this));
 		}).pos(this.width / 2 - 165, 68).size(160, 20).build());
-		
+		**/
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {
 			this.minecraft.setScreen(this.parentScreen);
 		}).bounds(this.width / 2 - 100, this.height - 40, 200, 20).build());

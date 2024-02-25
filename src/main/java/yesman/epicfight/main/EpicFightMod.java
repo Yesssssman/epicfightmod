@@ -84,20 +84,15 @@ import yesman.epicfight.world.level.block.EpicFightBlocks;
 import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 
 /**
- *  Known issues
+ *  TODO
  *  
- *  1. armor resource packs are not reloaded in 1.19.2 (Need to test, path and .json extend)
+ *  1. Liechtenaur can be activated even when you're not holding the weapon
  *  
- *	2. make all version to use resource location format for weapon type in datapack (solved)
- *	
- *	3. Wrathful Thunder doesn't stun the entity and unable to guard (solved)
- *	
- *	4. attack , speed bonus are not applied to tooltip (solved)
- *	
- *	5. Rushing Tempo doesn't work if server requires any resource packs (solved)
- *	
- *	6. Fixed weapon type datapack loading issue in dedicated server
- * @author yesman
+ *  2. All items are registred to mining category that is already registered as battle category
+ *  
+ *  3. Add an event to toggle the player's model
+ *  
+ *  @author yesman
  */
 @Mod("epicfight")
 public class EpicFightMod {
