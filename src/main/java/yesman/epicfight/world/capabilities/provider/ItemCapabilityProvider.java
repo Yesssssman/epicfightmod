@@ -51,8 +51,8 @@ public class ItemCapabilityProvider implements ICapabilityProvider, NonNullSuppl
 		CAPABILITIES.put(item, cap);
 	}
 	
-	public static boolean has(Item item) {
-		return CAPABILITIES.containsKey(item);
+	public static CapabilityItem get(Item item) {
+		return CAPABILITIES.getOrDefault(item, CAPABILITY_BY_CLASS.containsKey(item.getClass()) ? CAPABILITY_BY_CLASS.get(item.getClass()).apply(item).build() : null);
 	}
 	
 	public static void clear() {

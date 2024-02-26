@@ -1,11 +1,18 @@
 package yesman.epicfight.client.gui.screen;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -14,18 +21,12 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.client.gui.component.BasicButton;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.client.CPChangeSkill;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillSlot;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 
 @OnlyIn(Dist.CLIENT)
 public class SkillEditScreen extends Screen {
@@ -91,9 +92,7 @@ public class SkillEditScreen extends Screen {
 					
 					this.selectedSlotButton = (SlotButton)button;
 					
-				}, (button, guiGraphics, x, y) -> {
-					guiGraphics.renderTooltip(this.minecraft.font, this.minecraft.font.split(Component.translatable(SkillSlot.ENUM_MANAGER.toTranslated(skillSlot)), Math.max(this.width / 2 - 43, 170)), x, y);
-				});
+				}, Component.translatable(SkillSlot.ENUM_MANAGER.toTranslated(skillSlot)));
 				
 				this.slotButtons.put(skillSlot, slotButton);
 				this.addWidget(slotButton);
@@ -184,19 +183,24 @@ public class SkillEditScreen extends Screen {
 		}
 	}
 	
-	class SlotButton extends BasicButton {
+	class SlotButton extends Button {
 		private final Skill iconSkill;
 		private final SkillSlot slot;
 
-		public SlotButton(int x, int y, int width, int height, SkillSlot slot, Skill skill, OnPress pressedAction, OnTooltip onTooltip) {
-			super(x, y, width, height, Component.empty(), pressedAction, onTooltip);
+		public SlotButton(int x, int y, int width, int height, SkillSlot slot, Skill skill, OnPress pressedAction, Component tooltipMessage) {
+			super(x, y, width, height, Component.empty(), pressedAction, Button.DEFAULT_NARRATION);
 			this.iconSkill = skill;
 			this.slot = slot;
+			this.setTooltip(Tooltip.create(tooltipMessage));
 		}
 		
 		@Override
 		public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-			this.isHovered = mouseX >= this.getX() && mouseY >= this.getY() && mouseX < this.getX() + this.width && mouseY < this.getY() + this.height;
+			super.render(guiGraphics, mouseX, mouseY, partialTicks);
+		}
+		
+		@Override
+		protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 			int y = (this.isHovered || SkillEditScreen.this.selectedSlotButton == this) ? 35 : 17;
 			guiGraphics.blit(SKILL_EDIT_UI, this.getX(), this.getY(), 237, y, this.width, this.height);
 			
@@ -204,18 +208,14 @@ public class SkillEditScreen extends Screen {
 				RenderSystem.enableBlend();
 				guiGraphics.blit(this.iconSkill.getSkillTexture(), this.getX() + 1, this.getY() + 1, 16, 16, 0, 0, 128, 128, 128, 128);
 			}
-			
-			if (this.isHoveredOrFocused()) {
-				this.renderToolTip(guiGraphics, mouseX, mouseY);
-			}
 		}
 	}
 	
-	class LearnSkillButton extends BasicButton {
+	class LearnSkillButton extends Button {
 		private final Skill skill;
 
 		public LearnSkillButton(int x, int y, int width, int height, Skill skill, Component title, OnPress pressedAction) {
-			super(x, y, width, height, title, pressedAction, BasicButton.NO_TOOLTIP);
+			super(x, y, width, height, title, pressedAction, Button.DEFAULT_NARRATION);
 			this.skill = skill;
 		}
 		

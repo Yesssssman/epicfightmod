@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -25,7 +26,7 @@ import yesman.epicfight.config.ClientConfig.VerticalBasis;
 import yesman.epicfight.config.OptionHandler;
 
 @OnlyIn(Dist.CLIENT)
-public class UIComponent extends BasicButton {
+public class UIComponent extends Button {
 	protected final UISetupScreen parentScreen;
 	protected final ResourceLocation texture;
 	protected int texU;
@@ -47,11 +48,10 @@ public class UIComponent extends BasicButton {
 	
 	public UIComponentPop<?> popupScreen;
 	
-	public UIComponent(int x, int y, OptionHandler<Integer> xCoord, OptionHandler<Integer> yCoord, OptionHandler<HorizontalBasis> horizontalBasis, OptionHandler<VerticalBasis> verticalBasis
-			, int width, int height, int texU, int texV, int texW, int texH, int resolutionDivW, int resolutionDivH, int r, int g, int b
-			, UISetupScreen parentScreen, ResourceLocation texture) {
+	public UIComponent(int x, int y, OptionHandler<Integer> xCoord, OptionHandler<Integer> yCoord, OptionHandler<HorizontalBasis> horizontalBasis, OptionHandler<VerticalBasis> verticalBasis, 
+						int width, int height, int texU, int texV, int texW, int texH, int resolutionDivW, int resolutionDivH, int r, int g, int b, UISetupScreen parentScreen, ResourceLocation texture) {
 		
-		super(x, y, width, height, Component.literal(""), (button) -> {}, NO_TOOLTIP);
+		super(x, y, width, height, Component.literal(""), (button) -> {}, Button.DEFAULT_NARRATION);
 		
 		this.texture = texture;
 		this.texU = texU;

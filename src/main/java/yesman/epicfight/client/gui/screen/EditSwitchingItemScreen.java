@@ -10,6 +10,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -18,8 +19,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
-import yesman.epicfight.client.gui.component.BasicButton;
 import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.world.capabilities.item.CapabilityItem;
+import yesman.epicfight.world.capabilities.item.WeaponCapability;
 import yesman.epicfight.world.capabilities.provider.ItemCapabilityProvider;
 
 @OnlyIn(Dist.CLIENT)
@@ -55,7 +57,7 @@ public class EditSwitchingItemScreen extends Screen {
 		this.addRenderableWidget(this.battleAutoSwitchItems);
 		this.addRenderableWidget(this.miningAutoSwitchItems);
 
-		this.addRenderableWidget(new BasicButton(this.width / 2 - 80, this.height - 28, 160, 20, CommonComponents.GUI_DONE, (button) -> {
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {
 			EpicFightMod.CLIENT_CONFIGS.battleAutoSwitchItems.clear();
 			EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems.clear();
 			this.battleAutoSwitchItems.toList().forEach((item) -> {
@@ -66,7 +68,7 @@ public class EditSwitchingItemScreen extends Screen {
 			});
 			EpicFightMod.CLIENT_CONFIGS.save();
 			this.onClose();
-		}));
+		}).bounds(this.width / 2 - 80, this.height - 28, 160, 20).build());
 	}
 
 	@Override
@@ -191,7 +193,7 @@ public class EditSwitchingItemScreen extends Screen {
 			@Override
 			public boolean equals(Object obj) {
 				if (obj instanceof ItemEntry && !(this instanceof ButtonInEntry)) {
-					return this.itemStack.equals(((ItemEntry)obj).itemStack);
+					return this.itemStack.getItem().equals(((ItemEntry)obj).itemStack.getItem());
 				} else {
 					return super.equals(obj);
 				}
@@ -211,23 +213,28 @@ public class EditSwitchingItemScreen extends Screen {
 
 			public ButtonInEntry() {
 				super(ItemStack.EMPTY);
-				this.addItemButton = new BasicButton(0, 0, 20, 20, Component.literal("+"), (button) -> {
+				
+				this.addItemButton = Button.builder(Component.literal("+"), (button) -> {
 					EditSwitchingItemScreen.RegisteredItemList thisList = EditSwitchingItemScreen.RegisteredItemList.this == EditSwitchingItemScreen.this.battleAutoSwitchItems ? EditSwitchingItemScreen.this.battleAutoSwitchItems : EditSwitchingItemScreen.this.miningAutoSwitchItems;
 					EditSwitchingItemScreen.RegisteredItemList opponentList = EditSwitchingItemScreen.RegisteredItemList.this == EditSwitchingItemScreen.this.battleAutoSwitchItems ? EditSwitchingItemScreen.this.miningAutoSwitchItems : EditSwitchingItemScreen.this.battleAutoSwitchItems;
 					RegisteredItemList.this.minecraft.setScreen(new EditItemListScreen(EditSwitchingItemScreen.this, thisList, opponentList));
-				}, BasicButton.NO_TOOLTIP);
-
-				this.removeAllButton = new BasicButton(0, 0, 60, 20,  Component.translatable("epicfight.gui.delete_all"), (button) -> {
+				}).bounds(0, 0, 20, 20).build();
+				
+				this.removeAllButton = Button.builder(Component.translatable("epicfight.gui.delete_all"), (button) -> {
 					RegisteredItemList.this.clearEntries();
 					RegisteredItemList.this.addEntry(this);
-				}, BasicButton.NO_TOOLTIP);
-
-				this.automaticRegisterButton = new BasicButton(0, 0, 60, 20,  Component.translatable("epicfight.gui.auto_add"), (button) -> {
+				}).bounds(0, 0, 60, 20).build();
+				
+				this.automaticRegisterButton = Button.builder(Component.translatable("epicfight.gui.auto_add"), (button) -> {
 					boolean isBattleTab = EditSwitchingItemScreen.RegisteredItemList.this == EditSwitchingItemScreen.this.battleAutoSwitchItems;
+					
 					if (isBattleTab) {
 						for (Item item : ForgeRegistries.ITEMS.getValues()) {
-							if (ItemCapabilityProvider.has(item)) {
+							CapabilityItem itemCap = ItemCapabilityProvider.get(item);
+							
+							if (itemCap != null && itemCap instanceof WeaponCapability) {
 								ItemEntry itemEntry = new ItemEntry(item.getDefaultInstance());
+								
 								if (!EditSwitchingItemScreen.this.battleAutoSwitchItems.children().contains(itemEntry)) {
 									EditSwitchingItemScreen.this.battleAutoSwitchItems.addEntry(itemEntry);
 								}
@@ -236,6 +243,7 @@ public class EditSwitchingItemScreen extends Screen {
 					} else {
 						for (Item item : ForgeRegistries.ITEMS.getValues()) {
 							ItemEntry itemEntry = new ItemEntry(item.getDefaultInstance());
+							
 							if (!EditSwitchingItemScreen.this.battleAutoSwitchItems.children().contains(itemEntry)) {
 								if (!EditSwitchingItemScreen.this.miningAutoSwitchItems.children().contains(itemEntry)) {
 									EditSwitchingItemScreen.this.miningAutoSwitchItems.addEntry(itemEntry);
@@ -243,20 +251,8 @@ public class EditSwitchingItemScreen extends Screen {
 							}
 						}
 					}
-
-				}, (button, guiGraphics, mouseX, mouseY) -> {
-					boolean isBattleTab = EditSwitchingItemScreen.RegisteredItemList.this == EditSwitchingItemScreen.this.battleAutoSwitchItems;
-					String tooltip = isBattleTab ? "epicfight.gui.tooltip_battle" : "epicfight.gui.tooltip_mining";
-					if (isBattleTab) {
-						EditSwitchingItemScreen.this.deferredTooltip = () -> {
-							guiGraphics.renderTooltip(EditSwitchingItemScreen.this.minecraft.font, EditSwitchingItemScreen.this.minecraft.font.split(
-									 Component.translatable(tooltip), Math.max(EditSwitchingItemScreen.this.width / 2 - 43, 170)), mouseX, mouseY);
-						};
-					} else {
-						guiGraphics.renderTooltip(EditSwitchingItemScreen.this.minecraft.font, EditSwitchingItemScreen.this.minecraft.font.split(
-								 Component.translatable(tooltip), Math.max(EditSwitchingItemScreen.this.width / 2 - 43, 170)), mouseX, mouseY);
-					}
-				});
+				}).bounds(0, 0, 60, 20).tooltip(Tooltip.create(EditSwitchingItemScreen.RegisteredItemList.this == EditSwitchingItemScreen.this.battleAutoSwitchItems
+						? Component.translatable("epicfight.gui.tooltip_battle") : Component.translatable("epicfight.gui.tooltip_mining"))).build();
 			}
 			
 			@Override

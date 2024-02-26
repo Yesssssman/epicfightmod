@@ -1,10 +1,16 @@
 package yesman.epicfight.client.gui.screen;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
@@ -17,7 +23,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.client.gui.component.BasicButton;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
@@ -28,10 +33,6 @@ import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.skill.passive.PassiveSkill;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.item.SkillBookItem;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 @OnlyIn(Dist.CLIENT)
 public class SkillBookScreen extends Screen {
@@ -67,35 +68,29 @@ public class SkillBookScreen extends Screen {
 		
 		boolean isUsing = thisSkill != null;
 		boolean condition = this.skill == null ? false : this.skill.getPriorSkill() == null || priorSkill != null;
-		BasicButton.OnTooltip tooltip = BasicButton.NO_TOOLTIP;
+		//BasicButton.OnTooltip tooltip = BasicButton.NO_TOOLTIP;
+		Component tooltip = Component.literal("");
 		
 		if (!isUsing) {
 			if (condition) {
 				if (thisSkill != null) {
-					tooltip = (button, guiGraphics, mouseX, mouseY) -> {
-						guiGraphics.renderTooltip(this.minecraft.font, this.minecraft.font.split(Component.translatable("gui." + EpicFightMod.MODID + ".replace",
-								Component.translatable(this.skill.getTranslationKey()).getString()), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
-					};
+					tooltip = Component.translatable("gui." + EpicFightMod.MODID + ".replace", Component.translatable(this.skill.getTranslationKey()).getString());
 				}
 			} else {
-				tooltip = (button, guiGraphics, mouseX, mouseY) -> {
-					guiGraphics.renderTooltip(this.minecraft.font, this.minecraft.font.split(Component.translatable("gui." + EpicFightMod.MODID + ".require_learning",
-							Component.translatable(this.skill.getPriorSkill().getTranslationKey()).getString()), Math.max(this.width / 2 - 43, 170)), mouseX, mouseY);
-				};
+				tooltip = Component.translatable("gui." + EpicFightMod.MODID + ".require_learning", Component.translatable(this.skill.getPriorSkill().getTranslationKey()).getString());
 			}
 		}
 		
-		Button changeButton = new BasicButton((this.width + 150) / 2, (this.height + 110) / 2, 46, 20,
-			Component.translatable("gui." + EpicFightMod.MODID + (isUsing ? ".applied" : condition ? ".learn" : ".unusable")), (p_onPress_1_) -> {
-				Set<SkillContainer> skillContainers = this.playerpatch.getSkillCapability().getSkillContainersFor(this.skill.getCategory());
-				
-				if (skillContainers.size() == 1) {
-					this.learnSkill(skillContainers.iterator().next());
-				} else {
-					SlotSelectScreen slotSelectScreen = new SlotSelectScreen(skillContainers, this);
-					this.minecraft.setScreen(slotSelectScreen);
-				}
-			}, tooltip);
+		Button changeButton = Button.builder(Component.translatable("gui." + EpicFightMod.MODID + (isUsing ? ".applied" : condition ? ".learn" : ".unusable")), (button) -> {
+			Set<SkillContainer> skillContainers = this.playerpatch.getSkillCapability().getSkillContainersFor(this.skill.getCategory());
+			
+			if (skillContainers.size() == 1) {
+				this.learnSkill(skillContainers.iterator().next());
+			} else {
+				SlotSelectScreen slotSelectScreen = new SlotSelectScreen(skillContainers, this);
+				this.minecraft.setScreen(slotSelectScreen);
+			}
+		}).bounds((this.width + 150) / 2, (this.height + 110) / 2, 46, 20).tooltip(Tooltip.create(tooltip, null)).build();
 		
 		if (isUsing || !condition) {
 			changeButton.active = false;

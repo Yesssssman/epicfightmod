@@ -1,17 +1,22 @@
 package yesman.epicfight.client.gui.screen;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+
 import com.mojang.blaze3d.systems.RenderSystem;
+
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
-import yesman.epicfight.client.gui.component.BasicButton;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.SkillContainer;
-
-import java.util.*;
 
 public class SlotSelectScreen extends Screen {
 	private static final ResourceLocation BACKGROUND = new ResourceLocation(EpicFightMod.MODID, "textures/gui/screen/slot_select.png");
@@ -88,9 +93,9 @@ public class SlotSelectScreen extends Screen {
 		super.render(guiGraphics, mouseX, mouseY, partialTicks);
 	}
 	
-	class SlotButton extends BasicButton {
+	class SlotButton extends Button {
 		public SlotButton(int x, int y, int width, int height, Component title, OnPress pressedAction) {
-			super(x, y, width, height, title, pressedAction);
+			super(x, y, width, height, title, pressedAction, Button.DEFAULT_NARRATION);
 		}
 		
 		@Override

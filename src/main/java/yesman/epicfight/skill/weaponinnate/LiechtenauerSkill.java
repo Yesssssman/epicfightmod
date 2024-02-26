@@ -166,7 +166,9 @@ public class LiechtenauerSkill extends WeaponInnateSkill {
 		if (executer.isLogicalClient()) {
 			return super.canExecute(executer);
 		} else {
-			return executer.getOriginal().getVehicle() == null;
+			ItemStack itemstack = executer.getOriginal().getMainHandItem();
+			
+			return EpicFightCapabilities.getItemStackCapability(itemstack).getInnateSkill(executer, itemstack) == this && executer.getOriginal().getVehicle() == null;
 		}
 	}
 	

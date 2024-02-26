@@ -1,7 +1,13 @@
 package yesman.epicfight.client.gui.component;
 
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.BufferUploader;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Button;
@@ -74,9 +80,7 @@ public class UIComponentPop<T extends UIComponent> extends Screen implements Con
 	}
 	
 	public static Button createButton(int x, int y, int width, int height, Button.OnPress onpress) {
-		Button bt = new BasicButton(x, y, width, height, Component.literal(""), onpress);
-
-		return bt;
+		return Button.builder(Component.literal(""), onpress).bounds(x, y, width, height).build();
 	}
 	
 	public void openPop() {
@@ -189,14 +193,14 @@ public class UIComponentPop<T extends UIComponent> extends Screen implements Con
 			}));
 		}
 		
-		public static class AlignButton extends BasicButton {
+		public static class AlignButton extends Button {
 			private static final ResourceLocation BATTLE_ICONS = new ResourceLocation(EpicFightMod.MODID, "textures/gui/battle_icons.png");
 			private final OptionHandler<HorizontalBasis> horBasis;
 			private final OptionHandler<VerticalBasis> verBasis;
 			private final OptionHandler<AlignDirection> alignDirection;
 			
 			public AlignButton(int x, int y, int width, int height, OptionHandler<HorizontalBasis> horBasis, OptionHandler<VerticalBasis> verBasis, OptionHandler<AlignDirection> alignDirection, OnPress onpress) {
-				super(x, y, width, height, Component.literal(""), onpress);
+				super(x, y, width, height, Component.literal(""), onpress, Button.DEFAULT_NARRATION);
 				
 				this.horBasis = horBasis;
 				this.verBasis = verBasis;

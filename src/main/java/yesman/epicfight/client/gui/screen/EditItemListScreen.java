@@ -1,14 +1,23 @@
 package yesman.epicfight.client.gui.screen;
 
+import java.util.List;
+import java.util.Set;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.*;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.Tesselator;
+import com.mojang.blaze3d.vertex.VertexFormat;
+
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.ObjectSelectionList;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.CommonComponents;
@@ -19,10 +28,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
-import yesman.epicfight.client.gui.component.BasicButton;
-
-import java.util.List;
-import java.util.Set;
 
 @OnlyIn(Dist.CLIENT)
 public class EditItemListScreen extends Screen {
@@ -53,13 +58,13 @@ public class EditItemListScreen extends Screen {
 		this.selectedItemList.setLeftPos(25);
 		this.addRenderableWidget(this.itemButtonList);
 		this.addRenderableWidget(this.selectedItemList);
-		this.addRenderableWidget(new BasicButton(this.width / 2 + 125, this.height - 26, 60, 20, CommonComponents.GUI_DONE, (button) -> {
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {
 			for (Item item : this.selectedItemList.toList()) {
 				this.targetList.addEntry(item);
 				this.opponentList.removeIfPresent(item);
 			}
 			this.onClose();
-		}));
+		}).bounds(this.width / 2 + 125, this.height - 26, 60, 20).build());
 	}
 
 	@Override
@@ -117,7 +122,6 @@ public class EditItemListScreen extends Screen {
 			}
 			
 			IPressableExtended pressAction = null;
-			BasicButton.OnTooltip onTooltip = null;
 			
 			if (ButtonList.this.type == Type.LIST) {
 				pressAction = (screen, button, x, y) -> {
@@ -131,23 +135,7 @@ public class EditItemListScreen extends Screen {
 				};
 			}
 			
-			if (EditItemListScreen.this.opponentRegistered.contains(item)) {
-				onTooltip = (button, guiGraphics, mouseX, mouseY) -> {
-					Component displayName = ((ItemButton)button).itemStack.getHoverName();
-					guiGraphics.renderTooltip(EditItemListScreen.this.font, Component.translatable("epicfight.gui.warn_already_registered",
-						displayName.equals(Component.empty()) ? Component.literal((ForgeRegistries.ITEMS.getKey(((ItemButton)button).itemStack.getItem()).toString()))
-							: displayName), mouseX, mouseY
-					);
-				};
-			} else {
-				onTooltip = (button, guiGraphics, mouseX, mouseY) -> {
-					Component displayName = ((ItemButton)button).itemStack.getHoverName();
-					guiGraphics.renderTooltip(EditItemListScreen.this.font, displayName.equals(Component.empty()) ?
-						Component.literal((ForgeRegistries.ITEMS.getKey(((ItemButton)button).itemStack.getItem()).toString()) ) : displayName, mouseX, mouseY);
-				};
-			}
-			
-			entry.buttonList.add(new ItemButton(0, 0, 16, 16, pressAction, onTooltip, EditItemListScreen.this, item.getDefaultInstance()));
+			entry.buttonList.add(new ItemButton(0, 0, 16, 16, pressAction, EditItemListScreen.this, item.getDefaultInstance()));
 		}
 		
 		public void removeAndRearrange(int x, int y) {
@@ -329,20 +317,35 @@ public class EditItemListScreen extends Screen {
 		}
 	}
 	
-	class ItemButton extends BasicButton {
+	class ItemButton extends Button {
 		private static final Set<Item> UNRENDERABLES = Sets.newHashSet();
 		
 		private final ItemStack itemStack;
 		private final IPressableExtended pressedAction;
 		
-		public ItemButton(int x, int y, int width, int height, IPressableExtended pressedAction, OnTooltip onTooltip, EditItemListScreen screen, ItemStack itemStack) {
-			super(x, y, width, height, Component.empty(), (button)->{}, onTooltip);
+		public ItemButton(int x, int y, int width, int height, IPressableExtended pressedAction, EditItemListScreen screen, ItemStack itemStack) {
+			super(x, y, width, height, Component.empty(), (button)->{}, Button.DEFAULT_NARRATION);
+			
 			this.itemStack = itemStack;
 			this.pressedAction = pressedAction;
 		}
 		
 		@Override
-		public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		public Tooltip getTooltip() {
+			Component displayName = this.itemStack.getHoverName();
+			Component tooltipMessage = null;
+			
+			if (EditItemListScreen.this.opponentRegistered.contains(this.itemStack.getItem())) {
+				tooltipMessage = Component.translatable("epicfight.gui.warn_already_registered", displayName.equals(Component.empty()) ? Component.literal((ForgeRegistries.ITEMS.getKey(this.itemStack.getItem()).toString())) : displayName);
+			} else {
+				tooltipMessage = displayName.equals(Component.empty()) ? Component.literal((ForgeRegistries.ITEMS.getKey(this.itemStack.getItem()).toString()) ) : displayName;
+			}
+			
+			return Tooltip.create(tooltipMessage);
+		}
+		
+		@Override
+		protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 			if (this.isMouseOver(mouseX, mouseY)) {
 				Tesselator tessellator = Tesselator.getInstance();
 				//GlStateManager._disableTexture();
@@ -353,7 +356,19 @@ public class EditItemListScreen extends Screen {
 				bufferbuilder.vertex((double) this.getX() + this.width, this.getY(), 0.0D).color(255, 255, 255, 255).endVertex();
 				bufferbuilder.vertex(this.getX(), this.getY(), 0.0D).color(255, 255, 255, 255).endVertex();
 				tessellator.end();
-				this.onTooltip.onTooltip(this, guiGraphics, mouseX, mouseY);
+				
+				Component displayName = this.itemStack.getHoverName();
+				Component tooltipMessage = null;
+				
+				if (EditItemListScreen.this.opponentRegistered.contains(this.itemStack.getItem())) {
+					tooltipMessage = Component.translatable("epicfight.gui.warn_already_registered", displayName.equals(Component.empty()) ? Component.literal((ForgeRegistries.ITEMS.getKey(this.itemStack.getItem()).toString())) : displayName);
+				} else {
+					tooltipMessage = displayName.equals(Component.empty()) ? Component.literal((ForgeRegistries.ITEMS.getKey(this.itemStack.getItem()).toString()) ) : displayName;
+				}
+				
+				this.setTooltip(Tooltip.create(tooltipMessage));
+			} else {
+				this.setTooltip(null);
 			}
 			
 			try {
