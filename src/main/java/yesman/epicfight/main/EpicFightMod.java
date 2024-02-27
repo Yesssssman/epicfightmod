@@ -86,9 +86,7 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 /**
  *  TODO
  *  
- *  1. Liechtenaur can be activated even when you're not holding the weapon (solved)
  *  
- *  2. All items are registred to mining category that is already registered as battle category
  *  
  *  @author yesman
  */
