@@ -4,10 +4,10 @@ license="GNU GENERAL PUBLIC LICENSE"
 #issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/" #optional
 [[mods]] #mandatory
 modId="epicfight" #mandatory
-version="18.5.22" #mandatory
+version="18.5.23" #mandatory
 displayName="Epic Fight" #mandatory
 #displayURL="https://www.curseforge.com/minecraft/mc-mods/epic-fight-mod" #optional
-#logoFile="epicfight.png" #optional
+logoFile="epicfight_logo.png" #optional
 #credits="METAL" #optional
 #authors="Yesman" #optional
 description='''Fight til u dead
