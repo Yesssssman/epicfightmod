@@ -4,10 +4,10 @@ license="GNU GENERAL PUBLIC LICENSE"
 #issueTrackerURL="https://change.me.to.your.issue.tracker.example.invalid/" #optional
 [[mods]] #mandatory
 modId="epicfight" #mandatory
-version="19.5.21" #mandatory
+version="19.5.23" #mandatory
 displayName="Epic Fight" #mandatory
 #displayURL="https://www.curseforge.com/minecraft/mc-mods/epic-fight-mod" #optional
-#logoFile="epicfight.png" #optional
+logoFile="epicfight_logo.png" #optional
 #credits="Gui Brabo(aka Metal), Nathan(aka Stel312)" #optional
 #authors="Yesman" #optional
 description='''Fight til u dead
