@@ -13,6 +13,7 @@ import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
@@ -58,7 +59,9 @@ import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.network.EpicFightDataSerializers;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.particle.EpicFightParticles;
-import yesman.epicfight.server.commands.arguments.SkillArgument;
+import yesman.epicfight.server.commands.PlayerModeCommand;
+import yesman.epicfight.server.commands.PlayerSkillCommand;
+import yesman.epicfight.server.commands.arguments.EpicFightCommandArgumentTypes;
 import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillDataKeys;
@@ -86,7 +89,11 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 /**
  *  TODO
  *  
+ *  1. Fixed battojutsu crash
  *  
+ *  2. Fixed skill command not working in a dedicated server
+ *  
+ *  3. Fixed default weapon types not being reloaded when entering the world
  *  
  *  @author yesman
  */
@@ -113,7 +120,7 @@ public class EpicFightMod {
     	
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 		
-		bus.addListener(this::event);
+		bus.addListener(this::newRegistry);
 		bus.addListener(this::constructMod);
     	bus.addListener(this::doClientStuff);
     	bus.addListener(this::doCommonStuff);
@@ -141,11 +148,13 @@ public class EpicFightMod {
         EpicFightBlockEntities.BLOCK_ENTITIES.register(bus);
 		EpicFightLootTables.LOOT_MODIFIERS.register(bus);
 		EpicFightSounds.SOUNDS.register(bus);
-		EpicFightDataSerializers.VEC.register(bus);
+		EpicFightDataSerializers.ENTITY_DATA_SERIALIZER.register(bus);
 		EpicFightConditions.CONDITIONS.register(bus);
 		SkillDataKeys.DATA_KEYS.register(bus);
-		
+		EpicFightCommandArgumentTypes.COMMAND_ARGUMENT_TYPES.register(bus);
         EpicFightSkills.registerSkills();
+        
+        MinecraftForge.EVENT_BUS.addListener(this::command);
         MinecraftForge.EVENT_BUS.addListener(this::reloadListnerEvent);
         
         ConfigManager.loadConfig(ConfigManager.CLIENT_CONFIG, FMLPaths.CONFIGDIR.get().resolve(MODID + "-client.toml").toString());
@@ -167,12 +176,17 @@ public class EpicFightMod {
 		});
 	}
     
-    private void event(NewRegistryEvent event) {
+    private void newRegistry(NewRegistryEvent event) {
     	RegistryBuilder<StaticAnimation> registryBuilder = RegistryBuilder.of(MODID + "animation");
     	registryBuilder.addCallback(AnimationManager.getCallBack());
     	
     	Supplier<IForgeRegistry<StaticAnimation>> animationRegistry = event.create(registryBuilder);
     	this.animationManager.onRegistryCreated(animationRegistry);
+    }
+    
+    private void command(final RegisterCommandsEvent event) {
+		PlayerModeCommand.register(event.getDispatcher());
+		PlayerSkillCommand.register(event.getDispatcher(), event.getBuildContext());
     }
     
     private void constructMod(final FMLConstructModEvent event) {
@@ -202,7 +216,7 @@ public class EpicFightMod {
 	}
 	
 	private void doCommonStuff(final FMLCommonSetupEvent event) {
-		event.enqueueWork(SkillArgument::registerArgumentTypes);
+		event.enqueueWork(EpicFightCommandArgumentTypes::registerArgumentTypes);
 		event.enqueueWork(EpicFightPotions::addRecipes);
 		event.enqueueWork(EpicFightNetworkManager::registerPackets);
 		event.enqueueWork(ItemCapabilityProvider::registerWeaponTypesByClass);

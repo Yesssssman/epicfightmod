@@ -1,5 +1,10 @@
 package yesman.epicfight.server.commands.arguments;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -11,31 +16,21 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.synchronization.ArgumentTypeInfos;
-import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategory;
-
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
+import yesman.epicfight.skill.SkillSlot;
 
 public class SkillArgument implements ArgumentType<Skill> {
-	private static final Collection<String> EXAMPLES = Arrays.asList("spooky", "effect");
-	public static final DynamicCommandExceptionType ERROR_UNKNOWN_SKILL = new DynamicCommandExceptionType((obj) -> {
+	private static final Collection<String> EXAMPLES = Arrays.asList("epicfight:dodge");
+	private static final DynamicCommandExceptionType ERROR_UNKNOWN_SKILL = new DynamicCommandExceptionType((obj) -> {
 		return Component.literal("epicfight.skillNotFound");
 	});
 	
 	public static SkillArgument skill() {
 		return new SkillArgument();
-	}
-	
-	public static void registerArgumentTypes() {
-		ArgumentTypeInfos.registerByClass(SkillArgument.class, SingletonArgumentInfo.contextFree(SkillArgument::skill));
 	}
 	
 	public static Skill getSkill(CommandContext<CommandSourceStack> commandContext, String name) {
@@ -57,16 +52,17 @@ public class SkillArgument implements ArgumentType<Skill> {
 
 	@Override
 	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
-		final SkillCategory skillCategory = commandContext.getNodes().get(4).getNode() instanceof LiteralCommandNode<?> literalNode ? 
-				SkillCategory.ENUM_MANAGER.get(literalNode.getLiteral()) : null;
+		final SkillCategory skillCategory = commandContext.getNodes().get(4).getNode() instanceof LiteralCommandNode<?> literalNode ? nullParam(SkillSlot.ENUM_MANAGER.get(literalNode.getLiteral())) : null;
 		
-		return SharedSuggestionProvider.suggestResource(SkillManager.getLearnableSkillNames(
-								(skillBuilder) -> skillBuilder.isLearnable() && (skillCategory == null || skillBuilder.hasCategory(skillCategory))
-							), suggestionsBuilder);
+		return SharedSuggestionProvider.suggestResource(SkillManager.getLearnableSkillNames((skillBuilder) -> skillBuilder.isLearnable() && (skillCategory == null || skillBuilder.hasCategory(skillCategory))), suggestionsBuilder);
 	}
 	
 	@Override
 	public Collection<String> getExamples() {
 		return EXAMPLES;
+	}
+	
+	private static SkillCategory nullParam(SkillSlot slot) {
+		return slot == null ? null : slot.category();
 	}
 }

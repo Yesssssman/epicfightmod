@@ -72,6 +72,8 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 	
 	@Override
 	protected void apply(Map<ResourceLocation, JsonElement> packEntry, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
+		registerDefaultWeaponTypes();
+		
 		for (Map.Entry<ResourceLocation, JsonElement> entry : packEntry.entrySet()) {
 			CompoundTag nbt = null;
 			

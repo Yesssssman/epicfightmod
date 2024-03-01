@@ -1,11 +1,17 @@
 package yesman.epicfight.server.commands;
 
+import java.util.Collection;
+import java.util.Locale;
+import java.util.function.Supplier;
+
 import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+
+import net.minecraft.commands.CommandBuildContext;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -23,16 +29,12 @@ import yesman.epicfight.skill.SkillSlot;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
-import java.util.Collection;
-import java.util.Locale;
-import java.util.function.Supplier;
-
 public class PlayerSkillCommand {
 	private static final SimpleCommandExceptionType ERROR_ADD_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.epicfight.skill.add.failed"));
 	private static final SimpleCommandExceptionType ERROR_REMOVE_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.epicfight.skill.remove.failed"));
 	private static final SimpleCommandExceptionType ERROR_CLEAR_FAILED = new SimpleCommandExceptionType(Component.translatable("commands.epicfight.skill.clear.failed"));
 	
-	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
+	public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext commandBuildContext) {
 		RequiredArgumentBuilder<CommandSourceStack, EntitySelector> addCommandBuilder = Commands.argument("targets", EntityArgument.players());
 		RequiredArgumentBuilder<CommandSourceStack, EntitySelector> removeCommandBuilder = Commands.argument("targets", EntityArgument.players());
 		

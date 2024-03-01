@@ -5,7 +5,6 @@ import com.google.common.collect.Lists;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
-import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
@@ -17,8 +16,6 @@ import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPChangeGamerule;
 import yesman.epicfight.network.server.SPDatapackSync;
 import yesman.epicfight.network.server.SPDatapackSyncSkill;
-import yesman.epicfight.server.commands.PlayerModeCommand;
-import yesman.epicfight.server.commands.PlayerSkillCommand;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
@@ -32,12 +29,6 @@ public class WorldEvents {
 	@SubscribeEvent
 	public static void onLootTableRegistry(final LootTableLoadEvent event) {
 		EpicFightLootTables.modifyVanillaLootPools(event);
-    }
-	
-	@SubscribeEvent
-	public static void onCommandRegistry(final RegisterCommandsEvent event) {
-		PlayerModeCommand.register(event.getDispatcher());
-		PlayerSkillCommand.register(event.getDispatcher());
     }
 	
 	@SubscribeEvent
