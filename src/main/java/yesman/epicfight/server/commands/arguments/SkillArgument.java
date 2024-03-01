@@ -12,6 +12,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -31,21 +32,7 @@ public class SkillArgument implements ArgumentType<Skill> {
 	});
 	
 	public static SkillArgument skill() {
-		return new SkillArgument(null);
-	}
-	
-	public static SkillArgument skill(SkillCategory skillCategory) {
-		return new SkillArgument(skillCategory);
-	}
-	
-	private final SkillCategory skillCategory;
-	
-	public SkillArgument() {
-		this.skillCategory = null;
-	}
-	
-	public SkillArgument(SkillCategory skillCategory) {
-		this.skillCategory = skillCategory;
+		return new SkillArgument();
 	}
 	
 	public static void registerArgumentTypes() {
@@ -69,8 +56,10 @@ public class SkillArgument implements ArgumentType<Skill> {
 		});
 	}
 
-	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> p_98438_, SuggestionsBuilder p_98439_) {
-		return SharedSuggestionProvider.suggestResource(SkillManager.getLearnableSkillNames((skillBuilder) -> skillBuilder.isLearnable() && (this.skillCategory == null || skillBuilder.hasCategory(this.skillCategory))), p_98439_);
+	public <S> CompletableFuture<Suggestions> listSuggestions(CommandContext<S> commandContext, SuggestionsBuilder suggestionsBuilder) {
+		final SkillCategory skillCategory = commandContext.getNodes().get(4).getNode() instanceof LiteralCommandNode<?> literalNode ? SkillCategory.ENUM_MANAGER.get(literalNode.getLiteral()) : null;
+		
+		return SharedSuggestionProvider.suggestResource(SkillManager.getLearnableSkillNames((skillBuilder) -> skillBuilder.isLearnable() && (skillCategory == null || skillBuilder.hasCategory(skillCategory))), suggestionsBuilder);
 	}
 
 	public Collection<String> getExamples() {
