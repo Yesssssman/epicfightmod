@@ -1,5 +1,10 @@
 package yesman.epicfight.main;
 
+import java.util.function.Function;
+
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
@@ -18,9 +23,11 @@ import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import yesman.epicfight.api.animation.*;
+import yesman.epicfight.api.animation.AnimationManager;
+import yesman.epicfight.api.animation.Animator;
+import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
+import yesman.epicfight.api.animation.ServerAnimator;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.model.ItemSkins;
 import yesman.epicfight.api.client.model.Meshes;
@@ -41,7 +48,7 @@ import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.network.EpicFightDataSerializers;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.particle.EpicFightParticles;
-import yesman.epicfight.server.commands.arguments.SkillArgument;
+import yesman.epicfight.server.commands.arguments.EpicFightCommandArgumentTypes;
 import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillSlot;
@@ -65,8 +72,6 @@ import yesman.epicfight.world.gamerule.EpicFightGamerules;
 import yesman.epicfight.world.item.EpicFightItems;
 import yesman.epicfight.world.level.block.EpicFightBlocks;
 import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
-
-import java.util.function.Function;
 
 @Mod("epicfight")
 public class EpicFightMod {
@@ -116,10 +121,10 @@ public class EpicFightMod {
         EpicFightBlockEntities.BLOCK_ENTITIES.register(bus);
 		EpicFightLootTables.LOOT_MODIFIERS.register(bus);
 		EpicFightSounds.SOUNDS.register(bus);
-		//SkillArgument.SKILLS.register(bus);
 		EpicFightDataSerializers.VEC.register(bus);
+		EpicFightCommandArgumentTypes.COMMAND_ARGUMENT_TYPES.register(bus);
+		
         EpicFightSkills.registerSkills();
-		//SkillBookLootModifier.createSkillLootTable();
         MinecraftForge.EVENT_BUS.addListener(this::reloadListnerEvent);
         
         ConfigManager.loadConfig(ConfigManager.CLIENT_CONFIG, FMLPaths.CONFIGDIR.get().resolve(MODID + "-client.toml").toString());
@@ -151,7 +156,7 @@ public class EpicFightMod {
 	}
 	
 	private void doCommonStuff(final FMLCommonSetupEvent event) {
-		event.enqueueWork(SkillArgument::registerArgumentTypes);
+		event.enqueueWork(EpicFightCommandArgumentTypes::registerArgumentTypes);
 		event.enqueueWork(EpicFightPotions::addRecipes);
 		event.enqueueWork(EpicFightNetworkManager::registerPackets);
 		event.enqueueWork(ItemCapabilityProvider::registerWeaponTypesByClass);

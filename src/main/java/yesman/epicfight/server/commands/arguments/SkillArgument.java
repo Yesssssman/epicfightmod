@@ -16,8 +16,6 @@ import com.mojang.brigadier.tree.LiteralCommandNode;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.synchronization.ArgumentTypeInfos;
-import net.minecraft.commands.synchronization.SingletonArgumentInfo;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import yesman.epicfight.api.data.reloader.SkillManager;
@@ -32,14 +30,6 @@ public class SkillArgument implements ArgumentType<Skill> {
 	
 	public static SkillArgument skill() {
 		return new SkillArgument();
-	}
-	
-	public static SkillArgument skill(SkillCategory skillCategory) {
-		return new SkillArgument();
-	}
-	
-	public static void registerArgumentTypes() {
-		ArgumentTypeInfos.registerByClass(SkillArgument.class, SingletonArgumentInfo.contextFree(SkillArgument::skill));
 	}
 	
 	public static Skill getSkill(CommandContext<CommandSourceStack> commandContext, String name) {
