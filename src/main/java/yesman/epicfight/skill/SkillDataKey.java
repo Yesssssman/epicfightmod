@@ -31,13 +31,10 @@ public class SkillDataKey<T> {
 		@Override
 		@SuppressWarnings("unchecked")
         public void onBake(IForgeRegistryInternal<SkillDataKey<?>> owner, RegistryManager stage) {
-			System.out.println("bake wtf " + stage);
-			
 			ClearableIdMapper<SkillDataKey<?>> skillDataKeyMap = owner.getSlaveMap(DATA_KEY_TO_ID, ClearableIdMapper.class);
             
 			for (SkillDataKey<?> block : owner) {
 				skillDataKeyMap.add(block);
-				System.out.println(owner.getKey(block) +"'s id is = "+ skillDataKeyMap.getId(block));
 			}
             
 			Map<Class<?>, Set<SkillDataKey<?>>> skillDataKeys = owner.getSlaveMap(CLASS_TO_DATA_KEYS, Map.class);
