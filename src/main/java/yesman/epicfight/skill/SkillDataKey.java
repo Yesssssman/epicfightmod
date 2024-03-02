@@ -16,6 +16,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryInternal;
 import net.minecraftforge.registries.RegistryManager;
+import yesman.epicfight.api.utils.ClearableIdMapper;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.main.EpicFightMod;
 
@@ -24,16 +25,19 @@ public class SkillDataKey<T> {
 	private static final ResourceLocation CLASS_TO_DATA_KEYS = new ResourceLocation(EpicFightMod.MODID, "classtodatakeys");
 	private static final ResourceLocation DATA_KEY_TO_ID = new ResourceLocation(EpicFightMod.MODID, "datakeytoid");
 	
-	private static class SkillDataKeyCallbacks implements IForgeRegistry.BakeCallback<SkillDataKey<?>>, IForgeRegistry.CreateCallback<SkillDataKey<?>> {
+	private static class SkillDataKeyCallbacks implements IForgeRegistry.BakeCallback<SkillDataKey<?>>, IForgeRegistry.CreateCallback<SkillDataKey<?>>, IForgeRegistry.ClearCallback<SkillDataKey<?>> {
 		static final SkillDataKeyCallbacks INSTANCE = new SkillDataKeyCallbacks();
 		
 		@Override
 		@SuppressWarnings("unchecked")
         public void onBake(IForgeRegistryInternal<SkillDataKey<?>> owner, RegistryManager stage) {
-            IdMapper<SkillDataKey<?>> skillDataKeyMap = owner.getSlaveMap(DATA_KEY_TO_ID, IdMapper.class);
+			System.out.println("bake wtf " + stage);
+			
+			ClearableIdMapper<SkillDataKey<?>> skillDataKeyMap = owner.getSlaveMap(DATA_KEY_TO_ID, ClearableIdMapper.class);
             
-			for (SkillDataKey<?> skillDataKey : owner) {
-				skillDataKeyMap.add(skillDataKey);
+			for (SkillDataKey<?> block : owner) {
+				skillDataKeyMap.add(block);
+				System.out.println(owner.getKey(block) +"'s id is = "+ skillDataKeyMap.getId(block));
 			}
             
 			Map<Class<?>, Set<SkillDataKey<?>>> skillDataKeys = owner.getSlaveMap(CLASS_TO_DATA_KEYS, Map.class);
@@ -61,8 +65,13 @@ public class SkillDataKey<T> {
 		@Override
 		public void onCreate(IForgeRegistryInternal<SkillDataKey<?>> owner, RegistryManager stage) {
 			owner.setSlaveMap(CLASS_TO_DATA_KEYS, Maps.newHashMap());
-			owner.setSlaveMap(DATA_KEY_TO_ID, new IdMapper<SkillDataKey<?>> (owner.getKeys().size()));
+			owner.setSlaveMap(DATA_KEY_TO_ID, new ClearableIdMapper<SkillDataKey<?>> (owner.getKeys().size()));
 		}
+		
+		@Override
+        public void onClear(IForgeRegistryInternal<SkillDataKey<?>> owner, RegistryManager stage) {
+            owner.getSlaveMap(DATA_KEY_TO_ID, ClearableIdMapper.class).clear();
+        }
 	}
 	
 	public static SkillDataKeyCallbacks getCallBack() {
