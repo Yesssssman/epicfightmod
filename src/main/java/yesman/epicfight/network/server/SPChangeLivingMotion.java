@@ -73,7 +73,7 @@ public class SPChangeLivingMotion {
 		}
 		
 		for (int i = 0; i < msg.count; i++) {
-			animationList.add(EpicFightMod.getInstance().animationManager.findAnimationById(buf.readInt(), buf.readInt()));
+			animationList.add(EpicFightMod.getInstance().animationManager.findAnimationById(buf.readInt()));
 		}
 		
 		msg.motionList = motionList;
@@ -92,7 +92,6 @@ public class SPChangeLivingMotion {
 		}
 		
 		for (StaticAnimation anim : msg.animationList) {
-			buf.writeInt(anim.getNamespaceId());
 			buf.writeInt(anim.getId());
 		}
 	}

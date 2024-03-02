@@ -19,8 +19,8 @@ public class SPPlayAnimationAndSetTarget extends SPPlayAnimation {
 		this.targetId = 0;
 	}
 	
-	public SPPlayAnimationAndSetTarget(int namespaceId, int animationId, int entityId, float modifyTime, int targetId) {
-		super(namespaceId, animationId, entityId, modifyTime);
+	public SPPlayAnimationAndSetTarget(int animationId, int entityId, float modifyTime, int targetId) {
+		super(animationId, entityId, modifyTime);
 		this.targetId = targetId;
 	}
 	
@@ -42,11 +42,10 @@ public class SPPlayAnimationAndSetTarget extends SPPlayAnimation {
 	}
 	
 	public static SPPlayAnimationAndSetTarget fromBytes(FriendlyByteBuf buf) {
-		return new SPPlayAnimationAndSetTarget(buf.readInt(), buf.readInt(), buf.readInt(), buf.readFloat(), buf.readInt());
+		return new SPPlayAnimationAndSetTarget(buf.readInt(), buf.readInt(), buf.readFloat(), buf.readInt());
 	}
 
 	public static void toBytes(SPPlayAnimationAndSetTarget msg, FriendlyByteBuf buf) {
-		buf.writeInt(msg.namespaceId);
 		buf.writeInt(msg.animationId);
 		buf.writeInt(msg.entityId);
 		buf.writeFloat(msg.convertTimeModifier);

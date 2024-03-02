@@ -7,11 +7,13 @@ import java.util.function.Function;
 
 import com.google.common.collect.Maps;
 
+import net.minecraft.core.IdMapper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.animation.Pose;
@@ -39,20 +41,19 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class StaticAnimation extends DynamicAnimation {
+	public static AnimationManager animationManager;
+	
 	protected final Map<AnimationProperty<?>, Object> properties = Maps.newHashMap();
 	protected final StateSpectrum.Blueprint stateSpectrumBlueprint = new StateSpectrum.Blueprint();
 	protected final ResourceLocation resourceLocation;
 	protected final ResourceLocation registryName;
 	protected final Armature armature;
-	protected final int namespaceId;
-	protected final int animationId;
+	protected int animationId = -1;
 	
 	private final StateSpectrum stateSpectrum = new StateSpectrum();
 	
 	public StaticAnimation() {
 		super(0.0F, false);
-		this.namespaceId = -1;
-		this.animationId = -1;
 		this.resourceLocation = null;
 		this.registryName = null;
 		this.armature = null;
@@ -66,19 +67,14 @@ public class StaticAnimation extends DynamicAnimation {
 		super(convertTime, isRepeat);
 		
 		AnimationManager animationManager = EpicFightMod.getInstance().animationManager;
-		this.namespaceId = animationManager.getNamespaceHash();
-		this.animationId = animationManager.getIdCounter();
-		
 		EpicFightMod.LOGGER.info("Assigned animation id " + this.animationId + " to " + path);
 		
 		int colon = path.indexOf(':');
 		String modid = (colon == -1) ? animationManager.getModid() : path.substring(0, colon);
 		String folderPath = (colon == -1) ? path : path.substring(colon + 1);
 		
-		animationManager.getIdMap().put(this.animationId, this);
 		this.resourceLocation = new ResourceLocation(modid, "animmodels/animations/" + folderPath);
 		this.registryName = new ResourceLocation(modid, folderPath);
-		animationManager.getNameMap().put(new ResourceLocation(animationManager.getModid(), folderPath), this);
 		this.armature = armature;
 	}
 	
@@ -86,8 +82,6 @@ public class StaticAnimation extends DynamicAnimation {
 		super(convertTime, repeatPlay);
 		
 		AnimationManager animationManager = EpicFightMod.getInstance().animationManager;
-		this.namespaceId = animationManager.getModid().hashCode();
-		this.animationId = -1;
 		
 		int colon = path.indexOf(':');
 		String modid = (colon == -1) ? animationManager.getModid() : path.substring(0, colon);
@@ -102,8 +96,6 @@ public class StaticAnimation extends DynamicAnimation {
 	public StaticAnimation(ResourceLocation baseAnimPath, float convertTime, boolean repeatPlay, String path, Armature armature, boolean notRegisteredInAnimationManager) {
 		super(convertTime, repeatPlay);
 		
-		this.namespaceId = baseAnimPath.getNamespace().hashCode();
-		this.animationId = -1;
 		this.resourceLocation = new ResourceLocation(baseAnimPath.getNamespace(), "animmodels/animations/" + path);
 		this.registryName = new ResourceLocation(baseAnimPath.getNamespace(), path);
 		this.armature = armature;
@@ -123,19 +115,23 @@ public class StaticAnimation extends DynamicAnimation {
 		(new JsonModelLoader(resourceManager, path)).loadStaticAnimationBothSide(animation);
 	}
 	
+	public void assignIdFromMap(IdMapper<StaticAnimation> idMapper) {
+		this.animationId = idMapper.getId(this);
+	}
+	
 	public void loadAnimation(ResourceManager resourceManager) {
 		try {
 			int id = Integer.parseInt(this.resourceLocation.getPath().substring(22));
-			StaticAnimation animation = EpicFightMod.getInstance().animationManager.findAnimationById(this.namespaceId, id);
+			StaticAnimation animation = EpicFightMod.getInstance().animationManager.findAnimationById(id);
 			ResourceLocation path = new ResourceLocation(animation.resourceLocation.getNamespace(), animation.resourceLocation.getPath() + ".json");
 			load(resourceManager, path, this);
 			
 			this.jointTransforms = animation.jointTransforms;
 		} catch (NumberFormatException numberFormatException) {
 			load(resourceManager, this);
-		} catch (Exception others) {
+		} catch (Exception e) {
 			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
-			others.printStackTrace();
+			e.printStackTrace();
 		}
 		
 		this.onLoaded();
@@ -159,7 +155,6 @@ public class StaticAnimation extends DynamicAnimation {
 				
 				for (TrailInfo trailInfo : trailInfos) {
 					double eid = Double.longBitsToDouble((long)entitypatch.getOriginal().getId());
-					double modid = Double.longBitsToDouble((long)this.namespaceId);
 					double animid = Double.longBitsToDouble((long)this.animationId);
 					double jointId = Double.longBitsToDouble((long)this.armature.searchJointByName(trailInfo.joint).getId());
 					double index = Double.longBitsToDouble((long)idx++);
@@ -177,7 +172,7 @@ public class StaticAnimation extends DynamicAnimation {
 						continue;
 					}
 					
-					entitypatch.getOriginal().level().addParticle(trailInfo.particle, eid, modid, animid, jointId, index, 0);
+					entitypatch.getOriginal().level().addParticle(trailInfo.particle, eid, 0, animid, jointId, index, 0);
 				}
 			});
 		}
@@ -281,11 +276,6 @@ public class StaticAnimation extends DynamicAnimation {
 	}
 	
 	@Override
-	public int getNamespaceId() {
-		return this.namespaceId;
-	}
-	
-	@Override
 	public int getId() {
 		return this.animationId;
 	}
@@ -293,18 +283,14 @@ public class StaticAnimation extends DynamicAnimation {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof StaticAnimation staticAnimation) {
-			return this.getNamespaceId() == staticAnimation.getNamespaceId() && this.getId() == staticAnimation.getId();
+			return this.getId() == staticAnimation.getId();
 		}
 		
 		return super.equals(obj);
 	}
 	
-	public boolean between(StaticAnimation a1, StaticAnimation a2) {
-		if (a1.getNamespaceId() != a2.getNamespaceId()) {
-			return false;
-		} else {
-			return a1.getId() <= this.getId() && a2.getId() >= this.getId();
-		}
+	public boolean idBetween(StaticAnimation a1, StaticAnimation a2) {
+		return a1.getId() <= this.getId() && a2.getId() >= this.getId();
 	}
 	
 	public boolean in(StaticAnimation[] animations) {
@@ -416,5 +402,10 @@ public class StaticAnimation extends DynamicAnimation {
 	public <T> StaticAnimation addStateIfNotExist(StateFactor<T> factor, T val) {
 		this.stateSpectrumBlueprint.addStateIfNotExist(factor, val);
 		return this;
+	}
+
+	@Override
+	public AnimationClip getAnimationClip() {
+		return EpicFightMod.getInstance().animationManager;
 	}
 }

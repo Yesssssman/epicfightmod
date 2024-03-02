@@ -329,7 +329,6 @@ public class TrailParticle extends TextureSheetParticle {
 		@Override
 		public Particle createParticle(SimpleParticleType typeIn, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
 			int eid = (int)Double.doubleToRawLongBits(x);
-			int modid = (int)Double.doubleToRawLongBits(y);
 			int animid = (int)Double.doubleToRawLongBits(z);
 			int jointId = (int)Double.doubleToRawLongBits(xSpeed);
 			int idx = (int)Double.doubleToRawLongBits(ySpeed);
@@ -337,7 +336,7 @@ public class TrailParticle extends TextureSheetParticle {
 			
 			if (entity != null) {
 				LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(entity, LivingEntityPatch.class);
-				StaticAnimation animation = EpicFightMod.getInstance().animationManager.findAnimationById(modid, animid);
+				StaticAnimation animation = EpicFightMod.getInstance().animationManager.findAnimationById(animid);
 				Optional<List<TrailInfo>> trailInfo = animation.getProperty(ClientAnimationProperties.TRAIL_EFFECT);
 				TrailInfo result = trailInfo.get().get(idx);
 				

@@ -3,13 +3,13 @@ package yesman.epicfight.api.animation.types;
 import java.util.Map;
 import java.util.Optional;
 
-import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
@@ -26,7 +26,6 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public abstract class DynamicAnimation {
-	protected Map<String, TransformSheet> jointTransforms = Maps.newHashMap();
 	protected final boolean isRepeat;
 	protected final float convertTime;
 	protected float totalTime = 0.0F;
@@ -40,15 +39,11 @@ public abstract class DynamicAnimation {
 		this.convertTime = convertTime;
 	}
 	
-	public void addSheet(String jointName, TransformSheet sheet) {
-		this.jointTransforms.put(jointName, sheet);
-	}
-	
 	public final Pose getRawPose(float time) {
 		Pose pose = new Pose();
 		
-		for (String jointName : this.jointTransforms.keySet()) {
-			pose.putJointData(jointName, this.jointTransforms.get(jointName).getInterpolatedTransform(time));
+		for (String jointName : this.getTransfroms().keySet()) {
+			pose.putJointData(jointName, this.getTransfroms().get(jointName).getInterpolatedTransform(time));
 		}
 		
 		return pose;
@@ -57,8 +52,8 @@ public abstract class DynamicAnimation {
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		Pose pose = new Pose();
 		
-		for (String jointName : this.jointTransforms.keySet()) {
-			pose.putJointData(jointName, this.jointTransforms.get(jointName).getInterpolatedTransform(time));
+		for (String jointName : this.getTransfroms().keySet()) {
+			pose.putJointData(jointName, this.getTransfroms().get(jointName).getInterpolatedTransform(time));
 		}
 		
 		this.modifyPose(this, pose, entitypatch, time, partialTicks);
@@ -96,7 +91,7 @@ public abstract class DynamicAnimation {
 				keyframes[0] = new Keyframe(0.0F, data1.get(jointName));
 				keyframes[1] = new Keyframe(totalTime, data2.get(jointName));
 				TransformSheet sheet = new TransformSheet(keyframes);
-				dest.addSheet(jointName, sheet);
+				dest.getAnimationClip().addJointTransform(jointName, sheet);
 			}
 		}
 	}
@@ -112,7 +107,7 @@ public abstract class DynamicAnimation {
 	
 	@OnlyIn(Dist.CLIENT)
 	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
-		return this.jointTransforms.containsKey(joint);
+		return this.getTransfroms().containsKey(joint);
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -132,16 +127,18 @@ public abstract class DynamicAnimation {
 		return stateFactor.defaultValue();
 	}
 	
+	public abstract AnimationClip getAnimationClip();
+	
 	public Map<String, TransformSheet> getTransfroms() {
-		return this.jointTransforms;
+		return this.getAnimationClip().getJointTransforms();
 	}
-
+	
 	public float getPlaySpeed(LivingEntityPatch<?> entitypatch) {
 		return 1.0F;
 	}
 	
 	public TransformSheet getCoord() {
-		return this.jointTransforms.get("Root");
+		return this.getTransfroms().get("Root");
 	}
 	
 	public DynamicAnimation getRealAnimation() {
@@ -166,10 +163,6 @@ public abstract class DynamicAnimation {
 	
 	public boolean canBePlayedReverse() {
 		return false;
-	}
-	
-	public int getNamespaceId() {
-		return -1;
 	}
 	
 	public ResourceLocation getRegistryName() {

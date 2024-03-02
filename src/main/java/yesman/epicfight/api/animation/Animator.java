@@ -42,12 +42,12 @@ public abstract class Animator {
 	public abstract void init();
 	public abstract void poseTick();
 	
-	public final void playAnimation(int namespaceId, int id, float convertTimeModifier) {
-		this.playAnimation(EpicFightMod.getInstance().animationManager.findAnimationById(namespaceId, id), convertTimeModifier);
+	public final void playAnimation(int id, float convertTimeModifier) {
+		this.playAnimation(EpicFightMod.getInstance().animationManager.findAnimationById(id), convertTimeModifier);
 	}
 	
-	public final void playAnimationInstantly(int namespaceId, int id) {
-		this.playAnimationInstantly(EpicFightMod.getInstance().animationManager.findAnimationById(namespaceId, id));
+	public final void playAnimationInstantly(int id) {
+		this.playAnimationInstantly(EpicFightMod.getInstance().animationManager.findAnimationById(id));
 	}
 	
 	public boolean isReverse() {

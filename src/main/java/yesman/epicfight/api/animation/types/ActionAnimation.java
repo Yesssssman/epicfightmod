@@ -175,7 +175,7 @@ public class ActionAnimation extends MainFrameAnimation {
 			keyframes[1] = new Keyframe(totalTime, data2.get(jointName));
 			
 			TransformSheet sheet = new TransformSheet(keyframes);
-			dest.addSheet(jointName, sheet);
+			dest.getAnimationClip().addJointTransform(jointName, sheet);
 		}
 	}
 	

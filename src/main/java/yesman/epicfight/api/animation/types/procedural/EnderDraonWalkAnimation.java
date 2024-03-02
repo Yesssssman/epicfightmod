@@ -59,7 +59,7 @@ public class EnderDraonWalkAnimation extends StaticAnimation implements Procedur
 	    	
 	    	for (IKInfo ikInfo : this.ikInfos) {
 	    		for (String jointName : ikInfo.pathToEndJoint) {
-					pose.putJointData(jointName, this.jointTransforms.get(jointName).getKeyframes()[ikInfo.ikPose].transform().copy());
+					pose.putJointData(jointName, this.getTransfroms().get(jointName).getKeyframes()[ikInfo.ikPose].transform().copy());
 				}
 	    		
 	    		TipPointAnimation tipAnim = enderdragonpatch.getTipPointAnimation(ikInfo.endJoint.getName());
@@ -160,12 +160,12 @@ public class EnderDraonWalkAnimation extends StaticAnimation implements Procedur
 		       	
 		       	Pose pose = new Pose();
 		       	
-				for (String jointName : this.jointTransforms.keySet()) {
-					pose.putJointData(jointName, this.jointTransforms.get(jointName).getInterpolatedTransform(playTime));
+				for (String jointName : this.getTransfroms().keySet()) {
+					pose.putJointData(jointName, this.getTransfroms().get(jointName).getInterpolatedTransform(playTime));
 				}
 				
 				for (String jointName : ikInfo.pathToEndJoint) {
-					pose.putJointData(jointName, this.jointTransforms.get(jointName).getKeyframes()[ikInfo.ikPose].transform().copy());
+					pose.putJointData(jointName, this.getTransfroms().get(jointName).getKeyframes()[ikInfo.ikPose].transform().copy());
 				}
 				
 				FABRIK fabrik = new FABRIK(pose, entitypatch.getArmature(), ikInfo.startJoint, ikInfo.endJoint);

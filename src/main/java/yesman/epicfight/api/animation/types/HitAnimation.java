@@ -47,7 +47,7 @@ public class HitAnimation extends MainFrameAnimation {
 				keyframes[2] = new Keyframe(this.convertTime + 0.033F, data3.get(jointName));
 				keyframes[3] = new Keyframe(convertTimeModifier + this.convertTime, data3.get(jointName));
 				TransformSheet sheet = new TransformSheet(keyframes);
-				dest.addSheet(jointName, sheet);
+				dest.getAnimationClip().addJointTransform(jointName, sheet);
 			}
 		}
 	}

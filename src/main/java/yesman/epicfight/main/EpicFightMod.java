@@ -89,11 +89,7 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 /**
  *  TODO
  *  
- *  1. Fixed battojutsu crash
- *  
- *  2. Fixed skill command not working in a dedicated server
- *  
- *  3. Fixed default weapon types not being reloaded when entering the world
+ *  1. 
  *  
  *  @author yesman
  */
@@ -211,7 +207,7 @@ public class EpicFightMod {
 	
 	private void doServerStuff(final FMLDedicatedServerSetupEvent event) {
 		Armatures.build(null);
-		this.animationManager.loadAnimationsOnServer();
+		//this.animationManager.loadAnimationsOnServer();
 		this.animatorProvider = ServerAnimator::getAnimator;
 	}
 	

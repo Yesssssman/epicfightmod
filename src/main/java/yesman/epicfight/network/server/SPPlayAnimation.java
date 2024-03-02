@@ -12,7 +12,6 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class SPPlayAnimation {
-	protected int namespaceId;
 	protected int animationId;
 	protected int entityId;
 	protected float convertTimeModifier;
@@ -24,15 +23,14 @@ public class SPPlayAnimation {
 	}
 	
 	public SPPlayAnimation(StaticAnimation animation, float convertTimeModifier, LivingEntityPatch<?> entitypatch) {
-		this(animation.getNamespaceId(), animation.getId(), entitypatch.getOriginal().getId(), convertTimeModifier);
+		this(animation.getId(), entitypatch.getOriginal().getId(), convertTimeModifier);
 	}
 	
 	public SPPlayAnimation(StaticAnimation animation, int entityId, float convertTimeModifier) {
-		this(animation.getNamespaceId(), animation.getId(), entityId, convertTimeModifier);
+		this(animation.getId(), entityId, convertTimeModifier);
 	}
 	
-	public SPPlayAnimation(int namespaceId, int animationId, int entityId, float convertTimeModifier) {
-		this.namespaceId = namespaceId;
+	public SPPlayAnimation(int animationId, int entityId, float convertTimeModifier) {
 		this.animationId = animationId;
 		this.entityId = entityId;
 		this.convertTimeModifier = convertTimeModifier;
@@ -49,16 +47,15 @@ public class SPPlayAnimation {
 		LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(entity, LivingEntityPatch.class);
 		
 		if (entitypatch != null) {
-			entitypatch.getAnimator().playAnimation(this.namespaceId, this.animationId, this.convertTimeModifier);
+			entitypatch.getAnimator().playAnimation(this.animationId, this.convertTimeModifier);
 		}
 	}
 	
 	public static SPPlayAnimation fromBytes(FriendlyByteBuf buf) {
-		return new SPPlayAnimation(buf.readInt(), buf.readInt(), buf.readInt(), buf.readFloat());
+		return new SPPlayAnimation(buf.readInt(), buf.readInt(), buf.readFloat());
 	}
 	
 	public static void toBytes(SPPlayAnimation msg, ByteBuf buf) {
-		buf.writeInt(msg.namespaceId);
 		buf.writeInt(msg.animationId);
 		buf.writeInt(msg.entityId);
 		buf.writeFloat(msg.convertTimeModifier);

@@ -3,6 +3,7 @@ package yesman.epicfight.api.animation.types;
 import java.util.Optional;
 
 import net.minecraft.client.Minecraft;
+import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.client.animation.Layer;
@@ -59,5 +60,10 @@ public class LayerOffAnimation extends DynamicAnimation {
 	@Override
 	public DynamicAnimation getRealAnimation() {
 		return Animations.DUMMY_ANIMATION;
+	}
+
+	@Override
+	public AnimationClip getAnimationClip() {
+		return null;
 	}
 }

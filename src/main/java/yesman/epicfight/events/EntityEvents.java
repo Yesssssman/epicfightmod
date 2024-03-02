@@ -560,7 +560,7 @@ public class EntityEvents {
 			if (!entitypatch.getEntityState().inaction() && !event.getEntity().isInWater()) {
 				StaticAnimation jumpAnimation = entitypatch.getClientAnimator().getJumpAnimation();
 				entitypatch.getAnimator().playAnimation(jumpAnimation, 0);
-				EpicFightNetworkManager.sendToServer(new CPPlayAnimation(jumpAnimation.getNamespaceId(), jumpAnimation.getId(), 0, true, false));
+				EpicFightNetworkManager.sendToServer(new CPPlayAnimation(jumpAnimation.getId(), 0, true, false));
 			}
 		}
 	}

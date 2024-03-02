@@ -16,8 +16,8 @@ public class SPMoveAndPlayAnimation extends SPPlayAnimationAndSetTarget {
 	protected double posZ;
 	protected float yRot;
 	
-	public SPMoveAndPlayAnimation(int namespaceId, int animation, int entityId, float modifyTime, int targetId, double posX, double posY, double posZ, float yRot) {
-		super(namespaceId, animation, entityId, modifyTime, targetId);
+	public SPMoveAndPlayAnimation(int animation, int entityId, float modifyTime, int targetId, double posX, double posY, double posZ, float yRot) {
+		super(animation, entityId, modifyTime, targetId);
 		this.posX = posX;
 		this.posY = posY;
 		this.posZ = posZ;
@@ -51,11 +51,10 @@ public class SPMoveAndPlayAnimation extends SPPlayAnimationAndSetTarget {
 	}
 	
 	public static SPMoveAndPlayAnimation fromBytes(FriendlyByteBuf buf) {
-		return new SPMoveAndPlayAnimation(buf.readInt(), buf.readInt(), buf.readInt(), buf.readFloat(), buf.readInt(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readFloat());
+		return new SPMoveAndPlayAnimation(buf.readInt(), buf.readInt(), buf.readFloat(), buf.readInt(), buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readFloat());
 	}
 	
 	public static void toBytes(SPMoveAndPlayAnimation msg, FriendlyByteBuf buf) {
-		buf.writeInt(msg.namespaceId);
 		buf.writeInt(msg.animationId);
 		buf.writeInt(msg.entityId);
 		buf.writeFloat(msg.convertTimeModifier);

@@ -12,7 +12,6 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 public class CPPlayAnimation {
-	private int namespaceId;
 	private final int animationId;
 	private final float modifyTime;
 	private boolean isClientSideAnimation;
@@ -25,11 +24,10 @@ public class CPPlayAnimation {
 	}
 
 	public CPPlayAnimation(StaticAnimation animation, float modifyTime, boolean clinetOnly, boolean resendToSender) {
-		this(animation.getNamespaceId(), animation.getId(), modifyTime, clinetOnly, resendToSender);
+		this(animation.getId(), modifyTime, clinetOnly, resendToSender);
 	}
 
-	public CPPlayAnimation(int namespaceId, int animationId, float modifyTime, boolean clinetOnly, boolean resendToSender) {
-		this.namespaceId = namespaceId;
+	public CPPlayAnimation(int animationId, float modifyTime, boolean clinetOnly, boolean resendToSender) {
 		this.animationId = animationId;
 		this.modifyTime = modifyTime;
 		this.isClientSideAnimation = clinetOnly;
@@ -37,11 +35,10 @@ public class CPPlayAnimation {
 	}
 	
 	public static CPPlayAnimation fromBytes(FriendlyByteBuf buf) {
-		return new CPPlayAnimation(buf.readInt(), buf.readInt(), buf.readFloat(), buf.readBoolean(), buf.readBoolean());
+		return new CPPlayAnimation(buf.readInt(), buf.readFloat(), buf.readBoolean(), buf.readBoolean());
 	}
 
 	public static void toBytes(CPPlayAnimation msg, FriendlyByteBuf buf) {
-		buf.writeInt(msg.namespaceId);
 		buf.writeInt(msg.animationId);
 		buf.writeFloat(msg.modifyTime);
 		buf.writeBoolean(msg.isClientSideAnimation);
@@ -54,13 +51,13 @@ public class CPPlayAnimation {
 			ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(serverPlayer, ServerPlayerPatch.class);
 			
 			if (!msg.isClientSideAnimation) {
-				playerpatch.getAnimator().playAnimation(msg.namespaceId, msg.animationId, msg.modifyTime);
+				playerpatch.getAnimator().playAnimation(msg.animationId, msg.modifyTime);
 			}
 			
-			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(new SPPlayAnimation(msg.namespaceId, msg.animationId, serverPlayer.getId(), msg.modifyTime), serverPlayer);
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(new SPPlayAnimation(msg.animationId, serverPlayer.getId(), msg.modifyTime), serverPlayer);
 			
 			if (msg.resendToSender) {
-				EpicFightNetworkManager.sendToPlayer(new SPPlayAnimation(msg.namespaceId, msg.animationId, serverPlayer.getId(), msg.modifyTime), serverPlayer);
+				EpicFightNetworkManager.sendToPlayer(new SPPlayAnimation(msg.animationId, serverPlayer.getId(), msg.modifyTime), serverPlayer);
 			}
 		});
 		ctx.get().setPacketHandled(true);

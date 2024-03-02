@@ -154,8 +154,8 @@ public class EnderDragonDynamicActionAnimation extends ActionAnimation implement
 		       	
 		       	Pose pose = new Pose();
 		       	
-				for (String jointName : this.jointTransforms.keySet()) {
-					pose.putJointData(jointName, this.jointTransforms.get(jointName).getInterpolatedTransform(playTime));
+				for (String jointName : this.getTransfroms().keySet()) {
+					pose.putJointData(jointName, this.getTransfroms().get(jointName).getInterpolatedTransform(playTime));
 				}
 			}
 		}

@@ -205,12 +205,12 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	
 	public void playAnimationClientPreemptive(StaticAnimation animation, float convertTimeModifier) {
 		this.animator.playAnimation(animation, convertTimeModifier);
-		EpicFightNetworkManager.sendToServer(new CPPlayAnimation(animation.getNamespaceId(), animation.getId(), convertTimeModifier, false, false));
+		EpicFightNetworkManager.sendToServer(new CPPlayAnimation(animation.getId(), convertTimeModifier, false, false));
 	}
 	
 	@Override
 	public void playAnimationSynchronized(StaticAnimation animation, float convertTimeModifier, AnimationPacketProvider packetProvider) {
-		EpicFightNetworkManager.sendToServer(new CPPlayAnimation(animation.getNamespaceId(), animation.getId(), convertTimeModifier, false, true));
+		EpicFightNetworkManager.sendToServer(new CPPlayAnimation(animation.getId(), convertTimeModifier, false, true));
 	}
 	
 	@Override

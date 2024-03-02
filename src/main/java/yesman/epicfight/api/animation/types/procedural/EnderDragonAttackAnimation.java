@@ -176,8 +176,8 @@ public class EnderDragonAttackAnimation extends AttackAnimation implements Proce
 		       	RenderingTool.drawQuad(poseStack, vertexBuilder, jointModelpos, 0.4F, 0.0F, 0.0F, 1.0F);
 		       	Pose pose = new Pose();
 		       	
-				for (String jointName : this.jointTransforms.keySet()) {
-					pose.putJointData(jointName, this.jointTransforms.get(jointName).getInterpolatedTransform(playTime));
+				for (String jointName : this.getTransfroms().keySet()) {
+					pose.putJointData(jointName, this.getTransfroms().get(jointName).getInterpolatedTransform(playTime));
 				}
 			}
 		}

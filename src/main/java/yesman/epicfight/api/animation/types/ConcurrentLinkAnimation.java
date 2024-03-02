@@ -1,11 +1,13 @@
 package yesman.epicfight.api.animation.types;
 
+import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.types.EntityState.StateFactor;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class ConcurrentLinkAnimation extends DynamicAnimation {
+	private AnimationClip animationClip;
 	protected DynamicAnimation nextAnimation;
 	protected DynamicAnimation currentAnimation;
 	protected float startsAt;
@@ -94,5 +96,10 @@ public class ConcurrentLinkAnimation extends DynamicAnimation {
 	@Override
 	public String toString() {
 		return "ConcurrentLinkAnimation: Mix " + this.currentAnimation + " and " + this.nextAnimation;
+	}
+	
+	@Override
+	public AnimationClip getAnimationClip() {
+		return this.animationClip;
 	}
 }

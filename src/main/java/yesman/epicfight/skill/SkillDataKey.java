@@ -32,8 +32,8 @@ public class SkillDataKey<T> {
         public void onBake(IForgeRegistryInternal<SkillDataKey<?>> owner, RegistryManager stage) {
             IdMapper<SkillDataKey<?>> skillDataKeyMap = owner.getSlaveMap(DATA_KEY_TO_ID, IdMapper.class);
             
-			for (SkillDataKey<?> block : owner) {
-				skillDataKeyMap.add(block);
+			for (SkillDataKey<?> skillDataKey : owner) {
+				skillDataKeyMap.add(skillDataKey);
 			}
             
 			Map<Class<?>, Set<SkillDataKey<?>>> skillDataKeys = owner.getSlaveMap(CLASS_TO_DATA_KEYS, Map.class);
