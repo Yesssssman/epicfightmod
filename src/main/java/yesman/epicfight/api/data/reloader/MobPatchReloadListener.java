@@ -35,6 +35,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
+import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.model.AnimatedMesh;
@@ -328,7 +329,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		
 		for (String key : defaultLivingmotions.getAllKeys()) {
 			String animation = defaultLivingmotions.getString(key);
-			defaultAnimations.add(Pair.of(LivingMotion.ENUM_MANAGER.get(key), EpicFightMod.getInstance().animationManager.findAnimationByPath(animation)));
+			defaultAnimations.add(Pair.of(LivingMotion.ENUM_MANAGER.get(key), AnimationManager.getInstance().byKey(animation)));
 		}
 		
 		return defaultAnimations;
@@ -341,7 +342,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			String lowerCaseName = tag.getString(stunType.name().toLowerCase(Locale.ROOT));
 			
 			if (!StringUtil.isNullOrEmpty(lowerCaseName)) {
-				stunAnimations.put(stunType, EpicFightMod.getInstance().animationManager.findAnimationByPath(lowerCaseName));
+				stunAnimations.put(stunType, AnimationManager.getInstance().byKey(lowerCaseName));
 			}
 		}
 		
@@ -371,7 +372,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			CompoundTag motionsTag = weaponMotionTag.getCompound("livingmotions");
 			
 			for (String key : motionsTag.getAllKeys()) {
-				motions.add(Pair.of(LivingMotion.ENUM_MANAGER.get(key), EpicFightMod.getInstance().animationManager.findAnimationByPath(motionsTag.getString(key))));
+				motions.add(Pair.of(LivingMotion.ENUM_MANAGER.get(key), AnimationManager.getInstance().byKey(motionsTag.getString(key))));
 			}
 			
 			Tag weponTypeTag = weaponMotionTag.get("weapon_categories");
@@ -414,7 +415,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			for (int j = 0; j < behaviorList.size(); j++) {
 				Behavior.Builder<T> behaviorBuilder = Behavior.builder();
 				CompoundTag behavior = behaviorList.getCompound(j);
-				StaticAnimation animation = EpicFightMod.getInstance().animationManager.findAnimationByPath(behavior.getString("animation"));
+				StaticAnimation animation = AnimationManager.getInstance().byKey(behavior.getString("animation"));
 				ListTag conditionList = behavior.getList("conditions", 10);
 				behaviorBuilder.animationBehavior(animation);
 				

@@ -40,21 +40,11 @@ public abstract class DynamicAnimation {
 	}
 	
 	public final Pose getRawPose(float time) {
-		Pose pose = new Pose();
-		
-		for (String jointName : this.getTransfroms().keySet()) {
-			pose.putJointData(jointName, this.getTransfroms().get(jointName).getInterpolatedTransform(time));
-		}
-		
-		return pose;
+		return this.getAnimationClip().getPoseInTime(time);
 	}
 	
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
-		Pose pose = new Pose();
-		
-		for (String jointName : this.getTransfroms().keySet()) {
-			pose.putJointData(jointName, this.getTransfroms().get(jointName).getInterpolatedTransform(time));
-		}
+		Pose pose = this.getRawPose(time);
 		
 		this.modifyPose(this, pose, entitypatch, time, partialTicks);
 		

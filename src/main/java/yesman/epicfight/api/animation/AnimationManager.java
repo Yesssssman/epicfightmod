@@ -1,26 +1,24 @@
 package yesman.epicfight.api.animation;
 
-import java.util.HashMap;
 import java.util.Map;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import com.google.common.collect.Maps;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
-import net.minecraft.core.IdMapper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryInternal;
-import net.minecraftforge.registries.IForgeRegistryModifiable;
-import net.minecraftforge.registries.RegistryManager;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.AnimationDataReader;
 import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
+import yesman.epicfight.api.utils.ClearableIdMapper;
 import yesman.epicfight.main.EpicFightMod;
 
 public class AnimationManager extends SimpleJsonResourceReloadListener {
@@ -31,40 +29,66 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	}
 	
 	private final Map<StaticAnimation, AnimationClip> animationClips = Maps.newHashMap();
-	private IForgeRegistryModifiable<StaticAnimation> animationRegistry;
-	private IdMapper<StaticAnimation> animationIdMap;
+	private final Map<ResourceLocation, StaticAnimation> animationRegistry = Maps.newHashMap();
+	private final ClearableIdMapper<StaticAnimation> animationIdMap = new ClearableIdMapper<> ();
+	private String currentWorkingModid;
 	
-	public StaticAnimation findAnimationById(int animationId) {
-		return this.animationIdMap.byIdOrThrow(animationId);
+	private ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
+	
+	public AnimationManager() {
+		super((new GsonBuilder()).create(), "animmodels/animations");
 	}
 	
-	public AnimationClip getStaticAnimationClip(StaticAnimation animation) {
-		return this.animationClips.get(animation);
-	}
-	
-	public StaticAnimation findAnimationByPath(String resourceLocation) {
-		ResourceLocation rl = new ResourceLocation(resourceLocation);
+	public StaticAnimation byId(int animationId) {
+		if (!this.animationIdMap.contains(animationId)) {
+			throw new IllegalArgumentException("No animation with id " + animationId);
+		}
 		
+		return this.animationIdMap.byId(animationId);
+	}
+	
+	public StaticAnimation byKey(String resourceLocation) {
+		return this.byKey(new ResourceLocation(resourceLocation));
+	}
+	
+	public StaticAnimation byKey(ResourceLocation rl) {
 		if (this.animationRegistry.containsKey(rl)) {
-			return this.animationRegistry.getValue(rl);
+			return this.animationRegistry.get(rl);
 		}
 		
 		throw new IllegalArgumentException("Can't find animation in path: " + rl);
 	}
 	
-	public void registerAnimations() {
-		this.animationRegistry.clear();
+	public AnimationClip getStaticAnimationClip(StaticAnimation animation) {
+		if (!this.animationClips.containsKey(animation)) {
+			animation.loadAnimation(this.resourceManager);
+		}
 		
-		Map<String, Runnable> registryMap = Maps.newHashMap();
-		ModLoader.get().postEvent(new AnimationRegistryEvent(registryMap));
-		
-		registryMap.entrySet().forEach((entry) -> {
-			EpicFightMod.LOGGER.info("Register animations from " + entry.getKey());
-			entry.getValue().run();
-		});
+		return this.animationClips.get(animation);
 	}
 	
-	private void setAnimationProperties(ResourceManager resourceManager, StaticAnimation animation) {
+	public int registerAnimation(StaticAnimation staticAnimation) {
+		if (this.currentWorkingModid == null) {
+			throw new IllegalStateException("[EpicFightMod] You must register an animation when AnimationRegistryEvent is being called!");
+		}
+		
+		this.animationRegistry.put(staticAnimation.getRegistryName(), staticAnimation);
+		
+		int id = this.animationRegistry.size();
+		
+		this.animationIdMap.addMapping(staticAnimation, id);
+		
+		return id;
+	}
+	
+	public void loadAnimationClip(StaticAnimation animation, Function<StaticAnimation, AnimationClip> clipProvider) {
+		if (!this.animationClips.containsKey(animation)) {
+			AnimationClip animationClip = clipProvider.apply(animation);
+			this.animationClips.put(animation, animationClip);
+		}
+	}
+	
+	private void readAnimationProperties(ResourceManager resourceManager, StaticAnimation animation) {
 		if (resourceManager == null) {
 			return;
 		}
@@ -82,12 +106,29 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		}
 	}
 	
+	public String workingModId() {
+		return this.currentWorkingModid;
+	}
+	
 	@Override
 	protected Map<ResourceLocation, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profilerIn) {
-		this.registerAnimations();
+		this.animationClips.clear();
+		this.animationIdMap.clear();
+		this.animationRegistry.clear();
 		
-		this.animationRegistry.forEach((animation) -> {
-			this.setAnimationProperties(resourceManager, animation);
+		Map<String, Runnable> registryMap = Maps.newLinkedHashMap();
+		ModLoader.get().postEvent(new AnimationRegistryEvent(registryMap));
+		
+		registryMap.entrySet().forEach((entry) -> {
+			EpicFightMod.LOGGER.info("Register animations from " + entry.getKey());
+			this.currentWorkingModid = entry.getKey();
+			entry.getValue().run();
+			
+			this.animationRegistry.values().forEach((animation) -> {
+				this.readAnimationProperties(resourceManager, animation);
+			});
+			
+			this.currentWorkingModid = null;
 		});
 		
 		return super.prepare(resourceManager, profilerIn);
@@ -96,46 +137,55 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	@Override
 	protected void apply(Map<ResourceLocation, JsonElement> objectIn, ResourceManager resourceManager, ProfilerFiller profilerIn) {
 		/**
-		 * Load animations that are not registered from {@link AnimationRegistryEvent} in resource packs
-		 * If am animation using the same path is already registered, it will be skipped
+		 * Load animations that are not registered from {@link AnimationRegistryEvent}
+		 * Reads from Resource Pack in physical client, Datapack in physical server.
 		 */
-		objectIn.values().forEach((map) -> {
-			map.values().forEach((animation) -> {
-				animation.loadAnimation(resourceManager);
-			});
-		});
+		for (Map.Entry<ResourceLocation, JsonElement> entry : objectIn.entrySet()) {
+			boolean shouldRegisterPackAnimation = !this.animationRegistry.containsKey(entry.getKey()) && !entry.getKey().getPath().contains("/data/");
+			
+			if (shouldRegisterPackAnimation) {
+				try {
+					readAnimationFromJson(entry.getKey(), entry.getValue());
+				} catch (Exception e) {
+					EpicFightMod.LOGGER.error("Failed to load Runtime animation because of " + e + ". Skipped");
+				}
+			}
+		}
 		
 		SkillManager.reloadAllSkillsAnimations();
 	}
 	
-	public static AnimationRegistryCallbacks getCallBack() {
-		return AnimationRegistryCallbacks.INSTANCE;
-	}
-	
-	private static class AnimationRegistryCallbacks implements IForgeRegistry.BakeCallback<StaticAnimation>, IForgeRegistry.CreateCallback<StaticAnimation> {
-		private static final AnimationRegistryCallbacks INSTANCE = new AnimationRegistryCallbacks();
-		private static final ResourceLocation ANIMATION_ID_MAP = new ResourceLocation(EpicFightMod.MODID, "animationidmap");
+	private static StaticAnimation readAnimationFromJson(ResourceLocation rl, JsonElement json) throws Exception {
+		JsonElement constructorElement = json.getAsJsonObject().get("constructor");
 		
-		@Override
-		@SuppressWarnings("unchecked")
-        public void onBake(IForgeRegistryInternal<StaticAnimation> owner, RegistryManager stage) {
-            IdMapper<StaticAnimation> animationIdMap = owner.getSlaveMap(ANIMATION_ID_MAP, IdMapper.class);
-            
-			for (StaticAnimation animation : owner) {
-				animationIdMap.add(animation);
-				animation.assignIdFromMap(animationIdMap);
-			}
-        }
-		
-		@Override
-		public void onCreate(IForgeRegistryInternal<StaticAnimation> owner, RegistryManager stage) {
-			IdMapper<StaticAnimation> animationIdMap = new IdMapper<StaticAnimation> (owner.getKeys().size());
-			owner.setSlaveMap(ANIMATION_ID_MAP, animationIdMap);
-			EpicFightMod.getInstance().animationManager.animationIdMap = animationIdMap;
+		if (constructorElement == null) {
+			throw new IllegalStateException("No constructor information has provided for Runtime animation " + rl);
 		}
-	}
-	
-	public void onRegistryCreated(Supplier<IForgeRegistry<StaticAnimation>> animationRegistry) {
-		this.animationRegistry = (IForgeRegistryModifiable<StaticAnimation>)animationRegistry.get();
+		
+		JsonObject constructorObject = constructorElement.getAsJsonObject();
+		String classpath = constructorObject.get("class").getAsString();
+		String arguments = constructorObject.get("arguments").getAsString();
+		
+		if (classpath == null) {
+			throw new IllegalStateException("No class information has provided for Runtime animation " + rl);
+		}
+		
+		if (arguments == null) {
+			throw new IllegalStateException("No argument information has provided for Runtime animation " + rl);
+		}
+		
+		String[] sArgumentArr = arguments.split(",");
+		Object[] oArgumentArr = new Object[sArgumentArr.length];
+		
+		for (String element : sArgumentArr) {
+			String[] value$type = element.split("$");
+			
+		}
+		
+		Class<?> cls = Class.forName(classpath);
+		
+		//cls.getconstructor
+		
+		return null;
 	}
 }

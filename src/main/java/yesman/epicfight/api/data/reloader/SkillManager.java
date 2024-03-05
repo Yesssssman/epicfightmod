@@ -94,7 +94,6 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 	public static Stream<CompoundTag> getDataStream() {
 		Stream<CompoundTag> tagStream = PARAMETER_MAP.entrySet().stream().map((entry) -> {
 			entry.getValue().putString("id", entry.getKey().toString());
-			
 			return entry.getValue();
 		});
 		

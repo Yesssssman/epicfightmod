@@ -8,11 +8,19 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
  * e.g. () -> Animations.DUMMY_ANIMATION
  */
 @FunctionalInterface
-public interface AnimationProvider {
-	public StaticAnimation get();
+public interface AnimationProvider<T extends StaticAnimation> {
+	public T get();
+	
+	/**
+	 * These interfaces are for array use
+	 */
+	@FunctionalInterface
+	interface StaticAnimationProvider extends AnimationProvider<StaticAnimation> {
+		public StaticAnimation get();
+	}
 	
 	@FunctionalInterface
-	public interface AttackAnimationProvider {
+	interface AttackAnimationProvider extends AnimationProvider<AttackAnimation> {
 		public AttackAnimation get();
 	}
 }

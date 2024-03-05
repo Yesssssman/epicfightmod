@@ -1,7 +1,6 @@
 package yesman.epicfight.main;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,15 +26,11 @@ import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.NewRegistryEvent;
-import net.minecraftforge.registries.RegistryBuilder;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.ServerAnimator;
-import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.model.ItemSkins;
 import yesman.epicfight.api.client.model.Meshes;
@@ -54,6 +49,7 @@ import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.data.conditions.EpicFightConditions;
 import yesman.epicfight.data.loot.EpicFightLootTables;
 import yesman.epicfight.gameasset.Armatures;
+import yesman.epicfight.gameasset.ColliderPreset;
 import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.network.EpicFightDataSerializers;
@@ -105,23 +101,19 @@ public class EpicFightMod {
 		return instance;
 	}
 	
-	public final AnimationManager animationManager;
 	private Function<LivingEntityPatch<?>, Animator> animatorProvider;
 	
     public EpicFightMod() {
-    	this.animationManager = new AnimationManager();
     	instance = this;
     	
     	ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ConfigManager.CLIENT_CONFIG);
-    	
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 		
-		bus.addListener(this::newRegistry);
 		bus.addListener(this::constructMod);
     	bus.addListener(this::doClientStuff);
     	bus.addListener(this::doCommonStuff);
     	bus.addListener(this::doServerStuff);
-    	bus.addListener(this::registerClientReloadListnerEvent);
+    	bus.addListener(this::registerResourcepackReloadListnerEvent);
     	bus.addListener(EpicFightAttributes::registerNewMobs);
     	bus.addListener(EpicFightAttributes::modifyExistingMobs);
     	bus.addListener(EpicFightCapabilities::registerCapabilities);
@@ -151,7 +143,7 @@ public class EpicFightMod {
         EpicFightSkills.registerSkills();
         
         MinecraftForge.EVENT_BUS.addListener(this::command);
-        MinecraftForge.EVENT_BUS.addListener(this::reloadListnerEvent);
+        MinecraftForge.EVENT_BUS.addListener(this::registerDatapackReloadListnerEvent);
         
         ConfigManager.loadConfig(ConfigManager.CLIENT_CONFIG, FMLPaths.CONFIGDIR.get().resolve(MODID + "-client.toml").toString());
         ConfigManager.loadConfig(ConfigManager.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve(CONFIG_FILE_PATH).toString());
@@ -171,14 +163,6 @@ public class EpicFightMod {
 			}
 		});
 	}
-    
-    private void newRegistry(NewRegistryEvent event) {
-    	RegistryBuilder<StaticAnimation> registryBuilder = RegistryBuilder.of(MODID + "animation");
-    	registryBuilder.addCallback(AnimationManager.getCallBack());
-    	
-    	Supplier<IForgeRegistry<StaticAnimation>> animationRegistry = event.create(registryBuilder);
-    	this.animationManager.onRegistryCreated(animationRegistry);
-    }
     
     private void command(final RegisterCommandsEvent event) {
 		PlayerModeCommand.register(event.getDispatcher());
@@ -207,7 +191,6 @@ public class EpicFightMod {
 	
 	private void doServerStuff(final FMLDedicatedServerSetupEvent event) {
 		Armatures.build(null);
-		//this.animationManager.loadAnimationsOnServer();
 		this.animatorProvider = ServerAnimator::getAnimator;
 	}
 	
@@ -222,14 +205,19 @@ public class EpicFightMod {
 		event.enqueueWork(EpicFightMobEffects::addOffhandModifier);
     }
 	
-	private void registerClientReloadListnerEvent(final RegisterClientReloadListenersEvent event) {
+	private void registerResourcepackReloadListnerEvent(final RegisterClientReloadListenersEvent event) {
 		event.registerReloadListener(Meshes.INSTANCE);
 		event.registerReloadListener(Armatures.INSTANCE);
-		event.registerReloadListener(this.animationManager);
+		event.registerReloadListener(AnimationManager.getInstance());
 		event.registerReloadListener(ItemSkins.INSTANCE);
 	}
 	
-	private void reloadListnerEvent(final AddReloadListenerEvent event) {
+	private void registerDatapackReloadListnerEvent(final AddReloadListenerEvent event) {
+		if (!isPhysicalClient()) {
+			event.addListener(AnimationManager.getInstance());
+		}
+		
+		event.addListener(new ColliderPreset());
 		event.addListener(new SkillManager());
 		event.addListener(new WeaponTypeReloadListener());
 		event.addListener(new ItemCapabilityReloadListener());

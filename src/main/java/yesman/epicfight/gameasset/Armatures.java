@@ -34,7 +34,6 @@ import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
 import yesman.epicfight.world.entity.EpicFightEntities;
 
 public class Armatures implements PreparableReloadListener {
-	
 	public static final Armatures INSTANCE = new Armatures();
 	
 	@FunctionalInterface

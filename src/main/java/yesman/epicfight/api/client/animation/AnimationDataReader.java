@@ -37,9 +37,8 @@ import yesman.epicfight.api.client.animation.property.TrailInfo;
 
 @OnlyIn(Dist.CLIENT)
 public class AnimationDataReader {
-	static final Gson GSON = (new GsonBuilder()).registerTypeAdapter(AnimationDataReader.class, new Deserializer()).create();
-	static final TypeToken<AnimationDataReader> TYPE = new TypeToken<AnimationDataReader>() {};
-	
+	private static final Gson GSON = (new GsonBuilder()).registerTypeAdapter(AnimationDataReader.class, new Deserializer()).create();
+	private static final TypeToken<AnimationDataReader> TYPE = new TypeToken<AnimationDataReader>() {};
 	private final LayerInfo layerInfo;
 	private final LayerInfo multilayerInfo;
 	private final List<TrailInfo> trailInfo;
@@ -65,7 +64,7 @@ public class AnimationDataReader {
         	animation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.layerInfo.layerType);
         	animation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.layerInfo.priority);
         }
-
+		
 		if (propertySetter.multilayerInfo != null) {
 			StaticAnimation multilayerAnimation = new StaticAnimation(animation.getLocation(), animation.getConvertTime(), animation.isRepeat(), String.valueOf(animation.getId()), animation.getArmature(), true);
 

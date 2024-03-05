@@ -6,7 +6,7 @@ import java.util.UUID;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import yesman.epicfight.api.animation.AnimationProvider.AttackAnimationProvider;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.skill.Skill;
@@ -20,8 +20,8 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 public class GraspingSpireSkill extends WeaponInnateSkill {
 	private static final UUID EVENT_UUID = UUID.fromString("3fa26bbc-d14e-11ed-afa1-0242ac120002");
 	
-	private AttackAnimationProvider first;
-	private AttackAnimationProvider second;
+	private AnimationProvider<AttackAnimation> first;
+	private AnimationProvider<AttackAnimation> second;
 	
 	public GraspingSpireSkill(Builder<? extends Skill> builder) {
 		super(builder);

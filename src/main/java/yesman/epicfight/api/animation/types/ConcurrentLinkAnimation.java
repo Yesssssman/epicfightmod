@@ -7,7 +7,7 @@ import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class ConcurrentLinkAnimation extends DynamicAnimation {
-	private AnimationClip animationClip;
+	private final AnimationClip animationClip = new AnimationClip();
 	protected DynamicAnimation nextAnimation;
 	protected DynamicAnimation currentAnimation;
 	protected float startsAt;

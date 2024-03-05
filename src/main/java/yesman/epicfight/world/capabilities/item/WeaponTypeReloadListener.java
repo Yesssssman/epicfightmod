@@ -25,6 +25,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.registries.ForgeRegistries;
+import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
@@ -150,7 +151,7 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 			StaticAnimation[] animArray = new StaticAnimation[comboAnimations.size()];
 			
 			for (int i = 0; i < comboAnimations.size(); i++) {
-				animArray[i] = EpicFightMod.getInstance().animationManager.findAnimationByPath(comboAnimations.getString(i));
+				animArray[i] = AnimationManager.getInstance().byKey(comboAnimations.getString(i));
 			}
 			
 			builder.newStyleCombo(style, animArray);
@@ -172,7 +173,7 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 			
 			for (String sLivingmotion : styleAnimationTag.getAllKeys()) {
 				LivingMotion livingmotion = LivingMotion.ENUM_MANAGER.get(sLivingmotion);
-				StaticAnimation animation = EpicFightMod.getInstance().animationManager.findAnimationByPath(styleAnimationTag.getString(sLivingmotion));
+				StaticAnimation animation = AnimationManager.getInstance().byKey(styleAnimationTag.getString(sLivingmotion));
 				
 				builder.livingMotionModifier(style, livingmotion, animation);
 			}

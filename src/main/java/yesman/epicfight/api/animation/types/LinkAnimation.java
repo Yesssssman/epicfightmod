@@ -14,7 +14,7 @@ import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class LinkAnimation extends DynamicAnimation {
-	private AnimationClip animationClip;
+	private final AnimationClip animationClip = new AnimationClip();
 	protected DynamicAnimation nextAnimation;
 	protected float startsAt;
 	

@@ -24,6 +24,7 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.RenderingTool;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.EnderDragonPatch;
 
@@ -38,7 +39,13 @@ public class EnderDragonActionAnimation extends ActionAnimation implements Proce
 	
 	@Override
 	public void loadAnimation(ResourceManager resourceManager) {
-		loadBothSide(resourceManager, this);
+		try {
+			loadAllJointsClip(resourceManager, this);
+		} catch (Exception e) {
+			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
+			e.printStackTrace();
+		}
+		
 		this.tipPointTransforms = Maps.newHashMap();
 		this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransforms, this.getArmature(), this.getProperty(ActionAnimationProperty.MOVE_VERTICAL).orElse(false), true);
 		this.onLoaded();

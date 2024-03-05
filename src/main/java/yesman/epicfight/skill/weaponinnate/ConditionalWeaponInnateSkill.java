@@ -9,10 +9,10 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import yesman.epicfight.api.animation.AnimationManager;
+import yesman.epicfight.api.animation.AnimationProvider.AttackAnimationProvider;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
-import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
@@ -55,17 +55,18 @@ public class ConditionalWeaponInnateSkill extends WeaponInnateSkill {
 		return (new ConditionalWeaponInnateSkill.Builder()).setCategory(SkillCategories.WEAPON_INNATE).setResource(Resource.WEAPON_INNATE_ENERGY);
 	}
 	
-	protected final StaticAnimation[] attackAnimations;
+	protected final AttackAnimationProvider[] attackAnimations;
 	protected final Function<ServerPlayerPatch, Integer> selector;
 	
 	public ConditionalWeaponInnateSkill(ConditionalWeaponInnateSkill.Builder builder) {
 		super(builder);
 		this.properties = Lists.newArrayList();
-		this.attackAnimations = new StaticAnimation[builder.animationLocations.length];
+		this.attackAnimations = new AttackAnimationProvider[builder.animationLocations.length];
 		this.selector = builder.selector;
 		
 		for (int i = 0; i < builder.animationLocations.length; i++) {
-			this.attackAnimations[i] = EpicFightMod.getInstance().animationManager.findAnimationByPath(builder.animationLocations[i].toString());
+			final int idx = i;
+			this.attackAnimations[idx] = () -> (AttackAnimation)AnimationManager.getInstance().byKey(builder.animationLocations[idx].toString());
 		}
 	}
 	
@@ -79,8 +80,9 @@ public class ConditionalWeaponInnateSkill extends WeaponInnateSkill {
 	
 	@Override
 	public WeaponInnateSkill registerPropertiesToAnimation() {
-		for (StaticAnimation animation : this.attackAnimations) {
-			AttackAnimation anim = ((AttackAnimation)animation);
+		for (AttackAnimationProvider animationProvider : this.attackAnimations) {
+			AttackAnimation anim = animationProvider.get();
+			
 			for (Phase phase : anim.phases) {
 				phase.addProperties(this.properties.get(0).entrySet());
 			}
@@ -91,7 +93,7 @@ public class ConditionalWeaponInnateSkill extends WeaponInnateSkill {
 	
 	@Override
 	public void executeOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
-		executer.playAnimationSynchronized(this.attackAnimations[this.getAnimationInCondition(executer)], 0);
+		executer.playAnimationSynchronized(this.attackAnimations[this.getAnimationInCondition(executer)].get(), 0);
 		super.executeOnServer(executer, args);
 	}
 	

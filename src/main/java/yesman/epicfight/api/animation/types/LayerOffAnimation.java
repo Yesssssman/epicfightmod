@@ -13,6 +13,7 @@ import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class LayerOffAnimation extends DynamicAnimation {
+	private final AnimationClip animationClip = new AnimationClip();
 	private DynamicAnimation lastAnimation;
 	private Pose lastPose;
 	private final Priority layerPriority;
@@ -64,6 +65,6 @@ public class LayerOffAnimation extends DynamicAnimation {
 
 	@Override
 	public AnimationClip getAnimationClip() {
-		return null;
+		return this.animationClip;
 	}
 }

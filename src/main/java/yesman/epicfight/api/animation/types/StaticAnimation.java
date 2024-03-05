@@ -7,7 +7,6 @@ import java.util.function.Function;
 
 import com.google.common.collect.Maps;
 
-import net.minecraft.core.IdMapper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemStack;
@@ -16,6 +15,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.AnimationPlayer;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.property.AnimationEvent;
@@ -45,10 +45,11 @@ public class StaticAnimation extends DynamicAnimation {
 	
 	protected final Map<AnimationProperty<?>, Object> properties = Maps.newHashMap();
 	protected final StateSpectrum.Blueprint stateSpectrumBlueprint = new StateSpectrum.Blueprint();
-	protected final ResourceLocation resourceLocation;
 	protected final ResourceLocation registryName;
 	protected final Armature armature;
-	protected int animationId = -1;
+	
+	protected ResourceLocation resourceLocation;
+	protected final int animationId;
 	
 	private final StateSpectrum stateSpectrum = new StateSpectrum();
 	
@@ -57,6 +58,7 @@ public class StaticAnimation extends DynamicAnimation {
 		this.resourceLocation = null;
 		this.registryName = null;
 		this.armature = null;
+		this.animationId = -1;
 	}
 	
 	public StaticAnimation(boolean repeatPlay, String path, Armature armature) {
@@ -66,69 +68,62 @@ public class StaticAnimation extends DynamicAnimation {
 	public StaticAnimation(float convertTime, boolean isRepeat, String path, Armature armature) {
 		super(convertTime, isRepeat);
 		
-		AnimationManager animationManager = EpicFightMod.getInstance().animationManager;
-		EpicFightMod.LOGGER.info("Assigned animation id " + this.animationId + " to " + path);
-		
 		int colon = path.indexOf(':');
-		String modid = (colon == -1) ? animationManager.getModid() : path.substring(0, colon);
+		String modid = (colon == -1) ? AnimationManager.getInstance().workingModId() : path.substring(0, colon);
 		String folderPath = (colon == -1) ? path : path.substring(colon + 1);
 		
-		this.resourceLocation = new ResourceLocation(modid, "animmodels/animations/" + folderPath);
+		this.resourceLocation = new ResourceLocation(modid, "animmodels/animations/" + folderPath + ".json");
 		this.registryName = new ResourceLocation(modid, folderPath);
 		this.armature = armature;
+		this.animationId = AnimationManager.getInstance().registerAnimation(this);
 	}
 	
 	public StaticAnimation(float convertTime, boolean repeatPlay, String path, Armature armature, boolean notRegisteredInAnimationManager) {
 		super(convertTime, repeatPlay);
 		
-		AnimationManager animationManager = EpicFightMod.getInstance().animationManager;
-		
 		int colon = path.indexOf(':');
-		String modid = (colon == -1) ? animationManager.getModid() : path.substring(0, colon);
+		String modid = (colon == -1) ? AnimationManager.getInstance().workingModId() : path.substring(0, colon);
 		String folderPath = (colon == -1) ? path : path.substring(colon + 1);
 		
-		this.resourceLocation = new ResourceLocation(modid, "animmodels/animations/" + folderPath);
+		this.resourceLocation = new ResourceLocation(modid, "animmodels/animations/" + folderPath + ".json");
 		this.registryName = new ResourceLocation(modid, folderPath);
 		this.armature = armature;
+		this.animationId = AnimationManager.getInstance().registerAnimation(this);
 	}
 	
 	/* Multilayer Constructor */
 	public StaticAnimation(ResourceLocation baseAnimPath, float convertTime, boolean repeatPlay, String path, Armature armature, boolean notRegisteredInAnimationManager) {
 		super(convertTime, repeatPlay);
 		
-		this.resourceLocation = new ResourceLocation(baseAnimPath.getNamespace(), "animmodels/animations/" + path);
+		this.resourceLocation = new ResourceLocation(baseAnimPath.getNamespace(), "animmodels/animations/" + path + ".json");
 		this.registryName = new ResourceLocation(baseAnimPath.getNamespace(), path);
 		this.armature = armature;
+		this.animationId = AnimationManager.getInstance().registerAnimation(this);
 	}
 	
-	public static void load(ResourceManager resourceManager, ResourceLocation rl, StaticAnimation animation) {
-		(new JsonModelLoader(resourceManager, rl)).loadStaticAnimation(animation);
+	public static void loadClip(ResourceManager resourceManager, StaticAnimation animation) throws Exception {
+		try {
+			JsonModelLoader modelLoader = (new JsonModelLoader(resourceManager, animation.resourceLocation));
+			AnimationManager.getInstance().loadAnimationClip(animation, modelLoader::loadClipForAnimation);
+		} catch (Exception e) {
+			EpicFightMod.LOGGER.warn("Failed to load animation: " + animation.resourceLocation);
+			e.printStackTrace();
+		}
 	}
 	
-	public static void load(ResourceManager resourceManager, StaticAnimation animation) {
-		ResourceLocation path = new ResourceLocation(animation.resourceLocation.getNamespace(), animation.resourceLocation.getPath() + ".json");
-		(new JsonModelLoader(resourceManager, path)).loadStaticAnimation(animation);
-	}
-	
-	public static void loadBothSide(ResourceManager resourceManager, StaticAnimation animation) {
-		ResourceLocation path = new ResourceLocation(animation.resourceLocation.getNamespace(), animation.resourceLocation.getPath() + ".json");
-		(new JsonModelLoader(resourceManager, path)).loadStaticAnimationBothSide(animation);
-	}
-	
-	public void assignIdFromMap(IdMapper<StaticAnimation> idMapper) {
-		this.animationId = idMapper.getId(this);
+	public static void loadAllJointsClip(ResourceManager resourceManager, StaticAnimation animation) throws Exception {
+		try {
+			JsonModelLoader modelLoader = (new JsonModelLoader(resourceManager, animation.resourceLocation));
+			AnimationManager.getInstance().loadAnimationClip(animation, modelLoader::loadAllJointsClipForAnimation);
+		} catch (Exception e) {
+			EpicFightMod.LOGGER.warn("Failed to load animation: " + animation.resourceLocation);
+			e.printStackTrace();
+		}
 	}
 	
 	public void loadAnimation(ResourceManager resourceManager) {
 		try {
-			int id = Integer.parseInt(this.resourceLocation.getPath().substring(22));
-			StaticAnimation animation = EpicFightMod.getInstance().animationManager.findAnimationById(id);
-			ResourceLocation path = new ResourceLocation(animation.resourceLocation.getNamespace(), animation.resourceLocation.getPath() + ".json");
-			load(resourceManager, path, this);
-			
-			this.jointTransforms = animation.jointTransforms;
-		} catch (NumberFormatException numberFormatException) {
-			load(resourceManager, this);
+			loadClip(resourceManager, this);
 		} catch (Exception e) {
 			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
 			e.printStackTrace();
@@ -303,6 +298,21 @@ public class StaticAnimation extends DynamicAnimation {
 		return false;
 	}
 	
+	@SuppressWarnings("rawtypes")
+	public boolean in(AnimationProvider[] animationProviders) {
+		for (AnimationProvider animationProvider : animationProviders) {
+			if (this.equals(animationProvider.get())) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public void setCustomResourceLocation(ResourceLocation rl) {
+		this.resourceLocation = rl;
+	}
+	
 	public ResourceLocation getLocation() {
 		return this.resourceLocation;
 	}
@@ -406,6 +416,6 @@ public class StaticAnimation extends DynamicAnimation {
 
 	@Override
 	public AnimationClip getAnimationClip() {
-		return EpicFightMod.getInstance().animationManager;
+		return AnimationManager.getInstance().getStaticAnimationClip(this);
 	}
 }

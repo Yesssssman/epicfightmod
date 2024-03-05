@@ -8,6 +8,7 @@ import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimation
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
 import yesman.epicfight.api.model.Armature;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class MirrorAnimation extends StaticAnimation {
@@ -33,8 +34,16 @@ public class MirrorAnimation extends StaticAnimation {
 	
 	@Override
 	public void loadAnimation(ResourceManager resourceManager) {
-		load(resourceManager, this.original);
-		load(resourceManager, this.mirror);
+		try {
+			loadClip(resourceManager, this.original);
+			loadClip(resourceManager, this.mirror);
+		} catch (Exception e) {
+			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
+			e.printStackTrace();
+		}
+		
+		this.original.onLoaded();
+		this.mirror.onLoaded();
 	}
 	
 	@Override

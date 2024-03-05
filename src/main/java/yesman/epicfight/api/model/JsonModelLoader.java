@@ -25,6 +25,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.loading.FMLEnvironment;
+import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
@@ -67,8 +68,6 @@ public class JsonModelLoader {
 			} else {
 				this.resourceManager = resourceManager;
 				Resource resource = resourceManager.getResource(resourceLocation).get();
-				
-				//TODO Double check
 				JsonReader in = new JsonReader(new InputStreamReader(resource.open(), StandardCharsets.UTF_8));
 				in.setLenient(true);
 				this.rootJson = Streams.parse(in).getAsJsonObject();
@@ -275,9 +274,9 @@ public class JsonModelLoader {
 		return joint;
 	}
 	
-	public void loadStaticAnimation(StaticAnimation animation) {
+	public AnimationClip loadClipForAnimation(StaticAnimation animation) {
 		if (this.rootJson == null) {
-			throw new IllegalStateException("[ModelParsingError]Can't find animation path: " + animation);
+			throw new IllegalStateException("Can't find animation in path: " + animation);
 		}
 		
 		JsonArray array = this.rootJson.get("animation").getAsJsonArray();
@@ -312,6 +311,8 @@ public class JsonModelLoader {
 		} else if (action) {
 			allowedJoints.add("Root");
 		}
+		
+		AnimationClip clip = new AnimationClip();
 		
 		for (JsonElement element : array) {
 			JsonObject keyObject = element.getAsJsonObject();
@@ -380,18 +381,21 @@ public class JsonModelLoader {
 			TransformSheet sheet = getTransformSheet(times, transforms, OpenMatrix4f.invert(joint.getLocalTrasnform(), null), root);
 			
 			if (!noTransformData) {
-				animation.addSheet(name, sheet);
+				clip.addJointTransform(name, sheet);
 			}
 			
 			animation.setTotalTime(times[times.length - 1]);
 			root = false;
 		}
+		
+		return clip;
 	}
 	
-	public void loadStaticAnimationBothSide(StaticAnimation animation) {
+	public AnimationClip loadAllJointsClipForAnimation(StaticAnimation animation) {
 		JsonArray array = this.rootJson.get("animation").getAsJsonArray();
 		boolean root = true;
 		Armature armature = animation.getArmature();
+		AnimationClip clip = new AnimationClip();
 		
 		for (JsonElement element : array) {
 			JsonObject keyObject = element.getAsJsonObject();
@@ -399,7 +403,8 @@ public class JsonModelLoader {
 			Joint joint = armature.searchJointByName(name);
 			
 			if (joint == null) {
-				throw new IllegalArgumentException("[EpicFightMod] Can't find the joint " + name + " in animation data " + animation);
+				EpicFightMod.LOGGER.warn("[EpicFightMod] Can't find the joint " + name + " in animation data " + animation.getRegistryName());
+				continue;
 			}
 			
 			JsonArray timeArray = keyObject.getAsJsonArray("time");
@@ -422,10 +427,13 @@ public class JsonModelLoader {
 			}
 			
 			TransformSheet sheet = getTransformSheet(times, transforms, OpenMatrix4f.invert(joint.getLocalTrasnform(), null), root);
-			animation.addSheet(name, sheet);
+			clip.addJointTransform(name, sheet);
+			
 			animation.setTotalTime(times[times.length - 1]);
 			root = false;
 		}
+		
+		return clip;
 	}
 	
 	private static TransformSheet getTransformSheet(float[] times, float[] trasnformMatrix, OpenMatrix4f invLocalTransform, boolean correct) {

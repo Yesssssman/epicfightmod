@@ -16,6 +16,7 @@ import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.config.EpicFightOptions;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class AimAnimation extends StaticAnimation {
@@ -92,15 +93,26 @@ public class AimAnimation extends StaticAnimation {
 		this.lookDown.addProperty(propertyType, value);
 		this.lookUp.addProperty(propertyType, value);
 		this.lying.addProperty(propertyType, value);
+		
 		return this;
 	}
 	
 	@Override
 	public void loadAnimation(ResourceManager resourceManager) {
-		load(resourceManager, this);
-		load(resourceManager, this.lookUp);
-		load(resourceManager, this.lookDown);
-		load(resourceManager, this.lying);
+		try {
+			loadClip(resourceManager, this);
+			loadClip(resourceManager, this.lookUp);
+			loadClip(resourceManager, this.lookDown);
+			loadClip(resourceManager, this.lying);
+		} catch (Exception e) {
+			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
+			e.printStackTrace();
+		}
+		
+		this.onLoaded();
+		this.lookUp.onLoaded();
+		this.lookDown.onLoaded();
+		this.lying.onLoaded();
 	}
 	
 	@Override

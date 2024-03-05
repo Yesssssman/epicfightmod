@@ -105,6 +105,9 @@ public class EpicFightSkills {
 	public static Skill DEMOLITION_LEAP;
 	public static Skill PHANTOM_ASCENT;
 	
+	/**
+	 * Registers skill builders first to be shown at the search result in creative tabs
+	 */
 	public static void registerSkills() {
 		SkillManager.register(BasicAttack::new, BasicAttack.createBasicAttackBuilder(), EpicFightMod.MODID, "basic_attack");
 		SkillManager.register(AirAttack::new, AirAttack.createAirAttackBuilder(), EpicFightMod.MODID, "air_attack");
@@ -187,8 +190,7 @@ public class EpicFightSkills {
 					.addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.multiplier(1.6F))
 					.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.LONG)
 					.addProperty(AttackPhaseProperty.EXTRA_DAMAGE, Set.of(ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create()))
-					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE))
-					.registerPropertiesToAnimation();
+					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE));
 		SWEEPING_EDGE = sweepingEdge;
 		
 		WeaponInnateSkill dancingEdge = onBuild.build(EpicFightMod.MODID, "dancing_edge");
@@ -206,8 +208,7 @@ public class EpicFightSkills {
 					.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(1))
 					.addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.multiplier(1.2F))
 					.addProperty(AttackPhaseProperty.EXTRA_DAMAGE, Set.of(ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create()))
-					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE))
-					.registerPropertiesToAnimation();
+					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE));
 		DANCING_EDGE = dancingEdge;
 		
 		WeaponInnateSkill theGuillotine = onBuild.build(EpicFightMod.MODID, "the_guillotine");
@@ -218,8 +219,7 @@ public class EpicFightSkills {
 					.addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.multiplier(2.0F))
 					.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.LONG)
 					.addProperty(AttackPhaseProperty.EXTRA_DAMAGE, Set.of(ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create()))
-					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE))
-					.registerPropertiesToAnimation();
+					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE));
 		GUILLOTINE_AXE = theGuillotine;
 		
 		WeaponInnateSkill graspingSpire = onBuild.build(EpicFightMod.MODID, "grasping_spire");
@@ -234,8 +234,7 @@ public class EpicFightSkills {
 					.addProperty(AttackPhaseProperty.DAMAGE_MODIFIER, ValueModifier.multiplier(1.25F))
 					.addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.multiplier(1.2F))
 					.addProperty(AttackPhaseProperty.EXTRA_DAMAGE, Set.of(ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create()))
-					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE))
-					.registerPropertiesToAnimation();
+					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE));
 		GRASPING_SPIRE = graspingSpire;
 		
 		WeaponInnateSkill heartpiercer = onBuild.build(EpicFightMod.MODID, "heartpiercer");
@@ -243,16 +242,14 @@ public class EpicFightSkills {
 					.addProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER, ValueModifier.adder(10.0F))
 					.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.HOLD)
 					.addProperty(AttackPhaseProperty.EXTRA_DAMAGE, Set.of(ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create()))
-					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE))
-					.registerPropertiesToAnimation();
+					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE));
 		HEARTPIERCER = heartpiercer;
 		
 		WeaponInnateSkill steelWhirlwind = onBuild.build(EpicFightMod.MODID, "steel_whirlwind");
 		steelWhirlwind.newProperty()
 					  .addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.multiplier(1.4F))
 					  .addProperty(AttackPhaseProperty.EXTRA_DAMAGE, Set.of(ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create()))
-					  .addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE))
-					  .registerPropertiesToAnimation();
+					  .addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE));
 		STEEL_WHIRLWIND = steelWhirlwind;
 		
 		BATTOJUTSU_PASSIVE = onBuild.build(EpicFightMod.MODID, "battojutsu_passive");
@@ -264,8 +261,7 @@ public class EpicFightSkills {
 					.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(6))
 					.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.HOLD)
 					.addProperty(AttackPhaseProperty.EXTRA_DAMAGE, Set.of(ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create()))
-					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE))
-					.registerPropertiesToAnimation();
+					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE));
 		BATTOJUTSU = battojutsu;
 		
 		WeaponInnateSkill rushingTempo = onBuild.build(EpicFightMod.MODID, "rushing_tempo");
@@ -276,8 +272,7 @@ public class EpicFightSkills {
 					.addProperty(AttackPhaseProperty.SWING_SOUND, EpicFightSounds.WHOOSH_SHARP.get())
 					.addProperty(AttackPhaseProperty.EXTRA_DAMAGE, Set.of(ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create()))
 					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE))
-					.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.HOLD)
-					.registerPropertiesToAnimation();
+					.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.HOLD);
 		RUSHING_TEMPO = rushingTempo;
 		
 		WeaponInnateSkill relentlessCombo = onBuild.build(EpicFightMod.MODID, "relentless_combo");
@@ -287,8 +282,7 @@ public class EpicFightSkills {
 					.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.HOLD)
 					.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT)
 					.addProperty(AttackPhaseProperty.EXTRA_DAMAGE, Set.of(ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create()))
-					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE))
-					.registerPropertiesToAnimation();
+					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE));
 		RELENTLESS_COMBO = relentlessCombo;
 		
 		WeaponInnateSkill sharpStab = onBuild.build(EpicFightMod.MODID, "sharp_stab");
@@ -297,8 +291,7 @@ public class EpicFightSkills {
 					.addProperty(AttackPhaseProperty.IMPACT_MODIFIER, ValueModifier.multiplier(0.5F))
 					.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT)
 					.addProperty(AttackPhaseProperty.EXTRA_DAMAGE, Set.of(ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create()))
-					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE, EpicFightDamageType.GUARD_PUNCTURE))
-					.registerPropertiesToAnimation();
+					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE, EpicFightDamageType.GUARD_PUNCTURE));
 		SHARP_STAB = sharpStab;
 		
 		LIECHTENAUER = onBuild.build(EpicFightMod.MODID, "liechtenauer");
@@ -314,8 +307,7 @@ public class EpicFightSkills {
 					.addProperty(AttackPhaseProperty.EXTRA_DAMAGE, Set.of(ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create(), ExtraDamageInstance.TARGET_LOST_HEALTH.create(0.5F)))
 					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE))
 					.addProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER, ValueModifier.adder(50.0F))
-					.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.LONG)
-				.registerPropertiesToAnimation();
+					.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.LONG);
 		EVISCERATE = eviscerate;
 		
 		WeaponInnateSkill bladeRush = onBuild.build(EpicFightMod.MODID, "blade_rush");
@@ -326,8 +318,7 @@ public class EpicFightSkills {
 					.newProperty()
 					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.EXECUTION, EpicFightDamageType.WEAPON_INNATE))
 					.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.NONE)
-					.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLADE_RUSH_FINISHER.get())
-				.registerPropertiesToAnimation();
+					.addProperty(AttackPhaseProperty.HIT_SOUND, EpicFightSounds.BLADE_RUSH_FINISHER.get());
 		BLADE_RUSH = bladeRush;
 		
 		WeaponInnateSkill wrathfulLighting = onBuild.build(EpicFightMod.MODID, "wrathful_lighting");
@@ -339,16 +330,14 @@ public class EpicFightSkills {
 					.addProperty(AttackPhaseProperty.EXTRA_DAMAGE, Set.of(ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create()))
 					.addProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER, ValueModifier.adder(100.0F))
 					.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN)
-					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE))
-				.registerPropertiesToAnimation();
+					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE));
 		WRATHFUL_LIGHTING = wrathfulLighting;
 		
 		WeaponInnateSkill tsunami = onBuild.build(EpicFightMod.MODID, "tsunami");
 		tsunami.newProperty()
 					.addProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER, ValueModifier.adder(100.0F))
 					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE))
-					.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN)
-				.registerPropertiesToAnimation();
+					.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN);
 		TSUNAMI = tsunami;
 		
 		WeaponInnateSkill everlastAllegiance = onBuild.build(EpicFightMod.MODID, "everlasting_allegiance");
@@ -357,9 +346,7 @@ public class EpicFightSkills {
 					.addProperty(AttackPhaseProperty.DAMAGE_MODIFIER, ValueModifier.multiplier(1.4F))
 					.addProperty(AttackPhaseProperty.EXTRA_DAMAGE, Set.of(ExtraDamageInstance.SWEEPING_EDGE_ENCHANTMENT.create()))
 					.addProperty(AttackPhaseProperty.SOURCE_TAG, Set.of(EpicFightDamageType.WEAPON_INNATE))
-					.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.HOLD)
-				.registerPropertiesToAnimation();
+					.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.HOLD);
 		EVERLASTING_ALLEGIANCE = everlastAllegiance;
-		
 	}
 }

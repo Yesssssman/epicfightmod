@@ -16,7 +16,6 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap.TypeKey;
 import yesman.epicfight.gameasset.Animations;
-import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public abstract class Animator {
@@ -43,11 +42,11 @@ public abstract class Animator {
 	public abstract void poseTick();
 	
 	public final void playAnimation(int id, float convertTimeModifier) {
-		this.playAnimation(EpicFightMod.getInstance().animationManager.findAnimationById(id), convertTimeModifier);
+		this.playAnimation(AnimationManager.getInstance().byId(id), convertTimeModifier);
 	}
 	
 	public final void playAnimationInstantly(int id) {
-		this.playAnimationInstantly(EpicFightMod.getInstance().animationManager.findAnimationById(id));
+		this.playAnimationInstantly(AnimationManager.getInstance().byId(id));
 	}
 	
 	public boolean isReverse() {

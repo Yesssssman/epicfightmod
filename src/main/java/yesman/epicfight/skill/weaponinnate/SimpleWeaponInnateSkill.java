@@ -6,10 +6,10 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.AnimationProvider.AttackAnimationProvider;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
-import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
@@ -51,7 +51,7 @@ public class SimpleWeaponInnateSkill extends WeaponInnateSkill {
 	public SimpleWeaponInnateSkill(Builder builder) {
 		super(builder);
 		
-		this.attackAnimation = () -> (AttackAnimation)EpicFightMod.getInstance().animationManager.findAnimationByPath(builder.attackAnimation.toString());
+		this.attackAnimation = () -> (AttackAnimation)AnimationManager.getInstance().byKey(builder.attackAnimation.toString());
 	}
 	
 	@Override

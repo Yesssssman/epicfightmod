@@ -13,6 +13,7 @@ import net.minecraft.core.Direction;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
@@ -40,6 +41,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus;
+import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
@@ -132,7 +134,19 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
 @Mod.EventBusSubscriber(modid = EpicFightMod.MODID, bus = Bus.MOD)
 public class Animations {
-	public static StaticAnimation DUMMY_ANIMATION = new StaticAnimation();
+	public static StaticAnimation DUMMY_ANIMATION = new StaticAnimation() {
+		AnimationClip animatinoClip = new AnimationClip();
+		
+		@Override
+		public void loadAnimation(ResourceManager resourceManager) {
+		}
+		
+		@Override
+		public AnimationClip getAnimationClip() {
+			return this.animatinoClip;
+		}
+	};
+	
 	public static StaticAnimation BIPED_IDLE;
 	public static StaticAnimation BIPED_WALK;
 	public static StaticAnimation BIPED_RUN;
@@ -616,8 +630,8 @@ public class Animations {
 		BIPED_JAVELIN_AIM = new AimAnimation(false, "biped/combat/javelin_aim_mid", "biped/combat/javelin_aim_up", "biped/combat/javelin_aim_down", "biped/combat/javelin_aim_lying", biped);
 		BIPED_JAVELIN_THROW = new ReboundAnimation(0.08F, false, "biped/combat/javelin_throw_mid", "biped/combat/javelin_throw_up", "biped/combat/javelin_throw_down", "biped/combat/javelin_throw_lying", biped);
 		
-		OFF_ANIMATION_HIGHEST = new OffAnimation("off_highest");
-		OFF_ANIMATION_MIDDLE = new OffAnimation("off_middle");
+		OFF_ANIMATION_HIGHEST = new OffAnimation("common/off_highest");
+		OFF_ANIMATION_MIDDLE = new OffAnimation("common/off_middle");
 		
 		ZOMBIE_IDLE = new StaticAnimation(true, "zombie/idle", biped);
 		ZOMBIE_WALK = new MovementAnimation(true, "zombie/walk", biped);
