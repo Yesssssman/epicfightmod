@@ -810,7 +810,9 @@ public class Animations {
 		SPEAR_TWOHAND_AUTO2 = new BasicAttackAnimation(0.1F, 0.2F, 0.3F, 0.7F, null, biped.toolR, "biped/combat/spear_twohand_auto2", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		SPEAR_DASH = new DashAttackAnimation(0.1F, 0.25F, 0.3F, 0.4F, 0.8F, null, biped.toolR, "biped/combat/spear_dash", biped);
-		TOOL_AUTO1 = new BasicAttackAnimation(0.13F, 0.05F, 0.15F, 0.3F, null, biped.toolR, String.valueOf(SWORD_AUTO1.getId()), biped);
+		TOOL_AUTO1 = new BasicAttackAnimation(0.13F, 0.05F, 0.15F, 0.3F, null, biped.toolR, "biped/combat/tool_auto1", biped)
+				.setResourceLocation("biped/combat/sword_auto1");
+		
 		TOOL_AUTO2 = new BasicAttackAnimation(0.13F, 0.05F, 0.15F, 0.4F, null, biped.toolR, "biped/combat/sword_auto4", biped);
 		TOOL_DASH = new DashAttackAnimation(0.16F, 0.08F, 0.15F, 0.25F, 0.58F, null, biped.toolR, "biped/combat/tool_dash", biped)
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(1));
@@ -927,8 +929,9 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 4.0F);
 		DAGGER_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.45F, null, biped.toolR, "biped/combat/dagger_airslash", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
-		DAGGER_DUAL_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.4F, ColliderPreset.DUAL_DAGGER_AIR_SLASH, biped.torso, String.valueOf(SWORD_DUAL_AIR_SLASH.getId()), biped)
-				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
+		DAGGER_DUAL_AIR_SLASH = new AirSlashAnimation(0.1F, 0.15F, 0.26F, 0.4F, ColliderPreset.DUAL_DAGGER_AIR_SLASH, biped.torso, "biped/combat/dagger_dual_airslash", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F)
+				.setResourceLocation("biped/combat/sword_dual_airslash");
 		AXE_AIRSLASH = new AirSlashAnimation(0.1F, 0.3F, 0.4F, 0.65F, null, biped.toolR, "biped/combat/axe_airslash", biped);
 		
 		SWORD_MOUNT_ATTACK = new MountAttackAnimation(0.16F, 0.1F, 0.2F, 0.25F, 0.7F, null, biped.toolR, "biped/combat/sword_mount_attack", biped);
@@ -1626,9 +1629,10 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F)
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
 		
-		GRASPING_SPIRAL_FIRST = new AttackAnimation(0.1F, 0.25F, 0.3F, 0.4F, 0.8F, null, biped.toolR, String.valueOf(SPEAR_DASH.getId()), biped)
+		GRASPING_SPIRAL_FIRST = new AttackAnimation(0.1F, 0.25F, 0.3F, 0.4F, 0.8F, null, biped.toolR, "biped/skill/grasping_spire_first", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F)
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER)
+				.setResourceLocation("biped/combat/spear_dash")
 				.addEvents(StaticAnimationProperty.ON_END_EVENTS,
 					AnimationEvent.create((entitypatch, animation, params) -> {
 						List<LivingEntity> hitEnemies = entitypatch.getCurrenltyHurtEntities();

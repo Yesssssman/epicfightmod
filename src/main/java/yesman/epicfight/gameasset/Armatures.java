@@ -131,20 +131,18 @@ public class Armatures implements PreparableReloadListener {
 	
 	@SuppressWarnings("unchecked")
 	public static <A extends Armature> A getOrCreateArmature(ResourceManager rm, ResourceLocation rl, ArmatureContructor<A> constructor) {
-		return (A) ARMATURES.computeIfAbsent(rl, (key) -> {
-			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, rl);
+		final ResourceLocation wrappedLocation = wrapLocation(rl);
+		
+		return (A) ARMATURES.computeIfAbsent(wrappedLocation, (key) -> {
+			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, wrappedLocation);
 			return jsonModelLoader.loadArmature(constructor);
 		});
 	}
 	
-	public Armature register(ResourceManager rm, ResourceLocation rl) {
-		JsonModelLoader modelLoader = new JsonModelLoader(rm, rl);
-		Armature armature = modelLoader.loadArmature(Armature::new);
-		ARMATURES.put(rl, armature);
-		
-		return armature;
+	public static ResourceLocation wrapLocation(ResourceLocation rl) {
+		return rl.getPath().matches("animmodels/.*\\.json") ? rl : new ResourceLocation(rl.getNamespace(), "animmodels/" + rl.getPath() + ".json");
 	}
-
+	
 	@Override
 	public CompletableFuture<Void> reload(PreparableReloadListener.PreparationBarrier stage, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
 		return CompletableFuture.runAsync(() -> {

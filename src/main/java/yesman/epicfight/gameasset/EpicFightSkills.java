@@ -144,7 +144,7 @@ public class EpicFightSkills {
 		SkillManager.register(EviscerateSkill::new, WeaponInnateSkill.createWeaponInnateBuilder(), EpicFightMod.MODID, "eviscerate");
 		SkillManager.register(BladeRushSkill::new, BladeRushSkill.createBladeRushBuilder(), EpicFightMod.MODID, "blade_rush");
 		SkillManager.register(WrathfulLightingSkill::new, SimpleWeaponInnateSkill.createSimpleWeaponInnateBuilder().setAnimations(new ResourceLocation(EpicFightMod.MODID, "biped/skill/wrathful_lighting")), EpicFightMod.MODID, "wrathful_lighting");
-		SkillManager.register(ConditionalWeaponInnateSkill::new, ConditionalWeaponInnateSkill.createConditionalWeaponInnateBuilder().setSelector((executer) ->executer.getOriginal().isInWaterOrRain() ? 1 : 0).setAnimations(new ResourceLocation(EpicFightMod.MODID, "biped/skill/tsunami"), new ResourceLocation(EpicFightMod.MODID, "biped/skill/tsunami_reinforced")), EpicFightMod.MODID, "tsunami");
+		SkillManager.register(ConditionalWeaponInnateSkill::new, ConditionalWeaponInnateSkill.createConditionalWeaponInnateBuilder().setSelector((executer) -> executer.getOriginal().isInWaterOrRain() ? 1 : 0).setAnimations(new ResourceLocation(EpicFightMod.MODID, "biped/skill/tsunami"), new ResourceLocation(EpicFightMod.MODID, "biped/skill/tsunami_reinforced")), EpicFightMod.MODID, "tsunami");
 		SkillManager.register(EverlastingAllegiance::new, WeaponInnateSkill.createWeaponInnateBuilder(), EpicFightMod.MODID, "everlasting_allegiance");
 		
 		SkillManager.register(MeteorSlamSkill::new, MeteorSlamSkill.createMeteorSlamBuilder(), EpicFightMod.MODID, "meteor_slam");

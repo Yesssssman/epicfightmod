@@ -270,9 +270,6 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 				ResourceLocation modelLocation = new ResourceLocation(tag.getString("model"));
 				ResourceLocation armatureLocation = new ResourceLocation(tag.getString("armature"));
 				
-				modelLocation = new ResourceLocation(modelLocation.getNamespace(), "animmodels/" + modelLocation.getPath() + ".json");
-				armatureLocation = new ResourceLocation(armatureLocation.getNamespace(), "animmodels/" + armatureLocation.getPath() + ".json");
-				
 				if (EpicFightMod.isPhysicalClient()) {
 					Minecraft mc = Minecraft.getInstance();
 					Meshes.getOrCreateAnimatedMesh(mc.getResourceManager(), modelLocation, humanoid ? AnimatedMesh::new : HumanoidMesh::new);
@@ -574,11 +571,8 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 				} else {
 					Minecraft mc = Minecraft.getInstance();
 					ResourceLocation armatureLocation = new ResourceLocation(tag.getString("armature"));
-					armatureLocation = new ResourceLocation(armatureLocation.getNamespace(), "animmodels/" + armatureLocation.getPath() + ".json");
-					
 					boolean humanoid = tag.getBoolean("isHumanoid");
 					Armature armature = Armatures.getOrCreateArmature(mc.getResourceManager(), armatureLocation, humanoid ? Armature::new : HumanoidArmature::new);
-					
 					Armatures.registerEntityTypeArmature(entityType, armature);
 				}
 				

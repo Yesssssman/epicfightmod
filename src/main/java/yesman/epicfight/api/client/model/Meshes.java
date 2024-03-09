@@ -111,22 +111,30 @@ public class Meshes implements PreparableReloadListener {
 	
 	@SuppressWarnings("unchecked")
 	public static <M extends RawMesh> M getOrCreateRawMesh(ResourceManager rm, ResourceLocation rl, MeshContructor<VertexIndicator, M> constructor) {
-		return (M) MESHES.computeIfAbsent(rl, (key) -> {
-			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, rl);
+		final ResourceLocation wrappedLocation = wrapLocation(rl);
+		
+		return (M) MESHES.computeIfAbsent(wrappedLocation, (key) -> {
+			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, wrappedLocation);
 			return jsonModelLoader.loadMesh(constructor);
 		});
 	}
 	
 	@SuppressWarnings("unchecked")
 	public static <M extends AnimatedMesh> M getOrCreateAnimatedMesh(ResourceManager rm, ResourceLocation rl, MeshContructor<AnimatedVertexIndicator, M> constructor) {
-		return (M) MESHES.computeIfAbsent(rl, (key) -> {
-			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, rl);
+		final ResourceLocation wrappedLocation = wrapLocation(rl);
+		
+		return (M) MESHES.computeIfAbsent(wrappedLocation, (key) -> {
+			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, wrappedLocation);
 			return jsonModelLoader.loadAnimatedMesh(constructor);
 		});
 	}
 	
 	public static void addMesh(ResourceLocation rl, AnimatedMesh animatedMesh) {
 		MESHES.put(rl, animatedMesh);
+	}
+	
+	public static ResourceLocation wrapLocation(ResourceLocation rl) {
+		return rl.getPath().matches("animmodels/.*\\.json") ? rl : new ResourceLocation(rl.getNamespace(), "animmodels/" + rl.getPath() + ".json");
 	}
 	
 	@Override

@@ -45,11 +45,10 @@ public class StaticAnimation extends DynamicAnimation {
 	
 	protected final Map<AnimationProperty<?>, Object> properties = Maps.newHashMap();
 	protected final StateSpectrum.Blueprint stateSpectrumBlueprint = new StateSpectrum.Blueprint();
-	protected final ResourceLocation registryName;
 	protected final Armature armature;
-	
-	protected ResourceLocation resourceLocation;
 	protected final int animationId;
+	protected final ResourceLocation registryName;
+	protected ResourceLocation resourceLocation;
 	
 	private final StateSpectrum stateSpectrum = new StateSpectrum();
 	
@@ -92,13 +91,13 @@ public class StaticAnimation extends DynamicAnimation {
 	}
 	
 	/* Multilayer Constructor */
-	public StaticAnimation(ResourceLocation baseAnimPath, float convertTime, boolean repeatPlay, String path, Armature armature, boolean notRegisteredInAnimationManager) {
+	public StaticAnimation(ResourceLocation baseAnimPath, float convertTime, boolean repeatPlay, String registryName, Armature armature, boolean multilayer) {
 		super(convertTime, repeatPlay);
 		
-		this.resourceLocation = new ResourceLocation(baseAnimPath.getNamespace(), "animmodels/animations/" + path + ".json");
-		this.registryName = new ResourceLocation(baseAnimPath.getNamespace(), path);
+		this.resourceLocation = baseAnimPath;
+		this.registryName = new ResourceLocation(registryName);
 		this.armature = armature;
-		this.animationId = AnimationManager.getInstance().registerAnimation(this);
+		this.animationId = -1;
 	}
 	
 	public static void loadClip(ResourceManager resourceManager, StaticAnimation animation) throws Exception {
@@ -309,8 +308,14 @@ public class StaticAnimation extends DynamicAnimation {
 		return false;
 	}
 	
-	public void setCustomResourceLocation(ResourceLocation rl) {
-		this.resourceLocation = rl;
+	public StaticAnimation setResourceLocation(String path) {
+		int colon = path.indexOf(':');
+		String modid = (colon == -1) ? AnimationManager.getInstance().workingModId() : path.substring(0, colon);
+		String folderPath = (colon == -1) ? path : path.substring(colon + 1);
+		
+		this.resourceLocation = new ResourceLocation(modid, "animmodels/animations/" + folderPath + ".json");
+		
+		return this;
 	}
 	
 	public ResourceLocation getLocation() {
@@ -341,6 +346,15 @@ public class StaticAnimation extends DynamicAnimation {
 		String classPath = this.getClass().toString();
 		
 		return classPath.substring(classPath.lastIndexOf(".") + 1) + " " + this.getLocation();
+	}
+	
+	/**
+	 * Internal use only
+	 */
+	@Deprecated
+	public StaticAnimation addPropertyUnsafe(AnimationProperty<?> propertyType, Object value) {
+		this.properties.put(propertyType, value);
+		return this;
 	}
 	
 	public <V> StaticAnimation addProperty(StaticAnimationProperty<V> propertyType, V value) {

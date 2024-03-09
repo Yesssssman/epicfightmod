@@ -56,7 +56,7 @@ public class JsonModelLoader {
 	private JsonObject rootJson;
 	private ResourceManager resourceManager;
 	
-	public JsonModelLoader(ResourceManager resourceManager, ResourceLocation resourceLocation) {
+	public JsonModelLoader(ResourceManager resourceManager, ResourceLocation resourceLocation) throws IllegalStateException {
 		try {
 			if (resourceManager == null) {
 				Class<?> modClass = ModList.get().getModObjectById(resourceLocation.getNamespace()).get().getClass();
@@ -67,14 +67,13 @@ public class JsonModelLoader {
 				this.rootJson = Streams.parse(in).getAsJsonObject();	
 			} else {
 				this.resourceManager = resourceManager;
-				Resource resource = resourceManager.getResource(resourceLocation).get();
+				Resource resource = resourceManager.getResource(resourceLocation).orElseThrow();
 				JsonReader in = new JsonReader(new InputStreamReader(resource.open(), StandardCharsets.UTF_8));
 				in.setLenient(true);
 				this.rootJson = Streams.parse(in).getAsJsonObject();
 			}
 		} catch (Exception e) {
-			EpicFightMod.LOGGER.info("Can't read " + resourceLocation.toString() + " because of " + e);
-			e.printStackTrace();
+			throw new IllegalStateException("Can't read " + resourceLocation.toString() + " because of " + e);
 		}
 	}
 	

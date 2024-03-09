@@ -16,6 +16,22 @@ import yesman.epicfight.api.collider.OBBCollider;
 import yesman.epicfight.main.EpicFightMod;
 
 public class ColliderPreset implements PreparableReloadListener {
+	private static final Map<ResourceLocation, Collider> PRESETS = Maps.newHashMap();
+	
+	public static Collider registerCollider(ResourceLocation rl, Collider collider) {
+		if (PRESETS.containsKey(rl)) {
+			throw new IllegalStateException("Collider named " + rl + " already registered.");
+		}
+		
+		PRESETS.put(rl, collider);
+		
+		return collider;
+	}
+	
+	public static Collider get(ResourceLocation rl) {
+		return PRESETS.get(rl);
+	}
+	
 	public static final Collider DAGGER = registerCollider(new ResourceLocation(EpicFightMod.MODID, "dagger"), new MultiOBBCollider(3, 0.4D, 0.4D, 0.6D, 0.0D, 0.0D, -0.1D));
 	public static final Collider DUAL_DAGGER_DASH = registerCollider(new ResourceLocation(EpicFightMod.MODID, "dual_dagger_dash"), new OBBCollider(0.8D, 0.5D, 1.0D, 0.0D, 1.0D, -0.6D));
 	public static final Collider BIPED_BODY_COLLIDER = registerCollider(new ResourceLocation(EpicFightMod.MODID, "biped_body_collider"), new MultiOBBCollider(
@@ -53,22 +69,6 @@ public class ColliderPreset implements PreparableReloadListener {
 	public static final Collider DUAL_DAGGER_AIR_SLASH = registerCollider(new ResourceLocation(EpicFightMod.MODID, "dual_dagger_air_slash"), new OBBCollider(0.8D, 0.4D, 0.75D, 0D, 0.5D, -0.5D));
 	public static final Collider WITHER_CHARGE = registerCollider(new ResourceLocation(EpicFightMod.MODID, "wither_charge"), new MultiOBBCollider(5, 0.7D, 0.9D, 0.7D, 0D, 1.0D, -0.35D));
 	public static final Collider VEX_CHARGE = registerCollider(new ResourceLocation(EpicFightMod.MODID, "vex_charge"), new MultiOBBCollider(3, 0.4D, 0.4D, 0.95D, 0D, 1.0D, -0.85D));
-	
-	private static final Map<ResourceLocation, Collider> PRESETS = Maps.newHashMap();
-	
-	public static Collider registerCollider(ResourceLocation rl, Collider collider) {
-		if (PRESETS.containsKey(rl)) {
-			throw new IllegalStateException("Collider named " + rl + " already registered.");
-		}
-		
-		PRESETS.put(rl, collider);
-		
-		return collider;
-	}
-	
-	public static Collider get(ResourceLocation rl) {
-		return PRESETS.get(rl);
-	}
 	
 	@Override
 	public CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
