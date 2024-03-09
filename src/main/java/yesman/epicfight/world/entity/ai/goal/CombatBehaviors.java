@@ -6,6 +6,10 @@ import java.util.function.Function;
 
 import com.google.common.collect.Lists;
 
+import it.unimi.dsi.fastutil.floats.FloatArrayList;
+import it.unimi.dsi.fastutil.floats.FloatList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.world.entity.Entity;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.network.server.SPPlayAnimation;
@@ -24,8 +28,8 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 	}
 	
 	private int getRandomCombatBehaviorSeries() {
-		List<Integer> candidates = Lists.newArrayList();
-		List<Float> rescaledWeight = Lists.newArrayList();
+		IntList candidates = new IntArrayList();
+		FloatList rescaledWeight = new FloatArrayList();
 		float weightSum = 0.0F;
 		
 		for (int i = 0; i < this.behaviorSeriesList.size(); i++) {
@@ -48,8 +52,8 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 		float delta = 0.0F;
 		
 		for (int i = 0; i < candidates.size(); i++) {
-			int index = candidates.get(i);
-			delta += rescaledWeight.get(i);
+			int index = candidates.getInt(i);
+			delta += rescaledWeight.getFloat(i);
 			
 			if (random < delta) {
 				this.behaviorSeriesList.get(index).resetCooldown(this, true);
@@ -160,7 +164,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 		private final boolean canBeInterrupted;
 		private final float weight;
 		private final int maxCooldown;
-		private final List<Integer> cooldownSharingPointer;
+		private final IntList cooldownSharingPointer;
 		private int cooldown;
 		private int nextBehaviorPointer;
 		private boolean loopFinished;
@@ -218,7 +222,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 			private boolean canBeInterrupted = true;
 			private float weight;
 			private int cooldown;
-			private final List<Integer> cooldownSharingPointers = Lists.newArrayList();
+			private final IntList cooldownSharingPointers = new IntArrayList();
 			
 			public Builder<T> weight(float weight) {
 				this.weight = weight;

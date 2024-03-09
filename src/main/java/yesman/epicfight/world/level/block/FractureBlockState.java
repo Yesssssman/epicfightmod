@@ -1,11 +1,10 @@
 package yesman.epicfight.world.level.block;
 
-import java.util.Map;
-
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import com.mojang.serialization.MapCodec;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.BlockGetter;
@@ -25,7 +24,7 @@ public class FractureBlockState extends BlockState {
 	private Quaternionf rotation;
 	private double bouncing;
 	private int maxLifeTime;
-	private static final Map<Integer, BlockState> ORIGINAL_BLOCK_STATE_CACHE = Maps.newHashMap();
+	private static final Int2ObjectMap<BlockState> ORIGINAL_BLOCK_STATE_CACHE = new Int2ObjectOpenHashMap<>();
 	
 	public static void remove(BlockPos blockPos) {
 		ORIGINAL_BLOCK_STATE_CACHE.remove(blockPos.hashCode());

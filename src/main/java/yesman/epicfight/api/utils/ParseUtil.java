@@ -1,12 +1,15 @@
 package yesman.epicfight.api.utils;
 
-import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
-import org.apache.commons.lang3.ArrayUtils;
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleList;
+import it.unimi.dsi.fastutil.floats.FloatArrayList;
+import it.unimi.dsi.fastutil.floats.FloatList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 
-import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
@@ -17,41 +20,37 @@ import yesman.epicfight.api.utils.math.Vec3f;
 
 public class ParseUtil {
 	public static int[] toIntArray(JsonArray array) {
-		List<Integer> result = Lists.newArrayList();
+		IntList result = new IntArrayList();
 		
 		for (JsonElement je : array) {
 			result.add(je.getAsInt());
 		}
 		
-		return ArrayUtils.toPrimitive(result.toArray(new Integer[0]));
+		return result.toIntArray();
 	}
 	
 	public static float[] toFloatArray(JsonArray array) {
-		List<Float> result = Lists.newArrayList();
+		FloatList result = new FloatArrayList();
 		
 		for (JsonElement je : array) {
 			result.add(je.getAsFloat());
 		}
 		
-		return ArrayUtils.toPrimitive(result.toArray(new Float[0]));
+		return result.toFloatArray();
 	}
 	
 	public static Vec3f toVector3f(JsonArray array) {
-		List<Float> result = Lists.newArrayList();
+		float[] result = toFloatArray(array);
 		
-		for (JsonElement je : array) {
-			result.add(je.getAsFloat());
-		}
-		
-		if (result.size() < 3) {
+		if (result.length < 3) {
 			throw new IllegalArgumentException("Requires more than 3 elements to convert into 3d vector.");
 		}
 		
-		return new Vec3f(result.get(0), result.get(1), result.get(2));
+		return new Vec3f(result[0], result[1], result[2]);
 	}
 	
 	public static Vec3 toVector3d(JsonArray array) {
-		List<Double> result = Lists.newArrayList();
+		DoubleList result = new DoubleArrayList();
 		
 		for (JsonElement je : array) {
 			result.add(je.getAsDouble());
@@ -61,7 +60,7 @@ public class ParseUtil {
 			throw new IllegalArgumentException("Requires more than 3 elements to convert into 3d vector.");
 		}
 		
-		return new Vec3(result.get(0), result.get(1), result.get(2));
+		return new Vec3(result.getDouble(0), result.getDouble(1), result.getDouble(2));
 	}
 	
 	public static AttributeModifier toAttributeModifier(CompoundTag tag) {
@@ -96,4 +95,6 @@ public class ParseUtil {
 	public static String toStringNvl(Object obj) {
 		return obj == null ? "" : obj.toString();
 	}
+
+	private ParseUtil() {} // disallow creating new instances of a utility class that has no instance methods
 }

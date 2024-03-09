@@ -3,6 +3,7 @@ package yesman.epicfight.api.client.model.armor;
 import java.util.List;
 import java.util.Map;
 
+import it.unimi.dsi.fastutil.ints.IntList;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -172,7 +173,7 @@ public class GeoArmor extends ArmorModelTransformer {
 	
 	private static AnimatedMesh bakeMeshFromCubes(List<GeoModelPartition> partitions, boolean debuggingMode) {
 		List<SingleVertex> vertices = Lists.newArrayList();
-		Map<String, List<Integer>> indices = Maps.newHashMap();
+		Map<String, IntList> indices = Maps.newHashMap();
 		PoseStack poseStack = new PoseStack();
 		indexCount = 0;
 		
@@ -183,7 +184,7 @@ public class GeoArmor extends ArmorModelTransformer {
 		return SingleVertex.loadVertexInformation(vertices, indices);
 	}
 	
-	private static void bake(PoseStack poseStack, GeoModelPartition modelpartition, GeoBone geoBone, List<SingleVertex> vertices, Map<String, List<Integer>> indices, boolean debuggingMode) {
+	private static void bake(PoseStack poseStack, GeoModelPartition modelpartition, GeoBone geoBone, List<SingleVertex> vertices, Map<String, IntList> indices, boolean debuggingMode) {
 		if (geoBone == null) {
 			return;
 		}
@@ -222,7 +223,7 @@ public class GeoArmor extends ArmorModelTransformer {
 			this.jointId = jointId;
 		}
 		
-		public void bakeCube(PoseStack poseStack, String partName, GeoCube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
+		public void bakeCube(PoseStack poseStack, String partName, GeoCube cube, List<SingleVertex> vertices, Map<String, IntList> indices) {
 			for (GeoQuad quad : cube.quads()) {
 				if (quad == null) {
 					continue;
@@ -274,7 +275,7 @@ public class GeoArmor extends ArmorModelTransformer {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName, GeoCube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
+		public void bakeCube(PoseStack poseStack, String partName, GeoCube cube, List<SingleVertex> vertices, Map<String, IntList> indices) {
 			Vec3 centerOfCube = getCenterOfCube(poseStack, cube);
 			
 			if (!this.noneAttachmentArea.contains(centerOfCube)) {
@@ -475,7 +476,7 @@ public class GeoArmor extends ArmorModelTransformer {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName, GeoCube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
+		public void bakeCube(PoseStack poseStack, String partName, GeoCube cube, List<SingleVertex> vertices, Map<String, IntList> indices) {
 			Vec3 centerOfCube = getCenterOfCube(poseStack, cube);
 			
 			if (!this.noneAttachmentArea.contains(centerOfCube)) {

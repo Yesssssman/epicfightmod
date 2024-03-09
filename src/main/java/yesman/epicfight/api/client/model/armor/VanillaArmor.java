@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
+import it.unimi.dsi.fastutil.ints.IntList;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
@@ -132,7 +133,7 @@ public class VanillaArmor extends ArmorModelTransformer {
 	
 	private static AnimatedMesh bakeMeshFromCubes(List<VanillaModelPartition> partitions, boolean debuggingMode) {
 		List<SingleVertex> vertices = Lists.newArrayList();
-		Map<String, List<Integer>> indices = Maps.newHashMap();
+		Map<String, IntList> indices = Maps.newHashMap();
 		PoseStack poseStack = new PoseStack();
 		indexCount = 0;
 		poseStack.mulPose(QuaternionUtils.YP.rotationDegrees(180.0F));
@@ -146,7 +147,7 @@ public class VanillaArmor extends ArmorModelTransformer {
 		return SingleVertex.loadVertexInformation(vertices, indices);
 	}
 	
-	private static void bake(PoseStack poseStack, String partName, VanillaModelPartition modelpartition, ModelPart part, List<SingleVertex> vertices, Map<String, List<Integer>> indices, boolean debuggingMode) {
+	private static void bake(PoseStack poseStack, String partName, VanillaModelPartition modelpartition, ModelPart part, List<SingleVertex> vertices, Map<String, IntList> indices, boolean debuggingMode) {
 		poseStack.pushPose();
 		poseStack.translate(part.x, part.y, part.z);
 		
@@ -181,7 +182,7 @@ public class VanillaArmor extends ArmorModelTransformer {
 			this.jointId = jointId;
 		}
 		
-		public void bakeCube(PoseStack poseStack, String partName, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
+		public void bakeCube(PoseStack poseStack, String partName, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, IntList> indices) {
 			for (ModelPart.Polygon quad : cube.polygons) {
 				Vector3f norm = new Vector3f(quad.normal);
 				norm.mul(poseStack.last().normal());
@@ -227,7 +228,7 @@ public class VanillaArmor extends ArmorModelTransformer {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
+		public void bakeCube(PoseStack poseStack, String partName, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, IntList> indices) {
 			Vec3 centerOfCube = getCenterOfCube(poseStack, cube);
 			
 			if (!this.noneAttachmentArea.contains(centerOfCube)) {
@@ -430,7 +431,7 @@ public class VanillaArmor extends ArmorModelTransformer {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName,  ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
+		public void bakeCube(PoseStack poseStack, String partName,  ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, IntList> indices) {
 			List<AnimatedPolygon> polygons = Lists.<AnimatedPolygon>newArrayList();
 			
 			for (ModelPart.Polygon quad : cube.polygons) {
