@@ -40,14 +40,14 @@ public class EditSwitchingItemScreen extends Screen {
 	protected void init() {
 		if (this.battleAutoSwitchItems == null) {
 			this.battleAutoSwitchItems = new EditSwitchingItemScreen.RegisteredItemList(200, this.height,
-				 Component.translatable(EpicFightMod.MODID+".gui.to_battle_mode"), EpicFightMod.CLIENT_CONFIGS.battleAutoSwitchItems);
+				 Component.translatable(EpicFightMod.MODID+".gui.to_battle_mode"), List.copyOf(EpicFightMod.CLIENT_CONFIGS.battleAutoSwitchItems));
 		} else {
 			this.battleAutoSwitchItems.resize(200, this.height);
 		}
 		
 		if (this.miningAutoSwitchItems == null) {
 			this.miningAutoSwitchItems = new EditSwitchingItemScreen.RegisteredItemList(200, this.height,
-				 Component.translatable(EpicFightMod.MODID+".gui.to_mining_mode"), EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems);
+				 Component.translatable(EpicFightMod.MODID+".gui.to_mining_mode"), List.copyOf(EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems));
 		} else {
 			this.miningAutoSwitchItems.resize(200, this.height);
 		}
