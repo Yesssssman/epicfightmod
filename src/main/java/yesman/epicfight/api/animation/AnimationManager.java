@@ -5,6 +5,8 @@ import java.util.function.Supplier;
 
 import com.google.common.collect.Maps;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.core.IdMapper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -20,8 +22,8 @@ import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.main.EpicFightMod;
 
-public class AnimationManager extends SimplePreparableReloadListener<Map<Integer, Map<Integer, StaticAnimation>>> {
-	private final Map<Integer, Map<Integer, StaticAnimation>> animationById = Maps.newHashMap();
+public class AnimationManager extends SimplePreparableReloadListener<Int2ObjectMap<Int2ObjectMap<StaticAnimation>>> {
+	private final Int2ObjectMap<Int2ObjectMap<StaticAnimation>> animationById = new Int2ObjectOpenHashMap<>();
 	private final Map<ResourceLocation, StaticAnimation> animationByName = Maps.newHashMap();
 	/*
 	 * Note: The above registries will be replaced to below Forge registries
@@ -34,7 +36,7 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 	
 	public StaticAnimation findAnimationById(int namespaceId, int animationId) {
 		if (this.animationById.containsKey(namespaceId)) {
-			Map<Integer, StaticAnimation> map = this.animationById.get(namespaceId);
+			Int2ObjectMap<StaticAnimation> map = this.animationById.get(namespaceId);
 			
 			if (map.containsKey(animationId)) {
 				return map.get(animationId);
@@ -65,7 +67,7 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 			EpicFightMod.LOGGER.info("Start animation registration of " + entry.getKey());
 			this.modid = entry.getKey();
 			this.namespaceHash = this.modid.hashCode();
-			this.animationById.put(this.namespaceHash, Maps.newHashMap());
+			this.animationById.put(this.namespaceHash, new Int2ObjectOpenHashMap<>());
 			this.counter = 0;
 			entry.getValue().run();
 		});
@@ -83,7 +85,7 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 	}
 	
 	@Override
-	protected Map<Integer, Map<Integer, StaticAnimation>> prepare(ResourceManager resourceManager, ProfilerFiller profilerIn) {
+	protected Int2ObjectMap<Int2ObjectMap<StaticAnimation>> prepare(ResourceManager resourceManager, ProfilerFiller profilerIn) {
 		if (EpicFightMod.isPhysicalClient()) {
 			this.registerAnimations();
 			
@@ -98,7 +100,7 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 	}
 	
 	@Override
-	protected void apply(Map<Integer, Map<Integer, StaticAnimation>> objectIn, ResourceManager resourceManager, ProfilerFiller profilerIn) {
+	protected void apply(Int2ObjectMap<Int2ObjectMap<StaticAnimation>> objectIn, ResourceManager resourceManager, ProfilerFiller profilerIn) {
 		objectIn.values().forEach((map) -> {
 			map.values().forEach((animation) -> {
 				animation.loadAnimation(resourceManager);
@@ -142,7 +144,7 @@ public class AnimationManager extends SimplePreparableReloadListener<Map<Integer
 		return this.counter++;
 	}
 	
-	public Map<Integer, StaticAnimation> getIdMap() {
+	public Int2ObjectMap<StaticAnimation> getIdMap() {
 		return this.animationById.get(this.namespaceHash);
 	}
 	

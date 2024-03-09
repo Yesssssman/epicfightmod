@@ -1,8 +1,13 @@
 package yesman.epicfight.api.client.model;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import it.unimi.dsi.fastutil.floats.FloatArrayList;
+import it.unimi.dsi.fastutil.floats.FloatList;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import org.apache.commons.lang3.ArrayUtils;
 
 import com.google.common.collect.Lists;
@@ -76,13 +81,13 @@ public class SingleVertex {
 		}
 	}
 	
-	public static AnimatedMesh loadVertexInformation(List<SingleVertex> vertices, Map<String, List<Integer>> indices) {
-		List<Float> positions = Lists.newArrayList();
-		List<Float> normals = Lists.newArrayList();
-		List<Float> texCoords = Lists.newArrayList();
-		List<Integer> animationIndices = Lists.newArrayList();
-		List<Float> jointWeights = Lists.newArrayList();
-		List<Integer> affectCountList = Lists.newArrayList();
+	public static AnimatedMesh loadVertexInformation(List<SingleVertex> vertices, Map<String, IntList> indices) {
+		FloatList positions = new FloatArrayList();
+		FloatList normals = new FloatArrayList();
+		FloatList texCoords = new FloatArrayList();
+		IntList animationIndices = new IntArrayList();
+		FloatList jointWeights = new FloatArrayList();
+		IntList affectCountList = new IntArrayList();
 		
 		for (int i = 0; i < vertices.size(); i++) {
 			SingleVertex vertex = vertices.get(i);
@@ -125,12 +130,12 @@ public class SingleVertex {
 			}
 		}
 		
-		float[] positionList = ArrayUtils.toPrimitive(positions.toArray(new Float[0]));
-		float[] normalList = ArrayUtils.toPrimitive(normals.toArray(new Float[0]));
-		float[] texCoordList = ArrayUtils.toPrimitive(texCoords.toArray(new Float[0]));
-		int[] animationIndexList = ArrayUtils.toPrimitive(animationIndices.toArray(new Integer[0]));
-		float[] jointWeightList = ArrayUtils.toPrimitive(jointWeights.toArray(new Float[0]));
-		int[] affectJointCounts = ArrayUtils.toPrimitive(affectCountList.toArray(new Integer[0]));
+		float[] positionList = positions.toFloatArray();
+		float[] normalList = normals.toFloatArray();
+		float[] texCoordList = texCoords.toFloatArray();
+		int[] animationIndexList = animationIndices.toIntArray();
+		float[] jointWeightList = jointWeights.toFloatArray();
+		int[] affectJointCounts = affectCountList.toIntArray();
 		Map<String, float[]> arrayMap = Maps.newHashMap();
 		Map<String, ModelPart<AnimatedVertexIndicator>> meshMap = Maps.newHashMap();
 		
@@ -139,8 +144,8 @@ public class SingleVertex {
 		arrayMap.put("uvs", texCoordList);
 		arrayMap.put("weights", jointWeightList);
 		
-		for (Map.Entry<String, List<Integer>> e : indices.entrySet()) {
-			meshMap.put(e.getKey(), new ModelPart<AnimatedVertexIndicator>(VertexIndicator.createAnimated(ArrayUtils.toPrimitive(e.getValue().toArray(new Integer[0])), affectJointCounts, animationIndexList)));
+		for (Map.Entry<String, IntList> e : indices.entrySet()) {
+			meshMap.put(e.getKey(), new ModelPart<>(VertexIndicator.createAnimated(e.getValue().toIntArray(), affectJointCounts, animationIndexList)));
 		}
 		
 		return new AnimatedMesh(arrayMap, null, Mesh.RenderProperties.create(), meshMap);
