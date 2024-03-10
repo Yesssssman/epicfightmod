@@ -128,7 +128,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements ResizableComp
 			return -1;
 		}
 		
-		if (this.children().size() == 0) {
+		if (this.children().isEmpty()) {
 			return -1;
 		}
 		
@@ -339,7 +339,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements ResizableComp
 	
 	@Override
 	public boolean isMouseOver(double x, double y) {
-		double y0 = this.rowEditButtons.size() > 0 ? this.y0 - 12 : this.y0;
+		double y0 = !this.rowEditButtons.isEmpty() ? this.y0 - 12 : this.y0;
 		
 		return y >= y0 && y <= (double)this.y1 && x >= (double)this.x0 && x <= (double)this.x1;
 	}

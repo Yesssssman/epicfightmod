@@ -35,7 +35,7 @@ public class EviscerateSkill extends WeaponInnateSkill {
 			if (Animations.EVISCERATE_FIRST.equals(event.getAnimation())) {
 				List<LivingEntity> hurtEntities = event.getPlayerPatch().getCurrenltyHurtEntities();
 				
-				if (hurtEntities.size() > 0 && hurtEntities.get(0).isAlive()) {
+				if (!hurtEntities.isEmpty() && hurtEntities.get(0).isAlive()) {
 					event.getPlayerPatch().reserveAnimation(this.second.get());
 					event.getPlayerPatch().getServerAnimator().getPlayerFor(null).reset();
 					event.getPlayerPatch().getCurrenltyHurtEntities().clear();

@@ -254,7 +254,7 @@ public class ClientAnimator extends Animator {
 		
 		Joint rootJoint = this.entitypatch.getArmature().getRootJoint();
 		
-		if (layerPoses.size() > 0) {
+		if (!layerPoses.isEmpty()) {
 			applyBindModifier(this.entitypatch, baseLayerPose, composedPose, rootJoint, layerPoses);
 		}
 		
