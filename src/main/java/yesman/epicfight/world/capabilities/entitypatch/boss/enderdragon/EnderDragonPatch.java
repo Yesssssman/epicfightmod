@@ -255,7 +255,7 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 			}
 		}
 		
-		if (this.tipPointAnimations.size() > 0) {
+		if (!this.tipPointAnimations.isEmpty()) {
 			TipPointAnimation frontL = this.getTipPointAnimation("Leg_Front_L3");
 			TipPointAnimation frontR = this.getTipPointAnimation("Leg_Front_R3");
 			TipPointAnimation backL = this.getTipPointAnimation("Leg_Back_L3");

@@ -61,10 +61,8 @@ public class JointTransform {
 		this.translation.set(newV);
 		this.rotation.set(newQ);
 		this.scale.set(newS);
-		
-		for (Map.Entry<String, TransformEntry> entry : jt.entries.entrySet()) {
-			this.entries.put(entry.getKey(), entry.getValue());
-		}
+
+		this.entries.putAll(jt.entries);
 		
 		return this;
 	}

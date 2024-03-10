@@ -107,8 +107,8 @@ public class ClientAnimator extends Animator {
 	}
 	
 	public void setCurrentMotionsAsDefault() {
-		this.livingAnimations.forEach(this.defaultLivingAnimations::put);
-		this.compositeLivingAnimations.forEach(this.defaultCompositeLivingAnimations::put);
+		this.defaultLivingAnimations.putAll(this.livingAnimations);
+		this.defaultCompositeLivingAnimations.putAll(this.compositeLivingAnimations);
 	}
 	
 	@Override
@@ -254,7 +254,7 @@ public class ClientAnimator extends Animator {
 		
 		Joint rootJoint = this.entitypatch.getArmature().getRootJoint();
 		
-		if (layerPoses.size() > 0) {
+		if (!layerPoses.isEmpty()) {
 			applyBindModifier(this.entitypatch, baseLayerPose, composedPose, rootJoint, layerPoses);
 		}
 		

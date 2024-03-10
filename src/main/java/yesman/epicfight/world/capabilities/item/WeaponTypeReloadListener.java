@@ -59,7 +59,7 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 		
 		WeaponCapabilityPresetRegistryEvent weaponCapabilityPresetRegistryEvent = new WeaponCapabilityPresetRegistryEvent(typeEntry);
 		ModLoader.get().postEvent(weaponCapabilityPresetRegistryEvent);
-		weaponCapabilityPresetRegistryEvent.getTypeEntry().forEach(PRESETS::put);
+		PRESETS.putAll(weaponCapabilityPresetRegistryEvent.getTypeEntry());
 	}
 	
 	private static final Gson GSON = (new GsonBuilder()).create();

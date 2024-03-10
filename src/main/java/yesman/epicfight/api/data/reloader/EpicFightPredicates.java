@@ -1,8 +1,7 @@
 package yesman.epicfight.api.data.reloader;
 
 import java.util.Set;
-
-import com.google.common.collect.Sets;
+import java.util.stream.Collectors;
 
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -12,10 +11,10 @@ public abstract class EpicFightPredicates<T> {
 	public abstract boolean test(T object);
 	
 	public static class HasTag extends EpicFightPredicates<Entity> {
-		private final Set<String> allowedTags = Sets.newHashSet();
+		private final Set<String> allowedTags;
 		
 		public HasTag(ListTag allowedTags) {
-			allowedTags.stream().map(Tag::getAsString).forEach(this.allowedTags::add);
+			this.allowedTags = allowedTags.stream().map(Tag::getAsString).collect(Collectors.toUnmodifiableSet());
 		}
 		
 		@Override

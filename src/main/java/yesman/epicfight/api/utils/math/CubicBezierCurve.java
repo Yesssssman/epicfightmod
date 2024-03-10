@@ -118,7 +118,7 @@ public class CubicBezierCurve {
 		getBezierEquationCoefficients(z, z_a, z_b);
 		
 		for (int i = sliceBegin; i < sliceEnd; i++) {
-			if (interpolatedPoints.size() > 0) {
+			if (!interpolatedPoints.isEmpty()) {
 				interpolatedPoints.remove(interpolatedPoints.size() - 1);
 			}
 			

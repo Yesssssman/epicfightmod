@@ -412,7 +412,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 				if (this.ghostSummonCount < this.maxGhostSpawn) {
 					List<LivingEntity> nearbyEnemies = this.getNearbyTargets();
 					
-					if (nearbyEnemies.size() > 0) {
+					if (!nearbyEnemies.isEmpty()) {
 						LivingEntity randomTarget = nearbyEnemies.get(WitherPatch.this.original.getRandom().nextInt(nearbyEnemies.size()));
 						Vec3 summonPosition = randomTarget.position().add(new Vec3(0.0D, 0.0D, 6.0D).yRot(WitherPatch.this.original.getRandom().nextFloat() * 360.0F));
 						WitherGhostClone ghostclone = new WitherGhostClone((ServerLevel)WitherPatch.this.original.level(), summonPosition, randomTarget);
