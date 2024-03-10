@@ -107,8 +107,8 @@ public class ClientAnimator extends Animator {
 	}
 	
 	public void setCurrentMotionsAsDefault() {
-		this.livingAnimations.forEach(this.defaultLivingAnimations::put);
-		this.compositeLivingAnimations.forEach(this.defaultCompositeLivingAnimations::put);
+		this.defaultLivingAnimations.putAll(this.livingAnimations);
+		this.defaultCompositeLivingAnimations.putAll(this.compositeLivingAnimations);
 	}
 	
 	@Override

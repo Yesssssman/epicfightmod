@@ -60,12 +60,8 @@ public class EditSwitchingItemScreen extends Screen {
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {
 			EpicFightMod.CLIENT_CONFIGS.battleAutoSwitchItems.clear();
 			EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems.clear();
-			this.battleAutoSwitchItems.toList().forEach((item) -> {
-				EpicFightMod.CLIENT_CONFIGS.battleAutoSwitchItems.add(item);
-			});
-			this.miningAutoSwitchItems.toList().forEach((item) -> {
-				EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems.add(item);
-			});
+			EpicFightMod.CLIENT_CONFIGS.battleAutoSwitchItems.addAll(this.battleAutoSwitchItems.toList());
+			EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems.addAll(this.miningAutoSwitchItems.toList());
 			EpicFightMod.CLIENT_CONFIGS.save();
 			this.onClose();
 		}).bounds(this.width / 2 - 80, this.height - 28, 160, 20).build());
