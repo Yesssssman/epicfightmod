@@ -77,7 +77,7 @@ public class StaticAnimation extends DynamicAnimation {
 		this.animationId = AnimationManager.getInstance().registerAnimation(this);
 	}
 	
-	public StaticAnimation(float convertTime, boolean repeatPlay, String path, Armature armature, boolean notRegisteredInAnimationManager) {
+	public StaticAnimation(float convertTime, boolean repeatPlay, String path, Armature armature, boolean noRegister) {
 		super(convertTime, repeatPlay);
 		
 		int colon = path.indexOf(':');

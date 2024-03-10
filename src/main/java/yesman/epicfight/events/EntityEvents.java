@@ -245,7 +245,7 @@ public class EntityEvents {
 						attackerEntityPatch.gatherDamageDealt(epicFightDamageSource, calculatedDamage);
 					}
 		        }
-		        
+				
 				event.setAmount(totalDamage - trueDamage);
 				
 				if (event.getAmount() + trueDamage > 0.0F) {

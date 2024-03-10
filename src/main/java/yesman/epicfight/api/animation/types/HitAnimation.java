@@ -37,7 +37,7 @@ public class HitAnimation extends MainFrameAnimation {
 		dest.setNextAnimation(this);
 		Map<String, JointTransform> data1 = pose1.getJointTransformData();
 		Map<String, JointTransform> data2 = super.getPoseByTime(entitypatch, 0.0F, 0.0F).getJointTransformData();
-		Map<String, JointTransform> data3 = super.getPoseByTime(entitypatch, this.totalTime - 0.00001F, 0.0F).getJointTransformData();
+		Map<String, JointTransform> data3 = super.getPoseByTime(entitypatch, this.getTotalTime() - 0.00001F, 0.0F).getJointTransformData();
 		
 		for (String jointName : data1.keySet()) {
 			if (data1.containsKey(jointName) && data2.containsKey(jointName)) {

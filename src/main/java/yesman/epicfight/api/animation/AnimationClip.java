@@ -6,6 +6,7 @@ import com.google.common.collect.Maps;
 
 public class AnimationClip {
 	protected Map<String, TransformSheet> jointTransforms = Maps.newHashMap();
+	protected float clipTime;
 	
 	public void addJointTransform(String jointName, TransformSheet sheet) {
 		this.jointTransforms.put(jointName, sheet);
@@ -31,5 +32,13 @@ public class AnimationClip {
 	
 	public Map<String, TransformSheet> getJointTransforms() {
 		return this.jointTransforms;
+	}
+	
+	public float getClipTime() {
+		return this.clipTime;
+	}
+	
+	public void setClipTime(float clipTime) {
+		this.clipTime = clipTime;
 	}
 }

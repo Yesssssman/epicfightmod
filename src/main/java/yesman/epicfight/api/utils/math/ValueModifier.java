@@ -44,12 +44,12 @@ public class ValueModifier {
 	}
 	
 	public float getTotalValue(float value) {
-		return this.setter == Float.NaN ? (value * this.multiplier) + this.adder : this.setter;
+		return Float.isNaN(this.setter) ? (value * this.multiplier) + this.adder : this.setter;
 	}
 	
 	@Override
 	public String toString() {
-		return this.setter == Float.NaN
+		return Float.isNaN(this.setter)
 				? String.format("%.0f%%", this.multiplier * 100.0F) + (this.adder == 0 ? "" : String.format(" + %.1f", this.adder))
 				: String.format("%.0f", this.setter);
 	}

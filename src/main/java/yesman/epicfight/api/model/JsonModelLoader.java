@@ -1,12 +1,14 @@
 package yesman.epicfight.api.model;
 
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import com.google.common.collect.Maps;
@@ -51,29 +53,39 @@ import yesman.epicfight.gameasset.Armatures.ArmatureContructor;
 import yesman.epicfight.main.EpicFightMod;
 
 public class JsonModelLoader {
-	public static final OpenMatrix4f CORRECTION = OpenMatrix4f.createRotatorDeg(-90.0F, Vec3f.X_AXIS);
+	private static final OpenMatrix4f CORRECTION = OpenMatrix4f.createRotatorDeg(-90.0F, Vec3f.X_AXIS);
 	
 	private JsonObject rootJson;
 	private ResourceManager resourceManager;
 	
 	public JsonModelLoader(ResourceManager resourceManager, ResourceLocation resourceLocation) throws IllegalStateException {
+		JsonReader jsonReader = null;
+		this.resourceManager = resourceManager;
+		
 		try {
-			if (resourceManager == null) {
+			try {
+				Resource resource = resourceManager.getResource(resourceLocation).orElseThrow();
+				jsonReader = new JsonReader(new InputStreamReader(resource.open(), StandardCharsets.UTF_8));
+				jsonReader.setLenient(true);
+				this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
+			} catch (NoSuchElementException e) {
 				Class<?> modClass = ModList.get().getModObjectById(resourceLocation.getNamespace()).get().getClass();
 				BufferedInputStream inputstream = new BufferedInputStream(modClass.getResourceAsStream("/assets/" + resourceLocation.getNamespace() + "/" + resourceLocation.getPath()));
 				Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
-				JsonReader in = new JsonReader(reader);
-				in.setLenient(true);
-				this.rootJson = Streams.parse(in).getAsJsonObject();	
-			} else {
-				this.resourceManager = resourceManager;
-				Resource resource = resourceManager.getResource(resourceLocation).orElseThrow();
-				JsonReader in = new JsonReader(new InputStreamReader(resource.open(), StandardCharsets.UTF_8));
-				in.setLenient(true);
-				this.rootJson = Streams.parse(in).getAsJsonObject();
+				jsonReader = new JsonReader(reader);
+				jsonReader.setLenient(true);
+				this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
 			}
-		} catch (Exception e) {
+		} catch (IOException e) {
 			throw new IllegalStateException("Can't read " + resourceLocation.toString() + " because of " + e);
+		} finally {
+			if (jsonReader != null) {
+				try {
+					jsonReader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 	}
 	
@@ -383,7 +395,10 @@ public class JsonModelLoader {
 				clip.addJointTransform(name, sheet);
 			}
 			
-			animation.setTotalTime(times[times.length - 1]);
+			if (clip.getClipTime() < times[times.length - 1]) {
+				clip.setClipTime(times[times.length - 1]);
+			}
+			
 			root = false;
 		}
 		
@@ -428,7 +443,10 @@ public class JsonModelLoader {
 			TransformSheet sheet = getTransformSheet(times, transforms, OpenMatrix4f.invert(joint.getLocalTrasnform(), null), root);
 			clip.addJointTransform(name, sheet);
 			
-			animation.setTotalTime(times[times.length - 1]);
+			if (clip.getClipTime() < times[times.length - 1]) {
+				clip.setClipTime(times[times.length - 1]);
+			}
+			
 			root = false;
 		}
 		

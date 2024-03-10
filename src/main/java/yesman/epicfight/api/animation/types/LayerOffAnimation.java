@@ -36,7 +36,7 @@ public class LayerOffAnimation extends DynamicAnimation {
 	@Override
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		Pose lowerLayerPose = entitypatch.getClientAnimator().getComposedLayerPoseBelow(this.layerPriority, Minecraft.getInstance().getFrameTime());
-		return Pose.interpolatePose(this.lastPose, lowerLayerPose, time / this.totalTime);
+		return Pose.interpolatePose(this.lastPose, lowerLayerPose, time / this.getTotalTime());
 	}
 	
 	@Override

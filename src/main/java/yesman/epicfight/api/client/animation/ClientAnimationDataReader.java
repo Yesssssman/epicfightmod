@@ -87,9 +87,7 @@ public class ClientAnimationDataReader {
 				
 				return baseLayer.animationPlayer.getElapsedTime();
 			});
-
-			multilayerAnimation.loadAnimation(resourceManager);
-
+			
 			animation.addProperty(ClientAnimationProperties.MULTILAYER_ANIMATION, multilayerAnimation);
 		}
 

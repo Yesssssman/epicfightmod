@@ -83,7 +83,7 @@ public class BasicAttackAnimation extends AttackAnimation {
 		super.onLoaded();
 		
 		if (!this.properties.containsKey(AttackAnimationProperty.BASIS_ATTACK_SPEED)) {
-			float basisSpeed = Float.parseFloat(String.format(Locale.US, "%.2f", (1.0F / this.totalTime)));
+			float basisSpeed = Float.parseFloat(String.format(Locale.US, "%.2f", (1.0F / this.getTotalTime())));
 			this.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, basisSpeed);
 		}
 	}

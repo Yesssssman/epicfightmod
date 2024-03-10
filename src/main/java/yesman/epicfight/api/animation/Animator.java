@@ -73,7 +73,7 @@ public abstract class Animator {
 		this.animationVariables.remove(typeKey);
 	}
 	
-	public <T> void putAnimationVariables(TypeKey<T> typeKey, T value) {
+	public <T> void putAnimationVariable(TypeKey<T> typeKey, T value) {
 		if (this.animationVariables.containsKey(typeKey)) {
 			this.animationVariables.replace(typeKey, value);
 		} else {

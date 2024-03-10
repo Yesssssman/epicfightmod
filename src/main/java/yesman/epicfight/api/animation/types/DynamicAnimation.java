@@ -28,7 +28,7 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 public abstract class DynamicAnimation {
 	protected final boolean isRepeat;
 	protected final float convertTime;
-	protected float totalTime = 0.0F;
+	//protected float totalTime = 0.0F;
 	
 	public DynamicAnimation() {
 		this(EpicFightOptions.GENERAL_ANIMATION_CONVERT_TIME, false);
@@ -136,11 +136,11 @@ public abstract class DynamicAnimation {
 	}
 	
 	public void setTotalTime(float totalTime) {
-		this.totalTime = totalTime;
+		this.getAnimationClip().setClipTime(totalTime);
 	}
 	
 	public float getTotalTime() {
-		return this.totalTime - 0.001F;
+		return this.getAnimationClip().getClipTime() - 0.001F;
 	}
 	
 	public float getConvertTime() {

@@ -346,7 +346,7 @@ public class AttackAnimation extends ActionAnimation {
 			Phase phase = this.getPhaseByTime(playerpatch.getAnimator().getPlayerFor(this).getElapsedTime());
 			float speedFactor = this.getProperty(AttackAnimationProperty.ATTACK_SPEED_FACTOR).orElse(1.0F);
 			Optional<Float> property = this.getProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED);
-			float correctedSpeed = property.map((value) -> playerpatch.getAttackSpeed(phase.hand) / value).orElse(this.totalTime * playerpatch.getAttackSpeed(phase.hand));
+			float correctedSpeed = property.map((value) -> playerpatch.getAttackSpeed(phase.hand) / value).orElse(this.getTotalTime() * playerpatch.getAttackSpeed(phase.hand));
 			correctedSpeed = Math.round(correctedSpeed * 1000.0F) / 1000.0F;
 			
 			return 1.0F + (correctedSpeed - 1.0F) * speedFactor;

@@ -1,16 +1,12 @@
 package yesman.epicfight.gameasset;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
 import java.util.function.Function;
 
 import com.google.common.collect.Maps;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -33,7 +29,7 @@ import yesman.epicfight.model.armature.WitherArmature;
 import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
 import yesman.epicfight.world.entity.EpicFightEntities;
 
-public class Armatures implements PreparableReloadListener {
+public class Armatures {
 	public static final Armatures INSTANCE = new Armatures();
 	
 	@FunctionalInterface
@@ -141,12 +137,5 @@ public class Armatures implements PreparableReloadListener {
 	
 	public static ResourceLocation wrapLocation(ResourceLocation rl) {
 		return rl.getPath().matches("animmodels/.*\\.json") ? rl : new ResourceLocation(rl.getNamespace(), "animmodels/" + rl.getPath() + ".json");
-	}
-	
-	@Override
-	public CompletableFuture<Void> reload(PreparableReloadListener.PreparationBarrier stage, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
-		return CompletableFuture.runAsync(() -> {
-			Armatures.build(resourceManager);
-		}, gameExecutor).thenCompose(stage::wait);
 	}
 }

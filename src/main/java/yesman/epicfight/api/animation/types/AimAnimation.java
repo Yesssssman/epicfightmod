@@ -43,7 +43,7 @@ public class AimAnimation extends StaticAnimation {
 		Layer layer = animator.getCompositeLayer(this.getPriority());
 		AnimationPlayer player = layer.animationPlayer;
 		
-		if (player.getElapsedTime() >= this.totalTime - 0.06F) {
+		if (player.getElapsedTime() >= this.getTotalTime() - 0.06F) {
 			layer.pause();
 		}
 	}

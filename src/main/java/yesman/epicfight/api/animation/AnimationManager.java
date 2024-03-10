@@ -14,7 +14,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -36,18 +35,10 @@ import yesman.epicfight.gameasset.ColliderPreset;
 import yesman.epicfight.main.EpicFightMod;
 
 public class AnimationManager extends SimpleJsonResourceReloadListener {
-	private static final AnimationManager INSTANCE = new AnimationManager();
-	
-	public static AnimationManager getInstance() {
-		return INSTANCE;
-	}
-	
 	private final Map<ResourceLocation, AnimationClip> animationClips = Maps.newHashMap();
 	private final Map<ResourceLocation, StaticAnimation> animationRegistry = Maps.newHashMap();
 	private final ClearableIdMapper<StaticAnimation> animationIdMap = new ClearableIdMapper<> ();
 	private String currentWorkingModid;
-	
-	private ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
 	
 	public AnimationManager() {
 		super((new GsonBuilder()).create(), "animmodels/animations");
@@ -55,7 +46,7 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	
 	public StaticAnimation byId(int animationId) {
 		if (!this.animationIdMap.contains(animationId)) {
-			throw new IllegalArgumentException("No animation with id " + animationId);
+			throw new IllegalArgumentException("No animation id " + animationId);
 		}
 		
 		return this.animationIdMap.byId(animationId);
@@ -67,7 +58,7 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	
 	public StaticAnimation byKey(ResourceLocation rl) {
 		if (!this.animationRegistry.containsKey(rl)) {
-			throw new IllegalArgumentException("Can't find animation in path: " + rl);
+			throw new IllegalArgumentException("No animation with registry name " + rl);
 		}
 		
 		return this.animationRegistry.get(rl);
@@ -75,7 +66,7 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	
 	public AnimationClip getStaticAnimationClip(StaticAnimation animation) {
 		if (!this.animationClips.containsKey(animation.getLocation())) {
-			animation.loadAnimation(this.resourceManager);
+			animation.loadAnimation(resourceManager);
 		}
 		
 		return this.animationClips.get(animation.getLocation());
@@ -83,7 +74,13 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	
 	public int registerAnimation(StaticAnimation staticAnimation) {
 		if (this.currentWorkingModid == null) {
-			throw new IllegalStateException("[EpicFightMod] You must register an animation when AnimationRegistryEvent is being called!");
+			throw new IllegalStateException("[EpicFightMod] You have to register an animation when AnimationRegistryEvent is being called!");
+		}
+		
+		if (this.animationRegistry.containsKey(staticAnimation.getRegistryName())) {
+			EpicFightMod.LOGGER.error("Animation registration failed.");
+			new IllegalStateException("[EpicFightMod] Animation with registry name " + staticAnimation.getRegistryName() + " already exists!").printStackTrace();
+			return -1;
 		}
 		
 		this.animationRegistry.put(staticAnimation.getRegistryName(), staticAnimation);
@@ -107,20 +104,8 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		Optional<Resource> resource = resourceManager.getResource(dataLocation);
 		
 		if (!resource.isEmpty()) {
-			if (EpicFightMod.isPhysicalClient()) {
-				ClientAnimationDataReader.readAndApply(animation, resourceManager, resourceManager.getResource(dataLocation).get());
-			}
+			ClientAnimationDataReader.readAndApply(animation, resourceManager, resourceManager.getResource(dataLocation).get());
 		}
-	}
-	
-	private static ResourceLocation getAnimationDataFileLocation(ResourceLocation location) {
-		int splitIdx = location.getPath().lastIndexOf('/');
-		
-		if (splitIdx < 0) {
-			splitIdx = 0;
-		}
-		
-		return new ResourceLocation(location.getNamespace(), String.format("%s/data%s", location.getPath().substring(0, splitIdx), location.getPath().substring(splitIdx)));
 	}
 	
 	public String workingModId() {
@@ -129,6 +114,10 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	
 	@Override
 	protected Map<ResourceLocation, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profilerIn) {
+		reloadResourceManager(resourceManager);
+		
+		Armatures.build(resourceManager);
+		
 		this.animationClips.clear();
 		this.animationIdMap.clear();
 		this.animationRegistry.clear();
@@ -141,9 +130,11 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 			this.currentWorkingModid = entry.getKey();
 			entry.getValue().run();
 			
-			this.animationRegistry.values().stream().filter((animation) -> animation.getRegistryName().getNamespace().equals(this.currentWorkingModid)).forEach((animation) -> {
-				this.readAnimationProperties(resourceManager, animation);
-			});
+			if (EpicFightMod.isPhysicalClient()) {
+				this.animationRegistry.values().stream().filter((animation) -> animation.getRegistryName().getNamespace().equals(this.currentWorkingModid)).forEach((animation) -> {
+					this.readAnimationProperties(resourceManager, animation);
+				});
+			}
 			
 			this.currentWorkingModid = null;
 		});
@@ -165,9 +156,9 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 										}
 										
 										try {
-											readAnimationFromJson(entry.getKey(), entry.getValue());
+											readAnimationFromJson(resourceManager, entry.getKey(), entry.getValue());
 										} catch (Exception e) {
-											EpicFightMod.LOGGER.error("Failed to load Runtime animation " + entry.getKey() + " because of " + e + ". Skipped");
+											EpicFightMod.LOGGER.error("Failed to load Runtime animation " + entry.getKey() + " because of " + e + ". Skipped.");
 											e.printStackTrace();
 										}
 									});
@@ -176,7 +167,7 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	}
 	
 	@SuppressWarnings({ "rawtypes", "unchecked", "deprecation" })
-	private static StaticAnimation readAnimationFromJson(ResourceLocation rl, JsonElement json) throws Exception {
+	private StaticAnimation readAnimationFromJson(ResourceManager resourceManager, ResourceLocation rl, JsonElement json) throws Exception {
 		JsonElement constructorElement = json.getAsJsonObject().get("constructor");
 		
 		if (constructorElement == null) {
@@ -221,11 +212,15 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 			}
 		}
 		
+		if (EpicFightMod.isPhysicalClient()) {
+			this.readAnimationProperties(resourceManager, animation);
+		}
+		
 		return animation;
 	}
 	
 	@SuppressWarnings("rawtypes")
-	private static Pair<Object[], Class[]> splitArguments(String sArgs) throws Exception {
+	private Pair<Object[], Class[]> splitArguments(String sArgs) throws Exception {
 		List<String> sArgsList = Lists.newArrayList();
 		
 		int innderArgCounter = 0;
@@ -261,7 +256,7 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 			String element = sArgsList.get(i);
 			
 			if (!element.contains("$")) {
-				throw new IllegalStateException("Splitter not found in animation constructor in Runtime animation. " + element);
+				throw new IllegalStateException("No splitter have found in animation constructor in Runtime animation. " + element);
 			}
 			
 			String[] value$type = element.split("\\$");
@@ -296,6 +291,29 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	
 	private static final Map<String, Class<?>> PRIMITIVE_KEYWORDS = Maps.newHashMap();
 	private static final Map<Class<?>, Function<String, Object>> STRING_TO_OBJECT_PARSER = Maps.newHashMap();
+	private static final AnimationManager INSTANCE = new AnimationManager();
+	
+	private static ResourceManager resourceManager = null;
+	
+	public static AnimationManager getInstance() {
+		return INSTANCE;
+	}
+	
+	private static void reloadResourceManager(ResourceManager pResourceManager) {
+		if (resourceManager != pResourceManager) {
+			resourceManager = pResourceManager;
+		}
+	}
+	
+	private static ResourceLocation getAnimationDataFileLocation(ResourceLocation location) {
+		int splitIdx = location.getPath().lastIndexOf('/');
+		
+		if (splitIdx < 0) {
+			splitIdx = 0;
+		}
+		
+		return new ResourceLocation(location.getNamespace(), String.format("%s/data%s", location.getPath().substring(0, splitIdx), location.getPath().substring(splitIdx)));
+	}
 	
 	static {
 		PRIMITIVE_KEYWORDS.put("B", byte.class);
@@ -327,11 +345,11 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		});
 		STRING_TO_OBJECT_PARSER.put(Joint.class, (s) -> {
 			String[] armature$joint = s.split("\\.");
-			Armature armature = Armatures.getOrCreateArmature(Minecraft.getInstance().getResourceManager(), new ResourceLocation(armature$joint[0]), Armature::new);
+			Armature armature = Armatures.getOrCreateArmature(resourceManager, new ResourceLocation(armature$joint[0]), Armature::new);
 			Joint joint = armature.searchJointByName(armature$joint[1]);
 			
 			return joint;
 		});
-		STRING_TO_OBJECT_PARSER.put(Armature.class, (s) -> Armatures.getOrCreateArmature(Minecraft.getInstance().getResourceManager(), new ResourceLocation(s), Armature::new));
+		STRING_TO_OBJECT_PARSER.put(Armature.class, (s) -> Armatures.getOrCreateArmature(resourceManager, new ResourceLocation(s), Armature::new));
 	}
 }

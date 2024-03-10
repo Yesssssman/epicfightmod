@@ -113,7 +113,7 @@ public class LinkAnimation extends DynamicAnimation {
 	
 	public void copyTo(LinkAnimation linkAnimation) {
 		linkAnimation.setNextAnimation(this.nextAnimation);
-		linkAnimation.totalTime = this.totalTime;
+		linkAnimation.setTotalTime(this.getTotalTime());
 		
 		Map<String, TransformSheet> trnasforms = linkAnimation.getTransfroms();
 		trnasforms.clear();

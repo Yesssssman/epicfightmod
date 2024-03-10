@@ -22,10 +22,10 @@ public class SelectiveAnimation extends StaticAnimation {
 	private final StaticAnimation[] animations;
 	
 	/**
-	 * WARNING: All animations should have same priority and layer type
+	 * All animations should have same priority and layer type
 	 */
-	public SelectiveAnimation(Function<LivingEntityPatch<?>, Integer> selector, StaticAnimation... animations) {
-		super(0.15F, false, "", null);
+	public SelectiveAnimation(Function<LivingEntityPatch<?>, Integer> selector, String path, StaticAnimation... animations) {
+		super(0.15F, false, path, null);
 		
 		this.selector = selector;
 		this.animations = animations;
@@ -38,7 +38,7 @@ public class SelectiveAnimation extends StaticAnimation {
 		int result = this.selector.apply(entitypatch);
 		
 		entitypatch.getAnimator().playAnimation(this.animations[result], 0.0F);
-		entitypatch.getAnimator().putAnimationVariables(PREVIOUS_STATE, result);
+		entitypatch.getAnimator().putAnimationVariable(PREVIOUS_STATE, result);
 	}
 	
 	@Override
@@ -65,7 +65,7 @@ public class SelectiveAnimation extends StaticAnimation {
 				
 				if (entitypatch.getAnimator().getAnimationVariables(PREVIOUS_STATE) != result) {
 					entitypatch.getAnimator().playAnimation(this.animations[result], 0.0F);
-					entitypatch.getAnimator().putAnimationVariables(PREVIOUS_STATE, result);
+					entitypatch.getAnimator().putAnimationVariable(PREVIOUS_STATE, result);
 				}
 				
 			}, AnimationEvent.Side.BOTH));

@@ -5,8 +5,6 @@ import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
@@ -48,7 +46,6 @@ import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.data.conditions.EpicFightConditions;
 import yesman.epicfight.data.loot.EpicFightLootTables;
-import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.gameasset.ColliderPreset;
 import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.gameasset.EpicFightSounds;
@@ -119,6 +116,9 @@ public class EpicFightMod {
     	bus.addListener(EpicFightCapabilities::registerCapabilities);
     	bus.addListener(EpicFightEntities::onSpawnPlacementRegister);
     	
+    	MinecraftForge.EVENT_BUS.addListener(this::command);
+        MinecraftForge.EVENT_BUS.addListener(this::registerDatapackReloadListnerEvent);
+    	
     	LivingMotion.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, LivingMotions.class);
     	SkillCategory.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, SkillCategories.class);
     	SkillSlot.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, SkillSlots.class);
@@ -141,9 +141,6 @@ public class EpicFightMod {
 		SkillDataKeys.DATA_KEYS.register(bus);
 		EpicFightCommandArgumentTypes.COMMAND_ARGUMENT_TYPES.register(bus);
         EpicFightSkills.registerSkills();
-        
-        MinecraftForge.EVENT_BUS.addListener(this::command);
-        MinecraftForge.EVENT_BUS.addListener(this::registerDatapackReloadListnerEvent);
         
         ConfigManager.loadConfig(ConfigManager.CLIENT_CONFIG, FMLPaths.CONFIGDIR.get().resolve(MODID + "-client.toml").toString());
         ConfigManager.loadConfig(ConfigManager.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve(CONFIG_FILE_PATH).toString());
@@ -183,14 +180,10 @@ public class EpicFightMod {
     	
         this.animatorProvider = ClientAnimator::getAnimator;
 		EntityPatchProvider.registerEntityPatchesClient();
-		ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
-		Armatures.build(resourceManager);
-
 		EpicFightItemProperties.registerItemProperties();
     }
 	
 	private void doServerStuff(final FMLDedicatedServerSetupEvent event) {
-		Armatures.build(null);
 		this.animatorProvider = ServerAnimator::getAnimator;
 	}
 	
@@ -207,7 +200,6 @@ public class EpicFightMod {
 	
 	private void registerResourcepackReloadListnerEvent(final RegisterClientReloadListenersEvent event) {
 		event.registerReloadListener(Meshes.INSTANCE);
-		event.registerReloadListener(Armatures.INSTANCE);
 		event.registerReloadListener(AnimationManager.getInstance());
 		event.registerReloadListener(ItemSkins.INSTANCE);
 	}
