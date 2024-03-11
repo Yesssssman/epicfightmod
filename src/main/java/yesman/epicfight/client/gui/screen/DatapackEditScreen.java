@@ -6,7 +6,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.compress.utils.Lists;
+import com.google.common.collect.Lists;
 
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;

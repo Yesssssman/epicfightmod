@@ -6,9 +6,8 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.compress.utils.Lists;
-
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 import io.netty.util.internal.StringUtil;
 import net.minecraft.nbt.CompoundTag;
