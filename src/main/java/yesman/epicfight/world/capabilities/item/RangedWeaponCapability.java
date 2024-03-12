@@ -5,12 +5,13 @@ import java.util.Map;
 import com.google.common.collect.Maps;
 
 import net.minecraft.world.InteractionHand;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class RangedWeaponCapability extends CapabilityItem {
-	protected Map<LivingMotion, StaticAnimation> rangeAnimationModifiers;
+	protected Map<LivingMotion, AnimationProvider<?>> rangeAnimationModifiers;
 	
 	protected RangedWeaponCapability(CapabilityItem.Builder builder) {
 		super(builder);
@@ -25,7 +26,7 @@ public class RangedWeaponCapability extends CapabilityItem {
 	}
 	
 	@Override
-	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(LivingEntityPatch<?> playerdata, InteractionHand hand) {
+	public Map<LivingMotion, AnimationProvider<?>> getLivingMotionModifier(LivingEntityPatch<?> playerdata, InteractionHand hand) {
 		if (hand == InteractionHand.MAIN_HAND) {
 			return this.rangeAnimationModifiers;
 		}
@@ -48,7 +49,7 @@ public class RangedWeaponCapability extends CapabilityItem {
 	}
 	
 	public static class Builder extends CapabilityItem.Builder {
-		Map<LivingMotion, StaticAnimation> rangeAnimationModifiers;
+		Map<LivingMotion, AnimationProvider<?>> rangeAnimationModifiers;
 		
 		protected Builder() {
 			this.category = WeaponCategories.RANGED;

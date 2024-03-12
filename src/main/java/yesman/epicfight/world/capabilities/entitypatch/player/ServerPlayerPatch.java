@@ -20,6 +20,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.AttackResult;
@@ -174,13 +175,13 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 		this.getAnimator().resetLivingAnimations();
 		CapabilityItem mainhandCap = this.getHoldingItemCapability(InteractionHand.MAIN_HAND);
 		CapabilityItem offhandCap = this.getAdvancedHoldingItemCapability(InteractionHand.OFF_HAND);
-		Map<LivingMotion, StaticAnimation> motionModifier = Maps.newHashMap();
+		Map<LivingMotion, AnimationProvider<?>> motionModifier = Maps.newHashMap();
 		
 		offhandCap.getLivingMotionModifier(this, InteractionHand.OFF_HAND).forEach(motionModifier::put);
 		mainhandCap.getLivingMotionModifier(this, InteractionHand.MAIN_HAND).forEach(motionModifier::put);
 		
-		for (Map.Entry<LivingMotion, StaticAnimation> entry : motionModifier.entrySet()) {
-			this.getAnimator().addLivingAnimation(entry.getKey(), entry.getValue());
+		for (Map.Entry<LivingMotion, AnimationProvider<?>> entry : motionModifier.entrySet()) {
+			this.getAnimator().addLivingAnimation(entry.getKey(), entry.getValue().get());
 		}
 		
 		SPChangeLivingMotion msg = new SPChangeLivingMotion(this.original.getId());

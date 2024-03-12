@@ -91,6 +91,14 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		return id;
 	}
 	
+	public StaticAnimation refreshAnimation(StaticAnimation staticAnimation) {
+		if (!this.animationRegistry.containsKey(staticAnimation.getRegistryName())) {
+			throw new IllegalStateException("Animation refresh exception: No animation named " + staticAnimation.getRegistryName());
+		}
+		
+		return this.animationRegistry.get(staticAnimation.getRegistryName());
+	}
+	
 	public void loadAnimationClip(StaticAnimation animation, Function<StaticAnimation, AnimationClip> clipProvider) {
 		if (!this.animationClips.containsKey(animation.getLocation())) {
 			AnimationClip animationClip = clipProvider.apply(animation);

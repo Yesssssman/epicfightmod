@@ -319,7 +319,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements ResizableComp
 	@Override
 	protected void renderItem(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks, int rowPosition, int rowLeft, int rowTop, int rowRight, int itemHeight) {
 		Row row = this.getEntry(rowPosition);
-		//System.out.println(rowLeft +" "+ rowRight);
+		
 		if (this.isSelectedItem(rowPosition)) {
 			guiGraphics.pose().pushPose();
 			guiGraphics.pose().translate(0, 0, 1);

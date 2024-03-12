@@ -40,9 +40,7 @@ import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
-public class StaticAnimation extends DynamicAnimation {
-	public static AnimationManager animationManager;
-	
+public class StaticAnimation extends DynamicAnimation implements AnimationProvider<StaticAnimation> {
 	protected final Map<AnimationProperty<?>, Object> properties = Maps.newHashMap();
 	protected final StateSpectrum.Blueprint stateSpectrumBlueprint = new StateSpectrum.Blueprint();
 	protected final Armature armature;
@@ -431,5 +429,10 @@ public class StaticAnimation extends DynamicAnimation {
 	@Override
 	public AnimationClip getAnimationClip() {
 		return AnimationManager.getInstance().getStaticAnimationClip(this);
+	}
+
+	@Override
+	public StaticAnimation get() {
+		return AnimationManager.getInstance().refreshAnimation(this);
 	}
 }

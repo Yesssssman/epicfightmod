@@ -26,6 +26,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.item.enchantment.Enchantments;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.collider.Collider;
@@ -48,11 +49,11 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
 public class CapabilityItem {
 	public static CapabilityItem EMPTY = CapabilityItem.builder().build();
-	protected static List<StaticAnimation> commonAutoAttackMotion;
+	protected static List<AnimationProvider<?>> commonAutoAttackMotion;
 	protected final WeaponCategory weaponCategory;
 	
 	static {
-		commonAutoAttackMotion = new ArrayList<StaticAnimation> ();
+		commonAutoAttackMotion = new ArrayList<AnimationProvider<?>> ();
 		commonAutoAttackMotion.add(Animations.FIST_AUTO1);
 		commonAutoAttackMotion.add(Animations.FIST_AUTO2);
 		commonAutoAttackMotion.add(Animations.FIST_AUTO3);
@@ -60,7 +61,7 @@ public class CapabilityItem {
 		commonAutoAttackMotion.add(Animations.FIST_AIR_SLASH);
 	}
 	
-	public static List<StaticAnimation> getBasicAutoAttackMotion() {
+	public static List<AnimationProvider<?>> getBasicAutoAttackMotion() {
 		return commonAutoAttackMotion;
 	}
 	
@@ -162,11 +163,11 @@ public class CapabilityItem {
 		return null;
 	}
 
-	public List<StaticAnimation> getAutoAttckMotion(PlayerPatch<?> playerpatch) {
+	public List<AnimationProvider<?>> getAutoAttckMotion(PlayerPatch<?> playerpatch) {
 		return getBasicAutoAttackMotion();
 	}
 
-	public List<StaticAnimation> getMountAttackMotion() {
+	public List<AnimationProvider<?>> getMountAttackMotion() {
 		return null;
 	}
 	
@@ -286,7 +287,7 @@ public class CapabilityItem {
 		return map;
     }
 	
-	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(LivingEntityPatch<?> playerpatch, InteractionHand hand) {
+	public Map<LivingMotion, AnimationProvider<?>> getLivingMotionModifier(LivingEntityPatch<?> playerpatch, InteractionHand hand) {
 		return Maps.newHashMap();
 	}
 	

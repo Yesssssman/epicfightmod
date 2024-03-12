@@ -5,6 +5,7 @@ import java.util.List;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
@@ -28,8 +29,8 @@ public class AirAttack extends Skill {
 	
 	@Override
 	public void executeOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
-		List<StaticAnimation> motions = executer.getHoldingItemCapability(InteractionHand.MAIN_HAND).getAutoAttckMotion(executer);
-		StaticAnimation attackMotion = motions.get(motions.size() - 1);
+		List<AnimationProvider<?>> motions = executer.getHoldingItemCapability(InteractionHand.MAIN_HAND).getAutoAttckMotion(executer);
+		StaticAnimation attackMotion = motions.get(motions.size() - 1).get();
 		
 		if (attackMotion != null) {
 			super.executeOnServer(executer, args);
