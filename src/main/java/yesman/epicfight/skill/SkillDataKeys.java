@@ -22,7 +22,7 @@ import yesman.epicfight.skill.weaponinnate.GraspingSpireSkill;
 import yesman.epicfight.skill.weaponinnate.SteelWhirlwindSkill;
 
 public class SkillDataKeys {
-	private static final Supplier<RegistryBuilder<SkillDataKey<?>>> BUILDER = () -> new RegistryBuilder<SkillDataKey<?>>().addCallback(SkillDataKey.getCallBack());
+	private static final Supplier<RegistryBuilder<SkillDataKey<?>>> BUILDER = () -> new RegistryBuilder<SkillDataKey<?>>().addCallback(SkillDataKey.getRegistryCallback());
 	
 	public static final DeferredRegister<SkillDataKey<?>> DATA_KEYS = DeferredRegister.create(new ResourceLocation(EpicFightMod.MODID, "skill_data_keys"), EpicFightMod.MODID);
 	public static final Supplier<IForgeRegistry<SkillDataKey<?>>> REGISTRY = DATA_KEYS.makeRegistry(BUILDER);

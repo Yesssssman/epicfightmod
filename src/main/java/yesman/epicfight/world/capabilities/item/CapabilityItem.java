@@ -1,6 +1,5 @@
 package yesman.epicfight.world.capabilities.item;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -9,6 +8,7 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.mojang.datafixers.util.Pair;
@@ -53,12 +53,12 @@ public class CapabilityItem {
 	protected final WeaponCategory weaponCategory;
 	
 	static {
-		commonAutoAttackMotion = new ArrayList<AnimationProvider<?>> ();
-		commonAutoAttackMotion.add(Animations.FIST_AUTO1);
-		commonAutoAttackMotion.add(Animations.FIST_AUTO2);
-		commonAutoAttackMotion.add(Animations.FIST_AUTO3);
-		commonAutoAttackMotion.add(Animations.FIST_DASH);
-		commonAutoAttackMotion.add(Animations.FIST_AIR_SLASH);
+		commonAutoAttackMotion = Lists.newArrayList();
+		commonAutoAttackMotion.add(() -> Animations.FIST_AUTO1);
+		commonAutoAttackMotion.add(() -> Animations.FIST_AUTO2);
+		commonAutoAttackMotion.add(() -> Animations.FIST_AUTO3);
+		commonAutoAttackMotion.add(() -> Animations.FIST_DASH);
+		commonAutoAttackMotion.add(() -> Animations.FIST_AIR_SLASH);
 	}
 	
 	public static List<AnimationProvider<?>> getBasicAutoAttackMotion() {

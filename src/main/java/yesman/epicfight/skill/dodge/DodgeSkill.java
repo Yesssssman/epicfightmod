@@ -5,15 +5,13 @@ import java.util.List;
 import io.netty.buffer.Unpooled;
 import net.minecraft.client.player.Input;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.AnimationManager;
-import yesman.epicfight.api.animation.AnimationProvider;
+import yesman.epicfight.api.animation.StaticAnimationProvider;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.client.events.engine.ControllEngine;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
@@ -26,7 +24,7 @@ import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 
 public class DodgeSkill extends Skill {
 	public static class Builder extends Skill.Builder<DodgeSkill> {
-		protected ResourceLocation[] animations;
+		protected StaticAnimationProvider[] animations;
 		
 		public Builder setCategory(SkillCategory category) {
 			this.category = category;
@@ -48,7 +46,7 @@ public class DodgeSkill extends Skill {
 			return this;
 		}
 		
-		public Builder setAnimations(ResourceLocation... animations) {
+		public Builder setAnimations(StaticAnimationProvider... animations) {
 			this.animations = animations;
 			return this;
 		}
@@ -58,18 +56,12 @@ public class DodgeSkill extends Skill {
 		return (new Builder()).setCategory(SkillCategories.DODGE).setActivateType(ActivateType.ONE_SHOT).setResource(Resource.STAMINA);
 	}
 	
-	@SuppressWarnings("rawtypes")
-	protected final AnimationProvider[] animations;
+	protected final StaticAnimationProvider[] animations;
 	
 	public DodgeSkill(Builder builder) {
 		super(builder);
 		
-		this.animations = new AnimationProvider[builder.animations.length];
-		
-		for (int i = 0; i < builder.animations.length; i++) {
-			final int idx = i;
-			this.animations[idx] = () -> AnimationManager.getInstance().byKey(builder.animations[idx].toString());
-		}
+		this.animations = builder.animations;
 	}
 	
 	@OnlyIn(Dist.CLIENT)

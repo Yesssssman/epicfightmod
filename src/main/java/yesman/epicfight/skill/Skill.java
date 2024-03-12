@@ -29,7 +29,6 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.SkillCancelEvent;
 import yesman.epicfight.world.entity.eventlistener.SkillConsumeEvent;
-import yesman.epicfight.world.item.EpicFightCreativeTabs;
 
 public abstract class Skill {
 	public static class Builder<T extends Skill> {
@@ -62,22 +61,6 @@ public abstract class Skill {
 		public Builder<T> setCreativeTab(CreativeModeTab tab) {
 			this.tab = tab;
 			return this;
-		}
-		
-		public CreativeModeTab getCreativeTab() {
-			return this.tab == null ? EpicFightCreativeTabs.ITEMS.get() : this.tab;
-		}
-		
-		public ResourceLocation getRegistryName() {
-			return this.registryName;
-		}
-		
-		public boolean isLearnable() {
-			return this.category.learnable();
-		}
-		
-		public boolean hasCategory(SkillCategory category) {
-			return this.category == category;
 		}
 	}
 	

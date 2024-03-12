@@ -33,8 +33,8 @@ public class SkillDataKey<T> {
         public void onBake(IForgeRegistryInternal<SkillDataKey<?>> owner, RegistryManager stage) {
 			ClearableIdMapper<SkillDataKey<?>> skillDataKeyMap = owner.getSlaveMap(DATA_KEY_TO_ID, ClearableIdMapper.class);
             
-			for (SkillDataKey<?> block : owner) {
-				skillDataKeyMap.add(block);
+			for (SkillDataKey<?> key : owner) {
+				skillDataKeyMap.add(key);
 			}
             
 			Map<Class<?>, Set<SkillDataKey<?>>> skillDataKeys = owner.getSlaveMap(CLASS_TO_DATA_KEYS, Map.class);
@@ -71,7 +71,7 @@ public class SkillDataKey<T> {
         }
 	}
 	
-	public static SkillDataKeyCallbacks getCallBack() {
+	public static SkillDataKeyCallbacks getRegistryCallback() {
 		return SkillDataKeyCallbacks.INSTANCE;
 	}
 	

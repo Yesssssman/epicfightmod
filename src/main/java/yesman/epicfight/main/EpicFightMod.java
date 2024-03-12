@@ -47,7 +47,6 @@ import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.data.conditions.EpicFightConditions;
 import yesman.epicfight.data.loot.EpicFightLootTables;
 import yesman.epicfight.gameasset.ColliderPreset;
-import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.network.EpicFightDataSerializers;
 import yesman.epicfight.network.EpicFightNetworkManager;
@@ -113,6 +112,8 @@ public class EpicFightMod {
     	bus.addListener(this::registerResourcepackReloadListnerEvent);
     	bus.addListener(EpicFightAttributes::registerNewMobs);
     	bus.addListener(EpicFightAttributes::modifyExistingMobs);
+    	bus.addListener(SkillManager::createSkillRegistry);
+    	bus.addListener(SkillManager::registerSkills);
     	bus.addListener(EpicFightCapabilities::registerCapabilities);
     	bus.addListener(EpicFightEntities::onSpawnPlacementRegister);
     	
@@ -140,7 +141,6 @@ public class EpicFightMod {
 		EpicFightConditions.CONDITIONS.register(bus);
 		SkillDataKeys.DATA_KEYS.register(bus);
 		EpicFightCommandArgumentTypes.COMMAND_ARGUMENT_TYPES.register(bus);
-        EpicFightSkills.registerSkills();
         
         ConfigManager.loadConfig(ConfigManager.CLIENT_CONFIG, FMLPaths.CONFIGDIR.get().resolve(MODID + "-client.toml").toString());
         ConfigManager.loadConfig(ConfigManager.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve(CONFIG_FILE_PATH).toString());

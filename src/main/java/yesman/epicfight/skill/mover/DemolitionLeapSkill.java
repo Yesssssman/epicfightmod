@@ -7,7 +7,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
-import yesman.epicfight.api.animation.AnimationProvider;
+import yesman.epicfight.api.animation.StaticAnimationProvider;
 import yesman.epicfight.api.utils.LevelUtil;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.events.engine.ControllEngine;
@@ -32,8 +32,8 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 	
 	private static final UUID EVENT_UUID = UUID.fromString("3d142bf4-0dcd-11ee-be56-0242ac120002");
-	private AnimationProvider chargingAnimation;
-	private AnimationProvider shootAnimation;
+	private StaticAnimationProvider chargingAnimation;
+	private StaticAnimationProvider shootAnimation;
 	
 	public DemolitionLeapSkill(Builder<? extends Skill> builder) {
 		super(builder);

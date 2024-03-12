@@ -1,7 +1,10 @@
 package yesman.epicfight.events;
 
+import java.util.List;
+
 import com.google.common.collect.Lists;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
@@ -11,6 +14,7 @@ import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.data.loot.EpicFightLootTables;
+import yesman.epicfight.data.loot.SkillBookLootModifier;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPChangeGamerule;
@@ -29,6 +33,7 @@ public class WorldEvents {
 	@SubscribeEvent
 	public static void onLootTableRegistry(final LootTableLoadEvent event) {
 		EpicFightLootTables.modifyVanillaLootPools(event);
+		SkillBookLootModifier.createSkillLootTable();
     }
 	
 	@SubscribeEvent
@@ -58,7 +63,9 @@ public class WorldEvents {
     }
 	
 	private static void synchronizeWorldData(ServerPlayer player) {
-		SPDatapackSyncSkill skillParamsPacket = new SPDatapackSyncSkill(SkillManager.getParamCount(), SPDatapackSync.Type.SKILL_PARAMS);
+		List<CompoundTag> skillParams = SkillManager.getSkillParams();
+		
+		SPDatapackSyncSkill skillParamsPacket = new SPDatapackSyncSkill(skillParams.size(), SPDatapackSync.Type.SKILL_PARAMS);
 		ServerPlayerPatch serverplayerpatch = EpicFightCapabilities.getEntityPatch(player, ServerPlayerPatch.class);
 		CapabilitySkill skillCapability = serverplayerpatch.getSkillCapability();
 		
@@ -75,7 +82,7 @@ public class WorldEvents {
 			}
 		}
 		
-		SkillManager.getDataStream().forEach(skillParamsPacket::write);
+		skillParams.forEach(skillParamsPacket::write);
 		EpicFightNetworkManager.sendToPlayer(skillParamsPacket, player);
 		
 		SPDatapackSync armorPacket = new SPDatapackSync(ItemCapabilityReloadListener.armorCount(), SPDatapackSync.Type.ARMOR);

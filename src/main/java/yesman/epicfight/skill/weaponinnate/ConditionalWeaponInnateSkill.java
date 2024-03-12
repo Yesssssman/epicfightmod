@@ -7,10 +7,8 @@ import com.google.common.collect.Lists;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import yesman.epicfight.api.animation.AnimationManager;
-import yesman.epicfight.api.animation.AnimationProvider.AttackAnimationProvider;
+import yesman.epicfight.api.animation.AttackAnimationProvider;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
 import yesman.epicfight.skill.Skill;
@@ -23,7 +21,7 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem;
 public class ConditionalWeaponInnateSkill extends WeaponInnateSkill {
 	public static class Builder extends Skill.Builder<ConditionalWeaponInnateSkill> {
 		protected Function<ServerPlayerPatch, Integer> selector;
-		protected ResourceLocation[] animationLocations;
+		protected AttackAnimationProvider[] animations;
 		
 		public Builder setCategory(SkillCategory category) {
 			this.category = category;
@@ -45,8 +43,8 @@ public class ConditionalWeaponInnateSkill extends WeaponInnateSkill {
 			return this;
 		}
 		
-		public Builder setAnimations(ResourceLocation... animationLocations) {
-			this.animationLocations = animationLocations;
+		public Builder setAnimations(AttackAnimationProvider... animations) {
+			this.animations = animations;
 			return this;
 		}
 	}
@@ -61,13 +59,8 @@ public class ConditionalWeaponInnateSkill extends WeaponInnateSkill {
 	public ConditionalWeaponInnateSkill(ConditionalWeaponInnateSkill.Builder builder) {
 		super(builder);
 		this.properties = Lists.newArrayList();
-		this.attackAnimations = new AttackAnimationProvider[builder.animationLocations.length];
+		this.attackAnimations = builder.animations;
 		this.selector = builder.selector;
-		
-		for (int i = 0; i < builder.animationLocations.length; i++) {
-			final int idx = i;
-			this.attackAnimations[idx] = () -> (AttackAnimation)AnimationManager.getInstance().byKey(builder.animationLocations[idx].toString());
-		}
 	}
 	
 	@Override

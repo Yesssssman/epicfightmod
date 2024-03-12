@@ -7,7 +7,6 @@ import com.google.common.collect.Maps;
 import net.minecraft.world.InteractionHand;
 import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.LivingMotion;
-import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class RangedWeaponCapability extends CapabilityItem {
@@ -57,7 +56,7 @@ public class RangedWeaponCapability extends CapabilityItem {
 			this.rangeAnimationModifiers = Maps.newHashMap();
 		}
 		
-		public Builder addAnimationsModifier(LivingMotion livingMotion, StaticAnimation animations) {
+		public Builder addAnimationsModifier(LivingMotion livingMotion, AnimationProvider<?> animations) {
 			this.rangeAnimationModifiers.put(livingMotion, animations);
 			return this;
 		}

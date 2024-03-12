@@ -4,10 +4,8 @@ import java.util.List;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
-import yesman.epicfight.api.animation.AnimationManager;
-import yesman.epicfight.api.animation.AnimationProvider.AttackAnimationProvider;
+import yesman.epicfight.api.animation.AttackAnimationProvider;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
 import yesman.epicfight.skill.Skill;
@@ -19,7 +17,7 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem;
 
 public class SimpleWeaponInnateSkill extends WeaponInnateSkill {
 	public static class Builder extends Skill.Builder<SimpleWeaponInnateSkill> {
-		protected ResourceLocation attackAnimation;
+		protected AttackAnimationProvider attackAnimation;
 		
 		public Builder setCategory(SkillCategory category) {
 			this.category = category;
@@ -36,7 +34,7 @@ public class SimpleWeaponInnateSkill extends WeaponInnateSkill {
 			return this;
 		}
 		
-		public Builder setAnimations(ResourceLocation attackAnimation) {
+		public Builder setAnimations(AttackAnimationProvider attackAnimation) {
 			this.attackAnimation = attackAnimation;
 			return this;
 		}
@@ -51,7 +49,7 @@ public class SimpleWeaponInnateSkill extends WeaponInnateSkill {
 	public SimpleWeaponInnateSkill(Builder builder) {
 		super(builder);
 		
-		this.attackAnimation = () -> (AttackAnimation)AnimationManager.getInstance().byKey(builder.attackAnimation.toString());
+		this.attackAnimation = builder.attackAnimation;
 	}
 	
 	@Override

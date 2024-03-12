@@ -59,7 +59,7 @@ public class SkillBookItem extends Item {
 	}
 	
 	public void fillItemCategory(Consumer<ItemStack> items) {
-		SkillManager.getLearnableSkillNames(Skill.Builder::isLearnable)
+		SkillManager.getSkills((skill) -> skill.getCategory().learnable())
 			.forEach((rl) -> {
 				ItemStack stack = new ItemStack(this);
 				setContainingSkill(rl.toString(), stack);

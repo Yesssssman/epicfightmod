@@ -27,7 +27,6 @@ public abstract class ModelBuildEvent<T> extends Event implements IModBusEvent {
 	}
 	
 	public static class ArmatureBuild extends ModelBuildEvent<Armature> {
-		
 		public ArmatureBuild(ResourceManager resourceManager, Map<ResourceLocation, Armature> registerMap) {
 			super(resourceManager, registerMap);
 		}

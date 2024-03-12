@@ -16,7 +16,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.AnimationProvider;
+import yesman.epicfight.api.animation.StaticAnimationProvider;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.client.events.engine.ControllEngine;
@@ -77,7 +77,7 @@ public class BladeRushSkill extends WeaponInnateSkill {
 		}
 	}
 	
-	private final AnimationProvider[] comboAnimations = new AnimationProvider[3];
+	private final StaticAnimationProvider[] comboAnimations = new StaticAnimationProvider[3];
 	private final Map<EntityType<?>, StaticAnimation> tryAnimations;
 	
 	public BladeRushSkill(Builder builder) {

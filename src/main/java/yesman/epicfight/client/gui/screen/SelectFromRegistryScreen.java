@@ -107,7 +107,7 @@ public class SelectFromRegistryScreen<T> extends Screen {
 			this.children().clear();
 			
 			this.registry.getEntries().stream().filter((entry) -> StringUtil.isNullOrEmpty(keyward) ? true : entry.getKey().toString().contains(keyward))
-											.map((entry) -> new RegistryEntry(entry.getValue(), entry.getKey().location().toString())) .forEach(this::addEntry);
+												.map((entry) -> new RegistryEntry(entry.getValue(), entry.getKey().location().toString())) .forEach(this::addEntry);
 		}
 		
 		@OnlyIn(Dist.CLIENT)
