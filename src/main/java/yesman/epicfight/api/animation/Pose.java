@@ -11,6 +11,7 @@ import com.google.common.collect.Sets;
 import yesman.epicfight.api.client.animation.property.JointMask;
 
 public class Pose {
+	public static final Pose EMPTY_POSE = new Pose();
 	private final Map<String, JointTransform> jointTransformData = Maps.newHashMap();
 	
 	public void putJointData(String name, JointTransform transform) {
@@ -58,12 +59,13 @@ public class Pose {
 	}
 	
 	public String toString() {
-		String str = "";
+		StringBuilder sb = new StringBuilder();
+		sb.append("Pose: ");
 		
 		for (Map.Entry<String, JointTransform> entry : this.jointTransformData.entrySet()) {
-			str += String.format("%s{%s, %s}, ", entry.getKey(), entry.getValue().translation().toString(), entry.getValue().rotation().toString()) + "\n";
+			sb.append(String.format("%s{%s, %s}, ", entry.getKey(), entry.getValue().translation().toString(), entry.getValue().rotation().toString()) + "\n");
 		}
 		
-		return str;
+		return sb.toString();
 	}
 }

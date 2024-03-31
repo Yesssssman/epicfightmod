@@ -2,44 +2,24 @@ package yesman.epicfight.data.conditions;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public interface Condition<T> {
-	public void read(CompoundTag tag);
+	public Condition<T> read(CompoundTag tag);
 	public CompoundTag serializePredicate();
 	public boolean predicate(T target);
 	
 	@OnlyIn(Dist.CLIENT)
 	public Set<Map.Entry<String, Object>> getAcceptingParameters();
 	
-	public static class ConditionBuilder<T extends Condition<?>> {
-		final Function<CompoundTag, T> constructor;
-		CompoundTag tag;
-		
-		private ConditionBuilder(Function<CompoundTag, T> constructor) {
-			this.constructor = constructor;
-			this.tag = new CompoundTag();
-		}
-		
-		public ConditionBuilder<T> setTag(CompoundTag tag) {
-			this.tag = tag;
-			return this;
-		}
-		
-		public CompoundTag getTag() {
-			return this.tag;
-		}
-		
-		public T build() {
-			return this.constructor.apply(this.tag);
-		}
-		
-		public static <T extends Condition<?>> ConditionBuilder<T> builder(Function<CompoundTag, T> constructor) {
-			return new ConditionBuilder<>(constructor);
-		}
+	public static abstract class LivingEntityCondition implements Condition<LivingEntityPatch<?>> {
+	}
+	
+	public static abstract class ItemStackCondition implements Condition<ItemStack> {
 	}
 }

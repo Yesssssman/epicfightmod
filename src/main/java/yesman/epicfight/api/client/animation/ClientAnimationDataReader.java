@@ -122,7 +122,7 @@ public class ClientAnimationDataReader {
 					if (livingMotionName.equals("ALL")) {
 						builder.defaultMask(ClientAnimationDataReader.getJointMaskEntry(GsonHelper.getAsString(jointMaskEntry, "type")));
 					} else {
-						builder.mask((LivingMotion) LivingMotion.ENUM_MANAGER.get(livingMotionName), ClientAnimationDataReader.getJointMaskEntry(GsonHelper.getAsString(jointMaskEntry, "type")));
+						builder.mask((LivingMotion) LivingMotion.ENUM_MANAGER.getOrThrow(livingMotionName), ClientAnimationDataReader.getJointMaskEntry(GsonHelper.getAsString(jointMaskEntry, "type")));
 					}
 				});
 			}

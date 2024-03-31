@@ -3,6 +3,10 @@ package yesman.epicfight.api.utils;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -11,8 +15,10 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.IForgeRegistry;
 import yesman.epicfight.api.utils.math.Vec3f;
 
 public class ParseUtil {
@@ -70,7 +76,15 @@ public class ParseUtil {
 		return new AttributeModifier(UUID.fromString(tag.getString("uuid")), tag.getString("name"), tag.getDouble("amount"), operation);
 	}
 	
-	public static String makeFirstLetterToUpper(String s) {
+	public static <T> String nullOrApply(T obj, Function<T, String> toDisplayText) {
+		return obj == null ? "" : toDisplayText.apply(obj);
+	}
+	
+	public static String snakeToSpacedCamel(String s) {
+		if (s == null) {
+			return "";
+		}
+		
 		StringBuilder sb = new StringBuilder();
 		boolean upperNext = true;
 		
@@ -93,7 +107,47 @@ public class ParseUtil {
 		return sb.toString();
 	}
 	
-	public static String toStringNvl(Object obj) {
+	public static boolean compareNullables(@Nullable Object obj1, @Nullable Object obj2) {
+		if (obj1 == null) {
+			if (obj2 == null) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return obj1.equals(obj2);
+		}
+	}
+	
+	public static String nullParam(Object obj) {
 		return obj == null ? "" : obj.toString();
+	}
+	
+	public static <T> String getRegistryName(T obj, IForgeRegistry<T> registry) {
+		return obj == null ? "" : registry.getKey(obj).toString();
+	}
+	
+	public static <T extends Tag> T getOrCreateTag(CompoundTag compTag, String name, Supplier<T> tag) {
+		return getOrCreateTag(compTag, name, tag.get());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T extends Tag> T getOrCreateTag(CompoundTag compTag, String name, T tag) {
+		if (compTag.contains(name)) {
+			return (T)compTag.get(name);
+		}
+		
+		compTag.put(name, tag);
+		
+		return tag;
+	}
+	
+	public static <T> boolean isParsable(String s, Function<String, T> parser) {
+		try {
+			parser.apply(s);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
 	}
 }

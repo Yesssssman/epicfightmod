@@ -5,6 +5,9 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -254,5 +257,29 @@ public class OBBCollider extends Collider {
         vertexBuilder.vertex(matrix, minX, minY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
         vertexBuilder.vertex(matrix, maxX, minY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
         matrixStackIn.popPose();
+	}
+	
+	public CompoundTag serialize(CompoundTag resultTag) {
+		if (resultTag == null) {
+			resultTag = new CompoundTag();
+		}
+		
+		resultTag.putInt("number", 1);
+		
+		ListTag center = new ListTag();
+		center.add(DoubleTag.valueOf(this.modelCenter.x));
+		center.add(DoubleTag.valueOf(this.modelCenter.y));
+		center.add(DoubleTag.valueOf(this.modelCenter.z));
+		
+		resultTag.put("center", center);
+		
+		ListTag size = new ListTag();
+		size.add(DoubleTag.valueOf(this.modelVertex[1].x));
+		size.add(DoubleTag.valueOf(this.modelVertex[1].y));
+		size.add(DoubleTag.valueOf(this.modelVertex[1].z));
+		
+		resultTag.put("size", size);
+		
+		return resultTag;
 	}
 }

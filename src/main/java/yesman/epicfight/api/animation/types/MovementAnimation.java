@@ -13,6 +13,10 @@ public class MovementAnimation extends StaticAnimation {
 		super(convertTime, isRepeat, path, armature);
 	}
 	
+	public MovementAnimation(float convertTime, boolean isRepeat, String path, Armature armature, boolean noRegister) {
+		super(convertTime, isRepeat, path, armature, noRegister);
+	}
+	
 	@Override
 	public float getPlaySpeed(LivingEntityPatch<?> entitypatch) {
 		float movementSpeed = 1.0F;

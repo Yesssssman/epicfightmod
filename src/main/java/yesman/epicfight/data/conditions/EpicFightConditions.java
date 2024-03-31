@@ -1,9 +1,7 @@
 package yesman.epicfight.data.conditions;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
 
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -14,19 +12,22 @@ import yesman.epicfight.data.conditions.itemstack.TagValueCondition;
 import yesman.epicfight.main.EpicFightMod;
 
 public class EpicFightConditions {
-	public static final DeferredRegister<Function<CompoundTag, Condition<?>>> CONDITIONS = DeferredRegister.create(new ResourceLocation(EpicFightMod.MODID, "conditions"), EpicFightMod.MODID);
-	public static final Supplier<IForgeRegistry<Function<CompoundTag, Condition<?>>>> REGISTRY = CONDITIONS.makeRegistry(RegistryBuilder::new);
+	public static final DeferredRegister<Supplier<Condition<?>>> CONDITIONS = DeferredRegister.create(new ResourceLocation(EpicFightMod.MODID, "conditions"), EpicFightMod.MODID);
+	public static final Supplier<IForgeRegistry<Supplier<Condition<?>>>> REGISTRY = CONDITIONS.makeRegistry(RegistryBuilder::new);
 	
-	@SuppressWarnings("unchecked")
-	public static <T extends Condition<?>> Function<CompoundTag, T> getConditionOrThrow(ResourceLocation key) {
+	public static <T extends Condition<?>> Supplier<T> getConditionOrThrow(ResourceLocation key) {
 		if (!REGISTRY.get().containsKey(key)) {
 			throw new IllegalArgumentException("No condition named " + key);
 		}
 		
-		return (Function<CompoundTag, T>)REGISTRY.get().getValue(key);
+		return getConditionOrNull(key);
 	}
 	
-	public static final RegistryObject<Function<CompoundTag, Condition<?>>> OFFHAND_CATEGORY = CONDITIONS.register(new ResourceLocation(EpicFightMod.MODID, "offhand_category").getPath(), () -> OffhandCategoryCondition::new);
+	@SuppressWarnings("unchecked")
+	public static <T extends Condition<?>> Supplier<T> getConditionOrNull(ResourceLocation key) {
+		return (Supplier<T>) REGISTRY.get().getValue(key);
+	}
 	
-	public static final RegistryObject<Function<CompoundTag, Condition<?>>> TAG_VALUE = CONDITIONS.register(new ResourceLocation(EpicFightMod.MODID, "tag_value").getPath(), () -> TagValueCondition::new);
+	public static final RegistryObject<Supplier<Condition<?>>> OFFHAND_CATEGORY = CONDITIONS.register(new ResourceLocation(EpicFightMod.MODID, "offhand_category").getPath(), () -> OffhandCategoryCondition::new);
+	public static final RegistryObject<Supplier<Condition<?>>> TAG_VALUE = CONDITIONS.register(new ResourceLocation(EpicFightMod.MODID, "tag_value").getPath(), () -> TagValueCondition::new);
 }

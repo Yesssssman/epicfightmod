@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.data.conditions.Condition.LivingEntityCondition;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
@@ -16,17 +17,15 @@ import yesman.epicfight.world.capabilities.item.WeaponCategory;
 public class OffhandCategoryCondition extends LivingEntityCondition {
 	private WeaponCategory category;
 	
-	public OffhandCategoryCondition(CompoundTag tag) {
-		super(tag);
-	}
-	
 	@Override
-	public void read(CompoundTag tag) {
-		this.category = WeaponCategory.ENUM_MANAGER.get(tag.getString("category"));
+	public OffhandCategoryCondition read(CompoundTag tag) {
+		this.category = WeaponCategory.ENUM_MANAGER.getOrThrow(tag.getString("category"));
 		
 		if (this.category == null) {
 			throw new IllegalArgumentException("Weapon category '" + this.category + "' does not exist!");
 		}
+		
+		return this;
 	}
 	
 	@Override

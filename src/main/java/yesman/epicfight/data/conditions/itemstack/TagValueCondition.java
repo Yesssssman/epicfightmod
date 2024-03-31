@@ -16,17 +16,14 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.data.conditions.Condition.ItemStackCondition;
 
 public class TagValueCondition extends ItemStackCondition {
 	private String key;
 	private String value;
 	
-	public TagValueCondition(CompoundTag tag) {
-		super(tag);
-	}
-	
 	@Override
-	public void read(CompoundTag tag) {
+	public TagValueCondition read(CompoundTag tag) {
 		this.key = tag.getString("key");
 		this.value = tag.get("value").getAsString();
 		
@@ -37,6 +34,8 @@ public class TagValueCondition extends ItemStackCondition {
 		if (this.value == null) {
 			throw new IllegalArgumentException("No value provided!");
 		}
+		
+		return this;
 	}
 	
 	@Override

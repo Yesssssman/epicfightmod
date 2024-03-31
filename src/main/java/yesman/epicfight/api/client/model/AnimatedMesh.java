@@ -3,6 +3,11 @@ package yesman.epicfight.api.client.model;
 import java.util.List;
 import java.util.Map;
 
+import org.joml.Matrix3f;
+import org.joml.Matrix4f;
+import org.joml.Vector3f;
+import org.joml.Vector4f;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
@@ -12,10 +17,6 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
 import yesman.epicfight.api.client.model.VertexIndicator.AnimatedVertexIndicator;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -44,13 +45,17 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 		return parts.get(name);
 	}
 	
-	public void drawModelWithPose(PoseStack poseStack, VertexConsumer builder, int packedLightIn, float r, float g, float b, float a, int overlayCoord, Armature armature, OpenMatrix4f[] poses) {
+	public void draw(PoseStack poseStack, VertexConsumer builder, DrawingFunction drawingFunction, int packedLightIn, float r, float g, float b, float a, int overlay, Armature armature, OpenMatrix4f[] poses) {
 		Matrix4f matrix4f = poseStack.last().pose();
 		Matrix3f matrix3f = poseStack.last().normal();
 		OpenMatrix4f[] posesNoTranslation = new OpenMatrix4f[poses.length];
 		
 		for (int i = 0; i < poses.length; i++) {
-			posesNoTranslation[i] = OpenMatrix4f.mul(poses[i], armature.searchJointById(i).getToOrigin(), null).removeTranslation();
+			if (armature != null) {
+				posesNoTranslation[i] = OpenMatrix4f.mul(poses[i], armature.searchJointById(i).getToOrigin(), null).removeTranslation();
+			} else {
+				posesNoTranslation[i] = poses[i].removeTranslation();
+			}
 		}
 		
 		for (ModelPart<AnimatedVertexIndicator> part : this.parts.values()) {
@@ -59,6 +64,7 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 					int pos = vi.position * 3;
 					int norm = vi.normal * 3;
 					int uv = vi.uv * 2;
+					
 					Vec4f position = new Vec4f(this.positions[pos], this.positions[pos + 1], this.positions[pos + 2], 1.0F);
 					Vec4f normal = new Vec4f(this.normals[norm], this.normals[norm + 1], this.normals[norm + 2], 1.0F);
 					Vec4f totalPos = new Vec4f(0.0F, 0.0F, 0.0F, 0.0F);
@@ -68,44 +74,13 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 						int jointIndex = vi.joint.get(i);
 						int weightIndex = vi.weight.get(i);
 						float weight = this.weights[weightIndex];
-						Vec4f.add(OpenMatrix4f.transform(OpenMatrix4f.mul(poses[jointIndex], armature.searchJointById(jointIndex).getToOrigin(), null), position, null).scale(weight), totalPos, totalPos);
-						Vec4f.add(OpenMatrix4f.transform(posesNoTranslation[jointIndex], normal, null).scale(weight), totalNorm, totalNorm);
-					}
-					
-					Vector4f posVec = new Vector4f(totalPos.x, totalPos.y, totalPos.z, 1.0F);
-					Vector3f normVec = totalNorm.toMojangVector();
-					posVec.mul(matrix4f);
-					normVec.mul(matrix3f);
-					builder.vertex(posVec.x(), posVec.y(), posVec.z(), r, g, b, a, this.uvs[uv], this.uvs[uv + 1], overlayCoord, packedLightIn, normVec.x(), normVec.y(), normVec.z());
-				}
-			}
-		}
-	}
-	
-	public void drawWithPoseNoTexture(PoseStack poseStack, VertexConsumer builder, int packedLightIn, float r, float g, float b, float a, int overlayCoord, OpenMatrix4f[] poses) {
-		Matrix4f matrix4f = poseStack.last().pose();
-		Matrix3f matrix3f = poseStack.last().normal();
-		OpenMatrix4f[] posesNoTranslation = new OpenMatrix4f[poses.length];
-		
-		for (int i = 0; i < poses.length; i++) {
-			posesNoTranslation[i] = poses[i].removeTranslation();
-		}
-		
-		for (ModelPart<AnimatedVertexIndicator> part : this.parts.values()) {
-			if (!part.hidden) {
-				for (AnimatedVertexIndicator vi : part.getVertices()) {
-					int pos = vi.position * 3;
-					int norm = vi.normal * 3;
-					Vec4f position = new Vec4f(this.positions[pos], this.positions[pos + 1], this.positions[pos + 2], 1.0F);
-					Vec4f normal = new Vec4f(this.normals[norm], this.normals[norm + 1], this.normals[norm + 2], 1.0F);
-					Vec4f totalPos = new Vec4f(0.0F, 0.0F, 0.0F, 0.0F);
-					Vec4f totalNorm = new Vec4f(0.0F, 0.0F, 0.0F, 0.0F);
-					
-					for (int i = 0; i < vi.joint.size(); i++) {
-						int jointIndex = vi.joint.get(i);
-						int weightIndex = vi.weight.get(i);
-						float weight = this.weights[weightIndex];
-						Vec4f.add(OpenMatrix4f.transform(poses[jointIndex], position, null).scale(weight), totalPos, totalPos);
+						
+						if (armature != null) {
+							Vec4f.add(OpenMatrix4f.transform(OpenMatrix4f.mul(poses[jointIndex], armature.searchJointById(jointIndex).getToOrigin(), null), position, null).scale(weight), totalPos, totalPos);
+						} else {
+							Vec4f.add(OpenMatrix4f.transform(poses[jointIndex], position, null).scale(weight), totalPos, totalPos);
+						}
+						
 						Vec4f.add(OpenMatrix4f.transform(posesNoTranslation[jointIndex], normal, null).scale(weight), totalNorm, totalNorm);
 					}
 					
@@ -113,13 +88,42 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 					Vector3f normVec = new Vector3f(totalNorm.x, totalNorm.y, totalNorm.z);
 					posVec.mul(matrix4f);
 					normVec.mul(matrix3f);
-					builder.vertex(posVec.x(), posVec.y(), posVec.z());
-					builder.color(r, g, b, a);
-					builder.uv2(packedLightIn);
-					builder.endVertex();
+					
+					drawingFunction.draw(builder, posVec, normVec, packedLightIn, r, g, b, a, this.uvs[uv], this.uvs[uv + 1], overlay);
 				}
 			}
 		}
+	}
+	
+	public void drawModelWithPose(PoseStack poseStack, VertexConsumer builder, int packedLightIn, float r, float g, float b, float a, int overlayCoord, Armature armature, OpenMatrix4f[] poses) {
+		this.draw(poseStack, builder, DrawingFunction.ENTITY_TRANSLUCENT, packedLightIn, r, g, b, a, overlayCoord, armature, poses);
+	}
+	
+	public void drawWithPoseNoTexture(PoseStack poseStack, VertexConsumer builder, int packedLightIn, float r, float g, float b, float a, int overlayCoord, OpenMatrix4f[] poses) {
+		this.draw(poseStack, builder, DrawingFunction.ENTITY_PARTICLE, packedLightIn, r, g, b, a, overlayCoord, null, poses);
+	}
+	
+	@FunctionalInterface
+	public interface DrawingFunction {
+		public static final DrawingFunction ENTITY_TRANSLUCENT = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
+			builder.vertex(posVec.x(), posVec.y(), posVec.z(), r, g, b, a, u, v, overlay, packedLightIn, normalVec.x(), normalVec.y(), normalVec.z());
+		};
+		
+		public static final DrawingFunction ENTITY_PARTICLE = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
+			builder.vertex(posVec.x(), posVec.y(), posVec.z());
+			builder.color(r, g, b, a);
+			builder.uv2(packedLightIn);
+			builder.endVertex();
+		};
+		
+		public static final DrawingFunction ENTITY_SOLID = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
+			builder.vertex(posVec.x(), posVec.y(), posVec.z());
+			builder.color(r, g, b, a);
+			builder.normal(normalVec.x(), normalVec.y(), normalVec.z());
+			builder.endVertex();
+		};
+		
+		public void draw(VertexConsumer builder, Vector4f posVec, Vector3f normalVec, int packedLightIn, float r, float g, float b, float a, float u, float v, int overlay);
 	}
 	
 	public JsonObject toJsonObject() {

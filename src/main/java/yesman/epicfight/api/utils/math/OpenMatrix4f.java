@@ -688,11 +688,11 @@ public class OpenMatrix4f {
 	
 	@Override
 	public String toString() {
-		String buf = String.valueOf('\n' +
-				m00 + ' ' + m10 + ' ' + m20 + ' ' + m30 + '\n' +
-				m01 + ' ' + m11 + ' ' + m21 + ' ' + m31 + '\n' +
-				m02 + ' ' + m12 + ' ' + m22 + ' ' + m32 + '\n' +
-				m03 + ' ' + m13 + ' ' + m23 + ' ' + m33) + '\n';
+		String buf = String.valueOf("\n" +
+				m00 + " " + m10 + " " + m20 + " " + m30 + "\n" +
+				m01 + " " + m11 + " " + m21 + " " + m31 + "\n" +
+				m02 + " " + m12 + " " + m22 + " " + m32 + "\n" +
+				m03 + " " + m13 + " " + m23 + " " + m33) + "\n";
 		return buf;
 	}
 	

@@ -1,11 +1,16 @@
 package yesman.epicfight.gameasset;
 
+import java.util.Collections;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -16,7 +21,7 @@ import yesman.epicfight.api.collider.OBBCollider;
 import yesman.epicfight.main.EpicFightMod;
 
 public class ColliderPreset implements PreparableReloadListener {
-	private static final Map<ResourceLocation, Collider> PRESETS = Maps.newHashMap();
+	private static final BiMap<ResourceLocation, Collider> PRESETS = HashBiMap.create();
 	
 	public static Collider registerCollider(ResourceLocation rl, Collider collider) {
 		if (PRESETS.containsKey(rl)) {
@@ -26,6 +31,14 @@ public class ColliderPreset implements PreparableReloadListener {
 		PRESETS.put(rl, collider);
 		
 		return collider;
+	}
+	
+	public static Set<Map.Entry<ResourceLocation, Collider>> entries() {
+		return Collections.unmodifiableSet(PRESETS.entrySet());
+	}
+	
+	public static ResourceLocation getKey(Collider collider) {
+		return PRESETS.inverse().get(collider);
 	}
 	
 	public static Collider get(ResourceLocation rl) {
@@ -70,13 +83,40 @@ public class ColliderPreset implements PreparableReloadListener {
 	public static final Collider WITHER_CHARGE = registerCollider(new ResourceLocation(EpicFightMod.MODID, "wither_charge"), new MultiOBBCollider(5, 0.7D, 0.9D, 0.7D, 0D, 1.0D, -0.35D));
 	public static final Collider VEX_CHARGE = registerCollider(new ResourceLocation(EpicFightMod.MODID, "vex_charge"), new MultiOBBCollider(3, 0.4D, 0.4D, 0.95D, 0D, 1.0D, -0.85D));
 	
+	public static Collider deserializeSimpleCollider(CompoundTag tag) {
+		int number = tag.getInt("number");
+		
+		if (number < 1) {
+			throw new IllegalArgumentException("Datapack deserialization error: the number of colliders must bigger than 0!");
+		}
+		
+		ListTag sizeVector = tag.getList("size", 6);
+		ListTag centerVector = tag.getList("center", 6);
+		
+		double sizeX = sizeVector.getDouble(0);
+		double sizeY = sizeVector.getDouble(1);
+		double sizeZ = sizeVector.getDouble(2);
+		
+		double centerX = centerVector.getDouble(0);
+		double centerY = centerVector.getDouble(1);
+		double centerZ = centerVector.getDouble(2);
+		
+		if (sizeX < 0 || sizeY < 0 || sizeZ < 0) {
+			throw new IllegalArgumentException("Datapack deserialization error: the size of the collider must be non-negative value!");
+		}
+		
+		if (number == 1) {
+			return new OBBCollider(sizeX, sizeY, sizeZ, centerX, centerY, centerZ);
+		} else {
+			return new MultiOBBCollider(number, sizeX, sizeY, sizeZ, centerX, centerY, centerZ);
+		}
+	}
+	
 	@Override
 	public CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
 		return CompletableFuture.runAsync(() -> {
-			
 			//Collider newCOllider = new OBBCollider(0.7D, 0.7D, 3.5D, 0D, 1.0D, -3.5D);
 			//((AttackAnimation)Animations.FATAL_DRAW_DASH).changeCollider(newCOllider, 0);
-			
 		}, gameExecutor).thenCompose(stage::wait);
 	}
 }

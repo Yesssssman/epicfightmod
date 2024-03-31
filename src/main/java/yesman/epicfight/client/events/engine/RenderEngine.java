@@ -63,7 +63,7 @@ import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.gui.BattleModeGui;
 import yesman.epicfight.client.gui.BetaWarningMessage;
 import yesman.epicfight.client.gui.EntityIndicator;
-import yesman.epicfight.client.gui.screen.UISetupScreen;
+import yesman.epicfight.client.gui.screen.config.UISetupScreen;
 import yesman.epicfight.client.gui.screen.overlay.OverlayManager;
 import yesman.epicfight.client.input.EpicFightKeyMappings;
 import yesman.epicfight.client.renderer.AimHelperRenderer;

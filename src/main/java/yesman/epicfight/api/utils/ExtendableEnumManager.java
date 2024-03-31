@@ -76,7 +76,7 @@ public class ExtendableEnumManager<T extends ExtendableEnum> {
 		return lastOrdinal;
 	}
 	
-	public T get(int id) {
+	public T getOrThrow(int id) {
 		if (!this.enumMapByOrdinal.containsKey(id)) {
 			throw new IllegalArgumentException("Enum id " + id + " does not exist in " + this.enumName);
 		}
@@ -84,7 +84,7 @@ public class ExtendableEnumManager<T extends ExtendableEnum> {
 		return this.enumMapByOrdinal.get(id);
 	}
 	
-	public T get(String name) {
+	public T getOrThrow(String name) {
 		String key = name.toLowerCase(Locale.ROOT);
 		
 		if (!this.enumMapByName.containsKey(key)) {
@@ -92,6 +92,14 @@ public class ExtendableEnumManager<T extends ExtendableEnum> {
 		}
 		
 		return this.enumMapByName.get(key);
+	}
+	
+	public T get(int id) {
+		return this.enumMapByOrdinal.get(id);
+	}
+	
+	public T get(String name) {
+		return this.enumMapByName.get(name.toLowerCase(Locale.ROOT));
 	}
 	
 	public Collection<T> universalValues() {

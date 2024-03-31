@@ -20,7 +20,7 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public abstract class Animator {
 	protected final Map<LivingMotion, StaticAnimation> livingAnimations = Maps.newHashMap();
-	protected final TypeFlexibleHashMap<TypeKey<?>> animationVariables = new TypeFlexibleHashMap<TypeKey<?>>(false);
+	protected final TypeFlexibleHashMap<TypeKey<?>> animationVariables = new TypeFlexibleHashMap<> (false);
 	protected LivingEntityPatch<?> entitypatch;
 	
 	public Animator() {

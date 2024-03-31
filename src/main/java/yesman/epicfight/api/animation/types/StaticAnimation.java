@@ -99,29 +99,21 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 	}
 	
 	public static void loadClip(ResourceManager resourceManager, StaticAnimation animation) throws Exception {
-		try {
-			JsonModelLoader modelLoader = (new JsonModelLoader(resourceManager, animation.resourceLocation));
-			AnimationManager.getInstance().loadAnimationClip(animation, modelLoader::loadClipForAnimation);
-		} catch (Exception e) {
-			EpicFightMod.LOGGER.warn("Failed to load animation: " + animation.resourceLocation);
-			e.printStackTrace();
-		}
+		JsonModelLoader modelLoader = (new JsonModelLoader(resourceManager, animation.resourceLocation));
+		AnimationManager.getInstance().loadAnimationClip(animation, modelLoader::loadClipForAnimation);
 	}
 	
 	public static void loadAllJointsClip(ResourceManager resourceManager, StaticAnimation animation) throws Exception {
-		try {
-			JsonModelLoader modelLoader = (new JsonModelLoader(resourceManager, animation.resourceLocation));
-			AnimationManager.getInstance().loadAnimationClip(animation, modelLoader::loadAllJointsClipForAnimation);
-		} catch (Exception e) {
-			EpicFightMod.LOGGER.warn("Failed to load animation: " + animation.resourceLocation);
-			e.printStackTrace();
-		}
+		JsonModelLoader modelLoader = (new JsonModelLoader(resourceManager, animation.resourceLocation));
+		AnimationManager.getInstance().loadAnimationClip(animation, modelLoader::loadAllJointsClipForAnimation);
 	}
 	
 	public void loadAnimation(ResourceManager resourceManager) {
 		try {
 			loadClip(resourceManager, this);
 		} catch (Exception e) {
+			AnimationManager.getInstance().onFailed(this);
+			
 			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
 			e.printStackTrace();
 		}

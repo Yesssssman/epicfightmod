@@ -64,12 +64,13 @@ import yesman.epicfight.world.entity.ai.goal.CombatBehaviors.BehaviorPredicate;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors.BehaviorSeries;
 
 public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
+	public static final String DIRECTORY = "epicfight_mobpatch";
 	private static final Gson GSON = (new GsonBuilder()).create();
 	private static final Map<EntityType<?>, CompoundTag> TAGMAP = Maps.newHashMap();
 	private static final Map<EntityType<?>, AbstractMobPatchProvider> MOB_PATCH_PROVIDERS = Maps.newHashMap();
 	
 	public MobPatchReloadListener() {
-		super(GSON, "epicfight_mobpatch");
+		super(GSON, DIRECTORY);
 	}
 	
 	@Override
@@ -308,11 +309,11 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		for (int i = 0; i < tag.size(); i++) {
 			CompoundTag combatBehavior = tag.getCompound(i);
 			ListTag categories = combatBehavior.getList("weapon_categories", 8);
-			Style style = Style.ENUM_MANAGER.get(combatBehavior.getString("style"));
+			Style style = Style.ENUM_MANAGER.getOrThrow(combatBehavior.getString("style"));
 			CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = deserializeCombatBehaviorsBuilder(combatBehavior.getList("behavior_series", 10));
 			
 			for (int j = 0; j < categories.size(); j++) {
-				WeaponCategory category = WeaponCategory.ENUM_MANAGER.get(categories.getString(j));
+				WeaponCategory category = WeaponCategory.ENUM_MANAGER.getOrThrow(categories.getString(j));
 				combatBehaviorsMapBuilder.computeIfAbsent(category, (key) -> Maps.newHashMap());
 				combatBehaviorsMapBuilder.get(category).put(style, builder);
 			}
@@ -326,7 +327,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		
 		for (String key : defaultLivingmotions.getAllKeys()) {
 			String animation = defaultLivingmotions.getString(key);
-			defaultAnimations.add(Pair.of(LivingMotion.ENUM_MANAGER.get(key), AnimationManager.getInstance().byKey(animation)));
+			defaultAnimations.add(Pair.of(LivingMotion.ENUM_MANAGER.getOrThrow(key), AnimationManager.getInstance().byKeyOrThrow(animation)));
 		}
 		
 		return defaultAnimations;
@@ -339,7 +340,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			String lowerCaseName = tag.getString(stunType.name().toLowerCase(Locale.ROOT));
 			
 			if (!StringUtil.isNullOrEmpty(lowerCaseName)) {
-				stunAnimations.put(stunType, AnimationManager.getInstance().byKey(lowerCaseName));
+				stunAnimations.put(stunType, AnimationManager.getInstance().byKeyOrThrow(lowerCaseName));
 			}
 		}
 		
@@ -365,17 +366,17 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		for (int i = 0; i < tag.size(); i++) {
 			ImmutableSet.Builder<Pair<LivingMotion, StaticAnimation>> motions = ImmutableSet.builder();
 			CompoundTag weaponMotionTag = tag.getCompound(i);
-			Style style = Style.ENUM_MANAGER.get(weaponMotionTag.getString("style"));
+			Style style = Style.ENUM_MANAGER.getOrThrow(weaponMotionTag.getString("style"));
 			CompoundTag motionsTag = weaponMotionTag.getCompound("livingmotions");
 			
 			for (String key : motionsTag.getAllKeys()) {
-				motions.add(Pair.of(LivingMotion.ENUM_MANAGER.get(key), AnimationManager.getInstance().byKey(motionsTag.getString(key))));
+				motions.add(Pair.of(LivingMotion.ENUM_MANAGER.getOrThrow(key), AnimationManager.getInstance().byKeyOrThrow(motionsTag.getString(key))));
 			}
 			
 			Tag weponTypeTag = weaponMotionTag.get("weapon_categories");
 			
 			if (weponTypeTag instanceof StringTag) {
-				WeaponCategory weaponCategory = WeaponCategory.ENUM_MANAGER.get(weponTypeTag.getAsString());
+				WeaponCategory weaponCategory = WeaponCategory.ENUM_MANAGER.getOrThrow(weponTypeTag.getAsString());
 				if (!map.containsKey(weaponCategory)) {
 					map.put(weaponCategory, Maps.newHashMap());
 				}
@@ -384,7 +385,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			} else if (weponTypeTag instanceof ListTag weponTypesTag) {
 
 				for (int j = 0; j < weponTypesTag.size(); j++) {
-					WeaponCategory weaponCategory = WeaponCategory.ENUM_MANAGER.get(weponTypesTag.getString(j));
+					WeaponCategory weaponCategory = WeaponCategory.ENUM_MANAGER.getOrThrow(weponTypesTag.getString(j));
 					if (!map.containsKey(weaponCategory)) {
 						map.put(weaponCategory, Maps.newHashMap());
 					}
@@ -412,7 +413,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			for (int j = 0; j < behaviorList.size(); j++) {
 				Behavior.Builder<T> behaviorBuilder = Behavior.builder();
 				CompoundTag behavior = behaviorList.getCompound(j);
-				StaticAnimation animation = AnimationManager.getInstance().byKey(behavior.getString("animation"));
+				StaticAnimation animation = AnimationManager.getInstance().byKeyOrThrow(behavior.getString("animation"));
 				ListTag conditionList = behavior.getList("conditions", 10);
 				behaviorBuilder.animationBehavior(animation);
 				

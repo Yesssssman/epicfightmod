@@ -5,7 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.utils.math.Vec2i;
-import yesman.epicfight.client.gui.component.ColorWidget;
+import yesman.epicfight.client.gui.widgets.ColorWidget;
 import yesman.epicfight.config.OptionHandler.DoubleOptionHandler;
 import yesman.epicfight.config.OptionHandler.IntegerOptionHandler;
 

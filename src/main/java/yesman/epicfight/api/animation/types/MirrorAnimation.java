@@ -4,6 +4,7 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.InteractionHand;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
@@ -54,6 +55,11 @@ public class MirrorAnimation extends StaticAnimation {
 	@Override
 	public boolean isClientAnimation() {
 		return true;
+	}
+	
+	@Override
+	public AnimationClip getAnimationClip() {
+		return this.original.getAnimationClip();
 	}
 	
 	@Override

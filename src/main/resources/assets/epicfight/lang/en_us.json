@@ -158,7 +158,6 @@
 	"gui.epicfight.tab.datapack.mob_patch": "Mob Patch",
 	
 	"gui.epicfight.select": "%s Registry List",
-	"gui.epicfight.styles": "Styles",
 	
 	"item.epicfight.bokken": "Bokken",
 	"item.epicfight.uchigatana": "Uchigatana",
@@ -299,6 +298,39 @@
 	"epicfight.tip.demolition_leap": "To acquire Demolition Leap, you must defeat the Ender Dragon.",
 	"epicfight.tip.temples": "Uchigatanas, akin to skill books, can be discovered in Desert Temples or Jungle Temples. These rare weapons are not craftable.",
 	"epicfight.tip.combat_mode": "Switch between mining and combat modes by pressing it's default key, 'R'.",
+	
+	"datapack_edit.styles": "Styles",
+	
+	"datapack_edit.weapon_type.category": "Category",
+	"datapack_edit.weapon_type.hit_particle": "Hit Particle",
+	"datapack_edit.weapon_type.hit_sound": "Hit Sound",
+	"datapack_edit.weapon_type.swing_sound": "Swing Sound",
+	"datapack_edit.weapon_type.styles": "Styles",
+	"datapack_edit.weapon_type.offhand_validator": "Offhand Validator",
+	"datapack_edit.weapon_type.collider": "Collider",
+	"datapack_edit.weapon_type.collider.count": "Count",
+	"datapack_edit.weapon_type.collider.center": "Center",
+	"datapack_edit.weapon_type.collider.size": "Size",
+	"datapack_edit.weapon_type.combos": "Combos",
+	"datapack_edit.weapon_type.innate_skill": "Innate Skill",
+	"datapack_edit.weapon_type.living_animations": "Living Animations",
+	"datapack_edit.weapon_type.living_animations.modifiers": "Modifiers",
+	"datapack_edit.weapon_type.styles.default": "Default",
+	"datapack_edit.weapon_type.styles.condition": "Condition",
+	"datapack_edit.weapon_type.styles.parameters": "Parameters",
+	"datapack_edit.weapon_type.styles.dash_attak": "Dash Attack",
+	"datapack_edit.weapon_type.styles.air_slash": "Air Slash",
+	
+	"datapack_edit.item_capability.attributes": "Attributes",
+	"datapack_edit.item_capability.type": "Weapon Type",
+	"datapack_edit.item_capability.trail": "Trail Effect",
+	"datapack_edit.item_capability.color": "Color",
+	"datapack_edit.item_capability.begin_pos": "Start Position",
+	"datapack_edit.item_capability.end_pos": "End Position",
+	"datapack_edit.item_capability.lifetime": "Lifetime",
+	"datapack_edit.item_capability.interpolations": "Interpolations",
+	"datapack_edit.item_capability.texture_path": "Texture Path",
+	"datapack_edit.item_capability.particle_type": "Particle Type",
 	
 	"beta_warning": "The current version of Epic Fight is a closed beta and contains some experimental functions that may not working properly or stop your game. If you don't want to use this mod, delete it from your mod list."
 }

@@ -2,10 +2,15 @@ package yesman.epicfight.api.collider;
 
 import java.util.List;
 
+import org.joml.Vector3f;
+
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.world.phys.AABB;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -21,14 +26,12 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
-import org.joml.Vector3f;
-
 public class MultiOBBCollider extends MultiCollider<OBBCollider> {
-	public MultiOBBCollider(int arrayLength, double posX, double posY, double posZ, double vecX, double vecY, double vecZ) {
-		super(arrayLength, vecX, vecY, vecZ, null);
+	public MultiOBBCollider(int arrayLength, double vecX, double vecY, double vecZ, double centerX, double centerY, double centerZ) {
+		super(arrayLength, centerX, centerY, centerZ, null);
 		
-		AABB aabb = OBBCollider.getInitialAABB(posX, posY, posZ, vecX, vecY, vecZ);
-		OBBCollider colliderForAll = new OBBCollider(aabb, posX, posY, posZ, vecX, vecY, vecZ);
+		AABB aabb = OBBCollider.getInitialAABB(vecX, vecY, vecZ, centerX, centerY, centerZ);
+		OBBCollider colliderForAll = new OBBCollider(aabb, vecX, vecY, vecZ, centerX, centerY, centerZ);
 		
 		for (int i = 0; i < arrayLength; i++) {
 			this.colliders.add(colliderForAll);
@@ -87,5 +90,31 @@ public class MultiOBBCollider extends MultiCollider<OBBCollider> {
 			
 			interpolation += partialScale;
 		}
+	}
+	
+	public CompoundTag serialize(CompoundTag resultTag) {
+		if (resultTag == null) {
+			resultTag = new CompoundTag();
+		}
+		
+		resultTag.putInt("number", this.numberOfColliders);
+		
+		ListTag center = new ListTag();
+		
+		center.add(DoubleTag.valueOf(this.modelCenter.x));
+		center.add(DoubleTag.valueOf(this.modelCenter.y));
+		center.add(DoubleTag.valueOf(this.modelCenter.z));
+		
+		resultTag.put("center", center);
+		
+		ListTag size = new ListTag();
+		
+		size.add(DoubleTag.valueOf(this.colliders.get(0).modelVertex[1].x));
+		size.add(DoubleTag.valueOf(this.colliders.get(0).modelVertex[1].y));
+		size.add(DoubleTag.valueOf(this.colliders.get(0).modelVertex[1].z));
+		
+		resultTag.put("size", size);
+		
+		return resultTag;
 	}
 }

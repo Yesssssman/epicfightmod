@@ -5,6 +5,8 @@ import java.util.Map;
 import com.google.common.collect.Maps;
 
 public class AnimationClip {
+	public static final AnimationClip EMPTY_CLIP = new AnimationClip();
+	
 	protected Map<String, TransformSheet> jointTransforms = Maps.newHashMap();
 	protected float clipTime;
 	

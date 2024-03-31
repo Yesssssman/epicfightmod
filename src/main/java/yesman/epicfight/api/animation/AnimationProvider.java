@@ -13,6 +13,6 @@ public interface AnimationProvider<T extends StaticAnimation> {
 	
 	@SuppressWarnings("unchecked")
 	public static <T extends StaticAnimation> AnimationProvider<T> of(ResourceLocation rl) {
-		return () -> (T)AnimationManager.getInstance().byKey(rl);
+		return () -> (T)AnimationManager.getInstance().byKeyOrThrow(rl);
 	}
 }

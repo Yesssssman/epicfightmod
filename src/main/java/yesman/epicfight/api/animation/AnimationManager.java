@@ -5,12 +5,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.ibm.icu.impl.locale.XCldrStub.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.resources.ResourceLocation;
@@ -51,15 +53,23 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		return this.animationIdMap.byId(animationId);
 	}
 	
+	public StaticAnimation byKeyOrThrow(String resourceLocation) {
+		return this.byKeyOrThrow(new ResourceLocation(resourceLocation));
+	}
+	
+	public StaticAnimation byKeyOrThrow(ResourceLocation rl) {
+		if (!this.animationRegistry.containsKey(rl)) {
+			throw new IllegalArgumentException("No animation with registry name " + rl);
+		}
+		
+		return this.byKey(rl);
+	}
+	
 	public StaticAnimation byKey(String resourceLocation) {
 		return this.byKey(new ResourceLocation(resourceLocation));
 	}
 	
 	public StaticAnimation byKey(ResourceLocation rl) {
-		if (!this.animationRegistry.containsKey(rl)) {
-			throw new IllegalArgumentException("No animation with registry name " + rl);
-		}
-		
 		return this.animationRegistry.get(rl);
 	}
 	
@@ -69,6 +79,26 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		}
 		
 		return this.animationClips.get(animation.getLocation());
+	}
+	
+	public Map<ResourceLocation, StaticAnimation> getAnimations() {
+		return ImmutableMap.copyOf(this.animationRegistry);
+	}
+	
+	public Map<ResourceLocation, StaticAnimation> getAnimations(Predicate<StaticAnimation> filter) {
+		Map<ResourceLocation, StaticAnimation> filteredItems = this.animationRegistry.entrySet().stream().filter((entry) -> filter.test(entry.getValue())).reduce(Maps.newHashMap(), (map, entry) -> {
+			map.put(entry.getKey(), entry.getValue());
+			return map;
+		}, (map1, map2) -> {
+			map1.putAll(map2);
+			return map1;
+		});
+		
+		return ImmutableMap.copyOf(filteredItems);
+	}
+	
+	public Map<ResourceLocation, AnimationClip> getLoadedClips() {
+		return ImmutableMap.copyOf(this.animationClips);
 	}
 	
 	public int registerAnimation(StaticAnimation staticAnimation) {
@@ -103,6 +133,12 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		if (!this.animationClips.containsKey(animation.getLocation())) {
 			AnimationClip animationClip = clipProvider.apply(animation);
 			this.animationClips.put(animation.getLocation(), animationClip);
+		}
+	}
+	
+	public void onFailed(StaticAnimation animation) {
+		if (!this.animationClips.containsKey(animation.getLocation())) {
+			this.animationClips.put(animation.getLocation(), AnimationClip.EMPTY_CLIP);
 		}
 	}
 	

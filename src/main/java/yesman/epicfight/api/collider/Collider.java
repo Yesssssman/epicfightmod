@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -109,6 +110,10 @@ public abstract class Collider {
 	}
 	
 	public abstract Collider deepCopy();
+	
+	public CompoundTag serialize(CompoundTag resultTag) {
+		return resultTag;
+	}
 	
 	@Override
 	public String toString() {

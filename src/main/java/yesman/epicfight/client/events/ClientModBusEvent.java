@@ -1,11 +1,18 @@
 package yesman.epicfight.client.events;
 
+import java.io.IOException;
+
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.client.renderer.entity.NoopRenderer;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.client.event.EntityRenderersEvent;
 import net.minecraftforge.client.event.EntityRenderersEvent.RegisterRenderers;
 import net.minecraftforge.client.event.RegisterParticleProvidersEvent;
+import net.minecraftforge.client.event.RegisterShadersEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -28,6 +35,7 @@ import yesman.epicfight.client.particle.HitCutParticle;
 import yesman.epicfight.client.particle.LaserParticle;
 import yesman.epicfight.client.particle.TrailParticle;
 import yesman.epicfight.client.particle.TsunamiSplashParticle;
+import yesman.epicfight.client.renderer.EpicFightShaders;
 import yesman.epicfight.client.renderer.blockentity.FractureBlockRenderer;
 import yesman.epicfight.client.renderer.entity.DroppedNetherStarRenderer;
 import yesman.epicfight.client.renderer.entity.WitherGhostRenderer;
@@ -83,5 +91,12 @@ public class ClientModBusEvent {
 	public static void reloadEvent(EntityRenderersEvent.AddLayers event) {
 		ClientEngine.getInstance().renderEngine.registerRenderer();
 		WearableItemLayer.clear();
+	}
+	
+	@SubscribeEvent
+	public static void registerShadersEvent(RegisterShadersEvent event) throws IOException {
+		event.registerShader(new ShaderInstance(event.getResourceProvider(), new ResourceLocation(EpicFightMod.MODID, "solid_model"), DefaultVertexFormat.POSITION_COLOR_NORMAL), (reloadedShader) -> {
+			EpicFightShaders.positionColorNormalShader = reloadedShader;
+		});
 	}
 }

@@ -39,8 +39,8 @@ public class EpicFightItemProperties {
 		ItemProperties.register(Items.SHIELD, new ResourceLocation("blocking"), (itemstack, level, entity, i) -> {
 			LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(entity, LivingEntityPatch.class);
 			
-			if (entitypatch instanceof PlayerPatch) {
-				if (((PlayerPatch<?>)entitypatch).isBattleMode()) {
+			if (entitypatch instanceof PlayerPatch<?> playerpatch) {
+				if (playerpatch.isBattleMode()) {
 					return 0.0F;
 				}
 			} else {

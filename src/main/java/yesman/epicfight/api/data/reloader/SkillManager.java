@@ -3,7 +3,6 @@ package yesman.epicfight.api.data.reloader;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -26,7 +25,6 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.registries.ForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryInternal;
 import net.minecraftforge.registries.NewRegistryEvent;
@@ -49,8 +47,6 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 	
 	private static final List<CompoundTag> SKILL_PARAMS = Lists.newArrayList();
 	private static final Gson GSON = (new GsonBuilder()).create();
-	private static final Random RANDOM = new Random();
-	private static int lastPick = 0;
 	
 	public static List<CompoundTag> getSkillParams() {
 		return Collections.unmodifiableList(SKILL_PARAMS);
@@ -74,7 +70,7 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 	}
 	
 	public static Skill getSkill(String name) {
-		ForgeRegistry<Skill> skillRegistry = RegistryManager.ACTIVE.getRegistry(SKILL_REGISTRY_KEY);
+		IForgeRegistry<Skill> skillRegistry = getSkillRegistry();
 		ResourceLocation rl;
 		
 		if (name.indexOf(':') >= 0) {
@@ -91,26 +87,21 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 	}
 	
 	public static Stream<ResourceLocation> getSkills(Predicate<Skill> predicate) {
-		return RegistryManager.ACTIVE.getRegistry(SKILL_REGISTRY_KEY).getValues().stream().filter(skill -> predicate.test(skill)).map(builder -> builder.getRegistryName());
-	}
-	
-	@SuppressWarnings("unchecked")
-	public static String getRandomLearnableSkillName() {
-		Map<ResourceLocation, Skill> learnableSkills = RegistryManager.ACTIVE.getRegistry(SKILL_REGISTRY_KEY).getSlaveMap(SkillRegistryCallbacks.LEARNABLE_SKILLS, Map.class);
-		List<Skill> values = Lists.newArrayList(learnableSkills.values());
-		lastPick = (lastPick + RANDOM.nextInt(values.size() - 1) + 1) % values.size();
-		
-		return values.get(lastPick).toString();
+		return getSkillRegistry().getValues().stream().filter(skill -> predicate.test(skill)).map(builder -> builder.getRegistryName());
 	}
 	
 	public static void reloadAllSkillsAnimations() {
-		ForgeRegistry<Skill> skillRegistry = RegistryManager.ACTIVE.getRegistry(SKILL_REGISTRY_KEY);
+		IForgeRegistry<Skill> skillRegistry = getSkillRegistry();
 		skillRegistry.getValues().forEach((skill) -> skill.registerPropertiesToAnimation());
+	}
+	
+	public static IForgeRegistry<Skill> getSkillRegistry() {
+		return RegistryManager.ACTIVE.getRegistry(SKILL_REGISTRY_KEY);
 	}
 	
 	@OnlyIn(Dist.CLIENT)
 	public static void processServerPacket(SPDatapackSyncSkill packet) {
-		ForgeRegistry<Skill> skillRegistry = RegistryManager.ACTIVE.getRegistry(SKILL_REGISTRY_KEY);
+		IForgeRegistry<Skill> skillRegistry = getSkillRegistry();
 		
 		for (CompoundTag tag : packet.getTags()) {
 			if (!skillRegistry.containsKey(new ResourceLocation(tag.getString("id")))) {
@@ -170,7 +161,7 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 	
 	@Override
 	protected void apply(Map<ResourceLocation, JsonElement> objectIn, ResourceManager resourceManager, ProfilerFiller profileFiller) {
-		final ForgeRegistry<Skill> skillRegistry = RegistryManager.ACTIVE.getRegistry(SKILL_REGISTRY_KEY);
+		IForgeRegistry<Skill> skillRegistry = getSkillRegistry();
 		SKILL_PARAMS.clear();
 		
 		objectIn.entrySet().stream().filter((entry) -> {

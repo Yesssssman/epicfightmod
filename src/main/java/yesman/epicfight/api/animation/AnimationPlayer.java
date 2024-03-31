@@ -8,12 +8,12 @@ import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class AnimationPlayer {
-	private float elapsedTime;
-	private float prevElapsedTime;
-	private boolean isEnd;
-	private boolean doNotResetNext;
-	private boolean reversed;
-	private DynamicAnimation play;
+	protected float elapsedTime;
+	protected float prevElapsedTime;
+	protected boolean isEnd;
+	protected boolean doNotResetNext;
+	protected boolean reversed;
+	protected DynamicAnimation play;
 	
 	public AnimationPlayer() {
 		this.setPlayAnimation(Animations.DUMMY_ANIMATION);

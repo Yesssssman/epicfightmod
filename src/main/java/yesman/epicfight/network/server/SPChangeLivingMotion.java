@@ -69,7 +69,7 @@ public class SPChangeLivingMotion {
 		List<StaticAnimation> animationList = Lists.newArrayList();
 		
 		for (int i = 0; i < msg.count; i++) {
-			motionList.add(LivingMotion.ENUM_MANAGER.get(buf.readInt()));
+			motionList.add(LivingMotion.ENUM_MANAGER.getOrThrow(buf.readInt()));
 		}
 		
 		for (int i = 0; i < msg.count; i++) {

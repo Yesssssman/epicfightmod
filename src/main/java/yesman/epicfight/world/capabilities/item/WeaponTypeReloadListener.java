@@ -1,9 +1,13 @@
 package yesman.epicfight.world.capabilities.item;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -31,12 +35,13 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
 import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.api.forgeevent.WeaponCapabilityPresetRegistryEvent;
-import yesman.epicfight.data.conditions.Condition.ConditionBuilder;
+import yesman.epicfight.data.conditions.Condition;
 import yesman.epicfight.data.conditions.EpicFightConditions;
-import yesman.epicfight.data.conditions.entity.LivingEntityCondition;
+import yesman.epicfight.gameasset.ColliderPreset;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.server.SPDatapackSync;
 import yesman.epicfight.particle.HitParticleType;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 	public static void registerDefaultWeaponTypes() {
@@ -63,12 +68,14 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 		weaponCapabilityPresetRegistryEvent.getTypeEntry().forEach(PRESETS::put);
 	}
 	
+	public static final String DIRECTORY = "capabilities/weapons/types";
+	
 	private static final Gson GSON = (new GsonBuilder()).create();
-	private static final Map<ResourceLocation, Function<Item, CapabilityItem.Builder>> PRESETS = Maps.newHashMap();
+	private static final BiMap<ResourceLocation, Function<Item, CapabilityItem.Builder>> PRESETS = HashBiMap.create();
 	private static final Map<ResourceLocation, CompoundTag> TAGMAP = Maps.newHashMap();
 	
 	public WeaponTypeReloadListener() {
-		super(GSON, "capabilities/weapons/types");
+		super(GSON, DIRECTORY);
 	}
 	
 	@Override
@@ -96,7 +103,7 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 		}
 	}
 	
-	public static Function<Item, CapabilityItem.Builder> get(String typeName) {
+	public static Function<Item, CapabilityItem.Builder> getOrThrow(String typeName) {
 		ResourceLocation rl = new ResourceLocation(typeName);
 		
 		if (!PRESETS.containsKey(rl)) {
@@ -106,10 +113,15 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 		return PRESETS.get(rl);
 	}
 	
+	public static Function<Item, CapabilityItem.Builder> get(String typeName) {
+		ResourceLocation rl = new ResourceLocation(typeName);
+		return PRESETS.get(rl);
+	}
+	
 	private static WeaponCapability.Builder deserializeWeaponCapabilityBuilder(CompoundTag tag) {
 		WeaponCapability.Builder builder = WeaponCapability.builder();
-		builder.category(WeaponCategory.ENUM_MANAGER.get(tag.getString("category")));
-		builder.collider(ItemCapabilityReloadListener.deserializeCollider(tag.getCompound("collider")));
+		builder.category(WeaponCategory.ENUM_MANAGER.getOrThrow(tag.getString("category")));
+		builder.collider(ColliderPreset.deserializeSimpleCollider(tag.getCompound("collider")));
 		
 		if (tag.contains("hit_particle")) {
 			ParticleType<?> particleType = ForgeRegistries.PARTICLE_TYPES.getValue(new ResourceLocation(tag.getString("hit_particle")));
@@ -146,12 +158,12 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 		CompoundTag combosTag = tag.getCompound("combos");
 		
 		for (String key : combosTag.getAllKeys()) {
-			Style style = Style.ENUM_MANAGER.get(key);
+			Style style = Style.ENUM_MANAGER.getOrThrow(key);
 			ListTag comboAnimations = combosTag.getList(key, Tag.TAG_STRING);
 			StaticAnimation[] animArray = new StaticAnimation[comboAnimations.size()];
 			
 			for (int i = 0; i < comboAnimations.size(); i++) {
-				animArray[i] = AnimationManager.getInstance().byKey(comboAnimations.getString(i));
+				animArray[i] = AnimationManager.getInstance().byKeyOrThrow(comboAnimations.getString(i));
 			}
 			
 			builder.newStyleCombo(style, animArray);
@@ -160,7 +172,7 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 		CompoundTag innateSkillsTag = tag.getCompound("innate_skills");
 		
 		for (String key : innateSkillsTag.getAllKeys()) {
-			Style style = Style.ENUM_MANAGER.get(key);
+			Style style = Style.ENUM_MANAGER.getOrThrow(key);
 			
 			builder.innateSkill(style, (itemstack) -> SkillManager.getSkill(innateSkillsTag.getString(key)));
 		}
@@ -168,12 +180,12 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 		CompoundTag livingmotionModifierTag = tag.getCompound("livingmotion_modifier");
 		
 		for (String sStyle : livingmotionModifierTag.getAllKeys()) {
-			Style style = Style.ENUM_MANAGER.get(sStyle);
+			Style style = Style.ENUM_MANAGER.getOrThrow(sStyle);
 			CompoundTag styleAnimationTag = livingmotionModifierTag.getCompound(sStyle);
 			
 			for (String sLivingmotion : styleAnimationTag.getAllKeys()) {
-				LivingMotion livingmotion = LivingMotion.ENUM_MANAGER.get(sLivingmotion);
-				StaticAnimation animation = AnimationManager.getInstance().byKey(styleAnimationTag.getString(sLivingmotion));
+				LivingMotion livingmotion = LivingMotion.ENUM_MANAGER.getOrThrow(sLivingmotion);
+				StaticAnimation animation = AnimationManager.getInstance().byKeyOrThrow(styleAnimationTag.getString(sLivingmotion));
 				
 				builder.livingMotionModifier(style, livingmotion, animation);
 			}
@@ -187,20 +199,20 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 		for (Tag caseTag : stylesTag.getList("cases", Tag.TAG_COMPOUND)) {
 			CompoundTag caseCompTag = (CompoundTag)caseTag;
 			
-			Function<CompoundTag, LivingEntityCondition> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(caseCompTag.getString("condition")));
-			LivingEntityCondition condition = ConditionBuilder.builder(conditionProvider).setTag(caseCompTag.getCompound("predicate")).build();
+			Supplier<Condition<LivingEntityPatch<?>>> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(caseCompTag.getString("condition")));
+			Condition<LivingEntityPatch<?>> condition = conditionProvider.get().read(caseCompTag.getCompound("predicate"));
 			
-			Style style = Style.ENUM_MANAGER.get(caseCompTag.getString("style"));
+			Style style = Style.ENUM_MANAGER.getOrThrow(caseCompTag.getString("style"));
 			styleEntry.putNewEntry(condition, style);
 		}
 		
-		styleEntry.elseStyle = Style.ENUM_MANAGER.get(stylesTag.getString("default"));
+		styleEntry.elseStyle = Style.ENUM_MANAGER.getOrThrow(stylesTag.getString("default"));
 		builder.styleProvider(styleEntry::getStyle);
 		
 		CompoundTag offhandValidatorTag = tag.getCompound("offhand_item_compatible_predicate");
 		
-		Function<CompoundTag, LivingEntityCondition> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(offhandValidatorTag.getString("condition")));
-		builder.weaponCombinationPredicator(ConditionBuilder.builder(conditionProvider).setTag(offhandValidatorTag.getCompound("predicate")).build()::predicate);
+		Supplier<Condition<LivingEntityPatch<?>>> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(offhandValidatorTag.getString("condition")));
+		builder.weaponCombinationPredicator(conditionProvider.get().read(offhandValidatorTag.getCompound("predicate"))::predicate);
 		
 		return builder;
 	}
@@ -215,6 +227,14 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 			return entry.getValue();
 		});
 		return tagStream;
+	}
+	
+	public static ResourceLocation getKey(Function<Item, CapabilityItem.Builder> builder) {
+		return PRESETS.inverse().get(builder);
+	}
+	
+	public static Set<Map.Entry<ResourceLocation, Function<Item, CapabilityItem.Builder>>> entries() {
+		return PRESETS.entrySet();
 	}
 	
 	public static void clear() {

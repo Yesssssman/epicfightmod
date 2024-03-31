@@ -5,6 +5,8 @@ import java.util.function.Function;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.AnimationClip;
+import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.property.AnimationEvent;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.client.animation.Layer;
@@ -29,6 +31,11 @@ public class SelectiveAnimation extends StaticAnimation {
 		
 		this.selector = selector;
 		this.animations = animations;
+	}
+	
+	@Override
+	public AnimationClip getAnimationClip() {
+		return AnimationManager.getInstance().getStaticAnimationClip(this.animations[0]);
 	}
 	
 	@Override
