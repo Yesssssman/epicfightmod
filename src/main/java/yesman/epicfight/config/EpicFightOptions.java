@@ -25,6 +25,8 @@ public class EpicFightOptions {
 	public final OptionHandler<Boolean> autoPreparation;
 	public final OptionHandler<Boolean> bloodEffects;
 	public final OptionHandler<Boolean> noMiningInCombat;
+	public final OptionHandler<Boolean> aimingCorrection;
+	
 	public final List<Item> battleAutoSwitchItems;
 	public final List<Item> miningAutoSwitchItems;
 	public int aimHelperRealColor;
@@ -63,6 +65,7 @@ public class EpicFightOptions {
 		this.autoPreparation = new OptionHandler<Boolean>(config.autoPreparation.get());
 		this.bloodEffects = new OptionHandler<Boolean>(config.bloodEffects.get());
 		this.noMiningInCombat = new OptionHandler<Boolean>(config.noMiningInCombat.get());
+		this.aimingCorrection = new OptionHandler<Boolean>(config.aimingCorrection.get());
 		this.battleAutoSwitchItems = Lists.newArrayList(config.battleAutoSwitchItems.get().stream().map((itemName) ->
 			ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName))).iterator()
 		);
@@ -103,6 +106,7 @@ public class EpicFightOptions {
 		this.autoPreparation.setDefaultValue();
 		this.bloodEffects.setDefaultValue();
 		this.noMiningInCombat.setDefaultValue();
+		this.aimingCorrection.setDefaultValue();
 		this.aimHelperRealColor = ColorWidget.toColorInteger(this.aimHelperColor.getValue());
 		this.staminaBarX.setDefaultValue();
 		this.staminaBarY.setDefaultValue();
@@ -135,6 +139,7 @@ public class EpicFightOptions {
 		config.autoPreparation.set(this.autoPreparation.getValue());
 		config.bloodEffects.set(this.bloodEffects.getValue());
 		config.noMiningInCombat.set(this.noMiningInCombat.getValue());
+		config.aimingCorrection.set(this.aimingCorrection.getValue());
 		this.aimHelperRealColor = ColorWidget.toColorInteger(this.aimHelperColor.getValue());
 		config.battleAutoSwitchItems.set(Lists.newArrayList(this.battleAutoSwitchItems.stream().map((item) -> ForgeRegistries.ITEMS.getKey(item).toString()).iterator()));
 		config.miningAutoSwitchItems.set(Lists.newArrayList(this.miningAutoSwitchItems.stream().map((item) -> ForgeRegistries.ITEMS.getKey(item).toString()).iterator()));

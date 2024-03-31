@@ -537,7 +537,7 @@ public class RenderEngine {
 		
 		@SubscribeEvent
 		public static void cameraSetupEvent(ViewportEvent.ComputeCameraAngles event) {
-			if (renderEngine.zoomCount > 0) {
+			if (renderEngine.zoomCount > 0 && EpicFightMod.CLIENT_CONFIGS.aimingCorrection.getValue()) {
 				renderEngine.setRangedWeaponThirdPerson(event, renderEngine.minecraft.options.getCameraType(), event.getPartialTick());
 				
 				if (renderEngine.zoomOutTimer > 0) {
@@ -618,8 +618,7 @@ public class RenderEngine {
 
 		@SubscribeEvent
 		public static void renderWorldLast(RenderLevelStageEvent event) {
-			if (renderEngine.zoomCount > 0 && renderEngine.minecraft.options.getCameraType() == CameraType.THIRD_PERSON_BACK &&
-					event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
+			if (EpicFightMod.CLIENT_CONFIGS.aimingCorrection.getValue() && renderEngine.zoomCount > 0 && renderEngine.minecraft.options.getCameraType() == CameraType.THIRD_PERSON_BACK && event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
 				renderEngine.aimHelper.doRender(event.getPoseStack(), event.getPartialTick());
 			}
 			/**

@@ -22,6 +22,7 @@ public class ClientConfig {
 	public final BooleanValue autoPreparation;
 	public final BooleanValue bloodEffects;
 	public final BooleanValue noMiningInCombat;
+	public final BooleanValue aimingCorrection;
 	
 	public final ConfigValue<List<? extends String>> battleAutoSwitchItems;
 	public final ConfigValue<List<? extends String>> miningAutoSwitchItems;
@@ -61,6 +62,7 @@ public class ClientConfig {
 		this.autoPreparation = config.define("ingame.auto_preparation", () -> false);
 		this.bloodEffects = config.define("ingame.blood_effects", () -> true);
 		this.noMiningInCombat = config.define("ingame.no_mining_in_combat", () -> true);
+		this.aimingCorrection = config.define("ingame.aiming_correction", () -> true);
 		
 		this.battleAutoSwitchItems = config.defineList("ingame.battle_autoswitch_items", Lists.newArrayList(), (element) -> {
 			if (element instanceof String str) {
