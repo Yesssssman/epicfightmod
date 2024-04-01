@@ -62,7 +62,7 @@ public class DodgeAnimation extends ActionAnimation {
 		super.end(entitypatch, nextAnimation, isEnd);
 		
 		if (entitypatch.isLogicalClient() && entitypatch instanceof LocalPlayerPatch localPlayerPatch) {
-			localPlayerPatch.changeModelYRot(0);
+			localPlayerPatch.disableModelYRot();
 		}
 	}
 }

@@ -11,9 +11,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.decoration.ArmorStand;
-import net.minecraft.world.entity.projectile.ProjectileUtil;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
@@ -30,13 +28,12 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.client.ClientEngine;
-import yesman.epicfight.client.events.engine.RenderEngine;
 import yesman.epicfight.client.gui.screen.SkillBookScreen;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.client.CPChangePlayerMode;
+import yesman.epicfight.network.client.CPModifyEntityModelYRot;
 import yesman.epicfight.network.client.CPPlayAnimation;
-import yesman.epicfight.network.client.CPRotateEntityModelYRot;
 import yesman.epicfight.network.client.CPSetPlayerTarget;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
@@ -49,7 +46,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	private boolean targetLockedOn;
 	private float prevStamina;
 	private int prevChargingAmount;
-
+	
 	private float lockOnXRot;
 	private float lockOnXRotO;
 	private float lockOnYRot;
@@ -105,19 +102,6 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		super.clientTick(event);
 		
 		HitResult cameraHitResult = this.minecraft.hitResult;
-		RenderEngine renderEngine = ClientEngine.getInstance().renderEngine;
-		
-		if (renderEngine.isPlayerRotationLocked()) {
-			double pickRange = this.minecraft.gameMode.getPickRange();
-			Vec3 vec3 = this.original.getEyePosition(1.0F);
-			Vec3 vec31 = MathUtils.getVectorForRotation(renderEngine.getCorrectedXRot(), renderEngine.getCorrectedYRot());
-			Vec3 vec32 = vec3.add(vec31.x * pickRange, vec31.y * pickRange, vec31.z * pickRange);
-			AABB aabb = this.original.getBoundingBox().expandTowards(vec31.scale(pickRange)).inflate(1.0D, 1.0D, 1.0D);
-			
-			cameraHitResult = ProjectileUtil.getEntityHitResult(this.original, vec3, vec32, aabb, (hit) -> {
-				return !hit.isSpectator() && hit.isPickable() && !hit.is(this.grapplingTarget);
-			}, pickRange);
-		}
 		
 		if (cameraHitResult != null && cameraHitResult.getType() == HitResult.Type.ENTITY) {
 			Entity hit = ((EntityHitResult)cameraHitResult).getEntity();
@@ -314,20 +298,6 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		return Mth.rotLerp((float)partial, this.lockOnYRotO, this.lockOnYRot);
 	}
 	
-	@Override
-	public float getCameraXRot() {
-		RenderEngine renderEngine = ClientEngine.getInstance().renderEngine;
-		
-		return Mth.wrapDegrees(renderEngine.isPlayerRotationLocked() ? renderEngine.getCorrectedXRot() : super.getCameraXRot());
-	}
-	
-	@Override
-	public float getCameraYRot() {
-		RenderEngine renderEngine = ClientEngine.getInstance().renderEngine;
-		
-		return Mth.wrapDegrees(renderEngine.isPlayerRotationLocked() ? renderEngine.getCorrectedYRot() : super.getCameraYRot());
-	}
-	
 	public boolean isTargetLockedOn() {
 		return this.targetLockedOn;
 	}
@@ -349,9 +319,15 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	}
 	
 	@Override
-	public void changeModelYRot(float amount) {
-		super.changeModelYRot(amount);
-		EpicFightNetworkManager.sendToServer(new CPRotateEntityModelYRot(amount));
+	public void setModelYRot(float amount) {
+		super.setModelYRot(amount);
+		EpicFightNetworkManager.sendToServer(new CPModifyEntityModelYRot(amount));
+	}
+	
+	@Override
+	public void disableModelYRot() {
+		super.disableModelYRot();
+		EpicFightNetworkManager.sendToServer(new CPModifyEntityModelYRot());
 	}
 	
 	@Override

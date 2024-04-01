@@ -126,9 +126,6 @@ public class RenderEngine {
 	private int zoomOutTimer = 0;
 	private int zoomCount;
 	private final int zoomMaxCount = 20;
-	private float cameraXRot;
-	private float cameraYRot;
-	private boolean isPlayerRotationLocked;
 	
 	public RenderEngine() {
 		Events.renderEngine = this;
@@ -331,82 +328,34 @@ public class RenderEngine {
 		camera.setPosition(totalX, totalY, totalZ);
 	}
 	
-	public void rotateCameraByMouseInput(float dx, float dy) {
-		float f = dx * 0.15F;
-		float f1 = dy * 0.15F;
-		
-		if (!this.isPlayerRotationLocked) {
-			this.cameraXRot = this.minecraft.player.getXRot();
-			this.cameraYRot = this.minecraft.player.getYRot();
-			this.isPlayerRotationLocked = true;
-		}
-		
-		this.cameraXRot = Mth.clamp(this.cameraXRot + f, -90.0F, 90.0F);
-		this.cameraYRot += f1;
-	}
-	
-	public boolean isPlayerRotationLocked() {
-		return this.isPlayerRotationLocked;
-	}
-	
-	public float getCorrectedXRot() {
-		return this.cameraXRot;
-	}
-	
-	public float getCorrectedYRot() {
-		return this.cameraYRot;
-	}
-	
-	public void unlockRotation(Entity cameraEntity) {
-		if (this.isPlayerRotationLocked) {
-			cameraEntity.setXRot(this.cameraXRot);
-			cameraEntity.setYRot(this.cameraYRot);
-			
-			this.isPlayerRotationLocked = false;
-		}
-	}
-	
 	public void correctCamera(ViewportEvent.ComputeCameraAngles event, float partialTicks) {
 		LocalPlayerPatch localPlayerPatch = ClientEngine.getInstance().getPlayerPatch();
 		Camera camera = event.getCamera();
 		CameraType cameraType = this.minecraft.options.getCameraType();
-		boolean hasAnyCorrection = false;
 		
 		if (localPlayerPatch != null) {
 			if (localPlayerPatch.getTarget() != null && localPlayerPatch.isTargetLockedOn()) {
-				this.cameraXRot = localPlayerPatch.getLerpedLockOnX(event.getPartialTick());
-				this.cameraYRot = localPlayerPatch.getLerpedLockOnY(event.getPartialTick());
-				hasAnyCorrection = true;
-			} else if (this.isPlayerRotationLocked) {
-				if (!localPlayerPatch.getEntityState().turningLocked()) {
-					this.unlockRotation(this.minecraft.player);
+				float xRot = localPlayerPatch.getLerpedLockOnX(event.getPartialTick());
+				float yRot = localPlayerPatch.getLerpedLockOnY(event.getPartialTick());
+				
+				if (cameraType.isMirrored()) {
+					yRot += 180.0F;
+					xRot *= -1.0F;
 				}
 				
-				hasAnyCorrection = true;
-			}
-		}
-		
-		if (hasAnyCorrection) {
-			float xRot = this.cameraXRot;
-			float yRot = this.cameraYRot;
-			
-			if (cameraType.isMirrored()) {
-				yRot += 180.0F;
-				xRot *= -1.0F;
-			}
-			
-			camera.setRotation(yRot, xRot);
-			event.setPitch(xRot);
-			event.setYaw(yRot);
-			
-			if (!cameraType.isFirstPerson()) {
-				Entity cameraEntity = this.minecraft.cameraEntity;
+				camera.setRotation(yRot, xRot);
+				event.setPitch(xRot);
+				event.setYaw(yRot);
 				
-				camera.setPosition(Mth.lerp(partialTicks, cameraEntity.xo, cameraEntity.getX()),
-								   Mth.lerp(partialTicks, cameraEntity.yo, cameraEntity.getY()) + Mth.lerp(partialTicks, camera.eyeHeightOld, camera.eyeHeight),
-								   Mth.lerp(partialTicks, cameraEntity.zo, cameraEntity.getZ()));
-				
-				camera.move(-camera.getMaxZoom(4.0D), 0.0D, 0.0D);
+				if (!cameraType.isFirstPerson()) {
+					Entity cameraEntity = this.minecraft.cameraEntity;
+					
+					camera.setPosition(Mth.lerp(partialTicks, cameraEntity.xo, cameraEntity.getX()),
+									   Mth.lerp(partialTicks, cameraEntity.yo, cameraEntity.getY()) + Mth.lerp(partialTicks, camera.eyeHeightOld, camera.eyeHeight),
+									   Mth.lerp(partialTicks, cameraEntity.zo, cameraEntity.getZ()));
+					
+					camera.move(-camera.getMaxZoom(4.0D), 0.0D, 0.0D);
+				}
 			}
 		}
 	}
@@ -447,10 +396,10 @@ public class RenderEngine {
 
 				if (event.getPartialTick() == 1.0F && entitypatch instanceof LocalPlayerPatch localPlayerPatch) {
 					playerpatch = localPlayerPatch;
-					bodyRotO = playerpatch.prevBodyYaw;
-					bodyRot = playerpatch.getBodyYaw();
-					playerpatch.prevBodyYaw = livingentity.getYRot();
-					playerpatch.setYaw(livingentity.getYRot());
+					bodyRotO = playerpatch.oBodyYRot;
+					bodyRot = playerpatch.getBodyRot();
+					playerpatch.oBodyYRot = livingentity.getYRot();
+					playerpatch.setBodyRot(livingentity.getYRot());
 
 					event.getPoseStack().translate(0, 0.1D, 0);
 				}
@@ -461,8 +410,8 @@ public class RenderEngine {
 				}
 
 				if (playerpatch != null) {
-					playerpatch.prevBodyYaw = bodyRotO;
-					playerpatch.setYaw(bodyRot);
+					playerpatch.oBodyYRot = bodyRotO;
+					playerpatch.setBodyRot(bodyRot);
 				}
 			}
 			

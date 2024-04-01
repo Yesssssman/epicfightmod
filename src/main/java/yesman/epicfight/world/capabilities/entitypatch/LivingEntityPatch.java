@@ -375,11 +375,11 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	public float getCameraXRot() {
-		return this.original.getXRot();
+		return Mth.wrapDegrees(this.original.getXRot());
 	}
 	
 	public float getCameraYRot() {
-		return this.original.getYRot();
+		return Mth.wrapDegrees(this.original.getYRot());
 	}
 	
 	@OnlyIn(Dist.CLIENT)

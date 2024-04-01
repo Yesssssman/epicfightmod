@@ -9,6 +9,7 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -23,6 +24,7 @@ import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.utils.AttackResult;
+import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSkills;
@@ -50,14 +52,15 @@ import yesman.epicfight.world.gamerule.EpicFightGamerules;
 public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T> {
 	private static final UUID ACTION_EVENT_UUID = UUID.fromString("e6beeac4-77d2-11eb-9439-0242ac130002");
 	public static final EntityDataAccessor<Float> STAMINA = new EntityDataAccessor<Float> (253, EntityDataSerializers.FLOAT);
-	
-	protected float modelYRot;
 	protected PlayerEventListener eventListeners;
-	protected int tickSinceLastAction;
 	protected PlayerMode playerMode = PlayerMode.MINING;
 	protected double xo;
 	protected double yo;
 	protected double zo;
+	protected float oModelYRot;
+	protected float modelYRot;
+	protected boolean useModelYRot;
+	protected int tickSinceLastAction;
 	protected int lastChargingTick;
 	protected int chargingAmount;
 	protected ChargeableSkill chargingSkill;
@@ -155,14 +158,30 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		}
 	}
 	
-	public void changeModelYRot(float degree) {
-		this.modelYRot = degree;
+	public void setModelYRot(float rotDeg) {
+		this.useModelYRot = true;
+		this.modelYRot = rotDeg;
+	}
+	
+	public void disableModelYRot() {
+		this.useModelYRot = false;
 	}
 	
 	@Override
 	public OpenMatrix4f getModelMatrix(float partialTicks) {
-		OpenMatrix4f mat = super.getModelMatrix(partialTicks);
-		return mat.scale(0.9375F, 0.9375F, 0.9375F);
+		float oYRot;
+		float yRot;
+		float scale = (this.original.isBaby() ? 0.5F : 1.0F) * 0.9375F;
+		
+		if (this.original.getVehicle() instanceof LivingEntity ridingEntity) {
+			oYRot = ridingEntity.yBodyRotO;
+			yRot = ridingEntity.yBodyRot;
+		} else {
+			oYRot = this.isLogicalClient() ? this.original.yBodyRotO : this.oModelYRot;
+			yRot = this.isLogicalClient() ? this.original.yBodyRot : this.modelYRot;
+		}
+		
+		return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, oYRot, yRot, partialTicks, scale, scale, scale);
 	}
 	
 	@Override
@@ -203,6 +222,22 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		}
 		
 		super.tick(event);
+		
+		this.oModelYRot = this.modelYRot;
+		
+		if (this.getEntityState().turningLocked()) {
+			if (!this.useModelYRot) {
+				this.setModelYRot(this.original.getYRot());
+			}
+		} else {
+			if (this.useModelYRot) {
+				this.disableModelYRot();
+			}
+		}
+		
+		if (!this.useModelYRot) {
+			this.modelYRot += Mth.clamp(Mth.wrapDegrees(this.original.yBodyRot - this.modelYRot), -45.0F, 45.0F);
+		}
 	}
 	
 	public SkillContainer getSkill(Skill skill) {
