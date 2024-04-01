@@ -129,9 +129,9 @@ public class DodgeSkill extends Skill {
 	public void executeOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
 		super.executeOnServer(executer, args);
 		int i = args.readInt();
-		float yaw = args.readFloat();
+		float yRot = args.readFloat();
 		executer.playAnimationSynchronized(this.animations[i], 0);
-		executer.changeModelYRot(yaw);
+		executer.setModelYRot(executer.getOriginal().getYRot() + yRot);
 	}
 	
 	@Override

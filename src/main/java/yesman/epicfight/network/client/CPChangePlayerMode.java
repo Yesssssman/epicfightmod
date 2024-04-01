@@ -35,7 +35,7 @@ public class CPChangePlayerMode {
 				
 				if (playerpatch != null) {
 					playerpatch.toMode(msg.mode, false);
-					EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(new SPModifyPlayerData(player.getId(), playerpatch.getPlayerMode()), player);
+					EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(SPModifyPlayerData.setPlayerMode(player.getId(), playerpatch.getPlayerMode()), player);
 				}
 			}
 		});

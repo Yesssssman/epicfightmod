@@ -5,7 +5,6 @@ import java.util.Set;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.events.engine.ControllEngine;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.network.client.CPExecuteSkill;
@@ -157,7 +156,9 @@ public class SkillContainer {
 		
 		if (this.containingSkill instanceof ChargeableSkill chargeableSkill && this.containingSkill.getActivateType() == Skill.ActivateType.CHARGING) {
 			if (executer.isChargingSkill(this.containingSkill)) {
-				ClientEngine.getInstance().renderEngine.unlockRotation(executer.getOriginal());
+				executer.disableModelYRot();
+				//ClientEngine.getInstance().renderEngine.unlockRotation(executer.getOriginal());
+				
 				packet = this.containingSkill.getExecutionPacket(executer, this.containingSkill.gatherArguments(executer, controllEngine));
 				executer.resetSkillCharging();
 			} else {
@@ -174,7 +175,9 @@ public class SkillContainer {
 				return event;
 			}
 			
-			ClientEngine.getInstance().renderEngine.unlockRotation(executer.getOriginal());
+			executer.disableModelYRot();
+			//ClientEngine.getInstance().renderEngine.unlockRotation(executer.getOriginal());
+			
 			packet = this.containingSkill.getExecutionPacket(executer, this.containingSkill.gatherArguments(executer, controllEngine));
 		}
 		

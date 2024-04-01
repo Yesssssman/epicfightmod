@@ -744,7 +744,7 @@ public class Animations {
 				}, Side.CLIENT))
 				.addEvents(StaticAnimationProperty.ON_END_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
 					if (entitypatch instanceof PlayerPatch<?> playerpatch) {
-						playerpatch.changeModelYRot(0);
+						playerpatch.disableModelYRot();
 					}
 				}, Side.CLIENT));
 		BIPED_PHANTOM_ASCENT_BACKWARD = new ActionAnimation(0.05F, 0.7F, "biped/skill/phantom_ascent_backward", biped)
@@ -759,7 +759,7 @@ public class Animations {
 				}, Side.CLIENT))
 				.addEvents(StaticAnimationProperty.ON_END_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
 					if (entitypatch instanceof PlayerPatch<?> playerpatch) {
-						playerpatch.changeModelYRot(0);
+						playerpatch.disableModelYRot();
 					}
 				}, Side.CLIENT));
 		

@@ -41,9 +41,8 @@ import javax.annotation.Nonnull;
 
 @OnlyIn(Dist.CLIENT)
 public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends PlayerPatch<T> {
-	protected float prevYaw;
-	protected float bodyYaw;
-	public float prevBodyYaw;
+	protected float bodyYRot;
+	public float oBodyYRot;
 	private Item prevHeldItem;
 	private Item prevHeldItemOffHand;
 	
@@ -160,14 +159,13 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	
 	@Override
 	protected void clientTick(LivingEvent.LivingTickEvent event) {
-		this.prevYaw = this.modelYRot;
-		this.prevBodyYaw = this.bodyYaw;
+		this.oBodyYRot = this.bodyYRot;
 		
 		if (!this.getEntityState().updateLivingMotion()) {
 			this.original.yBodyRot = this.original.getYRot();
 		}
 		
-		this.bodyYaw = this.original.yBodyRot;
+		this.bodyYRot = this.original.yBodyRot;
 		boolean isMainHandChanged = this.prevHeldItem != this.original.getInventory().getSelected().getItem();
 		boolean isOffHandChanged = this.prevHeldItemOffHand != this.original.getInventory().offhand.get(0).getItem();
 
@@ -242,7 +240,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
         			|| (!this.original.onGround() && this.original.onClimbable())) {
     	        yaw = 0;
     		} else {
-    			float f = MathUtils.lerpBetween(this.prevBodyYaw, this.bodyYaw, partialTick);
+    			float f = MathUtils.lerpBetween(this.oBodyYRot, this.bodyYRot, partialTick);
     			float f1 = MathUtils.lerpBetween(this.original.yHeadRotO, this.original.yHeadRot, partialTick);
     	        yaw = f1 - f;
     		}
@@ -262,11 +260,11 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 		
 		if (this.original.isAutoSpinAttack()) {
 			OpenMatrix4f mat = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0, partialTick, 0.9375F, 0.9375F, 0.9375F);
-			float yawDegree = MathUtils.lerpBetween(this.original.yRotO, this.original.getYRot(), partialTick);
-			float pitchDegree = MathUtils.lerpBetween(this.original.xRotO, this.original.getXRot(), partialTick);
+			float yRot = MathUtils.lerpBetween(this.original.yRotO, this.original.getYRot(), partialTick);
+			float xRot = MathUtils.lerpBetween(this.original.xRotO, this.original.getXRot(), partialTick);
 			
-			mat.rotateDeg(-yawDegree, Vec3f.Y_AXIS)
-			   .rotateDeg(-pitchDegree, Vec3f.X_AXIS)
+			mat.rotateDeg(-yRot, Vec3f.Y_AXIS)
+			   .rotateDeg(-xRot, Vec3f.X_AXIS)
 			   .rotateDeg((this.original.tickCount + partialTick) * -55.0F, Vec3f.Z_AXIS)
 			   .translate(0F, -0.39F, 0F);
 			
@@ -292,19 +290,19 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			return mat;
 		} else if (this.original.isSleeping()) {
 			BlockState blockstate = this.original.getFeetBlockState();
-			float yaw = 0.0F;
+			float yRot = 0.0F;
 			
 			if (blockstate.isBed(this.original.level(), this.original.getSleepingPos().orElse(null), this.original)) {
 				if (blockstate.hasProperty(BlockStateProperties.HORIZONTAL_FACING)) {
             		switch(blockstate.getValue(BlockStateProperties.HORIZONTAL_FACING)) {
             		case EAST:
-        				yaw = 90.0F;
+        				yRot = 90.0F;
         				break;
         			case WEST:
-        				yaw = -90.0F;
+        				yRot = -90.0F;
         				break;
         			case SOUTH:
-        				yaw = 180.0F;
+        				yRot = 180.0F;
         				break;
         			default:
         				break;
@@ -312,59 +310,57 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
             	}
 			}
 			
-			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yaw, yaw, 0, 0.9375F, 0.9375F, 0.9375F);
+			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yRot, yRot, 0, 0.9375F, 0.9375F, 0.9375F);
 		} else if ((direction = this.getLadderDirection(this.original.getFeetBlockState(), this.original.level(), this.original.blockPosition(), this.original)) != Direction.UP) {
-			float yaw = 0.0F;
+			float yRot = 0.0F;
 			
 			switch(direction) {
 			case EAST:
-				yaw = 90.0F;
+				yRot = 90.0F;
 				break;
 			case WEST:
-				yaw = -90.0F;
+				yRot = -90.0F;
 				break;
 			case SOUTH:
-				yaw = 180.0F;
+				yRot = 180.0F;
 				break;
 			default:
 				break;
 			}
 			
-			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yaw, yaw, 0.0F, 0.9375F, 0.9375F, 0.9375F);
+			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yRot, yRot, 0.0F, 0.9375F, 0.9375F, 0.9375F);
 		} else {
-			float yaw;
-			float prevRotYaw;
-			float rotyaw;
-			float prevPitch = 0;
-			float pitch = 0;
+			float oYRot;
+			float yRot;
+			float oXRot = 0;
+			float xRot = 0;
 			
 			if (this.original.getVehicle() instanceof LivingEntity ridingEntity) {
-				prevRotYaw = ridingEntity.yBodyRotO;
-				rotyaw = ridingEntity.yBodyRot;
+				oYRot = ridingEntity.yBodyRotO;
+				yRot = ridingEntity.yBodyRot;
 			} else {
-				yaw = MathUtils.lerpBetween(this.prevYaw, this.modelYRot, partialTick);
-				prevRotYaw = this.prevBodyYaw + yaw;
-				rotyaw = this.bodyYaw + yaw;
+				oYRot = this.oModelYRot;
+				yRot = this.modelYRot;
 			}
 			
 			if (!this.getEntityState().inaction() && this.original.getPose() == Pose.SWIMMING) {
 				float f = this.original.getSwimAmount(partialTick);
 				float f3 = this.original.isInWater() ? this.original.getXRot() : 0;
 		        float f4 = Mth.lerp(f, 0.0F, f3);
-		        prevPitch = f4;
-		        pitch = f4;
+		        oXRot = f4;
+		        xRot = f4;
 			}
 			
-			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, prevPitch, pitch, prevRotYaw, rotyaw, partialTick, 0.9375F, 0.9375F, 0.9375F);
+			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, oXRot, xRot, oYRot, yRot, partialTick, 0.9375F, 0.9375F, 0.9375F);
 		}
 	}
 	
-	public void setYaw(float bodyYaw) {
-		this.bodyYaw = bodyYaw;
+	public void setBodyRot(float bodyYaw) {
+		this.bodyYRot = bodyYaw;
 	}
 	
-	public float getBodyYaw() {
-		return this.bodyYaw;
+	public float getBodyRot() {
+		return this.bodyYRot;
 	}
 	
 	public Direction getLadderDirection(@Nonnull BlockState state, @Nonnull Level world, @Nonnull BlockPos pos, @Nonnull LivingEntity entity) {
