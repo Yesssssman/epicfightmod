@@ -485,8 +485,8 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	@Override
 	public void onFall(LivingFallEvent event) {
 		FallEvent fallEvent = new FallEvent(this, event);
-		
 		this.getEventListener().triggerEvents(EventType.FALL_EVENT, fallEvent);
+		super.onFall(event);
 		
 		this.setAirborneState(false);
 	}

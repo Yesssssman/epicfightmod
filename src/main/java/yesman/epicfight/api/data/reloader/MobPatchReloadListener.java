@@ -72,6 +72,14 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 	}
 	
 	@Override
+	protected Map<ResourceLocation, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profileIn) {
+		MOB_PATCH_PROVIDERS.clear();
+		TAGMAP.clear();
+		
+		return super.prepare(resourceManager, profileIn);
+	}
+	
+	@Override
 	protected void apply(Map<ResourceLocation, JsonElement> objectIn, ResourceManager resourceManagerIn, ProfilerFiller profilerIn) {
 		for (Map.Entry<ResourceLocation, JsonElement> entry : objectIn.entrySet()) {
 			ResourceLocation rl = entry.getKey();

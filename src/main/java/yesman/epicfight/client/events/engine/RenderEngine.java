@@ -93,6 +93,7 @@ import yesman.epicfight.client.renderer.patched.item.RenderCrossbow;
 import yesman.epicfight.client.renderer.patched.item.RenderItemBase;
 import yesman.epicfight.client.renderer.patched.item.RenderKatana;
 import yesman.epicfight.client.renderer.patched.item.RenderMap;
+import yesman.epicfight.client.renderer.patched.item.RenderShield;
 import yesman.epicfight.client.renderer.patched.item.RenderTrident;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.main.EpicFightMod;
@@ -102,6 +103,7 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.EnderDragonPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
+import yesman.epicfight.world.capabilities.item.ShieldCapability;
 import yesman.epicfight.world.entity.EpicFightEntities;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 import yesman.epicfight.world.item.EpicFightItems;
@@ -118,7 +120,7 @@ public class RenderEngine {
 	private final Map<EntityType<?>, Supplier<PatchedEntityRenderer>> entityRendererProvider;
 	private final Map<EntityType<?>, PatchedEntityRenderer> entityRendererCache;
 	private final Map<Item, RenderItemBase> itemRendererMapByInstance;
-	private final Map<Class<? extends Item>, RenderItemBase> itemRendererMapByClass;
+	private final Map<Class<?>, RenderItemBase> itemRendererMapByClass;
 	private FirstPersonRenderer firstPersonRenderer;
 	private PHumanoidRenderer<?, ?, ?, ?> basicHumanoidRenderer;
 	private final OverlayManager overlayManager;
@@ -140,6 +142,11 @@ public class RenderEngine {
 	}
 	
 	public void registerRenderer() {
+		this.entityRendererProvider.clear();
+		this.entityRendererCache.clear();
+		this.itemRendererMapByInstance.clear();
+		this.itemRendererMapByClass.clear();
+		
 		this.firstPersonRenderer = new FirstPersonRenderer();
 		this.basicHumanoidRenderer = new PHumanoidRenderer<>(Meshes.BIPED);
 		
@@ -177,11 +184,12 @@ public class RenderEngine {
 		RenderCrossbow crossbowRenderer = new RenderCrossbow();
 		RenderTrident tridentRenderer = new RenderTrident();
 		RenderMap mapRenderer = new RenderMap();
+		RenderShield shieldRenderer = new RenderShield();
 		
 		this.itemRendererMapByInstance.clear();
 		this.itemRendererMapByInstance.put(Items.AIR, baseRenderer);
 		this.itemRendererMapByInstance.put(Items.BOW, bowRenderer);
-		this.itemRendererMapByInstance.put(Items.SHIELD, baseRenderer);
+		this.itemRendererMapByInstance.put(Items.SHIELD, shieldRenderer);
 		this.itemRendererMapByInstance.put(Items.CROSSBOW, crossbowRenderer);
 		this.itemRendererMapByInstance.put(Items.TRIDENT, tridentRenderer);
 		this.itemRendererMapByInstance.put(Items.FILLED_MAP, mapRenderer);
@@ -190,6 +198,9 @@ public class RenderEngine {
 		this.itemRendererMapByClass.put(CrossbowItem.class, crossbowRenderer);
 		this.itemRendererMapByClass.put(ShieldItem.class, baseRenderer);
 		this.itemRendererMapByClass.put(TridentItem.class, tridentRenderer);
+		this.itemRendererMapByClass.put(ShieldItem.class, shieldRenderer);
+		this.itemRendererMapByClass.put(ShieldCapability.class, shieldRenderer);
+		
 		this.aimHelper = new AimHelperRenderer();
 		
 		ModLoader.get().postEvent(new PatchedRenderersEvent.Add(this.entityRendererProvider, this.itemRendererMapByInstance));
@@ -219,17 +230,22 @@ public class RenderEngine {
 		}
 	}
 	
-	public RenderItemBase getItemRenderer(Item item) {
-		RenderItemBase renderItem = this.itemRendererMapByInstance.get(item);
+	public RenderItemBase getItemRenderer(ItemStack itemstack) {
+		RenderItemBase renderItem = this.itemRendererMapByInstance.get(itemstack.getItem());
 		
 		if (renderItem == null) {
-			renderItem = this.findMatchingRendererByClass(item.getClass());
+			renderItem = this.findMatchingRendererByClass(itemstack.getItem().getClass());
+			
+			if (renderItem == null) {
+				CapabilityItem itemCap = EpicFightCapabilities.getItemStackCapability(itemstack);
+				renderItem = this.findMatchingRendererByClass(itemCap.getClass());
+			}
 			
 			if (renderItem == null) {
 				renderItem = this.itemRendererMapByInstance.get(Items.AIR);
 			}
 			
-			this.itemRendererMapByInstance.put(item, renderItem);
+			this.itemRendererMapByInstance.put(itemstack.getItem(), renderItem);
 		}
 		
 		return renderItem;
@@ -239,7 +255,7 @@ public class RenderEngine {
 		RenderItemBase renderer = null;
 		
 		for (; clazz != null && renderer == null; clazz = clazz.getSuperclass()) {
-			renderer = this.itemRendererMapByClass.getOrDefault(clazz, null);
+			renderer = this.itemRendererMapByClass.get(clazz);
 		}
 		
 		return renderer;

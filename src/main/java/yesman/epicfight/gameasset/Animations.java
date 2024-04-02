@@ -1826,9 +1826,7 @@ public class Animations {
 				.addEvents(TimeStampedEvent.create(0.35F, (entitypatch, animation, params) -> {
 					entitypatch.playSound(SoundEvents.TRIDENT_RIPTIDE_3, 0, 0);
 				}, Side.CLIENT), TimeStampedEvent.create(0.35F, (entitypatch, animation, params) -> {
-					if (entitypatch.getOriginal().onGround()) {
-						entitypatch.setAirborneState(true);
-					}
+					entitypatch.setAirborneState(true);
 				}, AnimationEvent.Side.SERVER));
 		
 		TSUNAMI_REINFORCED = new AttackAnimation(0.2F, 0.2F, 0.35F, 0.65F, 1.3F, ColliderPreset.BIPED_BODY_COLLIDER, biped.rootJoint, "biped/skill/tsunami_reinforced", biped)
@@ -1856,9 +1854,7 @@ public class Animations {
 				.addEvents(TimeStampedEvent.create(0.35F, (entitypatch, animation, params) -> {
 					entitypatch.playSound(SoundEvents.TRIDENT_RIPTIDE_3, 0, 0);
 				}, Side.CLIENT), TimeStampedEvent.create(0.35F, (entitypatch, animation, params) -> {
-					if (entitypatch.getOriginal().onGround()) {
-						entitypatch.setAirborneState(true);
-					}
+					entitypatch.setAirborneState(true);
 				}, AnimationEvent.Side.SERVER));
 		
 		EVERLASTING_ALLEGIANCE_CALL = new ActionAnimation(0.1F, 0.55F, "biped/skill/everlasting_allegiance_call", biped)
