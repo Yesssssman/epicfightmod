@@ -741,11 +741,6 @@ public class Animations {
 					
 					entitypatch.playSound(EpicFightSounds.ROLL.get(), 0, 0);
 					entitypatch.getOriginal().level().addAlwaysVisibleParticle(EpicFightParticles.AIR_BURST.get(), pos.x, pos.y + entitypatch.getOriginal().getBbHeight() * 0.5D, pos.z, 0, -1, 2);
-				}, Side.CLIENT))
-				.addEvents(StaticAnimationProperty.ON_END_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
-					if (entitypatch instanceof PlayerPatch<?> playerpatch) {
-						playerpatch.disableModelYRot();
-					}
 				}, Side.CLIENT));
 		BIPED_PHANTOM_ASCENT_BACKWARD = new ActionAnimation(0.05F, 0.7F, "biped/skill/phantom_ascent_backward", biped)
 				.addStateRemoveOld(EntityState.MOVEMENT_LOCKED, false)
@@ -756,11 +751,6 @@ public class Animations {
 					
 					entitypatch.playSound(EpicFightSounds.ROLL.get(), 0, 0);
 					entitypatch.getOriginal().level().addAlwaysVisibleParticle(EpicFightParticles.AIR_BURST.get(), pos.x, pos.y + entitypatch.getOriginal().getBbHeight() * 0.5D, pos.z, 0, -1, 2);
-				}, Side.CLIENT))
-				.addEvents(StaticAnimationProperty.ON_END_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
-					if (entitypatch instanceof PlayerPatch<?> playerpatch) {
-						playerpatch.disableModelYRot();
-					}
 				}, Side.CLIENT));
 		
 		FIST_AUTO1 = new BasicAttackAnimation(0.08F, 0.0F, 0.11F, 0.16F, InteractionHand.OFF_HAND, null, biped.toolL, "biped/combat/fist_auto1", biped)

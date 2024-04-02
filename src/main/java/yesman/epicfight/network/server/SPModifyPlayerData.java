@@ -79,10 +79,10 @@ public class SPModifyPlayerData {
 				if (entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null) instanceof PlayerPatch<?> playerpatch) {
 					switch (msg.packetType) {
 					case SET_MODEL_YROT:
-						playerpatch.setModelYRot((float)msg.data.get("yaw"));
+						playerpatch.setModelYRot((float)msg.data.get("yaw"), false);
 						break;
 					case YROT_TURN_OFF:
-						playerpatch.disableModelYRot();
+						playerpatch.disableModelYRot(false);
 					case MODE:
 						playerpatch.toMode((PlayerPatch.PlayerMode)msg.data.get("mode"), false);
 						break;

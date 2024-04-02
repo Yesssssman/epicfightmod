@@ -156,8 +156,7 @@ public class SkillContainer {
 		
 		if (this.containingSkill instanceof ChargeableSkill chargeableSkill && this.containingSkill.getActivateType() == Skill.ActivateType.CHARGING) {
 			if (executer.isChargingSkill(this.containingSkill)) {
-				executer.disableModelYRot();
-				//ClientEngine.getInstance().renderEngine.unlockRotation(executer.getOriginal());
+				executer.disableModelYRot(true);
 				
 				packet = this.containingSkill.getExecutionPacket(executer, this.containingSkill.gatherArguments(executer, controllEngine));
 				executer.resetSkillCharging();
@@ -175,9 +174,7 @@ public class SkillContainer {
 				return event;
 			}
 			
-			executer.disableModelYRot();
-			//ClientEngine.getInstance().renderEngine.unlockRotation(executer.getOriginal());
-			
+			executer.disableModelYRot(true);
 			packet = this.containingSkill.getExecutionPacket(executer, this.containingSkill.gatherArguments(executer, controllEngine));
 		}
 		

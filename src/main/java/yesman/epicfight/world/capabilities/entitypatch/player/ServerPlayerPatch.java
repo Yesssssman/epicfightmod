@@ -203,15 +203,21 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	}
 	
 	@Override
-	public void setModelYRot(float amount) {
-		super.setModelYRot(amount);
-		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(SPModifyPlayerData.setPlayerYRot(this.original.getId(), this.modelYRot), this.original);
+	public void setModelYRot(float amount, boolean sendPacket) {
+		super.setModelYRot(amount, sendPacket);
+		
+		if (sendPacket) {
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(SPModifyPlayerData.setPlayerYRot(this.original.getId(), this.modelYRot), this.original);
+		}
 	}
 	
 	@Override
-	public void disableModelYRot() {
-		super.disableModelYRot();
-		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(SPModifyPlayerData.disablePlayerYRot(this.original.getId()), this.original);
+	public void disableModelYRot(boolean sendPacket) {
+		super.disableModelYRot(sendPacket);
+		
+		if (sendPacket) {
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(SPModifyPlayerData.disablePlayerYRot(this.original.getId()), this.original);
+		}
 	}
 	
 	@Override

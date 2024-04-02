@@ -11,7 +11,6 @@ import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimation
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.AttackResult;
-import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.entity.DodgeLeft;
@@ -61,8 +60,9 @@ public class DodgeAnimation extends ActionAnimation {
 	public void end(LivingEntityPatch<?> entitypatch, DynamicAnimation nextAnimation, boolean isEnd) {
 		super.end(entitypatch, nextAnimation, isEnd);
 		
+		/**
 		if (entitypatch.isLogicalClient() && entitypatch instanceof LocalPlayerPatch localPlayerPatch) {
-			localPlayerPatch.disableModelYRot();
-		}
+			localPlayerPatch.disableModelYRot(true);
+		}**/
 	}
 }
