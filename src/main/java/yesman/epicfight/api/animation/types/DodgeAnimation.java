@@ -55,14 +55,4 @@ public class DodgeAnimation extends ActionAnimation {
 			entitypatch.getOriginal().level().addFreshEntity(new DodgeLeft(entitypatch));
 		}
 	}
-	
-	@Override
-	public void end(LivingEntityPatch<?> entitypatch, DynamicAnimation nextAnimation, boolean isEnd) {
-		super.end(entitypatch, nextAnimation, isEnd);
-		
-		/**
-		if (entitypatch.isLogicalClient() && entitypatch instanceof LocalPlayerPatch localPlayerPatch) {
-			localPlayerPatch.disableModelYRot(true);
-		}**/
-	}
 }
