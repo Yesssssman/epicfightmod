@@ -44,7 +44,7 @@ public class CustomHumanoidMobPatch<T extends PathfinderMob> extends HumanoidMob
 	@SuppressWarnings("unchecked")
 	@Override
 	public void setAIAsInfantry(boolean holdingRanedWeapon) {
-		boolean isUsingBrain = this.getOriginal().getBrain().availableBehaviorsByPriority.size() > 0;
+		boolean isUsingBrain = !this.getOriginal().getBrain().availableBehaviorsByPriority.isEmpty();
 		
 		if (isUsingBrain) {
 			if (!holdingRanedWeapon) {

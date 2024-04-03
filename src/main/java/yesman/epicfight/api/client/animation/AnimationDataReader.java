@@ -94,7 +94,7 @@ public class AnimationDataReader {
 			animation.addProperty(ClientAnimationProperties.MULTILAYER_ANIMATION, multilayerAnimation);
 		}
 
-		if (propertySetter.trailInfo.size() > 0) {
+		if (!propertySetter.trailInfo.isEmpty()) {
 			animation.addProperty(ClientAnimationProperties.TRAIL_EFFECT, propertySetter.trailInfo);
 		}
 	}

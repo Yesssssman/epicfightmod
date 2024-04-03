@@ -236,7 +236,7 @@ public class DatapackEditScreen extends Screen {
 			public int nextStart(int spacing) {
 				int xPos;
 				
-				if (this.lastEntry.children.size() == 0) {
+				if (this.lastEntry.children.isEmpty()) {
 					xPos = this.x0;
 				} else {
 					ResizableComponent lastWidget = this.lastEntry.children.get(this.lastEntry.children.size() - 1);

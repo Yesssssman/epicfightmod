@@ -13,12 +13,12 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch.Animati
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 
 public class CombatBehaviors<T extends MobPatch<?>> {
-	private final List<BehaviorSeries<T>> behaviorSeriesList = Lists.newArrayList();
+	private final List<BehaviorSeries<T>> behaviorSeriesList;
 	private final T mobpatch;
 	private int currentBehaviorPointer;
 	
 	protected CombatBehaviors(CombatBehaviors.Builder<T> builder, T mobpatch) {
-		builder.behaviorSeriesList.stream().map((behaviorSeriesBuilder) -> behaviorSeriesBuilder.build()).forEach(this.behaviorSeriesList::add);
+		this.behaviorSeriesList = builder.behaviorSeriesList.stream().map(BehaviorSeries.Builder::build).toList();
 		this.mobpatch = mobpatch;
 		this.currentBehaviorPointer = -1;
 	}
@@ -155,7 +155,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 	}
 	
 	public static class BehaviorSeries<T extends MobPatch<?>> {
-		private final List<Behavior<T>> behaviors = Lists.newArrayList();
+		private final List<Behavior<T>> behaviors;
 		private final boolean looping;
 		private final boolean canBeInterrupted;
 		private final float weight;
@@ -166,7 +166,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 		private boolean loopFinished;
 		
 		private BehaviorSeries(BehaviorSeries.Builder<T> builder) {
-			builder.behaviors.stream().map((motionBuilder) -> motionBuilder.build()).forEach(this.behaviors::add);
+			this.behaviors = builder.behaviors.stream().map(Behavior.Builder::build).toList();
 			this.looping = builder.looping;
 			this.canBeInterrupted = builder.canBeInterrupted;
 			this.weight = builder.weight;

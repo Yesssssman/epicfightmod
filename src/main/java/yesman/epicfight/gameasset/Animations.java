@@ -569,8 +569,8 @@ public class Animations {
 								, OpenMatrix4f::mulAsOriginFront
 							);
 						}
-						
-						rawPose.getJointTransformData().forEach(pose.getJointTransformData()::put);
+
+						pose.getJointTransformData().putAll(rawPose.getJointTransformData());
 					}
 				});
 		BIPED_CROSSBOW_AIM = new AimAnimation(false, "biped/combat/crossbow_aim_mid", "biped/combat/crossbow_aim_up", "biped/combat/crossbow_aim_down", "biped/combat/crossbow_aim_lying", biped);
