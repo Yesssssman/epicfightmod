@@ -5,6 +5,8 @@ import java.util.function.BiFunction;
 
 import com.google.common.collect.Lists;
 
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleList;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
@@ -33,7 +35,7 @@ public class HitEntityList {
 	
 	public enum Priority {
 		DISTANCE((attacker, list) -> {
-			List<Double> distanceToAttacker = Lists.newArrayList();
+			DoubleList distanceToAttacker = new DoubleArrayList();
 			List<Entity> hitEntites = Lists.newArrayList();
 			
 			Outer:
@@ -42,7 +44,7 @@ public class HitEntityList {
 				int index = 0;
 				
 				for (; index < hitEntites.size(); index++) {
-					if (distance < distanceToAttacker.get(index)) {
+					if (distance < distanceToAttacker.getDouble(index)) {
 						hitEntites.add(index, entity);
 						distanceToAttacker.add(index, distance);
 						continue Outer;

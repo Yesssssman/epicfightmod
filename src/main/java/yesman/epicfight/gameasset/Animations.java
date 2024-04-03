@@ -3,6 +3,7 @@ package yesman.epicfight.gameasset;
 import java.util.List;
 import java.util.Set;
 
+import it.unimi.dsi.fastutil.ints.IntIntPair;
 import org.joml.Quaternionf;
 
 import com.google.common.collect.Lists;
@@ -1076,10 +1077,10 @@ public class Animations {
 		DRAGON_IDLE = new StaticAnimation(0.6F, true, "dragon/idle", dragon);
 		DRAGON_WALK = new EnderDraonWalkAnimation(0.35F, "dragon/walk", dragon,
 				new IKInfo[] {
-					IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, dragon.legFrontR3, Pair.of(0, 3), 0.12F, 0, new boolean[] {true, true, true}),
-					IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, dragon.legFrontL3, Pair.of(2, 5), 0.12F, 2, new boolean[] {true, true, true}),
-					IKInfo.make(dragon.legBackL1, dragon.legBackL3, dragon.legBackR3, Pair.of(2, 5), 0.1344F, 4, new boolean[] {true, true, true}),
-					IKInfo.make(dragon.legBackR1, dragon.legBackR3, dragon.legBackL3, Pair.of(0, 3), 0.1344F, 2, new boolean[] {true, true, true})
+					IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, dragon.legFrontR3, IntIntPair.of(0, 3), 0.12F, 0, new boolean[] {true, true, true}),
+					IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, dragon.legFrontL3, IntIntPair.of(2, 5), 0.12F, 2, new boolean[] {true, true, true}),
+					IKInfo.make(dragon.legBackL1, dragon.legBackL3, dragon.legBackR3, IntIntPair.of(2, 5), 0.1344F, 4, new boolean[] {true, true, true}),
+					IKInfo.make(dragon.legBackR1, dragon.legBackR3, dragon.legBackL3, IntIntPair.of(0, 3), 0.1344F, 2, new boolean[] {true, true, true})
 				});
 		
 		DRAGON_FLY = new StaticAnimation(0.35F, true, "dragon/fly", dragon)
@@ -1088,10 +1089,10 @@ public class Animations {
 		DRAGON_DEATH = new EnderDragonDeathAnimation(1.0F, "dragon/death", dragon);
 		
 		DRAGON_GROUND_TO_FLY = new EnderDragonActionAnimation(0.25F, "dragon/ground_to_fly", dragon, new IKInfo[] {
-					IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, Pair.of(3, 7), 0.12F, 0, new boolean[] {true, false, false, false}),
-					IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, Pair.of(3, 7), 0.12F, 0, new boolean[] {true, false, false, false}),
-					IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, Pair.of(4, 7), 0.1344F, 0, new boolean[] {true, false, false, false}),
-					IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, Pair.of(4, 7), 0.1344F, 0, new boolean[] {true, false, false, false})
+					IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, IntIntPair.of(3, 7), 0.12F, 0, new boolean[] {true, false, false, false}),
+					IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, IntIntPair.of(3, 7), 0.12F, 0, new boolean[] {true, false, false, false}),
+					IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, IntIntPair.of(4, 7), 0.1344F, 0, new boolean[] {true, false, false, false}),
+					IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, IntIntPair.of(4, 7), 0.1344F, 0, new boolean[] {true, false, false, false})
 				})
 				.addProperty(ActionAnimationProperty.STOP_MOVEMENT, true)
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true)
@@ -1106,10 +1107,10 @@ public class Animations {
 				);
 		
 		DRAGON_FLY_TO_GROUND = new EnderDragonDynamicActionAnimation(0.35F, "dragon/fly_to_ground", dragon, new IKInfo[] {
-					IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, Pair.of(0, 4), 0.12F, 9, new boolean[] {false, false, false, true}),
-					IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, Pair.of(0, 4), 0.12F, 9, new boolean[] {false, false, false, true}),
-					IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, Pair.of(0, 4), 0.1344F, 7, new boolean[] {false, false, false, true}),
-					IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, Pair.of(0, 4), 0.1344F, 7, new boolean[] {false, false, false, true})
+					IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, IntIntPair.of(0, 4), 0.12F, 9, new boolean[] {false, false, false, true}),
+					IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, IntIntPair.of(0, 4), 0.12F, 9, new boolean[] {false, false, false, true}),
+					IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, IntIntPair.of(0, 4), 0.1344F, 7, new boolean[] {false, false, false, true}),
+					IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, IntIntPair.of(0, 4), 0.1344F, 7, new boolean[] {false, false, false, true})
 				})
 				.addProperty(ActionAnimationProperty.STOP_MOVEMENT, true)
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true)
@@ -1150,10 +1151,10 @@ public class Animations {
 				);
 		
 		DRAGON_ATTACK1 = new EnderDragonAttackAnimation(0.35F, 0.4F, 0.65F, 0.76F, 1.9F, ColliderPreset.DRAGON_LEG, dragon.legFrontR3, "dragon/attack1", dragon, new IKInfo[] {
-				IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, Pair.of(2, 4), 0.12F, 0, new boolean[] {true, true}),
-				IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, Pair.of(0, 5), 0.12F, 0, new boolean[] {false, false, false, false, true}),
+				IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, IntIntPair.of(2, 4), 0.12F, 0, new boolean[] {true, true}),
+				IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, IntIntPair.of(0, 5), 0.12F, 0, new boolean[] {false, false, false, false, true}),
 				IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, null, 0.1344F, 0, new boolean[] {}),
-				IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, Pair.of(1, 4), 0.1344F, 0, new boolean[] {true, false, true})
+				IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, IntIntPair.of(1, 4), 0.1344F, 0, new boolean[] {true, false, true})
 			})
 			.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN)
 			.addEvents(TimeStampedEvent.create(0.65F, (entitypatch, animation, params) -> {
@@ -1167,22 +1168,22 @@ public class Animations {
 			}, AnimationEvent.Side.CLIENT));
 		
 		DRAGON_ATTACK2 = new EnderDragonAttackAnimation(0.35F, 0.25F, 0.45F, 0.66F, 0.75F, ColliderPreset.DRAGON_LEG, dragon.legFrontR3, "dragon/attack2", dragon, new IKInfo[] {
-				IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, Pair.of(1, 4), 0.12F, 0, new boolean[] {true, true, true}),
+				IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, IntIntPair.of(1, 4), 0.12F, 0, new boolean[] {true, true, true}),
 				IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, null, 0.1344F, 0, new boolean[] {}),
 				IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, null, 0.1344F, 0, new boolean[] {})
 			});
 		
 		DRAGON_ATTACK3 = new EnderDragonAttackAnimation(0.35F, 0.25F, 0.45F, 0.66F, 0.75F, ColliderPreset.DRAGON_LEG, dragon.legFrontL3, "dragon/attack3", dragon, new IKInfo[] {
-				IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, Pair.of(1, 4), 0.12F, 0, new boolean[] {true, true, true}),
+				IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, IntIntPair.of(1, 4), 0.12F, 0, new boolean[] {true, true, true}),
 				IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, null, 0.1344F, 0, new boolean[] {}),
 				IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, null, 0.1344F, 0, new boolean[] {})
 			});
 		
 		DRAGON_ATTACK4 = new EnderDragonAttackAnimation(0.35F, 0.5F, 1.15F, 1.26F, 1.9F, ColliderPreset.DRAGON_BODY, dragon.rootJoint, "dragon/attack4", dragon, new IKInfo[] {
-				IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, Pair.of(0, 7), 0.12F, 0, new boolean[] {false, false, false, false, true, true, true}),
-				IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, Pair.of(0, 7), 0.12F, 0, new boolean[] {false, false, false, false, true, true, true}),
-				IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, Pair.of(3, 8), 0.1344F, 0, new boolean[] {false, false, false, false, true}),
-				IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, Pair.of(3, 8), 0.1344F, 0, new boolean[] {false, false, false, false, true})
+				IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, IntIntPair.of(0, 7), 0.12F, 0, new boolean[] {false, false, false, false, true, true, true}),
+				IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, IntIntPair.of(0, 7), 0.12F, 0, new boolean[] {false, false, false, false, true, true, true}),
+				IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, IntIntPair.of(3, 8), 0.1344F, 0, new boolean[] {false, false, false, false, true}),
+				IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, IntIntPair.of(3, 8), 0.1344F, 0, new boolean[] {false, false, false, false, true})
 			})
 			.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.KNOCKDOWN)
 			.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true)
@@ -1199,17 +1200,17 @@ public class Animations {
 			}, AnimationEvent.Side.BOTH));
 		
 		DRAGON_ATTACK4_RECOVERY = new EnderDragonActionAnimation(0.35F, "dragon/attack4_recovery", dragon, new IKInfo[] {
-				IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, Pair.of(0, 4), 0.12F, 0, new boolean[] {true, false, true, true}),
-				IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, Pair.of(0, 3), 0.12F, 0, new boolean[] {true, true, true}),
-				IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, Pair.of(0, 5), 0.1344F, 0, new boolean[] {true, true, false, false, true}),
-				IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, Pair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, false, false})
+				IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, IntIntPair.of(0, 4), 0.12F, 0, new boolean[] {true, false, true, true}),
+				IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, IntIntPair.of(0, 3), 0.12F, 0, new boolean[] {true, true, true}),
+				IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, IntIntPair.of(0, 5), 0.1344F, 0, new boolean[] {true, true, false, false, true}),
+				IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, IntIntPair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, false, false})
 		});
 		
 		DRAGON_FIREBALL = new EnderDragonActionAnimation(0.16F, "dragon/fireball", dragon, new IKInfo[] {
-				IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, Pair.of(0, 5), 0.12F, 0, new boolean[] {true, true, true, true, true}),
-				IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, Pair.of(0, 5), 0.12F, 0, new boolean[] {true, true, true, true, true}),
-				IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, Pair.of(0, 5), 0.1344F, 0, new boolean[] {true, true, true, true, true}),
-				IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, Pair.of(0, 5), 0.1344F, 0, new boolean[] {true, true, true, true, true})
+				IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, IntIntPair.of(0, 5), 0.12F, 0, new boolean[] {true, true, true, true, true}),
+				IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, IntIntPair.of(0, 5), 0.12F, 0, new boolean[] {true, true, true, true, true}),
+				IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, IntIntPair.of(0, 5), 0.1344F, 0, new boolean[] {true, true, true, true, true}),
+				IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, IntIntPair.of(0, 5), 0.1344F, 0, new boolean[] {true, true, true, true, true})
 		}).addEvents(TimeStampedEvent.create(0.65F, (entitypatch, animation, params) -> {
 			LivingEntity original = entitypatch.getOriginal();
 			Entity target = entitypatch.getTarget();
@@ -1236,10 +1237,10 @@ public class Animations {
 			.addEvents(TimeStampedEvent.create(0.3F, ReusableSources.WING_FLAP, AnimationEvent.Side.CLIENT));
 		
 		DRAGON_BACKJUMP_PREPARE = new EnderDragonActionAnimation(0.35F, "dragon/backjump_prepare", dragon, new IKInfo[] {
-				IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, Pair.of(0, 4), 0.12F, 0, new boolean[] {true, true, true, true}),
-				IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, Pair.of(0, 4), 0.12F, 0, new boolean[] {true, true, true, true}),
-				IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, Pair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true}),
-				IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, Pair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true})
+				IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, IntIntPair.of(0, 4), 0.12F, 0, new boolean[] {true, true, true, true}),
+				IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, IntIntPair.of(0, 4), 0.12F, 0, new boolean[] {true, true, true, true}),
+				IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, IntIntPair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true}),
+				IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, IntIntPair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true})
 		}).addEvents(TimeStampedEvent.create(0.3F, (entitypatch, animation, params) -> {
 			entitypatch.getAnimator().reserveAnimation(DRAGON_BACKJUMP_MOVE);
 		}, Side.BOTH));
@@ -1252,10 +1253,10 @@ public class Animations {
 			}, Side.BOTH));
 		
 		DRAGON_BACKJUMP_RECOVERY = new EnderDragonActionAnimation(0.0F, "dragon/backjump_recovery", dragon, new IKInfo[] {
-				IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, Pair.of(0, 4), 0.12F, 0, new boolean[] {false, true, true, true}),
-				IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, Pair.of(0, 4), 0.12F, 0, new boolean[] {false, true, true, true}),
-				IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, Pair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true}),
-				IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, Pair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true})
+				IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, IntIntPair.of(0, 4), 0.12F, 0, new boolean[] {false, true, true, true}),
+				IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, IntIntPair.of(0, 4), 0.12F, 0, new boolean[] {false, true, true, true}),
+				IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, IntIntPair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true}),
+				IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, IntIntPair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true})
 			})
 			.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true)
 			.addEvents(TimeStampedEvent.create(0.15F, (entitypatch, animation, params) -> {
@@ -1269,10 +1270,10 @@ public class Animations {
 			}, AnimationEvent.Side.CLIENT));
 		
 		DRAGON_CRYSTAL_LINK = new EnderDragonActionAnimation(0.5F, "dragon/crystal_link", dragon, new IKInfo[] {
-				IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, Pair.of(0, 2), 0.12F, 0, new boolean[] {true, true}),
-				IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, Pair.of(0, 2), 0.12F, 0, new boolean[] {true, true}),
-				IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, Pair.of(0, 2), 0.1344F, 0, new boolean[] {true, true}),
-				IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, Pair.of(0, 2), 0.1344F, 0, new boolean[] {true, true})
+				IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, IntIntPair.of(0, 2), 0.12F, 0, new boolean[] {true, true}),
+				IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, IntIntPair.of(0, 2), 0.12F, 0, new boolean[] {true, true}),
+				IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, IntIntPair.of(0, 2), 0.1344F, 0, new boolean[] {true, true}),
+				IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, IntIntPair.of(0, 2), 0.1344F, 0, new boolean[] {true, true})
 			})
 			.addEvents(TimeStampedEvent.create(7.0F, (entitypatch, animation, params) -> {
 				entitypatch.getOriginal().playSound(SoundEvents.ENDER_DRAGON_GROWL, 7.0F, 0.8F + entitypatch.getOriginal().getRandom().nextFloat() * 0.3F);
@@ -1288,20 +1289,20 @@ public class Animations {
 			}, AnimationEvent.Side.CLIENT));
 		
 		DRAGON_NEUTRALIZED = new EnderDragonActionAnimation(0.1F, "dragon/neutralized", dragon, new IKInfo[] {
-				IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, Pair.of(0, 4), 0.12F, 0, new boolean[] {true, true, true, true}),
-				IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, Pair.of(0, 4), 0.12F, 0, new boolean[] {true, true, true, true}),
-				IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, Pair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true}),
-				IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, Pair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true})
+				IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, IntIntPair.of(0, 4), 0.12F, 0, new boolean[] {true, true, true, true}),
+				IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, IntIntPair.of(0, 4), 0.12F, 0, new boolean[] {true, true, true, true}),
+				IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, IntIntPair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true}),
+				IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, IntIntPair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true})
 			})
 			.addEvents(TimeStampedEvent.create(3.95F, (entitypatch, animation, params) -> {
 				entitypatch.getAnimator().playAnimation(DRAGON_NEUTRALIZED_RECOVERY, 0);
 			}, AnimationEvent.Side.BOTH));
 		
 		DRAGON_NEUTRALIZED_RECOVERY = new EnderDragonActionAnimation(0.05F, "dragon/neutralized_recovery", dragon, new IKInfo[] {
-				IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, Pair.of(0, 5), 0.12F, 0, new boolean[] {true, true, true, false, true}),
-				IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, Pair.of(0, 5), 0.12F, 0, new boolean[] {true, false, true, true, true}),
-				IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, Pair.of(0, 5), 0.1344F, 0, new boolean[] {true, true, true, true, true}),
-				IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, Pair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true})
+				IKInfo.make(dragon.legFrontL1, dragon.legFrontL3, null, IntIntPair.of(0, 5), 0.12F, 0, new boolean[] {true, true, true, false, true}),
+				IKInfo.make(dragon.legFrontR1, dragon.legFrontR3, null, IntIntPair.of(0, 5), 0.12F, 0, new boolean[] {true, false, true, true, true}),
+				IKInfo.make(dragon.legBackL1, dragon.legBackL3, null, IntIntPair.of(0, 5), 0.1344F, 0, new boolean[] {true, true, true, true, true}),
+				IKInfo.make(dragon.legBackR1, dragon.legBackR3, null, IntIntPair.of(0, 4), 0.1344F, 0, new boolean[] {true, true, true, true})
 			})
 			.addEvents(TimeStampedEvent.create(1.6F, (entitypatch, animation, params) -> {
 				if (entitypatch instanceof EnderDragonPatch) {

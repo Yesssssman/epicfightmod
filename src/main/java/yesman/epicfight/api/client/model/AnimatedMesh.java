@@ -1,15 +1,16 @@
 package yesman.epicfight.api.client.model;
 
-import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.joml.Matrix3f;
@@ -65,8 +66,8 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 					Vec4f totalNorm = new Vec4f(0.0F, 0.0F, 0.0F, 0.0F);
 					
 					for (int i = 0; i < vi.joint.size(); i++) {
-						int jointIndex = vi.joint.get(i);
-						int weightIndex = vi.weight.get(i);
+						int jointIndex = vi.joint.getInt(i);
+						int weightIndex = vi.weight.getInt(i);
 						float weight = this.weights[weightIndex];
 						Vec4f.add(OpenMatrix4f.transform(OpenMatrix4f.mul(poses[jointIndex], armature.searchJointById(jointIndex).getToOrigin(), null), position, null).scale(weight), totalPos, totalPos);
 						Vec4f.add(OpenMatrix4f.transform(posesNoTranslation[jointIndex], normal, null).scale(weight), totalNorm, totalNorm);
@@ -102,8 +103,8 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 					Vec4f totalNorm = new Vec4f(0.0F, 0.0F, 0.0F, 0.0F);
 					
 					for (int i = 0; i < vi.joint.size(); i++) {
-						int jointIndex = vi.joint.get(i);
-						int weightIndex = vi.weight.get(i);
+						int jointIndex = vi.joint.getInt(i);
+						int weightIndex = vi.weight.getInt(i);
 						float weight = this.weights[weightIndex];
 						Vec4f.add(OpenMatrix4f.transform(poses[jointIndex], position, null).scale(weight), totalPos, totalPos);
 						Vec4f.add(OpenMatrix4f.transform(posesNoTranslation[jointIndex], normal, null).scale(weight), totalNorm, totalNorm);
@@ -150,8 +151,8 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 		
 		int[] indices = new int[this.totalVertices * 3];
 		int[] vcounts = new int[positions.length / 3];
-		List<Integer> vIndexList = Lists.newArrayList();
-		Map<Integer, AnimatedVertexIndicator> positionMap = Maps.newHashMap();
+		IntList vIndexList = new IntArrayList();
+		Int2ObjectMap<AnimatedVertexIndicator> positionMap = new Int2ObjectOpenHashMap<>();
 		int[] vIndices;
 		int i = 0;
 		
@@ -169,12 +170,12 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 		for (i = 0; i < vcounts.length; i++) {
 			for (int j = 0; j < vcounts[i]; j++) {
 				AnimatedVertexIndicator vi = positionMap.get(i);
-				vIndexList.add(vi.joint.get(j));
-				vIndexList.add(vi.weight.get(j));
+				vIndexList.add(vi.joint.getInt(j));
+				vIndexList.add(vi.weight.getInt(j));
 			}
 		}
 		
-		vIndices = vIndexList.stream().mapToInt(j -> j).toArray();
+		vIndices = vIndexList.toIntArray();
 		vertices.add("positions", arrayToJsonObject(positions, 3));
 		vertices.add("uvs", arrayToJsonObject(this.uvs, 2));
 		vertices.add("normals", arrayToJsonObject(normals, 3));

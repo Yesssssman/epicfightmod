@@ -11,11 +11,13 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectLinkedOpenHashMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.network.chat.Component;
 import yesman.epicfight.main.EpicFightMod;
 
 public class ExtendableEnumManager<T extends ExtendableEnum> {
-	private final Map<Integer, T> enumMapByOrdinal = Maps.newLinkedHashMap();
+	private final Int2ObjectMap<T> enumMapByOrdinal = new Int2ObjectLinkedOpenHashMap<>();
 	private final Map<String, T> enumMapByName = Maps.newLinkedHashMap();
 	private final Map<String, Class<?>> enums = Maps.newConcurrentMap();
 	private final String enumName;
