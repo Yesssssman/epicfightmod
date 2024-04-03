@@ -9,7 +9,9 @@ import yesman.epicfight.client.gui.component.ColorWidget;
 import yesman.epicfight.config.OptionHandler.DoubleOptionHandler;
 import yesman.epicfight.config.OptionHandler.IntegerOptionHandler;
 
-import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public class EpicFightOptions {
 	public static final float A_TICK = 0.05F;
@@ -25,10 +27,9 @@ public class EpicFightOptions {
 	public final OptionHandler<Boolean> autoPreparation;
 	public final OptionHandler<Boolean> bloodEffects;
 	public final OptionHandler<Boolean> noMiningInCombat;
-	public final OptionHandler<Boolean> aimingCorrection;
-	
-	public final List<Item> battleAutoSwitchItems;
-	public final List<Item> miningAutoSwitchItems;
+  public final OptionHandler<Boolean> aimingCorrection;
+	public final Set<Item> battleAutoSwitchItems;
+	public final Set<Item> miningAutoSwitchItems;
 	public int aimHelperRealColor;
 	
 	public final OptionHandler<Integer> staminaBarX;
@@ -65,13 +66,15 @@ public class EpicFightOptions {
 		this.autoPreparation = new OptionHandler<Boolean>(config.autoPreparation.get());
 		this.bloodEffects = new OptionHandler<Boolean>(config.bloodEffects.get());
 		this.noMiningInCombat = new OptionHandler<Boolean>(config.noMiningInCombat.get());
-		this.aimingCorrection = new OptionHandler<Boolean>(config.aimingCorrection.get());
-		this.battleAutoSwitchItems = Lists.newArrayList(config.battleAutoSwitchItems.get().stream().map((itemName) ->
-			ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName))).iterator()
-		);
-		this.miningAutoSwitchItems = Lists.newArrayList(config.miningAutoSwitchItems.get().stream().map((itemName) ->
-			ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName))).iterator()
-		);
+    this.aimingCorrection = new OptionHandler<Boolean>(config.aimingCorrection.get());
+		this.battleAutoSwitchItems = config.battleAutoSwitchItems.get().stream()
+				.map(itemName -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName)))
+				.filter(Objects::nonNull)
+				.collect(Collectors.toSet());
+		this.miningAutoSwitchItems = config.miningAutoSwitchItems.get().stream()
+				.map(itemName -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName)))
+				.filter(Objects::nonNull)
+				.collect(Collectors.toSet());
 
 		this.staminaBarX = new OptionHandler<Integer>(config.staminaBarX.get());
 		this.staminaBarY = new OptionHandler<Integer>(config.staminaBarY.get());
