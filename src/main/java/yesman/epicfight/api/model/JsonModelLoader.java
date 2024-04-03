@@ -93,6 +93,12 @@ public class JsonModelLoader {
 				renderProperties.customTexturePath(properties.get("texture_path").getAsString());
 			}
 			
+			if (properties.has("parent_part_visualizer")) {
+				JsonObject partVisualizer = properties.get("parent_part_visualizer").getAsJsonObject();
+				
+				partVisualizer.entrySet().forEach((entry) -> renderProperties.newPartVisualizer(entry.getKey(), entry.getValue().getAsBoolean()));
+			}
+			
 			return renderProperties;
 		}
 		

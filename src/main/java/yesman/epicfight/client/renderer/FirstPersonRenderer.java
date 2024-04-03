@@ -37,7 +37,7 @@ import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerP
 import yesman.epicfight.gameasset.Armatures;
 
 @OnlyIn(Dist.CLIENT)
-public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer, LocalPlayerPatch, PlayerModel<LocalPlayer>, HumanoidMesh> {
+public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer, LocalPlayerPatch, PlayerModel<LocalPlayer>, LivingEntityRenderer<LocalPlayer, PlayerModel<LocalPlayer>>, HumanoidMesh> {
 	public FirstPersonRenderer() {
 		super();
 		this.addPatchedLayer(ElytraLayer.class, new EmptyLayer<>());
@@ -51,8 +51,7 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 	}
 	
 	@Override
-	public void render(LocalPlayer entityIn, LocalPlayerPatch entitypatch, LivingEntityRenderer<LocalPlayer, PlayerModel<LocalPlayer>> renderer,
-			MultiBufferSource buffer, PoseStack matStackIn, int packedLightIn, float partialTicks) {
+	public void render(LocalPlayer entityIn, LocalPlayerPatch entitypatch, LivingEntityRenderer<LocalPlayer, PlayerModel<LocalPlayer>> renderer, MultiBufferSource buffer, PoseStack matStackIn, int packedLightIn, float partialTicks) {
 		Armature armature = entitypatch.getArmature();
 		armature.initializeTransform();
 		OpenMatrix4f[] poses = armature.getPoseAsTransformMatrix(entitypatch.getClientAnimator().getComposedLayerPose(partialTicks));
@@ -63,14 +62,14 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 		Vec3f translateVectorOfHead = mat.toTranslationVector();
 		matStackIn.translate(-translateVectorOfHead.x, -translateVectorOfHead.y, -translateVectorOfHead.z);
 		HumanoidMesh mesh = this.getMesh(entitypatch);
-		this.prepareModel(mesh, entityIn, entitypatch);
+		this.prepareModel(mesh, entityIn, entitypatch, renderer);
 		
 		if (!entitypatch.getOriginal().isInvisible()) {
 			for (ModelPart<AnimatedVertexIndicator> p : mesh.getAllParts()) {
 				p.hidden = true;
 			}
 			
-			mesh.lefrArm.hidden = false;
+			mesh.leftArm.hidden = false;
 			mesh.rightArm.hidden = false;
 			mesh.leftSleeve.hidden = false;
 			mesh.rightSleeve.hidden = false;
@@ -86,6 +85,7 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 		matStackIn.popPose();
 	}
 	
+	@Override
 	protected void renderLayer(LivingEntityRenderer<LocalPlayer, PlayerModel<LocalPlayer>> renderer, LocalPlayerPatch entitypatch, LocalPlayer entityIn, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLightIn, float partialTicks) {
 		Iterator<RenderLayer<LocalPlayer, PlayerModel<LocalPlayer>>> iter = renderer.layers.iterator();
 		
@@ -115,7 +115,7 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 	}
 	
 	@Override
-	protected void prepareModel(HumanoidMesh mesh, LocalPlayer entity, LocalPlayerPatch entitypatch) {
+	protected void prepareModel(HumanoidMesh mesh, LocalPlayer entity, LocalPlayerPatch entitypatch, LivingEntityRenderer<LocalPlayer, PlayerModel<LocalPlayer>> renderer) {
 		mesh.initialize();
 		mesh.head.hidden = true;
 		mesh.hat.hidden = true;

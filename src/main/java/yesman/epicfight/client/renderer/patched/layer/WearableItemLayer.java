@@ -61,14 +61,12 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		this.firstPersonModel = firstPersonModel;
 	}
 	
-	private void renderArmor(PoseStack matStack, MultiBufferSource multiBufferSource, int packedLightIn, boolean hasEffect, AnimatedMesh model, Armature armature,
-								float r, float g, float b, ResourceLocation armorTexture, OpenMatrix4f[] poses) {
+	private void renderArmor(PoseStack matStack, MultiBufferSource multiBufferSource, int packedLightIn, boolean hasEffect, AnimatedMesh model, Armature armature, float r, float g, float b, ResourceLocation armorTexture, OpenMatrix4f[] poses) {
 		VertexConsumer vertexConsumer = EpicFightRenderTypes.getArmorFoilBufferTriangles(multiBufferSource, RenderType.armorCutoutNoCull(armorTexture), false, hasEffect);
 		model.drawModelWithPose(matStack, vertexConsumer, packedLightIn, r, g, b, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
 	}
 
-	private void renderTrim(PoseStack matStack, MultiBufferSource multiBufferSource, int packedLightIn, boolean hasEffect, AnimatedMesh model, Armature armature
-							, ArmorMaterial armorMaterial, ArmorTrim armorTrim, OpenMatrix4f[] poses) {
+	private void renderTrim(PoseStack matStack, MultiBufferSource multiBufferSource, int packedLightIn, boolean hasEffect, AnimatedMesh model, Armature armature, ArmorMaterial armorMaterial, ArmorTrim armorTrim, OpenMatrix4f[] poses) {
 		ResourceLocation armorTexture = armorTrim.outerTexture(armorMaterial);
 		TextureAtlasSprite textureatlassprite = this.armorTrimAtlas.apply(armorTexture);
 		VertexConsumer vertexConsumer = textureatlassprite.wrap(EpicFightRenderTypes.getArmorFoilBufferTriangles(multiBufferSource, Sheets.armorTrimsSheet(), false, hasEffect));

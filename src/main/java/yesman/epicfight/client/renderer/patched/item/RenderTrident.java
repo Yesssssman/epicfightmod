@@ -22,8 +22,7 @@ public class RenderTrident extends RenderItemBase {
 		if (entitypatch.getOriginal().getUseItemRemainingTicks() > 0) {
 			return new OpenMatrix4f(this.correctionMatrixReverse);
 		} else {
-			OpenMatrix4f mat = new OpenMatrix4f(this.mainhandcorrectionMatrix).translate(0.0F, 0.4F, 0.0F);
-			return mat;
+			return new OpenMatrix4f(this.mainhandcorrectionMatrix).translate(0.0F, 0.4F, 0.0F);
 		}
 	}
 }

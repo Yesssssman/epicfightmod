@@ -11,6 +11,8 @@ import org.joml.Vector4f;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanOpenHashMap;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.main.EpicFightMod;
@@ -20,6 +22,7 @@ public abstract class Mesh<T extends VertexIndicator> {
 	public static class RenderProperties {
 		protected String customTexturePath;
 		protected boolean isTransparent;
+		protected Object2BooleanMap<String> parentPartVisualizer;
 		
 		public String getCustomTexturePath() {
 			return this.customTexturePath;
@@ -29,6 +32,10 @@ public abstract class Mesh<T extends VertexIndicator> {
 			return this.isTransparent;
 		}
 		
+		public Object2BooleanMap<String> getParentPartVisualizer() {
+			return this.parentPartVisualizer;
+		}
+		
 		public RenderProperties customTexturePath(String path) {
 			this.customTexturePath = path;
 			return this;
@@ -36,6 +43,16 @@ public abstract class Mesh<T extends VertexIndicator> {
 		
 		public RenderProperties transparency(boolean isTransparent) {
 			this.isTransparent = isTransparent;
+			return this;
+		}
+		
+		public RenderProperties newPartVisualizer(String partName, boolean setVisible) {
+			if (this.parentPartVisualizer == null) {
+				this.parentPartVisualizer = new Object2BooleanOpenHashMap<>();
+			}
+			
+			this.parentPartVisualizer.put(partName, setVisible);
+			
 			return this;
 		}
 		

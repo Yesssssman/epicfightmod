@@ -1,6 +1,7 @@
 package yesman.epicfight.client.renderer.patched.entity;
 
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.ElytraLayer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
@@ -19,7 +20,7 @@ import yesman.epicfight.client.renderer.patched.layer.WearableItemLayer;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PHumanoidRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends HumanoidModel<E>, AM extends HumanoidMesh> extends PatchedLivingEntityRenderer<E, T, M, AM> {
+public class PHumanoidRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends HumanoidModel<E>, R extends LivingEntityRenderer<E, M>, AM extends HumanoidMesh> extends PatchedLivingEntityRenderer<E, T, M, R, AM> {
 	private final AM mesh;
 	
 	public PHumanoidRenderer(AM mesh) {

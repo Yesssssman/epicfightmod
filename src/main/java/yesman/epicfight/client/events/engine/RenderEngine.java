@@ -102,8 +102,12 @@ import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.EnderDragonPatch;
+import yesman.epicfight.world.capabilities.item.BowCapability;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
+import yesman.epicfight.world.capabilities.item.CrossbowCapability;
+import yesman.epicfight.world.capabilities.item.MapCapability;
 import yesman.epicfight.world.capabilities.item.ShieldCapability;
+import yesman.epicfight.world.capabilities.item.TridentCapability;
 import yesman.epicfight.world.entity.EpicFightEntities;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 import yesman.epicfight.world.item.EpicFightItems;
@@ -122,7 +126,7 @@ public class RenderEngine {
 	private final Map<Item, RenderItemBase> itemRendererMapByInstance;
 	private final Map<Class<?>, RenderItemBase> itemRendererMapByClass;
 	private FirstPersonRenderer firstPersonRenderer;
-	private PHumanoidRenderer<?, ?, ?, ?> basicHumanoidRenderer;
+	private PHumanoidRenderer<?, ?, ?, ?, ?> basicHumanoidRenderer;
 	private final OverlayManager overlayManager;
 	private boolean aiming;
 	private int zoomOutTimer = 0;
@@ -193,11 +197,18 @@ public class RenderEngine {
 		this.itemRendererMapByInstance.put(Items.TRIDENT, tridentRenderer);
 		this.itemRendererMapByInstance.put(Items.FILLED_MAP, mapRenderer);
 		this.itemRendererMapByInstance.put(EpicFightItems.UCHIGATANA.get(), new RenderKatana());
+		
+		//Render by item class
 		this.itemRendererMapByClass.put(BowItem.class, bowRenderer);
 		this.itemRendererMapByClass.put(CrossbowItem.class, crossbowRenderer);
 		this.itemRendererMapByClass.put(ShieldItem.class, baseRenderer);
 		this.itemRendererMapByClass.put(TridentItem.class, tridentRenderer);
 		this.itemRendererMapByClass.put(ShieldItem.class, shieldRenderer);
+		//Render by capability class
+		this.itemRendererMapByClass.put(BowCapability.class, bowRenderer);
+		this.itemRendererMapByClass.put(CrossbowCapability.class, crossbowRenderer);
+		this.itemRendererMapByClass.put(TridentCapability.class, tridentRenderer);
+		this.itemRendererMapByClass.put(MapCapability.class, mapRenderer);
 		this.itemRendererMapByClass.put(ShieldCapability.class, shieldRenderer);
 		
 		this.aimHelper = new AimHelperRenderer();
@@ -575,7 +586,7 @@ public class RenderEngine {
 				}
 			}
 		}
-
+		
 		@SubscribeEvent
 		public static void renderWorldLast(RenderLevelStageEvent event) {
 			if (EpicFightMod.CLIENT_CONFIGS.aimingCorrection.getValue() && renderEngine.zoomCount > 0 && renderEngine.minecraft.options.getCameraType() == CameraType.THIRD_PERSON_BACK && event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {

@@ -1,6 +1,7 @@
 package yesman.epicfight.client.renderer.patched.entity;
 
 import net.minecraft.client.model.CreeperModel;
+import net.minecraft.client.renderer.entity.CreeperRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.monster.Creeper;
@@ -12,7 +13,7 @@ import yesman.epicfight.client.mesh.CreeperMesh;
 import yesman.epicfight.world.capabilities.entitypatch.mob.CreeperPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PCreeperRenderer extends PatchedLivingEntityRenderer<Creeper, CreeperPatch, CreeperModel<Creeper>, CreeperMesh> {
+public class PCreeperRenderer extends PatchedLivingEntityRenderer<Creeper, CreeperPatch, CreeperModel<Creeper>, CreeperRenderer, CreeperMesh> {
 	@Override
 	protected int getOverlayCoord(Creeper entity, CreeperPatch entitypatch, float partialTicks) {
 		float f = entity.getSwelling(partialTicks);

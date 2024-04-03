@@ -307,7 +307,8 @@ public class WeaponCapabilityPresets {
 			.addAnimationsModifier(LivingMotions.IDLE, Animations.BIPED_IDLE)
 			.addAnimationsModifier(LivingMotions.WALK, Animations.BIPED_WALK)
 			.addAnimationsModifier(LivingMotions.AIM, Animations.BIPED_BOW_AIM)
-			.addAnimationsModifier(LivingMotions.SHOT, Animations.BIPED_BOW_SHOT);
+			.addAnimationsModifier(LivingMotions.SHOT, Animations.BIPED_BOW_SHOT)
+			.constructor(BowCapability::new);
 			
 	public static final Function<Item, CapabilityItem.Builder> CROSSBOW =  (item) -> RangedWeaponCapability.builder()
 			.addAnimationsModifier(LivingMotions.IDLE, Animations.BIPED_HOLD_CROSSBOW)
@@ -320,7 +321,8 @@ public class WeaponCapabilityPresets {
 			.addAnimationsModifier(LivingMotions.FALL, Animations.BIPED_HOLD_CROSSBOW)
 			.addAnimationsModifier(LivingMotions.RELOAD, Animations.BIPED_CROSSBOW_RELOAD)
 			.addAnimationsModifier(LivingMotions.AIM, Animations.BIPED_CROSSBOW_AIM)
-			.addAnimationsModifier(LivingMotions.SHOT, Animations.BIPED_CROSSBOW_SHOT);
+			.addAnimationsModifier(LivingMotions.SHOT, Animations.BIPED_CROSSBOW_SHOT)
+			.constructor(CrossbowCapability::new);
 	
 	public static final Function<Item, CapabilityItem.Builder> TRIDENT = (item) -> RangedWeaponCapability.builder()
 			.addAnimationsModifier(LivingMotions.IDLE, Animations.BIPED_IDLE)

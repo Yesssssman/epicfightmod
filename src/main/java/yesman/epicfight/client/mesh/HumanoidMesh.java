@@ -11,7 +11,7 @@ import yesman.epicfight.api.client.model.VertexIndicator.AnimatedVertexIndicator
 public class HumanoidMesh extends AnimatedMesh {
 	public final ModelPart<AnimatedVertexIndicator> head;
 	public final ModelPart<AnimatedVertexIndicator> torso;
-	public final ModelPart<AnimatedVertexIndicator> lefrArm;
+	public final ModelPart<AnimatedVertexIndicator> leftArm;
 	public final ModelPart<AnimatedVertexIndicator> rightArm;
 	public final ModelPart<AnimatedVertexIndicator> leftLeg;
 	public final ModelPart<AnimatedVertexIndicator> rightLeg;
@@ -27,7 +27,7 @@ public class HumanoidMesh extends AnimatedMesh {
 		
 		this.head = this.getOrLogException(parts, "head");
 		this.torso = this.getOrLogException(parts, "torso");
-		this.lefrArm = this.getOrLogException(parts, "leftArm");
+		this.leftArm = this.getOrLogException(parts, "leftArm");
 		this.rightArm = this.getOrLogException(parts, "rightArm");
 		this.leftLeg = this.getOrLogException(parts, "leftLeg");
 		this.rightLeg = this.getOrLogException(parts, "rightLeg");

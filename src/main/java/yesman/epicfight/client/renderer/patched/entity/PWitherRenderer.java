@@ -7,7 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.WitherBossModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.LivingEntityRenderer;
+import net.minecraft.client.renderer.entity.WitherBossRenderer;
 import net.minecraft.client.renderer.entity.layers.WitherArmorLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
@@ -27,7 +27,7 @@ import yesman.epicfight.client.renderer.patched.layer.PatchedWitherArmorLayer;
 import yesman.epicfight.world.capabilities.entitypatch.boss.WitherPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, WitherPatch, WitherBossModel<WitherBoss>, WitherMesh> {
+public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, WitherPatch, WitherBossModel<WitherBoss>, WitherBossRenderer, WitherMesh> {
 	public static final ResourceLocation WITHER_INVULNERABLE_LOCATION = new ResourceLocation("textures/entity/wither/wither_invulnerable.png");
 	private static final ResourceLocation WITHER_LOCATION = new ResourceLocation("textures/entity/wither/wither.png");
 	
@@ -36,7 +36,7 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 	}
 	
 	@Override
-	public void render(WitherBoss entityIn, WitherPatch entitypatch, LivingEntityRenderer<WitherBoss, WitherBossModel<WitherBoss>> renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
+	public void render(WitherBoss entityIn, WitherPatch entitypatch, WitherBossRenderer renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
 		Minecraft mc = Minecraft.getInstance();
 		boolean isVisible = this.isVisible(entityIn, entitypatch);
 		boolean isVisibleToPlayer = !isVisible && !entityIn.isInvisibleTo(mc.player);
