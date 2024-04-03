@@ -9,7 +9,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EnderDragonRenderer;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraftforge.common.MinecraftForge;
 import yesman.epicfight.api.client.forgeevent.RenderEnderDragonEvent;

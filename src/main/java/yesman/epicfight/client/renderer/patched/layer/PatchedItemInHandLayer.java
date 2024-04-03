@@ -39,18 +39,18 @@ public class PatchedItemInHandLayer<E extends LivingEntity, T extends LivingEnti
 		if (mainHandStack.getItem() != Items.AIR) {
 			if (entitypatch.getOriginal().getVehicle() != null) {
 				if (!entitypatch.getHoldingItemCapability(InteractionHand.MAIN_HAND).availableOnHorse()) {
-					renderEngine.getItemRenderer(mainHandStack.getItem()).renderUnusableItemMount(mainHandStack, entitypatch, poses, buffer, postStack, packedLightIn);
+					renderEngine.getItemRenderer(mainHandStack).renderUnusableItemMount(mainHandStack, entitypatch, poses, buffer, postStack, packedLightIn);
 					return;
 				}
 			}
 			
-			renderEngine.getItemRenderer(mainHandStack.getItem()).renderItemInHand(mainHandStack, entitypatch, InteractionHand.MAIN_HAND, humanoidArmature, poses, buffer, postStack, packedLightIn);
+			renderEngine.getItemRenderer(mainHandStack).renderItemInHand(mainHandStack, entitypatch, InteractionHand.MAIN_HAND, humanoidArmature, poses, buffer, postStack, packedLightIn);
 		}
 		
 		ItemStack offHandStack = entitypatch.getOriginal().getOffhandItem();
 		
 		if (entitypatch.isOffhandItemValid()) {
-			renderEngine.getItemRenderer(offHandStack.getItem()).renderItemInHand(offHandStack, entitypatch, InteractionHand.OFF_HAND, humanoidArmature, poses, buffer, postStack, packedLightIn);
+			renderEngine.getItemRenderer(offHandStack).renderItemInHand(offHandStack, entitypatch, InteractionHand.OFF_HAND, humanoidArmature, poses, buffer, postStack, packedLightIn);
 		}
 	}
 }

@@ -18,6 +18,8 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
 
 import io.netty.util.internal.StringUtil;
+import it.unimi.dsi.fastutil.objects.Object2DoubleMap;
+import it.unimi.dsi.fastutil.objects.Object2DoubleOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -71,6 +73,14 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 	
 	public MobPatchReloadListener() {
 		super(GSON, DIRECTORY);
+	}
+	
+	@Override
+	protected Map<ResourceLocation, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profileIn) {
+		MOB_PATCH_PROVIDERS.clear();
+		TAGMAP.clear();
+		
+		return super.prepare(resourceManager, profileIn);
 	}
 	
 	@Override
@@ -168,7 +178,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		protected CombatBehaviors.Builder<?> combatBehaviorsBuilder;
 		protected List<Pair<LivingMotion, StaticAnimation>> defaultAnimations;
 		protected Map<StunType, StaticAnimation> stunAnimations;
-		protected Map<Attribute, Double> attributeValues;
+		protected Object2DoubleMap<Attribute> attributeValues;
 		protected Faction faction;
 		protected double chasingSpeed;
 		protected float scale;
@@ -191,7 +201,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			return this.stunAnimations;
 		}
 
-		public Map<Attribute, Double> getAttributeValues() {
+		public Object2DoubleMap<Attribute> getAttributeValues() {
 			return this.attributeValues;
 		}
 		
@@ -228,17 +238,12 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 	public static EpicFightPredicates<Entity> deserializePredicate(CompoundTag tag) {
 		String predicateType = tag.getString("predicate");
 		EpicFightPredicates<Entity> predicate = null;
-		List<String[]> loggerNote = Lists.newArrayList();
 
 		if ("has_tags".equals(predicateType)) {
 			if (!tag.contains("tags", 9)) {
-				loggerNote.add(new String[]{"has_tags", "tags", "string list"});
+				EpicFightMod.LOGGER.info("[Custom Entity Error] can't find a proper argument for %s. [name: %s, type: %s]".formatted("has_tags", "tags", "string list"));
 			}
 			predicate = new EpicFightPredicates.HasTag(tag.getList("tags", 8));
-		}
-		
-		for (String[] formatArgs : loggerNote) {
-			EpicFightMod.LOGGER.info(String.format("[Custom Entity Error] can't find a proper argument for %s. [name: %s, type: %s]", (Object[])formatArgs));
 		}
 		
 		if (predicate == null) {
@@ -347,8 +352,8 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		return stunAnimations;
 	}
 	
-	public static Map<Attribute, Double> deserializeAttributes(CompoundTag tag) {
-		Map<Attribute, Double> attributes = Maps.newHashMap();
+	public static Object2DoubleMap<Attribute> deserializeAttributes(CompoundTag tag) {
+		Object2DoubleMap<Attribute> attributes = new Object2DoubleOpenHashMap<>();
 		attributes.put(EpicFightAttributes.IMPACT.get(), tag.contains("impact", 6) ? tag.getDouble("impact") : 0.5D);
 		attributes.put(EpicFightAttributes.ARMOR_NEGATION.get(), tag.contains("armor_negation", 6) ? tag.getDouble("armor_negation") : 0.0D);
 		attributes.put(EpicFightAttributes.MAX_STRIKES.get(), (double)(tag.contains("max_strikes", 3) ? tag.getInt("max_strikes") : 1));

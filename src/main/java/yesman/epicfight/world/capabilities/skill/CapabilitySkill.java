@@ -59,7 +59,7 @@ public class CapabilitySkill {
 		
 		if (this.learnedSkills.containsKey(category)) {
 			if (this.learnedSkills.remove(category, skill)) {
-				if (this.learnedSkills.get(category).size() == 0) {
+				if (this.learnedSkills.get(category).isEmpty()) {
 					this.learnedSkills.removeAll(category);
 				}
 				

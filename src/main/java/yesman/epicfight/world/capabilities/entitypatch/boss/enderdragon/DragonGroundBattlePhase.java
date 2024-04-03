@@ -169,7 +169,7 @@ public class DragonGroundBattlePhase extends PatchedDragonPhase {
 	private void searchNearestTarget() {
 		this.refreshNearbyPlayers(60.0F);
 		
-		if (this.recognizedPlayers.size() > 0) {
+		if (!this.recognizedPlayers.isEmpty()) {
 			int nearestPlayerIndex = 0;
 			double nearestDistance = this.recognizedPlayers.get(0).distanceToSqr(this.dragon);
 			

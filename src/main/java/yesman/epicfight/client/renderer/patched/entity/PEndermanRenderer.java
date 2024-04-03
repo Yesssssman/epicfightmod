@@ -1,6 +1,7 @@
 package yesman.epicfight.client.renderer.patched.entity;
 
 import net.minecraft.client.model.EndermanModel;
+import net.minecraft.client.renderer.entity.EndermanRenderer;
 import net.minecraft.client.renderer.entity.layers.EnderEyesLayer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.monster.EnderMan;
@@ -14,7 +15,7 @@ import yesman.epicfight.client.renderer.patched.layer.PatchedEyeLayer;
 import yesman.epicfight.world.capabilities.entitypatch.mob.EndermanPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PEndermanRenderer extends PatchedLivingEntityRenderer<EnderMan, EndermanPatch, EndermanModel<EnderMan>, EndermanMesh> {
+public class PEndermanRenderer extends PatchedLivingEntityRenderer<EnderMan, EndermanPatch, EndermanModel<EnderMan>, EndermanRenderer, EndermanMesh> {
 	private static final ResourceLocation ENDERMAN_EYE_TEXTURE = new ResourceLocation("textures/entity/enderman/enderman_eyes.png");
 	
 	public PEndermanRenderer() {

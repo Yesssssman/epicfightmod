@@ -1,10 +1,10 @@
 package yesman.epicfight.world.capabilities.entitypatch.player;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 import net.minecraft.server.level.ServerPlayer;
@@ -175,10 +175,8 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 		this.getAnimator().resetLivingAnimations();
 		CapabilityItem mainhandCap = this.getHoldingItemCapability(InteractionHand.MAIN_HAND);
 		CapabilityItem offhandCap = this.getAdvancedHoldingItemCapability(InteractionHand.OFF_HAND);
-		Map<LivingMotion, AnimationProvider<?>> motionModifier = Maps.newHashMap();
-		
-		offhandCap.getLivingMotionModifier(this, InteractionHand.OFF_HAND).forEach(motionModifier::put);
-		mainhandCap.getLivingMotionModifier(this, InteractionHand.MAIN_HAND).forEach(motionModifier::put);
+		Map<LivingMotion, AnimationProvider<?>> motionModifier = new HashMap<>(mainhandCap.getLivingMotionModifier(this, InteractionHand.MAIN_HAND));
+		motionModifier.putAll(offhandCap.getLivingMotionModifier(this, InteractionHand.OFF_HAND));
 		
 		for (Map.Entry<LivingMotion, AnimationProvider<?>> entry : motionModifier.entrySet()) {
 			this.getAnimator().addLivingAnimation(entry.getKey(), entry.getValue().get());
@@ -204,15 +202,21 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	}
 	
 	@Override
-	public void setModelYRot(float amount) {
-		super.setModelYRot(amount);
-		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(SPModifyPlayerData.setPlayerYRot(this.original.getId(), this.modelYRot), this.original);
+	public void setModelYRot(float amount, boolean sendPacket) {
+		super.setModelYRot(amount, sendPacket);
+		
+		if (sendPacket) {
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(SPModifyPlayerData.setPlayerYRot(this.original.getId(), this.modelYRot), this.original);
+		}
 	}
 	
 	@Override
-	public void disableModelYRot() {
-		super.disableModelYRot();
-		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(SPModifyPlayerData.disablePlayerYRot(this.original.getId()), this.original);
+	public void disableModelYRot(boolean sendPacket) {
+		super.disableModelYRot(sendPacket);
+		
+		if (sendPacket) {
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(SPModifyPlayerData.disablePlayerYRot(this.original.getId()), this.original);
+		}
 	}
 	
 	@Override

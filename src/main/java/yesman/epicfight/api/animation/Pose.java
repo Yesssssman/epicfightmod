@@ -1,5 +1,6 @@
 package yesman.epicfight.api.animation;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -47,8 +48,7 @@ public class Pose {
 	public static Pose interpolatePose(Pose pose1, Pose pose2, float pregression) {
 		Pose pose = new Pose();
 		
-		Set<String> mergedSet = Sets.newHashSet();
-		mergedSet.addAll(pose1.jointTransformData.keySet());
+		Set<String> mergedSet = new HashSet<>(pose1.jointTransformData.keySet());
 		mergedSet.addAll(pose2.jointTransformData.keySet());
 		
 		for (String jointName : mergedSet) {

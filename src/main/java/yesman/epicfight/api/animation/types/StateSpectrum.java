@@ -7,6 +7,8 @@ import java.util.function.Function;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import yesman.epicfight.api.animation.types.EntityState.StateFactor;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
@@ -102,7 +104,7 @@ public class StateSpectrum {
 	static class ConditionalStatesInTime extends StatesInTime {
 		float start;
 		float end;
-		Map<Integer, Map<StateFactor<?>, Object>> conditionalStates = Maps.newHashMap();
+		Int2ObjectMap<Map<StateFactor<?>, Object>> conditionalStates = new Int2ObjectOpenHashMap<>();
 		Function<LivingEntityPatch<?>, Integer> condition;
 		
 		public ConditionalStatesInTime(Function<LivingEntityPatch<?>, Integer> condition, float start, float end) {
@@ -118,6 +120,7 @@ public class StateSpectrum {
 			return this;
 		}
 		
+		@SuppressWarnings("deprecation")
 		@Override
 		public Set<Map.Entry<StateFactor<?>, Object>> getStates(LivingEntityPatch<?> entitypatch) {
 			return this.conditionalStates.get(this.condition.apply(entitypatch)).entrySet();

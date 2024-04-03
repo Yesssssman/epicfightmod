@@ -65,7 +65,7 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 		
 		WeaponCapabilityPresetRegistryEvent weaponCapabilityPresetRegistryEvent = new WeaponCapabilityPresetRegistryEvent(typeEntry);
 		ModLoader.get().postEvent(weaponCapabilityPresetRegistryEvent);
-		weaponCapabilityPresetRegistryEvent.getTypeEntry().forEach(PRESETS::put);
+		PRESETS.putAll(weaponCapabilityPresetRegistryEvent.getTypeEntry());
 	}
 	
 	public static final String DIRECTORY = "capabilities/weapons/types";

@@ -158,12 +158,12 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		}
 	}
 	
-	public void setModelYRot(float rotDeg) {
+	public void setModelYRot(float rotDeg, boolean sendPacket) {
 		this.useModelYRot = true;
 		this.modelYRot = rotDeg;
 	}
 	
-	public void disableModelYRot() {
+	public void disableModelYRot(boolean sendPacket) {
 		this.useModelYRot = false;
 	}
 	
@@ -227,11 +227,11 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		
 		if (this.getEntityState().turningLocked()) {
 			if (!this.useModelYRot) {
-				this.setModelYRot(this.original.getYRot());
+				this.setModelYRot(this.original.getYRot(), false);
 			}
 		} else {
 			if (this.useModelYRot) {
-				this.disableModelYRot();
+				this.disableModelYRot(false);
 			}
 		}
 		
@@ -485,8 +485,8 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	@Override
 	public void onFall(LivingFallEvent event) {
 		FallEvent fallEvent = new FallEvent(this, event);
-		
 		this.getEventListener().triggerEvents(EventType.FALL_EVENT, fallEvent);
+		super.onFall(event);
 		
 		this.setAirborneState(false);
 	}

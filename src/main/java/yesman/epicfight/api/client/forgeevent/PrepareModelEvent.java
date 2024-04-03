@@ -19,9 +19,9 @@ public class PrepareModelEvent extends Event {
 	private final int packedLight;
 	private final float partialTicks;
 	
-	private final PatchedLivingEntityRenderer<?, ?, ?, ?> renderer;
+	private final PatchedLivingEntityRenderer<?, ?, ?, ?, ?> renderer;
 	
-	public PrepareModelEvent(PatchedLivingEntityRenderer<?, ?, ?, ?> renderer, AnimatedMesh mesh, LivingEntityPatch<?> entitypatch, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
+	public PrepareModelEvent(PatchedLivingEntityRenderer<?, ?, ?, ?, ?> renderer, AnimatedMesh mesh, LivingEntityPatch<?> entitypatch, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
 		this.renderer = renderer;
 		this.mesh = mesh;
 		this.entitypatch = entitypatch;
@@ -55,7 +55,7 @@ public class PrepareModelEvent extends Event {
 		return this.partialTicks;
 	}
 
-	public PatchedLivingEntityRenderer<?, ?, ?, ?> getRenderer() {
+	public PatchedLivingEntityRenderer<?, ?, ?, ?, ?> getRenderer() {
 		return this.renderer;
 	}
 }

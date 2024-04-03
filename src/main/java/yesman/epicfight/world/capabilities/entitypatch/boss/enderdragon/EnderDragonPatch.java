@@ -1,6 +1,8 @@
 package yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon;
 
 import com.google.common.collect.Maps;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -53,7 +55,7 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	public static EnderDragonPatch INSTANCE_SERVER;
 	private final Map<String, TipPointAnimation> tipPointAnimations = Maps.newHashMap();
 	private final Map<LivingMotions, StaticAnimation> livingMotions = Maps.newHashMap();
-	private final Map<Player, Integer> contributors = Maps.newHashMap();
+	private final Object2IntMap<Player> contributors = new Object2IntOpenHashMap<>();
 	private boolean groundPhase;
 	public float xRoot;
 	public float xRootO;
@@ -193,7 +195,7 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 			}
 		}
 
-		this.contributors.entrySet().removeIf((entry) -> this.original.tickCount - entry.getValue() > 600 || !entry.getKey().isAlive());
+		this.contributors.object2IntEntrySet().removeIf((entry) -> this.original.tickCount - entry.getIntValue() > 600 || !entry.getKey().isAlive());
 	}
 	
 	@Override
@@ -255,7 +257,7 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 			}
 		}
 		
-		if (this.tipPointAnimations.size() > 0) {
+		if (!this.tipPointAnimations.isEmpty()) {
 			TipPointAnimation frontL = this.getTipPointAnimation("Leg_Front_L3");
 			TipPointAnimation frontR = this.getTipPointAnimation("Leg_Front_R3");
 			TipPointAnimation backL = this.getTipPointAnimation("Leg_Back_L3");

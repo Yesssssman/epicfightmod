@@ -43,12 +43,14 @@ public class CPModifyEntityModelYRot {
 			ServerPlayer player = ctx.get().getSender();
 			
 			if (player != null) {
-				PlayerPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(player, PlayerPatch.class);
+				PlayerPatch<?> playerpatch = EpicFightCapabilities.getEntityPatch(player, PlayerPatch.class);
 				
-				if (entitypatch != null) {
+				if (playerpatch != null) {
 					if (msg.disable) {
+						playerpatch.disableModelYRot(false);
 						EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(SPModifyPlayerData.disablePlayerYRot(player.getId()), player);
 					} else {
+						playerpatch.setModelYRot(msg.modelYRot, false);
 						EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(SPModifyPlayerData.setPlayerYRot(player.getId(), msg.modelYRot), player);
 					}
 				}

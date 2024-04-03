@@ -95,6 +95,7 @@
 	"gamerule.disableEntityUI": "Turn off health bar and target indicator for all players",
 	"gamerule.globalStun": "Enable Global Hitstun",
 	"gamerule.canSwitchCombat": "Enable switching between Battle/Mining mode",
+	"gamerule.noMobsInBossfight": "Disable mob spawn during Bossfight",
 	
 	"gui.epicfight.configurations": "Epic Fight Configurations",
 	"gui.epicfight.graphic_options": "Epic Fight Graphics",

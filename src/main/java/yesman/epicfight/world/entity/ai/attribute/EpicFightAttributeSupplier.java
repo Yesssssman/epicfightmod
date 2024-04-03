@@ -1,9 +1,9 @@
 package yesman.epicfight.world.entity.ai.attribute;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -12,7 +12,7 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public class EpicFightAttributeSupplier extends AttributeSupplier {
 	private static Map<Attribute, AttributeInstance> putEpicFightAttributes(Map<Attribute, AttributeInstance> originalMap) {
-		Map<Attribute, AttributeInstance> newMap = Maps.newHashMap();
+		Map<Attribute, AttributeInstance> newMap = new HashMap<>(originalMap);
 		
 		AttributeSupplier supplier = AttributeSupplier.builder()
 				.add(Attributes.ATTACK_DAMAGE)
@@ -29,7 +29,6 @@ public class EpicFightAttributeSupplier extends AttributeSupplier {
 			.build();
 		
 		newMap.putAll(supplier.instances);
-		newMap.putAll(originalMap);
 		
 		return ImmutableMap.copyOf(newMap);
 	}

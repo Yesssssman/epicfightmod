@@ -140,7 +140,8 @@ public class ClientEvents {
 			WeaponTypeReloadListener.clear();
 			
 			ClientEngine.getInstance().renderEngine.battleModeUI.reset();
-			ClientEngine.getInstance().renderEngine.clearCustomEntityRenerer();
+			// Reset renderers
+			ClientEngine.getInstance().renderEngine.registerRenderer();
 		}
 		
 		FractureBlockState.reset();

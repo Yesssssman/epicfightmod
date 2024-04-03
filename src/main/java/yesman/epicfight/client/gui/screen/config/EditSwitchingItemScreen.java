@@ -39,15 +39,15 @@ public class EditSwitchingItemScreen extends Screen {
 	@Override
 	protected void init() {
 		if (this.battleAutoSwitchItems == null) {
-			this.battleAutoSwitchItems = new EditSwitchingItemScreen.RegisteredItemList(200, this.height,
-				 Component.translatable(EpicFightMod.MODID+".gui.to_battle_mode"), EpicFightMod.CLIENT_CONFIGS.battleAutoSwitchItems);
+			this.battleAutoSwitchItems = new EditSwitchingItemScreen.RegisteredItemList(200, this.height, Component.translatable(EpicFightMod.MODID+".gui.to_battle_mode"));
+			EpicFightMod.CLIENT_CONFIGS.battleAutoSwitchItems.stream().sorted((e1, e2) -> e1.getDescriptionId().compareTo(e2.getDescriptionId())).forEach((item) -> this.battleAutoSwitchItems.addEntry(item));
 		} else {
 			this.battleAutoSwitchItems.resize(200, this.height);
 		}
 		
 		if (this.miningAutoSwitchItems == null) {
-			this.miningAutoSwitchItems = new EditSwitchingItemScreen.RegisteredItemList(200, this.height,
-				 Component.translatable(EpicFightMod.MODID+".gui.to_mining_mode"), EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems);
+			this.miningAutoSwitchItems = new EditSwitchingItemScreen.RegisteredItemList(200, this.height, Component.translatable(EpicFightMod.MODID+".gui.to_mining_mode"));
+			EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems.stream().sorted((e1, e2) -> e1.getDescriptionId().compareTo(e2.getDescriptionId())).forEach((item) -> this.miningAutoSwitchItems.addEntry(item));
 		} else {
 			this.miningAutoSwitchItems.resize(200, this.height);
 		}
@@ -60,12 +60,8 @@ public class EditSwitchingItemScreen extends Screen {
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {
 			EpicFightMod.CLIENT_CONFIGS.battleAutoSwitchItems.clear();
 			EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems.clear();
-			this.battleAutoSwitchItems.toList().forEach((item) -> {
-				EpicFightMod.CLIENT_CONFIGS.battleAutoSwitchItems.add(item);
-			});
-			this.miningAutoSwitchItems.toList().forEach((item) -> {
-				EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems.add(item);
-			});
+			EpicFightMod.CLIENT_CONFIGS.battleAutoSwitchItems.addAll(this.battleAutoSwitchItems.toList());
+			EpicFightMod.CLIENT_CONFIGS.miningAutoSwitchItems.addAll(this.miningAutoSwitchItems.toList());
 			EpicFightMod.CLIENT_CONFIGS.save();
 			this.onClose();
 		}).bounds(this.width / 2 - 80, this.height - 28, 160, 20).build());
@@ -94,7 +90,7 @@ public class EditSwitchingItemScreen extends Screen {
 	class RegisteredItemList extends ObjectSelectionList<EditSwitchingItemScreen.RegisteredItemList.ItemEntry> {
 		private final Component title;
 
-		public RegisteredItemList(int width, int height, Component title, List<Item> saved) {
+		public RegisteredItemList(int width, int height, Component title) {
 			super(EditSwitchingItemScreen.this.minecraft, width, height, 32, height - 50, 22);
 			this.title = title;
 			this.setRenderHeader(true, (int)(9.0F * 1.5F));
@@ -104,10 +100,6 @@ public class EditSwitchingItemScreen extends Screen {
 			}
 			
 			this.addEntry(new ButtonInEntry());
-			
-			for (Item item : saved) {
-				this.addEntry(new ItemEntry(item.getDefaultInstance()));
-			}
 		}
 		
 		public void resize(int width, int height) {
@@ -145,11 +137,13 @@ public class EditSwitchingItemScreen extends Screen {
 
 		protected List<Item> toList() {
 			List<Item> list = Lists.newArrayList();
+			
 			for (ItemEntry entry : this.children()) {
 				if (!entry.itemStack.isEmpty()) {
 					list.add(entry.itemStack.getItem());
 				}
 			}
+			
 			return list;
 		}
 

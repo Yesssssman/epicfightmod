@@ -319,15 +319,21 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	}
 	
 	@Override
-	public void setModelYRot(float amount) {
-		super.setModelYRot(amount);
-		EpicFightNetworkManager.sendToServer(new CPModifyEntityModelYRot(amount));
+	public void setModelYRot(float amount, boolean sendPacket) {
+		super.setModelYRot(amount, sendPacket);
+		
+		if (sendPacket) {
+			EpicFightNetworkManager.sendToServer(new CPModifyEntityModelYRot(amount));
+		}
 	}
 	
 	@Override
-	public void disableModelYRot() {
-		super.disableModelYRot();
-		EpicFightNetworkManager.sendToServer(new CPModifyEntityModelYRot());
+	public void disableModelYRot(boolean sendPacket) {
+		super.disableModelYRot(sendPacket);
+		
+		if (sendPacket) {
+			EpicFightNetworkManager.sendToServer(new CPModifyEntityModelYRot());
+		}
 	}
 	
 	@Override

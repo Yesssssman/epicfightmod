@@ -139,7 +139,7 @@ public class TrailParticle extends TextureSheetParticle {
 		this.setSize(this.bbWidth + move, this.bbHeight + move);
 		
 		boolean isTrailInvisible = animPlayer.getAnimation() instanceof LinkAnimation || animPlayer.getElapsedTime() <= this.trailInfo.startTime;
-		boolean isFirstTrail = this.visibleTrailEdges.size() == 0;
+		boolean isFirstTrail = this.visibleTrailEdges.isEmpty();
 		boolean needCorrection = (!isTrailInvisible && isFirstTrail);
 
 		if (needCorrection) {
@@ -230,7 +230,7 @@ public class TrailParticle extends TextureSheetParticle {
 	
 	@Override
 	public void render(VertexConsumer vertexConsumer, Camera camera, float partialTick) {
-		if (this.visibleTrailEdges.size() < 1) {
+		if (this.visibleTrailEdges.isEmpty()) {
 			return;
 		}
 		

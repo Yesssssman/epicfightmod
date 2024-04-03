@@ -1,6 +1,7 @@
 package yesman.epicfight.client.renderer.patched.entity;
 
 import net.minecraft.client.model.HoglinModel;
+import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.hoglin.HoglinBase;
 import net.minecraftforge.api.distmarker.Dist;
@@ -13,7 +14,7 @@ import yesman.epicfight.client.mesh.HoglinMesh;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PHoglinRenderer<E extends Mob & HoglinBase, T extends MobPatch<E>> extends PatchedLivingEntityRenderer<E, T, HoglinModel<E>, HoglinMesh> {
+public class PHoglinRenderer<E extends Mob & HoglinBase, T extends MobPatch<E>> extends PatchedLivingEntityRenderer<E, T, HoglinModel<E>, MobRenderer<E, HoglinModel<E>>, HoglinMesh> {
 	private static final OpenMatrix4f CORRECTION = OpenMatrix4f.createRotatorDeg(-30.0F, Vec3f.X_AXIS);
 	private static final OpenMatrix4f REVERSE = OpenMatrix4f.createRotatorDeg(30.0F, Vec3f.X_AXIS);
 	

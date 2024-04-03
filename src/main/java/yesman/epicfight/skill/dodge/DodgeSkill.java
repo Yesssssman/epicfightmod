@@ -2,7 +2,7 @@ package yesman.epicfight.skill.dodge;
 
 import java.util.List;
 
-import io.netty.buffer.Unpooled;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.player.Input;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.Mth;
@@ -13,7 +13,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.StaticAnimationProvider;
 import yesman.epicfight.api.animation.types.EntityState;
-import yesman.epicfight.client.events.engine.ControllEngine;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.network.client.CPExecuteSkill;
 import yesman.epicfight.skill.Skill;
@@ -66,7 +65,7 @@ public class DodgeSkill extends Skill {
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public FriendlyByteBuf gatherArguments(LocalPlayerPatch executer, ControllEngine controllEngine) {
+	public Object getExecutionPacket(LocalPlayerPatch executer, FriendlyByteBuf args) {
 		Input input = executer.getOriginal().input;
 		float pulse = Mth.clamp(0.3F + EnchantmentHelper.getSneakingSpeedBonus(executer.getOriginal()), 0.0F, 1.0F);
 		input.tick(false, pulse);
@@ -75,26 +74,10 @@ public class DodgeSkill extends Skill {
         int backward = input.down ? -1 : 0;
         int left = input.left ? 1 : 0;
         int right = input.right ? -1 : 0;
-		
-		FriendlyByteBuf buf = new FriendlyByteBuf(Unpooled.buffer());
-		buf.writeInt(forward);
-		buf.writeInt(backward);
-		buf.writeInt(left);
-		buf.writeInt(right);
-		
-		return buf;
-	}
-	
-	@OnlyIn(Dist.CLIENT)
-	@Override
-	public Object getExecutionPacket(LocalPlayerPatch executer, FriendlyByteBuf args) {
-		int forward = args.readInt();
-		int backward = args.readInt();
-		int left = args.readInt();
-		int right = args.readInt();
 		int vertic = forward + backward;
 		int horizon = left + right;
-		int degree = -(90 * horizon * (1 - Math.abs(vertic)) + 45 * vertic * horizon);
+		float yRot = Minecraft.getInstance().gameRenderer.getMainCamera().getYRot();
+		float degree = -(90 * horizon * (1 - Math.abs(vertic)) + 45 * vertic * horizon) + yRot;
 		
 		CPExecuteSkill packet = new CPExecuteSkill(executer.getSkill(this).getSlotId());
 		packet.getBuffer().writeInt(vertic >= 0 ? 0 : 1);
@@ -106,7 +89,6 @@ public class DodgeSkill extends Skill {
 	@OnlyIn(Dist.CLIENT)
 	public List<Object> getTooltipArgsOfScreen(List<Object> list) {
 		list.add(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(this.consumption));
-		
 		return list;
 	}
 	
@@ -115,8 +97,9 @@ public class DodgeSkill extends Skill {
 		super.executeOnServer(executer, args);
 		int i = args.readInt();
 		float yRot = args.readFloat();
+		
 		executer.playAnimationSynchronized(this.animations[i].get(), 0);
-		executer.setModelYRot(executer.getOriginal().getYRot() + yRot);
+		executer.setModelYRot(yRot, true);
 	}
 	
 	@Override

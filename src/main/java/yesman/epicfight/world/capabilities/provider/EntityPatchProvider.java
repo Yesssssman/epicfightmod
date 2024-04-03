@@ -118,7 +118,7 @@ public class EntityPatchProvider implements ICapabilityProvider, NonNullSupplier
 		EntityPatchRegistryEvent entitypatchRegistryEvent = new EntityPatchRegistryEvent(registry);
 		ModLoader.get().postEvent(entitypatchRegistryEvent);
 		
-		registry.forEach(CAPABILITIES::put);
+		CAPABILITIES.putAll(registry);
 	}
 	
 	public static void registerEntityPatchesClient() {

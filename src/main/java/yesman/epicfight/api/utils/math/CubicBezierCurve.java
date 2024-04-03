@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 
+import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
+import it.unimi.dsi.fastutil.doubles.DoubleList;
 import net.minecraft.world.phys.Vec3;
 
 public class CubicBezierCurve {
@@ -13,59 +15,59 @@ public class CubicBezierCurve {
 	 * https://towardsdatascience.com/b%C3%A9zier-interpolation-8033e9a262c2
 	 */
 	
-	private static final List<Double> MATRIX_CONSTANTS = Lists.newArrayList();
+	private static final DoubleList MATRIX_CONSTANTS = new DoubleArrayList();
 	
 	static {
 		MATRIX_CONSTANTS.add(0.5D);
 	}
 	
-	private static void getBezierEquationCoefficients(List<Double> points, List<Double> aList, List<Double> bList) {
-		List<Double> results = Lists.newArrayList();
+	private static void getBezierEquationCoefficients(DoubleList points, DoubleList aList, DoubleList bList) {
+		DoubleList results = new DoubleArrayList();
 		int size = points.size();
 		
-		results.add(points.get(0) + points.get(1) * 2);
+		results.add(points.getDouble(0) + points.getDouble(1) * 2);
 		
 		for (int idx = 1; idx < size - 2; idx++) {
-			results.add(points.get(idx) * 4 + points.get(idx + 1) * 2);
+			results.add(points.getDouble(idx) * 4 + points.getDouble(idx + 1) * 2);
 		}
 		
-		results.add(points.get(size - 2) * 8 + points.get(size - 1));
+		results.add(points.getDouble(size - 2) * 8 + points.getDouble(size - 1));
 		
 		int storedConstsSize = MATRIX_CONSTANTS.size();
 		int coordSize = results.size();
 		
 		if (storedConstsSize < coordSize - 1) {
 			for (int i = 0; i < (coordSize - 1) - storedConstsSize; i++) {
-				double lastConst = MATRIX_CONSTANTS.get(storedConstsSize - 1);
+				double lastConst = MATRIX_CONSTANTS.getDouble(storedConstsSize - 1);
 				MATRIX_CONSTANTS.add(1.0D / (4.0D - lastConst));
 			}
 		}
 		
-		List<Double> convertedResults = Lists.newArrayList();
+		DoubleList convertedResults = new DoubleArrayList();
 		
 		for (int idx = 0; idx < coordSize; idx++) {
 			if (idx == 0) {
-				convertedResults.add(results.get(idx) * 0.5D);
+				convertedResults.add(results.getDouble(idx) * 0.5D);
 			} else if (idx == coordSize - 1) {
-				convertedResults.add((results.get(idx) - 2 * convertedResults.get(idx - 1)) * (1.0D / (7.0D - MATRIX_CONSTANTS.get(idx - 1) * 2.0D)));
+				convertedResults.add((results.getDouble(idx) - 2 * convertedResults.getDouble(idx - 1)) * (1.0D / (7.0D - MATRIX_CONSTANTS.getDouble(idx - 1) * 2.0D)));
 			} else {
-				convertedResults.add((results.get(idx) - convertedResults.get(idx - 1)) * MATRIX_CONSTANTS.get(idx));
+				convertedResults.add((results.getDouble(idx) - convertedResults.getDouble(idx - 1)) * MATRIX_CONSTANTS.getDouble(idx));
 			}
 		}
 		
 		for (int idx = coordSize - 1; idx >= 0; idx--) {
 			if (idx == coordSize - 1) {
-				aList.add(0, convertedResults.get(idx));
+				aList.add(0, convertedResults.getDouble(idx));
 			} else {
-				aList.add(0, convertedResults.get(idx) - convertedResults.get(idx + 1) * MATRIX_CONSTANTS.get(idx));
+				aList.add(0, convertedResults.getDouble(idx) - convertedResults.getDouble(idx + 1) * MATRIX_CONSTANTS.getDouble(idx));
 			}
 		}
 		
 		for (int i = 0; i < coordSize; i++) {
 			if (i == coordSize - 1) {
-				bList.add((aList.get(i) + points.get(i + 1)) * 0.5D);
+				bList.add((aList.getDouble(i) + points.getDouble(i + 1)) * 0.5D);
 			} else {
-				bList.add(2 * points.get(i + 1) - aList.get(i + 1));
+				bList.add(2 * points.getDouble(i + 1) - aList.getDouble(i + 1));
 			}
 		}
 	}
@@ -96,9 +98,9 @@ public class CubicBezierCurve {
 		
 		int size = points.size();
 		List<Vec3> interpolatedPoints = Lists.newArrayList();
-		List<Double> x = Lists.newArrayList();
-		List<Double> y = Lists.newArrayList();
-		List<Double> z = Lists.newArrayList();
+		DoubleList x = new DoubleArrayList();
+		DoubleList y = new DoubleArrayList();
+		DoubleList z = new DoubleArrayList();
 		
 		for (int idx = 0; idx < size; idx++) {
 			x.add(points.get(idx).x);
@@ -106,30 +108,30 @@ public class CubicBezierCurve {
 			z.add(points.get(idx).z);
 		}
 		
-		List<Double> x_a = Lists.newArrayList();
-		List<Double> x_b = Lists.newArrayList();
-		List<Double> y_a = Lists.newArrayList();
-		List<Double> y_b = Lists.newArrayList();
-		List<Double> z_a = Lists.newArrayList();
-		List<Double> z_b = Lists.newArrayList();
+		DoubleList x_a = new DoubleArrayList();
+		DoubleList x_b = new DoubleArrayList();
+		DoubleList y_a = new DoubleArrayList();
+		DoubleList y_b = new DoubleArrayList();
+		DoubleList z_a = new DoubleArrayList();
+		DoubleList z_b = new DoubleArrayList();
 		
 		getBezierEquationCoefficients(x, x_a, x_b);
 		getBezierEquationCoefficients(y, y_a, y_b);
 		getBezierEquationCoefficients(z, z_a, z_b);
 		
 		for (int i = sliceBegin; i < sliceEnd; i++) {
-			if (interpolatedPoints.size() > 0) {
+			if (!interpolatedPoints.isEmpty()) {
 				interpolatedPoints.remove(interpolatedPoints.size() - 1);
 			}
 			
 			Vec3 start = points.get(i);
 			Vec3 end = points.get(i + 1);
-			double x_av = x_a.get(i);
-			double x_bv = x_b.get(i);
-			double y_av = y_a.get(i);
-			double y_bv = y_b.get(i);
-			double z_av = z_a.get(i);
-			double z_bv = z_b.get(i);
+			double x_av = x_a.getDouble(i);
+			double x_bv = x_b.getDouble(i);
+			double y_av = y_a.getDouble(i);
+			double y_bv = y_b.getDouble(i);
+			double z_av = z_a.getDouble(i);
+			double z_bv = z_b.getDouble(i);
 			
 			for (int j = 0; j < interpolatedResults + 1; j++) {
 				double t = (double)j / (double)interpolatedResults;

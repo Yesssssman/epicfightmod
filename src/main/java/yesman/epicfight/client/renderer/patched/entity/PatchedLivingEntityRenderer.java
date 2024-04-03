@@ -2,11 +2,11 @@ package yesman.epicfight.client.renderer.patched.entity;
 
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -37,7 +37,7 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, AM extends AnimatedMesh> extends PatchedEntityRenderer<E, T, LivingEntityRenderer<E, M>, AM> {
+public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, R extends LivingEntityRenderer<E, M>, AM extends AnimatedMesh> extends PatchedEntityRenderer<E, T, R, AM> {
 	protected static Method isBodyVisible;
 	protected static Method getRenderType;
 	
@@ -49,7 +49,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 	protected Map<Class<?>, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>, AM>> patchedLayers = Maps.newHashMap();
 
 	@Override
-	public void render(E entityIn, T entitypatch, LivingEntityRenderer<E, M> renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
+	public void render(E entityIn, T entitypatch, R renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
 		super.render(entityIn, entitypatch, renderer, buffer, poseStack, packedLight, partialTicks);
 		
 		Minecraft mc = Minecraft.getInstance();
@@ -66,7 +66,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		    this.prepareVanillaModel(entityIn, renderer.getModel(), renderer, partialTicks);
 			
 			AM mesh = this.getMesh(entitypatch);
-			this.prepareModel(mesh, entityIn, entitypatch);
+			this.prepareModel(mesh, entityIn, entitypatch, renderer);
 			
 			PrepareModelEvent prepareModelEvent = new PrepareModelEvent(this, mesh, entitypatch, buffer, poseStack, packedLight, partialTicks);
 			
@@ -152,14 +152,14 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		model.setupAnim(entityIn, f5, f8, f7, f2, f6);
 	}
 	
-	protected void prepareModel(AM mesh, E entity, T entitypatch) {
+	protected void prepareModel(AM mesh, E entity, T entitypatch, R renderer) {
 		mesh.initialize();
 	}
 	
 	protected void renderLayer(LivingEntityRenderer<E, M> renderer, T entitypatch, E entityIn, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLightIn, float partialTicks) {
-		List<RenderLayer<E, M>> layers = Lists.newArrayList();
-		renderer.layers.forEach(layers::add);
+		List<RenderLayer<E, M>> layers = new ArrayList<>(renderer.layers);
 		Iterator<RenderLayer<E, M>> iter = layers.iterator();
+		
 		float f = MathUtils.lerpBetween(entityIn.yBodyRotO, entityIn.yBodyRot, partialTicks);
         float f1 = MathUtils.lerpBetween(entityIn.yHeadRotO, entityIn.yHeadRot, partialTicks);
         float f2 = f1 - f;

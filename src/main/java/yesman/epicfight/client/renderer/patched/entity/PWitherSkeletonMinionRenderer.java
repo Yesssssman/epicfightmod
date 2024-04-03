@@ -1,6 +1,7 @@
 package yesman.epicfight.client.renderer.patched.entity;
 
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -13,7 +14,7 @@ import yesman.epicfight.client.mesh.HumanoidMesh;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PWitherSkeletonMinionRenderer extends PHumanoidRenderer<PathfinderMob, HumanoidMobPatch<PathfinderMob>, HumanoidModel<PathfinderMob>, HumanoidMesh> {
+public class PWitherSkeletonMinionRenderer extends PHumanoidRenderer<PathfinderMob, HumanoidMobPatch<PathfinderMob>, HumanoidModel<PathfinderMob>, HumanoidMobRenderer<PathfinderMob, HumanoidModel<PathfinderMob>>, HumanoidMesh> {
 	public PWitherSkeletonMinionRenderer() {
 		super(Meshes.SKELETON);
 	}

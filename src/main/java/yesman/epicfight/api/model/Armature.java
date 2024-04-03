@@ -6,6 +6,10 @@ import java.util.Map;
 
 import com.google.common.collect.Maps;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Pose;
@@ -14,9 +18,9 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.main.EpicFightMod;
 
 public class Armature {
-	private final Map<Integer, Joint> jointById;
+	private final Int2ObjectMap<Joint> jointById;
 	private final Map<String, Joint> jointByName;
-	private final Map<String, Integer> pathIndexMap;
+	private final Object2IntMap<String> pathIndexMap;
 	private final int jointNumber;
 	public final Joint rootJoint;
 	private final TransformSheet actionAnimationCoord = new TransformSheet();
@@ -27,8 +31,8 @@ public class Armature {
 		this.jointNumber = jointNumber;
 		this.rootJoint = rootJoint;
 		this.jointByName = jointMap;
-		this.jointById = Maps.newHashMap();
-		this.pathIndexMap = Maps.newHashMap();
+		this.jointById = new Int2ObjectOpenHashMap<>();
+		this.pathIndexMap = new Object2IntOpenHashMap<>();
 		this.jointByName.values().forEach((joint) -> {
 			this.jointById.put(joint.getId(), joint);
 		});
@@ -115,7 +119,7 @@ public class Armature {
 	
 	public int searchPathIndex(String joint) {
 		if (this.pathIndexMap.containsKey(joint)) {
-			return this.pathIndexMap.get(joint);
+			return this.pathIndexMap.getInt(joint);
 		} else {
 			String pathIndex = this.rootJoint.searchPath("", joint);
 			int pathIndex2Int = 0;

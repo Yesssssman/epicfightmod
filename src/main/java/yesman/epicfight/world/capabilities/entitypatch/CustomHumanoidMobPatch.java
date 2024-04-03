@@ -44,7 +44,7 @@ public class CustomHumanoidMobPatch<T extends PathfinderMob> extends HumanoidMob
 	@SuppressWarnings("unchecked")
 	@Override
 	public void setAIAsInfantry(boolean holdingRanedWeapon) {
-		boolean isUsingBrain = this.getOriginal().getBrain().availableBehaviorsByPriority.size() > 0;
+		boolean isUsingBrain = !this.getOriginal().getBrain().availableBehaviorsByPriority.isEmpty();
 		
 		if (isUsingBrain) {
 			if (!holdingRanedWeapon) {
@@ -79,12 +79,12 @@ public class CustomHumanoidMobPatch<T extends PathfinderMob> extends HumanoidMob
 	@Override
 	protected void initAttributes() {
 		this.original.getAttribute(EpicFightAttributes.WEIGHT.get()).setBaseValue(this.original.getAttribute(Attributes.MAX_HEALTH).getBaseValue() * 2.0D);
-		this.original.getAttribute(EpicFightAttributes.MAX_STRIKES.get()).setBaseValue(this.provider.getAttributeValues().get(EpicFightAttributes.MAX_STRIKES.get()));
-		this.original.getAttribute(EpicFightAttributes.ARMOR_NEGATION.get()).setBaseValue(this.provider.getAttributeValues().get(EpicFightAttributes.ARMOR_NEGATION.get()));
-		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(this.provider.getAttributeValues().get(EpicFightAttributes.IMPACT.get()));
+		this.original.getAttribute(EpicFightAttributes.MAX_STRIKES.get()).setBaseValue(this.provider.getAttributeValues().getDouble(EpicFightAttributes.MAX_STRIKES.get()));
+		this.original.getAttribute(EpicFightAttributes.ARMOR_NEGATION.get()).setBaseValue(this.provider.getAttributeValues().getDouble(EpicFightAttributes.ARMOR_NEGATION.get()));
+		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(this.provider.getAttributeValues().getDouble(EpicFightAttributes.IMPACT.get()));
 		
 		if (this.provider.getAttributeValues().containsKey(Attributes.ATTACK_DAMAGE)) {
-			this.original.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(this.provider.getAttributeValues().get(Attributes.ATTACK_DAMAGE));
+			this.original.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(this.provider.getAttributeValues().getDouble(Attributes.ATTACK_DAMAGE));
 		}
 	}
 	
