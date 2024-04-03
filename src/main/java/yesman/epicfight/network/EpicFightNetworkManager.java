@@ -14,7 +14,7 @@ import yesman.epicfight.network.client.CPChangeSkill;
 import yesman.epicfight.network.client.CPExecuteSkill;
 import yesman.epicfight.network.client.CPModifySkillData;
 import yesman.epicfight.network.client.CPPlayAnimation;
-import yesman.epicfight.network.client.CPRotateEntityModelYRot;
+import yesman.epicfight.network.client.CPModifyEntityModelYRot;
 import yesman.epicfight.network.client.CPSetPlayerTarget;
 import yesman.epicfight.network.server.SPAddLearnedSkill;
 import yesman.epicfight.network.server.SPAddOrRemoveSkillData;
@@ -78,7 +78,7 @@ public class EpicFightNetworkManager {
 		
 		INSTANCE.registerMessage(id++, CPExecuteSkill.class, CPExecuteSkill::toBytes, CPExecuteSkill::fromBytes, CPExecuteSkill::handle);
 		INSTANCE.registerMessage(id++, CPPlayAnimation.class, CPPlayAnimation::toBytes, CPPlayAnimation::fromBytes, CPPlayAnimation::handle);
-		INSTANCE.registerMessage(id++, CPRotateEntityModelYRot.class, CPRotateEntityModelYRot::toBytes, CPRotateEntityModelYRot::fromBytes, CPRotateEntityModelYRot::handle);
+		INSTANCE.registerMessage(id++, CPModifyEntityModelYRot.class, CPModifyEntityModelYRot::toBytes, CPModifyEntityModelYRot::fromBytes, CPModifyEntityModelYRot::handle);
 		INSTANCE.registerMessage(id++, CPChangePlayerMode.class, CPChangePlayerMode::toBytes, CPChangePlayerMode::fromBytes, CPChangePlayerMode::handle);
 		INSTANCE.registerMessage(id++, CPSetPlayerTarget.class, CPSetPlayerTarget::toBytes, CPSetPlayerTarget::fromBytes, CPSetPlayerTarget::handle);
 		INSTANCE.registerMessage(id++, CPChangeSkill.class, CPChangeSkill::toBytes, CPChangeSkill::fromBytes, CPChangeSkill::handle);

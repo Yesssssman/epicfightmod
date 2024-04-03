@@ -9,6 +9,7 @@ import net.minecraft.stats.Stats;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityDimensions;
@@ -47,6 +48,7 @@ import net.minecraftforge.event.entity.living.ShieldBlockEvent;
 import net.minecraftforge.event.entity.player.PlayerFlyableFallEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.gameasset.Animations;
@@ -77,6 +79,7 @@ import yesman.epicfight.world.entity.eventlistener.DealtDamageEvent;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.ProjectileHitEvent;
+import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 @Mod.EventBusSubscriber(modid=EpicFightMod.MODID)
 public class EntityEvents {
@@ -320,6 +323,18 @@ public class EntityEvents {
 								hitHurtableEntityPatch.knockBackEntity(sourcePosition, knockBackAmount);
 							}
 						}
+					}
+				}
+			}
+		} else {
+			if (event.getSource().is(DamageTypes.FALL) && event.getAmount() > 1.0F && event.getEntity().level().getGameRules().getBoolean(EpicFightGamerules.HAS_FALL_ANIMATION)) {
+				LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), LivingEntityPatch.class);
+				
+				if (entitypatch != null && !entitypatch.getEntityState().inaction()) {
+					StaticAnimation fallAnimation = entitypatch.getAnimator().getLivingAnimation(LivingMotions.LANDING_RECOVERY, entitypatch.getHitAnimation(StunType.FALL));
+					
+					if (fallAnimation != null) {
+						entitypatch.playAnimationSynchronized(fallAnimation, 0);
 					}
 				}
 			}

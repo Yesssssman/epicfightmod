@@ -124,6 +124,10 @@
 	"gui.epicfight.blood_effects.off": "Blood Effects: OFF",
 	"gui.epicfight.no_mining_in_combat.on": "No Mining In Combat: ON",
 	"gui.epicfight.no_mining_in_combat.off": "No Mining In Combat: OFF",
+	
+	"gui.epicfight.aiming_correction.on": "Aiming Correction: ON",
+	"gui.epicfight.aiming_correction.off": "Aiming Correction: OFF",
+	
 	"gui.epicfight.auto_switching_items": "Auto Switching Items",
 	"gui.epicfight.export_custom_armor": "Export Armor Models",
 	"gui.epicfight.filter_animation.tooltip": "Turn on/off the Epic Fight model in Mining mode",
@@ -135,6 +139,7 @@
 	"gui.epicfight.auto_preparation.tooltip": "Automatically switch to the battle mode when the player takes damage",
 	"gui.epicfight.blood_effects.tooltip": "Turn on/off blood effects",
 	"gui.epicfight.no_mining_in_combat.tooltip": "Enables/Disables the mining ability in combat mode",
+	"gui.epicfight.aiming_correction.tooltip": "Enables/Disables the camera correction when aiming ranged weapons",
 	"gui.epicfight.auto_switching_items.tooltip": "Edit the list of items that will automatically switch between Battle/Mining mode",
 	"gui.epicfight.export_custom_armor.tooltip": "Export the all custom armor models as an resource pack",
 	"gui.epicfight.replace": "Following skill will be removed: %s",

@@ -72,7 +72,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 		}
 
 		EpicFightNetworkManager.sendToPlayer(new SPAddLearnedSkill(learnedSkill.toArray(new String[0])), this.original);
-		EpicFightNetworkManager.sendToPlayer(new SPModifyPlayerData(this.getOriginal().getId(), this.playerMode), this.original);
+		EpicFightNetworkManager.sendToPlayer(SPModifyPlayerData.setPlayerMode(this.getOriginal().getId(), this.playerMode), this.original);
 	}
 	
 	@Override
@@ -91,7 +91,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 		}
 		
 		EpicFightNetworkManager.sendToPlayer(msg, trackingPlayer);
-		EpicFightNetworkManager.sendToPlayer(new SPModifyPlayerData(this.getOriginal().getId(), this.playerMode), trackingPlayer);
+		EpicFightNetworkManager.sendToPlayer(SPModifyPlayerData.setPlayerMode(this.getOriginal().getId(), this.playerMode), trackingPlayer);
 	}
 	
 	@Override
@@ -203,9 +203,21 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	}
 	
 	@Override
-	public void changeModelYRot(float amount) {
-		super.changeModelYRot(amount);
-		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(new SPModifyPlayerData(this.original.getId(), this.modelYRot), this.original);
+	public void setModelYRot(float amount, boolean sendPacket) {
+		super.setModelYRot(amount, sendPacket);
+		
+		if (sendPacket) {
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(SPModifyPlayerData.setPlayerYRot(this.original.getId(), this.modelYRot), this.original);
+		}
+	}
+	
+	@Override
+	public void disableModelYRot(boolean sendPacket) {
+		super.disableModelYRot(sendPacket);
+		
+		if (sendPacket) {
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(SPModifyPlayerData.disablePlayerYRot(this.original.getId()), this.original);
+		}
 	}
 	
 	@Override
@@ -246,7 +258,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 		super.toMiningMode(synchronize);
 		
 		if (synchronize) {
-			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(new SPModifyPlayerData(this.original.getId(), PlayerMode.MINING), this.original);
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(SPModifyPlayerData.setPlayerMode(this.original.getId(), PlayerMode.MINING), this.original);
 		}
 	}
 	
@@ -255,7 +267,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 		super.toBattleMode(synchronize);
 		
 		if (synchronize) {
-			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(new SPModifyPlayerData(this.original.getId(), PlayerMode.BATTLE), this.original);
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(SPModifyPlayerData.setPlayerMode(this.original.getId(), PlayerMode.BATTLE), this.original);
 		}
 	}
 	
@@ -271,7 +283,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	@Override
 	public void setLastAttackSuccess(boolean setter) {
 		if (setter) {
-			EpicFightNetworkManager.sendToPlayer(new SPModifyPlayerData(this.original.getId(), true), this.original);
+			EpicFightNetworkManager.sendToPlayer(SPModifyPlayerData.setLastAttackResult(this.original.getId(), true), this.original);
 		}
 		
 		this.isLastAttackSuccess = setter;
@@ -298,6 +310,6 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	@Override
 	public void setGrapplingTarget(LivingEntity grapplingTarget) {
 		super.setGrapplingTarget(grapplingTarget);
-		EpicFightNetworkManager.sendToPlayer(new SPModifyPlayerData(this.original.getId(), grapplingTarget), this.original);
+		EpicFightNetworkManager.sendToPlayer(SPModifyPlayerData.setGrapplingTarget(this.original.getId(), grapplingTarget), this.original);
 	}
 }

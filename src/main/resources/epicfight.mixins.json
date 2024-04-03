@@ -9,7 +9,6 @@
 		"MixinBufferBuilder",
 		"MixinLightTexture",
 		"MixinKeyboardHandler",
-		"MixinMouseHandler",
 		"MixinLocalPlayer"
 	],
 	"mixins": [

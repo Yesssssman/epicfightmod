@@ -15,6 +15,25 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class SPModifyPlayerData {
+	public static SPModifyPlayerData setPlayerYRot(int entityId, float yaw) {
+		return new SPModifyPlayerData(PacketType.SET_MODEL_YROT, entityId).addData("yaw", yaw);
+	}
+	
+	public static SPModifyPlayerData disablePlayerYRot(int entityId) {
+		return new SPModifyPlayerData(PacketType.YROT_TURN_OFF, entityId);
+	}
+	
+	public static SPModifyPlayerData setLastAttackResult(int entityId, boolean lastAttackSuccess) {
+		return new SPModifyPlayerData(PacketType.LAST_ATTACK_RESULT, entityId).addData("lastAttackSuccess", lastAttackSuccess);
+	}
+	
+	public static SPModifyPlayerData setPlayerMode(int entityId, PlayerPatch.PlayerMode mode) {
+		return new SPModifyPlayerData(PacketType.MODE, entityId).addData("mode", mode);
+	}
+	
+	public static SPModifyPlayerData setGrapplingTarget(int entityId, Entity grapplingTarget) {
+		return new SPModifyPlayerData(PacketType.SET_GRAPPLE_TARGET, entityId).addData("grapplingTarget", grapplingTarget == null ? -1 : grapplingTarget.getId());
+	}
 	
 	PacketType packetType;
 	private final int entityId;
@@ -26,27 +45,7 @@ public class SPModifyPlayerData {
 		this.data = Maps.newHashMap();
 	}
 	
-	public SPModifyPlayerData(int entityId, float yaw) {
-		this(PacketType.YAW_CORRECTION, entityId);
-		this.addData("yaw", yaw);
-	}
-	
-	public SPModifyPlayerData(int entityId, boolean lastAttackSuccess) {
-		this(PacketType.LAST_ATTACK_RESULT, entityId);
-		this.addData("lastAttackSuccess", lastAttackSuccess);
-	}
-	
-	public SPModifyPlayerData(int entityId, PlayerPatch.PlayerMode mode) {
-		this(PacketType.MODE, entityId);
-		this.addData("mode", mode);
-	}
-	
-	public SPModifyPlayerData(int entityId, Entity grapplingTarget) {
-		this(PacketType.SET_GRAPPLE_TARGET, entityId);
-		this.addData("grapplingTarget", grapplingTarget == null ? -1 : grapplingTarget.getId());
-	}
-	
-	public SPModifyPlayerData(PacketType packetType, int entityId) {
+	private SPModifyPlayerData(PacketType packetType, int entityId) {
 		this.packetType = packetType;
 		this.entityId = entityId;
 		this.data = Maps.newHashMap();
@@ -79,9 +78,11 @@ public class SPModifyPlayerData {
 			if (entity != null) {
 				if (entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).orElse(null) instanceof PlayerPatch<?> playerpatch) {
 					switch (msg.packetType) {
-					case YAW_CORRECTION:
-						playerpatch.changeModelYRot((float)msg.data.get("yaw"));
+					case SET_MODEL_YROT:
+						playerpatch.setModelYRot((float)msg.data.get("yaw"), false);
 						break;
+					case YROT_TURN_OFF:
+						playerpatch.disableModelYRot(false);
 					case MODE:
 						playerpatch.toMode((PlayerPatch.PlayerMode)msg.data.get("mode"), false);
 						break;
@@ -107,28 +108,30 @@ public class SPModifyPlayerData {
 	}
 	
 	public enum PacketType {
-		YAW_CORRECTION( (packet, buffer) -> {
-			buffer.writeFloat( (float)packet.data.get("yaw") );
+		SET_MODEL_YROT((packet, buffer) -> {
+			buffer.writeFloat((float)packet.data.get("yaw"));
 		}, (packet, buffer) -> {
 			packet.addData("yaw", buffer.readFloat());
-		})
-		
-		,MODE( (packet, buffer) -> {
+		}),
+		YROT_TURN_OFF((packet, buffer) -> {
+		}, (packet, buffer) -> {
+		}),
+		MODE((packet, buffer) -> {
 			buffer.writeInt(((PlayerPatch.PlayerMode)packet.data.get("mode")).ordinal());
 		}, (packet, buffer) -> {
 			packet.addData("mode", PlayerPatch.PlayerMode.values()[buffer.readInt()]);
-		})
-		
-		,LAST_ATTACK_RESULT( (packet, buffer) -> {
-			buffer.writeBoolean( (boolean)packet.data.get("lastAttackSuccess") );
+		}),
+		LAST_ATTACK_RESULT((packet, buffer) -> {
+			buffer.writeBoolean((boolean)packet.data.get("lastAttackSuccess"));
 		}, (packet, buffer) -> {
 			packet.addData("lastAttackSuccess", buffer.readBoolean());
-		})
-		,SET_GRAPPLE_TARGET( (packet, buffer) -> {
-			buffer.writeInt( (int)packet.data.get("grapplingTarget") );
+		}),
+		SET_GRAPPLE_TARGET((packet, buffer) -> {
+			buffer.writeInt((int)packet.data.get("grapplingTarget"));
 		}, (packet, buffer) -> {
 			packet.addData("grapplingTarget", buffer.readInt());
-		});
+		})
+		;
 		
 		BiConsumer<SPModifyPlayerData, FriendlyByteBuf> encoder;
 		BiConsumer<SPModifyPlayerData, FriendlyByteBuf> decoder;

@@ -40,6 +40,7 @@ public class EpicFightGraphicOptionScreen extends EpicFightOptionSubScreen {
 		OptionHandler<Boolean> enableAimHelper = this.config.enableAimHelperPointer;
 		OptionHandler<Double> aimHelperColor = this.config.aimHelperColor;
 		OptionHandler<Boolean> bloodEffects = this.config.bloodEffects;
+		OptionHandler<Boolean> aimingCorrection = this.config.aimingCorrection;
 		
 		int buttonHeight = -32;
 		
@@ -91,12 +92,17 @@ public class EpicFightGraphicOptionScreen extends EpicFightOptionSubScreen {
 		this.optionsList.addSmall(bloodEffectsButton, exportCustomArmors);
 		
 		buttonHeight += 24;
-
+		
+		Button aimingCorrectionButton = Button.builder(Component.translatable("gui."+EpicFightMod.MODID+".aiming_correction." + (aimingCorrection.getValue() ? "on" : "off")), (button) -> {
+			aimingCorrection.setValue(!aimingCorrection.getValue());
+			button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".aiming_correction." + (aimingCorrection.getValue() ? "on" : "off")));
+		}).pos(this.width / 2 - 165, this.height / 4 + buttonHeight).size(160, 20).tooltip(Tooltip.create(Component.translatable("gui."+EpicFightMod.MODID+".aiming_correction.tooltip"))).build();
+		
 		Button uiSetupButton = Button.builder(Component.translatable("gui."+EpicFightMod.MODID+".ui_setup"), (button) -> {
 			this.minecraft.setScreen(new UISetupScreen(this));
-		}).pos(this.width / 2 - 165, this.height / 4 + buttonHeight).size(160, 20).tooltip(Tooltip.create(Component.translatable("gui."+EpicFightMod.MODID+".ui_setup.tooltip"))).build();
+		}).pos(this.width / 2 + 5, this.height / 4 + buttonHeight).size(160, 20).tooltip(Tooltip.create(Component.translatable("gui."+EpicFightMod.MODID+".ui_setup.tooltip"))).build();
 		
-		this.optionsList.addSmall(uiSetupButton, null);
+		this.optionsList.addSmall(aimingCorrectionButton, uiSetupButton);
 		
 		buttonHeight += 30;
 		

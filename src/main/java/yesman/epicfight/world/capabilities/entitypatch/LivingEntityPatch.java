@@ -64,7 +64,6 @@ import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.TargetIndicatorCheckEvent;
-import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 public abstract class LivingEntityPatch<T extends LivingEntity> extends HurtableEntityPatch<T> {
 	public static final EntityDataAccessor<Float> STUN_SHIELD = new EntityDataAccessor<Float> (251, EntityDataSerializers.FLOAT);
@@ -130,21 +129,17 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 			this.aboutToDeath();
 		}
 		
-		if (this.original.onGround) {
+		if (!this.getEntityState().inaction() && this.original.onGround && this.isAirborneState()) {
 			this.setAirborneState(false);
 		}
 	}
 	
 	public void onFall(LivingFallEvent event) {
-		if (!this.getOriginal().level().isClientSide() && (this.isAirborneState() || (this.getOriginal().level().getGameRules().getBoolean(EpicFightGamerules.HAS_FALL_ANIMATION)
-				&& event.getDamageMultiplier() > 0.0F) && !this.getEntityState().inaction())) {
-
-			if (this.isAirborneState() || event.getDistance() > 5.0F) {
-				StaticAnimation fallAnimation = this.getAnimator().getLivingAnimation(LivingMotions.LANDING_RECOVERY, this.getHitAnimation(StunType.FALL));
-				
-				if (fallAnimation != null) {
-					this.playAnimationSynchronized(fallAnimation, 0);
-				}
+		if (!this.getOriginal().level().isClientSide() && this.isAirborneState()) {
+			StaticAnimation fallAnimation = this.getAnimator().getLivingAnimation(LivingMotions.LANDING_RECOVERY, this.getHitAnimation(StunType.FALL));
+			
+			if (fallAnimation != null) {
+				this.playAnimationSynchronized(fallAnimation, 0);
 			}
 		}
 		
@@ -375,11 +370,11 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	public float getCameraXRot() {
-		return this.original.getXRot();
+		return Mth.wrapDegrees(this.original.getXRot());
 	}
 	
 	public float getCameraYRot() {
-		return this.original.getYRot();
+		return Mth.wrapDegrees(this.original.getYRot());
 	}
 	
 	@OnlyIn(Dist.CLIENT)
