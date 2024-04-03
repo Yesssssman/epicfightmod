@@ -115,6 +115,7 @@ public class StateSpectrum {
 			return this;
 		}
 		
+		@SuppressWarnings("deprecation")
 		@Override
 		public Set<Map.Entry<StateFactor<?>, Object>> getStates(LivingEntityPatch<?> entitypatch) {
 			return this.conditionalStates.get(this.condition.apply(entitypatch)).entrySet();

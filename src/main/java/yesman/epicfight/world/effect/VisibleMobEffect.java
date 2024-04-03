@@ -27,6 +27,7 @@ public class VisibleMobEffect extends MobEffect {
 		}
 	}
 	
+	@SuppressWarnings("deprecation")
 	public ResourceLocation getIcon(MobEffectInstance effectInstance) {
 		return this.icons.get(this.metadataGetter.apply(effectInstance));
 	}

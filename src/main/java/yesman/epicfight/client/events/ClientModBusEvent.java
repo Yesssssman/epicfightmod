@@ -80,7 +80,7 @@ public class ClientModBusEvent {
 	}
 	
 	@SubscribeEvent
-	public static void reloadEvent(EntityRenderersEvent.AddLayers event) {
+	public static void addLayersEvent(EntityRenderersEvent.AddLayers event) {
 		ClientEngine.getInstance().renderEngine.registerRenderer();
 		WearableItemLayer.clear();
 	}

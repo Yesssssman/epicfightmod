@@ -186,7 +186,6 @@ public class RenderEngine {
 		RenderMap mapRenderer = new RenderMap();
 		RenderShield shieldRenderer = new RenderShield();
 		
-		this.itemRendererMapByInstance.clear();
 		this.itemRendererMapByInstance.put(Items.AIR, baseRenderer);
 		this.itemRendererMapByInstance.put(Items.BOW, bowRenderer);
 		this.itemRendererMapByInstance.put(Items.SHIELD, shieldRenderer);
@@ -272,10 +271,6 @@ public class RenderEngine {
 	
 	public boolean hasRendererFor(Entity entity) {
 		return this.entityRendererCache.computeIfAbsent(entity.getType(), (key) -> this.entityRendererProvider.containsKey(key) ? this.entityRendererProvider.get(entity.getType()).get() : null) != null;
-	}
-	
-	public void clearCustomEntityRenerer() {
-		this.entityRendererCache.clear();
 	}
 	
 	public void zoomIn() {

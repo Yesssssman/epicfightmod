@@ -2,8 +2,6 @@ package yesman.epicfight.api.animation.types.procedural;
 
 import java.util.List;
 
-import com.mojang.datafixers.util.Pair;
-
 import it.unimi.dsi.fastutil.ints.IntIntPair;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.utils.math.Vec3f;

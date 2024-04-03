@@ -11,7 +11,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class VertexIndicator {
-	
 	public static List<VertexIndicator> create(int[] drawingIndices) {
 		List<VertexIndicator> vertexIndicators = Lists.newArrayList();
 		
@@ -27,7 +26,6 @@ public class VertexIndicator {
 		return vertexIndicators;
 	}
 	
-	@SuppressWarnings("unchecked")
 	public static List<AnimatedVertexIndicator> createAnimated(int[] drawingIndices, int[] vCounts, int[] animationIndices) {
 		List<AnimatedVertexIndicator> vertexIndicators = Lists.newArrayList();
 		IntList[] listedAnimationData = new IntList[vCounts.length];
