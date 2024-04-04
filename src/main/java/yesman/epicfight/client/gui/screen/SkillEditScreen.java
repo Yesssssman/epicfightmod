@@ -183,6 +183,7 @@ public class SkillEditScreen extends Screen {
 		}
 	}
 	
+	@OnlyIn(Dist.CLIENT)
 	class SlotButton extends Button {
 		private final Skill iconSkill;
 		private final SkillSlot slot;
@@ -211,6 +212,7 @@ public class SkillEditScreen extends Screen {
 		}
 	}
 	
+	@OnlyIn(Dist.CLIENT)
 	class LearnSkillButton extends Button {
 		private final Skill skill;
 

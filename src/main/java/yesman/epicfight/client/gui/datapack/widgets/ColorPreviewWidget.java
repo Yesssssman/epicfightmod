@@ -1,35 +1,40 @@
 package yesman.epicfight.client.gui.datapack.widgets;
 
-import javax.annotation.Nullable;
-
-import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.components.EditBox;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class ResizableEditBox extends EditBox implements DataBindingComponent<String> {
-	public ResizableEditBox(Font font, int x, int y, int width, int height, Component title, HorizontalSizing horizontalSizingOption, VerticalSizing verticalSizingOption) {
-		super(font, x, y, width, height, title);
+public class ColorPreviewWidget extends AbstractWidget implements ResizableComponent {
+	private int packedColor;
+	
+	public ColorPreviewWidget(int x1, int x2, int y1, int y2, HorizontalSizing horizontalSizingOption, VerticalSizing verticalSizingOption, Component title) {
+		super(x1, y1, x2, y2, title);
 		
-		this.x1 = x;
-		this.x2 = width;
-		this.y1 = y;
-		this.y2 = height;
+		this.x1 = x1;
+		this.x2 = x2;
+		this.y1 = y1;
+		this.y2 = y2;
 		this.horizontalSizingOption = horizontalSizingOption;
 		this.verticalSizingOption = verticalSizingOption;
 	}
 	
-	public ResizableEditBox(Font font, int x, int y, int width, int height, @Nullable EditBox editbox, Component title, HorizontalSizing horizontalSizingOption, VerticalSizing verticalSizingOption) {
-		super(font, x, y, width, height, editbox, title);
-		
-		this.x1 = x;
-		this.x2 = width;
-		this.y1 = y;
-		this.y2 = height;
-		this.horizontalSizingOption = horizontalSizingOption;
-		this.verticalSizingOption = verticalSizingOption;
+	public void setColor(int r, int g, int b) {
+		this.packedColor = (0xFF000000 | r << 16 | g << 8 | b);
+	}
+	
+	@Override
+	protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		guiGraphics.fill(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), -1);
+		guiGraphics.fill(this.getX() + 1, this.getY() + 1, this.getX() + this.getWidth() - 1, this.getY() + this.getHeight() - 1, -16777216);
+		guiGraphics.fill(this.getX() + 2, this.getY() + 2, this.getX() + this.getWidth() - 2, this.getY() + this.getHeight() - 2, this.packedColor);
+	}
+	
+	@Override
+	protected void updateWidgetNarration(NarrationElementOutput p_259858_) {
 	}
 	
 	/*******************************************************************
@@ -46,17 +51,17 @@ public class ResizableEditBox extends EditBox implements DataBindingComponent<St
 	public void setX1(int x1) {
 		this.x1 = x1;
 	}
-
+	
 	@Override
 	public void setX2(int x2) {
 		this.x2 = x2;
 	}
-
+	
 	@Override
 	public void setY1(int y1) {
 		this.y1 = y1;
 	}
-
+	
 	@Override
 	public void setY2(int y2) {
 		this.y2 = y2;
@@ -86,7 +91,7 @@ public class ResizableEditBox extends EditBox implements DataBindingComponent<St
 	public HorizontalSizing getHorizontalSizingOption() {
 		return this.horizontalSizingOption;
 	}
-
+	
 	@Override
 	public VerticalSizing getVerticalSizingOption() {
 		return this.verticalSizingOption;
@@ -96,9 +101,8 @@ public class ResizableEditBox extends EditBox implements DataBindingComponent<St
 	public void setActive(boolean active) {
 		this.active = active;
 	}
-
+	
 	@Override
-	public void reset() {
-		this.setValue("");
+	public void tick() {
 	}
 }

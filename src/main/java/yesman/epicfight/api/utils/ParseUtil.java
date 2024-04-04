@@ -150,5 +150,13 @@ public class ParseUtil {
 		}
 	}
 	
+	public static <T> T parseOrGet(String value, Function<String, T> parseFunction, T defaultValue) {
+		try {
+			return parseFunction.apply(value);
+		} catch (NumberFormatException e) {
+			return defaultValue;
+		}
+	}
+	
 	private ParseUtil() {}
 }

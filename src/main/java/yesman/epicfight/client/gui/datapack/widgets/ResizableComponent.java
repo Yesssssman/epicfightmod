@@ -54,6 +54,7 @@ public interface ResizableComponent extends GuiEventListener, NarratableEntry {
 	HorizontalSizing getHorizontalSizingOption();
 	VerticalSizing getVerticalSizingOption();
 	
+	@OnlyIn(Dist.CLIENT)
 	public static enum HorizontalSizing {
 		LEFT_WIDTH((component, screenRectangle, v1, v2) -> {
 			component.setX(v1);
@@ -77,6 +78,7 @@ public interface ResizableComponent extends GuiEventListener, NarratableEntry {
 		}
 	}
 	
+	@OnlyIn(Dist.CLIENT)
 	public static enum VerticalSizing {
 		TOP_HEIGHT((component, screenRectangle, v1, v2) -> {
 			component.setY(v1);
@@ -100,6 +102,7 @@ public interface ResizableComponent extends GuiEventListener, NarratableEntry {
 		}
 	}
 	
+	@OnlyIn(Dist.CLIENT)
 	@FunctionalInterface
 	interface ResizeFunction {
 		public void resize(ResizableComponent component, ScreenRectangle screenRectangle, int v1, int v2);

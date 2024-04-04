@@ -86,6 +86,7 @@ public class EditItemListScreen extends Screen {
 		LIST, SELECTED
 	}
 	
+	@OnlyIn(Dist.CLIENT)
 	class ButtonList extends ObjectSelectionList<EditItemListScreen.ButtonList.ButtonEntry> {
 		private final Type type;
 		private final int itemsInColumn;
@@ -317,6 +318,7 @@ public class EditItemListScreen extends Screen {
 		}
 	}
 	
+	@OnlyIn(Dist.CLIENT)
 	class ItemButton extends Button {
 		private static final Set<Item> UNRENDERABLES = Sets.newHashSet();
 		

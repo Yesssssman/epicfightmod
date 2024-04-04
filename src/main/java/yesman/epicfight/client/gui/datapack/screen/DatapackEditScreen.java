@@ -71,6 +71,7 @@ import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.api.utils.ParseUtil;
+import yesman.epicfight.client.gui.datapack.widgets.ColorPreviewWidget;
 import yesman.epicfight.client.gui.datapack.widgets.ComboBox;
 import yesman.epicfight.client.gui.datapack.widgets.Grid;
 import yesman.epicfight.client.gui.datapack.widgets.InputComponentList;
@@ -377,10 +378,6 @@ public class DatapackEditScreen extends Screen {
 		public void tick() {
 			this.packListGrid.tick();
 			this.inputComponentsList.tick();
-			
-			if (this.packList.size() > 0) {
-				//System.out.println(this.packList.get(0).getTag());
-			}
 		}
 		
 		public void clear() {
@@ -776,38 +773,42 @@ public class DatapackEditScreen extends Screen {
 			final ResizableEditBox colorR = new ResizableEditBox(font, 0, 0, 30, 15, Component.translatable("datapack_edit.item_capability.trail.color.r"), HorizontalSizing.LEFT_WIDTH, null);
 			final ResizableEditBox colorG = new ResizableEditBox(font, 0, 0, 30, 15, Component.translatable("datapack_edit.item_capability.trail.color.g"), HorizontalSizing.LEFT_WIDTH, null);
 			final ResizableEditBox colorB = new ResizableEditBox(font, 0, 0, 30, 15, Component.translatable("datapack_edit.item_capability.trail.color.b"), HorizontalSizing.LEFT_WIDTH, null);
+			final ColorPreviewWidget colorWidget = new ColorPreviewWidget(0, 12, 0, 12, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.color"));
 			
 			colorR.setResponder((input) -> {
 				ListTag list = this.packList.get(this.packListGrid.getRowposition()).getTag().getCompound("trail").getList("color", Tag.TAG_INT);
 				int i = StringUtil.isNullOrEmpty(input) ? 0 : Integer.valueOf(input);
 				list.remove(0);
 				list.add(0, IntTag.valueOf(i));
-				
+				colorWidget.setColor(ParseUtil.parseOrGet(input, Integer::valueOf, 0), ParseUtil.parseOrGet(colorG.getValue(), Integer::valueOf, 0), ParseUtil.parseOrGet(colorB.getValue(), Integer::valueOf, 0));
 			});
 			colorG.setResponder((input) -> {
 				ListTag list = this.packList.get(this.packListGrid.getRowposition()).getTag().getCompound("trail").getList("color", Tag.TAG_INT);
 				int i = StringUtil.isNullOrEmpty(input) ? 0 : Integer.valueOf(input);
 				list.remove(1);
 				list.add(1, IntTag.valueOf(i));
+				colorWidget.setColor(ParseUtil.parseOrGet(colorR.getValue(), Integer::valueOf, 0), ParseUtil.parseOrGet(input, Integer::valueOf, 0), ParseUtil.parseOrGet(colorB.getValue(), Integer::valueOf, 0));
 			});
 			colorB.setResponder((input) -> {
 				ListTag list = this.packList.get(this.packListGrid.getRowposition()).getTag().getCompound("trail").getList("color", Tag.TAG_INT);
 				int i = StringUtil.isNullOrEmpty(input) ? 0 : Integer.valueOf(input);
 				list.remove(2);
 				list.add(2, IntTag.valueOf(i));
+				colorWidget.setColor(ParseUtil.parseOrGet(colorR.getValue(), Integer::valueOf, 0), ParseUtil.parseOrGet(colorG.getValue(), Integer::valueOf, 0), ParseUtil.parseOrGet(input, Integer::valueOf, 0));
 			});
 			
-			colorR.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Integer::parseInt));
-			colorG.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Integer::parseInt));
-			colorB.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Integer::parseInt));
+			colorR.setFilter((context) -> StringUtil.isNullOrEmpty(context) || (ParseUtil.isParsable(context, Integer::parseInt) && ParseUtil.parseOrGet(context, Integer::parseInt, 0) < 256));
+			colorG.setFilter((context) -> StringUtil.isNullOrEmpty(context) || (ParseUtil.isParsable(context, Integer::parseInt) && ParseUtil.parseOrGet(context, Integer::parseInt, 0) < 256));
+			colorB.setFilter((context) -> StringUtil.isNullOrEmpty(context) || (ParseUtil.isParsable(context, Integer::parseInt) && ParseUtil.parseOrGet(context, Integer::parseInt, 0) < 256));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.color")));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("R: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 28, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.color")));
+			this.inputComponentsList.addComponentCurrentRow(colorWidget.relocateX(rect, this.inputComponentsList.nextStart(4)));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(41), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("R: ")));
 			this.inputComponentsList.addComponentCurrentRow(colorR.relocateX(rect, this.inputComponentsList.nextStart(4)));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("G: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("G: ")));
 			this.inputComponentsList.addComponentCurrentRow(colorG.relocateX(rect, this.inputComponentsList.nextStart(4)));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("B: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("B: ")));
 			this.inputComponentsList.addComponentCurrentRow(colorB.relocateX(rect, this.inputComponentsList.nextStart(4)));
 			
 			final ResizableEditBox beginX = new ResizableEditBox(font, 0, 0, 30, 15, Component.translatable("datapack_edit.item_capability.trail.begin_pos.x"), HorizontalSizing.LEFT_WIDTH, null);
@@ -838,12 +839,12 @@ public class DatapackEditScreen extends Screen {
 			beginZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.begin_pos")));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.begin_pos")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
 			this.inputComponentsList.addComponentCurrentRow(beginX.relocateX(rect, this.inputComponentsList.nextStart(4)));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
 			this.inputComponentsList.addComponentCurrentRow(beginY.relocateX(rect, this.inputComponentsList.nextStart(4)));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
 			this.inputComponentsList.addComponentCurrentRow(beginZ.relocateX(rect, this.inputComponentsList.nextStart(4)));
 			
 			final ResizableEditBox endX = new ResizableEditBox(font, 0, 0, 30, 15, Component.translatable("datapack_edit.item_capability.trail.end_pos.x"), HorizontalSizing.LEFT_WIDTH, null);
@@ -874,12 +875,12 @@ public class DatapackEditScreen extends Screen {
 			endZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.end_pos")));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.end_pos")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
 			this.inputComponentsList.addComponentCurrentRow(endX.relocateX(rect, this.inputComponentsList.nextStart(4)));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
 			this.inputComponentsList.addComponentCurrentRow(endY.relocateX(rect, this.inputComponentsList.nextStart(4)));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
 			this.inputComponentsList.addComponentCurrentRow(endZ.relocateX(rect, this.inputComponentsList.nextStart(4)));
 			
 			final ResizableEditBox lifetime = new ResizableEditBox(font, 0, 0, 30, 15, Component.translatable("datapack_edit.item_capability.trail.lifetime"), HorizontalSizing.LEFT_WIDTH, null);
@@ -898,11 +899,11 @@ public class DatapackEditScreen extends Screen {
 			interpolation.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Integer::parseInt));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.lifetime")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.lifetime")));
 			this.inputComponentsList.addComponentCurrentRow(lifetime.relocateX(rect, this.inputComponentsList.nextStart(8)));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.interpolations")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.interpolations")));
 			this.inputComponentsList.addComponentCurrentRow(interpolation.relocateX(rect, this.inputComponentsList.nextStart(8)));
 			
 			final ResizableEditBox texturePath = new ResizableEditBox(font, 0, 0, 30, 15, Component.translatable("datapack_edit.item_capability.trail.end_pos.z"), HorizontalSizing.LEFT_RIGHT, null);
@@ -910,11 +911,11 @@ public class DatapackEditScreen extends Screen {
 			texturePath.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ResourceLocation.isValidResourceLocation(context));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.texture_path")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.texture_path")));
 			this.inputComponentsList.addComponentCurrentRow(texturePath.relocateX(rect, this.inputComponentsList.nextStart(8)));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.particle_type")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.particle_type")));
 			this.inputComponentsList.addComponentCurrentRow(new PopupBox.RegistryPopupBox<>(parentScreen, font, this.inputComponentsList.nextStart(8), 30, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 																		Component.translatable("datapack_edit.weapon_type.hit_particle"), ForgeRegistries.PARTICLE_TYPES,
 																		(item) -> this.packList.get(this.packListGrid.getRowposition()).getTag().getCompound("trail").putString("particle_type", ParseUtil.getRegistryName(item, ForgeRegistries.PARTICLE_TYPES))));
