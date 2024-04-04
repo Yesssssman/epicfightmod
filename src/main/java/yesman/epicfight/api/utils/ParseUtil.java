@@ -126,12 +126,12 @@ public class ParseUtil {
 		return obj == null ? "" : registry.getKey(obj).toString();
 	}
 	
-	public static <T extends Tag> T getOrCreateTag(CompoundTag compTag, String name, Supplier<T> tag) {
-		return getOrCreateTag(compTag, name, tag.get());
+	public static <T extends Tag> T getOrSupply(CompoundTag compTag, String name, Supplier<T> tag) {
+		return getOrDefaultTag(compTag, name, tag.get());
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T extends Tag> T getOrCreateTag(CompoundTag compTag, String name, T tag) {
+	public static <T extends Tag> T getOrDefaultTag(CompoundTag compTag, String name, T tag) {
 		if (compTag.contains(name)) {
 			return (T)compTag.get(name);
 		}

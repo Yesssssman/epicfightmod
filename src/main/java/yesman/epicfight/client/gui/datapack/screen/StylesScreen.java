@@ -50,7 +50,7 @@ public class StylesScreen extends Screen {
 				this.setComponentsActive(true);
 				Grid.PackImporter packImporter = new Grid.PackImporter();
 				
-				for (String key : ParseUtil.getOrCreateTag(tag, "predicate", new CompoundTag()).getAllKeys()) {
+				for (String key : ParseUtil.getOrDefaultTag(tag, "predicate", new CompoundTag()).getAllKeys()) {
 					packImporter.newRow();
 					packImporter.newValue("parameter_key", key);
 					packImporter.newValue("parameter_value", tag.getCompound("predicate").getString(key));
@@ -75,10 +75,10 @@ public class StylesScreen extends Screen {
 								.transparentBackground(false)
 								.rowpositionChanged((rowposition, values) -> this.inputComponentsList.importTag(rootTag.getList("cases", Tag.TAG_COMPOUND).getCompound(rowposition)))
 								.addColumn(Grid.combo("style", Style.ENUM_MANAGER.universalValues()).valueChanged((event) -> {
-												ParseUtil.getOrCreateTag(rootTag, "cases", new ListTag()).getCompound(event.rowposition).put("style", StringTag.valueOf(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT)));
+												ParseUtil.getOrDefaultTag(rootTag, "cases", new ListTag()).getCompound(event.rowposition).put("style", StringTag.valueOf(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT)));
 											}).defaultVal(Styles.ONE_HAND))
 								.pressAdd((grid, button) -> {
-									ParseUtil.getOrCreateTag(rootTag, "cases", new ListTag()).add(grid.children().size(), new CompoundTag());
+									ParseUtil.getOrDefaultTag(rootTag, "cases", new ListTag()).add(grid.children().size(), new CompoundTag());
 									int rowposition = grid.addRow();
 									grid.setGridFocus(rowposition, "style");
 								})
@@ -108,12 +108,12 @@ public class StylesScreen extends Screen {
 										.rowEditable(false)
 										.transparentBackground(false)
 										.addColumn(Grid.editbox("parameter_key").valueChanged((event) -> {
-											CompoundTag predicate = ParseUtil.getOrCreateTag(rootTag.getList("cases", Tag.TAG_COMPOUND).getCompound(this.stylesGrid.getRowposition()), "predicate", new CompoundTag());
+											CompoundTag predicate = ParseUtil.getOrDefaultTag(rootTag.getList("cases", Tag.TAG_COMPOUND).getCompound(this.stylesGrid.getRowposition()), "predicate", new CompoundTag());
 											predicate.remove(ParseUtil.nullParam(event.prevValue));
 											predicate.putString(ParseUtil.nullParam(event.postValue), ParseUtil.nullParam(event.grid.getValue(event.rowposition, "parameter_value")));
 										}).editable(false))
 										.addColumn(Grid.editbox("parameter_value").valueChanged((event) -> {
-											CompoundTag predicate = ParseUtil.getOrCreateTag(rootTag.getList("cases", Tag.TAG_COMPOUND).getCompound(this.stylesGrid.getRowposition()), "predicate", new CompoundTag());
+											CompoundTag predicate = ParseUtil.getOrDefaultTag(rootTag.getList("cases", Tag.TAG_COMPOUND).getCompound(this.stylesGrid.getRowposition()), "predicate", new CompoundTag());
 											predicate.putString(ParseUtil.nullParam(event.grid.getValue(event.rowposition, "parameter_key")), ParseUtil.nullParam(event.postValue));
 										}).width(150))
 										.build();

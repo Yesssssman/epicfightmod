@@ -429,7 +429,7 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList = new InputComponentList<>(DatapackEditScreen.this, 0, 0, 0, 0, 30) {
 				@Override
 				public void importTag(CompoundTag tag) {
-					CompoundTag colliderTag = ParseUtil.getOrCreateTag(tag, "collider", CompoundTag::new);
+					CompoundTag colliderTag = ParseUtil.getOrSupply(tag, "collider", CompoundTag::new);
 					boolean centerInit = colliderTag.contains("center");
 					boolean sizeInit = colliderTag.contains("size");
 					
@@ -506,12 +506,12 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.styles")));
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder(DatapackEditScreen.this).subScreen(StylesScreen::new)
-					.compoundTag(() -> ParseUtil.getOrCreateTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "styles", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+					.compoundTag(() -> ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "styles", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.offhand_validator")));
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder(DatapackEditScreen.this).subScreen(OffhandValidatorScreen::new)
-					.compoundTag(() -> ParseUtil.getOrCreateTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "offhand_item_compatible_predicate", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+					.compoundTag(() -> ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "offhand_item_compatible_predicate", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			final ResizableEditBox colliderCount = new ResizableEditBox(font, 0, 0, 40, 15, Component.translatable("datapack_edit.weapon_type.collider.count"), HorizontalSizing.LEFT_WIDTH, null);
 			final ResizableEditBox colliderCenterX = new ResizableEditBox(font, 0, 0, 35, 15, Component.translatable("datapack_edit.weapon_type.collider.center.x"), HorizontalSizing.LEFT_WIDTH, null);
@@ -522,7 +522,7 @@ public class DatapackEditScreen extends Screen {
 			final ResizableEditBox colliderSizeZ = new ResizableEditBox(font, 0, 0, 35, 15, Component.translatable("datapack_edit.weapon_type.collider.size.z"), HorizontalSizing.LEFT_WIDTH, null);
 			
 			colliderCount.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrCreateTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
 				
 				if (StringUtil.isNullOrEmpty(input)) {
 					collider.remove("count");
@@ -532,7 +532,7 @@ public class DatapackEditScreen extends Screen {
 			});
 			
 			colliderCenterX.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrCreateTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("center", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
@@ -541,7 +541,7 @@ public class DatapackEditScreen extends Screen {
 			});
 			
 			colliderCenterY.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrCreateTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("center", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
@@ -550,7 +550,7 @@ public class DatapackEditScreen extends Screen {
 			});
 			
 			colliderCenterZ.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrCreateTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("center", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
@@ -559,7 +559,7 @@ public class DatapackEditScreen extends Screen {
 			});
 			
 			colliderSizeX.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrCreateTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("size", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
@@ -568,7 +568,7 @@ public class DatapackEditScreen extends Screen {
 			});
 			
 			colliderSizeY.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrCreateTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("size", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
@@ -577,7 +577,7 @@ public class DatapackEditScreen extends Screen {
 			});
 			
 			colliderSizeZ.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrCreateTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("size", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
@@ -598,7 +598,7 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.addComponentCurrentRow(new PopupBox.ColliderPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 130, 30, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.collider"),
 																							(collider) -> {
 																								if (collider != null) {
-																									CompoundTag colliderTag = ParseUtil.getOrCreateTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+																									CompoundTag colliderTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
 																									collider.serialize(colliderTag);
 																									
 																									colliderCount.setValue(String.valueOf(colliderTag.getInt("number")));
@@ -641,7 +641,7 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.combos")));
 			
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder(DatapackEditScreen.this).subScreen(ComboScreen::new)
-					.compoundTag(() -> ParseUtil.getOrCreateTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "combos", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+					.compoundTag(() -> ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "combos", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.innate_skill")));
@@ -656,12 +656,12 @@ public class DatapackEditScreen extends Screen {
 																.rowEditable(true)
 																.transparentBackground(false)
 																.addColumn(Grid.combo("style", Style.ENUM_MANAGER.universalValues()).valueChanged((event) -> {
-																				CompoundTag innateSkillsTag = ParseUtil.getOrCreateTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "innate_skills", new CompoundTag());
+																				CompoundTag innateSkillsTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "innate_skills", new CompoundTag());
 																				innateSkillsTag.remove(ParseUtil.nullParam(event.prevValue).toLowerCase(Locale.ROOT));
 																				innateSkillsTag.putString(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT), ParseUtil.nullParam(event.grid.getValue(event.rowposition, "skill")));
 																			}).editable(true).width(100))
 																.addColumn(Grid.registryPopup("skill", SkillManager.getSkillRegistry()).filter((skill) -> skill.getCategory() == SkillCategories.WEAPON_INNATE).valueChanged((event) -> {
-																				CompoundTag innateSkillsTag = ParseUtil.getOrCreateTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "innate_skills", new CompoundTag());
+																				CompoundTag innateSkillsTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "innate_skills", new CompoundTag());
 																				innateSkillsTag.putString(ParseUtil.nullParam(event.grid.getValue(event.rowposition, "style")).toLowerCase(Locale.ROOT), ParseUtil.nullParam(event.postValue));
 																			}).toDisplayText((item) -> item == null ? "" : item.getRegistryName().toString()).width(150))
 																.pressAdd((grid, button) -> {
@@ -674,7 +674,7 @@ public class DatapackEditScreen extends Screen {
 																	int rowposition = grid.getRowposition();
 																	
 																	if (rowposition > -1) {
-																		CompoundTag innateSkillsTag = ParseUtil.getOrCreateTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "innate_skills", new CompoundTag());
+																		CompoundTag innateSkillsTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "innate_skills", new CompoundTag());
 																		innateSkillsTag.remove(ParseUtil.nullParam(grid.getValue(rowposition, "style")).toLowerCase(Locale.ROOT));
 																		grid.removeRow(rowposition);
 																	}
@@ -686,7 +686,7 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 80, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.living_animations")));
 			
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder(DatapackEditScreen.this).subScreen(LivingAnimationsScreen::new)
-					.compoundTag(() -> ParseUtil.getOrCreateTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "livingmotion_modifier", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+					.compoundTag(() -> ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "livingmotion_modifier", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.setComponentsActive(false);
 		}
@@ -706,7 +706,7 @@ public class DatapackEditScreen extends Screen {
 				public void importTag(CompoundTag tag) {
 					this.setComponentsActive(true);
 					
-					CompoundTag trailTag = ParseUtil.getOrCreateTag(tag, "trail", CompoundTag::new);
+					CompoundTag trailTag = ParseUtil.getOrSupply(tag, "trail", CompoundTag::new);
 					boolean colorInit = trailTag.contains("color");
 					boolean beginInit = trailTag.contains("begin_pos");
 					boolean endInit = trailTag.contains("end_pos");
@@ -759,7 +759,7 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.attributes")));
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder(DatapackEditScreen.this).subScreen(AttributeScreen::new)
-					.compoundTag(() -> ParseUtil.getOrCreateTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "attributes", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+					.compoundTag(() -> ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "attributes", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.type")));

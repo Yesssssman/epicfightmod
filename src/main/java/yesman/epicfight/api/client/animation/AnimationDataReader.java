@@ -46,7 +46,7 @@ public class AnimationDataReader {
 
 	public static void readAndApply(StaticAnimation animation, ResourceManager resourceManager, Resource iresource) {
 		InputStream inputstream = null;
-
+		
 		try {
 			inputstream = iresource.open();
 		} catch (IOException var5) {

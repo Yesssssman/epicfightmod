@@ -35,7 +35,7 @@ public class OffhandValidatorScreen extends Screen {
 				this.setComponentsActive(true);
 				Grid.PackImporter packImporter = new Grid.PackImporter();
 				
-				for (String key : ParseUtil.getOrCreateTag(tag, "predicate", new CompoundTag()).getAllKeys()) {
+				for (String key : ParseUtil.getOrDefaultTag(tag, "predicate", new CompoundTag()).getAllKeys()) {
 					packImporter.newRow();
 					packImporter.newValue("parameter_key", key);
 					packImporter.newValue("parameter_value", tag.getCompound("predicate").getString(key));
@@ -58,12 +58,12 @@ public class OffhandValidatorScreen extends Screen {
 										.rowEditable(false)
 										.transparentBackground(false)
 										.addColumn(Grid.editbox("parameter_key").valueChanged((event) -> {
-											CompoundTag predicate = ParseUtil.getOrCreateTag(rootTag, "predicate", new CompoundTag());
+											CompoundTag predicate = ParseUtil.getOrDefaultTag(rootTag, "predicate", new CompoundTag());
 											predicate.remove(ParseUtil.nullParam(event.prevValue));
 											predicate.putString(ParseUtil.nullParam(event.postValue), ParseUtil.nullParam(event.grid.getValue(event.rowposition, "parameter_value")));
 										}).editable(false))
 										.addColumn(Grid.editbox("parameter_value").valueChanged((event) -> {
-											CompoundTag predicate = ParseUtil.getOrCreateTag(rootTag, "predicate", new CompoundTag());
+											CompoundTag predicate = ParseUtil.getOrDefaultTag(rootTag, "predicate", new CompoundTag());
 											predicate.putString(ParseUtil.nullParam(event.grid.getValue(event.rowposition, "parameter_key")), ParseUtil.nullParam(event.postValue));
 										}).width(150))
 										.build();

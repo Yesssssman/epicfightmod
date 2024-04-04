@@ -1,6 +1,6 @@
 {
     "pack": {
-        "description": "epicfight resources",
+        "description": "${mod_id} resources",
         "pack_format": 15
     }
 }
