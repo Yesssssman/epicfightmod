@@ -96,6 +96,7 @@ public class ParryingSkill extends GuardSkill {
 					event.setParried(true);
 					penalty = 0.1F;
 					knockback *= 0.4F;
+					container.getDataManager().setData(LAST_ACTIVE, 0);
 				} else {
 					penalty += this.getPenalizer(itemCapability);
 					container.getDataManager().setDataSync(PENALTY, penalty, playerentity);
