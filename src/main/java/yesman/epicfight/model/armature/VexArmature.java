@@ -8,8 +8,8 @@ public class VexArmature extends HumanoidArmature {
 	public final Joint wingL;
 	public final Joint wingR;
 	
-	public VexArmature(int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
-		super(jointNumber, rootJoint, jointMap);
+	public VexArmature(String name, int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
+		super(name, jointNumber, rootJoint, jointMap);
 		
 		this.wingL = this.getOrLogException(jointMap, "Wing_L");
 		this.wingR = this.getOrLogException(jointMap, "Wing_R");

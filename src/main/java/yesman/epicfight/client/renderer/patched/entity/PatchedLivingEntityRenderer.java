@@ -203,7 +203,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 			RenderType renderType = (RenderType)getRenderType.invoke(renderer, entityIn, isVisible, isVisibleToPlayer, isGlowing);
 			
 			if (renderType != null) {
-				renderType = EpicFightRenderTypes.triangles(renderType);
+				renderType = EpicFightRenderTypes.getTriangulated(renderType);
 			}
 			
 			return renderType;

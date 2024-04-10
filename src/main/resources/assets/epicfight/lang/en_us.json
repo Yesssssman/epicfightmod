@@ -305,6 +305,20 @@
 	"epicfight.tip.temples": "Uchigatanas, akin to skill books, can be discovered in Desert Temples or Jungle Temples. These rare weapons are not craftable.",
 	"epicfight.tip.combat_mode": "Switch between mining and combat modes by pressing it's default key, 'R'.",
 	
+	"datapack_edit.model_player.collider": "Collider",
+	"datapack_edit.model_player.item": "Item",
+	"datapack_edit.model_player.trail": "Trail",
+	"datapack_edit.import_animation": "Import Animation",
+	"datapack_edit.import_animation.type": "Type",
+	"datapack_edit.import_animation.convert_time": "Transition",
+	"datapack_edit.import_animation.repeat": "Repeat",
+	"datapack_edit.import_animation.antic": "Anticipation",
+	"datapack_edit.import_animation.pre_delay": "Pre-Delay",
+	"datapack_edit.import_animation.contact": "Contract",
+	"datapack_edit.import_animation.recovery": "Recovery",
+	
+	"datapack_edit.import_animation.preview": "Preview",
+	
 	"datapack_edit.styles": "Styles",
 	
 	"datapack_edit.weapon_type.category": "Category",

@@ -239,6 +239,7 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 	
 	public static void clear() {
 		PRESETS.clear();
+		WeaponTypeReloadListener.registerDefaultWeaponTypes();
 	}
 	
 	@OnlyIn(Dist.CLIENT)

@@ -101,8 +101,8 @@ public class StylesScreen extends Screen {
 		this.font = parentScreen.getMinecraft().font;
 		
 		final Grid parameterGrid = Grid.builder(this, parentScreen.getMinecraft())
-										.xy1(this.inputComponentsList.getLeft() + 4, 40)
-										.xy2(12, 80)
+										.xy1(4, 40)
+										.xy2(6, 80)
 										.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
 										.rowHeight(26)
 										.rowEditable(false)
@@ -120,7 +120,7 @@ public class StylesScreen extends Screen {
 		
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 80, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.styles.condition")));
-		this.inputComponentsList.addComponentCurrentRow(new PopupBox.RegistryPopupBox<>(this, this.font, this.inputComponentsList.nextStart(5), 21, 60, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.condition"),
+		this.inputComponentsList.addComponentCurrentRow(new PopupBox.RegistryPopupBox<>(this, this.font, this.inputComponentsList.nextStart(5), 7, 60, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.condition"),
 																		EpicFightConditions.REGISTRY.get(), (conditionProvider) -> {
 																			if (conditionProvider != null) {
 																				parameterGrid.reset();
@@ -166,11 +166,10 @@ public class StylesScreen extends Screen {
 		this.stylesGrid.resize(screenRectangle);
 		this.defaultStyle.resize(screenRectangle);
 		
-		this.inputComponentsList.updateSize(screenRectangle.width() - 138, screenRectangle.height(), screenRectangle.top() + 45, screenRectangle.height() - 45);
+		this.inputComponentsList.updateSize(screenRectangle.width() - 200, screenRectangle.height(), screenRectangle.top() + 45, screenRectangle.height() - 45);
 		this.inputComponentsList.setLeftPos(180);
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {
-			//this.selectCallback.accept(this.registryList.getSelected() == null ? null : this.registryList.getSelected().item);
 			this.minecraft.setScreen(this.parentScreen);
 		}).pos(this.width / 2 - 162, this.height - 32).size(160, 21).build());
 		

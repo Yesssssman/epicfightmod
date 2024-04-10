@@ -85,7 +85,13 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		this.resourceLocation = new ResourceLocation(modid, "animmodels/animations/" + folderPath + ".json");
 		this.registryName = new ResourceLocation(modid, folderPath);
 		this.armature = armature;
-		this.animationId = AnimationManager.getInstance().registerAnimation(this);
+		
+		if (noRegister) {
+			AnimationManager.getInstance().registerNoIdAnimation(this);
+			this.animationId = -1;
+		} else {
+			this.animationId = AnimationManager.getInstance().registerAnimation(this);
+		}
 	}
 	
 	/* Multilayer Constructor */
@@ -152,7 +158,7 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 						}
 					}
 					
-					if (trailInfo.particle == null) {
+					if (!trailInfo.playable()) {
 						continue;
 					}
 					

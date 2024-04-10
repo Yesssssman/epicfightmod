@@ -28,7 +28,6 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 public abstract class DynamicAnimation {
 	protected final boolean isRepeat;
 	protected final float convertTime;
-	//protected float totalTime = 0.0F;
 	
 	public DynamicAnimation() {
 		this(EpicFightOptions.GENERAL_ANIMATION_CONVERT_TIME, false);
@@ -197,6 +196,5 @@ public abstract class DynamicAnimation {
 
 	@OnlyIn(Dist.CLIENT)
 	public void renderDebugging(PoseStack poseStack, MultiBufferSource buffer, LivingEntityPatch<?> entitypatch, float playTime, float partialTicks) {
-		
 	}
 }

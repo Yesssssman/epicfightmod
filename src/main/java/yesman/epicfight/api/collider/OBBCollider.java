@@ -1,9 +1,10 @@
 package yesman.epicfight.api.collider;
 
+import org.joml.Matrix4f;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
@@ -13,11 +14,12 @@ import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.Joint;
+import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
-
-import org.joml.Matrix4f;
 
 public class OBBCollider extends Collider {
 	protected final Vec3[] modelVertex;
@@ -223,15 +225,31 @@ public class OBBCollider extends Collider {
 		return super.toString() + " worldCenter : " + this.worldCenter + " direction : " + this.rotatedVertex[0];
 	}
 	
-	@OnlyIn(Dist.CLIENT) @Override
-	public void drawInternal(PoseStack matrixStackIn, MultiBufferSource buffer, OpenMatrix4f pose, boolean red) {
-		VertexConsumer vertexBuilder = buffer.getBuffer(RenderType.lineStrip());
+	@Override
+	@OnlyIn(Dist.CLIENT)
+	public RenderType getRenderType() {
+		return RenderType.lines();
+	}
+	
+	@Override
+	@OnlyIn(Dist.CLIENT)
+	public void drawInternal(PoseStack poseStack, VertexConsumer vertexConsumer, Armature armature, Joint joint, Pose pose1, Pose pose2, float partialTicks, int color) {
+		int pathIndex = armature.searchPathIndex(joint.getName());
+		OpenMatrix4f poseMatrix;
+		Pose interpolatedPose = Pose.interpolatePose(pose1, pose2, partialTicks);
+		
+		if (pathIndex == -1) {
+			poseMatrix = interpolatedPose.getOrDefaultTransform("Root").getAnimationBindedMatrix(armature.rootJoint, new OpenMatrix4f()).removeTranslation();
+		} else {
+			poseMatrix = armature.getBindedTransformByJointIndex(interpolatedPose, pathIndex);
+		}
+		
 		OpenMatrix4f transpose = new OpenMatrix4f();
-		OpenMatrix4f.transpose(pose, transpose);
-		matrixStackIn.pushPose();
-		MathUtils.translateStack(matrixStackIn, pose);
-        MathUtils.rotateStack(matrixStackIn, transpose);
-        Matrix4f matrix = matrixStackIn.last().pose();
+		OpenMatrix4f.transpose(poseMatrix, transpose);
+		poseStack.pushPose();
+		MathUtils.translateStack(poseStack, poseMatrix);
+        MathUtils.rotateStack(poseStack, transpose);
+        Matrix4f matrix = poseStack.last().pose();
         Vec3 vec = this.modelVertex[1];
         float maxX = (float)(this.modelCenter.x + vec.x);
         float maxY = (float)(this.modelCenter.y + vec.y);
@@ -239,24 +257,33 @@ public class OBBCollider extends Collider {
         float minX = (float)(this.modelCenter.x - vec.x);
         float minY = (float)(this.modelCenter.y - vec.y);
         float minZ = (float)(this.modelCenter.z - vec.z);
-        float color = red ? 0.0F : 1.0F;
-        vertexBuilder.vertex(matrix, maxX, maxY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-        vertexBuilder.vertex(matrix, maxX, maxY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-        vertexBuilder.vertex(matrix, minX, maxY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-        vertexBuilder.vertex(matrix, minX, maxY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-        vertexBuilder.vertex(matrix, maxX, maxY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-        vertexBuilder.vertex(matrix, maxX, minY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-        vertexBuilder.vertex(matrix, maxX, minY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-        vertexBuilder.vertex(matrix, maxX, maxY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-        vertexBuilder.vertex(matrix, maxX, minY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-        vertexBuilder.vertex(matrix, minX, minY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-        vertexBuilder.vertex(matrix, minX, maxY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-        vertexBuilder.vertex(matrix, minX, minY, minZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-        vertexBuilder.vertex(matrix, minX, minY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-        vertexBuilder.vertex(matrix, minX, maxY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-        vertexBuilder.vertex(matrix, minX, minY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-        vertexBuilder.vertex(matrix, maxX, minY, maxZ).color(1.0F, color, color, 1.0F).normal(0.0F, 1.0F, 0.0F).endVertex();
-        matrixStackIn.popPose();
+        
+        vertexConsumer.vertex(matrix, minX, maxY, minZ).color(color).normal(0.0F, 0.0F, 1.0F).endVertex();
+        vertexConsumer.vertex(matrix, minX, maxY, maxZ).color(color).normal(0.0F, 0.0F, 1.0F).endVertex();
+        vertexConsumer.vertex(matrix, minX, maxY, maxZ).color(color).normal(1.0F, 0.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix, maxX, maxY, maxZ).color(color).normal(1.0F, 0.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix, maxX, maxY, maxZ).color(color).normal(0.0F, 0.0F, -1.0F).endVertex();
+        vertexConsumer.vertex(matrix, maxX, maxY, minZ).color(color).normal(0.0F, 0.0F, -1.0F).endVertex();
+        vertexConsumer.vertex(matrix, maxX, maxY, minZ).color(color).normal(-1.0F, 0.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix, minX, maxY, minZ).color(color).normal(-1.0F, 0.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix, maxX, maxY, maxZ).color(color).normal(0.0F, -1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix, maxX, minY, maxZ).color(color).normal(0.0F, -1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix, minX, maxY, maxZ).color(color).normal(0.0F, -1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix, minX, minY, maxZ).color(color).normal(0.0F, -1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix, maxX, maxY, minZ).color(color).normal(0.0F, -1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix, maxX, minY, minZ).color(color).normal(0.0F, -1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix, minX, maxY, minZ).color(color).normal(0.0F, -1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix, minX, minY, minZ).color(color).normal(0.0F, -1.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix, minX, minY, minZ).color(color).normal(0.0F, 0.0F, 1.0F).endVertex();
+        vertexConsumer.vertex(matrix, minX, minY, maxZ).color(color).normal(0.0F, 0.0F, 1.0F).endVertex();
+        vertexConsumer.vertex(matrix, minX, minY, maxZ).color(color).normal(1.0F, 0.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix, maxX, minY, maxZ).color(color).normal(1.0F, 0.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix, maxX, minY, maxZ).color(color).normal(0.0F, 0.0F, -1.0F).endVertex();
+        vertexConsumer.vertex(matrix, maxX, minY, minZ).color(color).normal(0.0F, 0.0F, -1.0F).endVertex();
+        vertexConsumer.vertex(matrix, maxX, minY, minZ).color(color).normal(-1.0F, 0.0F, 0.0F).endVertex();
+        vertexConsumer.vertex(matrix, minX, minY, minZ).color(color).normal(-1.0F, 0.0F, 0.0F).endVertex();
+        
+        poseStack.popPose();
 	}
 	
 	public CompoundTag serialize(CompoundTag resultTag) {

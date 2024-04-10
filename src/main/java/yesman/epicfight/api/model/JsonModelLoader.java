@@ -2,6 +2,7 @@ package yesman.epicfight.api.model;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
@@ -20,6 +21,7 @@ import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import com.mojang.datafixers.util.Pair;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -57,10 +59,12 @@ public class JsonModelLoader {
 	
 	private JsonObject rootJson;
 	private ResourceManager resourceManager;
+	private ResourceLocation resourceLocation;
 	
 	public JsonModelLoader(ResourceManager resourceManager, ResourceLocation resourceLocation) throws IllegalStateException {
 		JsonReader jsonReader = null;
 		this.resourceManager = resourceManager;
+		this.resourceLocation = resourceLocation;
 		
 		try {
 			try {
@@ -69,6 +73,7 @@ public class JsonModelLoader {
 				jsonReader.setLenient(true);
 				this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
 			} catch (NoSuchElementException e) {
+				// In this case, reads the animation data from mod.jar (Especially in a server)
 				Class<?> modClass = ModList.get().getModObjectById(resourceLocation.getNamespace()).get().getClass();
 				BufferedInputStream inputstream = new BufferedInputStream(modClass.getResourceAsStream("/assets/" + resourceLocation.getNamespace() + "/" + resourceLocation.getPath()));
 				Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
@@ -87,6 +92,17 @@ public class JsonModelLoader {
 				}
 			}
 		}
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public JsonModelLoader(InputStream inputstream) throws IOException {
+		JsonReader jsonReader = null;
+		this.resourceManager = Minecraft.getInstance().getResourceManager();
+		
+		jsonReader = new JsonReader(new InputStreamReader(inputstream, StandardCharsets.UTF_8));
+		jsonReader.setLenient(true);
+		this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
+		jsonReader.close();
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -255,7 +271,11 @@ public class JsonModelLoader {
 		Joint joint = this.getJoint(hierarchy, nameAsVertexGroups, jointMap, true);
 		joint.initOriginTransform(new OpenMatrix4f());
 		
-		return constructor.invoke(jointMap.size(), joint, jointMap);
+		int sliceBegin = this.resourceLocation.getPath().lastIndexOf("/") + 1;
+		int sliceEnd = this.resourceLocation.getPath().indexOf(".json");
+		String armatureName = this.resourceLocation.getPath().substring(sliceBegin, sliceEnd);
+		
+		return constructor.invoke(armatureName, jointMap.size(), joint, jointMap);
 	}
 	
 	public Joint getJoint(JsonObject object, JsonArray nameAsVertexGroups, Map<String, Joint> jointMap, boolean start) {
@@ -424,6 +444,52 @@ public class JsonModelLoader {
 			
 			if (joint == null) {
 				EpicFightMod.LOGGER.warn("[EpicFightMod] Can't find the joint " + name + " in animation data " + animation.getRegistryName());
+				continue;
+			}
+			
+			JsonArray timeArray = keyObject.getAsJsonArray("time");
+			JsonArray transformArray = keyObject.getAsJsonArray("transform");
+			int timeNum = timeArray.size();
+			int matrixNum = transformArray.size();
+			float[] times = new float[timeNum];
+			float[] transforms = new float[matrixNum * 16];
+			
+			for (int i = 0; i < timeNum; i++) {
+				times[i] = timeArray.get(i).getAsFloat();
+			}
+			
+			for (int i = 0; i < matrixNum; i++) {
+				JsonArray matrixJson = transformArray.get(i).getAsJsonArray();
+				
+				for (int j = 0; j < 16; j++) {
+					transforms[i * 16 + j] = matrixJson.get(j).getAsFloat();
+				}
+			}
+			
+			TransformSheet sheet = getTransformSheet(times, transforms, OpenMatrix4f.invert(joint.getLocalTrasnform(), null), root);
+			clip.addJointTransform(name, sheet);
+			
+			if (clip.getClipTime() < times[times.length - 1]) {
+				clip.setClipTime(times[times.length - 1]);
+			}
+			
+			root = false;
+		}
+		
+		return clip;
+	}
+	
+	public AnimationClip loadAnimationClip(Armature armature) {
+		JsonArray array = this.rootJson.get("animation").getAsJsonArray();
+		AnimationClip clip = new AnimationClip();
+		boolean root = true;
+		
+		for (JsonElement element : array) {
+			JsonObject keyObject = element.getAsJsonObject();
+			String name = keyObject.get("name").getAsString();
+			Joint joint = armature.searchJointByName(name);
+			
+			if (joint == null) {
 				continue;
 			}
 			

@@ -8,7 +8,6 @@ import com.google.common.collect.Lists;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.Tag;
 import net.minecraftforge.api.distmarker.Dist;
@@ -41,7 +40,7 @@ public abstract class InputComponentList<T extends Tag> extends ContainerObjectS
 		int xPos;
 		
 		if (this.lastEntry.children.size() == 0) {
-			xPos = this.x0;
+			xPos = 0;
 		} else {
 			ResizableComponent lastWidget = this.lastEntry.children.get(this.lastEntry.children.size() - 1);
 			xPos = lastWidget.getX() + lastWidget.getWidth();
@@ -89,17 +88,24 @@ public abstract class InputComponentList<T extends Tag> extends ContainerObjectS
 	public void updateSize(int width, int height, int y0, int y1) {
 		super.updateSize(width, height, y0, y1);
 		
-		ScreenRectangle screenRectangle = this.owner.getRectangle();
-		
 		for (InputComponentList<T>.InputComponentEntry entry : this.children()) {
-			for (Object widget : entry.children()) {
-				if (widget instanceof ResizableComponent resizableComponent) {
-					resizableComponent.resize(screenRectangle);
-				}
+			for (ResizableComponent widget : entry.children()) {
+				widget.resize(this.getRectangle());
 			}
 		}
 	}
 	
+	@Override
+	public void setLeftPos(int xPos) {
+		super.setLeftPos(xPos);
+		
+		for (InputComponentList<T>.InputComponentEntry entry : this.children()) {
+			for (ResizableComponent widget : entry.children()) {
+				widget.resize(this.getRectangle());
+			}
+		}
+	}
+
 	public void tick() {
 		for (InputComponentList<T>.InputComponentEntry entry : this.children()) {
 			for (ResizableComponent widget : entry.children()) {
@@ -157,6 +163,23 @@ public abstract class InputComponentList<T extends Tag> extends ContainerObjectS
 		return super.mouseScrolled(x, y, amount);
 	}
 	
+	@Override
+	public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
+		for (int i = 0; i < this.children().size(); i++) {
+			InputComponentEntry entry = this.children().get(i);
+			int j1 = this.getRowTop(i);
+			int k1 = this.getRowBottom(i);
+			
+			if (k1 >= this.y0 && j1 <= this.y1) {
+				if (entry.getChildAt(mouseX, mouseY).filter((component) -> component.mouseDragged(mouseX, mouseY, button, dx, dy)).isPresent()) {
+					return true;
+				}
+			}
+		}
+		
+		return super.mouseDragged(mouseX, mouseY, button, dx, dy);
+	}
+	
 	@OnlyIn(Dist.CLIENT)
 	public class InputComponentEntry extends ContainerObjectSelectionList.Entry<InputComponentList<T>.InputComponentEntry> {
 		final List<ResizableComponent> children = Lists.newArrayList();
@@ -176,8 +199,7 @@ public abstract class InputComponentList<T extends Tag> extends ContainerObjectS
 		public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
 			for (ResizableComponent widget : this.children) {
 				widget.relocateY(InputComponentList.this.owner.getRectangle(), top + InputComponentList.this.itemHeight / 2 - widget.getHeight() / 2);
-				
-				widget.render(guiGraphics, mouseX, mouseY, partialTicks);
+				widget.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
 			}
 		}
 		

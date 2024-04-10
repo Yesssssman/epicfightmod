@@ -1,5 +1,6 @@
 package yesman.epicfight.client.gui.datapack.widgets;
 
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
@@ -21,7 +22,12 @@ public class ResizableButton extends Button implements ResizableComponent {
 	public static ResizableButton.Builder builder(Component title, Button.OnPress onPress) {
 		return new ResizableButton.Builder(title, onPress);
 	}
-
+	
+	@Override
+	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		super.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
+	}
+	
 	/*******************************************************************
 	 * @ResizableComponent variables                                   *
 	 *******************************************************************/

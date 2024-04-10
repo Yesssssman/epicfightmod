@@ -57,12 +57,12 @@ public interface ResizableComponent extends GuiEventListener, NarratableEntry {
 	@OnlyIn(Dist.CLIENT)
 	public static enum HorizontalSizing {
 		LEFT_WIDTH((component, screenRectangle, v1, v2) -> {
-			component.setX(v1);
+			component.setX(screenRectangle.left() + v1);
 			component.setWidth(v2);
 		}), LEFT_RIGHT((component, screenRectangle, v1, v2) -> {
 			int end = screenRectangle.right() - v2;
-			int width = Math.max(end - v1, 0);
-			component.setX(v1);
+			int width = Math.max(end - (screenRectangle.left() + v1), 0);
+			component.setX(screenRectangle.left() + v1);
 			component.setWidth(width);
 		}), WIDTH_RIGHT((component, screenRectangle, v1, v2) -> {
 			int end = screenRectangle.right() - v2;
@@ -115,7 +115,7 @@ public interface ResizableComponent extends GuiEventListener, NarratableEntry {
 	
 	void setActive(boolean active);
 	
-	void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks);
+	void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks);
 	
 	int getX();
 	int getY();

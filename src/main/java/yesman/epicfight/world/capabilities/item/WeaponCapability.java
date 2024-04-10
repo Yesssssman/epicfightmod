@@ -6,6 +6,7 @@ import java.util.function.Function;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.ibm.icu.impl.locale.XCldrStub.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.sounds.SoundEvent;
@@ -269,6 +270,14 @@ public class WeaponCapability extends CapabilityItem {
 		public Builder comboCancel(Function<Style, Boolean> comboCancel) {
 			this.comboCancel = comboCancel;
 			return this;
+		}
+		
+		public Map<Style, List<AnimationProvider<?>>> getComboAnimations() {
+			return ImmutableMap.copyOf(this.autoAttackMotionMap);
+		}
+		
+		public Collider getCollider() {
+			return this.collider;
 		}
 	}
 }

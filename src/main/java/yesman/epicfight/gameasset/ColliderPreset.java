@@ -101,7 +101,7 @@ public class ColliderPreset implements PreparableReloadListener {
 		double centerY = centerVector.getDouble(1);
 		double centerZ = centerVector.getDouble(2);
 		
-		if (sizeX < 0 || sizeY < 0 || sizeZ < 0) {
+		if (sizeX < 0 || sizeY < 0 || sizeZ < 0 || (sizeX == 0 && sizeY == 0 && sizeZ == 0)) {
 			throw new IllegalArgumentException("Datapack deserialization error: the size of the collider must be non-negative value!");
 		}
 		

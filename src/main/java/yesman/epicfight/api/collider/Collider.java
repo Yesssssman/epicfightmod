@@ -5,8 +5,10 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
@@ -79,37 +81,44 @@ public abstract class Collider {
 	
 	/** Display on debug mode **/
 	@OnlyIn(Dist.CLIENT)
-	public abstract void drawInternal(PoseStack matrixStackIn, MultiBufferSource buffer, OpenMatrix4f pose, boolean red);
+	public abstract void drawInternal(PoseStack poseStack, VertexConsumer vertexConsumer, Armature armature, Joint joint, Pose pose1, Pose pose2, float partialTicks, int colliderColor);
 	
 	/** Display on debug mode **/
 	@OnlyIn(Dist.CLIENT)
-	public void draw(PoseStack matrixStackIn, MultiBufferSource buffer, LivingEntityPatch<?> entitypatch, AttackAnimation animation, Joint joint, float prevElapsedTime, float elapsedTime, float partialTicks, float attackSpeed) {
+	public void draw(PoseStack poseStack, MultiBufferSource buffer, LivingEntityPatch<?> entitypatch, AttackAnimation animation, Joint joint, float prevElapsedTime, float elapsedTime, float partialTicks, float attackSpeed) {
 		Armature armature = entitypatch.getArmature();
 		int pathIndex =  armature.searchPathIndex(joint.getName());
 		EntityState state = animation.getState(entitypatch, elapsedTime);
 		EntityState prevState = animation.getState(entitypatch, prevElapsedTime);
-		boolean flag3 = prevState.attacking() || state.attacking() || (prevState.getLevel() < 2 && state.getLevel() > 2);
-		OpenMatrix4f mat = null;
+		boolean attacking = prevState.attacking() || state.attacking() || (prevState.getLevel() < 2 && state.getLevel() > 2);
+		Pose prevPose;
+		Pose currentPose;
 		
 		if (pathIndex == -1) {
-			Pose rootPose = new Pose();
-			rootPose.putJointData("Root", JointTransform.empty());
-			animation.modifyPose(animation, rootPose, entitypatch, elapsedTime, 1.0F);
-			mat = rootPose.getOrDefaultTransform("Root").getAnimationBindedMatrix(entitypatch.getArmature().rootJoint, new OpenMatrix4f()).removeTranslation();
+			prevPose = new Pose();
+			currentPose = new Pose();
+			prevPose.putJointData("Root", JointTransform.empty());
+			currentPose.putJointData("Root", JointTransform.empty());
+			animation.modifyPose(animation, prevPose, entitypatch, prevElapsedTime, 0.0F);
+			animation.modifyPose(animation, currentPose, entitypatch, elapsedTime, 1.0F);
 		} else {
-			mat = armature.getBindedTransformByJointIndex(animation.getPoseByTime(entitypatch, elapsedTime, 0.0F), pathIndex);
+			prevPose = animation.getPoseByTime(entitypatch, partialTicks, 0.0F);
+			currentPose = animation.getPoseByTime(entitypatch, elapsedTime, 1.0F);
 		}
 		
-		this.drawInternal(matrixStackIn, buffer, mat, flag3);
+		this.drawInternal(poseStack, buffer.getBuffer(this.getRenderType()), armature, joint, prevPose, currentPose, partialTicks, attacking ? 0xFFFF0000 : -1);
 	}
 	
+	public abstract Collider deepCopy();
+	
 	public abstract boolean isCollide(Entity opponent);
+	
+	@OnlyIn(Dist.CLIENT)
+	public abstract RenderType getRenderType();
 	
 	protected AABB getHitboxAABB() {
 		return this.outerAABB.move(-this.worldCenter.x, this.worldCenter.y, -this.worldCenter.z);
 	}
-	
-	public abstract Collider deepCopy();
 	
 	public CompoundTag serialize(CompoundTag resultTag) {
 		return resultTag;

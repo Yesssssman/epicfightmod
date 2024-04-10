@@ -34,7 +34,7 @@ public class Armatures {
 	
 	@FunctionalInterface
 	public interface ArmatureContructor<T extends Armature> {
-		T invoke(int jointNumber, Joint joint, Map<String, Joint> jointMap);
+		T invoke(String name, int jointNumber, Joint joint, Map<String, Joint> jointMap);
 	}
 	
 	private static final Map<ResourceLocation, Armature> ARMATURES = Maps.newHashMap();

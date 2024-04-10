@@ -1,10 +1,13 @@
 package yesman.epicfight.client.gui.datapack.screen;
 
+import java.io.File;
 import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
+
+import com.google.common.collect.Maps;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -18,6 +21,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringUtil;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.model.AnimatedMesh;
@@ -27,6 +31,12 @@ import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
 public class SelectAnimationScreen extends Screen {
+	private static final Map<AnimationClip, File> USER_IMPORT_ANIMATIONS = Maps.newHashMap();
+	
+	public static final void addUserImportAnimation(AnimationClip animation, File file) {
+		USER_IMPORT_ANIMATIONS.put(animation, file);
+	}
+	
 	private final Screen parentScreen;
 	private final AnimationList animationList;
 	private final AnimatedModelPlayer animationModelPlayer;
@@ -62,6 +72,10 @@ public class SelectAnimationScreen extends Screen {
 		editBox.setResponder(this.animationList::applyFilter);
 		
 		this.addRenderableWidget(editBox);
+		this.addRenderableWidget(Button.builder(Component.translatable("datapack_edit.import_animation"), (button) -> {
+			Minecraft.getInstance().setScreen(new ImportAnimationsScreen(this, this.animationModelPlayer.getArmature(), this.animationModelPlayer.getMesh()));
+		}).pos(10, 10).size(100, 21).build());
+		
 		this.addRenderableWidget(this.animationModelPlayer);
 		this.addRenderableWidget(this.animationList);
 		
@@ -71,17 +85,16 @@ public class SelectAnimationScreen extends Screen {
 			}
 			
 			this.onClose();
-			this.minecraft.setScreen(this.parentScreen);
 		}).pos(this.width / 2 - 162, this.height - 28).size(160, 21).build());
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, (button) -> {
 			this.onClose();
-			this.minecraft.setScreen(this.parentScreen);
 		}).pos(this.width / 2 + 2, this.height - 28).size(160, 21).build());
 	}
 	
 	@Override
 	public void onClose() {
 		this.animationModelPlayer.onDestroy();
+		this.minecraft.setScreen(this.parentScreen);
 	}
 	
 	@Override
@@ -100,7 +113,7 @@ public class SelectAnimationScreen extends Screen {
 		public AnimationList(Minecraft minecraft, int width, int height, int y0, int y1, int itemHeight) {
 			super(minecraft, width, height, y0, y1, itemHeight);
 			
-			SelectAnimationScreen.this.registeredAnimations.values().stream().sorted((a1, a2) -> a1.getRegistryName().compareTo(a2.getRegistryName())).map(AnimationEntry::new).forEach(this::addEntry);
+			SelectAnimationScreen.this.registeredAnimations.values().stream().sorted((a1, a2) -> Integer.compare(a1.getId(), a2.getId())).map(AnimationEntry::new).forEach(this::addEntry);
 		}
 		
 		@Override
@@ -125,7 +138,8 @@ public class SelectAnimationScreen extends Screen {
 			this.setScrollAmount(0.0D);
 			this.children().clear();
 			
-			SelectAnimationScreen.this.registeredAnimations.values().stream().filter((animation) -> StringUtil.isNullOrEmpty(keyward) ? true : animation.getRegistryName().toString().contains(keyward)).map(AnimationEntry::new).forEach(this::addEntry);
+			SelectAnimationScreen.this.registeredAnimations.values().stream().filter((animation) -> StringUtil.isNullOrEmpty(keyward) ? true : animation.getRegistryName().toString().contains(keyward))
+																	.map(AnimationEntry::new).sorted((a1, a2) -> Integer.compare(a1.animation.getId(), a2.animation.getId())).forEach(this::addEntry);
 		}
 		
 		@OnlyIn(Dist.CLIENT)

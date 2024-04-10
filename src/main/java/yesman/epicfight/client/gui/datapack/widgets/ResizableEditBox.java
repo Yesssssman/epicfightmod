@@ -1,7 +1,5 @@
 package yesman.epicfight.client.gui.datapack.widgets;
 
-import javax.annotation.Nullable;
-
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
@@ -12,17 +10,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class ResizableEditBox extends EditBox implements DataBindingComponent<String> {
 	public ResizableEditBox(Font font, int x, int y, int width, int height, Component title, HorizontalSizing horizontalSizingOption, VerticalSizing verticalSizingOption) {
 		super(font, x, y, width, height, title);
-		
-		this.x1 = x;
-		this.x2 = width;
-		this.y1 = y;
-		this.y2 = height;
-		this.horizontalSizingOption = horizontalSizingOption;
-		this.verticalSizingOption = verticalSizingOption;
-	}
-	
-	public ResizableEditBox(Font font, int x, int y, int width, int height, @Nullable EditBox editbox, Component title, HorizontalSizing horizontalSizingOption, VerticalSizing verticalSizingOption) {
-		super(font, x, y, width, height, editbox, title);
 		
 		this.x1 = x;
 		this.x2 = width;

@@ -25,6 +25,7 @@ import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.model.Meshes;
+import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.client.gui.datapack.widgets.AnimatedModelPlayer;
 import yesman.epicfight.client.gui.datapack.widgets.Grid;
@@ -34,6 +35,7 @@ import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.Horizonta
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.VerticalSizing;
 import yesman.epicfight.client.gui.datapack.widgets.Static;
 import yesman.epicfight.gameasset.Armatures;
+import yesman.epicfight.gameasset.ColliderPreset;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.Style;
 
@@ -90,8 +92,7 @@ public class ComboScreen extends Screen {
 			}
 		};
 		this.inputComponentsList.setLeftPos(parentScreen.width - 205);
-		
-		this.rootTag = rootTag;
+		this.rootTag = ParseUtil.getOrDefaultTag(rootTag, "combos", new CompoundTag());
 		this.font = parentScreen.getMinecraft().font;
 		
 		this.stylesGrid = Grid.builder(this, parentScreen.getMinecraft())
@@ -104,6 +105,7 @@ public class ComboScreen extends Screen {
 								.transparentBackground(false)
 								.rowpositionChanged((rowposition, values) -> {
 									this.inputComponentsList.importTag(this.styles.get(rowposition).getTag());
+									this.reloadAnimationPlayer();
 									
 									if (values.get("style") == Styles.MOUNT) {
 										this.dashAttackPopupbox.setValue(null);
@@ -187,6 +189,14 @@ public class ComboScreen extends Screen {
 		this.animationModelPlayer.setArmature(Armatures.BIPED);
 		this.animationModelPlayer.setMesh(Meshes.BIPED);
 		
+		CompoundTag colliderTag = rootTag.getCompound("collider");
+		
+		try {
+			Collider collider = ColliderPreset.deserializeSimpleCollider(colliderTag);
+			this.animationModelPlayer.setCollider(collider);
+		} catch (IllegalArgumentException e) {
+		}
+		
 		this.dashAttackPopupbox = new PopupBox.AnimationPopupBox(this, this.font, 110, -1, 15, 15, HorizontalSizing.WIDTH_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.dash_attak"),
 				(animation) -> {
 					if (animation != null) {
@@ -233,8 +243,8 @@ public class ComboScreen extends Screen {
 		
 		Grid.PackImporter packImporter = new Grid.PackImporter();
 		
-		for (String style : rootTag.getAllKeys()) {
-			this.styles.add(PackEntry.of(style, () -> rootTag.getList(style, Tag.TAG_STRING)));
+		for (String style : this.rootTag.getAllKeys()) {
+			this.styles.add(PackEntry.of(style, () -> this.rootTag.getList(style, Tag.TAG_STRING)));
 			
 			packImporter.newRow();
 			packImporter.newValue("style", Style.ENUM_MANAGER.get(style));
@@ -249,9 +259,8 @@ public class ComboScreen extends Screen {
 		
 		this.stylesGrid.resize(this.getRectangle());
 		
-		this.inputComponentsList.updateSize(230, screenRectangle.height(), screenRectangle.top() + 34, screenRectangle.height() - 45);
+		this.inputComponentsList.updateSize(205, screenRectangle.height(), screenRectangle.top() + 34, screenRectangle.height() - 45);
 		this.inputComponentsList.setLeftPos(this.width - 205);
-		
 		this.animationModelPlayer.resize(screenRectangle);
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {
@@ -259,7 +268,7 @@ public class ComboScreen extends Screen {
 			
 			for (PackEntry<String, ListTag> entry : this.styles) {
 				if (styles.contains(entry.getPackName())) {
-					this.minecraft.setScreen(new MessageScreen("Save Failed", "Unable to save because of duplicated style: " + entry.getPackName(), this, (button2) -> {
+					this.minecraft.setScreen(new MessageScreen<>("Save Failed", "Unable to save because of duplicated style: " + entry.getPackName(), this, (button2) -> {
 						this.minecraft.setScreen(this);
 					}, 180, 90));
 					return;
@@ -277,7 +286,7 @@ public class ComboScreen extends Screen {
 		}).pos(this.width / 2 - 162, this.height - 32).size(160, 21).build());
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, (button) -> {
-			this.minecraft.setScreen(new MessageScreen("", "Do you want to quit without saving changes?", this,
+			this.minecraft.setScreen(new MessageScreen<>("", "Do you want to quit without saving changes?", this,
 														(button2) -> {
 															this.onClose();
 														}, (button2) -> {

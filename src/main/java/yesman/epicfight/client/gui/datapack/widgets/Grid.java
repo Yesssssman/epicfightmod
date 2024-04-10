@@ -723,7 +723,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		private BiConsumer<Grid, Button> onAddPress;
 		private BiConsumer<Grid, Button> onRemovePress;
 		private BiConsumer<Integer, Map<String, Object>> onRowpositionChanged;
-		private HorizontalSizing horizontalSizing = HorizontalSizing.LEFT_WIDTH;
+		private HorizontalSizing horizontalSizing = null;
 		private VerticalSizing verticalSizing = null;
 		
 		private GridBuilder(Screen owner) {
@@ -835,6 +835,8 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		@Override
 		public AbstractWidget createEditWidget(Screen owner, Font font, int x, int y, int height, Row row, String colName, String value) {
 			EditBox editbox = new EditBox(font, x, y, this.width - 3, height, Component.literal("grid.editbox"));
+			
+			editbox.setMaxLength(100);
 			editbox.setValue(value);
 			editbox.setResponder((string) -> row.setValue(colName, string));
 			
@@ -1206,7 +1208,11 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 			this.reset();
 		}
 	}
-
+	
+	@Override
+	public void setResponder(Consumer<Object> responder) {
+	}
+	
 	@Override
 	public void setValue(Object value) {
 		this.reset();
@@ -1225,12 +1231,17 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 			this.setValueChangeEnabled(true);
 		}
 	}
-
+	
 	@Override
 	public Object getValue() {
 		return null;
 	}
-
+	
+	@Override
+	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		this.render(guiGraphics, mouseX, mouseY, partialTicks);
+	}
+	
 	@Override
 	public void reset() {
 		this.children().clear();

@@ -41,8 +41,6 @@ import javax.annotation.Nonnull;
 
 @OnlyIn(Dist.CLIENT)
 public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends PlayerPatch<T> {
-	protected float bodyYRot;
-	public float oBodyYRot;
 	private Item prevHeldItem;
 	private Item prevHeldItemOffHand;
 	
@@ -159,13 +157,10 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	
 	@Override
 	protected void clientTick(LivingEvent.LivingTickEvent event) {
-		this.oBodyYRot = this.bodyYRot;
-		
 		if (!this.getEntityState().updateLivingMotion()) {
 			this.original.yBodyRot = this.original.getYRot();
 		}
 		
-		this.bodyYRot = this.original.yBodyRot;
 		boolean isMainHandChanged = this.prevHeldItem != this.original.getInventory().getSelected().getItem();
 		boolean isOffHandChanged = this.prevHeldItemOffHand != this.original.getInventory().offhand.get(0).getItem();
 
@@ -240,7 +235,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
         			|| (!this.original.onGround() && this.original.onClimbable())) {
     	        yaw = 0;
     		} else {
-    			float f = MathUtils.lerpBetween(this.oBodyYRot, this.bodyYRot, partialTick);
+    			float f = MathUtils.lerpBetween(this.original.yBodyRotO, this.original.yBodyRot, partialTick);
     			float f1 = MathUtils.lerpBetween(this.original.yHeadRotO, this.original.yHeadRot, partialTick);
     	        yaw = f1 - f;
     		}
@@ -353,14 +348,6 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			
 			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, oXRot, xRot, oYRot, yRot, partialTick, 0.9375F, 0.9375F, 0.9375F);
 		}
-	}
-	
-	public void setBodyRot(float bodyYaw) {
-		this.bodyYRot = bodyYaw;
-	}
-	
-	public float getBodyRot() {
-		return this.bodyYRot;
 	}
 	
 	public Direction getLadderDirection(@Nonnull BlockState state, @Nonnull Level world, @Nonnull BlockPos pos, @Nonnull LivingEntity entity) {

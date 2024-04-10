@@ -51,8 +51,8 @@ public class OffhandValidatorScreen extends Screen {
 		this.font = parentScreen.getMinecraft().font;
 		
 		final Grid parameterGrid = Grid.builder(this, parentScreen.getMinecraft())
-										.xy1(this.inputComponentsList.getLeft() + 4, 40)
-										.xy2(20, 80)
+										.xy1(4, 40)
+										.xy2(12, 80)
 										.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
 										.rowHeight(26)
 										.rowEditable(false)
@@ -70,7 +70,7 @@ public class OffhandValidatorScreen extends Screen {
 		
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 80, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.styles.condition")));
-		this.inputComponentsList.addComponentCurrentRow(new PopupBox.RegistryPopupBox<>(this, this.font, this.inputComponentsList.nextStart(5), 21, 60, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.condition"),
+		this.inputComponentsList.addComponentCurrentRow(new PopupBox.RegistryPopupBox<>(this, this.font, this.inputComponentsList.nextStart(5), 13, 60, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.condition"),
 																		EpicFightConditions.REGISTRY.get(), (conditionProvider) -> {
 																			if (conditionProvider != null) {
 																				parameterGrid.reset();

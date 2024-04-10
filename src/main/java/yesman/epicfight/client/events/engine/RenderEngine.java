@@ -413,16 +413,11 @@ public class RenderEngine {
 			if (renderEngine.hasRendererFor(livingentity)) {
 				LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(livingentity, LivingEntityPatch.class);
 				LocalPlayerPatch playerpatch = null;
-				float bodyRotO = 0.0F;
-				float bodyRot = 0.0F;
-
+				
 				if (event.getPartialTick() == 1.0F && entitypatch instanceof LocalPlayerPatch localPlayerPatch) {
 					playerpatch = localPlayerPatch;
-					bodyRotO = playerpatch.oBodyYRot;
-					bodyRot = playerpatch.getBodyRot();
-					playerpatch.oBodyYRot = livingentity.getYRot();
-					playerpatch.setBodyRot(livingentity.getYRot());
-
+					playerpatch.setModelYRot(livingentity.getYRot(), false);
+					
 					event.getPoseStack().translate(0, 0.1D, 0);
 				}
 
@@ -430,10 +425,9 @@ public class RenderEngine {
 					event.setCanceled(true);
 					renderEngine.renderEntityArmatureModel(livingentity, entitypatch, event.getRenderer(), event.getMultiBufferSource(), event.getPoseStack(), event.getPackedLight(), event.getPartialTick());
 				}
-
+				
 				if (playerpatch != null) {
-					playerpatch.oBodyYRot = bodyRotO;
-					playerpatch.setBodyRot(bodyRot);
+					playerpatch.disableModelYRot(false);
 				}
 			}
 			

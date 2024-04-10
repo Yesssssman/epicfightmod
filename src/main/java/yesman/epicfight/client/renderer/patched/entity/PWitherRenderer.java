@@ -63,11 +63,11 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 					transparency = 1.0F - transparency;
 				}
 				
-				renderType = EpicFightRenderTypes.triangles(RenderType.entityTranslucent(WITHER_LOCATION));
+				renderType = EpicFightRenderTypes.getTriangulated(RenderType.entityTranslucent(WITHER_LOCATION));
 				VertexConsumer builder1 = buffer.getBuffer(renderType);
 				mesh.drawModelWithPose(poseStack, builder1, packedLight, 1.0F, 1.0F, 1.0F, transparency, OverlayTexture.NO_OVERLAY, armature, poseMatrices);
 				
-				renderType = EpicFightRenderTypes.triangles(RenderType.entityTranslucent(WITHER_INVULNERABLE_LOCATION));
+				renderType = EpicFightRenderTypes.getTriangulated(RenderType.entityTranslucent(WITHER_INVULNERABLE_LOCATION));
 				VertexConsumer builder2 = buffer.getBuffer(renderType);
 				mesh.drawModelWithPose(poseStack, builder2, packedLight, 1.0F, 1.0F, 1.0F, Mth.sin(transparency * 3.1415F), OverlayTexture.NO_OVERLAY, armature, poseMatrices);
 			}

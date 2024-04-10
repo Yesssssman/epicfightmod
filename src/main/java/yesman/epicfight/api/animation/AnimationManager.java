@@ -101,6 +101,19 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		return ImmutableMap.copyOf(this.animationClips);
 	}
 	
+	public void registerNoIdAnimation(StaticAnimation staticAnimation) {
+		if (this.currentWorkingModid == null) {
+			throw new IllegalStateException("[EpicFightMod] You have to register an animation when AnimationRegistryEvent is being called!");
+		}
+		
+		if (this.animationRegistry.containsKey(staticAnimation.getRegistryName())) {
+			EpicFightMod.LOGGER.error("Animation registration failed.");
+			new IllegalStateException("[EpicFightMod] Animation with registry name " + staticAnimation.getRegistryName() + " already exists!").printStackTrace();
+		}
+		
+		this.animationRegistry.put(staticAnimation.getRegistryName(), staticAnimation);
+	}
+	
 	public int registerAnimation(StaticAnimation staticAnimation) {
 		if (this.currentWorkingModid == null) {
 			throw new IllegalStateException("[EpicFightMod] You have to register an animation when AnimationRegistryEvent is being called!");
@@ -113,9 +126,7 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		}
 		
 		this.animationRegistry.put(staticAnimation.getRegistryName(), staticAnimation);
-		
 		int id = this.animationRegistry.size();
-		
 		this.animationIdMap.addMapping(staticAnimation, id);
 		
 		return id;

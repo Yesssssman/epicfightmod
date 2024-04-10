@@ -6,7 +6,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
+import io.netty.util.internal.StringUtil;
 import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.InteractionHand;
@@ -52,7 +56,7 @@ public class TrailInfo {
 	}
 	
 	public TrailInfo overwrite(TrailInfo trailInfo) {
-		boolean validTime = trailInfo.startTime >= 0.0F && trailInfo.endTime >= 0.0F;
+		boolean validTime = isValidTime(trailInfo.startTime) && isValidTime(trailInfo.endTime);
 		boolean validColor = trailInfo.rCol >= 0.0F && trailInfo.gCol >= 0.0F && trailInfo.bCol >= 0.0F;
 		TrailInfo.Builder builder = new TrailInfo.Builder();
 		
@@ -61,7 +65,7 @@ public class TrailInfo {
 		builder.joint((trailInfo.joint == null) ? this.joint : trailInfo.joint);
 		builder.type((trailInfo.particle == null) ? this.particle : trailInfo.particle);
 		builder.time((!validTime) ? this.startTime : trailInfo.startTime, (!validTime) ? this.endTime : trailInfo.endTime);
-		builder.fadeTime((trailInfo.fadeTime < 0.0F) ? this.fadeTime : trailInfo.fadeTime);
+		builder.fadeTime((!isValidTime(trailInfo.fadeTime)) ? this.fadeTime : trailInfo.fadeTime);
 		builder.r(!(validColor) ? this.rCol : trailInfo.rCol);
 		builder.g(!(validColor) ? this.gCol : trailInfo.gCol);
 		builder.b(!(validColor) ? this.bCol : trailInfo.bCol);
@@ -71,6 +75,14 @@ public class TrailInfo {
 		builder.itemSkinHand((trailInfo.hand == null) ? this.hand : trailInfo.hand);
 		
 		return builder.create();
+	}
+	
+	public static boolean isValidTime(float time) {
+		return !Float.isNaN(time) && time >= 0.0F;
+	}
+	
+	public boolean playable() {
+		return this.start != null && this.end != null && this.particle != null && !StringUtil.isNullOrEmpty(this.joint) && isValidTime(this.startTime) && isValidTime(this.endTime) && this.interpolateCount > 0 && this.trailLifetime > 0 && this.texturePath != null;
 	}
 	
 	public static TrailInfo.Builder builder() {
@@ -143,17 +155,80 @@ public class TrailInfo {
 		return trailBuilder.create();
 	}
 	
+	public static TrailInfo deserialize(CompoundTag compoundTag) {
+		TrailInfo.Builder trailBuilder = TrailInfo.builder();
+		
+		if (compoundTag.contains("start_time") && compoundTag.contains("end_time")) {
+			float startTime = compoundTag.getFloat("start_time");
+			float endTime = compoundTag.getFloat("end_time");
+			trailBuilder.time(startTime, endTime);
+		}
+		
+		if (compoundTag.contains("fade_time")) {
+			float fadeTime = compoundTag.getFloat("fade_time");
+			trailBuilder.fadeTime(fadeTime);
+		}
+		
+		if (compoundTag.contains("lifetime")) {
+			trailBuilder.lifetime(compoundTag.getInt("lifetime"));
+		}
+		
+		if (compoundTag.contains("interpolations")) {
+			trailBuilder.interpolations(compoundTag.getInt("interpolations"));
+		}
+		
+		if (compoundTag.contains("joint")) {
+			trailBuilder.joint(compoundTag.getString("joint"));
+		}
+		
+		if (compoundTag.contains("texture_path")) {
+			trailBuilder.texture(compoundTag.getString("texture_path"));
+		}
+		
+		if (compoundTag.contains("particle_type")) {
+			String particleTypeName = compoundTag.getString("particle_type");
+			SimpleParticleType particleType = (SimpleParticleType)ForgeRegistries.PARTICLE_TYPES.getValue(new ResourceLocation(particleTypeName));
+			trailBuilder.type(particleType);
+		}
+		
+		if (compoundTag.contains("color")) {
+			ListTag color = compoundTag.getList("color", Tag.TAG_INT);
+			trailBuilder.r(color.getInt(0) / 255F);
+			trailBuilder.g(color.getInt(1) / 255F);
+			trailBuilder.b(color.getInt(2) / 255F);
+		}
+		
+		if (compoundTag.contains("begin_pos")) {
+			ListTag beginPos = compoundTag.getList("begin_pos", Tag.TAG_DOUBLE);
+			trailBuilder.startPos(new Vec3(beginPos.getDouble(0), beginPos.getDouble(1), beginPos.getDouble(2)));
+		}
+		
+		if (compoundTag.contains("end_pos")) {
+			ListTag endPos = compoundTag.getList("end_pos", Tag.TAG_DOUBLE);
+			trailBuilder.endPos(new Vec3(endPos.getDouble(0), endPos.getDouble(1), endPos.getDouble(2)));
+		}
+		
+		if (compoundTag.contains("item_skin_hand")) {
+			String itemSkinHand = compoundTag.getString("item_skin_hand");
+			InteractionHand hand = InteractionHand.valueOf(itemSkinHand.toUpperCase(Locale.ROOT));
+			trailBuilder.itemSkinHand(hand);
+		}
+		
+		return trailBuilder.create();
+	}
+	
+	@OnlyIn(Dist.CLIENT)
 	public static class Builder {
 		private Vec3 start;
 		private Vec3 end;
 		private SimpleParticleType particle;
 		private String joint;
-		private float startTime = -1F;
-		private float endTime = -1F;
-		private float fadeTime = -1F;
-		private float rCol = -1F;
-		private float gCol = -1F;
-		private float bCol = -1F;
+		private float startTime = Float.NaN;
+		private float endTime = Float.NaN;
+		private float fadeTime = Float.NaN;
+		private float rCol = -1.0F;
+		private float gCol = -1.0F;
+		private float bCol = -1.0F;
 		private int interpolateCount = -1;
 		private int trailLifetime = -1;
 		private ResourceLocation texturePath;

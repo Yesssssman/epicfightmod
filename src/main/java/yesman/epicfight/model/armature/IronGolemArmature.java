@@ -21,8 +21,8 @@ public class IronGolemArmature extends Armature {
 	public final Joint RR1;
 	public final Joint RR2;
 	
-	public IronGolemArmature(int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
-		super(jointNumber, rootJoint, jointMap);
+	public IronGolemArmature(String name, int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
+		super(name, jointNumber, rootJoint, jointMap);
 		
 		this.chest = this.getOrLogException(jointMap, "Chest");
 		this.head = this.getOrLogException(jointMap, "Head");

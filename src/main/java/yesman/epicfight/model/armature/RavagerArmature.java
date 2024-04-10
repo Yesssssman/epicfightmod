@@ -25,8 +25,8 @@ public class RavagerArmature extends Armature {
 	public final Joint footLB;
 	public final Joint legLB_F;
 	
-	public RavagerArmature(int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
-		super(jointNumber, rootJoint, jointMap);
+	public RavagerArmature(String name, int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
+		super(name, jointNumber, rootJoint, jointMap);
 		
 		this.torso = this.getOrLogException(jointMap, "Torso");
 		this.headRoot = this.getOrLogException(jointMap, "Head_Root");

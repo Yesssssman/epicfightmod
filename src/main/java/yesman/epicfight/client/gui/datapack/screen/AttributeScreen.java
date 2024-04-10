@@ -136,7 +136,7 @@ public class AttributeScreen extends Screen {
 			
 			for (PackEntry<String, CompoundTag> entry : this.styles) {
 				if (styles.contains(entry.getPackName())) {
-					this.minecraft.setScreen(new MessageScreen("Save Failed", "Unable to save because of duplicated style: " + entry.getPackName(), this, (button2) -> {
+					this.minecraft.setScreen(new MessageScreen<>("Save Failed", "Unable to save because of duplicated style: " + entry.getPackName(), this, (button2) -> {
 						this.minecraft.setScreen(this);
 					}, 180, 90));
 					return;
@@ -154,7 +154,7 @@ public class AttributeScreen extends Screen {
 		}).pos(this.width / 2 - 162, this.height - 32).size(160, 21).build());
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, (button) -> {
-			this.minecraft.setScreen(new MessageScreen("", "Do you want to quit without saving changes?", this,
+			this.minecraft.setScreen(new MessageScreen<>("", "Do you want to quit without saving changes?", this,
 														(button2) -> {
 															this.onClose();
 														}, (button2) -> {

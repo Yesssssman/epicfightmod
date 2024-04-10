@@ -274,21 +274,22 @@ public class BattleModeGui extends ModIngameGui {
 			RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 		}
         
-        RenderSystem.disableCull();
+        GL11.glCullFace(GL11.GL_FRONT);
+        
         bufferbuilder.begin(VertexFormat.Mode.TRIANGLE_FAN, DefaultVertexFormat.POSITION_TEX);
         
         for (int j = 0; j < 2; j++) {
-        	bufferbuilder.vertex(poseStack.last().pose(), pos.x + iconSize * CLOCK_POS[j].x, pos.y + iconSize * CLOCK_POS[j].y, 0.0F)
-        		.uv(CLOCK_POS[j].x, CLOCK_POS[j].y).endVertex();
+        	bufferbuilder.vertex(poseStack.last().pose(), pos.x + iconSize * CLOCK_POS[j].x, pos.y + iconSize * CLOCK_POS[j].y, 0.0F).uv(CLOCK_POS[j].x, CLOCK_POS[j].y).endVertex();
 		}
 		
 		for (int j = CLOCK_POS.length - 1; j >= vertexNum; j--) {
-        	bufferbuilder.vertex(poseStack.last().pose(), pos.x + iconSize * CLOCK_POS[j].x, pos.y + iconSize * CLOCK_POS[j].y, 0.0F)
-        		.uv(CLOCK_POS[j].x, CLOCK_POS[j].y).endVertex();
+        	bufferbuilder.vertex(poseStack.last().pose(), pos.x + iconSize * CLOCK_POS[j].x, pos.y + iconSize * CLOCK_POS[j].y, 0.0F).uv(CLOCK_POS[j].x, CLOCK_POS[j].y).endVertex();
 		}
         
         bufferbuilder.vertex(poseStack.last().pose(), lastVertexX, lastVertexY, 0.0F).uv(lastTexX, lastTexY).endVertex();
         tessellator.end();
+        
+        GL11.glCullFace(GL11.GL_BACK);
         
      	RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         

@@ -22,11 +22,11 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<T> {
-	private final Consumer<T> responder;
 	private final ComboItemList comboItemList;
 	private final Font font;
 	private final int maxRows;
 	
+	private Consumer<T> responder;
 	private boolean listOpened;
 	
 	public ComboBox(Screen parent, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, int maxRows, Component title, Collection<T> items, Function<T, String> displayStringMapper, Consumer<T> responder) {
@@ -140,7 +140,7 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 	}
 	
 	@Override
-	protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		int outlineColor = this.isFocused() ? -1 : this.isActive() ? -6250336 : -12566463;
 		
 		guiGraphics.fill(this.getX() - 1, this.getY() - 1, this.getX() + this.width + 1, this.getY() + this.height + 1, outlineColor);
@@ -155,7 +155,7 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 		
 		if (this.listOpened) {
 			guiGraphics.pose().pushPose();
-			guiGraphics.pose().translate(0, 0, 1);
+			guiGraphics.pose().translate(0, 0, 100);
 			this.comboItemList.render(guiGraphics, mouseX, mouseY, partialTicks);
 			guiGraphics.pose().popPose();
 		}
@@ -319,11 +319,19 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 	public void setActive(boolean active) {
 		this.active = active;
 	}
-
+	
+	@Override
+	public void setResponder(Consumer<T> responder) {
+		this.responder = responder;
+	}
+	
 	@Override
 	public void setValue(T value) {
 		this.comboItemList.setSelected(value);
-		this.responder.accept(value);
+		
+		if (this.responder != null) {
+			this.responder.accept(value);
+		}
 	}
 	
 	@Override

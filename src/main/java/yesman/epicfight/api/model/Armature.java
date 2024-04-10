@@ -18,6 +18,7 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.main.EpicFightMod;
 
 public class Armature {
+	private final String name;
 	private final Int2ObjectMap<Joint> jointById;
 	private final Map<String, Joint> jointByName;
 	private final Object2IntMap<String> pathIndexMap;
@@ -27,7 +28,8 @@ public class Armature {
 	private Pose prevPose = new Pose();
 	private Pose currentPose = new Pose();
 	
-	public Armature(int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
+	public Armature(String name, int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
+		this.name = name;
 		this.jointNumber = jointNumber;
 		this.rootJoint = rootJoint;
 		this.jointByName = jointMap;
@@ -147,6 +149,11 @@ public class Armature {
 		return this.rootJoint;
 	}
 	
+	@Override
+	public String toString() {
+		return this.name;
+	}
+	
 	public Armature deepCopy() {
 		Map<String, Joint> oldToNewJoint = Maps.newHashMap();
 		oldToNewJoint.put("empty", Joint.EMPTY);
@@ -157,8 +164,8 @@ public class Armature {
 		Armature newArmature = null;
 		
 		try {
-			Constructor<? extends Armature> constructor = this.getClass().getConstructor(int.class, Joint.class, Map.class);
-			newArmature = constructor.newInstance(this.jointNumber, newRoot, oldToNewJoint);
+			Constructor<? extends Armature> constructor = this.getClass().getConstructor(String.class, int.class, Joint.class, Map.class);
+			newArmature = constructor.newInstance(this.name, this.jointNumber, newRoot, oldToNewJoint);
 		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			e.printStackTrace();
 		}

@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import org.joml.Matrix4f;
-import org.joml.Quaternionf;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL12;
@@ -41,6 +40,7 @@ import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
 import yesman.epicfight.api.client.model.ItemSkin;
 import yesman.epicfight.api.client.model.ItemSkins;
+import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.CubicBezierCurve;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -49,14 +49,14 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class TrailParticle extends TextureSheetParticle {
-	private final Joint joint;
-	private final TrailInfo trailInfo;
-	private final StaticAnimation animation;
-	private final LivingEntityPatch<?> entitypatch;
-	private final List<TrailEdge> invisibleTrailEdges;
-	private final List<TrailEdge> visibleTrailEdges;
-	private boolean animationEnd;
-	private float startEdgeCorrection = 0.0F;
+	protected final Joint joint;
+	protected final TrailInfo trailInfo;
+	protected final StaticAnimation animation;
+	protected final LivingEntityPatch<?> entitypatch;
+	protected final List<TrailEdge> invisibleTrailEdges;
+	protected final List<TrailEdge> visibleTrailEdges;
+	protected boolean animationEnd;
+	protected float startEdgeCorrection = 0.0F;
 	
 	protected TrailParticle(ClientLevel level, LivingEntityPatch<?> entitypatch, Joint joint, StaticAnimation animation, TrailInfo trailInfo, SpriteSet spriteSet) {
 		super(level, 0, 0, 0);
@@ -70,10 +70,10 @@ public class TrailParticle extends TextureSheetParticle {
 		this.trailInfo = trailInfo;
 		
 		Vec3 entityPos = entitypatch.getOriginal().position();
+		this.move(entityPos.x, entityPos.y + entitypatch.getOriginal().getEyeHeight(), entityPos.z);
 		
 		float size = (float)Math.max(this.trailInfo.start.length(), this.trailInfo.end.length()) * 2.0F;
 		this.setSize(size, size);
-		this.move(entityPos.x, entityPos.y + entitypatch.getOriginal().getEyeHeight(), entityPos.z);
 		this.setSpriteFromAge(spriteSet);
 		
 		Pose prevPose = this.entitypatch.getArmature().getPrevPose();
@@ -96,6 +96,7 @@ public class TrailParticle extends TextureSheetParticle {
 		OpenMatrix4f prevJointTf = this.entitypatch.getArmature().getBindedTransformFor(prevPose, this.joint).mulFront(prvmodelTf);
 		OpenMatrix4f middleJointTf = this.entitypatch.getArmature().getBindedTransformFor(middlePose, this.joint).mulFront(middleModelTf);
 		OpenMatrix4f currentJointTf = this.entitypatch.getArmature().getBindedTransformFor(currentPose, this.joint).mulFront(curModelTf);
+		
 		Vec3 prevStartPos = OpenMatrix4f.transform(prevJointTf, trailInfo.start);
 		Vec3 prevEndPos = OpenMatrix4f.transform(prevJointTf, trailInfo.end);
 		Vec3 middleStartPos = OpenMatrix4f.transform(middleJointTf, trailInfo.start);
@@ -107,9 +108,48 @@ public class TrailParticle extends TextureSheetParticle {
 		this.invisibleTrailEdges.add(new TrailEdge(middleStartPos, middleEndPos, this.trailInfo.trailLifetime));
 		this.invisibleTrailEdges.add(new TrailEdge(currentStartPos, currentEndPos, this.trailInfo.trailLifetime));
 		
-		this.rCol = this.trailInfo.rCol;
-		this.gCol = this.trailInfo.gCol;
-		this.bCol = this.trailInfo.bCol;
+		this.rCol = Math.max(this.trailInfo.rCol, 0.0F);
+		this.gCol = Math.max(this.trailInfo.gCol, 0.0F);
+		this.bCol = Math.max(this.trailInfo.bCol, 0.0F);
+	}
+	
+	@Deprecated /** This constructor is only for {@link AnimatedModelPlayer} **/
+	protected TrailParticle(Armature armature, Joint joint, StaticAnimation animation, TrailInfo trailInfo) {
+		super(null, 0, 0, 0);
+		
+		this.entitypatch = null;
+		this.joint = joint;
+		this.animation = animation;
+		this.invisibleTrailEdges = Lists.newLinkedList();
+		this.visibleTrailEdges = Lists.newLinkedList();
+		this.hasPhysics = false;
+		this.trailInfo = trailInfo;
+		
+		float size = (float)Math.max(this.trailInfo.start.length(), this.trailInfo.end.length()) * 2.0F;
+		this.setSize(size, size);
+		
+		Pose prevPose = armature.getPrevPose();
+		Pose middlePose = armature.getPose(0.5F);
+		Pose currentPose = armature.getCurrentPose();
+		
+		OpenMatrix4f prevJointTf = armature.getBindedTransformFor(prevPose, this.joint);
+		OpenMatrix4f middleJointTf = armature.getBindedTransformFor(middlePose, this.joint);
+		OpenMatrix4f currentJointTf = armature.getBindedTransformFor(currentPose, this.joint);
+		
+		Vec3 prevStartPos = OpenMatrix4f.transform(prevJointTf, trailInfo.start);
+		Vec3 prevEndPos = OpenMatrix4f.transform(prevJointTf, trailInfo.end);
+		Vec3 middleStartPos = OpenMatrix4f.transform(middleJointTf, trailInfo.start);
+		Vec3 middleEndPos = OpenMatrix4f.transform(middleJointTf, trailInfo.end);
+		Vec3 currentStartPos = OpenMatrix4f.transform(currentJointTf, trailInfo.start);
+		Vec3 currentEndPos = OpenMatrix4f.transform(currentJointTf, trailInfo.end);
+		
+		this.invisibleTrailEdges.add(new TrailEdge(prevStartPos, prevEndPos, this.trailInfo.trailLifetime));
+		this.invisibleTrailEdges.add(new TrailEdge(middleStartPos, middleEndPos, this.trailInfo.trailLifetime));
+		this.invisibleTrailEdges.add(new TrailEdge(currentStartPos, currentEndPos, this.trailInfo.trailLifetime));
+		
+		this.rCol = Math.max(this.trailInfo.rCol, 0.0F);
+		this.gCol = Math.max(this.trailInfo.gCol, 0.0F);
+		this.bCol = Math.max(this.trailInfo.bCol, 0.0F);
 	}
 	
 	@Override
@@ -128,7 +168,7 @@ public class TrailParticle extends TextureSheetParticle {
 			}
 		}
 		
-		if (this.trailInfo.fadeTime > 0.0F && this.trailInfo.endTime < animPlayer.getElapsedTime()) {
+		if (TrailInfo.isValidTime(this.trailInfo.fadeTime) && this.trailInfo.endTime < animPlayer.getElapsedTime()) {
 			return;
 		}
 		
@@ -236,6 +276,7 @@ public class TrailParticle extends TextureSheetParticle {
 		
 		TextureManager texturemanager = Minecraft.getInstance().getTextureManager();
         AbstractTexture abstracttexture = texturemanager.getTexture(this.trailInfo.texturePath);
+        
         RenderSystem.bindTexture(abstracttexture.getId());
         RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
 	    RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
@@ -254,7 +295,7 @@ public class TrailParticle extends TextureSheetParticle {
 		float fading = 1.0F;
 		
 		if (this.animationEnd) {
-			if (this.trailInfo.fadeTime > 0.0F) {
+			if (TrailInfo.isValidTime(this.trailInfo.fadeTime)) {
 				fading = ((float)this.lifetime / (float)this.trailInfo.trailLifetime);
 			} else {
 				fading = Mth.clamp((this.lifetime + (1.0F - partialTick)) / this.trailInfo.trailLifetime, 0.0F, 1.0F);
@@ -302,17 +343,15 @@ public class TrailParticle extends TextureSheetParticle {
 	}
 	
 	protected void setupPoseStack(PoseStack poseStack, Camera camera, float partialTicks) {
-		Quaternionf rotation = new Quaternionf(0.0F, 0.0F, 0.0F, 1.0F);
 		Vec3 vec3 = camera.getPosition();
 		float x = (float)-vec3.x();
 		float y = (float)-vec3.y();
 		float z = (float)-vec3.z();
 		
 		poseStack.translate(x, y, z);
-		poseStack.mulPose(rotation);
 	}
 	
-	private void makeTrailEdges(List<Vec3> startPositions, List<Vec3> endPositions, List<TrailEdge> dest) {
+	protected void makeTrailEdges(List<Vec3> startPositions, List<Vec3> endPositions, List<TrailEdge> dest) {
 		for (int i = 0; i < startPositions.size(); i++) {
 			dest.add(new TrailEdge(startPositions.get(i), endPositions.get(i), this.trailInfo.trailLifetime));
 		}
@@ -358,10 +397,11 @@ public class TrailParticle extends TextureSheetParticle {
 		}
 	}
 	
-	private static class TrailEdge {
-		final Vec3 start;
-		final Vec3 end;
-		int lifetime;
+	@OnlyIn(Dist.CLIENT)
+	public static class TrailEdge {
+		public final Vec3 start;
+		public final Vec3 end;
+		public int lifetime;
 		
 		public TrailEdge(Vec3 start, Vec3 end, int lifetime) {
 			this.start = start;
@@ -369,7 +409,7 @@ public class TrailParticle extends TextureSheetParticle {
 			this.lifetime = lifetime;
 		}
 		
-		boolean isAlive() {
+		public boolean isAlive() {
 			return --this.lifetime > 0;
 		}
 	}

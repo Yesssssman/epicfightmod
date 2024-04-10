@@ -141,12 +141,33 @@ public class ParseUtil {
 		return tag;
 	}
 	
+	public static <T> boolean isParsableAllowMinus(String s, Function<String, T> parser) {
+		if ("-".equals(s)) {
+			return true;
+		}
+		
+		try {
+			parser.apply(s);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+	
 	public static <T> boolean isParsable(String s, Function<String, T> parser) {
 		try {
 			parser.apply(s);
 			return true;
 		} catch (NumberFormatException e) {
 			return false;
+		}
+	}
+	
+	public static <T> T parseWithMinus(String value, Function<String, T> parseFunction) {
+		try {
+			return parseFunction.apply(value);
+		} catch (NumberFormatException e) {
+			return null;
 		}
 	}
 	

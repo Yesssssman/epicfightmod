@@ -165,8 +165,14 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 			
 			if (tag.contains("collider") && builder instanceof WeaponCapability.Builder weaponCapBuilder) {
 				CompoundTag colliderTag = tag.getCompound("collider");
-				Collider collider = ColliderPreset.deserializeSimpleCollider(colliderTag);
-				weaponCapBuilder.collider(collider);
+				
+				try {
+					Collider collider = ColliderPreset.deserializeSimpleCollider(colliderTag);
+					weaponCapBuilder.collider(collider);
+				} catch (IllegalArgumentException e) {
+					EpicFightMod.LOGGER.warn("Cannot deserialize collider: " + e.getMessage());
+					e.printStackTrace();
+				}
 			}
 			
 			capability = builder.build();

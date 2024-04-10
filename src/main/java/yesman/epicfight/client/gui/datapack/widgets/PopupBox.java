@@ -46,12 +46,12 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 	
 	protected final Screen owner;
 	protected final Font font;
-	protected final Consumer<T> responder;
 	protected final Function<T, String> toDisplayString;
 	
 	protected T item;
 	protected String itemDisplayName;
 	protected Predicate<T> filter;
+	protected Consumer<T> responder;
 	
 	public PopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Function<T, String> displayStringMapper, Consumer<T> responder) {
 		super(x1, y1, x2, y2, title);
@@ -108,7 +108,7 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 	}
 	
 	@Override
-	protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		int outlineColor = this.isFocused() ? -1 : this.isActive() ? -6250336 : -12566463;
 		
 		guiGraphics.fill(this.getX() - 1, this.getY() - 1, this.getX() + this.width + 1, this.getY() + this.height + 1, outlineColor);
@@ -292,6 +292,11 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 	@Override
 	public void setActive(boolean active) {
 		this.active = active;
+	}
+	
+	@Override
+	public void setResponder(Consumer<T> responder) {
+		this.responder = responder;
 	}
 	
 	@Override

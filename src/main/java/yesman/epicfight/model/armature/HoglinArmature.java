@@ -20,8 +20,8 @@ public class HoglinArmature extends Armature {
 	public final Joint legLB;
 	public final Joint kneeLB;
 	
-	public HoglinArmature(int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
-		super(jointNumber, rootJoint, jointMap);
+	public HoglinArmature(String name, int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
+		super(name, jointNumber, rootJoint, jointMap);
 		
 		this.head = this.getOrLogException(jointMap, "Head");
 		this.thighRF = this.getOrLogException(jointMap, "Thigh_RF");

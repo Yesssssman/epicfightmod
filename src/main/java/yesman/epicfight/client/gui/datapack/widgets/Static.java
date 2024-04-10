@@ -25,7 +25,7 @@ public class Static extends AbstractWidget implements ResizableComponent {
 	}
 	
 	@Override
-	protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		String correctedString = this.getMessage() == null ? "" : this.font.plainSubstrByWidth(this.getMessage().getString(), this.getWidth());
 		guiGraphics.drawString(this.font, correctedString, this.getX(), this.getY() + this.height / 2 - this.font.lineHeight / 2, 16777215, false);
 	}

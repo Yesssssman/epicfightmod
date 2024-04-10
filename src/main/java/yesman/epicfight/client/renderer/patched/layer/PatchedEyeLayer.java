@@ -23,7 +23,7 @@ public class PatchedEyeLayer<E extends LivingEntity, T extends LivingEntityPatch
 	
 	public PatchedEyeLayer(ResourceLocation eyeTexture, AM mesh) {
 		super(mesh);
-		this.renderType = EpicFightRenderTypes.triangles(RenderType.eyes(eyeTexture));
+		this.renderType = EpicFightRenderTypes.getTriangulated(RenderType.eyes(eyeTexture));
 	}
 	
 	@Override

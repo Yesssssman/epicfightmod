@@ -12,8 +12,8 @@ public class WitherArmature extends Armature {
 	public final Joint torso;
 	public final Joint tail;
 	
-	public WitherArmature(int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
-		super(jointNumber, rootJoint, jointMap);
+	public WitherArmature(String name, int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
+		super(name, jointNumber, rootJoint, jointMap);
 		
 		this.headM = this.getOrLogException(jointMap, "Head_M");
 		this.headR = this.getOrLogException(jointMap, "Head_R");

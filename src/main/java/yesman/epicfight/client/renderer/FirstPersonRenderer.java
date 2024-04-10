@@ -74,7 +74,7 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 			mesh.leftSleeve.hidden = false;
 			mesh.rightSleeve.hidden = false;
 			
-			mesh.drawModelWithPose(matStackIn, buffer.getBuffer(EpicFightRenderTypes.triangles(RenderType.entityCutoutNoCull(entityIn.getSkinTextureLocation()))),
+			mesh.drawModelWithPose(matStackIn, buffer.getBuffer(EpicFightRenderTypes.getTriangulated(RenderType.entityCutoutNoCull(entityIn.getSkinTextureLocation()))),
 					packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
 		}
 		
