@@ -151,11 +151,14 @@ public class PlayerEvents {
 	public static void attackEntityEvent(AttackEntityEvent event) {
 		boolean isLivingTarget = event.getTarget() instanceof LivingEntity livingEntity && livingEntity.attackable();
 		PlayerPatch<?> playerpatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), PlayerPatch.class);
-		
+
 		if (playerpatch != null) {
-			if (!event.getEntity().level().getGameRules().getBoolean(EpicFightGamerules.DO_VANILLA_ATTACK) && isLivingTarget && playerpatch.getEpicFightDamageSource() == null) {
+			if (!event.getEntity().level().getGameRules().getBoolean(EpicFightGamerules.DO_VANILLA_ATTACK) && isLivingTarget && playerpatch.getEpicFightDamageSource() == null && !fakePlayerCheck(event.getEntity())) {
 				event.setCanceled(true);
 			}
 		}
+	}
+	public static boolean fakePlayerCheck(Player source) {
+		return source instanceof FakePlayer;
 	}
 }
