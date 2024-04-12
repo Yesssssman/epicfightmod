@@ -64,4 +64,10 @@ public class OptionHandler<T> {
 			}
 		}
 	}
+	
+	public static class BooleanOptionHandler extends OptionHandler<Boolean> {
+		public BooleanOptionHandler(boolean defaultOption) {
+			super(defaultOption);
+		}
+	}
 }

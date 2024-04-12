@@ -41,6 +41,7 @@ public class WeaponCapability extends CapabilityItem {
 	protected final Map<Style, Map<LivingMotion, AnimationProvider<?>>> livingMotionModifiers;
 	protected final boolean canBePlacedOffhand;
 	protected final Function<Style, Boolean> comboCancel;
+	protected final ZoomInType zoomInType;
 	
 	protected WeaponCapability(CapabilityItem.Builder builder) {
 		super(builder);
@@ -59,6 +60,7 @@ public class WeaponCapability extends CapabilityItem {
 		this.canBePlacedOffhand = weaponBuilder.canBePlacedOffhand;
 		this.comboCancel = weaponBuilder.comboCancel;
 		this.attributeMap.putAll(weaponBuilder.attributeMap);
+		this.zoomInType = weaponBuilder.zoomInType;
 	}
 	
 	@Override
@@ -114,6 +116,11 @@ public class WeaponCapability extends CapabilityItem {
 	@Override
 	public boolean shouldCancelCombo(LivingEntityPatch<?> entitypatch) {
 		return this.comboCancel.apply(this.getStyle(entitypatch));
+	}
+	
+	@Override
+	public ZoomInType getZoomInType() {
+		return this.zoomInType;
 	}
 	
 	@Override
@@ -175,6 +182,7 @@ public class WeaponCapability extends CapabilityItem {
 		Map<Style, Map<LivingMotion, AnimationProvider<?>>> livingMotionModifiers;
 		Function<Style, Boolean> comboCancel;
 		boolean canBePlacedOffhand;
+		ZoomInType zoomInType;
 		
 		protected Builder() {
 			this.constructor = WeaponCapability::new;
@@ -190,6 +198,7 @@ public class WeaponCapability extends CapabilityItem {
 			this.livingMotionModifiers = null;
 			this.canBePlacedOffhand = true;
 			this.comboCancel = (style) -> true;
+			this.zoomInType = ZoomInType.NONE;
 		}
 		
 		@Override
@@ -269,6 +278,11 @@ public class WeaponCapability extends CapabilityItem {
 		
 		public Builder comboCancel(Function<Style, Boolean> comboCancel) {
 			this.comboCancel = comboCancel;
+			return this;
+		}
+		
+		public Builder comboCancel(ZoomInType zoomInType) {
+			this.zoomInType = zoomInType;
 			return this;
 		}
 		

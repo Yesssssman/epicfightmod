@@ -139,6 +139,7 @@ public class ClientEvents {
 			EntityPatchProvider.clear();
 			WeaponTypeReloadListener.clear();
 			
+			ClientEngine.getInstance().renderEngine.zoomOut(0);
 			ClientEngine.getInstance().renderEngine.battleModeUI.reset();
 			// Reset renderers
 			ClientEngine.getInstance().renderEngine.registerRenderer();

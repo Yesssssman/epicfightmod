@@ -11,12 +11,14 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class RangedWeaponCapability extends CapabilityItem {
 	protected Map<LivingMotion, AnimationProvider<?>> rangeAnimationModifiers;
+	protected ZoomInType zoomInType;
 	
 	protected RangedWeaponCapability(CapabilityItem.Builder builder) {
 		super(builder);
 		
 		RangedWeaponCapability.Builder rangedBuilder = (RangedWeaponCapability.Builder)builder;
 		this.rangeAnimationModifiers = rangedBuilder.rangeAnimationModifiers;
+		this.zoomInType = rangedBuilder.zoomInType;
 	}
 	
 	@Override
@@ -47,8 +49,14 @@ public class RangedWeaponCapability extends CapabilityItem {
 		return new RangedWeaponCapability.Builder();
 	}
 	
+	@Override
+	public ZoomInType getZoomInType() {
+		return this.zoomInType;
+	}
+	
 	public static class Builder extends CapabilityItem.Builder {
-		Map<LivingMotion, AnimationProvider<?>> rangeAnimationModifiers;
+		private Map<LivingMotion, AnimationProvider<?>> rangeAnimationModifiers;
+		private ZoomInType zoomInType = ZoomInType.USE_TICK;
 		
 		protected Builder() {
 			this.category = WeaponCategories.RANGED;
@@ -58,6 +66,11 @@ public class RangedWeaponCapability extends CapabilityItem {
 		
 		public Builder addAnimationsModifier(LivingMotion livingMotion, AnimationProvider<?> animations) {
 			this.rangeAnimationModifiers.put(livingMotion, animations);
+			return this;
+		}
+		
+		public Builder zoomInType(ZoomInType zoomInType) {
+			this.zoomInType = zoomInType;
 			return this;
 		}
 	}

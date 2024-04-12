@@ -128,10 +128,10 @@ public class RenderEngine {
 	private FirstPersonRenderer firstPersonRenderer;
 	private PHumanoidRenderer<?, ?, ?, ?, ?> basicHumanoidRenderer;
 	private final OverlayManager overlayManager;
-	private boolean aiming;
-	private int zoomOutTimer = 0;
-	private int zoomCount;
-	private final int zoomMaxCount = 20;
+	private boolean zoomingIn;
+	private int zoomOutStandbyTicks = 0;
+	private int zoomCount = 0;
+	private final int maxZoomCount = 20;
 	
 	public RenderEngine() {
 		Events.renderEngine = this;
@@ -284,15 +284,20 @@ public class RenderEngine {
 		return this.entityRendererCache.computeIfAbsent(entity.getType(), (key) -> this.entityRendererProvider.containsKey(key) ? this.entityRendererProvider.get(entity.getType()).get() : null) != null;
 	}
 	
+	//Nothing happens if player is already zooming-in
 	public void zoomIn() {
-		this.aiming = true;
-		this.zoomCount = this.zoomCount == 0 ? 1 : this.zoomCount;
-		this.zoomOutTimer = 0;
+		if (!this.zoomingIn) {
+			this.zoomingIn = true;
+			this.zoomCount = this.zoomCount == 0 ? 1 : this.zoomCount;
+		}
 	}
-
-	public void zoomOut(int timer) {
-		this.aiming = false;
-		this.zoomOutTimer = timer;
+	
+	//Nothing happens if player is already zooming-out
+	public void zoomOut(int zoomOutTicks) {
+		if (this.zoomingIn) {
+			this.zoomingIn = false;
+			this.zoomOutStandbyTicks = zoomOutTicks;
+		}
 	}
 	
 	private void setRangedWeaponThirdPerson(ViewportEvent.ComputeCameraAngles event, CameraType pov, double partialTicks) {
@@ -314,7 +319,7 @@ public class RenderEngine {
 			double entityPosX = entity.xOld + (entity.getX() - entity.xOld) * partialTicks;
 			double entityPosY = entity.yOld + (entity.getY() - entity.yOld) * partialTicks + entity.getEyeHeight();
 			double entityPosZ = entity.zOld + (entity.getZ() - entity.zOld) * partialTicks;
-			float intpol = pov == CameraType.THIRD_PERSON_BACK ? ((float) zoomCount / (float) zoomMaxCount) : 0;
+			float intpol = pov == CameraType.THIRD_PERSON_BACK ? ((float) zoomCount / (float) maxZoomCount) : 0;
 			Vec3f interpolatedCorrection = new Vec3f(AIMING_CORRECTION.x * intpol, AIMING_CORRECTION.y * intpol, AIMING_CORRECTION.z * intpol);
 			OpenMatrix4f rotationMatrix = ClientEngine.getInstance().getPlayerPatch().getMatrix((float)partialTicks);
 			Vec3f rotateVec = OpenMatrix4f.transform3v(rotationMatrix, interpolatedCorrection, null);
@@ -505,13 +510,13 @@ public class RenderEngine {
 			if (renderEngine.zoomCount > 0 && EpicFightMod.CLIENT_CONFIGS.aimingCorrection.getValue()) {
 				renderEngine.setRangedWeaponThirdPerson(event, renderEngine.minecraft.options.getCameraType(), event.getPartialTick());
 				
-				if (renderEngine.zoomOutTimer > 0) {
-					renderEngine.zoomOutTimer--;
+				if (renderEngine.zoomOutStandbyTicks > 0) {
+					renderEngine.zoomOutStandbyTicks--;
 				} else {
-					renderEngine.zoomCount = renderEngine.aiming ? renderEngine.zoomCount + 1 : renderEngine.zoomCount - 1;
+					renderEngine.zoomCount = renderEngine.zoomingIn ? renderEngine.zoomCount + 1 : renderEngine.zoomCount - 1;
 				}
 				
-				renderEngine.zoomCount = Math.min(renderEngine.zoomMaxCount, renderEngine.zoomCount);
+				renderEngine.zoomCount = Math.min(renderEngine.maxZoomCount, renderEngine.zoomCount);
 			}
 			
 			renderEngine.correctCamera(event, (float)event.getPartialTick());

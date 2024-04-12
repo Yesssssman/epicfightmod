@@ -336,6 +336,10 @@ public class CapabilityItem {
 		return UseAnim.NONE;
 	}
 	
+	public ZoomInType getZoomInType() {
+		return ZoomInType.NONE;
+	}
+	
 	public enum WeaponCategories implements WeaponCategory {
 		NOT_WEAPON, AXE, FIST, GREATSWORD, HOE, PICKAXE, SHOVEL, SWORD, UCHIGATANA, SPEAR, TACHI, TRIDENT, LONGSWORD, DAGGER, SHIELD, RANGED;
 		
@@ -370,6 +374,10 @@ public class CapabilityItem {
 		public boolean canUseOffhand() {
 			return this.canUseOffhand;
 		}
+	}
+	
+	public enum ZoomInType {
+		NONE, ALWAYS, USE_TICK, AIMING, CUSTOM
 	}
 	
 	public static CapabilityItem.Builder builder() {

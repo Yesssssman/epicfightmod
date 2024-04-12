@@ -1,12 +1,10 @@
 package yesman.epicfight.events;
 
-import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.BowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
@@ -17,7 +15,6 @@ import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickItem
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod;
-import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPChangeGamerule;
@@ -115,11 +112,7 @@ public class PlayerEvents {
 	
 	@SubscribeEvent
 	public static void itemUseStopEvent(LivingEntityUseItemEvent.Stop event) {
-		if (event.getEntity().level().isClientSide()) {
-			if (event.getEntity() instanceof LocalPlayer) {
-				ClientEngine.getInstance().renderEngine.zoomOut(0);
-			}
-		} else {
+		if (!event.getEntity().level().isClientSide()) {
 			if (event.getEntity() instanceof ServerPlayer player) {
 				ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(player, ServerPlayerPatch.class);
 				
@@ -128,15 +121,6 @@ public class PlayerEvents {
 					event.setCanceled(canceled);
 				}
 			}
-		}
-	}
-	
-	@SubscribeEvent
-	public static void itemUseTickEvent(LivingEntityUseItemEvent.Tick event) {
-		if (event.getEntity() instanceof Player && event.getItem().getItem() instanceof BowItem) {
-				PlayerPatch<?> playerpatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), PlayerPatch.class);
-				if (playerpatch.getEntityState().inaction())
-					event.setCanceled(true);
 		}
 	}
 	
