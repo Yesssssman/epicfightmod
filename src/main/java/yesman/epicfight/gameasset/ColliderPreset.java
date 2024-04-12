@@ -93,6 +93,14 @@ public class ColliderPreset implements PreparableReloadListener {
 		ListTag sizeVector = tag.getList("size", 6);
 		ListTag centerVector = tag.getList("center", 6);
 		
+		if (sizeVector.size() != 3) {
+			throw new IllegalArgumentException("The size list tag must consist of three double elements.");
+		}
+		
+		if (centerVector.size() != 3) {
+			throw new IllegalArgumentException("The center list tag must consist of three double elements.");
+		}
+		
 		double sizeX = sizeVector.getDouble(0);
 		double sizeY = sizeVector.getDouble(1);
 		double sizeZ = sizeVector.getDouble(2);
@@ -101,7 +109,7 @@ public class ColliderPreset implements PreparableReloadListener {
 		double centerY = centerVector.getDouble(1);
 		double centerZ = centerVector.getDouble(2);
 		
-		if (sizeX < 0 || sizeY < 0 || sizeZ < 0 || (sizeX == 0 && sizeY == 0 && sizeZ == 0)) {
+		if (sizeX < 0.0D || sizeY < 0.0D || sizeZ < 0.0D || (sizeX == 0.0D && sizeY == 0.0D && sizeZ == 0.0D)) {
 			throw new IllegalArgumentException("Datapack deserialization error: the size of the collider must be non-negative value!");
 		}
 		

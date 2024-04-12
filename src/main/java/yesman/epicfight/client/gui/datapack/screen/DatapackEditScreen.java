@@ -167,8 +167,7 @@ public class DatapackEditScreen extends Screen {
 			
 			return true;
 		} else {
-			this.minecraft.setScreen(new MessageScreen<>("Invalid datapack", "", this,
-					(button2) -> this.minecraft.setScreen(this), 160, 60));
+			this.minecraft.setScreen(new MessageScreen<>("Invalid datapack", "", this, (button2) -> this.minecraft.setScreen(this), 160, 60));
 			return false;
 		}
 	}
@@ -211,7 +210,7 @@ public class DatapackEditScreen extends Screen {
 		}
 		
 		if (this.weaponTab.packList.size() > 0 || this.itemCapabilityTab.packList.size() > 0 || this.mobPatchTab.packList.size() > 0) {
-			this.minecraft.setScreen(new MessageScreen<>("", "The current entries will be removed if you import a new data pack. Do you want to proceed?", this,
+			this.minecraft.setScreen(new MessageScreen<>("", "The current entries will be removed if you import the new data pack. Do you want to proceed?", this,
 														(button) -> {
 															if (this.importDataPack(filePath.get(0))) {
 																this.minecraft.setScreen(this);
@@ -346,7 +345,7 @@ public class DatapackEditScreen extends Screen {
 									.rowpositionChanged(this::packGridRowpositionChanged)
 									.addColumn(Grid.editbox("pack_item")
 													.editWidgetCreated((editbox) -> editbox.setFilter((str) -> ResourceLocation.isValidResourceLocation(str)))
-													.valueChanged((event) -> this.packList.get(event.rowposition).setPackName(new ResourceLocation(event.postValue)))
+													.valueChanged((event) -> this.packList.get(event.rowposition).setPackKey(new ResourceLocation(event.postValue)))
 									.defaultVal(EpicFightMod.MODID + ":").editable(registry == null ? true : false).width(180))
 									.pressAdd((grid, button) -> {
 										if (registry != null) {
@@ -405,7 +404,7 @@ public class DatapackEditScreen extends Screen {
 		}
 		
 		public void packGridRowpositionChanged(int rowposition, Map<String, Object> values) {
-			this.inputComponentsList.importTag(this.packList.get(rowposition).getTag());
+			this.inputComponentsList.importTag(this.packList.get(rowposition).getPackValue());
 		}
 		
 		public void importEntries(PackResources packResources) {
@@ -429,10 +428,10 @@ public class DatapackEditScreen extends Screen {
 		
 		public void exportEntries(ZipOutputStream out) throws IOException {
 			for (PackEntry<ResourceLocation, CompoundTag> packEntry : this.packList) {
-				ZipEntry zipEntry = new ZipEntry(String.format("data/%s/" + this.directory + "/%s.json", packEntry.getPackName().getNamespace(), packEntry.getPackName().getPath()));
+				ZipEntry zipEntry = new ZipEntry(String.format("data/%s/" + this.directory + "/%s.json", packEntry.getPackKey().getNamespace(), packEntry.getPackKey().getPath()));
 				Gson gson = new GsonBuilder().setPrettyPrinting().create();
 				out.putNextEntry(zipEntry);
-				out.write(gson.toJson(CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, packEntry.getTag()).get().left().get()).getBytes());
+				out.write(gson.toJson(CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, packEntry.getPackValue()).get().left().get()).getBytes());
 				out.closeEntry();
 			}
 		}
@@ -487,12 +486,12 @@ public class DatapackEditScreen extends Screen {
 						ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation(tag.getString("swing_sound"))),
 						null,
 						ParseUtil.nullParam(colliderTag.get("number")),
-						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("center", Tag.TAG_DOUBLE).get(0), (element) -> element.getAsString())) : "",
-						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("center", Tag.TAG_DOUBLE).get(1), (element) -> element.getAsString())) : "",
-						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("center", Tag.TAG_DOUBLE).get(2), (element) -> element.getAsString())) : "",
-						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("size", Tag.TAG_DOUBLE).get(0), (element) -> element.getAsString())) : "",
-						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("size", Tag.TAG_DOUBLE).get(1), (element) -> element.getAsString())) : "",
-						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("size", Tag.TAG_DOUBLE).get(2), (element) -> element.getAsString())) : "",
+						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("center", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
+						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("center", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
+						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("center", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
+						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("size", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
+						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("size", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
+						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("size", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
 						packImporter
 					});
 				}
@@ -503,36 +502,36 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.category")));
 			this.inputComponentsList.addComponentCurrentRow(new ComboBox<>(parentScreen, parentScreen.getMinecraft().font, this.inputComponentsList.nextStart(5), 124, 100, 15, HorizontalSizing.LEFT_WIDTH, null, 8,
-																			Component.translatable("datapack_edit.weapon_type.category"), new ArrayList<>(WeaponCategory.ENUM_MANAGER.universalValues()), (e) -> ParseUtil.snakeToSpacedCamel(e.toString()),
-																			(weaponCategory) -> this.packList.get(this.packListGrid.getRowposition()).getTag().putString("category", ParseUtil.nullParam(weaponCategory).toLowerCase(Locale.ROOT))));
+																			Component.translatable("datapack_edit.weapon_type.category"), new ArrayList<>(WeaponCategory.ENUM_MANAGER.universalValues()), ParseUtil::snakeToSpacedCamel,
+																			(weaponCategory) -> this.packList.get(this.packListGrid.getRowposition()).getPackValue().putString("category", ParseUtil.nullParam(weaponCategory).toLowerCase(Locale.ROOT))));
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.hit_particle")));
-			this.inputComponentsList.addComponentCurrentRow(new PopupBox.RegistryPopupBox<>(parentScreen, font, this.inputComponentsList.nextStart(5), 30, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
+			this.inputComponentsList.addComponentCurrentRow(new PopupBox.RegistryPopupBox<>(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 																			Component.translatable("datapack_edit.weapon_type.hit_particle"), ForgeRegistries.PARTICLE_TYPES,
-																			(item) -> this.packList.get(this.packListGrid.getRowposition()).getTag().putString("hit_particle", ParseUtil.getRegistryName(item, ForgeRegistries.PARTICLE_TYPES))));
+																			(item) -> this.packList.get(this.packListGrid.getRowposition()).getPackValue().putString("hit_particle", ParseUtil.getRegistryName(item, ForgeRegistries.PARTICLE_TYPES))));
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.hit_sound")));
-			this.inputComponentsList.addComponentCurrentRow(new PopupBox.SoundPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 30, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
+			this.inputComponentsList.addComponentCurrentRow(new PopupBox.SoundPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 																			Component.translatable("datapack_edit.weapon_type.hit_sound"),
-																			(item) -> this.packList.get(this.packListGrid.getRowposition()).getTag().putString("hit_sound", ParseUtil.getRegistryName(item, ForgeRegistries.SOUND_EVENTS))));
+																			(item) -> this.packList.get(this.packListGrid.getRowposition()).getPackValue().putString("hit_sound", ParseUtil.getRegistryName(item, ForgeRegistries.SOUND_EVENTS))));
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.swing_sound")));
-			this.inputComponentsList.addComponentCurrentRow(new PopupBox.SoundPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 30, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
+			this.inputComponentsList.addComponentCurrentRow(new PopupBox.SoundPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 																			Component.translatable("datapack_edit.weapon_type.swing_sound"),
-																			(item) -> this.packList.get(this.packListGrid.getRowposition()).getTag().putString("swing_sound", ParseUtil.getRegistryName(item, ForgeRegistries.SOUND_EVENTS))));
+																			(item) -> this.packList.get(this.packListGrid.getRowposition()).getPackValue().putString("swing_sound", ParseUtil.getRegistryName(item, ForgeRegistries.SOUND_EVENTS))));
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.styles")));
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder(DatapackEditScreen.this).subScreen(StylesScreen::new)
-					.compoundTag(() -> ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "styles", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+					.compoundTag(() -> ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "styles", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.offhand_validator")));
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder(DatapackEditScreen.this).subScreen(OffhandValidatorScreen::new)
-					.compoundTag(() -> ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "offhand_item_compatible_predicate", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+					.compoundTag(() -> ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "offhand_item_compatible_predicate", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			final ResizableEditBox colliderCount = new ResizableEditBox(font, 0, 0, 40, 15, Component.translatable("datapack_edit.weapon_type.collider.count"), HorizontalSizing.LEFT_WIDTH, null);
 			final ResizableEditBox colliderCenterX = new ResizableEditBox(font, 0, 0, 35, 15, Component.translatable("datapack_edit.weapon_type.collider.center.x"), HorizontalSizing.LEFT_WIDTH, null);
@@ -543,7 +542,7 @@ public class DatapackEditScreen extends Screen {
 			final ResizableEditBox colliderSizeZ = new ResizableEditBox(font, 0, 0, 35, 15, Component.translatable("datapack_edit.weapon_type.collider.size.z"), HorizontalSizing.LEFT_WIDTH, null);
 			
 			colliderCount.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
 				
 				if (StringUtil.isNullOrEmpty(input)) {
 					collider.remove("number");
@@ -553,7 +552,7 @@ public class DatapackEditScreen extends Screen {
 			});
 			
 			colliderCenterX.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("center", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
@@ -562,7 +561,7 @@ public class DatapackEditScreen extends Screen {
 			});
 			
 			colliderCenterY.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("center", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
@@ -571,7 +570,7 @@ public class DatapackEditScreen extends Screen {
 			});
 			
 			colliderCenterZ.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("center", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
@@ -580,7 +579,7 @@ public class DatapackEditScreen extends Screen {
 			});
 			
 			colliderSizeX.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("size", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
@@ -589,7 +588,7 @@ public class DatapackEditScreen extends Screen {
 			});
 			
 			colliderSizeY.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("size", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
@@ -598,7 +597,7 @@ public class DatapackEditScreen extends Screen {
 			});
 			
 			colliderSizeZ.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("size", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
@@ -616,10 +615,10 @@ public class DatapackEditScreen extends Screen {
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.collider")));
-			this.inputComponentsList.addComponentCurrentRow(new PopupBox.ColliderPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 130, 30, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.collider"),
+			this.inputComponentsList.addComponentCurrentRow(new PopupBox.ColliderPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 130, 15, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.collider"),
 																							(collider) -> {
 																								if (collider != null) {
-																									CompoundTag colliderTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+																									CompoundTag colliderTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
 																									collider.serialize(colliderTag);
 																									
 																									colliderCount.setValue(String.valueOf(colliderTag.getInt("number")));
@@ -662,7 +661,7 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.combos")));
 			
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder(DatapackEditScreen.this).subScreen(ComboScreen::new)
-					.compoundTag(() -> this.packList.get(this.packListGrid.getRowposition()).getTag()).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+					.compoundTag(() -> this.packList.get(this.packListGrid.getRowposition()).getPackValue()).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.innate_skill")));
@@ -671,18 +670,18 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(Grid.builder(DatapackEditScreen.this)
 																.xy1(this.inputComponentsList.nextStart(5), 0)
-																.xy2(20, 90)
+																.xy2(15, 90)
 																.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
 																.rowHeight(26)
 																.rowEditable(true)
 																.transparentBackground(false)
 																.addColumn(Grid.combo("style", Style.ENUM_MANAGER.universalValues()).valueChanged((event) -> {
-																				CompoundTag innateSkillsTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "innate_skills", new CompoundTag());
+																				CompoundTag innateSkillsTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "innate_skills", new CompoundTag());
 																				innateSkillsTag.remove(ParseUtil.nullParam(event.prevValue).toLowerCase(Locale.ROOT));
 																				innateSkillsTag.putString(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT), ParseUtil.nullParam(event.grid.getValue(event.rowposition, "skill")));
 																			}).editable(true).width(100))
 																.addColumn(Grid.registryPopup("skill", SkillManager.getSkillRegistry()).filter((skill) -> skill.getCategory() == SkillCategories.WEAPON_INNATE).valueChanged((event) -> {
-																				CompoundTag innateSkillsTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "innate_skills", new CompoundTag());
+																				CompoundTag innateSkillsTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "innate_skills", new CompoundTag());
 																				innateSkillsTag.putString(ParseUtil.nullParam(event.grid.getValue(event.rowposition, "style")).toLowerCase(Locale.ROOT), ParseUtil.nullParam(event.postValue));
 																			}).toDisplayText((item) -> item == null ? "" : item.getRegistryName().toString()).width(150))
 																.pressAdd((grid, button) -> {
@@ -695,7 +694,7 @@ public class DatapackEditScreen extends Screen {
 																	int rowposition = grid.getRowposition();
 																	
 																	if (rowposition > -1) {
-																		CompoundTag innateSkillsTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "innate_skills", new CompoundTag());
+																		CompoundTag innateSkillsTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "innate_skills", new CompoundTag());
 																		innateSkillsTag.remove(ParseUtil.nullParam(grid.getValue(rowposition, "style")).toLowerCase(Locale.ROOT));
 																		grid.removeRow(rowposition);
 																	}
@@ -707,7 +706,7 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 80, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.living_animations")));
 			
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder(DatapackEditScreen.this).subScreen(LivingAnimationsScreen::new)
-					.compoundTag(() -> ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "livingmotion_modifier", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+					.compoundTag(() -> ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "livingmotion_modifier", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.setComponentsActive(false);
 		}
@@ -724,7 +723,7 @@ public class DatapackEditScreen extends Screen {
 			Font font = DatapackEditScreen.this.font;
 			ScreenRectangle rect = DatapackEditScreen.this.getRectangle();
 			
-			this.modelPlayer = new AnimatedModelPlayer(20, 30, 0, 180, HorizontalSizing.LEFT_RIGHT, null);
+			this.modelPlayer = new AnimatedModelPlayer(20, 15, 0, 150, HorizontalSizing.LEFT_RIGHT, null);
 			this.modelPlayer.setMesh(Meshes.BIPED);
 			this.modelPlayer.setArmature(Armatures.BIPED);
 			
@@ -785,21 +784,21 @@ public class DatapackEditScreen extends Screen {
 						WeaponTypeReloadListener.get(tag.getString("type")),
 						null,
 						ParseUtil.nullParam(colliderTag.get("number")),
-						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("center", Tag.TAG_DOUBLE).get(0), (element) -> element.getAsString())) : "",
-						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("center", Tag.TAG_DOUBLE).get(1), (element) -> element.getAsString())) : "",
-						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("center", Tag.TAG_DOUBLE).get(2), (element) -> element.getAsString())) : "",
-						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("size", Tag.TAG_DOUBLE).get(0), (element) -> element.getAsString())) : "",
-						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("size", Tag.TAG_DOUBLE).get(1), (element) -> element.getAsString())) : "",
-						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("size", Tag.TAG_DOUBLE).get(2), (element) -> element.getAsString())) : "",
-						colorInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("color", Tag.TAG_INT).get(0), (element) -> element.getAsString())) : "",
-						colorInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("color", Tag.TAG_INT).get(1), (element) -> element.getAsString())) : "",
-						colorInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("color", Tag.TAG_INT).get(2), (element) -> element.getAsString())) : "",
-						beginInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(0), (element) -> element.getAsString())) : "",
-						beginInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(1), (element) -> element.getAsString())) : "",
-						beginInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(2), (element) -> element.getAsString())) : "",
-						endInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(0), (element) -> element.getAsString())) : "",
-						endInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(1), (element) -> element.getAsString())) : "",
-						endInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(2), (element) -> element.getAsString())) : "",
+						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("center", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
+						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("center", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
+						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("center", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
+						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("size", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
+						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("size", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
+						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("size", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
+						colorInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("color", Tag.TAG_INT).get(0), Tag::getAsString)) : "",
+						colorInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("color", Tag.TAG_INT).get(1), Tag::getAsString)) : "",
+						colorInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("color", Tag.TAG_INT).get(2), Tag::getAsString)) : "",
+						beginInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
+						beginInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
+						beginInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
+						endInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
+						endInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
+						endInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
 						ParseUtil.nullParam(trailTag.get("lifetime")),
 						ParseUtil.nullParam(trailTag.get("interpolation")),
 						ParseUtil.nullParam(trailTag.getString("texture_path")),
@@ -813,17 +812,17 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.attributes")));
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder(DatapackEditScreen.this).subScreen(AttributeScreen::new)
-					.compoundTag(() -> ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "attributes", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+					.compoundTag(() -> ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "attributes", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.type")));
-			this.inputComponentsList.addComponentCurrentRow(new PopupBox.WeaponTypePopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 30, 15, 15, HorizontalSizing.LEFT_RIGHT, null,
+			this.inputComponentsList.addComponentCurrentRow(new PopupBox.WeaponTypePopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 15, 15, HorizontalSizing.LEFT_RIGHT, null,
 																			Component.translatable("datapack_edit.item_capability.type"),
 																			(item) -> {
-																				this.packList.get(this.packListGrid.getRowposition()).getTag().putString("type", ParseUtil.nullParam(WeaponTypeReloadListener.getKey(item)));
+																				this.packList.get(this.packListGrid.getRowposition()).getPackValue().putString("type", ParseUtil.nullParam(WeaponTypeReloadListener.getKey(item)));
 																				
 																				if (item != null) {
-																					CapabilityItem.Builder builder = item.apply(this.registry.getValue(this.packList.get(this.packListGrid.getRowposition()).getPackName()));
+																					CapabilityItem.Builder builder = item.apply(this.registry.getValue(this.packList.get(this.packListGrid.getRowposition()).getPackKey()));
 																					
 																					if (builder instanceof WeaponCapability.Builder weaponBuilder) {
 																						this.modelPlayer.clearAnimations();
@@ -854,7 +853,7 @@ public class DatapackEditScreen extends Screen {
 			final ResizableEditBox colliderSizeZ = new ResizableEditBox(font, 0, 0, 35, 15, Component.translatable("datapack_edit.weapon_type.collider.size.z"), HorizontalSizing.LEFT_WIDTH, null);
 			
 			colliderCount.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
 				
 				if (StringUtil.isNullOrEmpty(input)) {
 					collider.remove("number");
@@ -864,12 +863,13 @@ public class DatapackEditScreen extends Screen {
 				
 				try {
 					this.modelPlayer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
+					this.modelPlayer.setCollider(null);
 				}
 			});
 			
 			colliderCenterX.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("center", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
@@ -878,12 +878,13 @@ public class DatapackEditScreen extends Screen {
 				
 				try {
 					this.modelPlayer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
+					this.modelPlayer.setCollider(null);
 				}
 			});
 			
 			colliderCenterY.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("center", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
@@ -892,12 +893,13 @@ public class DatapackEditScreen extends Screen {
 				
 				try {
 					this.modelPlayer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
+					this.modelPlayer.setCollider(null);
 				}
 			});
 			
 			colliderCenterZ.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("center", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
@@ -906,12 +908,13 @@ public class DatapackEditScreen extends Screen {
 				
 				try {
 					this.modelPlayer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
+				this.modelPlayer.setCollider(null);
 				}
 			});
 			
 			colliderSizeX.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("size", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
@@ -920,12 +923,13 @@ public class DatapackEditScreen extends Screen {
 				
 				try {
 					this.modelPlayer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
+					this.modelPlayer.setCollider(null);
 				}
 			});
 			
 			colliderSizeY.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("size", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
@@ -934,12 +938,13 @@ public class DatapackEditScreen extends Screen {
 				
 				try {
 					this.modelPlayer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
+					this.modelPlayer.setCollider(null);
 				}
 			});
 			
 			colliderSizeZ.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("size", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
@@ -948,7 +953,8 @@ public class DatapackEditScreen extends Screen {
 				
 				try {
 					this.modelPlayer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
-				} catch(IllegalArgumentException e) {
+				} catch (IllegalArgumentException e) {
+					this.modelPlayer.setCollider(null);
 				}
 			});
 			
@@ -961,10 +967,10 @@ public class DatapackEditScreen extends Screen {
 			colliderSizeZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
 			
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.collider")));
-			this.inputComponentsList.addComponentCurrentRow(new PopupBox.ColliderPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 130, 30, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.collider"),
+			this.inputComponentsList.addComponentCurrentRow(new PopupBox.ColliderPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 130, 15, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.collider"),
 																							(collider) -> {
 																								if (collider != null) {
-																									CompoundTag colliderTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getTag(), "collider", new CompoundTag());
+																									CompoundTag colliderTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
 																									collider.serialize(colliderTag);
 																									
 																									colliderCount.setValue(String.valueOf(colliderTag.getInt("number")));
@@ -1014,46 +1020,37 @@ public class DatapackEditScreen extends Screen {
 			final ColorPreviewWidget colorWidget = new ColorPreviewWidget(0, 12, 0, 12, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.color"));
 			
 			colorR.setResponder((input) -> {
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getTag().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
 				ListTag list = trailTag.getList("color", Tag.TAG_INT);
 				int i = StringUtil.isNullOrEmpty(input) ? 0 : Integer.valueOf(input);
 				list.remove(0);
 				list.add(0, IntTag.valueOf(i));
 				colorWidget.setColor(ParseUtil.parseOrGet(input, Integer::valueOf, 0), ParseUtil.parseOrGet(colorG.getValue(), Integer::valueOf, 0), ParseUtil.parseOrGet(colorB.getValue(), Integer::valueOf, 0));
 				
-				try {
-					TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
-					this.modelPlayer.setTrailInfo(trailInfo);
-				} catch(IllegalStateException e) {
-				}
+				TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
+				this.modelPlayer.setTrailInfo(trailInfo);
 			});
 			colorG.setResponder((input) -> {
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getTag().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
 				ListTag list = trailTag.getList("color", Tag.TAG_INT);
 				int i = StringUtil.isNullOrEmpty(input) ? 0 : Integer.valueOf(input);
 				list.remove(1);
 				list.add(1, IntTag.valueOf(i));
 				colorWidget.setColor(ParseUtil.parseOrGet(colorR.getValue(), Integer::valueOf, 0), ParseUtil.parseOrGet(input, Integer::valueOf, 0), ParseUtil.parseOrGet(colorB.getValue(), Integer::valueOf, 0));
 				
-				try {
-					TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
-					this.modelPlayer.setTrailInfo(trailInfo);
-				} catch(IllegalStateException e) {
-				}
+				TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
+				this.modelPlayer.setTrailInfo(trailInfo);
 			});
 			colorB.setResponder((input) -> {
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getTag().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
 				ListTag list = trailTag.getList("color", Tag.TAG_INT);
 				int i = StringUtil.isNullOrEmpty(input) ? 0 : Integer.valueOf(input);
 				list.remove(2);
 				list.add(2, IntTag.valueOf(i));
 				colorWidget.setColor(ParseUtil.parseOrGet(colorR.getValue(), Integer::valueOf, 0), ParseUtil.parseOrGet(colorG.getValue(), Integer::valueOf, 0), ParseUtil.parseOrGet(input, Integer::valueOf, 0));
 				
-				try {
-					TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
-					this.modelPlayer.setTrailInfo(trailInfo);
-				} catch(IllegalStateException e) {
-				}
+				TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
+				this.modelPlayer.setTrailInfo(trailInfo);
 			});
 			
 			colorR.setFilter((context) -> StringUtil.isNullOrEmpty(context) || (ParseUtil.isParsable(context, Integer::parseInt) && ParseUtil.parseOrGet(context, Integer::parseInt, 0) < 256));
@@ -1075,7 +1072,7 @@ public class DatapackEditScreen extends Screen {
 			final ResizableEditBox beginZ = new ResizableEditBox(font, 0, 0, 35, 15, Component.translatable("datapack_edit.item_capability.trail.begin_pos.z"), HorizontalSizing.LEFT_WIDTH, null);
 			
 			beginX.setResponder((input) -> {
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getTag().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
 				ListTag list = trailTag.getList("begin_pos", Tag.TAG_DOUBLE);
 				double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
 				list.remove(0);
@@ -1085,7 +1082,7 @@ public class DatapackEditScreen extends Screen {
 				this.modelPlayer.setTrailInfo(trailInfo);
 			});
 			beginY.setResponder((input) -> {
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getTag().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
 				ListTag list = trailTag.getList("begin_pos", Tag.TAG_DOUBLE);
 				double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
 				list.remove(1);
@@ -1095,7 +1092,7 @@ public class DatapackEditScreen extends Screen {
 				this.modelPlayer.setTrailInfo(trailInfo);
 			});
 			beginZ.setResponder((input) -> {
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getTag().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
 				ListTag list = trailTag.getList("begin_pos", Tag.TAG_DOUBLE);
 				double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
 				list.remove(2);
@@ -1123,7 +1120,7 @@ public class DatapackEditScreen extends Screen {
 			final ResizableEditBox endZ = new ResizableEditBox(font, 0, 0, 35, 15, Component.translatable("datapack_edit.item_capability.trail.end_pos.z"), HorizontalSizing.LEFT_WIDTH, null);
 			
 			endX.setResponder((input) -> {
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getTag().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
 				ListTag list =trailTag.getList("end_pos", Tag.TAG_DOUBLE);
 				double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
 				list.remove(0);
@@ -1133,7 +1130,7 @@ public class DatapackEditScreen extends Screen {
 				this.modelPlayer.setTrailInfo(trailInfo);
 			});
 			endY.setResponder((input) -> {
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getTag().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
 				ListTag list =trailTag.getList("end_pos", Tag.TAG_DOUBLE);
 				double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
 				list.remove(1);
@@ -1143,7 +1140,7 @@ public class DatapackEditScreen extends Screen {
 				this.modelPlayer.setTrailInfo(trailInfo);
 			});
 			endZ.setResponder((input) -> {
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getTag().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
 				ListTag list =trailTag.getList("end_pos", Tag.TAG_DOUBLE);
 				double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
 				list.remove(2);
@@ -1171,7 +1168,7 @@ public class DatapackEditScreen extends Screen {
 			
 			lifetime.setResponder((input) -> {
 				int i = StringUtil.isNullOrEmpty(input) ? 0 : Integer.valueOf(input);
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getTag().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
 				trailTag.put("lifetime", IntTag.valueOf(i));
 				
 				TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
@@ -1182,7 +1179,7 @@ public class DatapackEditScreen extends Screen {
 			interpolation.setResponder((input) -> {
 				int i = StringUtil.isNullOrEmpty(input) ? 0 : Integer.valueOf(input);
 				
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getTag().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
 				trailTag.put("interpolations", IntTag.valueOf(i));
 				
 				TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
@@ -1198,8 +1195,8 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.interpolations")));
 			this.inputComponentsList.addComponentCurrentRow(interpolation.relocateX(rect, this.inputComponentsList.nextStart(8)));
 			
-			final ResizableEditBox texturePath = new ResizableEditBox(font, 0, 0, 30, 15, Component.translatable("datapack_edit.item_capability.trail.end_pos.z"), HorizontalSizing.LEFT_RIGHT, null);
-			texturePath.setResponder((input) -> this.packList.get(this.packListGrid.getRowposition()).getTag().getCompound("trail").put("texture_path", StringTag.valueOf(new ResourceLocation(input).toString())));
+			final ResizableEditBox texturePath = new ResizableEditBox(font, 0, 0, 15, 15, Component.translatable("datapack_edit.item_capability.trail.end_pos.z"), HorizontalSizing.LEFT_RIGHT, null);
+			texturePath.setResponder((input) -> this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail").put("texture_path", StringTag.valueOf(new ResourceLocation(input).toString())));
 			texturePath.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ResourceLocation.isValidResourceLocation(context));
 			texturePath.setMaxLength(100);
 			
@@ -1209,10 +1206,10 @@ public class DatapackEditScreen extends Screen {
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.particle_type")));
-			this.inputComponentsList.addComponentCurrentRow(new PopupBox.RegistryPopupBox<>(parentScreen, font, this.inputComponentsList.nextStart(8), 30, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
+			this.inputComponentsList.addComponentCurrentRow(new PopupBox.RegistryPopupBox<>(parentScreen, font, this.inputComponentsList.nextStart(8), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 																		Component.translatable("datapack_edit.weapon_type.hit_particle"), ForgeRegistries.PARTICLE_TYPES,
 																		(item) -> {
-																			CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getTag().getCompound("trail");
+																			CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
 																			trailTag.putString("particle_type", ParseUtil.getRegistryName(item, ForgeRegistries.PARTICLE_TYPES));
 																			
 																			TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
@@ -1222,9 +1219,7 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(this.modelPlayer.relocateX(rect, this.inputComponentsList.nextStart(8)));
-			this.inputComponentsList.newRow();
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.newRow();
 			
@@ -1233,7 +1228,7 @@ public class DatapackEditScreen extends Screen {
 		
 		@Override
 		public void packGridRowpositionChanged(int rowposition, Map<String, Object> values) {
-			this.inputComponentsList.importTag(this.packList.get(rowposition).getTag());
+			this.inputComponentsList.importTag(this.packList.get(rowposition).getPackValue());
 			
 			ResourceLocation rl = new ResourceLocation(ParseUtil.nullParam(values.get("pack_item")));
 			

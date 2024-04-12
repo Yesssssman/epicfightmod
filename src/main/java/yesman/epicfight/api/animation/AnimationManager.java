@@ -115,21 +115,21 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	}
 	
 	public int registerAnimation(StaticAnimation staticAnimation) {
-		if (this.currentWorkingModid == null) {
-			throw new IllegalStateException("[EpicFightMod] You have to register an animation when AnimationRegistryEvent is being called!");
+		if (this.currentWorkingModid != null) {
+			if (this.animationRegistry.containsKey(staticAnimation.getRegistryName())) {
+				EpicFightMod.LOGGER.error("Animation registration failed.");
+				new IllegalStateException("[EpicFightMod] Animation with registry name " + staticAnimation.getRegistryName() + " already exists!").printStackTrace();
+				return -1;
+			}
+			
+			this.animationRegistry.put(staticAnimation.getRegistryName(), staticAnimation);
+			int id = this.animationRegistry.size();
+			this.animationIdMap.addMapping(staticAnimation, id);
+			
+			return id;
 		}
 		
-		if (this.animationRegistry.containsKey(staticAnimation.getRegistryName())) {
-			EpicFightMod.LOGGER.error("Animation registration failed.");
-			new IllegalStateException("[EpicFightMod] Animation with registry name " + staticAnimation.getRegistryName() + " already exists!").printStackTrace();
-			return -1;
-		}
-		
-		this.animationRegistry.put(staticAnimation.getRegistryName(), staticAnimation);
-		int id = this.animationRegistry.size();
-		this.animationIdMap.addMapping(staticAnimation, id);
-		
-		return id;
+		return -1;
 	}
 	
 	public StaticAnimation refreshAnimation(StaticAnimation staticAnimation) {

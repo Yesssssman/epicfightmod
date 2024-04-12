@@ -79,17 +79,16 @@ public class ParseUtil {
 		return obj == null ? "" : toDisplayText.apply(obj);
 	}
 	
-	public static String snakeToSpacedCamel(String s) {
-		if (s == null) {
+	public static String snakeToSpacedCamel(Object obj) {
+		if (obj == null) {
 			return "";
 		}
 		
 		StringBuilder sb = new StringBuilder();
 		boolean upperNext = true;
+		String toStr = obj.toString().toLowerCase(Locale.ROOT);
 		
-		s = s.toLowerCase(Locale.ROOT);
-		
-		for (String sElement : s.split("")) {
+		for (String sElement : toStr.split("")) {
 			if (upperNext) {
 				sElement = sElement.toUpperCase(Locale.ROOT);
 				upperNext = false;

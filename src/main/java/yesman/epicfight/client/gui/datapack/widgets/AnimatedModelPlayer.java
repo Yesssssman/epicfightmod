@@ -121,6 +121,7 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 	
 	private Armature armature;
 	private AnimatedMesh mesh;
+	private Joint colliderJoint;
 	private Collider collider;
 	private TrailInfo trailInfo;
 	private Item item;
@@ -160,7 +161,16 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 	}
 	
 	public void setCollider(Collider collider) {
+		this.setCollider(collider, null);
+	}
+	
+	public void setCollider(Collider collider, Joint joint) {
 		this.collider = collider;
+		this.colliderJoint = joint;
+	}
+	
+	public void setColliderJoint(Joint joint) {
+		this.colliderJoint = joint;
 	}
 	
 	public void setTrailInfo(TrailInfo trailInfo) {
@@ -343,7 +353,6 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 		guiGraphics.pose().mulPose(Axis.XP.rotationDegrees(this.xRot));
 		guiGraphics.pose().mulPose(Axis.YP.rotationDegrees(this.yRot));
 		
-		RenderSystem.enableDepthTest();
 		this.mesh.initialize();
 		
 		Tesselator tesselator = RenderSystem.renderThreadTesselator();
@@ -398,40 +407,34 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 		}
 		
 		if (this.collider != null && this.showColliderCheckbox.getValue()) {
-			DynamicAnimation animation = this.animationPlayer.getAnimation();
+			RenderType renderType = this.collider.getRenderType();
+			bufferbuilder.begin(renderType.mode(), renderType.format);
+			RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
 			
-			if (animation instanceof AttackAnimation attackanimation) {
-				float elapsedTime = this.animationPlayer.getPrevElapsedTime() + (this.animationPlayer.getElapsedTime() - this.animationPlayer.getPrevElapsedTime()) * partialTicks;
-				Phase phase = attackanimation.getPhaseByTime(elapsedTime);
-				RenderType renderType = this.collider.getRenderType();
-				RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
+			if (this.colliderJoint != null) {
+				Pose prevPose = this.armature.getPrevPose();
+				Pose currentPose = this.armature.getCurrentPose();
+				this.collider.drawInternal(guiGraphics.pose(), bufferbuilder, this.armature, this.colliderJoint, prevPose, currentPose, partialTicks, -1);
+			} else {
+				DynamicAnimation animation = this.animationPlayer.getAnimation();
 				
-				bufferbuilder.begin(renderType.mode(), renderType.format);
-				
-				for (Pair<Joint, Collider> pair : phase.getColliders()) {
-					int pathIndex = this.armature.searchPathIndex(pair.getFirst().getName());
-					Pose prevPose;
-					Pose currentPose;
+				if (animation instanceof AttackAnimation attackanimation) {
+					float elapsedTime = this.animationPlayer.getPrevElapsedTime() + (this.animationPlayer.getElapsedTime() - this.animationPlayer.getPrevElapsedTime()) * partialTicks;
+					Phase phase = attackanimation.getPhaseByTime(elapsedTime);
 					
-					if (pathIndex == -1) {
-						prevPose = new Pose();
-						currentPose = new Pose();
-						prevPose.putJointData("Root", JointTransform.empty());
-						currentPose.putJointData("Root", JointTransform.empty());
-					} else {
-						prevPose = animation.getRawPose(this.animationPlayer.getPrevElapsedTime());
-						currentPose = animation.getRawPose(this.animationPlayer.getElapsedTime());
+					for (Pair<Joint, Collider> pair : phase.getColliders()) {
+						Pose prevPose = animation.getRawPose(this.animationPlayer.getPrevElapsedTime());
+						Pose currentPose = animation.getRawPose(this.animationPlayer.getElapsedTime());
+						this.collider.drawInternal(guiGraphics.pose(), bufferbuilder, this.armature, pair.getFirst(), prevPose, currentPose, partialTicks, -1);
 					}
-					
-					this.collider.drawInternal(guiGraphics.pose(), bufferbuilder, this.armature, pair.getFirst(), prevPose, currentPose, partialTicks, -1);
 				}
-				
-				RenderSystem.lineWidth(3.0F);
-				RenderSystem.disableCull();
-				BufferUploader.drawWithShader(bufferbuilder.end());
-				RenderSystem.lineWidth(1.0F);
-				RenderSystem.enableCull();
 			}
+			
+			RenderSystem.lineWidth(3.0F);
+			RenderSystem.disableCull();
+			BufferUploader.drawWithShader(bufferbuilder.end());
+			RenderSystem.lineWidth(1.0F);
+			RenderSystem.enableCull();
 		}
 		
 		guiGraphics.pose().popPose();
@@ -444,8 +447,6 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 		this.modelRenderTarget.unbindWrite();
 		
 		minecraft.getMainRenderTarget().bindWrite(true);
-		
-		//RenderSystem.disableDepthTest();
 		
 		if (scissorApplied) {
 			guiGraphics.enableScissor(screenrectangle.left(), screenrectangle.top(), screenrectangle.right(), screenrectangle.bottom());
@@ -518,35 +519,29 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 		}
 		
 		private void blitToScreen(GuiGraphics guiGraphics) {
-			Minecraft minecraft = Minecraft.getInstance();
-			ShaderInstance shaderinstance = minecraft.gameRenderer.blitShader;
-			shaderinstance.setSampler("DiffuseSampler", this.colorTextureId);
-			shaderinstance.apply();
+			RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+			RenderSystem.setShaderTexture(0, this.colorTextureId);
 			
-			float guiScale = (float)Minecraft.getInstance().getWindow().getGuiScale();
-			float left = AnimatedModelPlayer.this.getX() * guiScale;
-			float top = AnimatedModelPlayer.this.getY() * guiScale;
-			float right = left + AnimatedModelPlayer.this.getWidth() * guiScale;
-			float bottom = top + AnimatedModelPlayer.this.getHeight() * guiScale;
+			float left = AnimatedModelPlayer.this.getX();
+			float top = AnimatedModelPlayer.this.getY();
+			float right = left + AnimatedModelPlayer.this.getWidth();
+			float bottom = top + AnimatedModelPlayer.this.getHeight();
 			
 			float u = (float) this.viewWidth / (float) this.width;
 			float v = (float) this.viewHeight / (float) this.height;
 			
-			Matrix4f matrix4f = guiGraphics.pose().last().pose();
-			RenderSystem.enableDepthTest();
-			
 			guiGraphics.pose().pushPose();
-			guiGraphics.pose().translate(0, 0, -10);
 			
-			Tesselator tesselator = RenderSystem.renderThreadTesselator();
+			Matrix4f matrix4f = guiGraphics.pose().last().pose();
+			
+			Tesselator tesselator = Tesselator.getInstance();
 			BufferBuilder bufferbuilder = tesselator.getBuilder();
 			bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
 			bufferbuilder.vertex(matrix4f, left, bottom, 0.0F).uv(0.0F, 0.0F).color(255, 255, 255, 255).endVertex();
 			bufferbuilder.vertex(matrix4f, right, bottom, 0.0F).uv(u, 0.0F).color(255, 255, 255, 255).endVertex();
 			bufferbuilder.vertex(matrix4f, right, top, 0.0F).uv(u, v).color(255, 255, 255, 255).endVertex();
 			bufferbuilder.vertex(matrix4f, left, top, 0.0F).uv(0.0F, v).color(255, 255, 255, 255).endVertex();
-			BufferUploader.draw(bufferbuilder.end());
-			shaderinstance.clear();
+			BufferUploader.drawWithShader(bufferbuilder.end());
 			
 			guiGraphics.pose().popPose();
 		}

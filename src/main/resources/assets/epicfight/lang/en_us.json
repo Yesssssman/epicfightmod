@@ -309,6 +309,7 @@
 	"datapack_edit.model_player.item": "Item",
 	"datapack_edit.model_player.trail": "Trail",
 	"datapack_edit.import_animation": "Import Animation",
+	"datapack_edit.import_animation.place_tooltip": "Drag & drop the animation files you want to import here.",
 	"datapack_edit.import_animation.type": "Type",
 	"datapack_edit.import_animation.convert_time": "Transition",
 	"datapack_edit.import_animation.repeat": "Repeat",
@@ -316,7 +317,8 @@
 	"datapack_edit.import_animation.pre_delay": "Pre-Delay",
 	"datapack_edit.import_animation.contact": "Contract",
 	"datapack_edit.import_animation.recovery": "Recovery",
-	
+	"datapack_edit.import_animation.hand": "Hand",
+	"datapack_edit.import_animation.joint": "Collider Joint",
 	"datapack_edit.import_animation.preview": "Preview",
 	
 	"datapack_edit.styles": "Styles",

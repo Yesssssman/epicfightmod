@@ -69,7 +69,7 @@ public class LivingAnimationsScreen extends Screen {
 								.rowpositionChanged((rowposition, values) -> {
 									Grid.PackImporter importer = new Grid.PackImporter();
 									
-									for (String livingMotion : this.styles.get(rowposition).getTag().getAllKeys()) {
+									for (String livingMotion : this.styles.get(rowposition).getPackValue().getAllKeys()) {
 										importer.newRow().newValue("living_motion", LivingMotion.ENUM_MANAGER.get(livingMotion));
 									}
 									
@@ -77,7 +77,7 @@ public class LivingAnimationsScreen extends Screen {
 									this.animationsGrid.setValue(importer);
 								})
 								.addColumn(Grid.combo("style", Style.ENUM_MANAGER.universalValues())
-												.valueChanged((event) -> this.styles.get(event.rowposition).setPackName(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT)))
+												.valueChanged((event) -> this.styles.get(event.rowposition).setPackKey(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT)))
 												.defaultVal(Styles.ONE_HAND))
 								.pressAdd((grid, button) -> {
 									this.styles.add(PackEntry.of("", CompoundTag::new));
@@ -103,7 +103,7 @@ public class LivingAnimationsScreen extends Screen {
 									.transparentBackground(false)
 									.addColumn(Grid.combo("living_motion", LivingMotion.ENUM_MANAGER.universalValues())
 															.valueChanged((event) -> {
-																CompoundTag tag = this.styles.get(this.stylesGrid.getRowposition()).getTag();
+																CompoundTag tag = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
 																String oldMotion = ParseUtil.nullParam(event.prevValue).toLowerCase(Locale.ROOT);
 																Tag animationTag = tag.get(oldMotion);
 																tag.remove(oldMotion);
@@ -116,7 +116,7 @@ public class LivingAnimationsScreen extends Screen {
 														this.animationModelPlayer.clearAnimations();
 														
 														LivingMotion livingMotion = event.grid.getValue(event.rowposition, "living_motion");
-														CompoundTag tag = this.styles.get(this.stylesGrid.getRowposition()).getTag();
+														CompoundTag tag = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
 														tag.put(ParseUtil.nullParam(livingMotion).toLowerCase(Locale.ROOT), StringTag.valueOf(ParseUtil.nullOrApply(event.postValue, (animation) -> animation.getRegistryName().toString())));
 														
 														if (event.postValue != null) {
@@ -126,12 +126,12 @@ public class LivingAnimationsScreen extends Screen {
 													.toDisplayText((animation) -> animation == null ? "" : animation.getRegistryName().toString())
 													.width(150))
 									.pressAdd((grid, button) -> {
-										this.styles.get(this.stylesGrid.getRowposition()).getTag().put("", StringTag.valueOf(""));
+										this.styles.get(this.stylesGrid.getRowposition()).getPackValue().put("", StringTag.valueOf(""));
 										int rowposition = grid.addRow();
 										grid.setGridFocus(rowposition, "living_animation");
 									})
 									.pressRemove((grid, button) -> {
-										this.styles.get(this.stylesGrid.getRowposition()).getTag().remove(ParseUtil.nullParam(grid.getValue(grid.getRowposition(), "living_motion")).toLowerCase(Locale.ROOT));
+										this.styles.get(this.stylesGrid.getRowposition()).getPackValue().remove(ParseUtil.nullParam(grid.getValue(grid.getRowposition(), "living_motion")).toLowerCase(Locale.ROOT));
 										grid.removeRow();
 									})
 									.rowpositionChanged((rowposition, values) -> {
@@ -170,19 +170,19 @@ public class LivingAnimationsScreen extends Screen {
 			Set<String> styles = Sets.newHashSet();
 			
 			for (PackEntry<String, CompoundTag> entry : this.styles) {
-				if (styles.contains(entry.getPackName())) {
-					this.minecraft.setScreen(new MessageScreen<>("Save Failed", "Unable to save because of duplicated style: " + entry.getPackName(), this, (button2) -> {
+				if (styles.contains(entry.getPackKey())) {
+					this.minecraft.setScreen(new MessageScreen<>("Save Failed", "Unable to save because of duplicated style: " + entry.getPackKey(), this, (button2) -> {
 						this.minecraft.setScreen(this);
 					}, 180, 90));
 					return;
 				}
-				styles.add(entry.getPackName());
+				styles.add(entry.getPackKey());
 			}
 			
 			this.rootTag.tags.clear();
 			
 			for (PackEntry<String, CompoundTag> entry : this.styles) {
-				this.rootTag.put(entry.getPackName(), entry.getTag());
+				this.rootTag.put(entry.getPackKey(), entry.getPackValue());
 			}
 			
 			this.onClose();

@@ -2,33 +2,40 @@ package yesman.epicfight.client.gui.datapack.screen;
 
 import java.util.function.Supplier;
 
-import net.minecraft.nbt.Tag;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class PackEntry<K, T extends Tag> {
-	public static <K, T extends Tag> PackEntry<K, T> of(K packName, Supplier<T> tagGetter) {
-		return new PackEntry<>(packName, tagGetter);
+public class PackEntry<K, T> {
+	public static <K, T> PackEntry<K, T> of(K packKey, Supplier<T> valueGetter) {
+		return new PackEntry<>(packKey, valueGetter.get());
 	}
 	
-	private K packName;
-	private T packTag;
-	
-	private PackEntry(K packName, Supplier<T> tagGetter) {
-		this.packName = (packName);
-		this.packTag = tagGetter.get();
+	public static <K, T> PackEntry<K, T> ofValue(K packKey, T valueGetter) {
+		return new PackEntry<>(packKey, valueGetter);
 	}
 	
-	public void setPackName(K packName) {
-		this.packName = (packName);
+	private K packKey;
+	private T packValue;
+	
+	private PackEntry(K packKey, T valueGetter) {
+		this.packKey = (packKey);
+		this.packValue = valueGetter;
 	}
 	
-	public K getPackName() {
-		return this.packName;
+	public void setPackKey(K packKey) {
+		this.packKey = packKey;
 	}
 	
-	public T getTag() {
-		return this.packTag;
+	public void setPackValue(T packValue) {
+		this.packValue = packValue;
+	}
+	
+	public K getPackKey() {
+		return this.packKey;
+	}
+	
+	public T getPackValue() {
+		return this.packValue;
 	}
 }

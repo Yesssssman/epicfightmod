@@ -89,6 +89,12 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 	
 	@Override
 	public boolean isMouseOver(double x, double y) {
+		if (this.listOpened) {
+			if (this.comboItemList.isMouseOver(x, y)) {
+				return true;
+			}
+		}
+		
 		return this.active && this.visible && x >= (double)this.getX() && y >= (double) this.getY() && x < (double) (this.getX() + this.width) && y < (double) (this.getY() + this.height * (this.maxRows + 1));
 	}
 	
@@ -155,7 +161,7 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 		
 		if (this.listOpened) {
 			guiGraphics.pose().pushPose();
-			guiGraphics.pose().translate(0, 0, 100);
+			guiGraphics.pose().translate(0, 0, 10);
 			this.comboItemList.render(guiGraphics, mouseX, mouseY, partialTicks);
 			guiGraphics.pose().popPose();
 		}
@@ -336,7 +342,7 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 	
 	@Override
 	public T getValue() {
-		return this.comboItemList.getSelected().item;
+		return this.comboItemList.getSelected() == null ? null : this.comboItemList.getSelected().item;
 	}
 	
 	@Override

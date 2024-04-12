@@ -23,10 +23,10 @@ public class MessageScreen<T> extends Screen {
 	protected final Button.OnPress onCancelPress;
 	protected final Screen parentScreen;
 	protected final Component message;
-	protected final int messageBoxWidth;
-	protected final int messageBoxHeight;
 	protected final Consumer<T> onOkPressWithInput;
 	protected final DataBindingComponent<T> inputWidget;
+	protected int messageBoxWidth;
+	protected int messageBoxHeight;
 	
 	protected MessageScreen(String title, String message, Screen parentScreen, Button.OnPress onOkPres, int width, int height) {
 		this(title, message, parentScreen, onOkPres, null, width, height);
@@ -43,6 +43,8 @@ public class MessageScreen<T> extends Screen {
 		this.messageBoxHeight = height;
 		this.onOkPressWithInput = null;
 		this.inputWidget = null;
+		
+		this.minecraft = parentScreen.getMinecraft();
 	}
 	
 	protected MessageScreen(String title, String message, Screen parentScreen, Consumer<T> onOkPressWithInput, @Nullable Button.OnPress onCancelPress, DataBindingComponent<T> inputWidget, int width, int height) {
@@ -56,6 +58,16 @@ public class MessageScreen<T> extends Screen {
 		this.messageBoxHeight = height;
 		this.onOkPressWithInput = onOkPressWithInput;
 		this.inputWidget = inputWidget;
+		
+		this.minecraft = parentScreen.getMinecraft();
+	}
+	
+	public MessageScreen<T> autoCalculateHeight() {
+		List<FormattedCharSequence> messageLines = this.minecraft.font.split(this.message, this.messageBoxWidth - 16);
+		
+		this.messageBoxHeight = 70 + messageLines.size() * 15;
+		
+		return this;
 	}
 	
 	@Override
@@ -70,7 +82,7 @@ public class MessageScreen<T> extends Screen {
 				} else {
 					this.onOkPressWithInput.accept(this.inputWidget.getValue());
 				}
-			}).bounds(this.width / 2 - 56, this.height / 2 + height - 20, 55, 16).build());
+			}).bounds(this.width / 2 - 56, this.height / 2 + height - 20, 55 + (this.onCancelPress == null ? 57 : 0), 16).build());
 		}
 		
 		if (this.onCancelPress != null) {
@@ -83,11 +95,16 @@ public class MessageScreen<T> extends Screen {
 	}
 	
 	@Override
+	public void tick() {
+		this.parentScreen.tick();
+	}
+	
+	@Override
 	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
 		this.parentScreen.render(guiGraphics, mouseX, mouseY, partialTick);
 		
 		guiGraphics.pose().pushPose();
-		guiGraphics.pose().translate(0, 0, 1);
+		guiGraphics.pose().translate(0, 0, 100);
 		guiGraphics.fillGradient(0, 0, this.width, this.height, -1072689136, -804253680);
 		
 		int width = this.messageBoxWidth / 2;

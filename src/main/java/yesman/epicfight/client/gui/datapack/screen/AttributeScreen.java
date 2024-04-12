@@ -55,7 +55,7 @@ public class AttributeScreen extends Screen {
 								.rowpositionChanged((rowposition, values) -> {
 									Grid.PackImporter packImporter = new Grid.PackImporter();
 									
-									for (Map.Entry<String, Tag> entry : this.styles.get(rowposition).getTag().tags.entrySet()) {
+									for (Map.Entry<String, Tag> entry : this.styles.get(rowposition).getPackValue().tags.entrySet()) {
 										packImporter.newRow().newValue("attribute", entry.getKey()).newValue("amount", entry.getValue().getAsString());
 									}
 									
@@ -63,7 +63,7 @@ public class AttributeScreen extends Screen {
 									this.attributesGrid.setValue(packImporter);
 								})
 								.addColumn(Grid.combo("style", Style.ENUM_MANAGER.universalValues())
-												.valueChanged((event) -> this.styles.get(event.rowposition).setPackName(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT)))
+												.valueChanged((event) -> this.styles.get(event.rowposition).setPackKey(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT)))
 												.defaultVal(Styles.ONE_HAND))
 								.pressAdd((grid, button) -> {
 									this.styles.add(PackEntry.of("", CompoundTag::new));
@@ -88,9 +88,9 @@ public class AttributeScreen extends Screen {
 									.rowEditable(true)
 									.transparentBackground(false)
 									.addColumn(Grid.combo("attribute", EPICFIGHT_ATTRIBUTES)
-													.toDisplayText((string) -> ParseUtil.snakeToSpacedCamel(string))
+													.toDisplayText(ParseUtil::snakeToSpacedCamel)
 													.valueChanged((event) -> {
-														CompoundTag attributesCompound = this.styles.get(this.stylesGrid.getRowposition()).getTag();
+														CompoundTag attributesCompound = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
 														Tag tag = attributesCompound.get(ParseUtil.nullParam(event.prevValue));
 														
 														attributesCompound.remove(ParseUtil.nullParam(event.prevValue));
@@ -100,17 +100,17 @@ public class AttributeScreen extends Screen {
 									.addColumn(Grid.editbox("amount")
 													.editWidgetCreated((editbox) -> editbox.setFilter((context) -> ParseUtil.isParsable(context, Double::parseDouble)))
 													.valueChanged((event) -> {
-														CompoundTag attributesCompound = this.styles.get(this.stylesGrid.getRowposition()).getTag();
+														CompoundTag attributesCompound = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
 														attributesCompound.put(event.grid.getValue(event.rowposition, "attribute"), StringTag.valueOf(ParseUtil.nullParam(event.postValue)));
 													})
 													.width(150))
 									.pressAdd((grid, button) -> {
-										this.styles.get(this.stylesGrid.getRowposition()).getTag().put("", StringTag.valueOf(""));
+										this.styles.get(this.stylesGrid.getRowposition()).getPackValue().put("", StringTag.valueOf(""));
 										int rowposition = grid.addRow();
 										grid.setGridFocus(rowposition, "attribute");
 									})
 									.pressRemove((grid, button) -> {
-										grid.removeRow((removedRow) -> this.styles.get(this.stylesGrid.getRowposition()).getTag().remove(grid.getValue(removedRow, "attribute")));
+										grid.removeRow((removedRow) -> this.styles.get(this.stylesGrid.getRowposition()).getPackValue().remove(grid.getValue(removedRow, "attribute")));
 									})
 									.build();
 		
@@ -135,19 +135,19 @@ public class AttributeScreen extends Screen {
 			Set<String> styles = Sets.newHashSet();
 			
 			for (PackEntry<String, CompoundTag> entry : this.styles) {
-				if (styles.contains(entry.getPackName())) {
-					this.minecraft.setScreen(new MessageScreen<>("Save Failed", "Unable to save because of duplicated style: " + entry.getPackName(), this, (button2) -> {
+				if (styles.contains(entry.getPackKey())) {
+					this.minecraft.setScreen(new MessageScreen<>("Save Failed", "Unable to save because of duplicated style: " + entry.getPackKey(), this, (button2) -> {
 						this.minecraft.setScreen(this);
 					}, 180, 90));
 					return;
 				}
-				styles.add(entry.getPackName());
+				styles.add(entry.getPackKey());
 			}
 			
 			this.rootTag.tags.clear();
 			
 			for (PackEntry<String, CompoundTag> entry : this.styles) {
-				this.rootTag.put(entry.getPackName(), entry.getTag());
+				this.rootTag.put(entry.getPackKey(), entry.getPackValue());
 			}
 			
 			this.onClose();

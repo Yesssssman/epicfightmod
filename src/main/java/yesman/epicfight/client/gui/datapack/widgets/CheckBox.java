@@ -17,7 +17,7 @@ public class CheckBox extends AbstractWidget implements DataBindingComponent<Boo
 	private final boolean defaultVal;
 	
 	private Consumer<Boolean> responder;
-	private boolean value;
+	private Boolean value;
 	
 	public CheckBox(Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, boolean defaultVal, Component title, Consumer<Boolean> responder) {
 		super(x1, y1, x2, y2, title);
@@ -58,9 +58,9 @@ public class CheckBox extends AbstractWidget implements DataBindingComponent<Boo
 	
 	@Override
 	public void onClick(double x, double y) {
-		this.setValue(!this.getValue());
+		this.setValue(this.value == null ? !this.defaultVal : !this.value.booleanValue());
 	}
-
+	
 	@Override
 	public boolean isMouseOver(double x, double y) {
 		int rectangleLength = Math.min(this.getWidth(), this.getHeight());
@@ -74,7 +74,7 @@ public class CheckBox extends AbstractWidget implements DataBindingComponent<Boo
 		guiGraphics.fill(this.getX(), this.getY(), this.getX() + rectangleLength, this.getY() + rectangleLength, -1);
 		guiGraphics.fill(this.getX() + 1, this.getY() + 1, this.getX() + rectangleLength - 1, this.getY() + rectangleLength - 1, -16777216);
 		
-		if (this.value) {
+		if (this.value == null ? this.defaultVal : this.value.booleanValue()) {
 			guiGraphics.fill(this.getX() + 2, this.getY() + 2, this.getX() + rectangleLength - 2, this.getY() + rectangleLength - 2, -1);
 		}
 		
@@ -163,7 +163,7 @@ public class CheckBox extends AbstractWidget implements DataBindingComponent<Boo
 		this.value = value;
 		
 		if (this.responder != null) {
-			this.responder.accept(value.booleanValue());
+			this.responder.accept(value == null ? this.defaultVal : value.booleanValue());
 		}
 	}
 	

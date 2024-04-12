@@ -95,8 +95,7 @@ public class StylesScreen extends Screen {
 								.build();
 		
 		this.defaultStyle = new ComboBox<>(parentScreen, this.font, 55, 116, 15, 53, HorizontalSizing.LEFT_WIDTH, VerticalSizing.HEIGHT_BOTTOM, 8, Component.translatable("datapack_edit.weapon_type.styles.default"),
-											new ArrayList<>(Style.ENUM_MANAGER.universalValues()), (e) -> ParseUtil.snakeToSpacedCamel(e.toString()),
-											(style) -> rootTag.putString("default", ParseUtil.nullParam(style).toLowerCase(Locale.ROOT)));
+											new ArrayList<>(Style.ENUM_MANAGER.universalValues()), ParseUtil::snakeToSpacedCamel, (style) -> rootTag.putString("default", ParseUtil.nullParam(style).toLowerCase(Locale.ROOT)));
 		
 		this.font = parentScreen.getMinecraft().font;
 		

@@ -9,12 +9,11 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.ContainerObjectSelectionList;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.nbt.Tag;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class InputComponentList<T extends Tag> extends ContainerObjectSelectionList<InputComponentList<T>.InputComponentEntry> {
+public abstract class InputComponentList<T> extends ContainerObjectSelectionList<InputComponentList<T>.InputComponentEntry> {
 	private final Screen owner;
 	private final List<DataBindingComponent<?>> dataBindingComponent = Lists.newArrayList();
 	private InputComponentList<T>.InputComponentEntry lastEntry;
@@ -61,13 +60,24 @@ public abstract class InputComponentList<T extends Tag> extends ContainerObjectS
 	public void setDataBindingComponenets(Object[] values) {
 		for (int i = 0; i < values.length; i++) {
 			DataBindingComponent<Object> dataBinder = (DataBindingComponent<Object>)this.dataBindingComponent.get(i);
-			dataBinder.setValue(values[i]);
+			
+			try {
+				dataBinder.setValue(values[i]);
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new IllegalStateException(String.format("Error while binding component [%s] because of %s", dataBinder.getMessage(), e.getMessage()));
+			}
 		}
 	}
 	
 	public void newRow() {
 		this.lastEntry = new InputComponentEntry();
 		this.addEntry(this.lastEntry);
+	}
+	
+	public void clearComponents() {
+		this.children().clear();
+		this.dataBindingComponent.clear();
 	}
 	
 	public void setComponentsActive(boolean active) {

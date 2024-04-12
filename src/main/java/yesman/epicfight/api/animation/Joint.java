@@ -79,7 +79,26 @@ public class Joint {
 	public String getName() {
 		return this.jointName;
 	}
-
+	
+	@Override
+	public String toString() {
+		return this.jointName;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Joint joint) {
+			return this.jointName.equals(joint.jointName) && this.jointId == joint.jointId;
+		} else {
+			return super.equals(o);
+		}
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.jointName.hashCode() + this.jointId;
+	}
+	
 	public int getId() {
 		return this.jointId;
 	}

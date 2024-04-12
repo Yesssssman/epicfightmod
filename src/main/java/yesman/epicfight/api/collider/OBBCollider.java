@@ -15,6 +15,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.Joint;
+import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
@@ -239,7 +240,13 @@ public class OBBCollider extends Collider {
 		Pose interpolatedPose = Pose.interpolatePose(pose1, pose2, partialTicks);
 		
 		if (pathIndex == -1) {
-			poseMatrix = interpolatedPose.getOrDefaultTransform("Root").getAnimationBindedMatrix(armature.rootJoint, new OpenMatrix4f()).removeTranslation();
+			JointTransform jt = interpolatedPose.getOrDefaultTransform("Root");
+			jt.rotation().x = 0.0F;
+			jt.rotation().y = 0.0F;
+			jt.rotation().z = 0.0F;
+			jt.rotation().w = 1.0F;
+			
+			poseMatrix = jt.getAnimationBindedMatrix(armature.rootJoint, new OpenMatrix4f());
 		} else {
 			poseMatrix = armature.getBindedTransformByJointIndex(interpolatedPose, pathIndex);
 		}

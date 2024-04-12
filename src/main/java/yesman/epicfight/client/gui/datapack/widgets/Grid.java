@@ -861,7 +861,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		@Override
 		public AbstractWidget createEditWidget(Screen owner, Font font, int x, int y, int height, Row row, String colName, T value) {
 			ComboBox<T> comboBox = new ComboBox<>(owner, font, x, this.width - 3, y, height, null, null, Math.min(this.enums.size(), 8), Component.literal("grid.comboEdit"), this.enums,
-													(e) -> ParseUtil.snakeToSpacedCamel(e.toString()), (item) -> row.setValue(colName, item));
+													ParseUtil::snakeToSpacedCamel, (item) -> row.setValue(colName, item));
 			comboBox.setValue(value);
 			
 			if (this.onEditWidgetCreate != null) {
@@ -993,7 +993,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 			super(name);
 			
 			this.enums = enums;
-			this.toDisplayText = (enumObj) -> ParseUtil.nullOrApply(enumObj, (e) -> ParseUtil.snakeToSpacedCamel(e.toString()));
+			this.toDisplayText = (enumObj) -> ParseUtil.nullOrApply(enumObj, ParseUtil::snakeToSpacedCamel);
 		}
 		
 		@Override
@@ -1248,5 +1248,10 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		this.setSelected(null);
 		this.editingColumn = null;
 		this.editingWidget = null;
+	}
+
+	@Override
+	public Component getMessage() {
+		return Component.literal(this.toString());
 	}
 }

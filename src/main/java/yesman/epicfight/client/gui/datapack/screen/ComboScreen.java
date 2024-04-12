@@ -104,7 +104,7 @@ public class ComboScreen extends Screen {
 								.rowEditable(true)
 								.transparentBackground(false)
 								.rowpositionChanged((rowposition, values) -> {
-									this.inputComponentsList.importTag(this.styles.get(rowposition).getTag());
+									this.inputComponentsList.importTag(this.styles.get(rowposition).getPackValue());
 									this.reloadAnimationPlayer();
 									
 									if (values.get("style") == Styles.MOUNT) {
@@ -120,7 +120,7 @@ public class ComboScreen extends Screen {
 														this.dashAttackPopupbox.setActive(true);
 														this.airSlashPopupbox.setActive(true);
 														
-														ListTag combosList = this.styles.get(event.rowposition).getTag();
+														ListTag combosList = this.styles.get(event.rowposition).getPackValue();
 														combosList.add(StringTag.valueOf(""));
 														combosList.add(StringTag.valueOf(""));
 														
@@ -130,12 +130,12 @@ public class ComboScreen extends Screen {
 														this.dashAttackPopupbox.setActive(false);
 														this.airSlashPopupbox.setActive(false);
 														
-														ListTag combosList = this.styles.get(event.rowposition).getTag();
+														ListTag combosList = this.styles.get(event.rowposition).getPackValue();
 														combosList.remove(combosList.size() - 1);
 														combosList.remove(combosList.size() - 1);
 													}
 													
-													this.styles.get(event.rowposition).setPackName(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT));
+													this.styles.get(event.rowposition).setPackKey(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT));
 												})
 												.defaultVal(Styles.ONE_HAND))
 								.pressAdd((grid, button) -> {
@@ -164,7 +164,7 @@ public class ComboScreen extends Screen {
 												.editWidgetCreated((popupBox) -> popupBox.setModel(() -> Armatures.BIPED, () -> Meshes.BIPED))
 												.toDisplayText((animation) -> animation == null ? "" : animation.getRegistryName().toString())
 												.valueChanged((event) -> {
-													ListTag animationList = this.styles.get(this.stylesGrid.getRowposition()).getTag();
+													ListTag animationList = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
 													
 													animationList.remove(event.rowposition);
 													animationList.add(event.rowposition, StringTag.valueOf(ParseUtil.nullOrApply(event.postValue, (animation) -> animation.getRegistryName().toString())));
@@ -175,12 +175,12 @@ public class ComboScreen extends Screen {
 												})
 												.width(150))
 								.pressAdd((grid, button) -> {
-									this.styles.get(this.stylesGrid.getRowposition()).getTag().add(grid.children().size(), StringTag.valueOf(""));
+									this.styles.get(this.stylesGrid.getRowposition()).getPackValue().add(grid.children().size(), StringTag.valueOf(""));
 									int rowposition = grid.addRow();
 									grid.setGridFocus(rowposition, "combo_animation");
 								})
 								.pressRemove((grid, button) -> {
-									grid.removeRow((removedRow) -> this.styles.get(this.stylesGrid.getRowposition()).getTag().remove(removedRow));
+									grid.removeRow((removedRow) -> this.styles.get(this.stylesGrid.getRowposition()).getPackValue().remove(removedRow));
 									this.reloadAnimationPlayer();
 								})
 								.build();
@@ -200,7 +200,7 @@ public class ComboScreen extends Screen {
 		this.dashAttackPopupbox = new PopupBox.AnimationPopupBox(this, this.font, 110, -1, 15, 15, HorizontalSizing.WIDTH_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.dash_attak"),
 				(animation) -> {
 					if (animation != null) {
-						ListTag listTag = this.styles.get(this.stylesGrid.getRowposition()).getTag();
+						ListTag listTag = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
 						listTag.remove(listTag.size() - 2);
 						listTag.add(listTag.size() - 1, StringTag.valueOf(ParseUtil.nullOrApply(animation, (animation2) -> animation.getRegistryName().toString())));
 						this.reloadAnimationPlayer();
@@ -209,7 +209,7 @@ public class ComboScreen extends Screen {
 		this.airSlashPopupbox = new PopupBox.AnimationPopupBox(this, this.font, 110, -1, 15, 15, HorizontalSizing.WIDTH_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.air_slash"),
 				(animation) -> {
 					if (animation != null) {
-						ListTag listTag = this.styles.get(this.stylesGrid.getRowposition()).getTag();
+						ListTag listTag = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
 						listTag.remove(listTag.size() - 1);
 						listTag.add(listTag.size(), StringTag.valueOf(ParseUtil.nullOrApply(animation, (animation2) -> animation.getRegistryName().toString())));
 						this.reloadAnimationPlayer();
@@ -267,19 +267,19 @@ public class ComboScreen extends Screen {
 			Set<String> styles = Sets.newHashSet();
 			
 			for (PackEntry<String, ListTag> entry : this.styles) {
-				if (styles.contains(entry.getPackName())) {
-					this.minecraft.setScreen(new MessageScreen<>("Save Failed", "Unable to save because of duplicated style: " + entry.getPackName(), this, (button2) -> {
+				if (styles.contains(entry.getPackKey())) {
+					this.minecraft.setScreen(new MessageScreen<>("Save Failed", "Unable to save because of duplicated style: " + entry.getPackKey(), this, (button2) -> {
 						this.minecraft.setScreen(this);
 					}, 180, 90));
 					return;
 				}
-				styles.add(entry.getPackName());
+				styles.add(entry.getPackKey());
 			}
 			
 			this.rootTag.tags.clear();
 			
 			for (PackEntry<String, ListTag> entry : this.styles) {
-				this.rootTag.put(entry.getPackName(), entry.getTag());
+				this.rootTag.put(entry.getPackKey(), entry.getPackValue());
 			}
 			
 			this.onClose();

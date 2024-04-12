@@ -4,6 +4,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -125,4 +126,5 @@ public interface ResizableComponent extends GuiEventListener, NarratableEntry {
 	void setY(int y);
 	void setWidth(int width);
 	void setHeight(int height);
+	Component getMessage();
 }
