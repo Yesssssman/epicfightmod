@@ -268,6 +268,7 @@ public class EntityEvents {
 						
 						switch (stunType) {
 						case SHORT:
+							stunType = StunType.NONE;
 							if (!hitEntity.hasEffect(EpicFightMobEffects.STUN_IMMUNITY.get()) && (hitHurtableEntityPatch.getStunShield() == 0.0F)) {
 								float totalStunTime = (0.25F + (epicFightDamageSource.getImpact()) * 0.1F) * weight;
 								totalStunTime *= (1.0F - hitHurtableEntityPatch.getStunReduction());
@@ -278,8 +279,6 @@ public class EntityEvents {
 									stunTime = flag ? 0.83F : stunTime;
 									stunType = flag ? StunType.LONG : StunType.SHORT;
 									knockBackAmount = Math.min(flag ? epicFightDamageSource.getImpact() * 0.05F : totalStunTime, 2.0F);
-								} else {
-									stunType = StunType.NONE;
 								}
 								
 								stunTime *= 1.0F - hitEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
