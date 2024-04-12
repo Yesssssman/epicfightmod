@@ -7,6 +7,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.UseAnim;
+import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
@@ -135,6 +136,8 @@ public class PlayerEvents {
 			}
 		}
 	}
+	
+	// Fixed by Saithe6(github)
 	public static boolean fakePlayerCheck(Player source) {
 		return source instanceof FakePlayer;
 	}
