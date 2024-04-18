@@ -19,16 +19,6 @@ public abstract class MixinAbstractContainerEventHandler {
 	@Shadow
 	private GuiEventListener focused;
 	
-	@Inject(at = @At(value = "HEAD"), method = "serverAiStep()V", cancellable = true)
-	private void epicfight_serverAiStep(CallbackInfo info) {
-		Mob self = (Mob)((Object)this);
-		HurtableEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(self, HurtableEntityPatch.class);
-		
-		if (entitypatch != null && entitypatch.isStunned()) {
-			info.cancel();
-		}
-	}
-	
 	@Inject(at = @At(value = "HEAD"), method = "setFocused()V", cancellable = true)
 	private void epicfight_setFocused(@Nullable GuiEventListener widget, CallbackInfo info) {
 		if (this.focused == widget) {
