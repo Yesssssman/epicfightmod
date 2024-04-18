@@ -84,8 +84,6 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 						this.getSkill(SkillSlots.WEAPON_INNATE).getSkill().setConsumptionSynchronize(this, value);
 					}
 				}
-				
-				System.out.println("damage deal final ???? " + playerevent.getAttackDamage());
 			}
 		}, 10);
 		

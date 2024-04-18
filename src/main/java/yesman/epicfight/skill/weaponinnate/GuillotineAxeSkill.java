@@ -46,7 +46,7 @@ public class GuillotineAxeSkill extends SimpleWeaponInnateSkill {
 				damageModifier.merge(ValueModifier.multiplier(0.8F));
 				float health = event.getTarget().getHealth();
 				float executionHealth = damageModifier.getTotalValue((float)event.getPlayerPatch().getOriginal().getAttributeValue(Attributes.ATTACK_DAMAGE));
-				System.out.println("wtf " + health +" "+ executionHealth);
+				
 				if (health < executionHealth) {
 					if (event.getDamageSource() != null) {
 						event.getDamageSource().addRuntimeTag(EpicFightDamageType.EXECUTION);
