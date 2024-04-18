@@ -489,6 +489,7 @@ public class Animations {
 	public static StaticAnimation SHARP_STAB;
 	public static StaticAnimation OFF_ANIMATION_HIGHEST;
 	public static StaticAnimation OFF_ANIMATION_MIDDLE;
+	public static StaticAnimation OFF_ANIMATION_LOWEST;
 	
 	@SubscribeEvent
 	public static void registerAnimations(AnimationRegistryEvent event) {
@@ -634,6 +635,7 @@ public class Animations {
 		
 		OFF_ANIMATION_HIGHEST = new OffAnimation("common/off_highest");
 		OFF_ANIMATION_MIDDLE = new OffAnimation("common/off_middle");
+		OFF_ANIMATION_LOWEST = new OffAnimation("common/off_lowest");
 		
 		ZOMBIE_IDLE = new StaticAnimation(true, "zombie/idle", biped);
 		ZOMBIE_WALK = new MovementAnimation(true, "zombie/walk", biped);

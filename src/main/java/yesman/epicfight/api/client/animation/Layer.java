@@ -2,6 +2,7 @@ package yesman.epicfight.api.client.animation;
 
 import java.util.Arrays;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import com.google.common.collect.Maps;
 
@@ -30,7 +31,11 @@ public class Layer {
 	public final AnimationPlayer animationPlayer;
 	
 	public Layer(Priority priority) {
-		this.animationPlayer = new AnimationPlayer();
+		this(priority, AnimationPlayer::new);
+	}
+	
+	public Layer(Priority priority, Supplier<AnimationPlayer> animationPlayerProvider) {
+		this.animationPlayer = animationPlayerProvider.get();
 		this.linkAnimation = new LinkAnimation();
 		this.concurrentLinkAnimation = new ConcurrentLinkAnimation();
 		this.layerOffAnimation = new LayerOffAnimation(priority);
@@ -168,17 +173,39 @@ public class Layer {
 		offAnimation.setTotalTime(convertTime);
 	}
 	
-	@Override
-	public String toString() {
-		return (this.isBaseLayer() ? "" : this.priority) + (this.isBaseLayer() ? " Base Layer : " : " Composite Layer : ") + this.animationPlayer.getAnimation() +" "+ this.animationPlayer.getElapsedTime();
+	public DynamicAnimation getNextAnimation() {
+		return this.nextAnimation;
 	}
 	
+	@Override
+	public String toString() {
+		StringBuilder sb = new StringBuilder();
+		
+		if (!this.isBaseLayer()) {
+			sb.append(this.priority);
+		}
+		
+		sb.append(this.isBaseLayer() ? " Base Layer : " : " Composite Layer : ");
+		sb.append(this.animationPlayer.getAnimation() + " ");
+		sb.append(this.animationPlayer.getElapsedTime() + " ");
+		sb.append(this.animationPlayer.getAnimation() + " ");
+		sb.append(this.getClass());
+		
+		return sb.toString();
+	}
+	
+	@OnlyIn(Dist.CLIENT)
 	public static class BaseLayer extends Layer {
 		protected Map<Layer.Priority, Layer> compositeLayers = Maps.newLinkedHashMap();
 		protected Layer.Priority baseLayerPriority;
 		
-		public BaseLayer(Layer.Priority priority) {
-			super(priority);
+		public BaseLayer() {
+			this(AnimationPlayer::new);
+		}
+		
+		public BaseLayer(Supplier<AnimationPlayer> animationPlayerProvider) {
+			super(null, animationPlayerProvider);
+			
 			this.compositeLayers.computeIfAbsent(Priority.LOWEST, Layer::new);
 			this.compositeLayers.computeIfAbsent(Priority.MIDDLE, Layer::new);
 			this.compositeLayers.computeIfAbsent(Priority.HIGHEST, Layer::new);
@@ -252,10 +279,12 @@ public class Layer {
 		}
 	}
 	
+	@OnlyIn(Dist.CLIENT)
 	public enum LayerType {
 		BASE_LAYER, COMPOSITE_LAYER
 	}
 	
+	@OnlyIn(Dist.CLIENT)
 	public enum Priority {
 		/**
 		 * LOWEST: Common living motions (Composite layer having this priority will be overrided if base layer is {@link MainFrameAnimation})

@@ -1,6 +1,7 @@
 package yesman.epicfight.world.entity.eventlistener;
 
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 
@@ -30,5 +31,19 @@ public class DealtDamageEvent extends PlayerEvent<ServerPlayerPatch> {
 	
 	public float getAttackDamage() {
 		return this.attackDamage;
+	}
+	
+	public static class Pre extends DealtDamageEvent {
+		private final LivingHurtEvent forgeevent;
+		
+		public Pre(ServerPlayerPatch playerpatch, LivingEntity target, EpicFightDamageSource source, float damage, LivingHurtEvent forgeevent) {
+			super(playerpatch, target, source, damage);
+			
+			this.forgeevent = forgeevent;
+		}
+		
+		public LivingHurtEvent getForgeEvent() {
+			return this.forgeevent;
+		}
 	}
 }

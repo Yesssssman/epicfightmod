@@ -51,7 +51,7 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 	private final StateSpectrum stateSpectrum = new StateSpectrum();
 	
 	public StaticAnimation() {
-		super(0.0F, false);
+		super(0.0F, true);
 		this.resourceLocation = null;
 		this.registryName = null;
 		this.armature = null;
@@ -87,7 +87,6 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		this.armature = armature;
 		
 		if (noRegister) {
-			AnimationManager.getInstance().registerNoIdAnimation(this);
 			this.animationId = -1;
 		} else {
 			this.animationId = AnimationManager.getInstance().registerAnimation(this);
@@ -232,8 +231,7 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		if (!super.isJointEnabled(entitypatch, layer, joint)) {
 			return false;
 		} else {
-			return this.getProperty(ClientAnimationProperties.JOINT_MASK).map((bindModifier) -> 
-						!bindModifier.isMasked(entitypatch.getCurrentLivingMotion(), joint)).orElse(true);
+			return this.getProperty(ClientAnimationProperties.JOINT_MASK).map((bindModifier) -> !bindModifier.isMasked(entitypatch.getCurrentLivingMotion(), joint)).orElse(true);
 		}
 	}
 	
@@ -428,7 +426,11 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 	public AnimationClip getAnimationClip() {
 		return AnimationManager.getInstance().getStaticAnimationClip(this);
 	}
-
+	
+	public List<StaticAnimation> getAllClipAnimations() {
+		return List.of(this);
+	}
+	
 	@Override
 	public StaticAnimation get() {
 		return AnimationManager.getInstance().refreshAnimation(this);

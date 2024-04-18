@@ -178,6 +178,15 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 		narrationElementInput.add(NarratedElementType.TITLE, this.createNarrationMessage());
 	}
 	
+	@Override
+	public void setFocused(boolean focused) {
+		super.setFocused(focused);
+		
+		if (!focused) {
+			this.listOpened = false;
+		}
+	}
+
 	@OnlyIn(Dist.CLIENT)
 	class ComboItemList extends ObjectSelectionList<ComboItemList.ComboItemEntry> {
 		private final Map<T, ComboItemEntry> entryMap = Maps.newHashMap();

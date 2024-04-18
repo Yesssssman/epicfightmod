@@ -70,8 +70,9 @@ public class CheckBox extends AbstractWidget implements DataBindingComponent<Boo
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		int rectangleLength = Math.min(this.getWidth(), this.getHeight());
+		int outlineColor = this.isFocused() ? -1 : this.isActive() ? -6250336 : -12566463;
 		
-		guiGraphics.fill(this.getX(), this.getY(), this.getX() + rectangleLength, this.getY() + rectangleLength, -1);
+		guiGraphics.fill(this.getX(), this.getY(), this.getX() + rectangleLength, this.getY() + rectangleLength, outlineColor);
 		guiGraphics.fill(this.getX() + 1, this.getY() + 1, this.getX() + rectangleLength - 1, this.getY() + rectangleLength - 1, -16777216);
 		
 		if (this.value == null ? this.defaultVal : this.value.booleanValue()) {

@@ -8,7 +8,7 @@ import yesman.epicfight.api.model.Armature;
 
 @OnlyIn(Dist.CLIENT)
 public class FakeStaticAnimation extends StaticAnimation implements ClipHoldingAnimation {
-	private AnimationClip clip;
+	protected AnimationClip clip;
 	
 	public FakeStaticAnimation(float convertTime, boolean isRepeat, String path, Armature armature) {
 		super(convertTime, isRepeat, path, armature);
@@ -22,5 +22,17 @@ public class FakeStaticAnimation extends StaticAnimation implements ClipHoldingA
 	@Override
 	public AnimationClip getAnimationClip() {
 		return this.clip;
+	}
+	
+	@Override
+	public FakeAnimation toFakeAnimation() {
+		FakeAnimation fakeAnimation = new FakeAnimation(this.registryName.toString(), this.armature, this.clip);
+		fakeAnimation.setAnimationClass(StaticAnimation.class);
+		fakeAnimation.setParameter("convertTime", this.convertTime);
+		fakeAnimation.setParameter("isRepeat", this.isRepeat());
+		fakeAnimation.setParameter("path", this.registryName.toString());
+		fakeAnimation.setParameter("armature", this.armature);
+		
+		return fakeAnimation;
 	}
 }

@@ -47,6 +47,7 @@ import yesman.epicfight.world.entity.eventlistener.DodgeSuccessEvent;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.SetTargetEvent;
+import yesman.epicfight.world.entity.eventlistener.StaminaConsumeEvent;
 
 public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	private LivingEntity attackTarget;
@@ -221,13 +222,16 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	
 	@Override
 	public boolean consumeStamina(float amount) {
+		StaminaConsumeEvent event = new StaminaConsumeEvent(this, amount);
+		
+		this.eventListeners.triggerEvents(EventType.STAMINA_CONSUME_EVENT, event);
 		float currentStamina = this.getStamina();
 		
-		if (currentStamina < amount) {
+		if (currentStamina < event.getAmount()) {
 			return false;
 		}
 		
-		this.setStamina(currentStamina - amount);
+		this.setStamina(currentStamina - event.getAmount());
 		this.resetActionTick();
 		
 		return true;

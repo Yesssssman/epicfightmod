@@ -146,24 +146,9 @@ public class DatapackEditScreen extends Screen {
 			PackResources packResources = pack.open();
 			
 			this.weaponTab.importEntries(packResources);
-			this.itemCapabilityTab.clear();
-			this.mobPatchTab.clear();
-			
-			packResources.getNamespaces(PackType.SERVER_DATA).stream().distinct().forEach((namespace) -> {
-				packResources.listResources(PackType.SERVER_DATA, namespace, "capabilities/weapons/types", (resourceLocation, ioSupplier) -> {
-					try {
-						JsonReader jsonReader = new JsonReader(new InputStreamReader(ioSupplier.get(), StandardCharsets.UTF_8));
-						jsonReader.setLenient(true);
-						JsonObject jsonObject = Streams.parse(jsonReader).getAsJsonObject();
-						CompoundTag compTag = TagParser.parseTag(jsonObject.toString());
-						
-						this.weaponTab.packList.add(PackEntry.of(resourceLocation, () -> compTag));
-						this.weaponTab.packListGrid.addRowWithDefaultValues("pack_item", resourceLocation.toString());
-					} catch (IOException | CommandSyntaxException e) {
-						e.printStackTrace();
-					}
-				});
-			});
+			this.itemCapabilityTab.importEntries(packResources);
+			this.mobPatchTab.importEntries(packResources);
+			ImportAnimationsScreen.importAnimations(packResources);
 			
 			return true;
 		} else {
@@ -181,6 +166,7 @@ public class DatapackEditScreen extends Screen {
 			this.weaponTab.exportEntries(out);
 			this.itemCapabilityTab.exportEntries(out);
 			this.mobPatchTab.exportEntries(out);
+			ImportAnimationsScreen.export(out);
 			
 			ZipEntry zipEntry = new ZipEntry("pack.mcmeta");
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -615,7 +601,7 @@ public class DatapackEditScreen extends Screen {
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.collider")));
-			this.inputComponentsList.addComponentCurrentRow(new PopupBox.ColliderPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 130, 15, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.collider"),
+			this.inputComponentsList.addComponentCurrentRow(new PopupBox.ColliderPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.collider"),
 																							(collider) -> {
 																								if (collider != null) {
 																									CompoundTag colliderTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
@@ -723,9 +709,7 @@ public class DatapackEditScreen extends Screen {
 			Font font = DatapackEditScreen.this.font;
 			ScreenRectangle rect = DatapackEditScreen.this.getRectangle();
 			
-			this.modelPlayer = new AnimatedModelPlayer(20, 15, 0, 150, HorizontalSizing.LEFT_RIGHT, null);
-			this.modelPlayer.setMesh(Meshes.BIPED);
-			this.modelPlayer.setArmature(Armatures.BIPED);
+			this.modelPlayer = new AnimatedModelPlayer(20, 15, 0, 150, HorizontalSizing.LEFT_RIGHT, null, Armatures.BIPED, Meshes.BIPED);
 			
 			this.inputComponentsList = new InputComponentList<>(DatapackEditScreen.this, 0, 0, 0, 0, 30) {
 				@Override
@@ -967,7 +951,7 @@ public class DatapackEditScreen extends Screen {
 			colliderSizeZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
 			
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.collider")));
-			this.inputComponentsList.addComponentCurrentRow(new PopupBox.ColliderPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 130, 15, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.collider"),
+			this.inputComponentsList.addComponentCurrentRow(new PopupBox.ColliderPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.collider"),
 																							(collider) -> {
 																								if (collider != null) {
 																									CompoundTag colliderTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());

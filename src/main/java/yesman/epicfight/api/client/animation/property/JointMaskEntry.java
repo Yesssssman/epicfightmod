@@ -1,12 +1,11 @@
 package yesman.epicfight.api.client.animation.property;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -16,98 +15,27 @@ import yesman.epicfight.api.animation.LivingMotion;
 
 @OnlyIn(Dist.CLIENT)
 public class JointMaskEntry {
-	public static final List<JointMask> BIPED_UPPER_JOINTS = new ArrayList<> (
-		Arrays.asList(
-			JointMask.of("Torso"), JointMask.of("Chest"),
-			JointMask.of("Head"), JointMask.of("Shoulder_R"),
-			JointMask.of("Arm_R"), JointMask.of("Hand_R"),
-			JointMask.of("Elbow_R"), JointMask.of("Tool_R"),
-			JointMask.of("Shoulder_L"), JointMask.of("Arm_L"),
-			JointMask.of("Hand_L"), JointMask.of("Elbow_L"),
-			JointMask.of("Tool_L")
-		)
+	public static final List<JointMask> BIPED_UPPER_JOINTS_WITH_ROOT = ImmutableList.of(
+		JointMask.of("Root", JointMask.KEEP_CHILD_LOCROT), JointMask.of("Torso"),
+		JointMask.of("Chest"), JointMask.of("Head"),
+		JointMask.of("Shoulder_R"), JointMask.of("Arm_R"),
+		JointMask.of("Hand_R"), JointMask.of("Elbow_R"),
+		JointMask.of("Tool_R"), JointMask.of("Shoulder_L"),
+		JointMask.of("Arm_L"), JointMask.of("Hand_L"),
+		JointMask.of("Elbow_L"), JointMask.of("Tool_L")
 	);
 	
-	public static final List<JointMask> BIPED_UPPER_JOINTS_WITH_ROOT = new ArrayList<> (
-		Arrays.asList(
-			JointMask.of("Root", JointMask.KEEP_CHILD_LOCROT), JointMask.of("Torso"),
-			JointMask.of("Chest"), JointMask.of("Head"),
-			JointMask.of("Shoulder_R"), JointMask.of("Arm_R"),
-			JointMask.of("Hand_R"), JointMask.of("Elbow_R"),
-			JointMask.of("Tool_R"), JointMask.of("Shoulder_L"),
-			JointMask.of("Arm_L"), JointMask.of("Hand_L"),
-			JointMask.of("Elbow_L"), JointMask.of("Tool_L")
-		)
-	);
-	
-	public static final List<JointMask> BIPED_LOWER_JOINTS_WITH_ROOT = new ArrayList<> (
-		Arrays.asList(
-			JointMask.of("Root", JointMask.KEEP_CHILD_LOCROT), JointMask.of("Thigh_R"),
-			JointMask.of("Leg_R"), JointMask.of("Knee_R"),
-			JointMask.of("Thigh_L"), JointMask.of("Leg_L"),
-			JointMask.of("Knee_L"), JointMask.of("Torso"), JointMask.of("Head")
-		)
-	);
-	
-	public static final List<JointMask> BIPED_ARMS = new ArrayList<> (
-		Arrays.asList(
-			JointMask.of("Shoulder_R"), JointMask.of("Arm_R"),
-			JointMask.of("Hand_R"), JointMask.of("Elbow_R"),
-			JointMask.of("Tool_R"), JointMask.of("Shoulder_L"),
-			JointMask.of("Arm_L"), JointMask.of("Hand_L"),
-			JointMask.of("Elbow_L"), JointMask.of("Tool_L")
-		)
-	);
-	
-	public static final List<JointMask> BIPED_RIGHT_ARMS = new ArrayList<> (
-			Arrays.asList(
-				JointMask.of("Shoulder_R"), JointMask.of("Arm_R"),
-				JointMask.of("Hand_R"), JointMask.of("Elbow_R"),
-				JointMask.of("Tool_R")
-			)
-		);
-	
-	public static final List<JointMask> BIPED_BODY_AND_RIGHT_ARMS = new ArrayList<> (
-			Arrays.asList(
-				JointMask.of("Shoulder_R"), JointMask.of("Arm_R"),
-				JointMask.of("Hand_R"), JointMask.of("Elbow_R"),
-				JointMask.of("Tool_R"), JointMask.of("Head"),
-				JointMask.of("Chest")
-			)
-		);
-	
-	public static final List<JointMask> BIPED_LEFT_ARMS = new ArrayList<> (
-			Arrays.asList(
-				JointMask.of("Shoulder_L"), JointMask.of("Arm_L"),
-				JointMask.of("Hand_L"), JointMask.of("Elbow_L"),
-				JointMask.of("Tool_L")
-			)
-		);
-	
-	public static final List<JointMask> BIPED_BODY_AND_LEFT_ARMS = new ArrayList<> (
-			Arrays.asList(
-				JointMask.of("Shoulder_L"), JointMask.of("Arm_L"),
-				JointMask.of("Hand_L"), JointMask.of("Elbow_L"),
-				JointMask.of("Tool_L"), JointMask.of("Head"),
-				JointMask.of("Chest")
-			)
-		);
-	
-	public static final List<JointMask> WINGS = new ArrayList<> (Arrays.asList(JointMask.of("Wing_L"), JointMask.of("Wing_R")));
-	
-	public static final List<JointMask> ALL = new ArrayList<> (
-		Arrays.asList(
-			JointMask.of("Root"), JointMask.of("Thigh_R"),
-			JointMask.of("Leg_R"), JointMask.of("Knee_R"),
-			JointMask.of("Thigh_L"), JointMask.of("Leg_L"),
-			JointMask.of("Knee_L"), JointMask.of("Torso"),
-			JointMask.of("Chest"), JointMask.of("Head"),
-			JointMask.of("Shoulder_R"), JointMask.of("Arm_R"),
-			JointMask.of("Hand_R"), JointMask.of("Elbow_R"),
-			JointMask.of("Tool_R"), JointMask.of("Shoulder_L"),
-			JointMask.of("Arm_L"), JointMask.of("Hand_L"),
-			JointMask.of("Elbow_L"), JointMask.of("Tool_L")
-		)
+	public static final List<JointMask> ALL = ImmutableList.of(
+		JointMask.of("Root"), JointMask.of("Thigh_R"),
+		JointMask.of("Leg_R"), JointMask.of("Knee_R"),
+		JointMask.of("Thigh_L"), JointMask.of("Leg_L"),
+		JointMask.of("Knee_L"), JointMask.of("Torso"),
+		JointMask.of("Chest"), JointMask.of("Head"),
+		JointMask.of("Shoulder_R"), JointMask.of("Arm_R"),
+		JointMask.of("Hand_R"), JointMask.of("Elbow_R"),
+		JointMask.of("Tool_R"), JointMask.of("Shoulder_L"),
+		JointMask.of("Arm_L"), JointMask.of("Hand_L"),
+		JointMask.of("Elbow_L"), JointMask.of("Tool_L")
 	);
 	
 	public static final JointMaskEntry BASIC_ATTACK_MASK = JointMaskEntry.builder().defaultMask(JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT).create();
@@ -147,6 +75,7 @@ public class JointMaskEntry {
 		return new JointMaskEntry.Builder();
 	}
 	
+	@OnlyIn(Dist.CLIENT)
 	public static class Builder {
 		private final List<Pair<LivingMotion, List<JointMask>>> masks = Lists.newArrayList();
 		private List<JointMask> defaultMask = null;

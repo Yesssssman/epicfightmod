@@ -68,7 +68,7 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 			ResourceLocation rl = entry.getKey();
 			String path = rl.getPath();
 			
-			if (path.contains("/")) {
+			if (path.contains("/") && !path.contains("types")) {
 				String[] str = path.split("/", 2);
 				ResourceLocation registryName = new ResourceLocation(rl.getNamespace(), str[1]);
 				Item item = ForgeRegistries.ITEMS.getValue(registryName);

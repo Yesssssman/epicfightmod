@@ -106,6 +106,12 @@ public class JsonModelLoader {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
+	public JsonModelLoader(JsonObject rootJson) throws IOException {
+		this.resourceManager = Minecraft.getInstance().getResourceManager();
+		this.rootJson = rootJson;
+	}
+	
+	@OnlyIn(Dist.CLIENT)
 	public AnimatedMesh.RenderProperties getRenderProperties() {
 		JsonObject properties = this.rootJson.getAsJsonObject("render_properties");
 		AnimatedMesh.RenderProperties renderProperties = AnimatedMesh.RenderProperties.create();

@@ -43,7 +43,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
-import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
@@ -59,9 +59,11 @@ import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
+import yesman.epicfight.api.animation.types.LayerOffAnimation;
 import yesman.epicfight.api.animation.types.LinkAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
+import yesman.epicfight.api.client.animation.ClientAnimator;
+import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.collider.Collider;
@@ -76,58 +78,35 @@ import yesman.epicfight.client.renderer.EpicFightShaders;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+import yesman.epicfight.world.damagesource.StunType;
 
 @OnlyIn(Dist.CLIENT)
 public class AnimatedModelPlayer extends AbstractWidget implements ResizableComponent {
-	private final AnimationPlayer animationPlayer = new AnimationPlayer() {
-		@Override
-		public void tick(LivingEntityPatch<?> entitypatch) {
-			this.prevElapsedTime = this.elapsedTime;
-			this.elapsedTime += EpicFightOptions.A_TICK * 0.75F * (this.isReversed() && this.getAnimation().canBePlayedReverse() ? -1.0F : 1.0F);
-			
-			if (this.elapsedTime >= this.play.getTotalTime()) {
-				if (this.play.isRepeat()) {
-					this.prevElapsedTime = 0;
-					this.elapsedTime %= this.play.getTotalTime();
-				} else {
-					this.elapsedTime = this.play.getTotalTime();
-					this.isEnd = true;
-				}
-			} else if (this.elapsedTime < 0) {
-				if (this.play.isRepeat()) {
-					this.prevElapsedTime = this.play.getTotalTime();
-					this.elapsedTime = this.play.getTotalTime() + this.elapsedTime;
-				} else {
-					this.elapsedTime = 0.0F;
-					this.isEnd = true;
-				}
-			}
-		}
-	};
-	private final LinkAnimation linkAnimation = new LinkAnimation();
+	public final NoEntityAnimator animator;
 	private final ModelRenderTarget modelRenderTarget;
 	private final List<StaticAnimation> animationsToPlay = Lists.newArrayList();
 	private final List<CustomTrailParticle> trailParticles = Lists.newArrayList();
 	private final CheckBox showColliderCheckbox = new CheckBox(Minecraft.getInstance().font, 0, 60, 0, 10, null, null, true, Component.translatable("datapack_edit.model_player.collider"), null);
 	private final CheckBox showItemCheckbox = new CheckBox(Minecraft.getInstance().font, 0, 40, 0, 10, null, null, true, Component.translatable("datapack_edit.model_player.item"), null);
 	private final CheckBox showTrailCheckbox = new CheckBox(Minecraft.getInstance().font, 0, 40, 0, 10, null, null, true, Component.translatable("datapack_edit.model_player.trail"), null);
-	
 	private double zoom = -3.0D;
 	private float xRot = 0.0F;
 	private float yRot = 180.0F;
 	private float xMove = 0.0F;
 	private float yMove = 0.0F;
 	private int index;
-	
-	private Armature armature;
 	private AnimatedMesh mesh;
 	private Joint colliderJoint;
 	private Collider collider;
 	private TrailInfo trailInfo;
 	private Item item;
 	
-	public AnimatedModelPlayer(int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical) {
+	public AnimatedModelPlayer(int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Armature armature, AnimatedMesh mesh) {
 		super(x1, y1, x2, y2, Component.literal("datapack_edit.weapon_type.combo.animation_player"));
+		
+		FakeEntityPatch patch = new FakeEntityPatch(armature);
+		this.animator = new NoEntityAnimator(patch);
+		patch.setAnimator();
 		
 		this.x1 = x1;
 		this.x2 = x2;
@@ -135,6 +114,7 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 		this.y2 = y2;
 		this.horizontalSizingOption = horizontal;
 		this.verticalSizingOption = vertical;
+		this.mesh = mesh;
 		
 		this.modelRenderTarget = new ModelRenderTarget();
 		
@@ -145,19 +125,11 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 	}
 	
 	public Armature getArmature() {
-		return this.armature;
+		return this.animator.getEntityPatch().getArmature();
 	}
 	
 	public AnimatedMesh getMesh() {
 		return this.mesh;
-	}
-	
-	public void setArmature(Armature armature) {
-		this.armature = armature.deepCopy();
-	}
-	
-	public void setMesh(AnimatedMesh mesh) {
-		this.mesh = mesh;
 	}
 	
 	public void setCollider(Collider collider) {
@@ -187,6 +159,7 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 		}
 		
 		this.animationsToPlay.add(animation);
+		this.animator.playAnimation(animation, 0.0F);
 	}
 	
 	public void removeAnimationPlayingAnimation(StaticAnimation animation) {
@@ -196,7 +169,15 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 	public void clearAnimations() {
 		this.index = -1;
 		this.animationsToPlay.clear();
-		this.animationPlayer.setPlayAnimation(Animations.DUMMY_ANIMATION);
+		this.animator.playAnimation(Animations.DUMMY_ANIMATION, 0.0F);
+		
+		this.animator.getAllLayers().forEach((layer) -> {
+			layer.off(this.animator.getEntityPatch());
+		});
+		
+		this.animator.playAnimation(Animations.OFF_ANIMATION_HIGHEST, 0.0F);
+		this.animator.playAnimation(Animations.OFF_ANIMATION_MIDDLE, 0.0F);
+		this.animator.playAnimation(Animations.OFF_ANIMATION_LOWEST, 0.0F);
 	}
 	
 	public void restartAnimations() {
@@ -207,68 +188,12 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 			return;
 		}
 		
-		this.animationPlayer.setPlayAnimation(this.animationsToPlay.get(0));
+		this.animator.playAnimation(this.animationsToPlay.get(0), 0.0F);
 	}
 	
 	@Override
 	public void tick() {
-		if (this.animationsToPlay.size() == 0) {
-			return;
-		}
-		
-		this.animationPlayer.tick(null);
-		
-		if (this.animationPlayer.isEnd()) {
-			if (this.animationPlayer.getAnimation() == this.linkAnimation) {
-				this.animationPlayer.setPlayAnimation(this.animationsToPlay.get(this.index));
-				this.index = (this.index + 1) % this.animationsToPlay.size();
-			} else {
-				Pose currentPose = this.animationPlayer.getAnimation().getRawPose(this.animationPlayer.getElapsedTime());
-				StaticAnimation toPlay = this.animationsToPlay.get(this.index);
-				Pose nextAnimationPose = toPlay.getRawPose(0.0F);
-				float totalTime = toPlay.getConvertTime();
-				
-				this.linkAnimation.getTransfroms().clear();
-				this.linkAnimation.setTotalTime(totalTime);
-				this.linkAnimation.setNextAnimation(toPlay);
-				
-				Map<String, JointTransform> data1 = currentPose.getJointTransformData();
-				Map<String, JointTransform> data2 = nextAnimationPose.getJointTransformData();
-				
-				for (String jointName : data1.keySet()) {
-					if (data1.containsKey(jointName) && data2.containsKey(jointName)) {
-						Keyframe[] keyframes = new Keyframe[2];
-						keyframes[0] = new Keyframe(0.0F, data1.get(jointName));
-						keyframes[1] = new Keyframe(totalTime, data2.get(jointName));
-						TransformSheet sheet = new TransformSheet(keyframes);
-						this.linkAnimation.getAnimationClip().addJointTransform(jointName, sheet);
-					}
-				}
-				
-				this.animationPlayer.setPlayAnimation(this.linkAnimation);
-				
-				if (this.trailInfo != null) {
-					toPlay.getProperty(ClientAnimationProperties.TRAIL_EFFECT).ifPresent(trailInfos -> {
-						for (TrailInfo info : trailInfos) {
-							if (info.hand != InteractionHand.MAIN_HAND) {
-								continue;
-							}
-							
-							TrailInfo combinedTrailInfo = this.trailInfo.overwrite(info);
-							
-							if (combinedTrailInfo.playable()) {
-								CustomTrailParticle trail = new CustomTrailParticle(this.armature.searchJointByName(combinedTrailInfo.joint), toPlay, combinedTrailInfo);
-								this.trailParticles.add(trail);
-							}
-						}
-					});
-				}
-			}
-		}
-		
-		float elapsedTime = this.animationPlayer.getElapsedTime();
-		Pose pose = this.animationPlayer.getAnimation().getRawPose(elapsedTime);
-		this.armature.setPose(pose);
+		this.animator.tick();
 		
 		this.trailParticles.forEach((trail) -> trail.tick());
 		this.trailParticles.removeIf((trail) -> !trail.isAlive());
@@ -331,11 +256,11 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 		
 		this.modelRenderTarget.clear(true);
 		this.modelRenderTarget.bindWrite(true);
-		this.armature.initializeTransform();
+		this.getArmature().initializeTransform();
 		
-		Pose pose = this.armature.getPose(partialTicks);
+		Pose pose = this.getArmature().getPose(partialTicks);
 		
-		OpenMatrix4f[] poseMatrices = this.armature.getAllPoseTransform(partialTicks);
+		OpenMatrix4f[] poseMatrices = this.getArmature().getAllPoseTransform(partialTicks);
 		guiGraphics.pose().pushPose();
 		
 		ShaderInstance prevShader = RenderSystem.getShader();
@@ -358,7 +283,7 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 		Tesselator tesselator = RenderSystem.renderThreadTesselator();
 		BufferBuilder bufferbuilder = tesselator.getBuilder();
 		bufferbuilder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
-		this.mesh.draw(guiGraphics.pose(), bufferbuilder, AnimatedMesh.DrawingFunction.ENTITY_SOLID, -1, 0.9411F, 0.9411F, 0.9411F, 1.0F, -1, this.armature, poseMatrices);
+		this.mesh.draw(guiGraphics.pose(), bufferbuilder, AnimatedMesh.DrawingFunction.ENTITY_SOLID, -1, 0.9411F, 0.9411F, 0.9411F, 1.0F, -1, this.getArmature(), poseMatrices);
 		BufferUploader.drawWithShader(bufferbuilder.end());
 		
 		if (this.item != null && this.showItemCheckbox.getValue()) {
@@ -367,7 +292,7 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 			ItemStack itemstack = new ItemStack(this.item);
 			
 			OpenMatrix4f correction = new OpenMatrix4f().translate(0F, 0F, -0.13F).rotateDeg(-90.0F, Vec3f.X_AXIS);
-			OpenMatrix4f handTransform = correction.mulFront(this.armature.getBindedTransformFor(pose, this.armature.searchJointByName("Tool_R")));
+			OpenMatrix4f handTransform = correction.mulFront(this.getArmature().getBindedTransformFor(pose, this.getArmature().searchJointByName("Tool_R")));
 			OpenMatrix4f transposed = handTransform.transpose(null);
 			
 			guiGraphics.pose().pushPose();
@@ -412,20 +337,21 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 			RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
 			
 			if (this.colliderJoint != null) {
-				Pose prevPose = this.armature.getPrevPose();
-				Pose currentPose = this.armature.getCurrentPose();
-				this.collider.drawInternal(guiGraphics.pose(), bufferbuilder, this.armature, this.colliderJoint, prevPose, currentPose, partialTicks, -1);
+				Pose prevPose = this.getArmature().getPrevPose();
+				Pose currentPose = this.getArmature().getCurrentPose();
+				this.collider.drawInternal(guiGraphics.pose(), bufferbuilder, this.getArmature(), this.colliderJoint, prevPose, currentPose, partialTicks, -1);
 			} else {
-				DynamicAnimation animation = this.animationPlayer.getAnimation();
+				AnimationPlayer player = this.animator.getPlayerFor(null);
+				DynamicAnimation animation = player.getAnimation();
 				
 				if (animation instanceof AttackAnimation attackanimation) {
-					float elapsedTime = this.animationPlayer.getPrevElapsedTime() + (this.animationPlayer.getElapsedTime() - this.animationPlayer.getPrevElapsedTime()) * partialTicks;
+					float elapsedTime = player.getPrevElapsedTime() + (player.getElapsedTime() - player.getPrevElapsedTime()) * partialTicks;
 					Phase phase = attackanimation.getPhaseByTime(elapsedTime);
 					
 					for (Pair<Joint, Collider> pair : phase.getColliders()) {
-						Pose prevPose = animation.getRawPose(this.animationPlayer.getPrevElapsedTime());
-						Pose currentPose = animation.getRawPose(this.animationPlayer.getElapsedTime());
-						this.collider.drawInternal(guiGraphics.pose(), bufferbuilder, this.armature, pair.getFirst(), prevPose, currentPose, partialTicks, -1);
+						Pose prevPose = animation.getRawPose(player.getPrevElapsedTime());
+						Pose currentPose = animation.getRawPose(player.getElapsedTime());
+						this.collider.drawInternal(guiGraphics.pose(), bufferbuilder, this.getArmature(), pair.getFirst(), prevPose, currentPose, partialTicks, -1);
 					}
 				}
 			}
@@ -508,7 +434,318 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	private class ModelRenderTarget extends RenderTarget {
+	public class FakeEntityPatch extends LivingEntityPatch<LivingEntity> {
+		public FakeEntityPatch(Armature armature) {
+			this.armature = armature.deepCopy();
+		}
+		
+		public void setAnimator() {
+			this.animator = AnimatedModelPlayer.this.animator;
+		}
+		
+		@Override
+		public void initAnimator(ClientAnimator clientAnimator) {
+			
+		}
+		
+		@Override
+		public void updateMotion(boolean considerInaction) {
+			
+		}
+		
+		@Override
+		public StaticAnimation getHitAnimation(StunType stunType) {
+			return null;
+		}
+		
+		@Override
+		public boolean isLogicalClient() {
+			return true;
+		}
+		
+		@Override
+		public void cancelAnyAction() {
+		}
+		
+		@Override
+		public float getAttackDirectionPitch() {
+			return 0.0F;
+		}
+		
+		@Override
+		public OpenMatrix4f getModelMatrix(float partialTicks) {
+			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, partialTicks, 1.0F, 1.0F, 1.0F);
+		}
+		
+		@Override
+		public void updateEntityState() {
+		}
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public class NoEntityAnimator extends ClientAnimator {
+		public NoEntityAnimator(FakeEntityPatch entitypatch) {
+			super(entitypatch, NoEntityBaseLayer::new);
+		}
+		
+		@Override
+		public void tick() {
+			this.baseLayer.update(this.entitypatch);
+			
+			if (this.baseLayer.animationPlayer.isEnd() && this.baseLayer.getNextAnimation() == null) {
+				this.baseLayer.playAnimation(AnimatedModelPlayer.this.animationsToPlay.get(AnimatedModelPlayer.this.index), this.entitypatch, 0.0F);
+				AnimatedModelPlayer.this.index = (AnimatedModelPlayer.this.index + 1) % AnimatedModelPlayer.this.animationsToPlay.size();
+			}
+			
+			this.poseTick();
+		}
+		
+		public LivingEntityPatch<?> getEntityPatch() {
+			return this.entitypatch;
+		}
+		
+		@OnlyIn(Dist.CLIENT)
+		static class NoEntityAnimationPlayer extends AnimationPlayer {
+			@Override
+			public void tick(LivingEntityPatch<?> entitypatch) {
+				this.prevElapsedTime = this.elapsedTime;
+				this.elapsedTime += EpicFightOptions.A_TICK * (this.isReversed() && this.getAnimation().canBePlayedReverse() ? -1.0F : 1.0F);
+				
+				if (this.elapsedTime >= this.play.getTotalTime()) {
+					if (this.play.isRepeat()) {
+						this.prevElapsedTime = 0;
+						this.elapsedTime %= this.play.getTotalTime();
+					} else {
+						this.elapsedTime = this.play.getTotalTime();
+						this.isEnd = true;
+					}
+				} else if (this.elapsedTime < 0) {
+					if (this.play.isRepeat()) {
+						this.prevElapsedTime = this.play.getTotalTime();
+						this.elapsedTime = this.play.getTotalTime() + this.elapsedTime;
+					} else {
+						this.elapsedTime = 0.0F;
+						this.isEnd = true;
+					}
+				}
+			}
+		}
+		
+		@OnlyIn(Dist.CLIENT)
+		static class NoEntityLayer extends Layer {
+			public NoEntityLayer(Priority priority) {
+				super(priority, NoEntityAnimationPlayer::new);
+			}
+			
+			public void playAnimation(StaticAnimation nextAnimation, LivingEntityPatch<?> entitypatch, float convertTimeModifier) {
+				Pose lastPose = entitypatch.getArmature().getPose(1.0F);
+				this.resume();
+				
+				if (!nextAnimation.isMetaAnimation()) {
+					this.setLinkAnimation(nextAnimation, entitypatch, lastPose, convertTimeModifier);
+					this.linkAnimation.putOnPlayer(this.animationPlayer);
+					this.nextAnimation = nextAnimation;
+				}
+			}
+			
+			public void playAnimationInstant(DynamicAnimation nextAnimation, LivingEntityPatch<?> entitypatch) {
+				this.resume();
+				nextAnimation.putOnPlayer(this.animationPlayer);
+				this.nextAnimation = null;
+			}
+			
+			protected void setLinkAnimation(DynamicAnimation nextAnimation, LivingEntityPatch<?> entitypatch, Pose lastPose, float convertTimeModifier) {
+				Pose currentPose = this.animationPlayer.getAnimation().getRawPose(this.animationPlayer.getElapsedTime());
+				Pose nextAnimationPose = nextAnimation.getRawPose(0.0F);
+				float totalTime = nextAnimation.getConvertTime();
+				
+				this.linkAnimation.getTransfroms().clear();
+				this.linkAnimation.setTotalTime(totalTime);
+				this.linkAnimation.setNextAnimation(nextAnimation);
+				
+				Map<String, JointTransform> data1 = currentPose.getJointTransformData();
+				Map<String, JointTransform> data2 = nextAnimationPose.getJointTransformData();
+				
+				for (String jointName : data1.keySet()) {
+					if (data1.containsKey(jointName) && data2.containsKey(jointName)) {
+						Keyframe[] keyframes = new Keyframe[2];
+						keyframes[0] = new Keyframe(0.0F, data1.get(jointName));
+						keyframes[1] = new Keyframe(totalTime, data2.get(jointName));
+						TransformSheet sheet = new TransformSheet(keyframes);
+						this.linkAnimation.getAnimationClip().addJointTransform(jointName, sheet);
+					}
+				}
+				
+				this.animationPlayer.setPlayAnimation(this.linkAnimation);
+			}
+			
+			public void update(LivingEntityPatch<?> entitypatch) {
+				if (this.paused) {
+					this.animationPlayer.setElapsedTime(this.animationPlayer.getElapsedTime());
+				} else {
+					this.animationPlayer.tick(entitypatch);
+				}
+				
+				if (!this.paused && this.animationPlayer.isEnd()) {
+					if (this.nextAnimation != null) {
+						this.nextAnimation.putOnPlayer(this.animationPlayer);
+						this.nextAnimation = null;
+					} else {
+						if (this.animationPlayer.getAnimation() instanceof LayerOffAnimation) {
+							this.animationPlayer.getAnimation().end(entitypatch, Animations.DUMMY_ANIMATION, true);
+						} else {
+							this.off(entitypatch);
+						}
+					}
+				}
+			}
+			
+			public Pose getEnabledPose(LivingEntityPatch<?> entitypatch, float partialTick) {
+				Pose pose = this.animationPlayer.getAnimation().getRawPose(partialTick);
+				DynamicAnimation animation = this.animationPlayer.getAnimation();
+				pose.removeJointIf((entry) -> !animation.isJointEnabled(entitypatch, this.priority, entry.getKey()));
+				
+				return pose;
+			}
+			
+			public void off(LivingEntityPatch<?> entitypatch) {
+				if (!this.isDisabled() && !(this.animationPlayer.getAnimation() instanceof LayerOffAnimation)) {
+					float convertTime = entitypatch.getClientAnimator().baseLayer.animationPlayer.getAnimation().getConvertTime();
+					setLayerOffAnimation(this.animationPlayer.getAnimation(), this.getEnabledPose(entitypatch, 1.0F), this.layerOffAnimation, convertTime);
+					this.playAnimationInstant(this.layerOffAnimation, entitypatch);
+				}
+			}
+		}
+		
+		@OnlyIn(Dist.CLIENT)
+		static class NoEntityBaseLayer extends Layer.BaseLayer {
+			public NoEntityBaseLayer() {
+				super(NoEntityAnimationPlayer::new);
+				
+				this.compositeLayers.clear();
+				this.compositeLayers.computeIfAbsent(Priority.LOWEST, NoEntityLayer::new);
+				this.compositeLayers.computeIfAbsent(Priority.MIDDLE, NoEntityLayer::new);
+				this.compositeLayers.computeIfAbsent(Priority.HIGHEST, NoEntityLayer::new);
+			}
+			
+			@Override
+			public void playAnimation(StaticAnimation nextAnimation, LivingEntityPatch<?> entitypatch, float convertTimeModifier) {
+				Priority priority = nextAnimation.getPriority();
+				this.baseLayerPriority = priority;
+				this.offCompositeLayerLowerThan(entitypatch, nextAnimation);
+				
+				Pose lastPose = entitypatch.getArmature().getPose(1.0F);
+				this.resume();
+				
+				if (!nextAnimation.isMetaAnimation()) {
+					this.setLinkAnimation(nextAnimation, entitypatch, lastPose, convertTimeModifier);
+					this.linkAnimation.putOnPlayer(this.animationPlayer);
+					entitypatch.updateEntityState();
+					this.nextAnimation = nextAnimation;
+				}
+			}
+			
+			@Override
+			public void playAnimationInstant(DynamicAnimation nextAnimation, LivingEntityPatch<?> entitypatch) {
+				this.resume();
+				nextAnimation.putOnPlayer(this.animationPlayer);
+				this.nextAnimation = null;
+			}
+			
+			@Override
+			protected void playLivingAnimation(StaticAnimation nextAnimation, LivingEntityPatch<?> entitypatch) {
+				this.resume();
+				
+				if (!nextAnimation.isMetaAnimation()) {
+					this.concurrentLinkAnimation.acceptFrom(this.animationPlayer.getAnimation().getRealAnimation(), nextAnimation, this.animationPlayer.getElapsedTime());
+					this.concurrentLinkAnimation.putOnPlayer(this.animationPlayer);
+					this.nextAnimation = nextAnimation;
+				}
+			}
+			
+			@Override
+			public void update(LivingEntityPatch<?> entitypatch) {
+				if (this.paused) {
+					this.animationPlayer.setElapsedTime(this.animationPlayer.getElapsedTime());
+				} else {
+					this.animationPlayer.tick(entitypatch);
+				}
+				
+				if (!this.paused && this.animationPlayer.isEnd()) {
+					if (this.nextAnimation != null) {
+						this.nextAnimation.putOnPlayer(this.animationPlayer);
+						this.nextAnimation = null;
+					} else {
+						if (this.animationPlayer.getAnimation() instanceof LayerOffAnimation) {
+							this.animationPlayer.getAnimation().end(entitypatch, Animations.DUMMY_ANIMATION, true);
+						} else {
+							this.off(entitypatch);
+						}
+					}
+				}
+				
+				for (Layer layer : this.compositeLayers.values()) {
+					layer.update(entitypatch);
+				}
+			}
+			
+			protected void setLinkAnimation(DynamicAnimation nextAnimation, LivingEntityPatch<?> entitypatch, Pose lastPose, float convertTimeModifier) {
+				Pose currentPose = this.animationPlayer.getAnimation().getRawPose(this.animationPlayer.getElapsedTime());
+				Pose nextAnimationPose = nextAnimation.getRawPose(0.0F);
+				float totalTime = nextAnimation.getConvertTime();
+				
+				this.linkAnimation.getTransfroms().clear();
+				this.linkAnimation.setTotalTime(totalTime);
+				this.linkAnimation.setNextAnimation(nextAnimation);
+				
+				Map<String, JointTransform> data1 = currentPose.getJointTransformData();
+				Map<String, JointTransform> data2 = nextAnimationPose.getJointTransformData();
+				
+				for (String jointName : data1.keySet()) {
+					if (data1.containsKey(jointName) && data2.containsKey(jointName)) {
+						Keyframe[] keyframes = new Keyframe[2];
+						keyframes[0] = new Keyframe(0.0F, data1.get(jointName));
+						keyframes[1] = new Keyframe(totalTime, data2.get(jointName));
+						TransformSheet sheet = new TransformSheet(keyframes);
+						this.linkAnimation.getAnimationClip().addJointTransform(jointName, sheet);
+					}
+				}
+				
+				this.animationPlayer.setPlayAnimation(this.linkAnimation);
+			}
+			
+			public void offCompositeLayerLowerThan(LivingEntityPatch<?> entitypatch, StaticAnimation nextAnimation) {
+				for (Priority p : nextAnimation.getPriority().lowerEquals()) {
+					if (p == Priority.LOWEST && !nextAnimation.isMainFrameAnimation()) {
+						continue;
+					}
+					
+					this.compositeLayers.get(p).off(entitypatch);
+				}
+			}
+			
+			public Layer getLayer(Priority priority) {
+				return this.compositeLayers.get(priority);
+			}
+			
+			@Override
+			public void off(LivingEntityPatch<?> entitypatch) {
+			}
+			
+			@Override
+			protected boolean isDisabled() {
+				return false;
+			}
+			
+			@Override
+			protected boolean isBaseLayer() {
+				return true;
+			}
+		}
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	class ModelRenderTarget extends RenderTarget {
 		public ModelRenderTarget() {
 			super(true);
 			
@@ -548,15 +785,15 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	private class CustomTrailParticle extends TrailParticle {
+	class CustomTrailParticle extends TrailParticle {
 		@SuppressWarnings("deprecation")
 		protected CustomTrailParticle(Joint joint, StaticAnimation animation, TrailInfo trailInfo) {
-			super(AnimatedModelPlayer.this.armature, joint, animation, trailInfo);
+			super(AnimatedModelPlayer.this.getArmature(), joint, animation, trailInfo);
 		}
 		
 		@Override
 		public void tick() {
-			AnimationPlayer animPlayer = AnimatedModelPlayer.this.animationPlayer;
+			AnimationPlayer animPlayer = AnimatedModelPlayer.this.animator.getPlayerFor(null);
 			this.visibleTrailEdges.removeIf(v -> !v.isAlive());
 			
 			if (this.animationEnd) {
@@ -584,12 +821,12 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 			}
 			
 			TrailInfo trailInfo = this.trailInfo;
-			Pose prevPose = AnimatedModelPlayer.this.armature.getPrevPose();
-			Pose middlePose = AnimatedModelPlayer.this.armature.getPose(0.5F);
-			Pose currentPose = AnimatedModelPlayer.this.armature.getCurrentPose();
-			OpenMatrix4f prevJointTf = AnimatedModelPlayer.this.armature.getBindedTransformFor(prevPose, this.joint);
-			OpenMatrix4f middleJointTf = AnimatedModelPlayer.this.armature.getBindedTransformFor(middlePose, this.joint);
-			OpenMatrix4f currentJointTf = AnimatedModelPlayer.this.armature.getBindedTransformFor(currentPose, this.joint);
+			Pose prevPose = AnimatedModelPlayer.this.getArmature().getPrevPose();
+			Pose middlePose = AnimatedModelPlayer.this.getArmature().getPose(0.5F);
+			Pose currentPose = AnimatedModelPlayer.this.getArmature().getCurrentPose();
+			OpenMatrix4f prevJointTf = AnimatedModelPlayer.this.getArmature().getBindedTransformFor(prevPose, this.joint);
+			OpenMatrix4f middleJointTf = AnimatedModelPlayer.this.getArmature().getBindedTransformFor(middlePose, this.joint);
+			OpenMatrix4f currentJointTf = AnimatedModelPlayer.this.getArmature().getBindedTransformFor(currentPose, this.joint);
 			Vec3 prevStartPos = OpenMatrix4f.transform(prevJointTf, trailInfo.start);
 			Vec3 prevEndPos = OpenMatrix4f.transform(prevJointTf, trailInfo.end);
 			Vec3 middleStartPos = OpenMatrix4f.transform(middleJointTf, trailInfo.start);

@@ -1,3 +1,4 @@
 {
-	"priority":"MIDDLE"
+	"priority":"MIDDLE",
+	"layer":"COMPOSITE_LAYER"
 }

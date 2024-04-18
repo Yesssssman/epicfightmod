@@ -21,7 +21,6 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.model.Meshes;
@@ -74,19 +73,19 @@ public class ComboScreen extends Screen {
 				
 				if (isMount) {
 					for (int i = 0; i < tagSize; i++) {
-						packImporter.newRow().newValue("combo_animation", AnimationManager.getInstance().byKey(tag.getString(i)));
+						packImporter.newRow().newValue("combo_animation", ImportAnimationsScreen.getAnimationById(tag.getString(i)));
 					}
 					
 					this.setDataBindingComponenets(new Object[] {packImporter});
 				} else {
 					for (int i = 0; i < tagSize - 2; i++) {
-						packImporter.newRow().newValue("combo_animation", AnimationManager.getInstance().byKey(tag.getString(i)));
+						packImporter.newRow().newValue("combo_animation", ImportAnimationsScreen.getAnimationById(tag.getString(i)));
 					}
 					
 					this.setDataBindingComponenets(new Object[] {
 						packImporter,
-						AnimationManager.getInstance().byKey(tag.getString(tagSize - 2)),
-						AnimationManager.getInstance().byKey(tag.getString(tagSize - 1))
+						ImportAnimationsScreen.getAnimationById(tag.getString(tagSize - 2)),
+						ImportAnimationsScreen.getAnimationById(tag.getString(tagSize - 1))
 					});
 				}
 			}
@@ -185,9 +184,7 @@ public class ComboScreen extends Screen {
 								})
 								.build();
 		
-		this.animationModelPlayer = new AnimatedModelPlayer(110, 200, 50, 49, HorizontalSizing.LEFT_RIGHT, VerticalSizing.TOP_BOTTOM);
-		this.animationModelPlayer.setArmature(Armatures.BIPED);
-		this.animationModelPlayer.setMesh(Meshes.BIPED);
+		this.animationModelPlayer = new AnimatedModelPlayer(110, 200, 50, 49, HorizontalSizing.LEFT_RIGHT, VerticalSizing.TOP_BOTTOM, Armatures.BIPED, Meshes.BIPED);
 		
 		CompoundTag colliderTag = rootTag.getCompound("collider");
 		
@@ -197,7 +194,7 @@ public class ComboScreen extends Screen {
 		} catch (IllegalArgumentException e) {
 		}
 		
-		this.dashAttackPopupbox = new PopupBox.AnimationPopupBox(this, this.font, 110, -1, 15, 15, HorizontalSizing.WIDTH_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.dash_attak"),
+		this.dashAttackPopupbox = new PopupBox.AnimationPopupBox(this, this.font, 110, 15, -1, 15, HorizontalSizing.WIDTH_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.dash_attak"),
 				(animation) -> {
 					if (animation != null) {
 						ListTag listTag = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
@@ -206,7 +203,7 @@ public class ComboScreen extends Screen {
 						this.reloadAnimationPlayer();
 					}
 				});
-		this.airSlashPopupbox = new PopupBox.AnimationPopupBox(this, this.font, 110, -1, 15, 15, HorizontalSizing.WIDTH_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.air_slash"),
+		this.airSlashPopupbox = new PopupBox.AnimationPopupBox(this, this.font, 110, 15, -1, 15, HorizontalSizing.WIDTH_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.air_slash"),
 				(animation) -> {
 					if (animation != null) {
 						ListTag listTag = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();

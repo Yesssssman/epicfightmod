@@ -95,7 +95,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 			row.setValue(entry.getKey(), entry.getValue().defaultVal);
 		}
 		
-		this.resize(this.owner.getRectangle());
+		this.resizeColumnWidth();
 		
 		return rowposition;
 	}
@@ -119,7 +119,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 			row.setValue((String)defaultValues[i], defaultValues[i + 1]);
 		}
 		
-		this.resize(this.owner.getRectangle());
+		this.resizeColumnWidth();
 		
 		return rowposition;
 	}
@@ -151,7 +151,11 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		}
 		
 		this.children().remove(row);
-		this.resize(this.owner.getRectangle());
+		
+		double scrollAmount = this.getScrollAmount();
+		this.setScrollAmount(Math.min(scrollAmount, this.getMaxScroll()));
+		
+		this.resizeColumnWidth();
 		
 		if (callback != null) {
 			callback.accept(row);
@@ -279,6 +283,10 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		
 		this.relocateButtons();
 		
+		this.resizeColumnWidth();
+	}
+	
+	protected void resizeColumnWidth() {
 		int remainWidth = this.width - (this.getMaxScroll() > 0 ? 7 : 1);
 		int idx = 0;
 		int size = this.columns.size();
@@ -913,7 +921,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		
 		@Override
 		public AbstractWidget createEditWidget(Screen owner, Font font, int x, int y, int height, Row row, String colName, T value) {
-			P popup = this.popupBoxProvider.create(owner, font, x, y, this.width - 3, height, null, null, Component.literal("grid.popupEdit"), (item) -> row.setValue(colName, item));
+			P popup = this.popupBoxProvider.create(owner, font, x, this.width - 3, y, height, null, null, Component.literal("grid.popupEdit"), (item) -> row.setValue(colName, item));
 			
 			popup.applyFilter(this.filter);
 			popup.setValue(value);

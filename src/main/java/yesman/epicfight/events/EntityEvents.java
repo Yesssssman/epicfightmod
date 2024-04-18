@@ -165,7 +165,7 @@ public class EntityEvents {
 				LivingEntity hitEntity = event.getEntity();
 				
 				if (attackerEntityPatch instanceof ServerPlayerPatch playerpatch) {
-					DealtDamageEvent dealDamagePre = new DealtDamageEvent(playerpatch, hitEntity, epicFightDamageSource, baseDamage);
+					DealtDamageEvent.Pre dealDamagePre = new DealtDamageEvent.Pre(playerpatch, hitEntity, epicFightDamageSource, baseDamage, event);
 					playerpatch.getEventListener().triggerEvents(EventType.DEALT_DAMAGE_EVENT_PRE, dealDamagePre);
 				}
 				

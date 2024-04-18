@@ -34,9 +34,7 @@ public class SelectAnimationScreen extends Screen {
 	public SelectAnimationScreen(Screen parentScreen, Consumer<StaticAnimation> selectCallback, Predicate<StaticAnimation> filter, Armature armature, AnimatedMesh mesh) {
 		super(Component.translatable("gui.epicfight.select.animations"));
 		
-		this.animationModelPlayer = new AnimatedModelPlayer(10, 20, 36, 60, null, null);
-		this.animationModelPlayer.setArmature(armature);
-		this.animationModelPlayer.setMesh(mesh);
+		this.animationModelPlayer = new AnimatedModelPlayer(10, 20, 36, 60, null, null, armature, mesh);
 		
 		this.animationList = new AnimationList(parentScreen.getMinecraft(), this.width, this.height, 36, this.height - 16, 21);
 		this.animationList.setRenderTopAndBottom(false);

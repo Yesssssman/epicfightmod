@@ -1,5 +1,7 @@
 package yesman.epicfight.api.animation.types;
 
+import java.util.List;
+
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.InteractionHand;
 import net.minecraftforge.api.distmarker.Dist;
@@ -45,6 +47,11 @@ public class MirrorAnimation extends StaticAnimation {
 		
 		this.original.onLoaded();
 		this.mirror.onLoaded();
+	}
+	
+	@Override
+	public List<StaticAnimation> getAllClipAnimations() {
+		return List.of(this.original, this.mirror);
 	}
 	
 	@Override

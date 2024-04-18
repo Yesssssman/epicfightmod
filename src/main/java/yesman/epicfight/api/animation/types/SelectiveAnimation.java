@@ -1,5 +1,6 @@
 package yesman.epicfight.api.animation.types;
 
+import java.util.List;
 import java.util.function.Function;
 
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -77,6 +78,11 @@ public class SelectiveAnimation extends StaticAnimation {
 				
 			}, AnimationEvent.Side.BOTH));
 		}
+	}
+	
+	@Override
+	public List<StaticAnimation> getAllClipAnimations() {
+		return List.of(this.animations);
 	}
 	
 	@OnlyIn(Dist.CLIENT)

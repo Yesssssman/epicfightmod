@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -44,13 +45,17 @@ public class ClientAnimator extends Animator {
 	private LivingMotion currentCompositeMotion;
 	
 	public ClientAnimator(LivingEntityPatch<?> entitypatch) {
+		this(entitypatch, Layer.BaseLayer::new);
+	}
+	
+	public ClientAnimator(LivingEntityPatch<?> entitypatch, Supplier<Layer.BaseLayer> layerSupplier) {
 		this.entitypatch = entitypatch;
 		this.currentMotion = LivingMotions.IDLE;
 		this.currentCompositeMotion = LivingMotions.IDLE;
 		this.compositeLivingAnimations = Maps.newHashMap();
 		this.defaultLivingAnimations = Maps.newHashMap();
 		this.defaultCompositeLivingAnimations = Maps.newHashMap();
-		this.baseLayer = new Layer.BaseLayer(null);
+		this.baseLayer = layerSupplier.get();
 	}
 	
 	/** Play an animation by animation instance **/

@@ -30,6 +30,7 @@ import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.ServerAnimator;
 import yesman.epicfight.api.client.animation.ClientAnimator;
+import yesman.epicfight.api.client.animation.property.JointMaskReloadListener;
 import yesman.epicfight.api.client.model.ItemSkins;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
@@ -161,11 +162,9 @@ public class EpicFightMod {
 		});
 	}
     
-    private void command(final RegisterCommandsEvent event) {
-		PlayerModeCommand.register(event.getDispatcher());
-		PlayerSkillCommand.register(event.getDispatcher(), event.getBuildContext());
-    }
-    
+    /**
+     * FML Lifecycle Events
+     */
     private void constructMod(final FMLConstructModEvent event) {
     	LivingMotion.ENUM_MANAGER.loadEnum();
     	SkillCategory.ENUM_MANAGER.loadEnum();
@@ -198,7 +197,16 @@ public class EpicFightMod {
 		event.enqueueWork(EpicFightMobEffects::addOffhandModifier);
     }
 	
+	/**
+	 * Register Etc
+	 */
+	private void command(final RegisterCommandsEvent event) {
+		PlayerModeCommand.register(event.getDispatcher());
+		PlayerSkillCommand.register(event.getDispatcher(), event.getBuildContext());
+    }
+	
 	private void registerResourcepackReloadListnerEvent(final RegisterClientReloadListenersEvent event) {
+		event.registerReloadListener(new JointMaskReloadListener());
 		event.registerReloadListener(Meshes.INSTANCE);
 		event.registerReloadListener(AnimationManager.getInstance());
 		event.registerReloadListener(ItemSkins.INSTANCE);
@@ -216,6 +224,9 @@ public class EpicFightMod {
 		event.addListener(new MobPatchReloadListener());
 	}
 	
+	/**
+	 * Epic Fight utils
+	 */
 	public static Animator getAnimator(LivingEntityPatch<?> entitypatch) {
 		return EpicFightMod.getInstance().animatorProvider.apply(entitypatch);
 	}

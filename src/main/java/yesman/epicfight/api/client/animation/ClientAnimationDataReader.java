@@ -7,10 +7,8 @@ import java.io.Reader;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
-import java.util.Map;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
@@ -30,10 +28,11 @@ import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
-import yesman.epicfight.api.client.animation.property.JointMask;
 import yesman.epicfight.api.client.animation.property.JointMaskEntry;
+import yesman.epicfight.api.client.animation.property.JointMaskReloadListener;
 import yesman.epicfight.api.client.animation.property.LayerInfo;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
+import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientAnimationDataReader {
@@ -101,7 +100,8 @@ public class ClientAnimationDataReader {
 		this.layerInfo = layerInfo;
 		this.trailInfo = trailInfo;
 	}
-
+	
+	@OnlyIn(Dist.CLIENT)
 	static class Deserializer implements JsonDeserializer<ClientAnimationDataReader> {
 		static LayerInfo deserializeLayerInfo(JsonObject jsonObject) {
 			return deserializeLayerInfo(jsonObject, null);
@@ -118,11 +118,16 @@ public class ClientAnimationDataReader {
 				maskArray.forEach(element -> {
 					JsonObject jointMaskEntry = element.getAsJsonObject();
 					String livingMotionName = GsonHelper.getAsString(jointMaskEntry, "livingmotion");
+					String type = GsonHelper.getAsString(jointMaskEntry, "type");
+					
+					if (!type.contains(":")) {
+						type = (new StringBuilder(EpicFightMod.MODID)).append(":").append(type).toString();
+					}
 					
 					if (livingMotionName.equals("ALL")) {
-						builder.defaultMask(ClientAnimationDataReader.getJointMaskEntry(GsonHelper.getAsString(jointMaskEntry, "type")));
+						builder.defaultMask(JointMaskReloadListener.getJointMaskEntry(type));
 					} else {
-						builder.mask((LivingMotion) LivingMotion.ENUM_MANAGER.getOrThrow(livingMotionName), ClientAnimationDataReader.getJointMaskEntry(GsonHelper.getAsString(jointMaskEntry, "type")));
+						builder.mask((LivingMotion) LivingMotion.ENUM_MANAGER.getOrThrow(livingMotionName), JointMaskReloadListener.getJointMaskEntry(type));
 					}
 				});
 			}
@@ -151,27 +156,5 @@ public class ClientAnimationDataReader {
 			
 			return new ClientAnimationDataReader(multilayerInfo, layerInfo, trailInfos);
 		}
-	}
-	
-	private static final Map<String, List<JointMask>> JOINT_MASKS = Maps.newHashMap();
-	
-	static {
-		registerJointMask("none", JointMaskEntry.ALL);
-		registerJointMask("arms", JointMaskEntry.BIPED_ARMS);
-		registerJointMask("right_arms", JointMaskEntry.BIPED_RIGHT_ARMS);
-		registerJointMask("right_arms_body", JointMaskEntry.BIPED_BODY_AND_RIGHT_ARMS);
-		registerJointMask("left_arms", JointMaskEntry.BIPED_LEFT_ARMS);
-		registerJointMask("left_arms_body", JointMaskEntry.BIPED_BODY_AND_LEFT_ARMS);
-		registerJointMask("upper_joints", JointMaskEntry.BIPED_UPPER_JOINTS);
-		registerJointMask("root_upper_joints", JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT);
-		registerJointMask("wings", JointMaskEntry.WINGS);
-	}
-	
-	public static void registerJointMask(String name, List<JointMask> jointMask) {
-		JOINT_MASKS.put(name, jointMask);
-	}
-	
-	private static List<JointMask> getJointMaskEntry(String type) {
-		return JOINT_MASKS.getOrDefault(type, JointMaskEntry.ALL);
 	}
 }

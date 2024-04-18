@@ -1,12 +1,12 @@
 package yesman.epicfight.api.animation.types.datapack;
 
-import java.io.File;
 import java.lang.reflect.Constructor;
 import java.util.Iterator;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraftforge.api.distmarker.Dist;
@@ -52,15 +52,18 @@ public class FakeAnimation extends StaticAnimation {
 		FAKE_ANIMATIONS.put(AttackAnimation.class, FakeAttackAnimation.class);
 	}
 	
-	private File file;
+	public static Class<? extends ClipHoldingAnimation> switchType(Class<? extends StaticAnimation> cls) {
+		return FAKE_ANIMATIONS.get(cls);
+	}
+	
 	private Class<? extends StaticAnimation> animationClass;
 	private AnimationClip animationClip;
 	private Map<String, Object> parameters = Maps.newLinkedHashMap();
+	private CompoundTag properties = new CompoundTag();
 	
-	public FakeAnimation(File file, String path, Armature armature, AnimationClip clip) {
+	public FakeAnimation(String path, Armature armature, AnimationClip clip) {
 		super(new ResourceLocation(""), 0.0F, false, "", armature, true);
 		
-		this.file = file;
 		this.animationClip = clip;
 		this.parameters.put("path", path);
 		this.parameters.put("armature", armature);
@@ -78,12 +81,12 @@ public class FakeAnimation extends StaticAnimation {
 		}
 	}
 	
-	public File getFile() {
-		return this.file;
-	}
-	
 	public Class<? extends StaticAnimation> getAnimationClass() {
 		return this.animationClass;
+	}
+	
+	public CompoundTag getPropertiesTag() {
+		return this.properties;
 	}
 	
 	public void setAnimationClass(Class<? extends StaticAnimation> animationClass) {
@@ -103,8 +106,13 @@ public class FakeAnimation extends StaticAnimation {
 		return this.animationClip;
 	}
 	
+	@Override
+	public ResourceLocation getRegistryName() {
+		return new ResourceLocation((String)this.parameters.get("path"));
+	}
+	
 	public FakeAnimation deepCopy() {
-		FakeAnimation fakeAnimation = new FakeAnimation(this.file, (String)this.getParameter("path"), this.armature, this.animationClip);
+		FakeAnimation fakeAnimation = new FakeAnimation((String)this.getParameter("path"), this.armature, this.animationClip);
 		fakeAnimation.animationClass = this.animationClass;
 		fakeAnimation.parameters.clear();
 		fakeAnimation.parameters.putAll(this.parameters);
@@ -122,7 +130,7 @@ public class FakeAnimation extends StaticAnimation {
 			Map<String, Class<?>> map = PARAMETERS.get(this.animationClass);
 			Class[] paramClasses = map.values().toArray(new Class[0]);
 			Object[] params = this.parameters.values().toArray();
-			Constructor<? extends ClipHoldingAnimation> constructor = FAKE_ANIMATIONS.get(this.animationClass).getConstructor(paramClasses);
+			Constructor<? extends ClipHoldingAnimation> constructor = switchType(this.animationClass).getConstructor(paramClasses);
 			
 			ClipHoldingAnimation animation = constructor.newInstance(params);
 			animation.setAnimationClip(this.animationClip);

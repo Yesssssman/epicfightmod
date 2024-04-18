@@ -28,4 +28,23 @@ public class FakeAttackAnimation extends AttackAnimation implements ClipHoldingA
 	public AnimationClip getAnimationClip() {
 		return this.clip;
 	}
+	
+	@Override
+	public FakeAnimation toFakeAnimation() {
+		FakeAnimation fakeAnimation = new FakeAnimation(this.registryName.toString(), this.armature, this.clip);
+		
+		fakeAnimation.setAnimationClass(AttackAnimation.class);
+		fakeAnimation.setParameter("convertTime", this.convertTime);
+		fakeAnimation.setParameter("antic", this.phases[0].antic);
+		fakeAnimation.setParameter("preDelay", this.phases[0].preDelay);
+		fakeAnimation.setParameter("contact", this.phases[0].contact);
+		fakeAnimation.setParameter("recovery", this.phases[0].recovery);
+		fakeAnimation.setParameter("hand", this.phases[0].hand);
+		fakeAnimation.setParameter("collider", this.phases[0].colliders.get(0).getSecond());
+		fakeAnimation.setParameter("colliderJoint", this.phases[0].colliders.get(0).getFirst());
+		fakeAnimation.setParameter("path", this.registryName.toString());
+		fakeAnimation.setParameter("armature", this.armature);
+		
+		return fakeAnimation;
+	}
 }

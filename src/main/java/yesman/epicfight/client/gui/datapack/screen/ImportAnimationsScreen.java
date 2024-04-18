@@ -4,12 +4,23 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
+import java.util.zip.ZipOutputStream;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.internal.Streams;
+import com.google.gson.stream.JsonReader;
+import com.mojang.datafixers.util.Pair;
 
 import io.netty.util.internal.StringUtil;
 import net.minecraft.client.gui.GuiGraphics;
@@ -23,13 +34,17 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackResources;
+import net.minecraft.server.packs.PackType;
 import net.minecraft.world.InteractionHand;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.MovementAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.api.animation.types.datapack.ClipHoldingAnimation;
 import yesman.epicfight.api.animation.types.datapack.FakeAnimation;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.collider.Collider;
@@ -47,47 +62,11 @@ import yesman.epicfight.client.gui.datapack.widgets.PopupBox;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.HorizontalSizing;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableEditBox;
 import yesman.epicfight.client.gui.datapack.widgets.Static;
+import yesman.epicfight.client.gui.datapack.widgets.SubScreenOpenButton;
 import yesman.epicfight.gameasset.ColliderPreset;
 
 @OnlyIn(Dist.CLIENT)
 public class ImportAnimationsScreen extends Screen {
-	private static final List<PackEntry<FakeAnimation, StaticAnimation>> USER_ANIMATIONS = Lists.newArrayList();
-	
-	private static String createRealAnimations(List<FakeAnimation> fakeAnimations) {
-		USER_ANIMATIONS.clear();
-		
-		StringBuilder sb = new StringBuilder();
-		boolean hasException = false;
-		
-		List<Object> uniquepaths = fakeAnimations.stream().map((fakeAnim) -> fakeAnim.getParameter("path")).distinct().toList();
-		
-		if (uniquepaths.size() != fakeAnimations.size()) {
-			hasException = true;
-			sb.append("Duplicated animation path.");
-		} else {
-			for (FakeAnimation fakeAnimation : fakeAnimations) {
-				try {
-					USER_ANIMATIONS.add(PackEntry.ofValue(fakeAnimation, fakeAnimation.createAnimation()));
-				} catch (Exception e) {
-					hasException = true;
-					USER_ANIMATIONS.add(PackEntry.ofValue(fakeAnimation, null));
-					sb.append(String.format("%s : %s\n", fakeAnimation.getParameter("path"), e.getMessage()));
-					e.printStackTrace();
-				}
-			}
-		}
-		
-		if (hasException) {
-			return sb.toString();
-		} else {
-			return null;
-		}
-	}
-	
-	public static List<StaticAnimation> getUserAnimations(Predicate<StaticAnimation> filter) {
-		return USER_ANIMATIONS.stream().map((entry) -> entry.getPackValue()).filter(filter).toList();
-	}
-	
 	private final SelectAnimationScreen caller;
 	private final Grid grid;
 	private final AnimatedModelPlayer animationModelPlayer;
@@ -100,12 +79,10 @@ public class ImportAnimationsScreen extends Screen {
 	public ImportAnimationsScreen(SelectAnimationScreen caller, Armature armature, AnimatedMesh mesh) {
 		super(Component.literal("register_animation_screen"));
 		
-		this.tempAnimations.addAll(USER_ANIMATIONS.stream().map(PackEntry::getPackKey).map(FakeAnimation::deepCopy).toList());
+		this.tempAnimations.addAll(USER_ANIMATIONS.values().stream().map(PackEntry::getPackKey).map(FakeAnimation::deepCopy).toList());
 		
 		this.caller = caller;
-		this.animationModelPlayer = new AnimatedModelPlayer(10, 15, 0, 140, HorizontalSizing.LEFT_RIGHT, null);
-		this.animationModelPlayer.setArmature(armature);
-		this.animationModelPlayer.setMesh(mesh);
+		this.animationModelPlayer = new AnimatedModelPlayer(10, 15, 0, 140, HorizontalSizing.LEFT_RIGHT, null, armature, mesh);
 		this.animationModelPlayer.setCollider(ColliderPreset.FIST);
 		
 		this.minecraft = caller.getMinecraft();
@@ -198,7 +175,7 @@ public class ImportAnimationsScreen extends Screen {
 		this.animationType = new ComboBox<>(this, this.font, 0, 124, 100, 15, HorizontalSizing.LEFT_WIDTH, null, 8, Component.translatable("datapack_edit.import_animation.type"),
 											List.of(StaticAnimation.class, MovementAnimation.class, AttackAnimation.class), (clz) -> clz.getSimpleName(), this.responder);
 		
-		for (PackEntry<FakeAnimation, StaticAnimation> entry : USER_ANIMATIONS) {
+		for (PackEntry<FakeAnimation, StaticAnimation> entry : USER_ANIMATIONS.values()) {
 			this.grid.addRowWithDefaultValues("animation_name", entry.getPackKey().getParameter("path"));
 		}
 	}
@@ -206,13 +183,14 @@ public class ImportAnimationsScreen extends Screen {
 	public void rearrangeComponents(Class<? extends StaticAnimation> animationClass) {
 		ScreenRectangle screenRect = this.getRectangle();
 		
-		this.inputComponentsList.children().clear();
-		this.inputComponentsList.newRow();
-		
+		this.animationModelPlayer.setCollider(null);
+		this.animationModelPlayer.setColliderJoint(null);
 		this.animationModelPlayer.clearAnimations();
 		this.animationModelPlayer.addAnimationToPlay(this.tempAnimations.get(this.grid.getRowposition()));
 		
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 60, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.type")));
+		this.inputComponentsList.children().clear();
+		this.inputComponentsList.newRow();
+		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.type")));
 		this.inputComponentsList.addComponentCurrentRow(this.animationType.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 		
 		if (animationClass == StaticAnimation.class || animationClass == MovementAnimation.class) {
@@ -229,13 +207,20 @@ public class ImportAnimationsScreen extends Screen {
 			repeat.setResponder((value) -> this.tempAnimations.get(this.grid.getRowposition()).setParameter("isRepeat", value));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 60, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.convert_time")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.convert_time")));
 			this.inputComponentsList.addComponentCurrentRow(convertTime.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 60, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.repeat")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.repeat")));
 			this.inputComponentsList.addComponentCurrentRow(repeat.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
+			
+			this.inputComponentsList.newRow();
+			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.client_data")));
+			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder(this).subScreen(StaticAnimationPropertyScreen::new).compoundTag(() -> this.tempAnimations.get(this.grid.getRowposition()).getPropertiesTag())
+																				.bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 		} else if (animationClass == AttackAnimation.class) {
+			this.animationModelPlayer.setCollider(ColliderPreset.FIST);
+			
 			final ResizableEditBox convertTime = new ResizableEditBox(this.font, 0, 0, 35, 15, Component.translatable("datapack_edit.import_animation.convert_time"), HorizontalSizing.LEFT_WIDTH, null);
 			final ResizableEditBox antic = new ResizableEditBox(this.font, 0, 0, 35, 15, Component.translatable("datapack_edit.import_animation.antic"), HorizontalSizing.LEFT_WIDTH, null);
 			final ResizableEditBox preDelay = new ResizableEditBox(this.font, 0, 0, 35, 15, Component.translatable("datapack_edit.import_animation.preDelay"), HorizontalSizing.LEFT_WIDTH, null);
@@ -274,22 +259,22 @@ public class ImportAnimationsScreen extends Screen {
 			recovery.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Float::parseFloat));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 60, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.convert_time")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.convert_time")));
 			this.inputComponentsList.addComponentCurrentRow(convertTime.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 60, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.antic")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.antic")));
 			this.inputComponentsList.addComponentCurrentRow(antic.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 60, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.pre_delay")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.pre_delay")));
 			this.inputComponentsList.addComponentCurrentRow(preDelay.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 60, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.contact")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.contact")));
 			this.inputComponentsList.addComponentCurrentRow(contact.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 60, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.recovery")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.recovery")));
 			this.inputComponentsList.addComponentCurrentRow(recovery.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 60, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.hand")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.hand")));
 			this.inputComponentsList.addComponentCurrentRow(new ComboBox<>(this, this.font, this.inputComponentsList.nextStart(5), 124, 100, 15, HorizontalSizing.LEFT_WIDTH, null, 8,
 																			Component.translatable("datapack_edit.import_animation.hand"), List.of(InteractionHand.MAIN_HAND, InteractionHand.OFF_HAND),
 																			ParseUtil::snakeToSpacedCamel, (hand) -> {
@@ -397,8 +382,8 @@ public class ImportAnimationsScreen extends Screen {
 														});
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 60, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.collider")));
-			this.inputComponentsList.addComponentCurrentRow(new PopupBox.ColliderPopupBox(this, font, this.inputComponentsList.nextStart(5), 130, 30, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.collider"),
+			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.collider")));
+			this.inputComponentsList.addComponentCurrentRow(new PopupBox.ColliderPopupBox(this, font, this.inputComponentsList.nextStart(5), 30, 130, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.collider"),
 																							(collider) -> {
 																								if (collider != null) {
 																									FakeAnimation fakeAnimation = this.tempAnimations.get(this.grid.getRowposition());
@@ -420,6 +405,8 @@ public class ImportAnimationsScreen extends Screen {
 																									colliderSizeZ.setValue(String.valueOf(sizeVec.getDouble(2)));
 																									
 																									this.animationModelPlayer.setCollider(collider, jointCombo.getValue());
+																								} else {
+																									this.animationModelPlayer.setCollider(ColliderPreset.FIST);
 																								}
 																							}).applyFilter((collider) -> collider instanceof OBBCollider || collider instanceof MultiOBBCollider));
 			
@@ -446,7 +433,7 @@ public class ImportAnimationsScreen extends Screen {
 			this.inputComponentsList.addComponentCurrentRow(colliderSizeZ.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 70, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.joint")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.joint")));
 			this.inputComponentsList.addComponentCurrentRow(jointCombo.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 		}
 		
@@ -525,11 +512,11 @@ public class ImportAnimationsScreen extends Screen {
 						InputStream stream = new FileInputStream(file);
 						JsonModelLoader jsonLoader = new JsonModelLoader(stream);
 						String animationPath = modid + ":" + this.animationModelPlayer.getArmature().toString() + "/" + file.getName().replace(".json", "");
-						FakeAnimation animation = new FakeAnimation(file, animationPath, this.animationModelPlayer.getArmature(), jsonLoader.loadAnimationClip(this.animationModelPlayer.getArmature()));
+						FakeAnimation animation = new FakeAnimation(animationPath, this.animationModelPlayer.getArmature(), jsonLoader.loadAnimationClip(this.animationModelPlayer.getArmature()));
 						
 						this.tempAnimations.add(animation);
 						this.grid.addRowWithDefaultValues("animation_name", animationPath);
-					} catch (IOException e) {
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				}
@@ -554,5 +541,119 @@ public class ImportAnimationsScreen extends Screen {
 	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		this.renderDirtBackground(guiGraphics);
 		super.render(guiGraphics, mouseX, mouseY, partialTicks);
+	}
+	
+	private static final Map<ResourceLocation, PackEntry<FakeAnimation, StaticAnimation>> USER_ANIMATIONS = Maps.newLinkedHashMap();
+	
+	private static String createRealAnimations(List<FakeAnimation> fakeAnimations) {
+		USER_ANIMATIONS.clear();
+		
+		StringBuilder sb = new StringBuilder();
+		boolean hasException = false;
+		
+		List<Object> uniquepaths = fakeAnimations.stream().map((fakeAnim) -> fakeAnim.getParameter("path")).distinct().toList();
+		
+		if (uniquepaths.size() != fakeAnimations.size()) {
+			hasException = true;
+			sb.append("Duplicated animation path.");
+		} else {
+			for (FakeAnimation fakeAnimation : fakeAnimations) {
+				try {
+					USER_ANIMATIONS.put(fakeAnimation.getRegistryName(), PackEntry.ofValue(fakeAnimation, fakeAnimation.createAnimation()));
+				} catch (Exception e) {
+					hasException = true;
+					USER_ANIMATIONS.put(fakeAnimation.getRegistryName(), PackEntry.ofValue(fakeAnimation, null));
+					sb.append(String.format("%s : %s\n", fakeAnimation.getParameter("path"), e.getMessage()));
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		if (hasException) {
+			return sb.toString();
+		} else {
+			return null;
+		}
+	}
+	
+	public static StaticAnimation getAnimationById(String path) {
+		ResourceLocation rl = new ResourceLocation(path);
+		StaticAnimation animation = AnimationManager.getInstance().byKey(rl);
+		
+		if (animation == null && USER_ANIMATIONS.containsKey(rl)) {
+			animation = USER_ANIMATIONS.get(rl).getPackValue();
+		}
+		
+		return animation;
+	}
+	
+	public static List<StaticAnimation> getUserAnimations(Predicate<StaticAnimation> filter) {
+		return USER_ANIMATIONS.values().stream().map((entry) -> entry.getPackValue()).filter(filter).toList();
+	}
+	
+	public static void importAnimations(PackResources packResources) {
+		packResources.getNamespaces(PackType.SERVER_DATA).stream().distinct().forEach((namespace) -> {
+			packResources.listResources(PackType.SERVER_DATA, namespace, "animmodels/animations", (resourceLocation, stream) -> {
+				try {
+					JsonReader jsonReader = new JsonReader(new InputStreamReader(stream.get(), StandardCharsets.UTF_8));
+					jsonReader.setLenient(true);
+					JsonObject jsonObject = Streams.parse(jsonReader).getAsJsonObject();
+					ResourceLocation rl = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll("animmodels/animations", "").replaceAll(".json", ""));
+					
+					deserializeFakeAnimation(rl, jsonObject);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			});
+		});
+	}
+	
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private static void deserializeFakeAnimation(ResourceLocation rl, JsonObject json) throws Exception {
+		JsonElement constructorElement = json.getAsJsonObject().get("constructor");
+		
+		if (constructorElement == null) {
+			throw new IllegalStateException("No constructor information has provided in User animation " + rl);
+		}
+		
+		JsonObject constructorObject = constructorElement.getAsJsonObject();
+		String classpath = constructorObject.get("class").getAsString();
+		String arguments = constructorObject.get("arguments").getAsString();
+		
+		if (classpath == null) {
+			throw new IllegalStateException("No class information has provided in User animation " + rl);
+		}
+		
+		if (arguments == null) {
+			throw new IllegalStateException("No argument information has provided in User animation " + rl);
+		}
+		
+		Object[] oArgumentArr = null;
+		Class[] argumentClasses = null;
+		
+		try {
+			Pair<Object[], Class[]> argumentsPair = AnimationManager.splitArguments(arguments);
+			oArgumentArr = argumentsPair.getFirst();
+			argumentClasses = argumentsPair.getSecond();
+		} catch (Exception e) {
+			throw e;
+		}
+		
+		Class<? extends ClipHoldingAnimation> animationClass = FakeAnimation.switchType((Class<? extends StaticAnimation>)Class.forName(classpath));
+		Constructor<? extends ClipHoldingAnimation> constructor = animationClass.getConstructor(argumentClasses);
+		ClipHoldingAnimation animation = constructor.newInstance(oArgumentArr);
+		
+		AnimationManager.readAnimationProperties(animation.toStaticAnimation());
+		
+		JsonModelLoader modelLoader = new JsonModelLoader(json.getAsJsonObject());
+		modelLoader.loadAnimationClip(animation.toStaticAnimation().getArmature());
+		
+		USER_ANIMATIONS.put(rl, PackEntry.ofValue(animation.toFakeAnimation(), animation.toStaticAnimation()));
+	}
+	
+	public static void export(ZipOutputStream out) throws IOException {
+		USER_ANIMATIONS.forEach((rl, packEntry) -> {
+			
+		});
 	}
 }

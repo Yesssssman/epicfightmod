@@ -1,5 +1,6 @@
 package yesman.epicfight.client.gui.datapack.widgets;
 
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -29,6 +30,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
 import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.api.client.animation.property.JointMask;
+import yesman.epicfight.api.client.animation.property.JointMaskReloadListener;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Armature;
@@ -167,8 +170,8 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 	
 	@OnlyIn(Dist.CLIENT)
 	public static class SoundPopupBox extends RegistryPopupBox<SoundEvent> {
-		public SoundPopupBox(Screen owner, Font font, int x, int y, int width, int height, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<SoundEvent> responder) {
-			super(owner, font, x, y, width, height, horizontal, vertical, title, ForgeRegistries.SOUND_EVENTS, (soundevent) -> {
+		public SoundPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<SoundEvent> responder) {
+			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, ForgeRegistries.SOUND_EVENTS, (soundevent) -> {
 				Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(soundevent, 1.0F));
 			}, responder);
 		}
@@ -179,8 +182,8 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 		private Supplier<Armature> armature;
 		private Supplier<AnimatedMesh> mesh;
 		
-		public AnimationPopupBox(Screen owner, Font font, int x, int y, int width, int height, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<StaticAnimation> responder) {
-			super(owner, font, x, width, y, height, horizontal, vertical, title, (animation) -> ParseUtil.nullOrApply(animation, (a) -> a.getRegistryName().toString()), responder);
+		public AnimationPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<StaticAnimation> responder) {
+			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (animation) -> ParseUtil.nullOrApply(animation, (a) -> a.getRegistryName().toString()), responder);
 		}
 		
 		public void setModel(Supplier<Armature> armature, Supplier<AnimatedMesh> mesh) {
@@ -198,8 +201,8 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 	
 	@OnlyIn(Dist.CLIENT)
 	public static class ColliderPopupBox extends PopupBox<Collider> {
-		public ColliderPopupBox(Screen owner, Font font, int x, int y, int width, int height, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<Collider> responder) {
-			super(owner, font, x, width, y, height, horizontal, vertical, title, (collider) -> ParseUtil.nullOrApply(collider, (c) -> ParseUtil.nullParam(ColliderPreset.getKey(c))), responder);
+		public ColliderPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<Collider> responder) {
+			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (collider) -> ParseUtil.nullOrApply(collider, (c) -> ParseUtil.nullParam(ColliderPreset.getKey(c))), responder);
 		}
 		
 		@Override
@@ -220,6 +223,20 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 		public void onClick(double x, double y) {
 			if (this.clickedPopupButton(x, y)) {
 				this.owner.getMinecraft().setScreen(new SelectFromRegistryScreen<>(this.owner, WeaponTypeReloadListener.entries(), "Weapon Types", this::setValue, (c) -> {}, this.getFilter()));
+			}
+		}
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public static class JointMaskPopupBox extends PopupBox<List<JointMask>> {
+		public JointMaskPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<List<JointMask>> responder) {
+			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (jointMask) -> ParseUtil.nullParam(JointMaskReloadListener.getKey(jointMask)), responder);
+		}
+		
+		@Override
+		public void onClick(double x, double y) {
+			if (this.clickedPopupButton(x, y)) {
+				this.owner.getMinecraft().setScreen(new SelectFromRegistryScreen<>(this.owner, JointMaskReloadListener.entries(), "Joint Masks", this::setValue, (c) -> {}, this.getFilter()));
 			}
 		}
 	}

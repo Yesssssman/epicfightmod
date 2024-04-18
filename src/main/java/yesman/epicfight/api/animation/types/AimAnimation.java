@@ -1,5 +1,7 @@
 package yesman.epicfight.api.animation.types;
 
+import java.util.List;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.Mth;
@@ -113,6 +115,11 @@ public class AimAnimation extends StaticAnimation {
 		this.lookUp.onLoaded();
 		this.lookDown.onLoaded();
 		this.lying.onLoaded();
+	}
+	
+	@Override
+	public List<StaticAnimation> getAllClipAnimations() {
+		return List.of(this, this.lookUp, this.lookDown, this.lying);
 	}
 	
 	@Override

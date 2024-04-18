@@ -17,6 +17,7 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class JointMask {
+	@OnlyIn(Dist.CLIENT)
 	@FunctionalInterface
 	public interface BindModifier {
 		public void modify(LivingEntityPatch<?> entitypatch, Pose baseLayerPose, Pose resultPose, Layer.Priority priority, Joint joint, Map<Layer.Priority, Pair<DynamicAnimation, Pose>> poses);

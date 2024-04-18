@@ -1,0 +1,5 @@
+{
+	"joints": [
+		"Shoulder_L", "Arm_L", "Hand_L", "Elbow_L", "Tool_L", "Head", "Chest"
+	]
+}

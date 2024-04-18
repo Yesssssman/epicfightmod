@@ -281,7 +281,7 @@ public class WeaponCapability extends CapabilityItem {
 			return this;
 		}
 		
-		public Builder comboCancel(ZoomInType zoomInType) {
+		public Builder zoomInType(ZoomInType zoomInType) {
 			this.zoomInType = zoomInType;
 			return this;
 		}

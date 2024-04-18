@@ -7,6 +7,7 @@ import java.util.Set;
 
 import org.apache.commons.compress.utils.Lists;
 
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import net.minecraft.client.gui.GuiGraphics;
@@ -21,6 +22,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.MainFrameAnimation;
@@ -33,6 +35,7 @@ import yesman.epicfight.client.gui.datapack.widgets.PopupBox;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.HorizontalSizing;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.VerticalSizing;
 import yesman.epicfight.client.gui.datapack.widgets.Static;
+import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.Style;
@@ -54,9 +57,7 @@ public class LivingAnimationsScreen extends Screen {
 		this.rootTag = rootTag;
 		this.font = parentScreen.getMinecraft().font;
 		
-		this.animationModelPlayer = new AnimatedModelPlayer(106, 200, 60, 49, HorizontalSizing.LEFT_RIGHT, VerticalSizing.TOP_BOTTOM);
-		this.animationModelPlayer.setArmature(Armatures.BIPED);
-		this.animationModelPlayer.setMesh(Meshes.BIPED);
+		this.animationModelPlayer = new AnimatedModelPlayer(106, 200, 60, 49, HorizontalSizing.LEFT_RIGHT, VerticalSizing.TOP_BOTTOM, Armatures.BIPED, Meshes.BIPED);
 		
 		this.stylesGrid = Grid.builder(this, parentScreen.getMinecraft())
 								.xy1(12, 60)
@@ -69,8 +70,8 @@ public class LivingAnimationsScreen extends Screen {
 								.rowpositionChanged((rowposition, values) -> {
 									Grid.PackImporter importer = new Grid.PackImporter();
 									
-									for (String livingMotion : this.styles.get(rowposition).getPackValue().getAllKeys()) {
-										importer.newRow().newValue("living_motion", LivingMotion.ENUM_MANAGER.get(livingMotion));
+									for (Map.Entry<String, Tag> entry : this.styles.get(rowposition).getPackValue().tags.entrySet()) {
+										importer.newRow().newValue("living_motion", LivingMotion.ENUM_MANAGER.get(entry.getKey())).newValue("living_animation", AnimationManager.getInstance().byKey(entry.getValue().getAsString()));
 									}
 									
 									this.animationsGrid.setActive(true);
@@ -108,6 +109,20 @@ public class LivingAnimationsScreen extends Screen {
 																Tag animationTag = tag.get(oldMotion);
 																tag.remove(oldMotion);
 																tag.put(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT), animationTag == null ? StringTag.valueOf("") : animationTag);
+																
+																this.animationModelPlayer.clearAnimations();
+																this.animationModelPlayer.animator.getEntityPatch().currentLivingMotion = event.postValue;
+																this.animationModelPlayer.animator.getEntityPatch().currentCompositeMotion = event.postValue;
+																
+																if (LIVING_ANIMTIONS.containsKey(event.postValue)) {
+																	this.animationModelPlayer.addAnimationToPlay(LIVING_ANIMTIONS.get(event.postValue));
+																}
+																
+																StaticAnimation livingAnimation = this.animationsGrid.getValue(event.rowposition, "living_animation");
+																
+																if (livingAnimation != null) {
+																	this.animationModelPlayer.animator.playAnimation(livingAnimation, 0.0F);
+																}
 															}).defaultVal(LivingMotions.IDLE))
 									.addColumn(Grid.popup("living_animation", PopupBox.AnimationPopupBox::new)
 													.filter((animation) -> !(animation instanceof MainFrameAnimation))
@@ -136,10 +151,18 @@ public class LivingAnimationsScreen extends Screen {
 									})
 									.rowpositionChanged((rowposition, values) -> {
 										this.animationModelPlayer.clearAnimations();
+										LivingMotion livingMotion = (LivingMotion)values.get("living_motion");
+										this.animationModelPlayer.animator.getEntityPatch().currentLivingMotion = livingMotion;
+										this.animationModelPlayer.animator.getEntityPatch().currentCompositeMotion = livingMotion;
+										
+										if (LIVING_ANIMTIONS.containsKey(livingMotion)) {
+											this.animationModelPlayer.addAnimationToPlay(LIVING_ANIMTIONS.get(livingMotion));
+										}
+										
 										StaticAnimation animation = (StaticAnimation)values.get("living_animation");
 										
 										if (animation != null) {
-											this.animationModelPlayer.addAnimationToPlay((StaticAnimation)values.get("living_animation"));
+											this.animationModelPlayer.animator.playAnimation(animation, 0.0F);
 										}
 									})
 									.build();
@@ -235,5 +258,27 @@ public class LivingAnimationsScreen extends Screen {
 		guiGraphics.fillGradient(RenderType.guiOverlay(), 0, yEnd, this.width, yEnd + 1, 0, -16777216, 0);
 		
 		super.render(guiGraphics, mouseX, mouseY, partialTick);
+	}
+	
+	private static final Map<LivingMotion, StaticAnimation> LIVING_ANIMTIONS = Maps.newHashMap();
+	
+	static {
+		LIVING_ANIMTIONS.put(LivingMotions.IDLE, Animations.BIPED_IDLE);
+		LIVING_ANIMTIONS.put(LivingMotions.WALK, Animations.BIPED_WALK);
+		LIVING_ANIMTIONS.put(LivingMotions.RUN, Animations.BIPED_RUN);
+		LIVING_ANIMTIONS.put(LivingMotions.SNEAK, Animations.BIPED_SNEAK);
+		LIVING_ANIMTIONS.put(LivingMotions.SWIM, Animations.BIPED_SWIM);
+		LIVING_ANIMTIONS.put(LivingMotions.FLOAT, Animations.BIPED_FLOAT);
+		LIVING_ANIMTIONS.put(LivingMotions.KNEEL, Animations.BIPED_KNEEL);
+		LIVING_ANIMTIONS.put(LivingMotions.FALL, Animations.BIPED_FALL);
+		LIVING_ANIMTIONS.put(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
+		LIVING_ANIMTIONS.put(LivingMotions.SIT, Animations.BIPED_SIT);
+		LIVING_ANIMTIONS.put(LivingMotions.FLY, Animations.BIPED_FLYING);
+		LIVING_ANIMTIONS.put(LivingMotions.DEATH, Animations.BIPED_DEATH);
+		LIVING_ANIMTIONS.put(LivingMotions.JUMP, Animations.BIPED_JUMP);
+		LIVING_ANIMTIONS.put(LivingMotions.CLIMB, Animations.BIPED_CLIMBING);
+		LIVING_ANIMTIONS.put(LivingMotions.SLEEP, Animations.BIPED_SLEEPING);
+		LIVING_ANIMTIONS.put(LivingMotions.CREATIVE_FLY, Animations.BIPED_CREATIVE_FLYING);
+		LIVING_ANIMTIONS.put(LivingMotions.CREATIVE_IDLE, Animations.BIPED_CREATIVE_IDLE);
 	}
 }
