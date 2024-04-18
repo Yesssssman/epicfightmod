@@ -10,16 +10,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import net.minecraft.world.entity.Mob;
-import yesman.epicfight.world.capabilities.EpicFightCapabilities;
-import yesman.epicfight.world.capabilities.entitypatch.HurtableEntityPatch;
 
 @Mixin(value = AbstractContainerEventHandler.class)
 public abstract class MixinAbstractContainerEventHandler {
 	@Shadow
 	private GuiEventListener focused;
 	
-	@Inject(at = @At(value = "HEAD"), method = "setFocused()V", cancellable = true)
+	@Inject(at = @At(value = "HEAD"), method = "setFocused(Lnet/minecraft/client/gui/components/events/GuiEventListener;)V", cancellable = true)
 	private void epicfight_setFocused(@Nullable GuiEventListener widget, CallbackInfo info) {
 		if (this.focused == widget) {
 			info.cancel();
