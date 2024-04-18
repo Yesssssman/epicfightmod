@@ -160,7 +160,7 @@ public class GuardSkill extends Skill {
 			container.getDataManager().setDataSync(SkillDataKeys.PENALTY_RESTORE_COUNTER.get(), serverplayer.tickCount, serverplayer);
 		});
 		
-		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID, (event) -> {
+		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID, (event) -> {
 			container.getDataManager().setDataSync(SkillDataKeys.PENALTY.get(), 0.0F, event.getPlayerPatch().getOriginal());
 		});
 		
@@ -341,7 +341,7 @@ public class GuardSkill extends Skill {
 		container.getExecuter().getEventListener().removeListener(EventType.CLIENT_ITEM_USE_EVENT, EVENT_UUID);
 		container.getExecuter().getEventListener().removeListener(EventType.SERVER_ITEM_USE_EVENT, EVENT_UUID);
 		container.getExecuter().getEventListener().removeListener(EventType.SERVER_ITEM_STOP_EVENT, EVENT_UUID);
-		container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID);
 	}
 	
 	@Override

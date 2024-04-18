@@ -39,14 +39,14 @@ public class GuillotineAxeSkill extends SimpleWeaponInnateSkill {
 	public void onInitiate(SkillContainer container) {
 		super.onInitiate(container);
 		
-		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_PRE, EVENT_UUID, (event) -> {
+		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_HURT, EVENT_UUID, (event) -> {
 			if (event.getDamageSource().getAnimation() == Animations.THE_GUILLOTINE) {
 				ValueModifier damageModifier = ValueModifier.empty();
 				this.getProperty(AttackPhaseProperty.DAMAGE_MODIFIER, this.properties.get(0)).ifPresent(damageModifier::merge);
 				damageModifier.merge(ValueModifier.multiplier(0.8F));
 				float health = event.getTarget().getHealth();
 				float executionHealth = damageModifier.getTotalValue((float)event.getPlayerPatch().getOriginal().getAttributeValue(Attributes.ATTACK_DAMAGE));
-				
+				System.out.println("wtf " + health +" "+ executionHealth);
 				if (health < executionHealth) {
 					if (event.getDamageSource() != null) {
 						event.getDamageSource().addRuntimeTag(EpicFightDamageType.EXECUTION);
@@ -60,7 +60,7 @@ public class GuillotineAxeSkill extends SimpleWeaponInnateSkill {
 	public void onRemoved(SkillContainer container) {
 		super.onRemoved(container);
 		
-		container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_PRE, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_HURT, EVENT_UUID);
 	}
 	
 	@OnlyIn(Dist.CLIENT)

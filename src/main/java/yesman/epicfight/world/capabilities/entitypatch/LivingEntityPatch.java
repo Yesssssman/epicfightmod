@@ -295,8 +295,6 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		return false;
 	}
 	
-	public void gatherDamageDealt(EpicFightDamageSource source, float amount) {}
-	
 	@Override
 	public float getStunShield() {
 		return this.original.getEntityData().get(STUN_SHIELD).floatValue();

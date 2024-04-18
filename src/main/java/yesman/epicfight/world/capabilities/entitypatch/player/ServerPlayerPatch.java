@@ -41,7 +41,6 @@ import yesman.epicfight.skill.SkillSlots;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
-import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.eventlistener.DodgeSuccessEvent;
 import yesman.epicfight.world.entity.eventlistener.HurtEvent;
@@ -72,7 +71,24 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 				learnedSkill.addAll(Lists.newArrayList(skillCapability.getLearnedSkills(category).stream().map((skill) -> skill.toString()).iterator()));
 			}
 		}
-
+		
+		this.eventListeners.addEventListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, PLAYER_EVENT_UUID, (playerevent) -> {
+			if (playerevent.getDamageSource().isBasicAttack()) {
+				SkillContainer container = this.getSkill(SkillSlots.WEAPON_INNATE);
+				ItemStack mainHandItem = this.getOriginal().getMainHandItem();
+				
+				if (!container.isFull() && !container.isActivated() && container.hasSkill(EpicFightCapabilities.getItemStackCapability(mainHandItem).getInnateSkill(this, mainHandItem))) {
+					float value = container.getResource() + playerevent.getAttackDamage();
+					
+					if (value > 0.0F) {
+						this.getSkill(SkillSlots.WEAPON_INNATE).getSkill().setConsumptionSynchronize(this, value);
+					}
+				}
+				
+				System.out.println("damage deal final ???? " + playerevent.getAttackDamage());
+			}
+		}, 10);
+		
 		EpicFightNetworkManager.sendToPlayer(new SPAddLearnedSkill(learnedSkill.toArray(new String[0])), this.original);
 		EpicFightNetworkManager.sendToPlayer(SPModifyPlayerData.setPlayerMode(this.getOriginal().getId(), this.playerMode), this.original);
 	}
@@ -94,22 +110,6 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 		
 		EpicFightNetworkManager.sendToPlayer(msg, trackingPlayer);
 		EpicFightNetworkManager.sendToPlayer(SPModifyPlayerData.setPlayerMode(this.getOriginal().getId(), this.playerMode), trackingPlayer);
-	}
-	
-	@Override
-	public void gatherDamageDealt(EpicFightDamageSource source, float amount) {
-		if (source.isBasicAttack()) {
-			SkillContainer container = this.getSkill(SkillSlots.WEAPON_INNATE);
-			ItemStack mainHandItem = this.getOriginal().getMainHandItem();
-			
-			if (!container.isFull() && !container.isActivated() && container.hasSkill(EpicFightCapabilities.getItemStackCapability(mainHandItem).getInnateSkill(this, mainHandItem))) {
-				float value = container.getResource() + amount;
-				
-				if (value > 0.0F) {
-					this.getSkill(SkillSlots.WEAPON_INNATE).getSkill().setConsumptionSynchronize(this, value);
-				}
-			}
-		}
 	}
 	
 	@Override

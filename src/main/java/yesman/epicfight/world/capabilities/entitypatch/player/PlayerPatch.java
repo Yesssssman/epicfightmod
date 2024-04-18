@@ -50,7 +50,7 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T> {
-	private static final UUID ACTION_EVENT_UUID = UUID.fromString("e6beeac4-77d2-11eb-9439-0242ac130002");
+	protected static final UUID PLAYER_EVENT_UUID = UUID.fromString("e6beeac4-77d2-11eb-9439-0242ac130002");
 	public static final EntityDataAccessor<Float> STAMINA = new EntityDataAccessor<Float> (253, EntityDataSerializers.FLOAT);
 	protected PlayerEventListener eventListeners;
 	protected PlayerMode playerMode = PlayerMode.MINING;
@@ -87,7 +87,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		
 		this.tickSinceLastAction = 0;
 		
-		this.eventListeners.addEventListener(EventType.ACTION_EVENT_SERVER, ACTION_EVENT_UUID, (playerEvent) -> {
+		this.eventListeners.addEventListener(EventType.ACTION_EVENT_SERVER, PLAYER_EVENT_UUID, (playerEvent) -> {
 			this.resetActionTick();
 		});
 	}

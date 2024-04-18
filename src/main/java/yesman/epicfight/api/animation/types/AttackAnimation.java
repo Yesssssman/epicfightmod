@@ -46,7 +46,6 @@ import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.damagesource.EpicFightDamageSources;
 import yesman.epicfight.world.entity.eventlistener.AttackEndEvent;
-import yesman.epicfight.world.entity.eventlistener.DealtDamageEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 public class AttackAnimation extends ActionAnimation {
@@ -234,10 +233,6 @@ public class AttackAnimation extends ActionAnimation {
 							hitten.invulnerableTime = prevInvulTime;
 							
 							if (attackResult.resultType.dealtDamage()) {
-								if (entitypatch instanceof ServerPlayerPatch playerpatch) {
-									playerpatch.getEventListener().triggerEvents(EventType.DEALT_DAMAGE_EVENT_POST, new DealtDamageEvent(playerpatch, trueEntity, source, attackResult.damage));
-								}
-								
 								hitten.level().playSound(null, hitten.getX(), hitten.getY(), hitten.getZ(), this.getHitSound(entitypatch, phase), hitten.getSoundSource(), 1.0F, 1.0F);
 								this.spawnHitParticle((ServerLevel)hitten.level(), entitypatch, hitten, phase);
 							}
