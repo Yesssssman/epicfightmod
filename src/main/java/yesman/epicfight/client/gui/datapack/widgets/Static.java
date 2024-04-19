@@ -26,8 +26,8 @@ public class Static extends AbstractWidget implements ResizableComponent {
 	
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-		String correctedString = this.getMessage() == null ? "" : this.font.plainSubstrByWidth(this.getMessage().getString(), this.getWidth());
-		guiGraphics.drawString(this.font, correctedString, this.getX(), this.getY() + this.height / 2 - this.font.lineHeight / 2, 16777215, false);
+		String correctedString = this._getMessage() == null ? "" : this.font.plainSubstrByWidth(this._getMessage().getString(), this._getWidth());
+		guiGraphics.drawString(this.font, correctedString, this._getX(), this._getY() + this.height / 2 - this.font.lineHeight / 2, 16777215, false);
 	}
 	
 	@Override
@@ -109,11 +109,61 @@ public class Static extends AbstractWidget implements ResizableComponent {
 	}
 	
 	@Override
-	public void setActive(boolean active) {
+	public void _setActive(boolean active) {
 		this.active = active;
 	}
 	
 	@Override
-	public void tick() {
+	public void _tick() {
+	}
+	
+	@Override
+	public int _getX() {
+		return this.getX();
+	}
+
+	@Override
+	public int _getY() {
+		return this.getY();
+	}
+
+	@Override
+	public int _getWidth() {
+		return this.getWidth();
+	}
+
+	@Override
+	public int _getHeight() {
+		return this.getHeight();
+	}
+
+	@Override
+	public void _setX(int x) {
+		this.setX(x);
+	}
+
+	@Override
+	public void _setY(int y) {
+		this.setY(y);
+	}
+
+	@Override
+	public void _setWidth(int width) {
+		this.setWidth(width);
+	}
+
+	@Override
+	public void _setHeight(int height) {
+		this.setHeight(height);
+	}
+
+	@Override
+	public Component _getMessage() {
+		return this.getMessage();
+	}
+
+	@Override
+	public void _renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		this.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
 	}
 }

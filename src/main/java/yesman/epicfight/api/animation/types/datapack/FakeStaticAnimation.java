@@ -1,5 +1,6 @@
 package yesman.epicfight.api.animation.types.datapack;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationClip;
@@ -25,8 +26,8 @@ public class FakeStaticAnimation extends StaticAnimation implements ClipHoldingA
 	}
 	
 	@Override
-	public FakeAnimation toFakeAnimation() {
-		FakeAnimation fakeAnimation = new FakeAnimation(this.registryName.toString(), this.armature, this.clip);
+	public FakeAnimation toFakeAnimation(CompoundTag rawAnimationData) {
+		FakeAnimation fakeAnimation = new FakeAnimation(this.registryName.toString(), this.armature, this.clip, rawAnimationData);
 		fakeAnimation.setAnimationClass(StaticAnimation.class);
 		fakeAnimation.setParameter("convertTime", this.convertTime);
 		fakeAnimation.setParameter("isRepeat", this.isRepeat());

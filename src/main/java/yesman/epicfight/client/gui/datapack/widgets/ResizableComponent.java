@@ -1,6 +1,7 @@
 package yesman.epicfight.client.gui.datapack.widgets;
 
 import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.narration.NarratableEntry;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -21,10 +22,10 @@ public interface ResizableComponent extends GuiEventListener, NarratableEntry {
 	}
 	
 	default ResizableComponent relocateX(ScreenRectangle screenrect, int screenX) {
-		this.setX(screenX);
+		this._setX(screenX);
 		
 		if (this.getHorizontalSizingOption() == HorizontalSizing.WIDTH_RIGHT) {
-			this.setX2(screenrect.right() - (screenX + this.getWidth()));
+			this.setX2(screenrect.right() - (screenX + this._getWidth()));
 		} else {
 			this.setX1(screenX);
 		}
@@ -33,10 +34,10 @@ public interface ResizableComponent extends GuiEventListener, NarratableEntry {
 	}
 	
 	default ResizableComponent relocateY(ScreenRectangle screenrect, int screenY) {
-		this.setY(screenY);
+		this._setY(screenY);
 		
 		if (this.getVerticalSizingOption() == VerticalSizing.HEIGHT_BOTTOM) {
-			this.setY2(screenrect.bottom() - (screenY + this.getHeight()));
+			this.setY2(screenrect.bottom() - (screenY + this._getHeight()));
 		} else {
 			this.setY1(screenY);
 		}
@@ -58,18 +59,18 @@ public interface ResizableComponent extends GuiEventListener, NarratableEntry {
 	@OnlyIn(Dist.CLIENT)
 	public static enum HorizontalSizing {
 		LEFT_WIDTH((component, screenRectangle, v1, v2) -> {
-			component.setX(screenRectangle.left() + v1);
-			component.setWidth(v2);
+			component._setX(screenRectangle.left() + v1);
+			component._setWidth(v2);
 		}), LEFT_RIGHT((component, screenRectangle, v1, v2) -> {
 			int end = screenRectangle.right() - v2;
 			int width = Math.max(end - (screenRectangle.left() + v1), 0);
-			component.setX(screenRectangle.left() + v1);
-			component.setWidth(width);
+			component._setX(screenRectangle.left() + v1);
+			component._setWidth(width);
 		}), WIDTH_RIGHT((component, screenRectangle, v1, v2) -> {
 			int end = screenRectangle.right() - v2;
 			int start = Math.max(end - v1, 0);
-			component.setX(start);
-			component.setWidth(v1);
+			component._setX(start);
+			component._setWidth(v1);
 		});
 		
 		ResizeFunction resizeFunction;
@@ -82,18 +83,18 @@ public interface ResizableComponent extends GuiEventListener, NarratableEntry {
 	@OnlyIn(Dist.CLIENT)
 	public static enum VerticalSizing {
 		TOP_HEIGHT((component, screenRectangle, v1, v2) -> {
-			component.setY(v1);
-			component.setHeight(v2);
+			component._setY(v1);
+			component._setHeight(v2);
 		}), TOP_BOTTOM((component, screenRectangle, v1, v2) -> {
 			int end = screenRectangle.bottom() - v2;
 			int height = Math.max(end - v1, 0);
-			component.setY(v1);
-			component.setHeight(height);
+			component._setY(v1);
+			component._setHeight(height);
 		}), HEIGHT_BOTTOM((component, screenRectangle, v1, v2) -> {
 			int end = screenRectangle.bottom() - v2;
 			int start = Math.max(end - v1, 0);
-			component.setY(start);
-			component.setHeight(v1);
+			component._setY(start);
+			component._setHeight(v1);
 		});
 		
 		ResizeFunction resizeFunction;
@@ -109,22 +110,26 @@ public interface ResizableComponent extends GuiEventListener, NarratableEntry {
 		public void resize(ResizableComponent component, ScreenRectangle screenRectangle, int v1, int v2);
 	}
 	
+	default AbstractWidget asWidget() {
+		return (AbstractWidget)this;
+	}
+	
 	/*****************************************
 	 *        Vanilla Widget Functions       *
 	 *****************************************/
-	void tick();
+	void _tick();
 	
-	void setActive(boolean active);
+	void _setActive(boolean active);
 	
-	void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks);
+	void _renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks);
 	
-	int getX();
-	int getY();
-	int getWidth();
-	int getHeight();
-	void setX(int x);
-	void setY(int y);
-	void setWidth(int width);
-	void setHeight(int height);
-	Component getMessage();
+	int _getX();
+	int _getY();
+	int _getWidth();
+	int _getHeight();
+	void _setX(int x);
+	void _setY(int y);
+	void _setWidth(int width);
+	void _setHeight(int height);
+	Component _getMessage();
 }

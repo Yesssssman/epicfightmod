@@ -42,7 +42,7 @@ public abstract class InputComponentList<T> extends ContainerObjectSelectionList
 			xPos = 0;
 		} else {
 			ResizableComponent lastWidget = this.lastEntry.children.get(this.lastEntry.children.size() - 1);
-			xPos = lastWidget.getX() + lastWidget.getWidth();
+			xPos = lastWidget._getX() + lastWidget._getWidth();
 		}
 		
 		return xPos + spacing;
@@ -65,7 +65,7 @@ public abstract class InputComponentList<T> extends ContainerObjectSelectionList
 				dataBinder.setValue(values[i]);
 			} catch (Exception e) {
 				e.printStackTrace();
-				throw new IllegalStateException(String.format("Error while binding component [%s] because of %s", dataBinder.getMessage(), e.getMessage()));
+				throw new IllegalStateException(String.format("Error while binding component [%s] because of %s", dataBinder._getMessage(), e.getMessage()));
 			}
 		}
 	}
@@ -83,7 +83,7 @@ public abstract class InputComponentList<T> extends ContainerObjectSelectionList
 	public void setComponentsActive(boolean active) {
 		for (InputComponentList<T>.InputComponentEntry e : this.children()) {
 			for (ResizableComponent componenet : e.children) {
-				componenet.setActive(active);
+				componenet._setActive(active);
 			}
 		}
 	}
@@ -119,7 +119,7 @@ public abstract class InputComponentList<T> extends ContainerObjectSelectionList
 	public void tick() {
 		for (InputComponentList<T>.InputComponentEntry entry : this.children()) {
 			for (ResizableComponent widget : entry.children()) {
-				widget.tick();
+				widget._tick();
 			}
 		}
 	}
@@ -208,8 +208,8 @@ public abstract class InputComponentList<T> extends ContainerObjectSelectionList
 		@Override
 		public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
 			for (ResizableComponent widget : this.children) {
-				widget.relocateY(InputComponentList.this.owner.getRectangle(), top + InputComponentList.this.itemHeight / 2 - widget.getHeight() / 2);
-				widget.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
+				widget.relocateY(InputComponentList.this.owner.getRectangle(), top + InputComponentList.this.itemHeight / 2 - widget._getHeight() / 2);
+				widget._renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
 			}
 		}
 		

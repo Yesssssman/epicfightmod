@@ -378,7 +378,7 @@ public class DatapackEditScreen extends Screen {
 		
 		@Override
 		public void tick() {
-			this.packListGrid.tick();
+			this.packListGrid._tick();
 			this.inputComponentsList.tick();
 		}
 		

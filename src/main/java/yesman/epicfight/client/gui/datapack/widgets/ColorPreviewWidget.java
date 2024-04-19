@@ -28,9 +28,9 @@ public class ColorPreviewWidget extends AbstractWidget implements ResizableCompo
 	
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-		guiGraphics.fill(this.getX(), this.getY(), this.getX() + this.getWidth(), this.getY() + this.getHeight(), -1);
-		guiGraphics.fill(this.getX() + 1, this.getY() + 1, this.getX() + this.getWidth() - 1, this.getY() + this.getHeight() - 1, -16777216);
-		guiGraphics.fill(this.getX() + 2, this.getY() + 2, this.getX() + this.getWidth() - 2, this.getY() + this.getHeight() - 2, this.packedColor);
+		guiGraphics.fill(this._getX(), this._getY(), this._getX() + this._getWidth(), this._getY() + this._getHeight(), -1);
+		guiGraphics.fill(this._getX() + 1, this._getY() + 1, this._getX() + this._getWidth() - 1, this._getY() + this._getHeight() - 1, -16777216);
+		guiGraphics.fill(this._getX() + 2, this._getY() + 2, this._getX() + this._getWidth() - 2, this._getY() + this._getHeight() - 2, this.packedColor);
 	}
 	
 	@Override
@@ -98,11 +98,61 @@ public class ColorPreviewWidget extends AbstractWidget implements ResizableCompo
 	}
 	
 	@Override
-	public void setActive(boolean active) {
+	public void _setActive(boolean active) {
 		this.active = active;
 	}
 	
 	@Override
-	public void tick() {
+	public void _tick() {
+	}
+
+	@Override
+	public int _getX() {
+		return this.getX();
+	}
+
+	@Override
+	public int _getY() {
+		return this.getY();
+	}
+
+	@Override
+	public int _getWidth() {
+		return this.getWidth();
+	}
+
+	@Override
+	public int _getHeight() {
+		return this.getHeight();
+	}
+
+	@Override
+	public void _setX(int x) {
+		this.setX(x);
+	}
+
+	@Override
+	public void _setY(int y) {
+		this.setY(y);
+	}
+
+	@Override
+	public void _setWidth(int width) {
+		this.setWidth(width);
+	}
+
+	@Override
+	public void _setHeight(int height) {
+		this.setHeight(height);
+	}
+
+	@Override
+	public Component _getMessage() {
+		return this.getMessage();
+	}
+	
+	@Override
+	public void _renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		this.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
 	}
 }

@@ -109,15 +109,15 @@ public class ComboScreen extends Screen {
 									if (values.get("style") == Styles.MOUNT) {
 										this.dashAttackPopupbox.setValue(null);
 										this.airSlashPopupbox.setValue(null);
-										this.dashAttackPopupbox.setActive(false);
-										this.airSlashPopupbox.setActive(false);
+										this.dashAttackPopupbox._setActive(false);
+										this.airSlashPopupbox._setActive(false);
 									}
 								})
 								.addColumn(Grid.combo("style", Style.ENUM_MANAGER.universalValues())
 												.valueChanged((event) -> {
 													if (event.prevValue == Styles.MOUNT) {
-														this.dashAttackPopupbox.setActive(true);
-														this.airSlashPopupbox.setActive(true);
+														this.dashAttackPopupbox._setActive(true);
+														this.airSlashPopupbox._setActive(true);
 														
 														ListTag combosList = this.styles.get(event.rowposition).getPackValue();
 														combosList.add(StringTag.valueOf(""));
@@ -126,8 +126,8 @@ public class ComboScreen extends Screen {
 													} else if (event.postValue == Styles.MOUNT) {
 														this.dashAttackPopupbox.setValue(null);
 														this.airSlashPopupbox.setValue(null);
-														this.dashAttackPopupbox.setActive(false);
-														this.airSlashPopupbox.setActive(false);
+														this.dashAttackPopupbox._setActive(false);
+														this.airSlashPopupbox._setActive(false);
 														
 														ListTag combosList = this.styles.get(event.rowposition).getPackValue();
 														combosList.remove(combosList.size() - 1);
@@ -146,7 +146,7 @@ public class ComboScreen extends Screen {
 									grid.removeRow((removedRow) -> this.styles.remove(removedRow));
 									
 									if (grid.children().size() == 0) {
-										this.comboGrid.setActive(false);
+										this.comboGrid._setActive(false);
 									}
 								})
 								.build();
@@ -304,7 +304,7 @@ public class ComboScreen extends Screen {
 	
 	@Override
 	public void tick() {
-		this.animationModelPlayer.tick();
+		this.animationModelPlayer._tick();
 	}
 	
 	@Override

@@ -6,12 +6,12 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.JsonArray;
@@ -20,8 +20,11 @@ import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.JsonOps;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -55,7 +58,7 @@ import yesman.epicfight.gameasset.Armatures.ArmatureContructor;
 import yesman.epicfight.main.EpicFightMod;
 
 public class JsonModelLoader {
-	private static final OpenMatrix4f CORRECTION = OpenMatrix4f.createRotatorDeg(-90.0F, Vec3f.X_AXIS);
+	public static final OpenMatrix4f CORRECTION = OpenMatrix4f.createRotatorDeg(-90.0F, Vec3f.X_AXIS);
 	
 	private JsonObject rootJson;
 	private ResourceManager resourceManager;
@@ -485,6 +488,24 @@ public class JsonModelLoader {
 		return clip;
 	}
 	
+	public CompoundTag toTag() {
+		JsonObject jo = new JsonObject();
+		
+		JsonArray jsonArr = new JsonArray();
+		jsonArr.add(1.5F);
+		jsonArr.add(2.9F);
+		jsonArr.add(1.7F);
+		
+		jo.add("one", jsonArr);
+		//System.out.println(this.rootJson);
+		//System.out.println("to");
+		DataResult<Pair<CompoundTag, JsonElement>> dr = CompoundTag.CODEC.decode(JsonOps.INSTANCE, jo);
+		
+		System.out.println(dr.get().left().get());
+		
+		return CompoundTag.CODEC.decode(JsonOps.INSTANCE, this.rootJson).get().left().get().getFirst();
+	}
+	
 	public AnimationClip loadAnimationClip(Armature armature) {
 		JsonArray array = this.rootJson.get("animation").getAsJsonArray();
 		AnimationClip clip = new AnimationClip();
@@ -532,7 +553,7 @@ public class JsonModelLoader {
 	}
 	
 	private static TransformSheet getTransformSheet(float[] times, float[] trasnformMatrix, OpenMatrix4f invLocalTransform, boolean correct) {
-		List<Keyframe> keyframeList = new ArrayList<Keyframe> ();
+		List<Keyframe> keyframeList = Lists.newArrayList();
 		
 		for (int i = 0; i < times.length; i++) {
 			float timeStamp = times[i];

@@ -133,7 +133,7 @@ public abstract class AnimationProperty<T> {
 		}
 		
 		/**
-		 * This property will set the entity's delta movement to (0, 0, 0) on beginning of the animation if true.
+		 * This property will set the entity's delta movement to (0, 0, 0) at the beginning of an animation if true.
 		 */
 		public static final ActionAnimationProperty<Boolean> STOP_MOVEMENT = new ActionAnimationProperty<Boolean> ("stop_movements", Codec.BOOL);
 		

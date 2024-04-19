@@ -65,7 +65,6 @@ public class CreeperPatch extends MobPatch<Creeper> {
 		super.serverTick(event);
 		
 		if (this.getEntityState().inaction()) {
-			
 			for (WrappedGoal goal : this.original.goalSelector.getAvailableGoals()) {
 				if (goal.getGoal() instanceof CreeperSwellStoppableGoal && goal.isRunning()) {
 					goal.stop();

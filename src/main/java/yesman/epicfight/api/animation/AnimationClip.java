@@ -35,12 +35,11 @@ public class AnimationClip {
 	public Map<String, TransformSheet> getJointTransforms() {
 		return this.jointTransforms;
 	}
+	public void setClipTime(float clipTime) {
+		this.clipTime = clipTime;
+	}
 	
 	public float getClipTime() {
 		return this.clipTime;
-	}
-	
-	public void setClipTime(float clipTime) {
-		this.clipTime = clipTime;
 	}
 }

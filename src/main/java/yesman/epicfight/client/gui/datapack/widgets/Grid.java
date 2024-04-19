@@ -547,7 +547,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		return super.charTyped(c, i);
 	}
 
-	public void tick() {
+	public void _tick() {
 		if (this.editingWidget instanceof EditBox editBox) {
 			editBox.tick();
 		}
@@ -1136,7 +1136,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 	}
 	
 	@Override
-	public void setX(int x) {
+	public void _setX(int x) {
 		this.x0 = x;
 		this.x1 = this.x0 + width;
 		
@@ -1144,7 +1144,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 	}
 	
 	@Override
-	public void setY(int y) {
+	public void _setY(int y) {
 		this.y0 = y;
 		this.y1 = this.y0 + height;
 		
@@ -1152,7 +1152,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 	}
 	
 	@Override
-	public void setWidth(int width) {
+	public void _setWidth(int width) {
 		this.x1 = this.x0 + width;
 		this.width = width;
 		
@@ -1160,7 +1160,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 	}
 	
 	@Override
-	public void setHeight(int height) {
+	public void _setHeight(int height) {
 		this.y1 = this.y0 + height;
 		this.height = height;
 		
@@ -1168,12 +1168,12 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 	}
 	
 	@Override
-	public int getX() {
+	public int _getX() {
 		return this.x0;
 	}
 	
 	@Override
-	public int getY() {
+	public int _getY() {
 		return this.y0;
 	}
 	
@@ -1208,9 +1208,9 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 	}
 	
 	@Override
-	public void setActive(boolean active) {
+	public void _setActive(boolean active) {
 		this.active = active;
-		this.rowEditButtons.forEach((button) -> button.setActive(active));
+		this.rowEditButtons.forEach((button) -> button._setActive(active));
 		
 		if (!this.active) {
 			this.reset();
@@ -1246,7 +1246,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 	}
 	
 	@Override
-	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+	public void _renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		this.render(guiGraphics, mouseX, mouseY, partialTicks);
 	}
 	
@@ -1259,7 +1259,17 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 	}
 
 	@Override
-	public Component getMessage() {
+	public Component _getMessage() {
 		return Component.literal(this.toString());
+	}
+	
+	@Override
+	public int _getWidth() {
+		return this.getWidth();
+	}
+
+	@Override
+	public int _getHeight() {
+		return this.getHeight();
 	}
 }

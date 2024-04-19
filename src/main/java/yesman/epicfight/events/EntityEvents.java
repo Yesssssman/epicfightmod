@@ -188,6 +188,8 @@ public class EntityEvents {
 					totalDamage = hurtEvent.getAmount();
 				}
 				
+				event.setAmount(totalDamage);
+				
 				if (epicFightDamageSource.is(EpicFightDamageType.EXECUTION)) {
 					float amount = event.getAmount();
 					event.setAmount(2147483647F);
@@ -299,9 +301,22 @@ public class EntityEvents {
 		
 		if (attacker != null) {
 			ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(attacker, ServerPlayerPatch.class);
+			EpicFightDamageSource epicFightDamageSource = null;
 			
-			if (playerpatch != null && playerpatch.getEpicFightDamageSource() != null) {
-				playerpatch.getEventListener().triggerEvents(EventType.DEALT_DAMAGE_EVENT_DAMAGE, new DealtDamageEvent.Damage(playerpatch, event.getEntity(), playerpatch.getEpicFightDamageSource(), event));
+			if (event.getSource() instanceof EpicFightDamageSource instance) {
+                epicFightDamageSource = instance;
+			} else if (event.getSource().isIndirect() && event.getSource().getDirectEntity() != null) {
+				ProjectilePatch<?> projectileCap = EpicFightCapabilities.getEntityPatch(event.getSource().getDirectEntity(), ProjectilePatch.class);
+				
+				if (projectileCap != null) {
+					epicFightDamageSource = projectileCap.getEpicFightDamageSource(event.getSource());
+				}
+			} else if (playerpatch != null) {
+				epicFightDamageSource = playerpatch.getEpicFightDamageSource();
+			}
+			
+			if (playerpatch != null && epicFightDamageSource != null) {
+				playerpatch.getEventListener().triggerEvents(EventType.DEALT_DAMAGE_EVENT_DAMAGE, new DealtDamageEvent.Damage(playerpatch, event.getEntity(), epicFightDamageSource, event));
 			}
 		}
 	}

@@ -59,7 +59,7 @@ public class AttributeScreen extends Screen {
 										packImporter.newRow().newValue("attribute", entry.getKey()).newValue("amount", entry.getValue().getAsString());
 									}
 									
-									this.attributesGrid.setActive(true);
+									this.attributesGrid._setActive(true);
 									this.attributesGrid.setValue(packImporter);
 								})
 								.addColumn(Grid.combo("style", Style.ENUM_MANAGER.universalValues())
@@ -74,7 +74,7 @@ public class AttributeScreen extends Screen {
 									grid.removeRow((removedRow) -> this.styles.remove(removedRow));
 									
 									if (grid.children().size() == 0) {
-										this.attributesGrid.setActive(false);
+										this.attributesGrid._setActive(false);
 									}
 								})
 								.build();
@@ -124,7 +124,7 @@ public class AttributeScreen extends Screen {
 		}
 		
 		this.stylesGrid.setValue(packImporter);
-		this.attributesGrid.setActive(false);
+		this.attributesGrid._setActive(false);
 	}
 	
 	@Override

@@ -192,7 +192,7 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 	}
 	
 	@Override
-	public void tick() {
+	public void _tick() {
 		this.animator.tick();
 		
 		this.trailParticles.forEach((trail) -> trail.tick());
@@ -381,31 +381,31 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 		this.modelRenderTarget.blitToScreen(guiGraphics);
 		
 		// Visibility control widget
-		int top = this.getY() + 6;
-		int right = this.getX() + this.getWidth() - 2;
+		int top = this._getY() + 6;
+		int right = this._getX() + this._getWidth() - 2;
 		
 		if (this.trailInfo != null) {
-			right -= this.showTrailCheckbox.getWidth();
+			right -= this.showTrailCheckbox._getWidth();
 			
-			this.showTrailCheckbox.setX(right);
-			this.showTrailCheckbox.setY(top);
-			this.showTrailCheckbox.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
+			this.showTrailCheckbox._setX(right);
+			this.showTrailCheckbox._setY(top);
+			this.showTrailCheckbox._renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
 		}
 		
 		if (this.item != null) {
-			right -= this.showItemCheckbox.getWidth();
+			right -= this.showItemCheckbox._getWidth();
 			
-			this.showItemCheckbox.setX(right);
-			this.showItemCheckbox.setY(top);
-			this.showItemCheckbox.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
+			this.showItemCheckbox._setX(right);
+			this.showItemCheckbox._setY(top);
+			this.showItemCheckbox._renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
 		}
 		
 		if (this.collider != null) {
-			right -= this.showColliderCheckbox.getWidth();
+			right -= this.showColliderCheckbox._getWidth();
 			
-			this.showColliderCheckbox.setX(right);
-			this.showColliderCheckbox.setY(top);
-			this.showColliderCheckbox.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
+			this.showColliderCheckbox._setX(right);
+			this.showColliderCheckbox._setY(top);
+			this.showColliderCheckbox._renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
 		}
 	}
 	
@@ -426,7 +426,7 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 		
 		double guiScale = Minecraft.getInstance().getWindow().getGuiScale();
 		
-		this.modelRenderTarget.resize(this.getWidth() * (int)guiScale, this.getHeight() * (int)guiScale, true);
+		this.modelRenderTarget.resize(this._getWidth() * (int)guiScale, this._getHeight() * (int)guiScale, true);
 	}
 	
 	public void onDestroy() {
@@ -759,10 +759,10 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 			RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 			RenderSystem.setShaderTexture(0, this.colorTextureId);
 			
-			float left = AnimatedModelPlayer.this.getX();
-			float top = AnimatedModelPlayer.this.getY();
-			float right = left + AnimatedModelPlayer.this.getWidth();
-			float bottom = top + AnimatedModelPlayer.this.getHeight();
+			float left = AnimatedModelPlayer.this._getX();
+			float top = AnimatedModelPlayer.this._getY();
+			float right = left + AnimatedModelPlayer.this._getWidth();
+			float bottom = top + AnimatedModelPlayer.this._getHeight();
 			
 			float u = (float) this.viewWidth / (float) this.width;
 			float v = (float) this.viewHeight / (float) this.height;
@@ -1024,6 +1024,56 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 	}
 
 	@Override
-	public void setActive(boolean active) {
+	public void _setActive(boolean active) {
+	}
+
+	@Override
+	public int _getX() {
+		return this.getX();
+	}
+
+	@Override
+	public int _getY() {
+		return this.getY();
+	}
+
+	@Override
+	public int _getWidth() {
+		return this.getWidth();
+	}
+
+	@Override
+	public int _getHeight() {
+		return this.getHeight();
+	}
+
+	@Override
+	public void _setX(int x) {
+		this.setX(x);
+	}
+
+	@Override
+	public void _setY(int y) {
+		this.setY(y);
+	}
+
+	@Override
+	public void _setWidth(int width) {
+		this.setWidth(width);
+	}
+
+	@Override
+	public void _setHeight(int height) {
+		this.setHeight(height);
+	}
+
+	@Override
+	public Component _getMessage() {
+		return this.getMessage();
+	}
+
+	@Override
+	public void _renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		this.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
 	}
 }

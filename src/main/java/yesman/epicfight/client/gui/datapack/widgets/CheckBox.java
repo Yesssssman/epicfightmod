@@ -53,7 +53,7 @@ public class CheckBox extends AbstractWidget implements DataBindingComponent<Boo
 	
 	@Override
 	protected boolean clicked(double x, double y) {
-		return this.active && this.visible && x >= (double)this.getX() && y >= (double) this.getY() && x < (double) (this.getX() + this.width) && y < (double) (this.getY() + this.height);
+		return this.active && this.visible && x >= (double)this._getX() && y >= (double) this._getY() && x < (double) (this._getX() + this.width) && y < (double) (this._getY() + this.height);
 	}
 	
 	@Override
@@ -63,25 +63,25 @@ public class CheckBox extends AbstractWidget implements DataBindingComponent<Boo
 	
 	@Override
 	public boolean isMouseOver(double x, double y) {
-		int rectangleLength = Math.min(this.getWidth(), this.getHeight());
-		return this.active && this.visible && x >= (double)this.getX() && y >= (double)this.getY() && x < (double)(this.getX() + rectangleLength) && y < (double)(this.getY() + rectangleLength);
+		int rectangleLength = Math.min(this._getWidth(), this._getHeight());
+		return this.active && this.visible && x >= (double)this._getX() && y >= (double)this._getY() && x < (double)(this._getX() + rectangleLength) && y < (double)(this._getY() + rectangleLength);
 	}
 	
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-		int rectangleLength = Math.min(this.getWidth(), this.getHeight());
+		int rectangleLength = Math.min(this._getWidth(), this._getHeight());
 		int outlineColor = this.isFocused() ? -1 : this.isActive() ? -6250336 : -12566463;
 		
-		guiGraphics.fill(this.getX(), this.getY(), this.getX() + rectangleLength, this.getY() + rectangleLength, outlineColor);
-		guiGraphics.fill(this.getX() + 1, this.getY() + 1, this.getX() + rectangleLength - 1, this.getY() + rectangleLength - 1, -16777216);
+		guiGraphics.fill(this._getX(), this._getY(), this._getX() + rectangleLength, this._getY() + rectangleLength, outlineColor);
+		guiGraphics.fill(this._getX() + 1, this._getY() + 1, this._getX() + rectangleLength - 1, this._getY() + rectangleLength - 1, -16777216);
 		
 		if (this.value == null ? this.defaultVal : this.value.booleanValue()) {
-			guiGraphics.fill(this.getX() + 2, this.getY() + 2, this.getX() + rectangleLength - 2, this.getY() + rectangleLength - 2, -1);
+			guiGraphics.fill(this._getX() + 2, this._getY() + 2, this._getX() + rectangleLength - 2, this._getY() + rectangleLength - 2, -1);
 		}
 		
 		int fontColor = this.isActive() ? 16777215 : 4210752;
 		
-		guiGraphics.drawString(this.font, this.getMessage(), this.getX() + rectangleLength + 4, this.getY() + this.height / 2 - this.font.lineHeight / 2 + 1, fontColor, false);
+		guiGraphics.drawString(this.font, this._getMessage(), this._getX() + rectangleLength + 4, this._getY() + this.height / 2 - this.font.lineHeight / 2 + 1, fontColor, false);
 	}
 	
 	@Override
@@ -150,7 +150,7 @@ public class CheckBox extends AbstractWidget implements DataBindingComponent<Boo
 	}
 	
 	@Override
-	public void setActive(boolean active) {
+	public void _setActive(boolean active) {
 		this.active = active;
 	}
 	
@@ -179,7 +179,56 @@ public class CheckBox extends AbstractWidget implements DataBindingComponent<Boo
 	}
 	
 	@Override
-	public void tick() {
+	public void _tick() {
 	}
 
+	@Override
+	public int _getX() {
+		return this.getX();
+	}
+
+	@Override
+	public int _getY() {
+		return this.getY();
+	}
+
+	@Override
+	public int _getWidth() {
+		return this.getWidth();
+	}
+
+	@Override
+	public int _getHeight() {
+		return this.getHeight();
+	}
+
+	@Override
+	public void _setX(int x) {
+		this.setX(x);
+	}
+
+	@Override
+	public void _setY(int y) {
+		this.setY(y);
+	}
+
+	@Override
+	public void _setWidth(int width) {
+		this.setWidth(width);
+	}
+
+	@Override
+	public void _setHeight(int height) {
+		this.setHeight(height);
+	}
+
+	@Override
+	public Component _getMessage() {
+		return this.getMessage();
+	}
+
+	@Override
+	public void _renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		this.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
+	}
 }

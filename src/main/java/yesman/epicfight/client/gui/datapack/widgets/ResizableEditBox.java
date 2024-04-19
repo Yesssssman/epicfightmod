@@ -1,6 +1,7 @@
 package yesman.epicfight.client.gui.datapack.widgets;
 
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
@@ -80,12 +81,67 @@ public class ResizableEditBox extends EditBox implements DataBindingComponent<St
 	}
 	
 	@Override
-	public void setActive(boolean active) {
+	public void _setActive(boolean active) {
 		this.active = active;
 	}
 
 	@Override
 	public void reset() {
 		this.setValue("");
+	}
+
+	@Override
+	public int _getX() {
+		return this.getX();
+	}
+
+	@Override
+	public int _getY() {
+		return this.getY();
+	}
+
+	@Override
+	public int _getWidth() {
+		return this.getWidth();
+	}
+
+	@Override
+	public int _getHeight() {
+		return this.getHeight();
+	}
+
+	@Override
+	public void _setX(int x) {
+		this.setX(x);
+	}
+
+	@Override
+	public void _setY(int y) {
+		this.setY(y);
+	}
+
+	@Override
+	public void _setWidth(int width) {
+		this.setWidth(width);
+	}
+
+	@Override
+	public void _setHeight(int height) {
+		this.setHeight(height);
+	}
+
+	@Override
+	public Component _getMessage() {
+		return this.getMessage();
+	}
+
+	@Override
+	public void _tick() {
+		this.tick();
+	}
+
+	@Override
+	public void _renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		this.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
 	}
 }

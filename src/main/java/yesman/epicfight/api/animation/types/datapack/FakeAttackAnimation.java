@@ -2,6 +2,7 @@ package yesman.epicfight.api.animation.types.datapack;
 
 import javax.annotation.Nullable;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -30,8 +31,8 @@ public class FakeAttackAnimation extends AttackAnimation implements ClipHoldingA
 	}
 	
 	@Override
-	public FakeAnimation toFakeAnimation() {
-		FakeAnimation fakeAnimation = new FakeAnimation(this.registryName.toString(), this.armature, this.clip);
+	public FakeAnimation toFakeAnimation(CompoundTag rawAnimationData) {
+		FakeAnimation fakeAnimation = new FakeAnimation(this.registryName.toString(), this.armature, this.clip, rawAnimationData);
 		
 		fakeAnimation.setAnimationClass(AttackAnimation.class);
 		fakeAnimation.setParameter("convertTime", this.convertTime);

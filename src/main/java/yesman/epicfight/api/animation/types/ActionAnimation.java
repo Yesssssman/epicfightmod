@@ -58,6 +58,13 @@ public class ActionAnimation extends MainFrameAnimation {
 		if (entitypatch.shouldMoveOnCurrentSide(this)) {
 			entitypatch.correctRotation();
 			
+			if (this.getProperty(ActionAnimationProperty.STOP_MOVEMENT).orElse(false)) {
+				entitypatch.getOriginal().setDeltaMovement(0.0D, entitypatch.getOriginal().getDeltaMovement().y, 0.0D);
+				entitypatch.getOriginal().xxa = 0.0F;
+				entitypatch.getOriginal().yya = 0.0F;
+				entitypatch.getOriginal().zza = 0.0F;
+			}
+			
 			MoveCoordSetter moveCoordSetter = this.getProperty(ActionAnimationProperty.COORD_SET_BEGIN).orElse(MoveCoordFunctions.RAW_COORD);
 			moveCoordSetter.set(this, entitypatch, entitypatch.getArmature().getActionAnimationCoord());
 		}
@@ -85,13 +92,6 @@ public class ActionAnimation extends MainFrameAnimation {
 			LivingEntity livingentity = entitypatch.getOriginal();
 			Vec3 vec3 = this.getCoordVector(entitypatch, animation);
 			livingentity.move(MoverType.SELF, vec3);
-			
-			if (this.getProperty(ActionAnimationProperty.STOP_MOVEMENT).orElse(false)) {
-				entitypatch.getOriginal().setDeltaMovement(0.0D, entitypatch.getOriginal().getDeltaMovement().y, 0.0D);
-				entitypatch.getOriginal().xxa = 0.0F;
-				entitypatch.getOriginal().yya = 0.0F;
-				entitypatch.getOriginal().zza = 0.0F;
-			}
 		}
 	}
 	

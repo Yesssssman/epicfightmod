@@ -55,8 +55,8 @@ public class SelectAnimationScreen extends Screen {
 	protected void init() {
 		int split = this.width / 2 - 80;
 		
-		this.animationModelPlayer.setWidth(split - 10);
-		this.animationModelPlayer.setHeight(this.height - 68);
+		this.animationModelPlayer._setWidth(split - 10);
+		this.animationModelPlayer._setHeight(this.height - 68);
 		this.animationModelPlayer.resize(null);
 		
 		this.animationList.updateSize(this.width - split, this.height, 36, this.height - 32);
@@ -95,7 +95,7 @@ public class SelectAnimationScreen extends Screen {
 	
 	@Override
 	public void tick() {
-		this.animationModelPlayer.tick();
+		this.animationModelPlayer._tick();
 	}
 	
 	@Override

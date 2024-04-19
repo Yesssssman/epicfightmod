@@ -489,7 +489,7 @@ public class ImportAnimationsScreen extends Screen {
 	
 	@Override
 	public void tick() {
-		this.grid.tick();
+		this.grid._tick();
 		this.inputComponentsList.tick();
 	}
 	
@@ -512,7 +512,7 @@ public class ImportAnimationsScreen extends Screen {
 						InputStream stream = new FileInputStream(file);
 						JsonModelLoader jsonLoader = new JsonModelLoader(stream);
 						String animationPath = modid + ":" + this.animationModelPlayer.getArmature().toString() + "/" + file.getName().replace(".json", "");
-						FakeAnimation animation = new FakeAnimation(animationPath, this.animationModelPlayer.getArmature(), jsonLoader.loadAnimationClip(this.animationModelPlayer.getArmature()));
+						FakeAnimation animation = new FakeAnimation(animationPath, this.animationModelPlayer.getArmature(), jsonLoader.loadAnimationClip(this.animationModelPlayer.getArmature()), jsonLoader.toTag());
 						
 						this.tempAnimations.add(animation);
 						this.grid.addRowWithDefaultValues("animation_name", animationPath);
@@ -648,7 +648,7 @@ public class ImportAnimationsScreen extends Screen {
 		JsonModelLoader modelLoader = new JsonModelLoader(json.getAsJsonObject());
 		modelLoader.loadAnimationClip(animation.toStaticAnimation().getArmature());
 		
-		USER_ANIMATIONS.put(rl, PackEntry.ofValue(animation.toFakeAnimation(), animation.toStaticAnimation()));
+		USER_ANIMATIONS.put(rl, PackEntry.ofValue(animation.toFakeAnimation(modelLoader.toTag()), animation.toStaticAnimation()));
 	}
 	
 	public static void export(ZipOutputStream out) throws IOException {

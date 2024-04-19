@@ -100,6 +100,7 @@ repositories {
 
 mixin {
     add sourceSets.main, "mixins.epicfight.refmap.json"
+    config 'mixins.epicfight.json'
 }
 
 dependencies {

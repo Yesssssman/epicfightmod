@@ -84,7 +84,7 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 	
 	@Override
 	protected boolean clicked(double x, double y) {
-		return this.active && this.visible && x >= (double)this.getX() && y >= (double) this.getY() && x < (double) (this.getX() + this.width) && y < (double) (this.getY() + this.height);
+		return this.active && this.visible && x >= (double)this._getX() && y >= (double) this._getY() && x < (double) (this._getX() + this.width) && y < (double) (this._getY() + this.height);
 	}
 	
 	@Override
@@ -95,35 +95,35 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 			}
 		}
 		
-		return this.active && this.visible && x >= (double)this.getX() && y >= (double) this.getY() && x < (double) (this.getX() + this.width) && y < (double) (this.getY() + this.height * (this.maxRows + 1));
+		return this.active && this.visible && x >= (double)this._getX() && y >= (double) this._getY() && x < (double) (this._getX() + this.width) && y < (double) (this._getY() + this.height * (this.maxRows + 1));
 	}
 	
 	@Override
-	public void setX(int x) {
+	public void _setX(int x) {
 		super.setX(x);
 		this.relocateComboList();
 	}
 	
 	@Override
-	public void setY(int y) {
+	public void _setY(int y) {
 		super.setY(y);
 		this.relocateComboList();
 	}
 	
 	private void relocateComboList() {
 		int entryHeight = 15;
-		int possibleTopPosition = this.getY() - (entryHeight * this.maxRows + 1);
-		int possibleBottomPosition = this.getY() + this.height + entryHeight * this.maxRows + 1;
+		int possibleTopPosition = this._getY() - (entryHeight * this.maxRows + 1);
+		int possibleBottomPosition = this._getY() + this.height + entryHeight * this.maxRows + 1;
 		int bottomSpace = Minecraft.getInstance().getWindow().getGuiScaledHeight() - possibleBottomPosition;
 		int topSpace = possibleTopPosition;
 		
 		if (bottomSpace < topSpace) {
-			this.comboItemList.updateSize(this.width, entryHeight * this.maxRows, this.getY() - (entryHeight * this.maxRows + 1), this.getY() - 1);
+			this.comboItemList.updateSize(this.width, entryHeight * this.maxRows, this._getY() - (entryHeight * this.maxRows + 1), this._getY() - 1);
 		} else {
-			this.comboItemList.updateSize(this.width, entryHeight * this.maxRows, this.getY() + this.height + 1, this.getY() + this.height + entryHeight * this.maxRows + 1);
+			this.comboItemList.updateSize(this.width, entryHeight * this.maxRows, this._getY() + this.height + 1, this._getY() + this.height + entryHeight * this.maxRows + 1);
 		}
 		
-		this.comboItemList.setLeftPos(this.getX());
+		this.comboItemList.setLeftPos(this._getX());
 	}
 	
 	@Override
@@ -140,24 +140,24 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 	}
 	
 	private boolean arrowClicked(double x, double y) {
-		int openPressed = this.getX() + this.width - 14;
+		int openPressed = this._getX() + this.width - 14;
 		
-		return this.active && this.visible && x >= (double)openPressed && y >= (double) this.getY() && x < (double) (this.getX() + this.width) && y < (double) (this.getY() + this.height);
+		return this.active && this.visible && x >= (double)openPressed && y >= (double) this._getY() && x < (double) (this._getX() + this.width) && y < (double) (this._getY() + this.height);
 	}
 	
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		int outlineColor = this.isFocused() ? -1 : this.isActive() ? -6250336 : -12566463;
 		
-		guiGraphics.fill(this.getX() - 1, this.getY() - 1, this.getX() + this.width + 1, this.getY() + this.height + 1, outlineColor);
-		guiGraphics.fill(this.getX(), this.getY(), this.getX() + this.width, this.getY() + this.height, -16777216);
+		guiGraphics.fill(this._getX() - 1, this._getY() - 1, this._getX() + this.width + 1, this._getY() + this.height + 1, outlineColor);
+		guiGraphics.fill(this._getX(), this._getY(), this._getX() + this.width, this._getY() + this.height, -16777216);
 		
 		String correctedString = this.font.plainSubstrByWidth(this.comboItemList.getSelected() == null ? "" : this.comboItemList.getSelected().displayName, this.width - 10);
 		
 		int fontColor = this.isActive() ? 16777215 : 4210752;
 		
-		guiGraphics.drawString(this.font, Component.literal(correctedString), this.getX() + 4, this.getY() + this.height / 2 - this.font.lineHeight / 2 + 1, fontColor, false);
-		guiGraphics.drawString(this.font, Component.literal("▼"), this.getX() + this.width - 8, this.getY() + this.height / 2 - this.font.lineHeight / 2 + 1, fontColor, false);
+		guiGraphics.drawString(this.font, Component.literal(correctedString), this._getX() + 4, this._getY() + this.height / 2 - this.font.lineHeight / 2 + 1, fontColor, false);
+		guiGraphics.drawString(this.font, Component.literal("▼"), this._getX() + this.width - 8, this._getY() + this.height / 2 - this.font.lineHeight / 2 + 1, fontColor, false);
 		
 		if (this.listOpened) {
 			guiGraphics.pose().pushPose();
@@ -169,7 +169,7 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 	
 	@Override
 	protected MutableComponent createNarrationMessage() {
-		Component component = this.getMessage();
+		Component component = this._getMessage();
 		return Component.translatable("gui.epicfight.narrate.comboBox", component);
 	}
 
@@ -331,7 +331,7 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 	}
 	
 	@Override
-	public void setActive(boolean active) {
+	public void _setActive(boolean active) {
 		this.active = active;
 	}
 	
@@ -360,6 +360,46 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 	}
 	
 	@Override
-	public void tick() {
+	public void _tick() {
+	}
+
+	@Override
+	public int _getX() {
+		return this.getX();
+	}
+
+	@Override
+	public int _getY() {
+		return this.getY();
+	}
+
+	@Override
+	public int _getWidth() {
+		return this.getWidth();
+	}
+
+	@Override
+	public int _getHeight() {
+		return this.getHeight();
+	}
+
+	@Override
+	public void _setWidth(int width) {
+		this.setWidth(width);
+	}
+
+	@Override
+	public void _setHeight(int height) {
+		this.setHeight(height);
+	}
+
+	@Override
+	public Component _getMessage() {
+		return this.getMessage();
+	}
+
+	@Override
+	public void _renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		this.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
 	}
 }

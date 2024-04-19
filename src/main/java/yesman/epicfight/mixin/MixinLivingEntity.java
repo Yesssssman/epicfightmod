@@ -84,7 +84,6 @@ public abstract class MixinLivingEntity {
 			float amountElse = amount - armorNegationAmount;
 			LivingEntity self = (LivingEntity)((Object)this);
 			amountElse = CombatRules.getDamageAfterAbsorb(amountElse, (float)self.getArmorValue(), (float)self.getAttributeValue(Attributes.ARMOR_TOUGHNESS));
-			
 			info.setReturnValue(armorNegationAmount + amountElse);
 			info.cancel();
 		}

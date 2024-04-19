@@ -24,7 +24,7 @@ public class ResizableButton extends Button implements ResizableComponent {
 	}
 	
 	@Override
-	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+	public void _renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		super.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
 	}
 	
@@ -89,10 +89,55 @@ public class ResizableButton extends Button implements ResizableComponent {
 	}
 	
 	@Override
-	public void setActive(boolean active) {
+	public void _setActive(boolean active) {
 		this.active = active;
 	}
 	
+	@Override
+	public int _getX() {
+		return this.getX();
+	}
+
+	@Override
+	public int _getY() {
+		return this.getY();
+	}
+
+	@Override
+	public int _getWidth() {
+		return this.getWidth();
+	}
+
+	@Override
+	public int _getHeight() {
+		return this.getHeight();
+	}
+
+	@Override
+	public void _setX(int x) {
+		this.setX(x);
+	}
+
+	@Override
+	public void _setY(int y) {
+		this.setY(y);
+	}
+
+	@Override
+	public void _setWidth(int width) {
+		this.setWidth(width);
+	}
+
+	@Override
+	public void _setHeight(int height) {
+		this.setHeight(height);
+	}
+
+	@Override
+	public Component _getMessage() {
+		return this.getMessage();
+	}
+
 	@OnlyIn(Dist.CLIENT)
 	public static class Builder extends Button.Builder {
 		private int x1;
@@ -174,6 +219,6 @@ public class ResizableButton extends Button implements ResizableComponent {
 	}
 	
 	@Override
-	public void tick() {
+	public void _tick() {
 	}
 }

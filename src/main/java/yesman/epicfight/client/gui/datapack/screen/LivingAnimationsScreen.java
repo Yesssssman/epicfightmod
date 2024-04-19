@@ -74,7 +74,7 @@ public class LivingAnimationsScreen extends Screen {
 										importer.newRow().newValue("living_motion", LivingMotion.ENUM_MANAGER.get(entry.getKey())).newValue("living_animation", AnimationManager.getInstance().byKey(entry.getValue().getAsString()));
 									}
 									
-									this.animationsGrid.setActive(true);
+									this.animationsGrid._setActive(true);
 									this.animationsGrid.setValue(importer);
 								})
 								.addColumn(Grid.combo("style", Style.ENUM_MANAGER.universalValues())
@@ -89,7 +89,7 @@ public class LivingAnimationsScreen extends Screen {
 									grid.removeRow((removedRow) -> this.styles.remove(removedRow));
 									
 									if (grid.children().size() == 0) {
-										this.animationsGrid.setActive(false);
+										this.animationsGrid._setActive(false);
 									}
 								})
 								.build();
@@ -167,7 +167,7 @@ public class LivingAnimationsScreen extends Screen {
 									})
 									.build();
 		
-		this.animationsGrid.setActive(false);
+		this.animationsGrid._setActive(false);
 		
 		Grid.PackImporter packImporter = new Grid.PackImporter();
 		
@@ -235,7 +235,7 @@ public class LivingAnimationsScreen extends Screen {
 	
 	@Override
 	public void tick() {
-		this.animationModelPlayer.tick();
+		this.animationModelPlayer._tick();
 	}
 	
 	@Override

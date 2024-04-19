@@ -129,9 +129,9 @@ public class MessageScreen<T> extends Screen {
 		}
 		
 		if (this.inputWidget != null) {
-			this.inputWidget.setWidth((width - 20) * 2);
-			this.inputWidget.setX(this.width / 2 - width + 20);
-			this.inputWidget.setY(y + 8);
+			this.inputWidget._setWidth((width - 20) * 2);
+			this.inputWidget._setX(this.width / 2 - width + 20);
+			this.inputWidget._setY(y + 8);
 		}
 		
 		super.render(guiGraphics, mouseX, mouseY, partialTick);
