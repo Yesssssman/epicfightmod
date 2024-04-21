@@ -5,8 +5,8 @@ import java.util.Iterator;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
+import com.google.gson.JsonObject;
 
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraftforge.api.distmarker.Dist;
@@ -16,6 +16,7 @@ import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.MovementAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.api.client.animation.ClientAnimationDataReader;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Armature;
 
@@ -24,10 +25,10 @@ public class FakeAnimation extends StaticAnimation {
 	private Class<? extends StaticAnimation> animationClass;
 	private AnimationClip animationClip;
 	private Map<String, Object> parameters = Maps.newLinkedHashMap();
-	private CompoundTag animation;
-	private CompoundTag properties = new CompoundTag();
+	private JsonObject animation;
+	private JsonObject properties = new JsonObject();
 	
-	public FakeAnimation(String path, Armature armature, AnimationClip clip, CompoundTag animation) {
+	public FakeAnimation(String path, Armature armature, AnimationClip clip, JsonObject animation) {
 		super(new ResourceLocation(""), 0.0F, false, "", armature, true);
 		
 		this.animationClip = clip;
@@ -52,7 +53,7 @@ public class FakeAnimation extends StaticAnimation {
 		return this.animationClass;
 	}
 	
-	public CompoundTag getPropertiesTag() {
+	public JsonObject getPropertiesJsonObject() {
 		return this.properties;
 	}
 	
@@ -102,12 +103,14 @@ public class FakeAnimation extends StaticAnimation {
 			ClipHoldingAnimation animation = constructor.newInstance(params);
 			animation.setAnimationClip(this.animationClip);
 			
+			ClientAnimationDataReader clientDataReader = ClientAnimationDataReader.DESERIALIZER.deserialize(this.properties, null, null);
+			clientDataReader.applyClientData(animation.cast());
+			
 			return (StaticAnimation)animation;
 		} catch (IllegalArgumentException e) {
 			e.printStackTrace();
 			
 			StringBuilder sb = new StringBuilder();
-			
 			Iterator<Map.Entry<String, Object>> iter = this.parameters.entrySet().iterator();
 			
 			while (iter.hasNext()) {

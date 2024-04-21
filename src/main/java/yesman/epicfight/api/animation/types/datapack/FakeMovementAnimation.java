@@ -1,6 +1,7 @@
 package yesman.epicfight.api.animation.types.datapack;
 
-import net.minecraft.nbt.CompoundTag;
+import com.google.gson.JsonObject;
+
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.types.MovementAnimation;
@@ -13,8 +14,8 @@ public class FakeMovementAnimation extends FakeStaticAnimation {
 	}
 	
 	@Override
-	public FakeAnimation toFakeAnimation(CompoundTag rawAnimationData) {
-		FakeAnimation fakeAnimation = new FakeAnimation(this.registryName.toString(), this.armature, this.clip, rawAnimationData);
+	public FakeAnimation toFakeAnimation(JsonObject rawAnimationJson) {
+		FakeAnimation fakeAnimation = new FakeAnimation(this.registryName.toString(), this.armature, this.clip, rawAnimationJson);
 		fakeAnimation.setAnimationClass(MovementAnimation.class);
 		fakeAnimation.setParameter("convertTime", this.convertTime);
 		fakeAnimation.setParameter("isRepeat", this.isRepeat());

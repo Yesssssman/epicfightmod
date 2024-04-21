@@ -97,6 +97,7 @@ import yesman.epicfight.world.capabilities.item.WeaponTypeReloadListener;
 
 @OnlyIn(Dist.CLIENT)
 public class DatapackEditScreen extends Screen {
+	private static DatapackEditScreen unsavedLastScreen;
 	public static final Component GUI_EXPORT = Component.translatable("gui.epicfight.export");
 	
 	private GridLayout bottomButtons;
@@ -229,13 +230,13 @@ public class DatapackEditScreen extends Screen {
 					final EditBox titleEditBox = new EditBox(this.font, this.width / 2 - 72, this.height / 2 - 6, 144, 16, Component.literal("pack_title_input_box"));
 					
 					this.addRenderableWidget(titleEditBox);
-					this.addRenderableWidget(Button.builder(CommonComponents.GUI_OK, (button2) -> DatapackEditScreen.this.exportDataPack(titleEditBox.getValue())).bounds(this.width / 2 - 56, this.height / 2 + height - 20, 55, 16).build());
-					this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, (button2) -> this.minecraft.setScreen(DatapackEditScreen.this)).bounds(this.width / 2 + 1, this.height / 2 + height - 20, 55, 16).build());
+					this.addRenderableWidget(Button.builder(CommonComponents.GUI_OK, (button$2) -> DatapackEditScreen.this.exportDataPack(titleEditBox.getValue())).bounds(this.width / 2 - 56, this.height / 2 + height - 20, 55, 16).build());
+					this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, (button$2) -> this.minecraft.setScreen(DatapackEditScreen.this)).bounds(this.width / 2 + 1, this.height / 2 + height - 20, 55, 16).build());
 				}
 			});
 		}).build());
 		gridlayout$rowhelper.addChild(Button.builder(CommonComponents.GUI_CANCEL, (button) -> {
-			this.minecraft.setScreen(this.parentScreen);
+			this.onClose();
 		}).build());
 		
 		this.bottomButtons.visitWidgets((button) -> {
@@ -244,6 +245,15 @@ public class DatapackEditScreen extends Screen {
 		});
 		
 		this.repositionElements();
+		
+		if (!this.initialized && unsavedLastScreen != null && unsavedLastScreen != this) {
+			this.initialized = true;
+			
+			this.minecraft.setScreen(new MessageScreen<>("", "Would you like to load the previous pack?", this, (button) -> {
+				this.minecraft.setScreen(unsavedLastScreen);
+				unsavedLastScreen = null;
+			}, 180, 70));
+		}
 	}
 	
 	@Override
@@ -266,6 +276,10 @@ public class DatapackEditScreen extends Screen {
 	
 	@Override
 	public void onClose() {
+		if (this.weaponTab.packList.size() > 0 || this.itemCapabilityTab.packList.size() > 0 || this.mobPatchTab.packList.size() > 0) {
+			unsavedLastScreen = this;
+		}
+		
 		this.minecraft.setScreen(this.parentScreen);
 		this.itemCapabilityTab.modelPlayer.onDestroy();
 	}
@@ -511,12 +525,12 @@ public class DatapackEditScreen extends Screen {
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.styles")));
-			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder(DatapackEditScreen.this).subScreen(StylesScreen::new)
+			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.<CompoundTag>builder(DatapackEditScreen.this).subScreen(StylesScreen::new)
 					.compoundTag(() -> ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "styles", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.offhand_validator")));
-			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder(DatapackEditScreen.this).subScreen(OffhandValidatorScreen::new)
+			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.<CompoundTag>builder(DatapackEditScreen.this).subScreen(OffhandValidatorScreen::new)
 					.compoundTag(() -> ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "offhand_item_compatible_predicate", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			final ResizableEditBox colliderCount = new ResizableEditBox(font, 0, 0, 40, 15, Component.translatable("datapack_edit.weapon_type.collider.count"), HorizontalSizing.LEFT_WIDTH, null);
@@ -646,7 +660,7 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.combos")));
 			
-			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder(DatapackEditScreen.this).subScreen(ComboScreen::new)
+			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.<CompoundTag>builder(DatapackEditScreen.this).subScreen(ComboScreen::new)
 					.compoundTag(() -> this.packList.get(this.packListGrid.getRowposition()).getPackValue()).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.newRow();
@@ -691,7 +705,7 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 80, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.living_animations")));
 			
-			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder(DatapackEditScreen.this).subScreen(LivingAnimationsScreen::new)
+			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.<CompoundTag>builder(DatapackEditScreen.this).subScreen(LivingAnimationsScreen::new)
 					.compoundTag(() -> ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "livingmotion_modifier", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.setComponentsActive(false);
@@ -795,7 +809,7 @@ public class DatapackEditScreen extends Screen {
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.attributes")));
-			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder(DatapackEditScreen.this).subScreen(AttributeScreen::new)
+			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.<CompoundTag>builder(DatapackEditScreen.this).subScreen(AttributeScreen::new)
 					.compoundTag(() -> ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "attributes", new CompoundTag())).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.newRow();

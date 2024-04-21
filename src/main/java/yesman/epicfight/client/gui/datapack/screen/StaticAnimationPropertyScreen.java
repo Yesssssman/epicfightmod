@@ -4,17 +4,18 @@ import java.util.List;
 import java.util.function.Consumer;
 
 import com.google.common.collect.Lists;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.util.GsonHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.LivingMotion;
@@ -32,18 +33,18 @@ import yesman.epicfight.client.gui.datapack.widgets.Static;
 
 @OnlyIn(Dist.CLIENT)
 public class StaticAnimationPropertyScreen extends Screen {
-	private final InputComponentList<CompoundTag> inputComponentsList;
+	private final InputComponentList<JsonObject> inputComponentsList;
 	private final ComboBox<LayerOptions> layerTypeCombo;
 	private final Consumer<LayerOptions> responder;
 	private final Screen parentScreen;
-	private final CompoundTag rootTag;
+	private final JsonObject rootTag;
 	
 	private Layer.Priority baseLayerPriority;
 	private Layer.Priority compositeLayerPriority;
 	private List<PackEntry<LivingMotion, List<JointMask>>> baseLayerMasks = Lists.newArrayList();
 	private List<PackEntry<LivingMotion, List<JointMask>>> compositeLayerMasks = Lists.newArrayList();
 	
-	protected StaticAnimationPropertyScreen(Screen parentScreen, CompoundTag tag) {
+	protected StaticAnimationPropertyScreen(Screen parentScreen, JsonObject tag) {
 		super(Component.translatable("datapack_edit.import_animation.client_data"));
 		
 		this.parentScreen = parentScreen;
@@ -53,15 +54,15 @@ public class StaticAnimationPropertyScreen extends Screen {
 		
 		this.inputComponentsList = new InputComponentList<> (this, 0, 0, 0, 0, 30) {
 			@Override
-			public void importTag(CompoundTag tag) {
+			public void importTag(JsonObject tag) {
 				this.clearComponents();
 				this.setComponentsActive(true);
 				
 				LayerOptions layerOption = null;
 				
-				if (tag.contains("layer")) {
-					layerOption = LayerOptions.valueOf(tag.getString("layer"));
-				} else if (tag.contains("multilayer")) {
+				if (tag.has("layer")) {
+					layerOption = LayerOptions.valueOf(GsonHelper.getAsString(tag, "layer"));
+				} else if (tag.has("multilayer")) {
 					layerOption = LayerOptions.MULTILAYER;
 				}
 				
@@ -70,20 +71,20 @@ public class StaticAnimationPropertyScreen extends Screen {
 				Object[] data;
 				
 				if (layerOption == LayerOptions.BASE_LAYER) {
-					Layer.Priority priority = Layer.Priority.valueOf(tag.getString("priority"));
+					Layer.Priority priority = Layer.Priority.valueOf(GsonHelper.getAsString(tag, "priority"));
 					
 					data = new Object[] {
 						layerOption,
 						priority
 					};
 				} else if (layerOption == LayerOptions.COMPOSITE_LAYER) {
-					Layer.Priority priority = Layer.Priority.valueOf(tag.getString("priority"));
+					Layer.Priority priority = Layer.Priority.valueOf(GsonHelper.getAsString(tag, "priority"));
 					Grid.PackImporter packImporter = new Grid.PackImporter();
 					
-					for (Tag maskTag : tag.getList("masks", Tag.TAG_COMPOUND)) {
-						CompoundTag maskCompoundTag = (CompoundTag)maskTag;
-						LivingMotion livingMotion = LivingMotion.ENUM_MANAGER.get(maskCompoundTag.getString("livingmotion"));
-						List<JointMask> jointMask = JointMaskReloadListener.getJointMaskEntry(maskCompoundTag.getString("type"));
+					for (JsonElement maskTag : tag.getAsJsonArray("masks")) {
+						JsonObject maskCompoundTag = maskTag.getAsJsonObject();
+						LivingMotion livingMotion = LivingMotion.ENUM_MANAGER.get(GsonHelper.getAsString(maskCompoundTag, "livingmotion"));
+						List<JointMask> jointMask = JointMaskReloadListener.getJointMaskEntry(GsonHelper.getAsString(maskCompoundTag, "type"));
 						
 						packImporter.newRow();
 						packImporter.newValue("living_motion", livingMotion);
@@ -99,16 +100,16 @@ public class StaticAnimationPropertyScreen extends Screen {
 					};
 					
 				} else if (layerOption == LayerOptions.MULTILAYER) {
-					CompoundTag base = tag.getCompound("multilayer").getCompound("base");
-					CompoundTag composite = tag.getCompound("multilayer").getCompound("composite");
+					JsonObject base = tag.getAsJsonObject("multilayer").getAsJsonObject("base");
+					JsonObject composite = tag.getAsJsonObject("multilayer").getAsJsonObject("composite");
 					
-					Layer.Priority basePriority = Layer.Priority.valueOf(base.getString("priority"));
+					Layer.Priority basePriority = Layer.Priority.valueOf(GsonHelper.getAsString(base, "priority"));
 					Grid.PackImporter basePackImporter = new Grid.PackImporter();
 					
-					for (Tag maskTag : base.getList("masks", Tag.TAG_COMPOUND)) {
-						CompoundTag maskCompoundTag = (CompoundTag)maskTag;
-						LivingMotion livingMotion = LivingMotion.ENUM_MANAGER.get(maskCompoundTag.getString("livingmotion"));
-						List<JointMask> jointMask = JointMaskReloadListener.getJointMaskEntry(maskCompoundTag.getString("type"));
+					for (JsonElement maskTag : base.getAsJsonArray("masks")) {
+						JsonObject maskCompoundTag = maskTag.getAsJsonObject();
+						LivingMotion livingMotion = LivingMotion.ENUM_MANAGER.get(GsonHelper.getAsString(maskCompoundTag, "livingmotion"));
+						List<JointMask> jointMask = JointMaskReloadListener.getJointMaskEntry(GsonHelper.getAsString(maskCompoundTag, "type"));
 						
 						basePackImporter.newRow();
 						basePackImporter.newValue("living_motion", livingMotion);
@@ -117,13 +118,13 @@ public class StaticAnimationPropertyScreen extends Screen {
 						StaticAnimationPropertyScreen.this.baseLayerMasks.add(PackEntry.ofValue(livingMotion, jointMask));
 					}
 					
-					Layer.Priority compositePriority = Layer.Priority.valueOf(composite.getString("priority"));
+					Layer.Priority compositePriority = Layer.Priority.valueOf(GsonHelper.getAsString(composite, "priority"));
 					Grid.PackImporter compositePackImporter = new Grid.PackImporter();
 					
-					for (Tag maskTag : composite.getList("masks", Tag.TAG_COMPOUND)) {
-						CompoundTag maskCompoundTag = (CompoundTag)maskTag;
-						LivingMotion livingMotion = LivingMotion.ENUM_MANAGER.get(maskCompoundTag.getString("livingmotion"));
-						List<JointMask> jointMask = JointMaskReloadListener.getJointMaskEntry(maskCompoundTag.getString("type"));
+					for (JsonElement maskTag : composite.getAsJsonArray("masks")) {
+						JsonObject maskCompoundTag = maskTag.getAsJsonObject();
+						LivingMotion livingMotion = LivingMotion.ENUM_MANAGER.get(GsonHelper.getAsString(maskCompoundTag, "livingmotion"));
+						List<JointMask> jointMask = JointMaskReloadListener.getJointMaskEntry(GsonHelper.getAsString(maskCompoundTag, "type"));
 						
 						compositePackImporter.newRow();
 						compositePackImporter.newValue("living_motion", livingMotion);
@@ -321,7 +322,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 	}
 	
 	public void save() throws IllegalStateException {
-		this.rootTag.tags.clear();
+		this.rootTag.asMap().clear();
 		LayerOptions layerOption = this.layerTypeCombo.getValue();
 		
 		if (layerOption == null) {
@@ -336,20 +337,20 @@ public class StaticAnimationPropertyScreen extends Screen {
 				throw new IllegalStateException("Composite layer priority is not defined!");
 			}
 			
-			CompoundTag multilayer = new CompoundTag();
-			CompoundTag base = new CompoundTag();
-			CompoundTag composite = new CompoundTag();
+			JsonObject multilayer = new JsonObject();
+			JsonObject base = new JsonObject();
+			JsonObject composite = new JsonObject();
 			
-			base.putString("priority", this.baseLayerPriority.toString());
-			composite.putString("priority", this.compositeLayerPriority.toString());
+			base.addProperty("priority", this.baseLayerPriority.toString());
+			composite.addProperty("priority", this.compositeLayerPriority.toString());
 			
-			ListTag baseMasks = new ListTag();
+			JsonArray baseMasks = new JsonArray();
 			int idx = 0;
 			
 			for (PackEntry<LivingMotion, List<JointMask>> entry : this.baseLayerMasks) {
 				idx++;
 				
-				CompoundTag jointEntryTag = new CompoundTag();
+				JsonObject jointEntryTag = new JsonObject();
 				
 				if (entry.getPackKey() == null) {
 					throw new IllegalStateException(String.format("Row %s: Living motion is not defined!", idx));
@@ -359,18 +360,18 @@ public class StaticAnimationPropertyScreen extends Screen {
 					throw new IllegalStateException(String.format("Row %s: Joint mask is not defined!", idx));
 				}
 				
-				jointEntryTag.putString("livingmotion", entry.getPackKey().toString());
-				jointEntryTag.putString("type", JointMaskReloadListener.getKey(entry.getPackValue()).toString());
+				jointEntryTag.addProperty("livingmotion", entry.getPackKey().toString());
+				jointEntryTag.addProperty("type", JointMaskReloadListener.getKey(entry.getPackValue()).toString());
 				baseMasks.add(jointEntryTag);
 			}
 			
-			ListTag compositeMasks = new ListTag();
+			JsonArray compositeMasks = new JsonArray();
 			idx = 0;
 			
 			for (PackEntry<LivingMotion, List<JointMask>> entry : this.compositeLayerMasks) {
 				idx++;
 				
-				CompoundTag jointEntryTag = new CompoundTag();
+				JsonObject jointEntryTag = new JsonObject();
 				
 				if (entry.getPackKey() == null) {
 					throw new IllegalStateException(String.format("Row %s: Living motion is not defined!", idx));
@@ -380,33 +381,29 @@ public class StaticAnimationPropertyScreen extends Screen {
 					throw new IllegalStateException(String.format("Row %s: Joint mask is not defined!", idx));
 				}
 				
-				jointEntryTag.putString("livingmotion", entry.getPackKey().toString());
-				jointEntryTag.putString("type", JointMaskReloadListener.getKey(entry.getPackValue()).toString());
+				jointEntryTag.addProperty("livingmotion", entry.getPackKey().toString());
+				jointEntryTag.addProperty("type", JointMaskReloadListener.getKey(entry.getPackValue()).toString());
 				
 				compositeMasks.add(jointEntryTag);
 			}
 			
-			base.put("masks", baseMasks);
-			composite.put("masks", compositeMasks);
-			multilayer.put("base", base);
-			multilayer.put("composite", composite);
-			this.rootTag.put("multilayer", multilayer);
+			base.add("masks", baseMasks);
+			composite.add("masks", compositeMasks);
+			multilayer.add("base", base);
+			multilayer.add("composite", composite);
+			this.rootTag.add("multilayer", multilayer);
 		} else {
-			this.rootTag.putString("layer", layerOption.toString());
-			this.rootTag.putString("priority", layerOption == LayerOptions.BASE_LAYER ? this.baseLayerPriority.toString() : this.compositeLayerPriority.toString());
+			this.rootTag.addProperty("layer", layerOption.toString());
+			this.rootTag.addProperty("priority", layerOption == LayerOptions.BASE_LAYER ? this.baseLayerPriority.toString() : this.compositeLayerPriority.toString());
 			
-			ListTag masks = new ListTag();
+			JsonArray masks = new JsonArray();
 			List<PackEntry<LivingMotion, List<JointMask>>> list = layerOption == LayerOptions.BASE_LAYER ? this.baseLayerMasks : this.compositeLayerMasks;
-			
-			//System.out.println(this.baseLayerPriority +" "+ this.compositeLayerPriority);
-			//System.out.println(this.baseLayerMasks +" "+ this.compositeLayerMasks);
-			
 			int idx = 0;
 			
 			for (PackEntry<LivingMotion, List<JointMask>> entry : list) {
 				idx++;
 				
-				CompoundTag jointEntryTag = new CompoundTag();
+				JsonObject jointEntryTag = new JsonObject();
 				
 				if (entry.getPackKey() == null) {
 					throw new IllegalStateException(String.format("Row %s: Living motion is not defined!", idx));
@@ -416,12 +413,12 @@ public class StaticAnimationPropertyScreen extends Screen {
 					throw new IllegalStateException(String.format("Row %s: Joint mask is not defined!", idx));
 				}
 				
-				jointEntryTag.putString("livingmotion", entry.getPackKey().toString());
-				jointEntryTag.putString("type", JointMaskReloadListener.getKey(entry.getPackValue()).toString());
+				jointEntryTag.addProperty("livingmotion", entry.getPackKey().toString());
+				jointEntryTag.addProperty("type", JointMaskReloadListener.getKey(entry.getPackValue()).toString());
 				masks.add(jointEntryTag);
 			}
 			
-			this.rootTag.put("masks", masks);
+			this.rootTag.add("masks", masks);
 		}
 	}
 	

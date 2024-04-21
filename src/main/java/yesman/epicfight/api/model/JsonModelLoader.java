@@ -20,11 +20,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.JsonOps;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -488,22 +485,8 @@ public class JsonModelLoader {
 		return clip;
 	}
 	
-	public CompoundTag toTag() {
-		JsonObject jo = new JsonObject();
-		
-		JsonArray jsonArr = new JsonArray();
-		jsonArr.add(1.5F);
-		jsonArr.add(2.9F);
-		jsonArr.add(1.7F);
-		
-		jo.add("one", jsonArr);
-		//System.out.println(this.rootJson);
-		//System.out.println("to");
-		DataResult<Pair<CompoundTag, JsonElement>> dr = CompoundTag.CODEC.decode(JsonOps.INSTANCE, jo);
-		
-		System.out.println(dr.get().left().get());
-		
-		return CompoundTag.CODEC.decode(JsonOps.INSTANCE, this.rootJson).get().left().get().getFirst();
+	public JsonObject getRootJsont() {
+		return this.rootJson;
 	}
 	
 	public AnimationClip loadAnimationClip(Armature armature) {

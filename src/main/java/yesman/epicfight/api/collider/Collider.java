@@ -55,7 +55,7 @@ public abstract class Collider {
 		}
 		
 		OpenMatrix4f toWorldCoord = OpenMatrix4f.createTranslation(-(float)entitypatch.getOriginal().getX(), (float)entitypatch.getOriginal().getY(), -(float)entitypatch.getOriginal().getZ());
-		transformMatrix.mulFront(toWorldCoord.mulBack(entitypatch.getModelMatrix(1.0F)));		
+		transformMatrix.mulFront(toWorldCoord.mulBack(entitypatch.getModelMatrix(1.0F)));
 		this.transform(transformMatrix);
 		
 		return this.getCollideEntities(entitypatch.getOriginal());

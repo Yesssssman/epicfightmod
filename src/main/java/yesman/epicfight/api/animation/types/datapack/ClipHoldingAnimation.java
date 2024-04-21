@@ -1,6 +1,7 @@
 package yesman.epicfight.api.animation.types.datapack;
 
-import net.minecraft.nbt.CompoundTag;
+import com.google.gson.JsonObject;
+
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationClip;
@@ -10,9 +11,9 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 public interface ClipHoldingAnimation {
 	public void setAnimationClip(AnimationClip clip);
 	
-	public FakeAnimation toFakeAnimation(CompoundTag rawAnimationData);
+	public FakeAnimation toFakeAnimation(JsonObject rawAnimationJson);
 	
-	default StaticAnimation toStaticAnimation() {
+	default StaticAnimation cast() {
 		return (StaticAnimation)this;
 	}
 }

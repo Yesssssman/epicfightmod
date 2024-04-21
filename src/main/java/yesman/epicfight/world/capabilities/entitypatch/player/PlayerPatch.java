@@ -177,8 +177,8 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 			oYRot = ridingEntity.yBodyRotO;
 			yRot = ridingEntity.yBodyRot;
 		} else {
-			oYRot = this.isLogicalClient() ? this.original.yBodyRotO : this.oModelYRot;
-			yRot = this.isLogicalClient() ? this.original.yBodyRot : this.modelYRot;
+			oYRot = this.oModelYRot;
+			yRot = this.modelYRot;
 		}
 		
 		return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, oYRot, yRot, partialTicks, scale, scale, scale);
@@ -236,7 +236,8 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		}
 		
 		if (!this.useModelYRot) {
-			this.modelYRot += Mth.clamp(Mth.wrapDegrees(this.original.yBodyRot - this.modelYRot), -45.0F, 45.0F);
+			float originalYRot = this.isLogicalClient() ? this.original.yBodyRot : this.original.getYRot();
+			this.modelYRot += Mth.clamp(Mth.wrapDegrees(originalYRot - this.modelYRot), -45.0F, 45.0F);
 		}
 	}
 	

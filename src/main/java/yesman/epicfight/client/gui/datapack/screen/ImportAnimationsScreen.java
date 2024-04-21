@@ -216,7 +216,7 @@ public class ImportAnimationsScreen extends Screen {
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.client_data")));
-			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder(this).subScreen(StaticAnimationPropertyScreen::new).compoundTag(() -> this.tempAnimations.get(this.grid.getRowposition()).getPropertiesTag())
+			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.<JsonObject>builder(this).subScreen(StaticAnimationPropertyScreen::new).compoundTag(() -> this.tempAnimations.get(this.grid.getRowposition()).getPropertiesJsonObject())
 																				.bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 		} else if (animationClass == AttackAnimation.class) {
 			this.animationModelPlayer.setCollider(ColliderPreset.FIST);
@@ -512,7 +512,7 @@ public class ImportAnimationsScreen extends Screen {
 						InputStream stream = new FileInputStream(file);
 						JsonModelLoader jsonLoader = new JsonModelLoader(stream);
 						String animationPath = modid + ":" + this.animationModelPlayer.getArmature().toString() + "/" + file.getName().replace(".json", "");
-						FakeAnimation animation = new FakeAnimation(animationPath, this.animationModelPlayer.getArmature(), jsonLoader.loadAnimationClip(this.animationModelPlayer.getArmature()), jsonLoader.toTag());
+						FakeAnimation animation = new FakeAnimation(animationPath, this.animationModelPlayer.getArmature(), jsonLoader.loadAnimationClip(this.animationModelPlayer.getArmature()), jsonLoader.getRootJsont());
 						
 						this.tempAnimations.add(animation);
 						this.grid.addRowWithDefaultValues("animation_name", animationPath);
@@ -643,12 +643,12 @@ public class ImportAnimationsScreen extends Screen {
 		Constructor<? extends ClipHoldingAnimation> constructor = animationClass.getConstructor(argumentClasses);
 		ClipHoldingAnimation animation = constructor.newInstance(oArgumentArr);
 		
-		AnimationManager.readAnimationProperties(animation.toStaticAnimation());
+		AnimationManager.readAnimationProperties(animation.cast());
 		
 		JsonModelLoader modelLoader = new JsonModelLoader(json.getAsJsonObject());
-		modelLoader.loadAnimationClip(animation.toStaticAnimation().getArmature());
+		modelLoader.loadAnimationClip(animation.cast().getArmature());
 		
-		USER_ANIMATIONS.put(rl, PackEntry.ofValue(animation.toFakeAnimation(modelLoader.toTag()), animation.toStaticAnimation()));
+		USER_ANIMATIONS.put(rl, PackEntry.ofValue(animation.toFakeAnimation(modelLoader.getRootJsont()), animation.cast()));
 	}
 	
 	public static void export(ZipOutputStream out) throws IOException {

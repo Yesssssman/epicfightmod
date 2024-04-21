@@ -152,7 +152,7 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		Optional<Resource> resource = resourceManager.getResource(dataLocation);
 		
 		if (!resource.isEmpty()) {
-			ClientAnimationDataReader.readAndApply(animation, resourceManager, resourceManager.getResource(dataLocation).get());
+			ClientAnimationDataReader.readAndApply(animation, resourceManager.getResource(dataLocation).get());
 		}
 	}
 	

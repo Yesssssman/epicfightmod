@@ -20,7 +20,6 @@ import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
 
 import net.minecraft.server.packs.resources.Resource;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -36,13 +35,14 @@ import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
 public class ClientAnimationDataReader {
-	private static final Gson GSON = (new GsonBuilder()).registerTypeAdapter(ClientAnimationDataReader.class, new Deserializer()).create();
+	public static final ClientAnimationDataReader.Deserializer DESERIALIZER = new ClientAnimationDataReader.Deserializer();
+	private static final Gson GSON = (new GsonBuilder()).registerTypeAdapter(ClientAnimationDataReader.class, DESERIALIZER).create();
 	private static final TypeToken<ClientAnimationDataReader> TYPE = new TypeToken<ClientAnimationDataReader>() {};
 	private final LayerInfo layerInfo;
 	private final LayerInfo multilayerInfo;
 	private final List<TrailInfo> trailInfo;
 	
-	public static void readAndApply(StaticAnimation animation, ResourceManager resourceManager, Resource iresource) {
+	public static void readAndApply(StaticAnimation animation, Resource iresource) {
 		InputStream inputstream = null;
 		
 		try {
@@ -54,25 +54,28 @@ public class ClientAnimationDataReader {
 		assert inputstream != null;
 		Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
 		ClientAnimationDataReader propertySetter = GsonHelper.fromJson(GSON, reader, TYPE);
-		
-		if (propertySetter.layerInfo != null) {
-			if (propertySetter.layerInfo.jointMaskEntry.isValid()) {
-				animation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.layerInfo.jointMaskEntry);
+		propertySetter.applyClientData(animation);
+	}
+	
+	public void applyClientData(StaticAnimation animation) {
+		if (this.layerInfo != null) {
+			if (this.layerInfo.jointMaskEntry.isValid()) {
+				animation.addProperty(ClientAnimationProperties.JOINT_MASK, this.layerInfo.jointMaskEntry);
 			}
 			
-        	animation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.layerInfo.layerType);
-        	animation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.layerInfo.priority);
+        	animation.addProperty(ClientAnimationProperties.LAYER_TYPE, this.layerInfo.layerType);
+        	animation.addProperty(ClientAnimationProperties.PRIORITY, this.layerInfo.priority);
         }
 		
-		if (propertySetter.multilayerInfo != null) {
+		if (this.multilayerInfo != null) {
 			StaticAnimation multilayerAnimation = new StaticAnimation(animation.getLocation(), animation.getConvertTime(), animation.isRepeat(), animation.getRegistryName().toString() + "_multilayer", animation.getArmature(), true);
 			
-			if (propertySetter.multilayerInfo.jointMaskEntry.isValid()) {
-				multilayerAnimation.addProperty(ClientAnimationProperties.JOINT_MASK, propertySetter.multilayerInfo.jointMaskEntry);
+			if (this.multilayerInfo.jointMaskEntry.isValid()) {
+				multilayerAnimation.addProperty(ClientAnimationProperties.JOINT_MASK, this.multilayerInfo.jointMaskEntry);
 			}
 
-			multilayerAnimation.addProperty(ClientAnimationProperties.LAYER_TYPE, propertySetter.multilayerInfo.layerType);
-			multilayerAnimation.addProperty(ClientAnimationProperties.PRIORITY, propertySetter.multilayerInfo.priority);
+			multilayerAnimation.addProperty(ClientAnimationProperties.LAYER_TYPE, this.multilayerInfo.layerType);
+			multilayerAnimation.addProperty(ClientAnimationProperties.PRIORITY, this.multilayerInfo.priority);
 			multilayerAnimation.addProperty(StaticAnimationProperty.ELAPSED_TIME_MODIFIER, (self, entitypatch, speed, elapsedTime) -> {
 				Layer baseLayer = entitypatch.getClientAnimator().baseLayer;
 				
@@ -89,9 +92,9 @@ public class ClientAnimationDataReader {
 			
 			animation.addProperty(ClientAnimationProperties.MULTILAYER_ANIMATION, multilayerAnimation);
 		}
-
-		if (propertySetter.trailInfo.size() > 0) {
-			animation.addProperty(ClientAnimationProperties.TRAIL_EFFECT, propertySetter.trailInfo);
+		
+		if (this.trailInfo.size() > 0) {
+			animation.addProperty(ClientAnimationProperties.TRAIL_EFFECT, this.trailInfo);
 		}
 	}
 	
@@ -102,7 +105,7 @@ public class ClientAnimationDataReader {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class Deserializer implements JsonDeserializer<ClientAnimationDataReader> {
+	public static class Deserializer implements JsonDeserializer<ClientAnimationDataReader> {
 		static LayerInfo deserializeLayerInfo(JsonObject jsonObject) {
 			return deserializeLayerInfo(jsonObject, null);
 		}
@@ -131,6 +134,7 @@ public class ClientAnimationDataReader {
 					}
 				});
 			}
+			
 			return new LayerInfo(builder.create(), priority, (defaultLayerType == null) ? layerType : defaultLayerType);
 		}
 
