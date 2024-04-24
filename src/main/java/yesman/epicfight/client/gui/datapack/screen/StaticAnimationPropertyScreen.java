@@ -20,8 +20,9 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
+import yesman.epicfight.api.animation.types.datapack.FakeAnimation;
 import yesman.epicfight.api.client.animation.Layer;
-import yesman.epicfight.api.client.animation.property.JointMask;
+import yesman.epicfight.api.client.animation.property.JointMask.JointMaskSet;
 import yesman.epicfight.api.client.animation.property.JointMaskReloadListener;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.client.gui.datapack.widgets.ComboBox;
@@ -35,22 +36,22 @@ import yesman.epicfight.client.gui.datapack.widgets.Static;
 public class StaticAnimationPropertyScreen extends Screen {
 	private final InputComponentList<JsonObject> inputComponentsList;
 	private final ComboBox<LayerOptions> layerTypeCombo;
-	private final Consumer<LayerOptions> responder;
+	private final Consumer<LayerOptions> layerTypeResponder;
 	private final Screen parentScreen;
-	private final JsonObject rootTag;
+	private final FakeAnimation animation;
 	
 	private Layer.Priority baseLayerPriority;
 	private Layer.Priority compositeLayerPriority;
-	private List<PackEntry<LivingMotion, List<JointMask>>> baseLayerMasks = Lists.newArrayList();
-	private List<PackEntry<LivingMotion, List<JointMask>>> compositeLayerMasks = Lists.newArrayList();
+	private List<PackEntry<LivingMotion, JointMaskSet>> baseLayerMasks = Lists.newArrayList();
+	private List<PackEntry<LivingMotion, JointMaskSet>> compositeLayerMasks = Lists.newArrayList();
 	
-	protected StaticAnimationPropertyScreen(Screen parentScreen, JsonObject tag) {
+	protected StaticAnimationPropertyScreen(Screen parentScreen, FakeAnimation animation) {
 		super(Component.translatable("datapack_edit.import_animation.client_data"));
 		
 		this.parentScreen = parentScreen;
 		this.minecraft = parentScreen.getMinecraft();
 		this.font = this.minecraft.font;
-		this.rootTag = tag;
+		this.animation = animation;
 		
 		this.inputComponentsList = new InputComponentList<> (this, 0, 0, 0, 0, 30) {
 			@Override
@@ -84,7 +85,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 					for (JsonElement maskTag : tag.getAsJsonArray("masks")) {
 						JsonObject maskCompoundTag = maskTag.getAsJsonObject();
 						LivingMotion livingMotion = LivingMotion.ENUM_MANAGER.get(GsonHelper.getAsString(maskCompoundTag, "livingmotion"));
-						List<JointMask> jointMask = JointMaskReloadListener.getJointMaskEntry(GsonHelper.getAsString(maskCompoundTag, "type"));
+						JointMaskSet jointMask = JointMaskReloadListener.getJointMaskEntry(GsonHelper.getAsString(maskCompoundTag, "type"));
 						
 						packImporter.newRow();
 						packImporter.newValue("living_motion", livingMotion);
@@ -109,7 +110,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 					for (JsonElement maskTag : base.getAsJsonArray("masks")) {
 						JsonObject maskCompoundTag = maskTag.getAsJsonObject();
 						LivingMotion livingMotion = LivingMotion.ENUM_MANAGER.get(GsonHelper.getAsString(maskCompoundTag, "livingmotion"));
-						List<JointMask> jointMask = JointMaskReloadListener.getJointMaskEntry(GsonHelper.getAsString(maskCompoundTag, "type"));
+						JointMaskSet jointMask = JointMaskReloadListener.getJointMaskEntry(GsonHelper.getAsString(maskCompoundTag, "type"));
 						
 						basePackImporter.newRow();
 						basePackImporter.newValue("living_motion", livingMotion);
@@ -124,7 +125,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 					for (JsonElement maskTag : composite.getAsJsonArray("masks")) {
 						JsonObject maskCompoundTag = maskTag.getAsJsonObject();
 						LivingMotion livingMotion = LivingMotion.ENUM_MANAGER.get(GsonHelper.getAsString(maskCompoundTag, "livingmotion"));
-						List<JointMask> jointMask = JointMaskReloadListener.getJointMaskEntry(GsonHelper.getAsString(maskCompoundTag, "type"));
+						JointMaskSet jointMask = JointMaskReloadListener.getJointMaskEntry(GsonHelper.getAsString(maskCompoundTag, "type"));
 						
 						compositePackImporter.newRow();
 						compositePackImporter.newValue("living_motion", livingMotion);
@@ -148,15 +149,15 @@ public class StaticAnimationPropertyScreen extends Screen {
 				
 				StaticAnimationPropertyScreen.this.layerTypeCombo.setResponder(null);
 				this.setDataBindingComponenets(data);
-				StaticAnimationPropertyScreen.this.layerTypeCombo.setResponder(StaticAnimationPropertyScreen.this.responder);
+				StaticAnimationPropertyScreen.this.layerTypeCombo.setResponder(StaticAnimationPropertyScreen.this.layerTypeResponder);
 			}
 		};
 		
-		this.responder = (layerType) -> this.rearrangeComponents(layerType);
+		this.layerTypeResponder = (layerType) -> this.rearrangeComponents(layerType);
 		this.layerTypeCombo = new ComboBox<>(this, this.font, 0, 124, 100, 15, HorizontalSizing.LEFT_WIDTH, null, 8, Component.translatable("datapack_edit.import_animation.client_data.layer_type"),
-												List.of(LayerOptions.values()), ParseUtil::snakeToSpacedCamel, this.responder);
+												List.of(LayerOptions.values()), ParseUtil::snakeToSpacedCamel, this.layerTypeResponder);
 		
-		this.inputComponentsList.importTag(tag);
+		this.inputComponentsList.importTag(animation.getPropertiesJson());
 	}
 	
 	protected void rearrangeComponents(LayerOptions layerType) {
@@ -322,7 +323,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 	}
 	
 	public void save() throws IllegalStateException {
-		this.rootTag.asMap().clear();
+		this.animation.getPropertiesJson().asMap().clear();
 		LayerOptions layerOption = this.layerTypeCombo.getValue();
 		
 		if (layerOption == null) {
@@ -347,7 +348,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 			JsonArray baseMasks = new JsonArray();
 			int idx = 0;
 			
-			for (PackEntry<LivingMotion, List<JointMask>> entry : this.baseLayerMasks) {
+			for (PackEntry<LivingMotion, JointMaskSet> entry : this.baseLayerMasks) {
 				idx++;
 				
 				JsonObject jointEntryTag = new JsonObject();
@@ -368,7 +369,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 			JsonArray compositeMasks = new JsonArray();
 			idx = 0;
 			
-			for (PackEntry<LivingMotion, List<JointMask>> entry : this.compositeLayerMasks) {
+			for (PackEntry<LivingMotion, JointMaskSet> entry : this.compositeLayerMasks) {
 				idx++;
 				
 				JsonObject jointEntryTag = new JsonObject();
@@ -391,16 +392,16 @@ public class StaticAnimationPropertyScreen extends Screen {
 			composite.add("masks", compositeMasks);
 			multilayer.add("base", base);
 			multilayer.add("composite", composite);
-			this.rootTag.add("multilayer", multilayer);
+			this.animation.getPropertiesJson().add("multilayer", multilayer);
 		} else {
-			this.rootTag.addProperty("layer", layerOption.toString());
-			this.rootTag.addProperty("priority", layerOption == LayerOptions.BASE_LAYER ? this.baseLayerPriority.toString() : this.compositeLayerPriority.toString());
+			this.animation.getPropertiesJson().addProperty("layer", layerOption.toString());
+			this.animation.getPropertiesJson().addProperty("priority", layerOption == LayerOptions.BASE_LAYER ? this.baseLayerPriority.toString() : this.compositeLayerPriority.toString());
 			
 			JsonArray masks = new JsonArray();
-			List<PackEntry<LivingMotion, List<JointMask>>> list = layerOption == LayerOptions.BASE_LAYER ? this.baseLayerMasks : this.compositeLayerMasks;
+			List<PackEntry<LivingMotion, JointMaskSet>> list = layerOption == LayerOptions.BASE_LAYER ? this.baseLayerMasks : this.compositeLayerMasks;
 			int idx = 0;
 			
-			for (PackEntry<LivingMotion, List<JointMask>> entry : list) {
+			for (PackEntry<LivingMotion, JointMaskSet> entry : list) {
 				idx++;
 				
 				JsonObject jointEntryTag = new JsonObject();
@@ -418,7 +419,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 				masks.add(jointEntryTag);
 			}
 			
-			this.rootTag.add("masks", masks);
+			this.animation.getPropertiesJson().add("masks", masks);
 		}
 	}
 	

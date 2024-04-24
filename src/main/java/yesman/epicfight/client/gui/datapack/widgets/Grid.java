@@ -44,7 +44,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 	private final boolean transparentBackground;
 	private final int columnSizeSum;
 	
-	private AbstractWidget editingWidget;
+	private ResizableComponent editingWidget;
 	private Column<?, ?> editingColumn;
 	private boolean active = true;
 	private boolean rowpositionChangeEnabled = true;
@@ -246,8 +246,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 			this.editingWidget = null;
 		} else {
 			if (this.editingColumn.editable) {
-				this.editingWidget = this.editingColumn.createEditWidget(this.owner, this.owner.getMinecraft().font, this.x0 + startX + 2, this.getRowTop(rowposition) - 2, this.itemHeight - 3, this.getSelected(),
-																			columnName, this.getSelected().getValue(columnName));
+				this.editingWidget = this.editingColumn.createEditWidget(this.owner, this.owner.getMinecraft().font, this.x0 + startX + 2, this.getRowTop(rowposition) + 2, this.itemHeight - 3, this.getSelected(), columnName, this.getSelected().getValue(columnName));
 				this.editingWidget.setFocused(true);
 			}
 		}
@@ -302,7 +301,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		}
 		
 		if (this.editingWidget != null) {
-			this.editingWidget.setWidth(this.editingColumn.width - 3);
+			this.editingWidget._setWidth(this.editingColumn.width - 3);
 		}
 	}
 	
@@ -376,6 +375,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		RenderSystem.stencilMask(0xFF);
 		// Clear doesn't work if stencil mask is set to 0
 		RenderSystem.clear(GL11.GL_STENCIL_BUFFER_BIT, true);
+		
 		guiGraphics.fill(this.x0, this.y0, this.x1, this.y1, color);
 		RenderSystem.stencilFunc(GL11.GL_EQUAL, 1, 0xFF);
 		RenderSystem.stencilMask(0x00);
@@ -390,9 +390,8 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 			if (rowBottom >= this.y0 && rowTop <= this.y1) {
 				guiGraphics.pose().pushPose();
 				guiGraphics.pose().translate(0, 0, 1);
-				
-				this.editingWidget.setY(this.getRowTop(this.rowposition) + 2);
-				this.editingWidget.render(guiGraphics, mouseX, mouseY, partialTicks);
+				this.editingWidget._setY(this.getRowTop(this.rowposition) + 2);
+				this.editingWidget.asWidget().render(guiGraphics, mouseX, mouseY, partialTicks);
 				guiGraphics.pose().popPose();
 			}
 		}
@@ -831,7 +830,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 			return this.toDisplayText.apply((T)object);
 		}
 		
-		public abstract AbstractWidget createEditWidget(Screen owner, Font font, int x, int y, int height, Row row, String colName, T value);
+		public abstract ResizableComponent createEditWidget(Screen owner, Font font, int x, int y, int height, Row row, String colName, T value);
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -841,8 +840,8 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		}
 		
 		@Override
-		public AbstractWidget createEditWidget(Screen owner, Font font, int x, int y, int height, Row row, String colName, String value) {
-			EditBox editbox = new EditBox(font, x, y, this.width - 3, height, Component.literal("grid.editbox"));
+		public ResizableComponent createEditWidget(Screen owner, Font font, int x, int y, int height, Row row, String colName, String value) {
+			ResizableEditBox editbox = new ResizableEditBox(font, x, this.width - 3, y, height, Component.literal("grid.editbox"), null, null);
 			
 			editbox.setMaxLength(100);
 			editbox.setValue(value);
@@ -867,9 +866,8 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		}
 		
 		@Override
-		public AbstractWidget createEditWidget(Screen owner, Font font, int x, int y, int height, Row row, String colName, T value) {
-			ComboBox<T> comboBox = new ComboBox<>(owner, font, x, this.width - 3, y, height, null, null, Math.min(this.enums.size(), 8), Component.literal("grid.comboEdit"), this.enums,
-													ParseUtil::snakeToSpacedCamel, (item) -> row.setValue(colName, item));
+		public ResizableComponent createEditWidget(Screen owner, Font font, int x, int y, int height, Row row, String colName, T value) {
+			ComboBox<T> comboBox = new ComboBox<>(owner, font, x, this.width - 3, y, height, null, null, Math.min(this.enums.size(), 8), Component.literal("grid.comboEdit"), this.enums, ParseUtil::snakeToSpacedCamel, (item) -> row.setValue(colName, item));
 			comboBox.setValue(value);
 			
 			if (this.onEditWidgetCreate != null) {
@@ -893,7 +891,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		}
 		
 		@Override
-		public AbstractWidget createEditWidget(Screen owner, Font font, int x, int y, int height, Row row, String colName, T value) {
+		public ResizableComponent createEditWidget(Screen owner, Font font, int x, int y, int height, Row row, String colName, T value) {
 			PopupBox.RegistryPopupBox<T> popup = new PopupBox.RegistryPopupBox<>(owner, font, x, this.width - 3, y, height, null, null, Component.literal("grid.popupEdit"), this.registry, (item) -> row.setValue(colName, item));
 			
 			popup.applyFilter(this.filter);
@@ -920,7 +918,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		}
 		
 		@Override
-		public AbstractWidget createEditWidget(Screen owner, Font font, int x, int y, int height, Row row, String colName, T value) {
+		public ResizableComponent createEditWidget(Screen owner, Font font, int x, int y, int height, Row row, String colName, T value) {
 			P popup = this.popupBoxProvider.create(owner, font, x, this.width - 3, y, height, null, null, Component.literal("grid.popupEdit"), (item) -> row.setValue(colName, item));
 			
 			popup.applyFilter(this.filter);

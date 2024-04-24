@@ -493,7 +493,10 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 			this.baseLayer.update(this.entitypatch);
 			
 			if (this.baseLayer.animationPlayer.isEnd() && this.baseLayer.getNextAnimation() == null) {
-				this.baseLayer.playAnimation(AnimatedModelPlayer.this.animationsToPlay.get(AnimatedModelPlayer.this.index), this.entitypatch, 0.0F);
+				StaticAnimation toPlay = AnimatedModelPlayer.this.index > -1 && AnimatedModelPlayer.this.index < AnimatedModelPlayer.this.animationsToPlay.size() ?
+											AnimatedModelPlayer.this.animationsToPlay.get(AnimatedModelPlayer.this.index) : Animations.DUMMY_ANIMATION;
+				
+				this.baseLayer.playAnimation(toPlay, this.entitypatch, 0.0F);
 				AnimatedModelPlayer.this.index = (AnimatedModelPlayer.this.index + 1) % AnimatedModelPlayer.this.animationsToPlay.size();
 			}
 			
@@ -601,7 +604,7 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 			}
 			
 			public Pose getEnabledPose(LivingEntityPatch<?> entitypatch, float partialTick) {
-				Pose pose = this.animationPlayer.getAnimation().getRawPose(partialTick);
+				Pose pose = this.animationPlayer.getAnimation().getRawPose(this.animationPlayer.getPrevElapsedTime() + (this.animationPlayer.getElapsedTime() - this.animationPlayer.getPrevElapsedTime()) * partialTick);
 				DynamicAnimation animation = this.animationPlayer.getAnimation();
 				pose.removeJointIf((entry) -> !animation.isJointEnabled(entitypatch, this.priority, entry.getKey()));
 				

@@ -1,14 +1,12 @@
 package yesman.epicfight.api.client.animation.property;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
-
-import org.apache.commons.compress.utils.Lists;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -21,26 +19,27 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
+import yesman.epicfight.api.client.animation.property.JointMask.JointMaskSet;
 
 @OnlyIn(Dist.CLIENT)
 public class JointMaskReloadListener extends SimpleJsonResourceReloadListener {
-	private static final BiMap<ResourceLocation, List<JointMask>> JOINT_MASKS = HashBiMap.create();
+	private static final BiMap<ResourceLocation, JointMaskSet> JOINT_MASKS = HashBiMap.create();
 	private static final Map<String, JointMask.BindModifier> BIND_MODIFIERS = Maps.newHashMap();
 	
 	static {
 		BIND_MODIFIERS.put("keep_child_locrot", JointMask.KEEP_CHILD_LOCROT);
 	}
 	
-	public static List<JointMask> getJointMaskEntry(String type) {
+	public static JointMaskSet getJointMaskEntry(String type) {
 		ResourceLocation rl = new ResourceLocation(type);
 		return JOINT_MASKS.getOrDefault(rl, JointMaskEntry.ALL);
 	}
 	
-	public static ResourceLocation getKey(List<JointMask> type) {
+	public static ResourceLocation getKey(JointMaskSet type) {
 		return JOINT_MASKS.inverse().get(type);
 	}
 	
-	public static Set<Map.Entry<ResourceLocation, List<JointMask>>> entries() {
+	public static Set<Map.Entry<ResourceLocation, JointMaskSet>> entries() {
 		return JOINT_MASKS.entrySet();
 	}
 	
@@ -53,7 +52,7 @@ public class JointMaskReloadListener extends SimpleJsonResourceReloadListener {
 		JOINT_MASKS.clear();
 		
 		for (Map.Entry<ResourceLocation, JsonElement> entry : objectIn.entrySet()) {
-			List<JointMask> masks = Lists.newArrayList();
+			Set<JointMask> masks = Sets.newHashSet();
 			JsonObject object = entry.getValue().getAsJsonObject();
 			JsonArray joints = object.getAsJsonArray("joints");
 			JsonObject bindModifiers = object.has("bind_modifiers") ? object.getAsJsonObject("bind_modifiers") : null;
@@ -73,7 +72,7 @@ public class JointMaskReloadListener extends SimpleJsonResourceReloadListener {
 			String path = entry.getKey().toString();
 			ResourceLocation key = new ResourceLocation(entry.getKey().getNamespace(), path.substring(path.lastIndexOf("/") + 1));
 			
-			JOINT_MASKS.put(key, masks);
+			JOINT_MASKS.put(key, JointMaskSet.of(masks));
 		}
 	}
 }

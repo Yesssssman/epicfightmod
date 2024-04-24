@@ -28,7 +28,6 @@ import yesman.epicfight.api.animation.types.EntityState.StateFactor;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.animation.Layer.LayerType;
 import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
-import yesman.epicfight.api.client.animation.property.JointMask;
 import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
 import yesman.epicfight.api.client.model.ItemSkin;
@@ -238,14 +237,7 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 	@Override
 	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
 		return this.getProperty(ClientAnimationProperties.JOINT_MASK).map((jointMaskEntry) -> {
-			List<JointMask> list = jointMaskEntry.getMask(entitypatch.getCurrentLivingMotion());
-			int position = list.indexOf(JointMask.of(joint));
-			
-			if (position >= 0) {
-				return list.get(position).getBindModifier();
-			} else {
-				return null;
-			}
+			return jointMaskEntry.getMask(entitypatch.getCurrentLivingMotion()).getBindModifier(joint);
 		}).orElse(null);
 	}
 	

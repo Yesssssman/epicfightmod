@@ -5,12 +5,15 @@ import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
@@ -118,6 +121,7 @@ public class EpicFightMod {
     	bus.addListener(EpicFightCapabilities::registerCapabilities);
     	bus.addListener(EpicFightEntities::onSpawnPlacementRegister);
     	
+    	MinecraftForge.EVENT_BUS.addListener(this::serverStart);
     	MinecraftForge.EVENT_BUS.addListener(this::command);
         MinecraftForge.EVENT_BUS.addListener(this::registerDatapackReloadListnerEvent);
     	
@@ -197,6 +201,12 @@ public class EpicFightMod {
 		event.enqueueWork(EpicFightMobEffects::addOffhandModifier);
     }
 	
+	private void serverStart(final ServerStartingEvent event) {
+		if (event.getServer().isDedicatedServer()) {
+			serverResourceManager = event.getServer().getResourceManager();
+		}
+	}
+	
 	/**
 	 * Register Etc
 	 */
@@ -234,4 +244,14 @@ public class EpicFightMod {
 	public static boolean isPhysicalClient() {
     	return FMLEnvironment.dist == Dist.CLIENT;
     }
+	
+	static ResourceManager serverResourceManager = null;
+	
+	public static ResourceManager getResourceManager() {
+		if (isPhysicalClient()) {
+			return Minecraft.getInstance().getResourceManager();
+		} else {
+			return serverResourceManager;
+		}
+	}
 }

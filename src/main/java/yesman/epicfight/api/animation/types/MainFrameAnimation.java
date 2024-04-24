@@ -15,6 +15,10 @@ public class MainFrameAnimation extends StaticAnimation {
 		super(convertTime, false, path, armature);
 	}
 	
+	public MainFrameAnimation(float convertTime, String path, Armature armature, boolean noRegister) {
+		super(convertTime, false, path, armature, noRegister);
+	}
+	
 	@Override
 	public void begin(LivingEntityPatch<?> entitypatch) {
 		super.begin(entitypatch);

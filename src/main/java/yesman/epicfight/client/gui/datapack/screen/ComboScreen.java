@@ -73,19 +73,19 @@ public class ComboScreen extends Screen {
 				
 				if (isMount) {
 					for (int i = 0; i < tagSize; i++) {
-						packImporter.newRow().newValue("combo_animation", ImportAnimationsScreen.getAnimationById(tag.getString(i)));
+						packImporter.newRow().newValue("combo_animation", ImportAnimationsScreen.byKey(tag.getString(i)));
 					}
 					
 					this.setDataBindingComponenets(new Object[] {packImporter});
 				} else {
 					for (int i = 0; i < tagSize - 2; i++) {
-						packImporter.newRow().newValue("combo_animation", ImportAnimationsScreen.getAnimationById(tag.getString(i)));
+						packImporter.newRow().newValue("combo_animation", ImportAnimationsScreen.byKey(tag.getString(i)));
 					}
 					
 					this.setDataBindingComponenets(new Object[] {
 						packImporter,
-						ImportAnimationsScreen.getAnimationById(tag.getString(tagSize - 2)),
-						ImportAnimationsScreen.getAnimationById(tag.getString(tagSize - 1))
+						ImportAnimationsScreen.byKey(tag.getString(tagSize - 2)),
+						ImportAnimationsScreen.byKey(tag.getString(tagSize - 1))
 					});
 				}
 			}

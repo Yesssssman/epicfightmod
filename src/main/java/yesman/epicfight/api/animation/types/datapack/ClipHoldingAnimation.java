@@ -10,8 +10,9 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 @OnlyIn(Dist.CLIENT)
 public interface ClipHoldingAnimation {
 	public void setAnimationClip(AnimationClip clip);
-	
-	public FakeAnimation toFakeAnimation(JsonObject rawAnimationJson);
+	public void setCreator(FakeAnimation fakeAnimation);
+	public FakeAnimation getCreator();
+	public FakeAnimation buildAnimation(JsonObject rawAnimationJson);
 	
 	default StaticAnimation cast() {
 		return (StaticAnimation)this;

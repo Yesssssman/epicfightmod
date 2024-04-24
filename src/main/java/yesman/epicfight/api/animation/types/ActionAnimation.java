@@ -29,8 +29,16 @@ public class ActionAnimation extends MainFrameAnimation {
 		this(convertTime, Float.MAX_VALUE, path, armature);
 	}
 	
+	public ActionAnimation(float convertTime, String path, Armature armature, boolean noRegister) {
+		this(convertTime, Float.MAX_VALUE, path, armature, noRegister);
+	}
+	
 	public ActionAnimation(float convertTime, float postDelay, String path, Armature armature) {
-		super(convertTime, path, armature);
+		this(convertTime, postDelay, path, armature, false);
+	}
+	
+	public ActionAnimation(float convertTime, float postDelay, String path, Armature armature, boolean noRegister) {
+		super(convertTime, path, armature, noRegister);
 		
 		this.stateSpectrumBlueprint.clear()
 			.newTimePair(0.0F, postDelay)

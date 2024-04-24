@@ -9,13 +9,13 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class ResizableEditBox extends EditBox implements DataBindingComponent<String> {
-	public ResizableEditBox(Font font, int x, int y, int width, int height, Component title, HorizontalSizing horizontalSizingOption, VerticalSizing verticalSizingOption) {
-		super(font, x, y, width, height, title);
+	public ResizableEditBox(Font font, int x1, int x2, int y1, int y2, Component title, HorizontalSizing horizontalSizingOption, VerticalSizing verticalSizingOption) {
+		super(font, x1, y1, x2, y2, title);
 		
-		this.x1 = x;
-		this.x2 = width;
-		this.y1 = y;
-		this.y2 = height;
+		this.x1 = x1;
+		this.x2 = x2;
+		this.y1 = y1;
+		this.y2 = y2;
 		this.horizontalSizingOption = horizontalSizingOption;
 		this.verticalSizingOption = verticalSizingOption;
 	}

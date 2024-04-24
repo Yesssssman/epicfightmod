@@ -52,7 +52,11 @@ public class ClientAnimationDataReader {
 		}
 		
 		assert inputstream != null;
-		Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
+		readAndApply(animation, inputstream);
+	}
+	
+	public static void readAndApply(StaticAnimation animation, InputStream resourceReader) {
+		Reader reader = new InputStreamReader(resourceReader, StandardCharsets.UTF_8);
 		ClientAnimationDataReader propertySetter = GsonHelper.fromJson(GSON, reader, TYPE);
 		propertySetter.applyClientData(animation);
 	}
@@ -118,6 +122,7 @@ public class ClientAnimationDataReader {
 			if (jsonObject.has("masks")) {
 				builder.defaultMask(JointMaskEntry.ALL);
 				JsonArray maskArray = jsonObject.get("masks").getAsJsonArray();
+				
 				maskArray.forEach(element -> {
 					JsonObject jointMaskEntry = element.getAsJsonObject();
 					String livingMotionName = GsonHelper.getAsString(jointMaskEntry, "livingmotion");

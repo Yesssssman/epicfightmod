@@ -22,7 +22,6 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.MainFrameAnimation;
@@ -71,7 +70,7 @@ public class LivingAnimationsScreen extends Screen {
 									Grid.PackImporter importer = new Grid.PackImporter();
 									
 									for (Map.Entry<String, Tag> entry : this.styles.get(rowposition).getPackValue().tags.entrySet()) {
-										importer.newRow().newValue("living_motion", LivingMotion.ENUM_MANAGER.get(entry.getKey())).newValue("living_animation", AnimationManager.getInstance().byKey(entry.getValue().getAsString()));
+										importer.newRow().newValue("living_motion", LivingMotion.ENUM_MANAGER.get(entry.getKey())).newValue("living_animation", ImportAnimationsScreen.byKey(entry.getValue().getAsString()));
 									}
 									
 									this.animationsGrid._setActive(true);
@@ -103,27 +102,27 @@ public class LivingAnimationsScreen extends Screen {
 									.rowEditable(true)
 									.transparentBackground(false)
 									.addColumn(Grid.combo("living_motion", LivingMotion.ENUM_MANAGER.universalValues())
-															.valueChanged((event) -> {
-																CompoundTag tag = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
-																String oldMotion = ParseUtil.nullParam(event.prevValue).toLowerCase(Locale.ROOT);
-																Tag animationTag = tag.get(oldMotion);
-																tag.remove(oldMotion);
-																tag.put(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT), animationTag == null ? StringTag.valueOf("") : animationTag);
-																
-																this.animationModelPlayer.clearAnimations();
-																this.animationModelPlayer.animator.getEntityPatch().currentLivingMotion = event.postValue;
-																this.animationModelPlayer.animator.getEntityPatch().currentCompositeMotion = event.postValue;
-																
-																if (LIVING_ANIMTIONS.containsKey(event.postValue)) {
-																	this.animationModelPlayer.addAnimationToPlay(LIVING_ANIMTIONS.get(event.postValue));
-																}
-																
-																StaticAnimation livingAnimation = this.animationsGrid.getValue(event.rowposition, "living_animation");
-																
-																if (livingAnimation != null) {
-																	this.animationModelPlayer.animator.playAnimation(livingAnimation, 0.0F);
-																}
-															}).defaultVal(LivingMotions.IDLE))
+													.valueChanged((event) -> {
+														CompoundTag tag = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
+														String oldMotion = ParseUtil.nullParam(event.prevValue).toLowerCase(Locale.ROOT);
+														Tag animationTag = tag.get(oldMotion);
+														tag.remove(oldMotion);
+														tag.put(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT), animationTag == null ? StringTag.valueOf("") : animationTag);
+														
+														this.animationModelPlayer.clearAnimations();
+														this.animationModelPlayer.animator.getEntityPatch().currentLivingMotion = event.postValue;
+														this.animationModelPlayer.animator.getEntityPatch().currentCompositeMotion = event.postValue;
+														
+														if (LIVING_ANIMTIONS.containsKey(event.postValue)) {
+															this.animationModelPlayer.addAnimationToPlay(LIVING_ANIMTIONS.get(event.postValue));
+														}
+														
+														StaticAnimation livingAnimation = this.animationsGrid.getValue(event.rowposition, "living_animation");
+														
+														if (livingAnimation != null) {
+															this.animationModelPlayer.animator.playAnimation(livingAnimation, 0.0F);
+														}
+													}).defaultVal(LivingMotions.IDLE))
 									.addColumn(Grid.popup("living_animation", PopupBox.AnimationPopupBox::new)
 													.filter((animation) -> !(animation instanceof MainFrameAnimation))
 													.editWidgetCreated((popupBox) -> popupBox.setModel(() -> Armatures.BIPED, () -> Meshes.BIPED))
@@ -133,6 +132,10 @@ public class LivingAnimationsScreen extends Screen {
 														LivingMotion livingMotion = event.grid.getValue(event.rowposition, "living_motion");
 														CompoundTag tag = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
 														tag.put(ParseUtil.nullParam(livingMotion).toLowerCase(Locale.ROOT), StringTag.valueOf(ParseUtil.nullOrApply(event.postValue, (animation) -> animation.getRegistryName().toString())));
+														
+														if (LIVING_ANIMTIONS.containsKey(livingMotion)) {
+															this.animationModelPlayer.addAnimationToPlay(LIVING_ANIMTIONS.get(livingMotion));
+														}
 														
 														if (event.postValue != null) {
 															this.animationModelPlayer.addAnimationToPlay(event.postValue);

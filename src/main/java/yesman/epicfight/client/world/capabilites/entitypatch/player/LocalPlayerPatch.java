@@ -338,6 +338,20 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		}
 	}
 	
+	public float getModelYRot() {
+		return this.modelYRot;
+	}
+	
+	public void setModelYRotInGui(float rotDeg) {
+		this.useModelYRot = true;
+		this.modelYRot = rotDeg;
+	}
+	
+	public void disableModelYRotInGui(float originalDeg) {
+		this.useModelYRot = false;
+		this.modelYRot = originalDeg;
+	}
+	
 	@Override
 	public void disableModelYRot(boolean sendPacket) {
 		super.disableModelYRot(sendPacket);

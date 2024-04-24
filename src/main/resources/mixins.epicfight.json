@@ -10,7 +10,8 @@
 		"MixinBufferBuilder",
 		"MixinLightTexture",
 		"MixinKeyboardHandler",
-		"MixinLocalPlayer"
+		"MixinLocalPlayer",
+		"MixinMinecraft"
 	],
 	"mixins": [
 		"MixinEndCrystal",

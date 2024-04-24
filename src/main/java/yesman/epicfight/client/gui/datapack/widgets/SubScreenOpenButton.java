@@ -1,6 +1,5 @@
 package yesman.epicfight.client.gui.datapack.widgets;
 
-import java.util.function.BiFunction;
 import java.util.function.Supplier;
 
 import net.minecraft.client.Minecraft;
@@ -10,53 +9,40 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class SubScreenOpenButton<T> extends ResizableButton {
-	protected final Screen owner;
-	protected final Supplier<T> compoundTagProvider;
-	protected final BiFunction<Screen, T, Screen> subScreenProvider;
+public class SubScreenOpenButton extends ResizableButton {
+	protected final Supplier<Screen> subScreenProvider;
 	
-	public SubScreenOpenButton(Builder<T> builder) {
+	public SubScreenOpenButton(Builder builder) {
 		super(builder);
 		
-		this.owner = builder.owner;
-		this.compoundTagProvider = builder.compoundTagProvider;
 		this.subScreenProvider = builder.subScreenProvider;
 	}
 	
 	@Override
 	public void onPress() {
-		Minecraft.getInstance().setScreen(this.subScreenProvider.apply(this.owner, this.compoundTagProvider.get()));
+		Minecraft.getInstance().setScreen(this.subScreenProvider.get());
 	}
 	
-	public static <T> SubScreenOpenButton.Builder<T> builder(Screen parent) {
-		return new SubScreenOpenButton.Builder<>(parent);
+	public static SubScreenOpenButton.Builder builder() {
+		return new SubScreenOpenButton.Builder();
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public static class Builder<T> extends ResizableButton.Builder {
-		Screen owner;
-		Supplier<T> compoundTagProvider;
-		BiFunction<Screen, T, Screen> subScreenProvider;
+	public static class Builder extends ResizableButton.Builder {
+		Supplier<Screen> subScreenProvider;
 		
-		public Builder(Screen owner) {
+		public Builder() {
 			super(CommonComponents.ELLIPSIS, null);
-			
-			this.owner = owner;
 		}
 		
-		public SubScreenOpenButton.Builder<T> subScreen(BiFunction<Screen, T, Screen> subScreenProvider) {
+		public SubScreenOpenButton.Builder subScreen(Supplier<Screen> subScreenProvider) {
 			this.subScreenProvider = subScreenProvider;
 			return this;
 		}
 		
-		public SubScreenOpenButton.Builder<T> compoundTag(Supplier<T> compoundTagProvider) {
-			this.compoundTagProvider = compoundTagProvider;
-			return this;
-		}
-		
 		@Override
-		public SubScreenOpenButton<T> build() {
-			return new SubScreenOpenButton<> (this);
+		public SubScreenOpenButton build() {
+			return new SubScreenOpenButton (this);
 		}
 	}
 }

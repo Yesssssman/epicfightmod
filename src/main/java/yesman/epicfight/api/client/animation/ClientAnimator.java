@@ -225,7 +225,7 @@ public class ClientAnimator extends Animator {
 				continue;
 			}
 			
-			if (!compositeLayer.isDisabled()) {
+			if (!compositeLayer.isDisabled() && !compositeLayer.animationPlayer.isEmpty()) {
 				Pose layerPose = compositeLayer.getEnabledPose(this.entitypatch, partialTicks);
 				layerPoses.put(priority, Pair.of(compositeLayer.animationPlayer.getAnimation(), layerPose));
 				composedPose.putJointData(layerPose);

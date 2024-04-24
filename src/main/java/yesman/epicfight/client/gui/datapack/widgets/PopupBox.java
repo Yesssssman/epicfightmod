@@ -1,6 +1,5 @@
 package yesman.epicfight.client.gui.datapack.widgets;
 
-import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -30,7 +29,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.property.JointMask;
+import yesman.epicfight.api.client.animation.property.JointMask.JointMaskSet;
 import yesman.epicfight.api.client.animation.property.JointMaskReloadListener;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.collider.Collider;
@@ -228,8 +227,8 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public static class JointMaskPopupBox extends PopupBox<List<JointMask>> {
-		public JointMaskPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<List<JointMask>> responder) {
+	public static class JointMaskPopupBox extends PopupBox<JointMaskSet> {
+		public JointMaskPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<JointMaskSet> responder) {
 			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (jointMask) -> ParseUtil.nullParam(JointMaskReloadListener.getKey(jointMask)), responder);
 		}
 		

@@ -34,6 +34,7 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 		
 		this.font = font;
 		this.maxRows = Math.min(maxRows, items.size());
+		
 		this.responder = responder;
 		this.comboItemList = new ComboItemList(parent.getMinecraft(), this.maxRows, 15);
 		
@@ -47,6 +48,8 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 		this.y2 = y2;
 		this.horizontalSizingOption = horizontal;
 		this.verticalSizingOption = vertical;
+		
+		this.relocateComboList();
 	}
 	
 	@Override
@@ -110,10 +113,19 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 		this.relocateComboList();
 	}
 	
+	@Override
+	public void setWidth(int width) {
+		this.width = width;
+		
+		int left = this.comboItemList.getLeft();
+		this.comboItemList.updateSize(width, this.comboItemList.getHeight(), this.comboItemList.getTop(), this.comboItemList.getBottom());
+		this.comboItemList.setLeftPos(left);
+	}
+	
 	private void relocateComboList() {
 		int entryHeight = 15;
-		int possibleTopPosition = this._getY() - (entryHeight * this.maxRows + 1);
-		int possibleBottomPosition = this._getY() + this.height + entryHeight * this.maxRows + 1;
+		int possibleTopPosition = this._getY() - (this.height * this.maxRows + 1);
+		int possibleBottomPosition = this._getY() + this.height + this.height * this.maxRows + 1;
 		int bottomSpace = Minecraft.getInstance().getWindow().getGuiScaledHeight() - possibleBottomPosition;
 		int topSpace = possibleTopPosition;
 		
@@ -230,6 +242,11 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 		@Override
 		public int getMaxScroll() {
 			return Math.max(0, this.getMaxPosition() - (this.y1 - this.y0));
+		}
+		
+		@Override
+		protected int getRowTop(int row) {
+			return this.y0 + 2 - (int) this.getScrollAmount() + row * this.itemHeight;
 		}
 		
 		@OnlyIn(Dist.CLIENT)

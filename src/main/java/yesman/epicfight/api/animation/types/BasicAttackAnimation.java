@@ -1,6 +1,5 @@
 package yesman.epicfight.api.animation.types;
 
-import java.util.List;
 import java.util.Locale;
 
 import javax.annotation.Nullable;
@@ -13,7 +12,6 @@ import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimation
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.types.EntityState.StateFactor;
 import yesman.epicfight.api.client.animation.Layer;
-import yesman.epicfight.api.client.animation.property.JointMask;
 import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
 import yesman.epicfight.api.client.animation.property.JointMaskEntry;
 import yesman.epicfight.api.collider.Collider;
@@ -135,14 +133,7 @@ public class BasicAttackAnimation extends AttackAnimation {
 	@Override
 	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
 		if (layer == Layer.Priority.HIGHEST) {
-			List<JointMask> list = JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT;
-			int position = list.indexOf(JointMask.of(joint));
-			
-			if (position >= 0) {
-				return list.get(position).getBindModifier();
-			} else {
-				return null;
-			}
+			return JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT.getBindModifier(joint);
 		} else {
 			return super.getBindModifier(entitypatch, layer, joint);
 		}

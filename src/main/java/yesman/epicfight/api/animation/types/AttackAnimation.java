@@ -1,7 +1,6 @@
 package yesman.epicfight.api.animation.types;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -11,6 +10,7 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.datafixers.util.Pair;
 
@@ -79,8 +79,16 @@ public class AttackAnimation extends ActionAnimation {
 		this(convertTime, path, armature, new Phase(0.0F, antic, preDelay, contact, recovery, Float.MAX_VALUE, hand, colliderJoint, collider));
 	}
 	
+	public AttackAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, InteractionHand hand, @Nullable Collider collider, Joint colliderJoint, String path, Armature armature, boolean noRegister) {
+		this(convertTime, path, armature, noRegister, new Phase(0.0F, antic, preDelay, contact, recovery, Float.MAX_VALUE, hand, colliderJoint, collider));
+	}
+	
 	public AttackAnimation(float convertTime, String path, Armature armature, Phase... phases) {
-		super(convertTime, path, armature);
+		this(convertTime, path, armature, false, phases);
+	}
+	
+	public AttackAnimation(float convertTime, String path, Armature armature, boolean noRegister, Phase... phases) {
+		super(convertTime, path, armature, noRegister);
 		
 		this.addProperty(ActionAnimationProperty.COORD_SET_BEGIN, MoveCoordFunctions.TRACE_LOC_TARGET);
 		this.addProperty(ActionAnimationProperty.COORD_SET_TICK, MoveCoordFunctions.TRACE_LOC_TARGET);
@@ -402,6 +410,16 @@ public class AttackAnimation extends ActionAnimation {
 		}
 	}
 	
+	public static class JointColliderPair extends Pair<Joint, Collider> {
+		public JointColliderPair(Joint first, Collider second) {
+			super(first, second);
+		}
+		
+		public static JointColliderPair of(Joint joint, Collider collider) {
+			return new JointColliderPair(joint, collider);
+		}
+	}
+	
 	public static class Phase {
 		private final Map<AttackPhaseProperty<?>, Object> properties = Maps.newHashMap();
 		public final float start;
@@ -411,7 +429,7 @@ public class AttackAnimation extends ActionAnimation {
 		public final float recovery;
 		public final float end;
 		public final InteractionHand hand;
-		public List<Pair<Joint, Collider>> colliders;
+		public JointColliderPair[] colliders;
 		public final boolean noStateBind;
 		
 		public Phase(float start, float antic, float contact, float recovery, float end, Joint joint, Collider collider) {
@@ -435,10 +453,14 @@ public class AttackAnimation extends ActionAnimation {
 		}
 		
 		public Phase(float start, float antic, float preDelay, float contact, float recovery, float end, boolean noStateBind, InteractionHand hand, Joint joint, Collider collider) {
-			this(start, antic, preDelay, contact, recovery, end, noStateBind, hand, List.of(Pair.of(joint, collider)));
+			this(start, antic, preDelay, contact, recovery, end, noStateBind, hand, JointColliderPair.of(joint, collider));
 		}
 		
-		public Phase(float start, float antic, float preDelay, float contact, float recovery, float end, boolean noStateBind, InteractionHand hand, List<Pair<Joint, Collider>> colliders) {
+		public Phase(float start, float antic, float preDelay, float contact, float recovery, float end, InteractionHand hand, JointColliderPair... colliders) {
+			this(start, antic, preDelay, contact, recovery, end, false, hand, colliders);
+		}
+		
+		public Phase(float start, float antic, float preDelay, float contact, float recovery, float end, boolean noStateBind, InteractionHand hand, JointColliderPair... colliders) {
 			this.start = start;
 			this.antic = antic;
 			this.preDelay = preDelay;
@@ -467,7 +489,7 @@ public class AttackAnimation extends ActionAnimation {
 		}
 		
 		public List<Entity> getCollidingEntities(LivingEntityPatch<?> entitypatch, AttackAnimation animation, float prevElapsedTime, float elapsedTime, float attackSpeed) {
-			List<Entity> entities = Lists.newArrayList();
+			Set<Entity> entities = Sets.newHashSet();
 			
 			for (Pair<Joint, Collider> colliderInfo : this.colliders) {
 				Collider collider = colliderInfo.getSecond();
@@ -479,10 +501,10 @@ public class AttackAnimation extends ActionAnimation {
 				entities.addAll(collider.updateAndSelectCollideEntity(entitypatch, animation, prevElapsedTime, elapsedTime, colliderInfo.getFirst(), attackSpeed));
 			}
 			
-			return new ArrayList<>(new HashSet<>(entities));
+			return new ArrayList<>(entities);
 		}
 		
-		public List<Pair<Joint, Collider>> getColliders() {
+		public JointColliderPair[] getColliders() {
 			return this.colliders;
 		}
 		
