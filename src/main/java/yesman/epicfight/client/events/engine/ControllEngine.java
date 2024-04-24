@@ -457,18 +457,6 @@ public class ControllEngine {
 				return;
 			}
 			
-			if (event.phase == TickEvent.Phase.START) {
-				while (EpicFightKeyMappings.WEAPON_INNATE_SKILL.consumeClick()) {
-					System.out.println("attack press");
-				}
-				
-				int i = 0;
-				
-				while (EpicFightKeyMappings.MOVER_SKILL.consumeClick()) {
-					System.out.println("skill press " + i++);
-				}
-			}
-			
 			if (event.phase == TickEvent.Phase.END) {
 				for (Object packet : controllEngine.packets) {
 					EpicFightNetworkManager.sendToServer(packet);
