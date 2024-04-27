@@ -19,7 +19,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
-import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
@@ -46,7 +45,6 @@ import yesman.epicfight.api.client.model.Meshes.MeshContructor;
 import yesman.epicfight.api.client.model.ModelPart;
 import yesman.epicfight.api.client.model.VertexIndicator;
 import yesman.epicfight.api.client.model.VertexIndicator.AnimatedVertexIndicator;
-import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -276,10 +274,7 @@ public class JsonModelLoader {
 		Map<String, Joint> jointMap = Maps.newHashMap();
 		Joint joint = this.getJoint(hierarchy, nameAsVertexGroups, jointMap, true);
 		joint.initOriginTransform(new OpenMatrix4f());
-		
-		int sliceBegin = this.resourceLocation.getPath().lastIndexOf("/") + 1;
-		int sliceEnd = this.resourceLocation.getPath().indexOf(".json");
-		String armatureName = this.resourceLocation.getPath().substring(sliceBegin, sliceEnd);
+		String armatureName = this.resourceLocation.toString().replaceAll("(animmodels/|\\.json)", "");
 		
 		return constructor.invoke(armatureName, jointMap.size(), joint, jointMap);
 	}
@@ -335,7 +330,7 @@ public class JsonModelLoader {
 			for (Phase phase : ((AttackAnimation)animation).phases) {
 				Joint joint = armature.getRootJoint();
 				
-				for (Pair<Joint, Collider> colliderInfo : phase.getColliders()) {
+				for (AttackAnimation.JointColliderPair colliderInfo : phase.getColliders()) {
 					int pathIndex = armature.searchPathIndex(colliderInfo.getFirst().getName());
 					
 					while (joint != null) {
@@ -485,7 +480,7 @@ public class JsonModelLoader {
 		return clip;
 	}
 	
-	public JsonObject getRootJsont() {
+	public JsonObject getRootJson() {
 		return this.rootJson;
 	}
 	

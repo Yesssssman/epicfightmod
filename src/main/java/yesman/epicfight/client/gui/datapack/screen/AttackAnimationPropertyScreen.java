@@ -1,8 +1,10 @@
 package yesman.epicfight.client.gui.datapack.screen;
 
 import java.util.List;
+import java.util.Locale;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import io.netty.util.internal.StringUtil;
@@ -11,59 +13,178 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.types.datapack.FakeAnimation;
+import yesman.epicfight.api.client.animation.property.TrailInfo;
 import yesman.epicfight.api.utils.ParseUtil;
+import yesman.epicfight.client.gui.datapack.widgets.AnimatedModelPlayer;
 import yesman.epicfight.client.gui.datapack.widgets.ComboBox;
+import yesman.epicfight.client.gui.datapack.widgets.Grid;
 import yesman.epicfight.client.gui.datapack.widgets.InputComponentList;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.HorizontalSizing;
+import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.VerticalSizing;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableEditBox;
 import yesman.epicfight.client.gui.datapack.widgets.Static;
+import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.particle.EpicFightParticles;
 
 @OnlyIn(Dist.CLIENT)
 public class AttackAnimationPropertyScreen extends Screen {
-	private final InputComponentList<CompoundTag> inputComponentsList;
+	public static final TrailInfo DEFAULT_TRAIL = TrailInfo.builder()
+		.startPos(new Vec3(0.0D, 0.0D, 0.0D))
+		.endPos(new Vec3(0.0D, 0.0D, -1.0D))
+		.interpolations(4)
+		.lifetime(4)
+		.r(0.75F)
+		.g(0.75F)
+		.b(0.75F)
+		.texture(new ResourceLocation(EpicFightMod.MODID, "textures/particle/swing_trail.png"))
+		.type(EpicFightParticles.SWING_TRAIL.get())
+		.create();
+	
 	private final Screen parentScreen;
 	private final FakeAnimation animation;
+	private final Grid trailGrid;
+	private final InputComponentList<JsonObject> inputComponentsList;
 	private final ResizableEditBox startTime;
 	private final ResizableEditBox endTime;
 	private final ComboBox<Joint> joint;
 	private final ComboBox<InteractionHand> hand;
+	private final ResizableEditBox interpolations;
+	private final ResizableEditBox lifetime;
+	private final AnimatedModelPlayer modelPlayer;
 	
-	protected AttackAnimationPropertyScreen(Screen parentScreen, FakeAnimation animation, List<Joint> joints) {
+	private JsonArray trailList = new JsonArray();
+	
+	protected AttackAnimationPropertyScreen(Screen parentScreen, FakeAnimation animation, List<Joint> joints, AnimatedModelPlayer modelPlayer) {
 		super(Component.translatable("datapack_edit.import_animation.client_data"));
 		
 		this.minecraft = parentScreen.getMinecraft();
 		this.parentScreen = parentScreen;
 		this.font = this.minecraft.font;
 		this.animation = animation;
+		this.modelPlayer = modelPlayer;
 		
 		this.inputComponentsList = new InputComponentList<> (this, 0, 0, 0, 0, 30) {
 			@Override
-			public void importTag(CompoundTag tag) {
-				this.clearComponents();
+			public void importTag(JsonObject tag) {
 				this.setComponentsActive(true);
+				
+				this.setDataBindingComponenets(new Object[] {
+					ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(tag.get("start_time"), JsonElement::getAsString)),
+					ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(tag.get("end_time"), JsonElement::getAsString)),
+					ParseUtil.nullOrApply(tag.get("joint"), (jsonElement) -> AttackAnimationPropertyScreen.this.modelPlayer.getArmature().searchJointByName(jsonElement.getAsString())),
+					ParseUtil.nullOrApply(tag.get("item_skin_hand"), (jsonElement) -> InteractionHand.valueOf(jsonElement.getAsString().toUpperCase(Locale.ROOT))),
+					ParseUtil.nullParam(ParseUtil.nullOrToString(tag.get("interpolations"), JsonElement::getAsString)),
+					ParseUtil.nullParam(ParseUtil.nullOrToString(tag.get("lifetime"), JsonElement::getAsString)),
+				});
 			}
 		};
 		
 		ScreenRectangle screenRect = this.getRectangle();
 		
-		this.startTime = new ResizableEditBox(this.font, 0, 35, 0, 15, Component.translatable("datapack_edit.import_animation.antic"), HorizontalSizing.LEFT_WIDTH, null);
-		this.endTime = new ResizableEditBox(this.font, 0, 35, 0, 15, Component.translatable("datapack_edit.import_animation.preDelay"), HorizontalSizing.LEFT_WIDTH, null);
+		this.trailGrid = Grid.builder(parentScreen, parentScreen.getMinecraft())
+								.xy1(15, 48)
+								.xy2(100, 50)
+								.verticalSizing(VerticalSizing.TOP_BOTTOM)
+								.rowHeight(26)
+								.rowEditable(true)
+								.transparentBackground(false)
+								.rowpositionChanged((rowposition, values) -> {
+									this.inputComponentsList.importTag(this.trailList.get(rowposition).getAsJsonObject());
+								})
+								.addColumn(Grid.editbox("trail")
+												.editable(false)
+												.width(200))
+								.pressAdd((grid, button) -> {
+									this.trailList.add(new JsonObject());
+									int rowposition = grid.addRowWithDefaultValues("trail", String.format("Trail%d", grid.children().size()));
+									grid.setGridFocus(rowposition, "trail");
+								})
+								.pressRemove((grid, button) -> {
+									grid.removeRow((removedRow) -> {
+										this.trailList.remove(removedRow);
+									});
+								})
+								.build();
+		
+		this.startTime = new ResizableEditBox(this.font, 0, 35, 0, 15, Component.translatable("datapack_edit.import_animation.client_data.start_time"), HorizontalSizing.LEFT_WIDTH, null);
+		this.endTime = new ResizableEditBox(this.font, 0, 35, 0, 15, Component.translatable("datapack_edit.import_animation.client_data.end_time"), HorizontalSizing.LEFT_WIDTH, null);
+		this.interpolations = new ResizableEditBox(this.font, 0, 35, 0, 15, Component.translatable("datapack_edit.item_capability.interpolations"), HorizontalSizing.LEFT_WIDTH, null);
+		this.lifetime = new ResizableEditBox(this.font, 0, 35, 0, 15, Component.translatable("datapack_edit.item_capability.lifetime"), HorizontalSizing.LEFT_WIDTH, null);
 		this.joint = new ComboBox<>(this, this.font, 0, 124, 100, 15, HorizontalSizing.LEFT_WIDTH, null, 8, Component.translatable("datapack_edit.import_animation.joint"),
-									joints, Joint::getName, (joint) -> {});
+									joints, Joint::getName, (joint) -> {
+										JsonObject trailObj = this.trailList.get(this.trailGrid.getRowposition()).getAsJsonObject();
+										
+										if (joint != null) {
+											trailObj.addProperty("joint", joint.getName());
+										} else {
+											trailObj.remove("joint");
+										}
+									});
 		this.hand = new ComboBox<>(this, this.font, 0, 124, 100, 15, HorizontalSizing.LEFT_WIDTH, null, 8,
 									Component.translatable("datapack_edit.import_animation.hand"), List.of(InteractionHand.MAIN_HAND, InteractionHand.OFF_HAND),
-									ParseUtil::snakeToSpacedCamel, (hand) -> {});
+									ParseUtil::snakeToSpacedCamel, (hand) -> {
+										JsonObject trailObj = this.trailList.get(this.trailGrid.getRowposition()).getAsJsonObject();
+										
+										if (hand != null) {
+											trailObj.addProperty("item_skin_hand", hand.toString().toLowerCase(Locale.ROOT));
+										} else {
+											trailObj.remove("item_skin_hand");
+										}
+									});
 		
-		this.startTime.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
-		this.endTime.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
+		this.startTime.setResponder((value) -> {
+			JsonObject trailObj = this.trailList.get(this.trailGrid.getRowposition()).getAsJsonObject();
+			
+			if (!StringUtil.isNullOrEmpty(value)) {
+				trailObj.addProperty("start_time", Float.parseFloat(value));
+			} else {
+				trailObj.remove("start_time");
+			}
+		});
+		
+		this.endTime.setResponder((value) -> {
+			JsonObject trailObj = this.trailList.get(this.trailGrid.getRowposition()).getAsJsonObject();
+			
+			if (!StringUtil.isNullOrEmpty(value)) {
+				trailObj.addProperty("end_time", Float.parseFloat(value));
+			} else {
+				trailObj.remove("end_time");
+			}
+		});
+		
+		this.interpolations.setResponder((value) -> {
+			JsonObject trailObj = this.trailList.get(this.trailGrid.getRowposition()).getAsJsonObject();
+			
+			if (!StringUtil.isNullOrEmpty(value)) {
+				trailObj.addProperty("interpolations", Integer.parseInt(value));
+			} else {
+				trailObj.remove("interpolations");
+			}
+		});
+		
+		this.lifetime.setResponder((value) -> {
+			JsonObject trailObj = this.trailList.get(this.trailGrid.getRowposition()).getAsJsonObject();
+			
+			if (!StringUtil.isNullOrEmpty(value)) {
+				trailObj.addProperty("lifetime", Integer.parseInt(value));
+			} else {
+				trailObj.remove("lifetime");
+			}
+		});
+		
+		this.startTime.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Float::parseFloat));
+		this.endTime.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Float::parseFloat));
+		this.interpolations.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Integer::parseInt));
+		this.lifetime.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Integer::parseInt));
 		
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.model_player.trail")));
@@ -79,15 +200,36 @@ public class AttackAnimationPropertyScreen extends Screen {
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(12), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.hand")));
 		this.inputComponentsList.addComponentCurrentRow(this.hand.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
+		this.inputComponentsList.newRow();
+		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(12), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.interpolations")));
+		this.inputComponentsList.addComponentCurrentRow(this.interpolations.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
+		this.inputComponentsList.newRow();
+		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(12), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.lifetime")));
+		this.inputComponentsList.addComponentCurrentRow(this.lifetime.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
+		
+		this.inputComponentsList.setComponentsActive(false);
+		
+		if (animation.getPropertiesJson().has("trail_effects")) {
+			JsonArray array = animation.getPropertiesJson().get("trail_effects").getAsJsonArray();
+			
+			this.trailList = array;
+			
+			for (int i = 0; i < array.size(); i++) {
+				this.trailGrid.addRowWithDefaultValues("trail", String.format("Trail%d", i));
+			}
+		}
 	}
 	
 	@Override
 	protected void init() {
 		ScreenRectangle screenRect = this.getRectangle();
 		
-		this.inputComponentsList.updateSize(screenRect.width() - 15, screenRect.height() - 68, screenRect.top() + 32, screenRect.bottom() - 48);
-		this.inputComponentsList.setLeftPos(15);
+		this.inputComponentsList.updateSize(screenRect.width() - 125, screenRect.height() - 68, screenRect.top() + 32, screenRect.bottom() - 48);
+		this.inputComponentsList.setLeftPos(125);
 		
+		this.trailGrid.resize(screenRect);
+		
+		this.addRenderableWidget(this.trailGrid);
 		this.addRenderableWidget(this.inputComponentsList);
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_OK, (button) -> {
@@ -115,18 +257,57 @@ public class AttackAnimationPropertyScreen extends Screen {
 	}
 	
 	public void save() throws IllegalStateException {
+		int i = 0;
+		
+		JsonArray jsonArr = new JsonArray();
+		TrailInfo[] trailArr = new TrailInfo[this.trailList.size()];
+		
+		for (JsonElement element : this.trailList) {
+			JsonObject trailObj = element.getAsJsonObject();
+			
+			if (!trailObj.has("start_time")) {
+				throw new IllegalStateException(String.format("Row %d: Start time undefined!", i+1));
+			}
+			
+			if (!trailObj.has("end_time")) {
+				throw new IllegalStateException(String.format("Row %d: End time undefined!", i+1));
+			}
+			
+			if (!trailObj.has("joint")) {
+				throw new IllegalStateException(String.format("Row %d: Joint undefined!", i+1));
+			}
+			
+			if (this.modelPlayer.getArmature().searchJointByName(trailObj.get("joint").getAsString()) == null) {
+				throw new IllegalStateException(String.format("Row %d: No joint named %s in %s!", i+1, trailObj.get("joint").getAsString(), this.modelPlayer.getArmature()));
+			}
+			
+			if (!trailObj.has("item_skin_hand")) {
+				throw new IllegalStateException(String.format("Row %d: Hand undefined!", i+1));
+			}
+			
+			TrailInfo.Builder builder = TrailInfo.builder()
+													.time(trailObj.get("start_time").getAsFloat(), trailObj.get("end_time").getAsFloat())
+													.joint(trailObj.get("joint").getAsString())
+													.itemSkinHand(InteractionHand.valueOf(trailObj.get("item_skin_hand").getAsString().toUpperCase(Locale.ROOT)));
+			
+			if (trailObj.has("lifetime")) {
+				builder.lifetime(trailObj.get("lifetime").getAsInt());
+			}
+			
+			if (trailObj.has("interpolations")) {
+				builder.interpolations(trailObj.get("interpolations").getAsInt());
+			}
+			
+			trailArr[i] = DEFAULT_TRAIL.overwrite(builder.create());
+			
+			jsonArr.add(element);
+			i++;
+		}
+		
 		this.animation.getPropertiesJson().asMap().clear();
+		this.animation.getPropertiesJson().add("trail_effects", jsonArr);
 		
-		JsonObject trailObj = new JsonObject();
-		trailObj.addProperty("start_time", Double.parseDouble(this.startTime.getValue()));
-		trailObj.addProperty("end_time", Double.parseDouble(this.endTime.getValue()));
-		trailObj.addProperty("joint", this.joint.getValue().toString());
-		trailObj.addProperty("item_skin_hand", this.hand.getValue().toString());
-		
-		JsonArray trailArray = new JsonArray();
-		trailArray.add(trailObj);
-		
-		this.animation.getPropertiesJson().add("trail_effects", trailArray);
+		this.modelPlayer.setTrailInfo(trailArr);
 	}
 	
 	@Override

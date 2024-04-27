@@ -386,11 +386,6 @@ public class AttackAnimation extends ActionAnimation {
 		return currentPhase;
 	}
 	
-	@Deprecated
-	public void changeCollider(Collider newCollider, int index) {
-		//this.phases[index].collider = newCollider;
-	}
-	
 	@Override
 	@OnlyIn(Dist.CLIENT)
 	public void renderDebugging(PoseStack poseStack, MultiBufferSource buffer, LivingEntityPatch<?> entitypatch, float playbackTime, float partialTicks) {
@@ -430,6 +425,10 @@ public class AttackAnimation extends ActionAnimation {
 		public final float end;
 		public final InteractionHand hand;
 		public JointColliderPair[] colliders;
+		
+		//public final Joint first;
+		//public final Collider second;
+		
 		public final boolean noStateBind;
 		
 		public Phase(float start, float antic, float contact, float recovery, float end, Joint joint, Collider collider) {
@@ -461,6 +460,10 @@ public class AttackAnimation extends ActionAnimation {
 		}
 		
 		public Phase(float start, float antic, float preDelay, float contact, float recovery, float end, boolean noStateBind, InteractionHand hand, JointColliderPair... colliders) {
+			if (start > end) {
+				throw new IllegalArgumentException("Phase create exception: Start time is bigger than end time");
+			}
+			
 			this.start = start;
 			this.antic = antic;
 			this.preDelay = preDelay;

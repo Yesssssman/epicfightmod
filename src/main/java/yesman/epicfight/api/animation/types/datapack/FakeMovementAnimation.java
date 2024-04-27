@@ -8,10 +8,9 @@ import com.google.gson.JsonObject;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.LivingMotion;
-import yesman.epicfight.api.animation.types.MovementAnimation;
 import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
-import yesman.epicfight.api.client.animation.property.JointMaskReloadListener;
 import yesman.epicfight.api.client.animation.property.JointMask.JointMaskSet;
+import yesman.epicfight.api.client.animation.property.JointMaskReloadListener;
 import yesman.epicfight.api.model.Armature;
 
 @OnlyIn(Dist.CLIENT)
@@ -21,9 +20,9 @@ public class FakeMovementAnimation extends FakeStaticAnimation {
 	}
 	
 	@Override
-	public FakeAnimation buildAnimation(JsonObject rawAnimationJson) {
+	public FakeAnimation buildAnimation(JsonArray rawAnimationJson) {
 		FakeAnimation fakeAnimation = new FakeAnimation(this.registryName.toString(), this.armature, this.clip, rawAnimationJson);
-		fakeAnimation.setAnimationClass(MovementAnimation.class);
+		fakeAnimation.setAnimationClass(FakeAnimation.AnimationType.MOVEMENT);
 		fakeAnimation.setParameter("convertTime", this.convertTime);
 		fakeAnimation.setParameter("isRepeat", this.isRepeat());
 		fakeAnimation.setParameter("path", this.registryName.toString());

@@ -157,8 +157,8 @@ public class DatapackEditScreen extends Screen {
 			return false;
 		}
 	}
-
-	public void exportDataPack(String packName) {
+	
+	public boolean exportDataPack(String packName) {
 		try {
 			File resourcePackDirectory = Minecraft.getInstance().getResourcePackDirectory().toFile();
 			File zipFile = new File(resourcePackDirectory, packName + ".zip");
@@ -190,11 +190,13 @@ public class DatapackEditScreen extends Screen {
 			out.close();
 			
 			Util.getPlatform().openFile(resourcePackDirectory);
-		} catch (IOException e) {
-			this.minecraft.setScreen(new MessageScreen<>("Failed to export datapack", e.getMessage(), this, (button2) -> this.minecraft.setScreen(this), 200, 110));
 			
-			EpicFightMod.LOGGER.info("Failed to export custom armor models");
+			return true;
+		} catch (Exception e) {
+			this.minecraft.setScreen(new MessageScreen<>("Failed to export datapack", e.getMessage(), this, (button2) -> this.minecraft.setScreen(this), 200, 110));
 			e.printStackTrace();
+			
+			return false;
 		}
 	}
 	
@@ -239,8 +241,9 @@ public class DatapackEditScreen extends Screen {
 					
 					this.addRenderableWidget(titleEditBox);
 					this.addRenderableWidget(Button.builder(CommonComponents.GUI_OK, (button$2) -> {
-						DatapackEditScreen.this.exportDataPack(titleEditBox.getValue());
-						DatapackEditScreen.this.minecraft.setScreen(DatapackEditScreen.this);
+						if (DatapackEditScreen.this.exportDataPack(titleEditBox.getValue())) {
+							DatapackEditScreen.this.minecraft.setScreen(DatapackEditScreen.this);
+						}
 					}).bounds(this.width / 2 - 56, this.height / 2 + height - 20, 55, 16).build());
 					this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, (button$2) -> this.minecraft.setScreen(DatapackEditScreen.this)).bounds(this.width / 2 + 1, this.height / 2 + height - 20, 55, 16).build());
 				}
@@ -502,12 +505,12 @@ public class DatapackEditScreen extends Screen {
 						ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation(tag.getString("swing_sound"))),
 						null,
 						ParseUtil.nullParam(colliderTag.get("number")),
-						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("center", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
-						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("center", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
-						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("center", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
-						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("size", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
-						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("size", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
-						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("size", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
+						centerInit ? ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(0), Tag::getAsString) : "",
+						centerInit ? ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(1), Tag::getAsString) : "",
+						centerInit ? ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(2), Tag::getAsString) : "",
+						sizeInit ? ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(0), Tag::getAsString) : "",
+						sizeInit ? ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(1), Tag::getAsString) : "",
+						sizeInit ? ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(2), Tag::getAsString) : "",
 						packImporter
 					});
 				}
@@ -624,9 +627,9 @@ public class DatapackEditScreen extends Screen {
 			});
 			
 			colliderCount.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Integer::parseInt));
-			colliderCenterX.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowMinus(context, Double::parseDouble));
-			colliderCenterY.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowMinus(context, Double::parseDouble));
-			colliderCenterZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowMinus(context, Double::parseDouble));
+			colliderCenterX.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
+			colliderCenterY.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
+			colliderCenterZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
 			colliderSizeX.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
 			colliderSizeY.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
 			colliderSizeZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
@@ -801,21 +804,21 @@ public class DatapackEditScreen extends Screen {
 						WeaponTypeReloadListener.get(tag.getString("type")),
 						null,
 						ParseUtil.nullParam(colliderTag.get("number")),
-						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("center", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
-						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("center", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
-						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("center", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
-						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("size", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
-						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("size", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
-						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(colliderTag.getList("size", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
-						colorInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("color", Tag.TAG_INT).get(0), Tag::getAsString)) : "",
-						colorInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("color", Tag.TAG_INT).get(1), Tag::getAsString)) : "",
-						colorInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("color", Tag.TAG_INT).get(2), Tag::getAsString)) : "",
-						beginInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
-						beginInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
-						beginInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
-						endInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
-						endInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
-						endInit ? ParseUtil.nullParam(ParseUtil.nullOrApply(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
+						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
+						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
+						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
+						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
+						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
+						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
+						colorInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("color", Tag.TAG_INT).get(0), Tag::getAsString)) : "",
+						colorInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("color", Tag.TAG_INT).get(1), Tag::getAsString)) : "",
+						colorInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("color", Tag.TAG_INT).get(2), Tag::getAsString)) : "",
+						beginInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
+						beginInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
+						beginInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
+						endInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
+						endInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
+						endInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
 						ParseUtil.nullParam(trailTag.get("lifetime")),
 						ParseUtil.nullParam(trailTag.get("interpolation")),
 						ParseUtil.nullParam(trailTag.getString("texture_path")),
@@ -977,9 +980,9 @@ public class DatapackEditScreen extends Screen {
 			});
 			
 			colliderCount.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Integer::parseInt));
-			colliderCenterX.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowMinus(context, Double::parseDouble));
-			colliderCenterY.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowMinus(context, Double::parseDouble));
-			colliderCenterZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowMinus(context, Double::parseDouble));
+			colliderCenterX.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
+			colliderCenterY.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
+			colliderCenterZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
 			colliderSizeX.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
 			colliderSizeY.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
 			colliderSizeZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
@@ -1120,9 +1123,9 @@ public class DatapackEditScreen extends Screen {
 				this.modelPlayer.setTrailInfo(trailInfo);
 			});
 			
-			beginX.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowMinus(context, Double::parseDouble));
-			beginY.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowMinus(context, Double::parseDouble));
-			beginZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowMinus(context, Double::parseDouble));
+			beginX.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
+			beginY.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
+			beginZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.begin_pos")));
@@ -1168,9 +1171,9 @@ public class DatapackEditScreen extends Screen {
 				this.modelPlayer.setTrailInfo(trailInfo);
 			});
 			
-			endX.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowMinus(context, Double::parseDouble));
-			endY.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowMinus(context, Double::parseDouble));
-			endZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowMinus(context, Double::parseDouble));
+			endX.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
+			endY.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
+			endZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.end_pos")));

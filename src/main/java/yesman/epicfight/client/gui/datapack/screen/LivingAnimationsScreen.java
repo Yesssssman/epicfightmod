@@ -131,7 +131,7 @@ public class LivingAnimationsScreen extends Screen {
 														
 														LivingMotion livingMotion = event.grid.getValue(event.rowposition, "living_motion");
 														CompoundTag tag = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
-														tag.put(ParseUtil.nullParam(livingMotion).toLowerCase(Locale.ROOT), StringTag.valueOf(ParseUtil.nullOrApply(event.postValue, (animation) -> animation.getRegistryName().toString())));
+														tag.put(ParseUtil.nullParam(livingMotion).toLowerCase(Locale.ROOT), StringTag.valueOf(ParseUtil.nullOrToString(event.postValue, (animation) -> animation.getRegistryName().toString())));
 														
 														if (LIVING_ANIMTIONS.containsKey(livingMotion)) {
 															this.animationModelPlayer.addAnimationToPlay(LIVING_ANIMTIONS.get(livingMotion));

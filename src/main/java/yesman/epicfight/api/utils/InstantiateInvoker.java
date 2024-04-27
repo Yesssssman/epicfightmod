@@ -8,6 +8,8 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
@@ -15,80 +17,43 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.collider.Collider;
-import yesman.epicfight.api.collider.MultiOBBCollider;
-import yesman.epicfight.api.collider.OBBCollider;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.gameasset.ColliderPreset;
 import yesman.epicfight.main.EpicFightMod;
 
 public class InstantiateInvoker {
-	private static final Map<String, Class<?>> PRIMITIVE_KEYWORDS = Maps.newHashMap();
+	private static final BiMap<String, Class<?>> PRIMITIVE_KEYWORDS = HashBiMap.create();
 	private static final Map<Class<?>, Function<String, Object>> STRING_TO_OBJECT_PARSER = Maps.newHashMap();
 	
 	static {
-		PRIMITIVE_KEYWORDS.put("B", byte.class);
-		PRIMITIVE_KEYWORDS.put("C", char.class);
-		PRIMITIVE_KEYWORDS.put("D", double.class);
-		PRIMITIVE_KEYWORDS.put("F", float.class);
-		PRIMITIVE_KEYWORDS.put("I", int.class);
-		PRIMITIVE_KEYWORDS.put("J", long.class);
-		PRIMITIVE_KEYWORDS.put("S", short.class);
-		PRIMITIVE_KEYWORDS.put("Z", boolean.class);
+		registerPrimitive("B", byte.class, Byte::parseByte);
+		registerPrimitive("C", char.class, (s) -> s.charAt(0));
+		registerPrimitive("D", double.class, Double::parseDouble);
+		registerPrimitive("F", float.class, Float::parseFloat);
+		registerPrimitive("I", int.class, Integer::parseInt);
+		registerPrimitive("J", long.class, Long::parseLong);
+		registerPrimitive("S", short.class, Short::parseShort);
+		registerPrimitive("Z", boolean.class, Boolean::parseBoolean);
 		
-		registerKeyword(byte.class, Byte::parseByte);
-		registerKeyword(char.class, (s) -> s.charAt(0));
-		registerKeyword(double.class, Double::parseDouble);
-		registerKeyword(float.class, Float::parseFloat);
-		registerKeyword(int.class, Integer::parseInt);
-		registerKeyword(long.class, Long::parseLong);
-		registerKeyword(short.class, Short::parseShort);
-		registerKeyword(boolean.class, Boolean::parseBoolean);
 		registerKeyword(String.class, (s) -> s);
 		registerKeyword(Collider.class, (s) -> ColliderPreset.get(new ResourceLocation(s)));
-		registerKeyword(OBBCollider.class, (s) -> {
-			String[] colliderArgs = s.split(",");
-			return new OBBCollider(Double.valueOf(colliderArgs[0]), Double.valueOf(colliderArgs[1]), Double.valueOf(colliderArgs[2]), Double.valueOf(colliderArgs[3]), Double.valueOf(colliderArgs[4]), Double.valueOf(colliderArgs[5]));
-		});
-		registerKeyword(MultiOBBCollider.class, (s) -> {
-			String[] colliderArgs = s.split(",");
-			return new MultiOBBCollider(Integer.valueOf(colliderArgs[0]), Double.valueOf(colliderArgs[1]), Double.valueOf(colliderArgs[2]), Double.valueOf(colliderArgs[3]), Double.valueOf(colliderArgs[4]), Double.valueOf(colliderArgs[5]), Double.valueOf(colliderArgs[6]));
-		});
 		registerKeyword(Joint.class, (s) -> {
 			String[] armature$joint = s.split("\\.");
 			Armature armature = Armatures.getOrCreateArmature(EpicFightMod.getResourceManager(), new ResourceLocation(armature$joint[0]), Armature::new);
-			Joint joint = armature.searchJointByName(armature$joint[1]);
-			
-			return joint;
+			return armature.searchJointByName(armature$joint[1]);
 		});
 		registerKeyword(Armature.class, (s) -> Armatures.getOrCreateArmature(EpicFightMod.getResourceManager(), new ResourceLocation(s), Armature::new));
 		registerKeyword(InteractionHand.class, InteractionHand::valueOf);
 	}
 	
-	public static void registerKeyword(Class<?> clz, Function<String, Object> parser) {
-		STRING_TO_OBJECT_PARSER.put(clz, parser);
+	public static void registerPrimitive(String keyword, Class<?> clz, Function<String, Object> decoder) {
+		PRIMITIVE_KEYWORDS.put(keyword, clz);
+		STRING_TO_OBJECT_PARSER.put(clz, decoder);
 	}
 	
-	public static class Result<T> {
-		final Class<T> type;
-		final T result;
-		
-		Result(Class<T> type, T result) {
-			this.type = type;
-			this.result = result;
-		}
-		
-		public static <T> Result<T> of(Class<T> type, T value) {
-			return new Result<>(type, value);
-		}
-		
-		public Class<T> getType() {
-			return this.type;
-		}
-		
-		public T getResult() {
-			return this.result;
-		}
+	public static void registerKeyword(Class<?> clz, Function<String, Object> decoder) {
+		STRING_TO_OBJECT_PARSER.put(clz, decoder);
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -150,9 +115,10 @@ public class InstantiateInvoker {
 			if (hint == null) {
 				throw new NoSuchMethodException();
 			}
+			
 			constructor = hint.getConstructor(oArgClss);
-			EpicFightMod.LOGGER.debug("Can't find the matching constructor for the hint class. Using the one given by command");
 		} catch (NoSuchMethodException e) {
+			EpicFightMod.LOGGER.debug("Can't find the matching constructor for the hint class " + hint + ". Use the given class " + type);
 			constructor = type.getConstructor(oArgClss);
 		}
 		
@@ -232,5 +198,27 @@ public class InstantiateInvoker {
 		}
 		
 		return sArgsList.toArray(new String[0]);
+	}
+	
+	public static class Result<T> {
+		final Class<T> type;
+		final T result;
+		
+		Result(Class<T> type, T result) {
+			this.type = type;
+			this.result = result;
+		}
+		
+		public static <T> Result<T> of(Class<T> type, T value) {
+			return new Result<>(type, value);
+		}
+		
+		public Class<T> getType() {
+			return this.type;
+		}
+		
+		public T getResult() {
+			return this.result;
+		}
 	}
 }

@@ -1,19 +1,30 @@
 package yesman.epicfight.skill;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.Map.Entry;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.registries.ForgeRegistries;
+import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.client.events.engine.ControllEngine;
 import yesman.epicfight.client.gui.BattleModeGui;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
@@ -76,6 +87,7 @@ public abstract class Skill {
 		return (new Skill.Builder<Skill>()).setCategory(SkillCategories.MOVER).setResource(Resource.STAMINA);
 	}
 	
+	private final Map<Attribute, AttributeModifier> attributes = Maps.newHashMap();
 	protected final ResourceLocation registryName;
 	protected final SkillCategory category;
 	protected final ActivateType activateType;
@@ -102,6 +114,21 @@ public abstract class Skill {
 		this.maxDuration = parameters.getInt("max_duration");
 		this.maxStackSize = parameters.contains("max_stacks") ? parameters.getInt("max_stacks") : 1;
 		this.requiredXp = parameters.getInt("xp_requirement");
+		
+		this.attributes.clear();
+		
+		if (parameters.contains("attribute_modifiers")) {
+			ListTag attributeList = parameters.getList("attribute_modifiers", 10);
+			
+			for (Tag tag : attributeList) {
+				CompoundTag comp = (CompoundTag)tag;
+				String attribute = comp.getString("attribute");
+				Attribute attr = ForgeRegistries.ATTRIBUTES.getValue(new ResourceLocation(attribute));
+				AttributeModifier modifier = ParseUtil.toAttributeModifier(comp);
+				
+				this.attributes.put(attr, modifier);
+			}
+		}
 	}
 	
 	public boolean isExecutableState(PlayerPatch<?> executer) {
@@ -199,6 +226,14 @@ public abstract class Skill {
 	
 	public void onInitiate(SkillContainer container) {
 		container.maxDuration = this.maxDuration;
+		
+		for (Map.Entry<Attribute, AttributeModifier> stat : this.attributes.entrySet()) {
+			AttributeInstance attr = container.getExecuter().getOriginal().getAttribute(stat.getKey());
+			
+			if (!attr.hasModifier(stat.getValue())) {
+				attr.addTransientModifier(stat.getValue());
+			}
+		}
 	}
 	
 	/**
@@ -206,6 +241,13 @@ public abstract class Skill {
 	 * @param container
 	 */
 	public void onRemoved(SkillContainer container) {
+		for (Map.Entry<Attribute, AttributeModifier> stat : this.attributes.entrySet()) {
+			AttributeInstance attr = container.getExecuter().getOriginal().getAttribute(stat.getKey());
+			
+			if (attr.hasModifier(stat.getValue())) {
+				attr.removeModifier(stat.getValue());
+			}
+		}
 	}
 	
 	/**
@@ -373,6 +415,10 @@ public abstract class Skill {
 	
 	public int getRequiredXp() {
 		return this.requiredXp;
+	}
+	
+	public Set<Entry<Attribute, AttributeModifier>> getModfierEntry() {
+		return this.attributes.entrySet();
 	}
 	
 	public boolean resourcePredicate(PlayerPatch<?> playerpatch) {

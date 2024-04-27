@@ -17,6 +17,7 @@ public abstract class InputComponentList<T> extends ContainerObjectSelectionList
 	private final Screen owner;
 	private final List<DataBindingComponent<?>> dataBindingComponent = Lists.newArrayList();
 	private InputComponentList<T>.InputComponentEntry lastEntry;
+	private InputComponentList<T>.InputComponentEntry focusingEntry;
 	
 	public InputComponentList(Screen owner, int width, int height, int y0, int y1, int itemHeight) {
 		super(owner.getMinecraft(), width, height, y0, y1, itemHeight);
@@ -65,7 +66,7 @@ public abstract class InputComponentList<T> extends ContainerObjectSelectionList
 				dataBinder.setValue(values[i]);
 			} catch (Exception e) {
 				e.printStackTrace();
-				throw new IllegalStateException(String.format("Error while binding component [%s] because of %s", dataBinder._getMessage(), e.getMessage()));
+				throw new IllegalStateException(String.format("Error while binding %sst component [%s] because of %s", String.valueOf(i), dataBinder._getMessage(), e.getMessage()));
 			}
 		}
 	}
@@ -77,6 +78,8 @@ public abstract class InputComponentList<T> extends ContainerObjectSelectionList
 	
 	public void clearComponents() {
 		this.children().clear();
+		
+		this.focusingEntry = null;
 		this.dataBindingComponent.clear();
 	}
 	
@@ -90,6 +93,11 @@ public abstract class InputComponentList<T> extends ContainerObjectSelectionList
 	
 	public void resetComponents() {
 		this.dataBindingComponent.forEach((dataBinder) -> dataBinder.reset());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public <O extends ResizableComponent> O getComponent(int row, int column) {
+		return (O)this.children().get(row).children.get(column);
 	}
 	
 	public abstract void importTag(T tag);
@@ -130,8 +138,36 @@ public abstract class InputComponentList<T> extends ContainerObjectSelectionList
 			return false;
 		}
 		
+		if (this.focusingEntry != null) {
+			int i = this.children().indexOf(this.focusingEntry);
+			int j1 = this.getRowTop(i);
+			int k1 = this.getRowBottom(i);
+			
+			if (k1 >= this.y0 && j1 <= this.y1) {
+				boolean pressed = false;
+				
+				for (GuiEventListener guiEventListener : this.focusingEntry.children()) {
+					boolean mouseClicked = guiEventListener.mouseClicked(x, y, button);
+					pressed |= mouseClicked;
+					
+					if (mouseClicked) {
+						this.owner.setFocused(guiEventListener);
+					}
+				}
+				
+				if (pressed) {
+					return false;
+				}
+			}
+		}
+		
 		for (int i = 0; i < this.children().size(); i++) {
 			InputComponentEntry entry = this.children().get(i);
+			
+			if (entry == this.focusingEntry) {
+				continue;
+			}
+			
 			int j1 = this.getRowTop(i);
 			int k1 = this.getRowBottom(i);
 			
@@ -148,6 +184,7 @@ public abstract class InputComponentList<T> extends ContainerObjectSelectionList
 				}
 				
 				if (pressed) {
+					this.focusingEntry = entry;
 					return false;
 				}
 			}

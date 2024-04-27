@@ -20,7 +20,6 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexSorting;
-import com.mojang.datafixers.util.Pair;
 import com.mojang.math.Axis;
 
 import net.minecraft.client.Camera;
@@ -43,6 +42,7 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.resources.model.BakedModel;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemDisplayContext;
@@ -64,6 +64,7 @@ import yesman.epicfight.api.animation.types.LinkAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.animation.Layer;
+import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.collider.Collider;
@@ -98,7 +99,7 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 	private AnimatedMesh mesh;
 	private Joint colliderJoint;
 	private Collider collider;
-	private TrailInfo trailInfo;
+	private List<TrailInfo> trailInfoList = Lists.newArrayList();
 	private Item item;
 	
 	public AnimatedModelPlayer(int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Armature armature, AnimatedMesh mesh) {
@@ -133,7 +134,7 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 	}
 	
 	public void setCollider(Collider collider) {
-		this.setCollider(collider, null);
+		this.collider = collider;
 	}
 	
 	public void setCollider(Collider collider, Joint joint) {
@@ -145,8 +146,12 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 		this.colliderJoint = joint;
 	}
 	
-	public void setTrailInfo(TrailInfo trailInfo) {
-		this.trailInfo = trailInfo;
+	public void setTrailInfo(TrailInfo... trailInfos) {
+		this.trailInfoList.clear();
+		
+		for (TrailInfo trailInfo : trailInfos) {
+			this.trailInfoList.add(trailInfo);
+		}
 	}
 	
 	public void setItemToRender(Item item) {
@@ -208,9 +213,23 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 				if (flag) {
 					this.playDownSound(Minecraft.getInstance().getSoundManager());
 					
-					this.showColliderCheckbox.mouseClicked(x, y, button);
-					this.showItemCheckbox.mouseClicked(x, y, button);
-					this.showTrailCheckbox.mouseClicked(x, y, button);
+					if (this.item != null) {
+						if (this.showItemCheckbox.mouseClicked(x, y, button)) {
+							return true;
+						}
+					}
+					
+					if (!this.trailInfoList.isEmpty()) {
+						if (this.showTrailCheckbox.mouseClicked(x, y, button)) {
+							return true;
+						}
+					}
+					
+					if (this.collider != null) {
+						if (this.showColliderCheckbox.mouseClicked(x, y, button)) {
+							return true;
+						}
+					}
 					
 					return true;
 				}
@@ -348,9 +367,12 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 					float elapsedTime = player.getPrevElapsedTime() + (player.getElapsedTime() - player.getPrevElapsedTime()) * partialTicks;
 					Phase phase = attackanimation.getPhaseByTime(elapsedTime);
 					
-					for (Pair<Joint, Collider> pair : phase.getColliders()) {
+					for (AttackAnimation.JointColliderPair pair : phase.getColliders()) {
 						Pose prevPose = animation.getRawPose(player.getPrevElapsedTime());
 						Pose currentPose = animation.getRawPose(player.getElapsedTime());
+						prevPose.getOrDefaultTransform("Root").translation().set(0.0F, 0.0F, 0.0F);
+						currentPose.getOrDefaultTransform("Root").translation().set(0.0F, 0.0F, 0.0F);
+						
 						this.collider.drawInternal(guiGraphics.pose(), bufferbuilder, this.getArmature(), pair.getFirst(), prevPose, currentPose, partialTicks, -1);
 					}
 				}
@@ -384,7 +406,7 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 		int top = this._getY() + 6;
 		int right = this._getX() + this._getWidth() - 2;
 		
-		if (this.trailInfo != null) {
+		if (!this.trailInfoList.isEmpty()) {
 			right -= this.showTrailCheckbox._getWidth();
 			
 			this.showTrailCheckbox._setX(right);
@@ -497,6 +519,31 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 											AnimatedModelPlayer.this.animationsToPlay.get(AnimatedModelPlayer.this.index) : Animations.DUMMY_ANIMATION;
 				
 				this.baseLayer.playAnimation(toPlay, this.entitypatch, 0.0F);
+				
+				if (!AnimatedModelPlayer.this.trailInfoList.isEmpty()) {
+					for (TrailInfo trailInfo : AnimatedModelPlayer.this.trailInfoList) {
+						if (trailInfo.playable()) {
+							CustomTrailParticle trail = new CustomTrailParticle(AnimatedModelPlayer.this.getArmature().searchJointByName(trailInfo.joint), toPlay, trailInfo);
+							AnimatedModelPlayer.this.trailParticles.add(trail);
+						} else {
+							toPlay.getProperty(ClientAnimationProperties.TRAIL_EFFECT).ifPresent(trailInfos -> {
+								for (TrailInfo info : trailInfos) {
+									if (info.hand != InteractionHand.MAIN_HAND) {
+										continue;
+									}
+
+									TrailInfo combinedTrailInfo = trailInfo.overwrite(info);
+
+									if (combinedTrailInfo.playable()) {
+										CustomTrailParticle trail = new CustomTrailParticle(AnimatedModelPlayer.this.getArmature().searchJointByName(combinedTrailInfo.joint), toPlay, combinedTrailInfo);
+										AnimatedModelPlayer.this.trailParticles.add(trail);
+									}
+								}
+							});
+						}
+					}
+				}
+				
 				AnimatedModelPlayer.this.index = (AnimatedModelPlayer.this.index + 1) % AnimatedModelPlayer.this.animationsToPlay.size();
 			}
 			

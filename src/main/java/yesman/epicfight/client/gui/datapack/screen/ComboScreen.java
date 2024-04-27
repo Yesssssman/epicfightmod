@@ -166,7 +166,7 @@ public class ComboScreen extends Screen {
 													ListTag animationList = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
 													
 													animationList.remove(event.rowposition);
-													animationList.add(event.rowposition, StringTag.valueOf(ParseUtil.nullOrApply(event.postValue, (animation) -> animation.getRegistryName().toString())));
+													animationList.add(event.rowposition, StringTag.valueOf(ParseUtil.nullOrToString(event.postValue, (animation) -> animation.getRegistryName().toString())));
 													
 													if (event.postValue != null) {
 														this.reloadAnimationPlayer();
@@ -199,7 +199,7 @@ public class ComboScreen extends Screen {
 					if (animation != null) {
 						ListTag listTag = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
 						listTag.remove(listTag.size() - 2);
-						listTag.add(listTag.size() - 1, StringTag.valueOf(ParseUtil.nullOrApply(animation, (animation2) -> animation.getRegistryName().toString())));
+						listTag.add(listTag.size() - 1, StringTag.valueOf(ParseUtil.nullOrToString(animation, (animation2) -> animation.getRegistryName().toString())));
 						this.reloadAnimationPlayer();
 					}
 				});
@@ -208,7 +208,7 @@ public class ComboScreen extends Screen {
 					if (animation != null) {
 						ListTag listTag = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
 						listTag.remove(listTag.size() - 1);
-						listTag.add(listTag.size(), StringTag.valueOf(ParseUtil.nullOrApply(animation, (animation2) -> animation.getRegistryName().toString())));
+						listTag.add(listTag.size(), StringTag.valueOf(ParseUtil.nullOrToString(animation, (animation2) -> animation.getRegistryName().toString())));
 						this.reloadAnimationPlayer();
 					}
 				});

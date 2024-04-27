@@ -75,8 +75,20 @@ public class ParseUtil {
 		return new AttributeModifier(UUID.fromString(tag.getString("uuid")), tag.getString("name"), tag.getDouble("amount"), operation);
 	}
 	
-	public static <T> String nullOrApply(T obj, Function<T, String> toDisplayText) {
-		return obj == null ? "" : toDisplayText.apply(obj);
+	public static <T> String nullOrToString(T obj, Function<T, String> toString) {
+		return obj == null ? "" : toString.apply(obj);
+	}
+	
+	public static <T, V> V nullOrApply(T obj, Function<T, V> apply) {
+		if (obj == null) {
+			return null;
+		}
+		
+		try {
+			return apply.apply(obj);
+		} catch (Exception e) {
+			return null;
+		}
 	}
 	
 	public static String snakeToSpacedCamel(Object obj) {
@@ -140,7 +152,7 @@ public class ParseUtil {
 		return tag;
 	}
 	
-	public static <T> boolean isParsableAllowMinus(String s, Function<String, T> parser) {
+	public static <T> boolean isParsableAllowingMinus(String s, Function<String, T> parser) {
 		if ("-".equals(s)) {
 			return true;
 		}
@@ -162,9 +174,9 @@ public class ParseUtil {
 		}
 	}
 	
-	public static <T> T parseWithMinus(String value, Function<String, T> parseFunction) {
+	public static <T> String valueOfOmittingType(T value) {
 		try {
-			return parseFunction.apply(value);
+			return String.valueOf(value).replaceAll("[df]", "");
 		} catch (NumberFormatException e) {
 			return null;
 		}

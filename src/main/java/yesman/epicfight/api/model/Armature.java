@@ -1,7 +1,5 @@
 package yesman.epicfight.api.model;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
@@ -161,16 +159,7 @@ public class Armature {
 		Joint newRoot = this.copyHierarchy(this.rootJoint, oldToNewJoint);
 		newRoot.initOriginTransform(new OpenMatrix4f());
 		
-		Armature newArmature = null;
-		
-		try {
-			Constructor<? extends Armature> constructor = this.getClass().getConstructor(String.class, int.class, Joint.class, Map.class);
-			newArmature = constructor.newInstance(this.name, this.jointNumber, newRoot, oldToNewJoint);
-		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			e.printStackTrace();
-		}
-		
-		return newArmature;
+		return new Armature(this.name, this.jointNumber, newRoot, oldToNewJoint);
 	}
 	
 	private Joint copyHierarchy(Joint joint, Map<String, Joint> oldToNewJoint) {

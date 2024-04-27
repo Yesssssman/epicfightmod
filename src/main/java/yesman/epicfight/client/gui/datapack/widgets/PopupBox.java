@@ -182,7 +182,7 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 		private Supplier<AnimatedMesh> mesh;
 		
 		public AnimationPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<StaticAnimation> responder) {
-			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (animation) -> ParseUtil.nullOrApply(animation, (a) -> a.getRegistryName().toString()), responder);
+			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (animation) -> ParseUtil.nullOrToString(animation, (a) -> a.getRegistryName().toString()), responder);
 		}
 		
 		public void setModel(Supplier<Armature> armature, Supplier<AnimatedMesh> mesh) {
@@ -201,7 +201,7 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 	@OnlyIn(Dist.CLIENT)
 	public static class ColliderPopupBox extends PopupBox<Collider> {
 		public ColliderPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<Collider> responder) {
-			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (collider) -> ParseUtil.nullOrApply(collider, (c) -> ParseUtil.nullParam(ColliderPreset.getKey(c))), responder);
+			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (collider) -> ParseUtil.nullOrToString(collider, (c) -> ParseUtil.nullParam(ColliderPreset.getKey(c))), responder);
 		}
 		
 		@Override

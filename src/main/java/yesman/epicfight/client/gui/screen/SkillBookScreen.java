@@ -28,9 +28,7 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.client.CPChangeSkill;
 import yesman.epicfight.skill.Skill;
-import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillContainer;
-import yesman.epicfight.skill.passive.PassiveSkill;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.item.SkillBookItem;
 
@@ -164,11 +162,10 @@ public class SkillBookScreen extends Screen {
 		width = this.font.width(skillCategory);
 		guiGraphics.drawString(font, skillCategory, posX + 36 - width / 2, posY + 100, 0, false);
 
-		if (this.skill.getCategory() == SkillCategories.PASSIVE) {
-			PassiveSkill passiveSkill = (PassiveSkill)this.skill;
+		if (!this.skill.getModfierEntry().isEmpty()) {
 			int i = 135;
 			
-			for (Map.Entry<Attribute, AttributeModifier> stat : passiveSkill.getModfierEntry()) {
+			for (Map.Entry<Attribute, AttributeModifier> stat : this.skill.getModfierEntry()) {
 				String attrName = Component.translatable(stat.getKey().getDescriptionId()).getString();
 				String amountString = "";
 				double amount = stat.getValue().getAmount();
@@ -184,14 +181,13 @@ public class SkillBookScreen extends Screen {
 					amountString = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(amount * 100.0D) + "%";
 					break;
 				}
-
-				guiGraphics.drawString(font, "+" + amountString + " " + attrName, posX + 23 - width / 2, posY + i, 0, false);
+				
+				guiGraphics.drawString(this.font, "+" + amountString + " " + attrName, posX + 23 - width / 2, posY + i, 0, false);
 				i += 10;
 			}
 		}
 		
 		List<FormattedCharSequence> list = this.font.split(Component.translatable(translationName + ".tooltip", this.skill.getTooltipArgsOfScreen(Lists.newArrayList()).toArray(new Object[0])), 150);
-		
 		int height = posY + 20 - Math.min((Math.max(list.size() - 10, 0) * 4), 20);
 		
 		for (int l1 = 0; l1 < list.size(); ++l1) {

@@ -2,42 +2,50 @@ package yesman.epicfight.api.animation.types.datapack;
 
 import java.lang.reflect.Constructor;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.InteractionHand;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationClip;
+import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.MovementAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimationDataReader;
+import yesman.epicfight.api.collider.Collider;
+import yesman.epicfight.api.collider.MultiOBBCollider;
+import yesman.epicfight.api.collider.OBBCollider;
 import yesman.epicfight.api.model.Armature;
+import yesman.epicfight.api.utils.ParseUtil;
 
 @OnlyIn(Dist.CLIENT)
 public class FakeAnimation extends StaticAnimation {
-	private Class<? extends StaticAnimation> animationClass;
+	private AnimationType animationType;
 	private AnimationClip animationClip;
 	private Map<String, Object> constructorParams = Maps.newLinkedHashMap();
-	private JsonObject rawAnimation;
+	private JsonArray rawAnimation;
 	private JsonObject properties = new JsonObject();
 	
-	public FakeAnimation(String path, Armature armature, AnimationClip clip, JsonObject animation) {
+	public FakeAnimation(String path, Armature armature, AnimationClip clip, JsonArray rawAnimation) {
 		super(new ResourceLocation(""), 0.0F, false, "", armature, true);
 		
 		this.animationClip = clip;
-		this.rawAnimation = animation;
+		this.rawAnimation = rawAnimation;
 		this.constructorParams.put("path", path);
 		this.constructorParams.put("armature", armature);
 	}
 	
-	public Object getParameter(String key) {
-		return this.constructorParams.get(key);
+	@SuppressWarnings("unchecked")
+	public <T> T getParameter(String key) {
+		return (T)this.constructorParams.get(key);
 	}
 	
 	public void setParameter(String key, Object value) {
@@ -48,16 +56,16 @@ public class FakeAnimation extends StaticAnimation {
 		}
 	}
 	
-	public Class<? extends StaticAnimation> getAnimationClass() {
-		return this.animationClass;
+	public AnimationType getAnimationClass() {
+		return this.animationType;
 	}
 	
 	public JsonObject getPropertiesJson() {
 		return this.properties;
 	}
 	
-	public void setAnimationClass(Class<? extends StaticAnimation> animationClass) {
-		String prevPath = (String)this.getParameter("path");
+	public void setAnimationClass(AnimationType animationClass) {
+		String prevPath = this.getParameter("path");
 		
 		this.constructorParams.clear();
 		PARAMETERS.get(animationClass).keySet().forEach((k) -> this.constructorParams.put(k, null));
@@ -65,7 +73,11 @@ public class FakeAnimation extends StaticAnimation {
 		this.setParameter("armature", this.getArmature());
 		this.setParameter("path", prevPath);
 		
-		this.animationClass = animationClass;
+		if (AttackAnimation.class.isAssignableFrom(animationClass.getAnimationClass())) {
+			this.setParameter("phases", new ListTag());
+		}
+		
+		this.animationType = animationClass;
 	}
 	
 	@Override
@@ -84,13 +96,75 @@ public class FakeAnimation extends StaticAnimation {
 		return new ResourceLocation((String)this.constructorParams.get("path"));
 	}
 	
-	public JsonObject getRawAnimationJson() {
+	public JsonArray getRawAnimationJson() {
 		return this.rawAnimation;
 	}
 	
+	public String getInvocationCommand() throws Exception {
+		if (this.animationType == null) {
+			throw new IllegalStateException("Animation type is not defined.");
+		}
+		
+		switch (this.animationType) {
+		case STATIC, MOVEMENT:
+			return String.format("(%s#F,%b#Z,%s#java.lang.String,%s#" + Armature.class.getTypeName() + ")#%s", this.constructorParams.get("convertTime"), this.constructorParams.get("isRepeat"), this.constructorParams.get("path"), this.constructorParams.get("armature"), this.animationType.animCls.getSimpleName());
+		case ATTACK:
+			ListTag phasesTag = this.getParameter("phases");
+			Iterator<Tag> iter = phasesTag.iterator();
+			
+			StringBuilder sb = new StringBuilder("[");
+			float start = 0.0F;
+			
+			while (iter.hasNext()) {
+				CompoundTag phaseCompound = (CompoundTag)iter.next();
+				float antic = phaseCompound.getFloat("antic");
+				float preDelay = phaseCompound.getFloat("preDelay");
+				float contact = phaseCompound.getFloat("contact");
+				float recovery = phaseCompound.getFloat("recovery");
+				float end = phaseCompound.getFloat("end");
+				String hand = phaseCompound.getString("hand");
+				String joint = phaseCompound.getString("joint");
+				String colliderInvokeCommand;
+				
+				if (phaseCompound.contains("collider")) {
+					CompoundTag colliderTag = phaseCompound.getCompound("collider");
+					int colliderCount = colliderTag.getInt("number");
+					ListTag center = colliderTag.getList("center", Tag.TAG_DOUBLE);
+					ListTag size = colliderTag.getList("size", Tag.TAG_DOUBLE);
+					
+					if (colliderCount == 1) {
+						colliderInvokeCommand = String.format("(%s#D,%s#D,%s#D,%s#D,%s#D,%s#D)#%s", center.get(0), center.get(1), center.get(2), size.get(0), size.get(1), size.get(2), OBBCollider.class.getTypeName());
+					} else {
+						colliderInvokeCommand = String.format("(%d#I,%s#D,%s#D,%s#D,%s#D,%s#D,%s#D)#%s", colliderCount, center.get(0), center.get(1), center.get(2), size.get(0), size.get(1), size.get(2), MultiOBBCollider.class.getTypeName());
+					}
+				} else {
+					colliderInvokeCommand = "null#" + Collider.class.getTypeName();
+				}
+				
+				sb.append(String.format("(%s#F,%s#F,%s#F,%s#F,%s#F,%s#F,%s#net.minecraft.world.InteractionHand,%s#" + Joint.class.getTypeName() + ",%s)", start, antic, preDelay, contact, recovery, end, hand, joint, colliderInvokeCommand));
+				
+				if (iter.hasNext()) {
+					sb.append(",");
+					start = end;
+				}
+			}
+			
+			sb.append("]#" + AttackAnimation.Phase.class.getTypeName());
+			
+			return String.format("(%s#F,%s#java.lang.String,%s#" + Armature.class.getTypeName() + ",%s)#%s",
+					this.constructorParams.get("convertTime"),
+					this.constructorParams.get("path"),
+					this.constructorParams.get("armature"), 
+					sb.toString(),
+					this.animationType.animCls.getTypeName());
+		}
+		
+		throw new IllegalStateException("Invalid animation type: " + this.animationType);
+	}
+	
 	public FakeAnimation deepCopy() {
-		FakeAnimation fakeAnimation = new FakeAnimation((String)this.getParameter("path"), this.armature, this.animationClip, this.rawAnimation);
-		fakeAnimation.animationClass = this.animationClass;
+		FakeAnimation fakeAnimation = new FakeAnimation(this.getParameter("path"), this.armature, this.animationClip, this.rawAnimation);
+		fakeAnimation.animationType = this.animationType;
 		fakeAnimation.constructorParams.clear();
 		fakeAnimation.constructorParams.putAll(this.constructorParams);
 		fakeAnimation.rawAnimation = this.rawAnimation;
@@ -102,14 +176,14 @@ public class FakeAnimation extends StaticAnimation {
 	@SuppressWarnings("rawtypes")
 	public ClipHoldingAnimation createAnimation() throws Exception {
 		try {
-			if (this.animationClass == null) {
+			if (this.animationType == null) {
 				throw new IllegalStateException("Animation type is not defined.");
 			}
 			
-			Map<String, Class<?>> map = PARAMETERS.get(this.animationClass);
+			Map<String, Class<?>> map = PARAMETERS.get(this.animationType);
 			Class[] paramClasses = map.values().toArray(new Class[0]);
 			Object[] params = this.constructorParams.values().toArray();
-			Constructor<? extends ClipHoldingAnimation> constructor = switchType(this.animationClass).getConstructor(paramClasses);
+			Constructor<? extends ClipHoldingAnimation> constructor = switchType(this.animationType).getConstructor(paramClasses);
 			
 			ClipHoldingAnimation animation = constructor.newInstance(params);
 			animation.setAnimationClip(this.animationClip);
@@ -130,15 +204,15 @@ public class FakeAnimation extends StaticAnimation {
 				sb.append(String.format(iter.hasNext() ? "%s(%s:%s), " : "%s(%s:%s)", entry.getKey(), entry.getValue(), entry.getValue() == null ? null : entry.getValue().getClass().getSimpleName()));
 			}
 			
-			throw new IllegalArgumentException(String.format("Invalid arguments for %s: %s", this.animationClass.getSimpleName(), sb.toString()));
+			throw new IllegalArgumentException(String.format("Invalid arguments for %s: %s", ParseUtil.snakeToSpacedCamel(this.animationType.toString()), sb.toString()));
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;
 		}
 	}
 	
-	private static final Map<Class<? extends StaticAnimation>, Map<String, Class<?>>> PARAMETERS = Maps.newHashMap();
-	private static final Map<Class<? extends StaticAnimation>, Class<? extends ClipHoldingAnimation>> FAKE_ANIMATIONS = Maps.newHashMap();
+	private static final Map<AnimationType, Map<String, Class<?>>> PARAMETERS = Maps.newHashMap();
+	private static final Map<AnimationType, Class<? extends ClipHoldingAnimation>> FAKE_ANIMATIONS = Maps.newHashMap();
 	
 	static {
 		Map<String, Class<?>> staticAnimationParameters = Maps.newLinkedHashMap();
@@ -147,46 +221,52 @@ public class FakeAnimation extends StaticAnimation {
 		staticAnimationParameters.put("path", String.class);
 		staticAnimationParameters.put("armature", Armature.class);
 		
-		/**
 		Map<String, Class<?>> attackAnimationParameters = Maps.newLinkedHashMap();
 		attackAnimationParameters.put("convertTime", float.class);
-		attackAnimationParameters.put("antic", float.class);
-		attackAnimationParameters.put("preDelay", float.class);
-		attackAnimationParameters.put("contact", float.class);
-		attackAnimationParameters.put("recovery", float.class);
-		attackAnimationParameters.put("hand", InteractionHand.class);
-		attackAnimationParameters.put("collider", Collider.class);
-		attackAnimationParameters.put("colliderJoint", Joint.class);
 		attackAnimationParameters.put("path", String.class);
 		attackAnimationParameters.put("armature", Armature.class);
-		**/
+		attackAnimationParameters.put("phases", ListTag.class);
 		
-		Map<String, Class<?>> attackAnimationParameters2 = Maps.newLinkedHashMap();
-		attackAnimationParameters2.put("convertTime", float.class);
-		attackAnimationParameters2.put("path", String.class);
-		attackAnimationParameters2.put("armature", Armature.class);
-		attackAnimationParameters2.put("phases", List.class);
+		PARAMETERS.put(AnimationType.STATIC, staticAnimationParameters);
+		PARAMETERS.put(AnimationType.MOVEMENT, staticAnimationParameters);
+		PARAMETERS.put(AnimationType.ATTACK, attackAnimationParameters);
 		
-		Map<String, Class<?>> phaseParameters = Maps.newLinkedHashMap();
-		phaseParameters.put("start", float.class);
-		phaseParameters.put("antic", float.class);
-		phaseParameters.put("preDelay", float.class);
-		phaseParameters.put("contact", float.class);
-		phaseParameters.put("recovery", float.class);
-		phaseParameters.put("end", float.class);
-		phaseParameters.put("hand", InteractionHand.class);
-		phaseParameters.put("colliders", List.class);
-		
-		PARAMETERS.put(StaticAnimation.class, staticAnimationParameters);
-		PARAMETERS.put(MovementAnimation.class, staticAnimationParameters);
-		PARAMETERS.put(AttackAnimation.class, attackAnimationParameters2);
-		
-		FAKE_ANIMATIONS.put(StaticAnimation.class, FakeStaticAnimation.class);
-		FAKE_ANIMATIONS.put(MovementAnimation.class, FakeMovementAnimation.class);
-		FAKE_ANIMATIONS.put(AttackAnimation.class, FakeAttackAnimation.class);
+		FAKE_ANIMATIONS.put(AnimationType.STATIC, FakeStaticAnimation.class);
+		FAKE_ANIMATIONS.put(AnimationType.MOVEMENT, FakeMovementAnimation.class);
+		FAKE_ANIMATIONS.put(AnimationType.ATTACK, FakeAttackAnimation.class);
+	}
+	
+	public static Class<? extends ClipHoldingAnimation> switchType(AnimationType cls) {
+		return FAKE_ANIMATIONS.get(cls);
 	}
 	
 	public static Class<? extends ClipHoldingAnimation> switchType(Class<? extends StaticAnimation> cls) {
-		return FAKE_ANIMATIONS.get(cls);
+		for (AnimationType animType : AnimationType.values()) {
+			if (animType.animCls == cls) {
+				return FAKE_ANIMATIONS.get(animType);
+			}
+		}
+		
+		return FakeStaticAnimation.class;
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public static enum AnimationType {
+		STATIC(StaticAnimation.class), MOVEMENT(MovementAnimation.class), ATTACK(AttackAnimation.class);
+		
+		final Class<? extends StaticAnimation> animCls;
+		
+		AnimationType(Class<? extends StaticAnimation> animCls) {
+			this.animCls = animCls;
+		}
+		
+		public Class<? extends StaticAnimation> getAnimationClass() {
+			return this.animCls;
+		}
+		
+		@Override
+		public String toString() {
+			return ParseUtil.snakeToSpacedCamel(this.name() + "_ANIMATION");
+		}
 	}
 }

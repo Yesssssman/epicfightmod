@@ -203,7 +203,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 										.valueChanged((event) -> this.compositeLayerMasks.get(event.rowposition).setPackKey(event.postValue)).defaultVal(LivingMotions.IDLE))
 						.addColumn(Grid.popup("joint_mask", PopupBox.JointMaskPopupBox::new)
 										.valueChanged((event) -> this.compositeLayerMasks.get(event.rowposition).setPackValue(event.postValue))
-										.toDisplayText((jointMask) -> ParseUtil.nullOrApply(jointMask, (m) -> JointMaskReloadListener.getKey(m).toString()))
+										.toDisplayText((jointMask) -> ParseUtil.nullOrToString(jointMask, (m) -> JointMaskReloadListener.getKey(m).toString()))
 										.width(150))
 						.pressAdd((grid, button) -> {
 							this.compositeLayerMasks.add(PackEntry.ofValue(LivingMotions.IDLE, null));
@@ -242,7 +242,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 							.valueChanged((event) -> this.baseLayerMasks.get(event.rowposition).setPackKey(event.postValue)).defaultVal(LivingMotions.IDLE))
 					.addColumn(Grid.popup("joint_mask", PopupBox.JointMaskPopupBox::new)
 							.valueChanged((event) -> this.baseLayerMasks.get(event.rowposition).setPackValue(event.postValue))
-							.toDisplayText((jointMask) -> ParseUtil.nullOrApply(jointMask, (m) -> JointMaskReloadListener.getKey(m).toString()))
+							.toDisplayText((jointMask) -> ParseUtil.nullOrToString(jointMask, (m) -> JointMaskReloadListener.getKey(m).toString()))
 							.width(150))
 					.pressAdd((grid, button) -> {
 						this.baseLayerMasks.add(PackEntry.ofValue(LivingMotions.IDLE, null));
@@ -280,7 +280,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 									.valueChanged((event) -> this.compositeLayerMasks.get(event.rowposition).setPackKey(event.postValue)).defaultVal(LivingMotions.IDLE))
 					.addColumn(Grid.popup("joint_mask", PopupBox.JointMaskPopupBox::new)
 									.valueChanged((event) -> this.compositeLayerMasks.get(event.rowposition).setPackValue(event.postValue))
-									.toDisplayText((jointMask) -> ParseUtil.nullOrApply(jointMask, (m) -> JointMaskReloadListener.getKey(m).toString()))
+									.toDisplayText((jointMask) -> ParseUtil.nullOrToString(jointMask, (m) -> JointMaskReloadListener.getKey(m).toString()))
 									.width(150))
 					.pressAdd((grid, button) -> {
 						this.compositeLayerMasks.add(PackEntry.ofValue(LivingMotions.IDLE, null));

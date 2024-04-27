@@ -63,7 +63,6 @@ import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.AimAnimation;
 import yesman.epicfight.api.animation.types.AirSlashAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation;
-import yesman.epicfight.api.animation.types.AttackAnimation.JointColliderPair;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
 import yesman.epicfight.api.animation.types.BasicAttackAnimation;
 import yesman.epicfight.api.animation.types.DashAttackAnimation;
@@ -148,6 +147,9 @@ public class Animations {
 			return this.animatinoClip;
 		}
 	};
+	
+	//bokken1 "0.1$F,0.15$F,0.25$F,0.4$F,null,Tool_R$yesman.epicfight.api.animation.Joint,biped/combat/bokken_auto1$java.lang.String,epicfight:entity/biped$yesman.epicfight.api.model.Armature"
+	//bokken2 "0.1$F,0.15$F,0.25$F,0.4$F,null,Tool_R$yesman.epicfight.api.animation.Joint,biped/combat/bokken_auto2$java.lang.String,epicfight:entity/biped$yesman.epicfight.api.model.Armature"
 	
 	public static StaticAnimation BIPED_IDLE;
 	public static StaticAnimation BIPED_WALK;
@@ -820,10 +822,10 @@ public class Animations {
 				.newTimePair(0.0F, 0.2F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false);
 		SWORD_DUAL_AUTO3 = new BasicAttackAnimation(0.1F, "biped/combat/sword_dual_auto3", biped,
-				new Phase(0.0F, 0.25F, 0.25F, 0.35F, 0.6F, Float.MAX_VALUE, InteractionHand.MAIN_HAND, JointColliderPair.of(biped.toolR, null), JointColliderPair.of(biped.toolL, null)))
+				new Phase(0.0F, 0.25F, 0.25F, 0.35F, 0.6F, Float.MAX_VALUE, InteractionHand.MAIN_HAND, AttackAnimation.JointColliderPair.of(biped.toolR, null), AttackAnimation.JointColliderPair.of(biped.toolL, null)))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
 		SWORD_DUAL_DASH = new DashAttackAnimation(0.16F, "biped/combat/sword_dual_dash", biped,
-				new Phase(0.0F, 0.05F, 0.05F, 0.3F, 0.75F, Float.MAX_VALUE, InteractionHand.MAIN_HAND, JointColliderPair.of(biped.toolR, null), JointColliderPair.of(biped.toolL, null)))
+				new Phase(0.0F, 0.05F, 0.05F, 0.3F, 0.75F, Float.MAX_VALUE, InteractionHand.MAIN_HAND, AttackAnimation.JointColliderPair.of(biped.toolR, null), AttackAnimation.JointColliderPair.of(biped.toolL, null)))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.addProperty(ActionAnimationProperty.COORD_SET_BEGIN, MoveCoordFunctions.RAW_COORD)
 				.addProperty(ActionAnimationProperty.COORD_SET_TICK, null);

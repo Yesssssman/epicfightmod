@@ -316,7 +316,7 @@
 	"datapack_edit.import_animation.repeat": "Repeat",
 	"datapack_edit.import_animation.antic": "Anticipation",
 	"datapack_edit.import_animation.pre_delay": "Pre-Delay",
-	"datapack_edit.import_animation.contact": "Contract",
+	"datapack_edit.import_animation.contact": "Contact",
 	"datapack_edit.import_animation.recovery": "Recovery",
 	"datapack_edit.import_animation.hand": "Hand",
 	"datapack_edit.import_animation.joint": "Collider Joint",

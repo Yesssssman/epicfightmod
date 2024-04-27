@@ -999,7 +999,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 			super(name);
 			
 			this.enums = enums;
-			this.toDisplayText = (enumObj) -> ParseUtil.nullOrApply(enumObj, ParseUtil::snakeToSpacedCamel);
+			this.toDisplayText = (enumObj) -> ParseUtil.nullOrToString(enumObj, ParseUtil::snakeToSpacedCamel);
 		}
 		
 		@Override
