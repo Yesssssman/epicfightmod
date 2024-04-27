@@ -49,7 +49,8 @@ public class ActionAnimation extends MainFrameAnimation {
 			.newTimePair(0.01F, postDelay)
 			.addState(EntityState.TURNING_LOCKED, true)
 			.newTimePair(0.0F, Float.MAX_VALUE)
-			.addState(EntityState.INACTION, true);
+			.addState(EntityState.INACTION, true)
+			.addState(EntityState.FIXED_POV, true);
 	}
 	
 	public <V> ActionAnimation addProperty(ActionAnimationProperty<V> propertyType, V value) {

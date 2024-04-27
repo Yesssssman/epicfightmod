@@ -7,7 +7,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.client.animation.ClientAnimator;
-import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
@@ -47,16 +46,6 @@ public class WitchPatch extends HumanoidMobPatch<Witch> {
 		
 		if (this.original.isDrinkingPotion()) {
 			this.currentCompositeMotion = LivingMotions.DRINK;
-		}
-	}
-	
-	@OnlyIn(Dist.CLIENT)
-	@Override
-	public OpenMatrix4f getHeadMatrix(float partialTicks) {
-		if (this.original.isDrinkingPotion()) {
-			return new OpenMatrix4f();
-		} else {
-			return super.getHeadMatrix(partialTicks);
 		}
 	}
 }

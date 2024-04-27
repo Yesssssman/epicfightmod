@@ -207,7 +207,13 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		SkillManager.reloadAllSkillsAnimations();
 		
 		if (EpicFightMod.isPhysicalClient()) {
-			this.animationRegistry.values().forEach(AnimationManager::readAnimationProperties);
+			this.animationRegistry.values().stream().reduce(Lists.<StaticAnimation>newArrayList(), (list, anim) -> {
+				list.addAll(anim.getAllClipAnimations());
+				return list;
+			}, (list1, list2) -> {
+				list1.addAll(list2);
+				return list1;
+			}).forEach(AnimationManager::readAnimationProperties);
 		}
 	}
 	

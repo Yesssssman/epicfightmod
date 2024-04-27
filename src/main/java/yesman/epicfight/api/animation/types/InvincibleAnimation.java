@@ -16,6 +16,7 @@ public class InvincibleAnimation extends ActionAnimation {
 			.addState(EntityState.CAN_BASIC_ATTACK, false)
 			.addState(EntityState.CAN_SKILL_EXECUTION, true)
 			.addState(EntityState.INACTION, true)
+			.addState(EntityState.FIXED_POV, true)
 			.addState(EntityState.ATTACK_RESULT, (damagesource) -> damagesource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) ? AttackResult.ResultType.BLOCKED : AttackResult.ResultType.SUCCESS);
 	}
 }

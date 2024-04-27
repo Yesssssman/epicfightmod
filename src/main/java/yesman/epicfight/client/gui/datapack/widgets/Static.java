@@ -3,6 +3,7 @@ package yesman.epicfight.client.gui.datapack.widgets;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
@@ -11,8 +12,17 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public class Static extends AbstractWidget implements ResizableComponent {
 	private Font font;
+	private Component tooltip;
+	
+	public Static(Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, String translateKey) {
+		this(font, x1, x2, y1, y2, horizontal, vertical, Component.translatable(translateKey), Component.translatable(translateKey + ".tooltip"));
+	}
 	
 	public Static(Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component message) {
+		this(font, x1, x2, y1, y2, horizontal, vertical, message, null);
+	}
+	
+	public Static(Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component message, Component tooltip) {
 		super(x1, y1, x2, y2, message);
 		
 		this.font = font;
@@ -22,12 +32,17 @@ public class Static extends AbstractWidget implements ResizableComponent {
 		this.y2 = y2;
 		this.horizontalSizingOption = horizontal;
 		this.verticalSizingOption = vertical;
+		this.tooltip = tooltip;
 	}
 	
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		String correctedString = this._getMessage() == null ? "" : this.font.plainSubstrByWidth(this._getMessage().getString(), this._getWidth());
 		guiGraphics.drawString(this.font, correctedString, this._getX(), this._getY() + this.height / 2 - this.font.lineHeight / 2, 16777215, false);
+		
+		if (this.tooltip != null) {
+			this.setTooltip(this.isMouseOver(mouseX, mouseY) ? Tooltip.create(this.tooltip) : null);
+		}
 	}
 	
 	@Override
@@ -35,19 +50,19 @@ public class Static extends AbstractWidget implements ResizableComponent {
 	}
 	
 	@Override
-	public boolean mouseClicked(double p_93641_, double p_93642_, int p_93643_) {
+	public boolean mouseClicked(double mouseX, double mouseY, int action) {
 		return false;
 	}
 	
 	@Override
-	public boolean mouseReleased(double p_93684_, double p_93685_, int p_93686_) {
+	public boolean mouseReleased(double mouseX, double mouseY, int action) {
 		return false;
 	}
-
-	public boolean mouseDragged(double p_93645_, double p_93646_, int p_93647_, double p_93648_, double p_93649_) {
+	
+	public boolean mouseDragged(double mouseX, double mouseY, int action, double p_93648_, double p_93649_) {
 		return false;
 	}
-
+	
 	/*******************************************************************
 	 * @ResizableComponent variables                                   *
 	 *******************************************************************/

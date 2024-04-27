@@ -24,14 +24,12 @@ public class PEndermanRenderer extends PatchedLivingEntityRenderer<EnderMan, End
 	
 	@Override
 	protected void setJointTransforms(EndermanPatch entitypatch, Armature armature, float partialTicks) {
-		this.setJointTransform("Head", armature, entitypatch.getHeadMatrix(partialTicks));
-		
 		if (entitypatch.isRaging()) {
 			OpenMatrix4f head = new OpenMatrix4f().translate(0.0F, 0.25F, 0.0F);
 			this.setJointTransform("Head_Top", armature, head);
 		}
 	}
-
+	
 	@Override
 	public EndermanMesh getMesh(EndermanPatch entitypatch) {
 		return Meshes.ENDERMAN;

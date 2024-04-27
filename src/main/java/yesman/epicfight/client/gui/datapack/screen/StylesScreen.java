@@ -66,7 +66,7 @@ public class StylesScreen extends Screen {
 		this.inputComponentsList.setLeftPos(180);
 		
 		this.stylesGrid = Grid.builder(this, parentScreen.getMinecraft())
-								.xy1(12, 50)
+								.xy1(12, 60)
 								.xy2(160, 76)
 								.horizontalSizing(HorizontalSizing.LEFT_WIDTH)
 								.verticalSizing(VerticalSizing.TOP_BOTTOM)
@@ -101,7 +101,7 @@ public class StylesScreen extends Screen {
 		
 		final Grid parameterGrid = Grid.builder(this, parentScreen.getMinecraft())
 										.xy1(4, 40)
-										.xy2(6, 80)
+										.xy2(6, 100)
 										.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
 										.rowHeight(26)
 										.rowEditable(false)
@@ -165,7 +165,7 @@ public class StylesScreen extends Screen {
 		this.stylesGrid.resize(screenRectangle);
 		this.defaultStyle.resize(screenRectangle);
 		
-		this.inputComponentsList.updateSize(screenRectangle.width() - 200, screenRectangle.height(), screenRectangle.top() + 45, screenRectangle.height() - 45);
+		this.inputComponentsList.updateSize(screenRectangle.width() - 200, screenRectangle.height(), screenRectangle.top() + 37, screenRectangle.height() - 45);
 		this.inputComponentsList.setLeftPos(180);
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {
@@ -179,6 +179,7 @@ public class StylesScreen extends Screen {
 		Static defaultStyleTitle = new Static(this.font, 12, 116, 15, 53, HorizontalSizing.LEFT_WIDTH, VerticalSizing.HEIGHT_BOTTOM, Component.translatable("datapack_edit.weapon_type.styles.default"));
 		defaultStyleTitle.resize(screenRectangle);
 		
+		this.addRenderableWidget(new Static(this.font, 12, 60, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.styles")));
 		this.addRenderableWidget(this.stylesGrid);
 		this.addRenderableWidget(defaultStyleTitle);
 		this.addRenderableWidget(this.defaultStyle);

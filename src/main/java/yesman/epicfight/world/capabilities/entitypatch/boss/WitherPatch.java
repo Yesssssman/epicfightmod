@@ -27,7 +27,9 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.LivingMotions;
+import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -35,6 +37,7 @@ import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
@@ -50,6 +53,8 @@ import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
 
 import java.util.EnumSet;
 import java.util.List;
+
+import org.joml.Quaternionf;
 
 public class WitherPatch extends MobPatch<WitherBoss> {
 	private static final EntityDataAccessor<Boolean> DATA_ARMOR_ACTIVED = SynchedEntityData.defineId(WitherBoss.class, EntityDataSerializers.BOOLEAN);
@@ -137,6 +142,30 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 		}
 		
 		super.tick(event);
+	}
+	
+	@Override
+	public void poseTick(DynamicAnimation animation, Pose pose) {
+		if (pose.getJointTransformData().containsKey("Head_M")) {
+			Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(-this.getXRotHead(), Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(this.getYBodyRot() - this.getYRotHead(), Vec3f.Y_AXIS)).toQuaternion();
+			pose.getOrDefaultTransform("Head_M").frontResult(JointTransform.getRotation(headRotation), OpenMatrix4f::mul);
+		}
+		
+		if (pose.getJointTransformData().containsKey("Head_R")) {
+			float rightHeadYRot = this.original.yRotHeads[1];
+			float rightHeadXRot = this.original.xRotHeads[1];
+			
+			Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(this.original.yBodyRot - rightHeadYRot, Vec3f.Y_AXIS).rotateDeg(-rightHeadXRot, Vec3f.X_AXIS).toQuaternion();
+			pose.getOrDefaultTransform("Head_R").frontResult(JointTransform.getRotation(headRotation), OpenMatrix4f::mul);
+		}
+		
+		if (pose.getJointTransformData().containsKey("Head_L")) {
+			float leftHeadYRot = this.original.yRotHeads[0];
+			float leftHeadXRot = this.original.xRotHeads[0];
+			
+			Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(this.original.yBodyRot - leftHeadYRot, Vec3f.Y_AXIS).rotateDeg(-leftHeadXRot, Vec3f.X_AXIS).toQuaternion();
+			pose.getOrDefaultTransform("Head_L").frontResult(JointTransform.getRotation(headRotation), OpenMatrix4f::mul);
+		}
 	}
 	
 	@Override

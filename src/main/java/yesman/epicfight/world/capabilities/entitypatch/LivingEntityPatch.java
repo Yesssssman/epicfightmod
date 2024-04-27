@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.joml.Quaternionf;
+
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.Minecraft;
@@ -36,11 +38,14 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.animation.Animator;
+import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
+import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.ServerAnimator;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation;
+import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
@@ -50,6 +55,7 @@ import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.AttackResult.ResultType;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.main.EpicFightMod;
@@ -82,6 +88,8 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	protected Vec3 lastAttackPosition;
 	protected EpicFightDamageSource epicFightDamageSource;
 	protected boolean isLastAttackSuccess;
+	protected float xRotHead;
+	protected float yRotHead;
 	
 	public LivingMotion currentLivingMotion = LivingMotions.IDLE;
 	public LivingMotion currentCompositeMotion = LivingMotions.IDLE;
@@ -132,6 +140,32 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		if (!this.getEntityState().inaction() && this.original.onGround && this.isAirborneState()) {
 			this.setAirborneState(false);
 		}
+	}
+	
+	public void poseTick(DynamicAnimation animation, Pose pose) {
+		if (pose.getJointTransformData().containsKey("Head")) {
+			Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(-this.getXRotHead(), Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(this.getYBodyRot() - this.getYRotHead(), Vec3f.Y_AXIS)).toQuaternion();
+			pose.getOrDefaultTransform("Head").frontResult(JointTransform.getRotation(headRotation), OpenMatrix4f::mul);
+		}
+	}
+	
+	@Override
+	protected void clientTick(LivingEvent.LivingTickEvent event) {
+		float destXRotHead;
+		float destYRotHead;
+		
+		if (this.getEntityState().fixedPov()) {
+			destXRotHead = 0.0F;
+			destYRotHead = this.getYBodyRot();
+		} else {
+			destXRotHead = this.original.getXRot();
+			destYRotHead = this.original.yHeadRot;
+		}
+		
+		this.animator.getPlayerFor(null);
+		
+		this.xRotHead += Mth.clamp(Mth.wrapDegrees(destXRotHead - this.xRotHead), -15.0F, 15.0F);
+		this.yRotHead += Mth.clamp(Mth.wrapDegrees(destYRotHead - this.yRotHead), -15.0F, 15.0F);
 	}
 	
 	public void onFall(LivingFallEvent event) {
@@ -375,28 +409,20 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		return Mth.wrapDegrees(this.original.getYRot());
 	}
 	
-	@OnlyIn(Dist.CLIENT)
-	public OpenMatrix4f getHeadMatrix(float partialTicks) {
-        float f2;
-        
-		if (this.state.inaction()) {
-			f2 = 0;
-		} else {
-			float f = MathUtils.lerpBetween(this.original.yBodyRotO, this.original.yBodyRot, partialTicks);
-			float f1 = MathUtils.lerpBetween(this.original.yHeadRotO, this.original.yHeadRot, partialTicks);
-			f2 = f1 - f;
-			
-			if (this.original.getVehicle() != null) {
-				if (f2 > 45.0F) {
-					f2 = 45.0F;
-				} else if (f2 < -45.0F) {
-					f2 = -45.0F;
-				}
-			}
-		}
-		
-		
-		return MathUtils.getModelMatrixIntegral(0, 0, 0, 0, 0, 0, this.original.xRotO, this.original.getXRot(), f2, f2, partialTicks, 1, 1, 1);
+	public float getXRotHead() {
+		return this.xRotHead;
+	}
+	
+	public float getYRotHead() {
+		return this.yRotHead;
+	}
+	
+	public float getYBodyRotO() {
+		return this.original.yBodyRotO;
+	}
+	
+	public float getYBodyRot() {
+		return this.original.yBodyRot;
 	}
 	
 	@Override

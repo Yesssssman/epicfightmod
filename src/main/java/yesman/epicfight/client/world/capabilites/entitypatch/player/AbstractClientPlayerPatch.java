@@ -157,6 +157,8 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	
 	@Override
 	protected void clientTick(LivingEvent.LivingTickEvent event) {
+		super.clientTick(event);
+		
 		if (!this.getEntityState().updateLivingMotion()) {
 			this.original.yBodyRot = this.original.getYRot();
 		}
@@ -219,6 +221,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 		return false;
 	}
 	
+	/**
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public OpenMatrix4f getHeadMatrix(float partialTick) {
@@ -247,6 +250,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
         
 		return MathUtils.getModelMatrixIntegral(0, 0, 0, 0, 0, 0, prvePitch, pitch, yaw, yaw, partialTick, 1, 1, 1);
 	}
+	**/
 	
 	@Override
 	public OpenMatrix4f getModelMatrix(float partialTick) {

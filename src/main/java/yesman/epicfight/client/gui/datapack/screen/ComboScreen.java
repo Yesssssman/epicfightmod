@@ -95,7 +95,7 @@ public class ComboScreen extends Screen {
 		this.font = parentScreen.getMinecraft().font;
 		
 		this.stylesGrid = Grid.builder(this, parentScreen.getMinecraft())
-								.xy1(12, 50)
+								.xy1(12, 60)
 								.xy2(85, 50)
 								.horizontalSizing(HorizontalSizing.LEFT_WIDTH)
 								.verticalSizing(VerticalSizing.TOP_BOTTOM)
@@ -184,7 +184,7 @@ public class ComboScreen extends Screen {
 								})
 								.build();
 		
-		this.animationModelPlayer = new AnimatedModelPlayer(110, 200, 50, 49, HorizontalSizing.LEFT_RIGHT, VerticalSizing.TOP_BOTTOM, Armatures.BIPED, Meshes.BIPED);
+		this.animationModelPlayer = new AnimatedModelPlayer(110, 200, 45, 49, HorizontalSizing.LEFT_RIGHT, VerticalSizing.TOP_BOTTOM, Armatures.BIPED, Meshes.BIPED);
 		
 		CompoundTag colliderTag = rootTag.getCompound("collider");
 		
@@ -291,6 +291,7 @@ public class ComboScreen extends Screen {
 														}, 180, 70));
 		}).pos(this.width / 2 + 2, this.height - 32).size(160, 21).build());
 		
+		this.addRenderableWidget(new Static(this.font, 12, 60, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.styles"), Component.translatable("datapack_edit.styles")));
 		this.addRenderableWidget(this.stylesGrid);
 		this.addRenderableWidget(this.animationModelPlayer);
 		this.addRenderableWidget(this.inputComponentsList);

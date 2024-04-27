@@ -20,7 +20,6 @@ import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
-import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.mesh.WitherMesh;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.patched.layer.PatchedWitherArmorLayer;
@@ -108,16 +107,19 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 	
 	@Override
 	protected void setJointTransforms(WitherPatch entitypatch, Armature armature, float partialTicks) {
+		/**
 		this.setJointTransform("Head_M", armature, entitypatch.getHeadMatrix(partialTicks));
 		WitherBoss witherBoss = entitypatch.getOriginal();
 		
 		float leftHeadYRot = witherBoss.yRotOHeads[0] + (witherBoss.yRotHeads[0] - witherBoss.yRotOHeads[0]) * partialTicks;
-		float rightHeadYRot = witherBoss.yRotOHeads[1] + (witherBoss.yRotHeads[1] - witherBoss.yRotOHeads[1]) * partialTicks;
 		float leftHeadXRot = witherBoss.xRotOHeads[0] + (witherBoss.xRotHeads[0] - witherBoss.xRotOHeads[0]) * partialTicks;
+		
+		float rightHeadYRot = witherBoss.yRotOHeads[1] + (witherBoss.yRotHeads[1] - witherBoss.yRotOHeads[1]) * partialTicks;
 		float rightHeadXRot = witherBoss.xRotOHeads[1] + (witherBoss.xRotHeads[1] - witherBoss.xRotOHeads[1]) * partialTicks;
 		
 		this.setJointTransform("Head_R", armature, OpenMatrix4f.createRotatorDeg(witherBoss.yBodyRot - rightHeadYRot, Vec3f.Y_AXIS).rotateDeg(-rightHeadXRot, Vec3f.X_AXIS));
 		this.setJointTransform("Head_L", armature, OpenMatrix4f.createRotatorDeg(witherBoss.yBodyRot - leftHeadYRot, Vec3f.Y_AXIS).rotateDeg(-leftHeadXRot, Vec3f.X_AXIS));
+		**/
 	}
 
 	@Override

@@ -31,6 +31,11 @@ public class ClientAnimationProperties {
 	public static final StaticAnimationProperty<List<TrailInfo>> TRAIL_EFFECT = new StaticAnimationProperty<List<TrailInfo>> ();
 	
 	/**
+	 * Limit the speed of head interpolation
+	 */
+	public static final StaticAnimationProperty<Float> HEAD_ROTATION_LIMIT = new StaticAnimationProperty<Float> ();
+	
+	/**
 	 * Multilayer for living animations (e.g. Greatsword holding animation should be played simultaneously with jumping animation) 
 	 */
 	public static final StaticAnimationProperty<StaticAnimation> MULTILAYER_ANIMATION = new StaticAnimationProperty<StaticAnimation> ();

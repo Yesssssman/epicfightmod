@@ -117,8 +117,8 @@ public class Armatures {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <A extends Armature> A getArmatureFor(EntityPatch<?> patch) {
-		return (A)ENTITY_TYPE_ARMATURE.get(patch.getOriginal().getType()).apply(patch).deepCopy();
+	public static <A extends Armature> A getArmatureFor(EntityPatch<?> entitypatch) {
+		return (A)ENTITY_TYPE_ARMATURE.get(entitypatch.getOriginal().getType()).apply(entitypatch).deepCopy();
 	}
 	
 	public static Function<EntityPatch<?>, Armature> getRegistry(EntityType<?> entityType) {

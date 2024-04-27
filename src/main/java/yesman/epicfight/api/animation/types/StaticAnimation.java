@@ -45,9 +45,8 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 	protected final Armature armature;
 	protected final int animationId;
 	protected final ResourceLocation registryName;
+	protected final StateSpectrum stateSpectrum = new StateSpectrum();
 	protected ResourceLocation resourceLocation;
-	
-	private final StateSpectrum stateSpectrum = new StateSpectrum();
 	
 	public StaticAnimation() {
 		super(0.0F, true);

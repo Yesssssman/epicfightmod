@@ -73,7 +73,10 @@ public class AnimationPlayer {
 	}
 	
 	public Pose getCurrentPose(LivingEntityPatch<?> entitypatch, float partialTicks) {
-		return this.play.getPoseByTime(entitypatch, this.prevElapsedTime + (this.elapsedTime - this.prevElapsedTime) * partialTicks, partialTicks);
+		Pose pose = this.play.getPoseByTime(entitypatch, this.prevElapsedTime + (this.elapsedTime - this.prevElapsedTime) * partialTicks, partialTicks);
+		entitypatch.poseTick(this.play, pose);
+		
+		return pose;
 	}
 	
 	public float getElapsedTime() {

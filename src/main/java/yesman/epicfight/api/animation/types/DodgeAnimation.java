@@ -39,6 +39,7 @@ public class DodgeAnimation extends ActionAnimation {
 			.addState(EntityState.CAN_BASIC_ATTACK, false)
 			.addState(EntityState.CAN_SKILL_EXECUTION, false)
 			.addState(EntityState.INACTION, true)
+			.addState(EntityState.FIXED_POV, true)
 			.newTimePair(0.0F, Float.MAX_VALUE)
 			.addState(EntityState.ATTACK_RESULT, DODGEABLE_SOURCE_VALIDATOR);
 

@@ -22,6 +22,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.client.gui.datapack.widgets.Grid;
+import yesman.epicfight.client.gui.datapack.widgets.Static;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.HorizontalSizing;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.VerticalSizing;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
@@ -45,7 +46,7 @@ public class AttributeScreen extends Screen {
 		this.font = parentScreen.getMinecraft().font;
 		
 		this.stylesGrid = Grid.builder(this, parentScreen.getMinecraft())
-								.xy1(20, 50)
+								.xy1(20, 60)
 								.xy2(90, 50)
 								.horizontalSizing(HorizontalSizing.LEFT_WIDTH)
 								.verticalSizing(VerticalSizing.TOP_BOTTOM)
@@ -80,7 +81,7 @@ public class AttributeScreen extends Screen {
 								.build();
 		
 		this.attributesGrid = Grid.builder(this, parentScreen.getMinecraft())
-									.xy1(120, 50)
+									.xy1(120, 60)
 									.xy2(20, 50)
 									.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
 									.verticalSizing(VerticalSizing.TOP_BOTTOM)
@@ -110,7 +111,8 @@ public class AttributeScreen extends Screen {
 										grid.setGridFocus(rowposition, "attribute");
 									})
 									.pressRemove((grid, button) -> {
-										grid.removeRow((removedRow) -> this.styles.get(this.stylesGrid.getRowposition()).getPackValue().remove(grid.getValue(removedRow, "attribute")));
+										this.styles.get(this.stylesGrid.getRowposition()).getPackValue().remove(grid.getValue(grid.getRowposition(), "attribute"));
+										grid.removeRow((removedRow) -> {});
 									})
 									.build();
 		
@@ -130,6 +132,12 @@ public class AttributeScreen extends Screen {
 	@Override
 	protected void init() {
 		this.stylesGrid.resize(this.getRectangle());
+		this.attributesGrid.resize(this.getRectangle());
+		
+		this.addRenderableWidget(new Static(this.font, 20, 60, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.styles")));
+		this.addRenderableWidget(this.stylesGrid);
+		this.addRenderableWidget(new Static(this.font, 120, 60, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.attributes")));
+		this.addRenderableWidget(this.attributesGrid);
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {
 			Set<String> styles = Sets.newHashSet();
@@ -161,9 +169,6 @@ public class AttributeScreen extends Screen {
 															this.minecraft.setScreen(this);
 														}, 180, 70));
 		}).pos(this.width / 2 + 2, this.height - 32).size(160, 21).build());
-		
-		this.addRenderableWidget(this.stylesGrid);
-		this.addRenderableWidget(this.attributesGrid);
 	}
 	
 	@Override

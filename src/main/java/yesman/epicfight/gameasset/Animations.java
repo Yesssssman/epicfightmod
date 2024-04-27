@@ -90,6 +90,7 @@ import yesman.epicfight.api.animation.types.procedural.EnderDragonDeathAnimation
 import yesman.epicfight.api.animation.types.procedural.EnderDragonDynamicActionAnimation;
 import yesman.epicfight.api.animation.types.procedural.EnderDraonWalkAnimation;
 import yesman.epicfight.api.animation.types.procedural.IKInfo;
+import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
 import yesman.epicfight.api.collider.OBBCollider;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
 import yesman.epicfight.api.utils.HitEntityList;
@@ -147,9 +148,6 @@ public class Animations {
 			return this.animatinoClip;
 		}
 	};
-	
-	//bokken1 "0.1$F,0.15$F,0.25$F,0.4$F,null,Tool_R$yesman.epicfight.api.animation.Joint,biped/combat/bokken_auto1$java.lang.String,epicfight:entity/biped$yesman.epicfight.api.model.Armature"
-	//bokken2 "0.1$F,0.15$F,0.25$F,0.4$F,null,Tool_R$yesman.epicfight.api.animation.Joint,biped/combat/bokken_auto2$java.lang.String,epicfight:entity/biped$yesman.epicfight.api.model.Armature"
 	
 	public static StaticAnimation BIPED_IDLE;
 	public static StaticAnimation BIPED_WALK;
@@ -558,8 +556,8 @@ public class Animations {
 		BIPED_DIG = new SelectiveAnimation((entitypatch) -> entitypatch.getOriginal().swingingArm == InteractionHand.OFF_HAND ? 1 : 0, "biped/living/dig", BIPED_DIG_MAINHAND, BIPED_DIG_OFFHAND);
 		BIPED_BOW_AIM = new AimAnimation(false, "biped/combat/bow_aim_mid", "biped/combat/bow_aim_up", "biped/combat/bow_aim_down", "biped/combat/bow_aim_lying", biped);
 		BIPED_BOW_SHOT = new ReboundAnimation(0.04F, false, "biped/combat/bow_shot_mid", "biped/combat/bow_shot_up", "biped/combat/bow_shot_down", "biped/combat/bow_shot_lying", biped);
-		BIPED_DRINK = new MirrorAnimation(0.35F, true, "biped/living/drink", "biped/living/drink_mainhand", "biped/living/drink_offhand", biped);
-		BIPED_EAT = new MirrorAnimation(0.35F, true, "biped/living/eat", "biped/living/eat_mainhand", "biped/living/eat_offhand", biped);
+		BIPED_DRINK = new MirrorAnimation(0.35F, true, "biped/living/drink", "biped/living/drink_mainhand", "biped/living/drink_offhand", biped).newTimePair(0.0F, 10.0F).addProperty(ClientAnimationProperties.HEAD_ROTATION_LIMIT, 15.0F).addState(EntityState.FIXED_POV, true);
+		BIPED_EAT = new MirrorAnimation(0.35F, true, "biped/living/eat", "biped/living/eat_mainhand", "biped/living/eat_offhand", biped).newTimePair(0.0F, 10.0F).addProperty(ClientAnimationProperties.HEAD_ROTATION_LIMIT, 15.0F).addState(EntityState.FIXED_POV, true);
 		BIPED_SPYGLASS_USE = new MirrorAnimation(0.15F, true, "biped/living/spyglass", "biped/living/spyglass_mainhand", "biped/living/spyglass_offhand", biped)
 				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, (self, entitypatch, speed, elapsedTime) -> {
 					if (self instanceof LinkAnimation) {
@@ -591,7 +589,10 @@ public class Animations {
 
 						pose.getJointTransformData().putAll(rawPose.getJointTransformData());
 					}
-				});
+				})
+				.addProperty(ClientAnimationProperties.HEAD_ROTATION_LIMIT, 15.0F)
+				.newTimePair(0.0F, 10.0F)
+				.addState(EntityState.FIXED_POV, true);
 		BIPED_CROSSBOW_AIM = new AimAnimation(false, "biped/combat/crossbow_aim_mid", "biped/combat/crossbow_aim_up", "biped/combat/crossbow_aim_down", "biped/combat/crossbow_aim_lying", biped);
 		BIPED_CROSSBOW_SHOT = new ReboundAnimation(false, "biped/combat/crossbow_shot_mid", "biped/combat/crossbow_shot_up", "biped/combat/crossbow_shot_down", "biped/combat/crossbow_shot_lying", biped);
 		BIPED_CROSSBOW_RELOAD = new StaticAnimation(false, "biped/combat/crossbow_reload", biped);
@@ -756,6 +757,7 @@ public class Animations {
 				.addStateRemoveOld(EntityState.MOVEMENT_LOCKED, false)
 				.newTimePair(0.0F, 0.5F)
 				.addStateRemoveOld(EntityState.INACTION, true)
+				.addStateRemoveOld(EntityState.FIXED_POV, true)
 				.addEvents(StaticAnimationProperty.ON_BEGIN_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
 					Vec3 pos = entitypatch.getOriginal().position();
 					
@@ -766,6 +768,7 @@ public class Animations {
 				.addStateRemoveOld(EntityState.MOVEMENT_LOCKED, false)
 				.newTimePair(0.0F, 0.5F)
 				.addStateRemoveOld(EntityState.INACTION, true)
+				.addStateRemoveOld(EntityState.FIXED_POV, true)
 				.addEvents(StaticAnimationProperty.ON_BEGIN_EVENTS, AnimationEvent.create((entitypatch, animation, params) -> {
 					Vec3 pos = entitypatch.getOriginal().position();
 					
@@ -1376,7 +1379,7 @@ public class Animations {
 		
 		VEX_NEUTRALIZED = new LongHitAnimation(0.1F, "vex/neutralized", vex);
 		
-		WITCH_DRINKING = new StaticAnimation(0.16F, false, "witch/drink", biped);
+		WITCH_DRINKING = new StaticAnimation(0.16F, false, "witch/drink", biped).newTimePair(0.0F, 10.0F).addState(EntityState.FIXED_POV, true);
 		
 		WITHER_SKELETON_ATTACK1 = new AttackAnimation(0.16F, 0.2F, 0.3F, 0.41F, 0.7F, ColliderPreset.SWORD, biped.toolR, "wither_skeleton/sword_attack1", biped)
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER);
