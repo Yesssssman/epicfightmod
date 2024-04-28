@@ -17,7 +17,6 @@ public class GuardAnimation extends MainFrameAnimation {
 			.addState(EntityState.UPDATE_LIVING_MOTION, false)
 			.addState(EntityState.CAN_BASIC_ATTACK, false)
 			.newTimePair(0.0F, Float.MAX_VALUE)
-			.addState(EntityState.INACTION, true)
-			.addState(EntityState.FIXED_POV, true);
+			.addState(EntityState.INACTION, true);
 	}
 }

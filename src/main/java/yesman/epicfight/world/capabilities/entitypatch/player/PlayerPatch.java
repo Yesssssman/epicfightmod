@@ -546,16 +546,6 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	@Override
-	public float getYBodyRotO() {
-		return this.oModelYRot;
-	}
-	
-	@Override
-	public float getYBodyRot() {
-		return this.modelYRot;
-	}
-	
-	@Override
 	public StaticAnimation getHitAnimation(StunType stunType) {
 		if (this.original.getVehicle() != null) {
 			return Animations.BIPED_HIT_ON_MOUNT;

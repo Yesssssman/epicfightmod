@@ -78,6 +78,8 @@ public class AimAnimation extends StaticAnimation {
 	
 	@Override
 	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
+		super.modifyPose(animation, pose, entitypatch, time, partialTicks);
+		
 		if (!entitypatch.isFirstPerson()) {
 			JointTransform chest = pose.getOrDefaultTransform("Chest");
 			JointTransform head = pose.getOrDefaultTransform("Head");

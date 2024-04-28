@@ -121,6 +121,11 @@ public abstract class AnimationProperty<T> {
 		 * This property will be called both in client and server when modifying the pose
 		 */
 		public static final StaticAnimationProperty<PoseModifier> POSE_MODIFIER = new StaticAnimationProperty<PoseModifier> ();
+		
+		/**
+		 * Fix the head rotation to the player's body rotation
+		 */
+		public static final StaticAnimationProperty<Boolean> FIXED_HEAD_ROTATION = new StaticAnimationProperty<Boolean> ();
 	}
 	
 	public static class ActionAnimationProperty<T> extends AnimationProperty<T> {

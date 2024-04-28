@@ -14,6 +14,7 @@ import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.property.MoveCoordFunctions;
 import yesman.epicfight.api.animation.property.MoveCoordFunctions.MoveCoordGetter;
 import yesman.epicfight.api.animation.property.MoveCoordFunctions.MoveCoordSetter;
@@ -49,8 +50,9 @@ public class ActionAnimation extends MainFrameAnimation {
 			.newTimePair(0.01F, postDelay)
 			.addState(EntityState.TURNING_LOCKED, true)
 			.newTimePair(0.0F, Float.MAX_VALUE)
-			.addState(EntityState.INACTION, true)
-			.addState(EntityState.FIXED_POV, true);
+			.addState(EntityState.INACTION, true);
+		
+		this.addProperty(StaticAnimationProperty.FIXED_HEAD_ROTATION, true);
 	}
 	
 	public <V> ActionAnimation addProperty(ActionAnimationProperty<V> propertyType, V value) {
@@ -131,6 +133,8 @@ public class ActionAnimation extends MainFrameAnimation {
 	
 	@Override
 	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
+		super.modifyPose(animation, pose, entitypatch, time, partialTicks);
+		
 		if (this.getProperty(ActionAnimationProperty.COORD).isEmpty()) {
 			JointTransform jt = pose.getOrDefaultTransform("Root");
 			Vec3f jointPosition = jt.translation();

@@ -45,7 +45,6 @@ public class Layer {
 	
 	public void playAnimation(StaticAnimation nextAnimation, LivingEntityPatch<?> entitypatch, float convertTimeModifier) {
 		Pose lastPose = entitypatch.getArmature().getPose(1.0F);
-		
 		this.animationPlayer.getAnimation().end(entitypatch, nextAnimation, this.animationPlayer.isEnd());
 		this.resume();
 		nextAnimation.begin(entitypatch);
@@ -261,6 +260,10 @@ public class Layer {
 		
 		public Layer getLayer(Priority priority) {
 			return this.compositeLayers.get(priority);
+		}
+		
+		public Priority getBaseLayerPriority() {
+			return this.baseLayerPriority;
 		}
 		
 		@Override

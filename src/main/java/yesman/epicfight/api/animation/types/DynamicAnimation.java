@@ -44,7 +44,6 @@ public abstract class DynamicAnimation {
 	
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		Pose pose = this.getRawPose(time);
-		
 		this.modifyPose(this, pose, entitypatch, time, partialTicks);
 		
 		return pose;

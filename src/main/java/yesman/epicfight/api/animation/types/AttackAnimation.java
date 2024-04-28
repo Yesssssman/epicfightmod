@@ -121,7 +121,6 @@ public class AttackAnimation extends ActionAnimation {
 			.addState(EntityState.CAN_BASIC_ATTACK, false)
 			.newTimePair(phase.start, phase.end)
 			.addState(EntityState.INACTION, true)
-			.addState(EntityState.FIXED_POV, true)
 			.newTimePair(phase.antic, phase.end)
 			.addState(EntityState.TURNING_LOCKED, true)
 			.newTimePair(preDelay, phase.contact + 0.01F)

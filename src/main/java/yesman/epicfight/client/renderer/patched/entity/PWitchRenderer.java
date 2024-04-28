@@ -17,13 +17,6 @@ public class PWitchRenderer extends PatchedLivingEntityRenderer<Witch, WitchPatc
 		this.addPatchedLayer(WitchItemLayer.class, new PatchedItemInHandLayer<>());
 	}
 	
-	/**
-	@Override
-	protected void setJointTransforms(WitchPatch entitypatch, Armature armature, float partialTicks) {
-		this.setJointTransform("Head", armature, entitypatch.getHeadMatrix(partialTicks));
-	}
-	**/
-	
 	@Override
 	public HumanoidMesh getMesh(WitchPatch entitypatch) {
 		return Meshes.WITCH;

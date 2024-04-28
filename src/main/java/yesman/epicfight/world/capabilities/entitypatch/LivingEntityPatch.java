@@ -43,6 +43,7 @@ import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.ServerAnimator;
+import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
@@ -88,9 +89,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	protected Vec3 lastAttackPosition;
 	protected EpicFightDamageSource epicFightDamageSource;
 	protected boolean isLastAttackSuccess;
-	protected float xRotHead;
-	protected float yRotHead;
-	
+
 	public LivingMotion currentLivingMotion = LivingMotions.IDLE;
 	public LivingMotion currentCompositeMotion = LivingMotions.IDLE;
 	
@@ -143,29 +142,12 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	public void poseTick(DynamicAnimation animation, Pose pose) {
-		if (pose.getJointTransformData().containsKey("Head")) {
-			Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(-this.getXRotHead(), Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(this.getYBodyRot() - this.getYRotHead(), Vec3f.Y_AXIS)).toQuaternion();
-			pose.getOrDefaultTransform("Head").frontResult(JointTransform.getRotation(headRotation), OpenMatrix4f::mul);
+		if (pose.getJointTransformData().containsKey("Head") && animation instanceof StaticAnimation) {
+			if (!animation.getProperty(StaticAnimationProperty.FIXED_HEAD_ROTATION).orElse(false)) {
+				Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(-this.original.getXRot(), Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(this.original.yBodyRot - this.original.yHeadRot, Vec3f.Y_AXIS)).toQuaternion();
+				pose.getOrDefaultTransform("Head").frontResult(JointTransform.getRotation(headRotation), OpenMatrix4f::mul);
+			}
 		}
-	}
-	
-	@Override
-	protected void clientTick(LivingEvent.LivingTickEvent event) {
-		float destXRotHead;
-		float destYRotHead;
-		
-		if (this.getEntityState().fixedPov()) {
-			destXRotHead = 0.0F;
-			destYRotHead = this.getYBodyRot();
-		} else {
-			destXRotHead = this.original.getXRot();
-			destYRotHead = this.original.yHeadRot;
-		}
-		
-		this.animator.getPlayerFor(null);
-		
-		this.xRotHead += Mth.clamp(Mth.wrapDegrees(destXRotHead - this.xRotHead), -15.0F, 15.0F);
-		this.yRotHead += Mth.clamp(Mth.wrapDegrees(destYRotHead - this.yRotHead), -15.0F, 15.0F);
 	}
 	
 	public void onFall(LivingFallEvent event) {
@@ -407,22 +389,6 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	
 	public float getCameraYRot() {
 		return Mth.wrapDegrees(this.original.getYRot());
-	}
-	
-	public float getXRotHead() {
-		return this.xRotHead;
-	}
-	
-	public float getYRotHead() {
-		return this.yRotHead;
-	}
-	
-	public float getYBodyRotO() {
-		return this.original.yBodyRotO;
-	}
-	
-	public float getYBodyRot() {
-		return this.original.yBodyRot;
 	}
 	
 	@Override

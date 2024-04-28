@@ -4,8 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
-import org.joml.Quaternionf;
-
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -27,15 +25,10 @@ import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.TridentItem;
 import yesman.epicfight.api.animation.AnimationProvider;
-import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
-import yesman.epicfight.api.animation.Pose;
-import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
-import yesman.epicfight.api.utils.math.OpenMatrix4f;
-import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.model.armature.HumanoidArmature;
@@ -240,14 +233,6 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 			} else {
 				this.setAIAsInfantry(this.original.getMainHandItem().getItem() instanceof ProjectileWeaponItem);
 			}
-		}
-	}
-	
-	@Override
-	public void poseTick(DynamicAnimation animation, Pose pose) {
-		if (pose.getJointTransformData().containsKey("Head")) {
-			Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(-this.getXRotHead(), Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(this.getYBodyRot() - this.getYRotHead(), Vec3f.Y_AXIS)).toQuaternion();
-			pose.getOrDefaultTransform("Head").frontResult(JointTransform.getRotation(headRotation), OpenMatrix4f::mul);
 		}
 	}
 	
