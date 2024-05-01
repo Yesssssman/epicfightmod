@@ -5,6 +5,7 @@ import java.util.Locale;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.events.GuiEventListener;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
@@ -27,6 +28,7 @@ import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.VerticalS
 import yesman.epicfight.client.gui.datapack.widgets.Static;
 import yesman.epicfight.data.conditions.Condition.LivingEntityCondition;
 import yesman.epicfight.data.conditions.EpicFightConditions;
+import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.Style;
 
@@ -74,7 +76,7 @@ public class StylesScreen extends Screen {
 								.rowEditable(true)
 								.transparentBackground(false)
 								.rowpositionChanged((rowposition, values) -> this.inputComponentsList.importTag(rootTag.getList("cases", Tag.TAG_COMPOUND).getCompound(rowposition)))
-								.addColumn(Grid.combo("style", Style.ENUM_MANAGER.universalValues()).valueChanged((event) -> {
+								.addColumn(Grid.combo("style", ParseUtil.remove(Style.ENUM_MANAGER.universalValues(), CapabilityItem.Styles.COMMON)).valueChanged((event) -> {
 												ParseUtil.getOrDefaultTag(rootTag, "cases", new ListTag()).getCompound(event.rowposition).put("style", StringTag.valueOf(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT)));
 											}).defaultVal(Styles.ONE_HAND))
 								.pressAdd((grid, button) -> {
@@ -95,13 +97,13 @@ public class StylesScreen extends Screen {
 								.build();
 		
 		this.defaultStyle = new ComboBox<>(parentScreen, this.font, 55, 116, 15, 53, HorizontalSizing.LEFT_WIDTH, VerticalSizing.HEIGHT_BOTTOM, 8, Component.translatable("datapack_edit.weapon_type.styles.default"),
-											new ArrayList<>(Style.ENUM_MANAGER.universalValues()), ParseUtil::snakeToSpacedCamel, (style) -> rootTag.putString("default", ParseUtil.nullParam(style).toLowerCase(Locale.ROOT)));
+											new ArrayList<>(ParseUtil.remove(Style.ENUM_MANAGER.universalValues(), CapabilityItem.Styles.COMMON)), ParseUtil::snakeToSpacedCamel, (style) -> rootTag.putString("default", ParseUtil.nullParam(style).toLowerCase(Locale.ROOT)));
 		
 		this.font = parentScreen.getMinecraft().font;
 		
 		final Grid parameterGrid = Grid.builder(this, parentScreen.getMinecraft())
 										.xy1(4, 40)
-										.xy2(6, 100)
+										.xy2(1, 100)
 										.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
 										.rowHeight(26)
 										.rowEditable(false)
@@ -119,8 +121,8 @@ public class StylesScreen extends Screen {
 		
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 80, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.styles.condition")));
-		this.inputComponentsList.addComponentCurrentRow(new PopupBox.RegistryPopupBox<>(this, this.font, this.inputComponentsList.nextStart(5), 7, 60, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.condition"),
-																		EpicFightConditions.REGISTRY.get(), (conditionProvider) -> {
+		this.inputComponentsList.addComponentCurrentRow(new PopupBox.RegistryPopupBox<>(this, this.font, this.inputComponentsList.nextStart(5), 1, 60, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.condition"),
+																		EpicFightConditions.REGISTRY.get(), (name, conditionProvider) -> {
 																			if (conditionProvider != null) {
 																				parameterGrid.reset();
 																				conditionProvider.get().getAcceptingParameters().forEach((e) -> parameterGrid.addRowWithDefaultValues("parameter_key", e.getKey()));
@@ -165,7 +167,7 @@ public class StylesScreen extends Screen {
 		this.stylesGrid.resize(screenRectangle);
 		this.defaultStyle.resize(screenRectangle);
 		
-		this.inputComponentsList.updateSize(screenRectangle.width() - 200, screenRectangle.height(), screenRectangle.top() + 37, screenRectangle.height() - 45);
+		this.inputComponentsList.updateSize(screenRectangle.width() - 190, screenRectangle.height(), screenRectangle.top() + 37, screenRectangle.height() - 45);
 		this.inputComponentsList.setLeftPos(180);
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {
@@ -176,10 +178,10 @@ public class StylesScreen extends Screen {
 			this.minecraft.setScreen(this.parentScreen);
 		}).pos(this.width / 2 + 2, this.height - 32).size(160, 21).build());
 		
-		Static defaultStyleTitle = new Static(this.font, 12, 116, 15, 53, HorizontalSizing.LEFT_WIDTH, VerticalSizing.HEIGHT_BOTTOM, Component.translatable("datapack_edit.weapon_type.styles.default"));
+		Static defaultStyleTitle = new Static(this.font, 12, 116, 15, 53, HorizontalSizing.LEFT_WIDTH, VerticalSizing.HEIGHT_BOTTOM, "datapack_edit.weapon_type.styles.default");
 		defaultStyleTitle.resize(screenRectangle);
 		
-		this.addRenderableWidget(new Static(this.font, 12, 60, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.styles")));
+		this.addRenderableWidget(new Static(this.font, 12, 60, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.styles"), Component.translatable("datapack_edit.styles.tooltip.optional")));
 		this.addRenderableWidget(this.stylesGrid);
 		this.addRenderableWidget(defaultStyleTitle);
 		this.addRenderableWidget(this.defaultStyle);
@@ -189,6 +191,37 @@ public class StylesScreen extends Screen {
 	@Override
 	public void onClose() {
 		this.minecraft.setScreen(this.parentScreen);
+	}
+	
+	@Override
+	public boolean mouseClicked(double mouseX, double mouseY, int action) {
+		if (this.getFocused() != null) {
+			if (this.getFocused().mouseClicked(mouseX, mouseY, action)) {
+				if (action == 0) {
+					this.setDragging(true);
+				}
+
+				return true;
+			}
+		}
+		
+		for (GuiEventListener guieventlistener : this.children()) {
+			if (guieventlistener == this.getFocused()) {
+				continue;
+			}
+			
+			if (guieventlistener.mouseClicked(mouseX, mouseY, action)) {
+				this.setFocused(guieventlistener);
+				
+				if (action == 0) {
+					this.setDragging(true);
+				}
+
+				return true;
+			}
+		}
+
+		return false;
 	}
 	
 	@Override

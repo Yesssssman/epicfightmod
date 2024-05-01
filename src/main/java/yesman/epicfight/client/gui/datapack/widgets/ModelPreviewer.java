@@ -82,7 +82,7 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.damagesource.StunType;
 
 @OnlyIn(Dist.CLIENT)
-public class AnimatedModelPlayer extends AbstractWidget implements ResizableComponent {
+public class ModelPreviewer extends AbstractWidget implements ResizableComponent {
 	public final NoEntityAnimator animator;
 	private final ModelRenderTarget modelRenderTarget;
 	private final List<StaticAnimation> animationsToPlay = Lists.newArrayList();
@@ -102,7 +102,7 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 	private List<TrailInfo> trailInfoList = Lists.newArrayList();
 	private Item item;
 	
-	public AnimatedModelPlayer(int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Armature armature, AnimatedMesh mesh) {
+	public ModelPreviewer(int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Armature armature, AnimatedMesh mesh) {
 		super(x1, y1, x2, y2, Component.literal("datapack_edit.weapon_type.combo.animation_player"));
 		
 		FakeEntityPatch patch = new FakeEntityPatch(armature);
@@ -462,7 +462,7 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 		}
 		
 		public void setAnimator() {
-			this.animator = AnimatedModelPlayer.this.animator;
+			this.animator = ModelPreviewer.this.animator;
 		}
 		
 		@Override
@@ -500,6 +500,10 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 		}
 		
 		@Override
+		public void poseTick(DynamicAnimation animation, Pose pose, float time) {
+		}
+		
+		@Override
 		public void updateEntityState() {
 		}
 	}
@@ -515,16 +519,16 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 			this.baseLayer.update(this.entitypatch);
 			
 			if (this.baseLayer.animationPlayer.isEnd() && this.baseLayer.getNextAnimation() == null) {
-				StaticAnimation toPlay = AnimatedModelPlayer.this.index > -1 && AnimatedModelPlayer.this.index < AnimatedModelPlayer.this.animationsToPlay.size() ?
-											AnimatedModelPlayer.this.animationsToPlay.get(AnimatedModelPlayer.this.index) : Animations.DUMMY_ANIMATION;
+				StaticAnimation toPlay = ModelPreviewer.this.index > -1 && ModelPreviewer.this.index < ModelPreviewer.this.animationsToPlay.size() ?
+											ModelPreviewer.this.animationsToPlay.get(ModelPreviewer.this.index) : Animations.DUMMY_ANIMATION;
 				
 				this.baseLayer.playAnimation(toPlay, this.entitypatch, 0.0F);
 				
-				if (!AnimatedModelPlayer.this.trailInfoList.isEmpty()) {
-					for (TrailInfo trailInfo : AnimatedModelPlayer.this.trailInfoList) {
+				if (!ModelPreviewer.this.trailInfoList.isEmpty()) {
+					for (TrailInfo trailInfo : ModelPreviewer.this.trailInfoList) {
 						if (trailInfo.playable()) {
-							CustomTrailParticle trail = new CustomTrailParticle(AnimatedModelPlayer.this.getArmature().searchJointByName(trailInfo.joint), toPlay, trailInfo);
-							AnimatedModelPlayer.this.trailParticles.add(trail);
+							CustomTrailParticle trail = new CustomTrailParticle(ModelPreviewer.this.getArmature().searchJointByName(trailInfo.joint), toPlay, trailInfo);
+							ModelPreviewer.this.trailParticles.add(trail);
 						} else {
 							toPlay.getProperty(ClientAnimationProperties.TRAIL_EFFECT).ifPresent(trailInfos -> {
 								for (TrailInfo info : trailInfos) {
@@ -535,8 +539,8 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 									TrailInfo combinedTrailInfo = trailInfo.overwrite(info);
 
 									if (combinedTrailInfo.playable()) {
-										CustomTrailParticle trail = new CustomTrailParticle(AnimatedModelPlayer.this.getArmature().searchJointByName(combinedTrailInfo.joint), toPlay, combinedTrailInfo);
-										AnimatedModelPlayer.this.trailParticles.add(trail);
+										CustomTrailParticle trail = new CustomTrailParticle(ModelPreviewer.this.getArmature().searchJointByName(combinedTrailInfo.joint), toPlay, combinedTrailInfo);
+										ModelPreviewer.this.trailParticles.add(trail);
 									}
 								}
 							});
@@ -544,7 +548,7 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 					}
 				}
 				
-				AnimatedModelPlayer.this.index = (AnimatedModelPlayer.this.index + 1) % AnimatedModelPlayer.this.animationsToPlay.size();
+				ModelPreviewer.this.index = (ModelPreviewer.this.index + 1) % ModelPreviewer.this.animationsToPlay.size();
 			}
 			
 			this.poseTick();
@@ -809,10 +813,10 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 			RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 			RenderSystem.setShaderTexture(0, this.colorTextureId);
 			
-			float left = AnimatedModelPlayer.this._getX();
-			float top = AnimatedModelPlayer.this._getY();
-			float right = left + AnimatedModelPlayer.this._getWidth();
-			float bottom = top + AnimatedModelPlayer.this._getHeight();
+			float left = ModelPreviewer.this._getX();
+			float top = ModelPreviewer.this._getY();
+			float right = left + ModelPreviewer.this._getWidth();
+			float bottom = top + ModelPreviewer.this._getHeight();
 			
 			float u = (float) this.viewWidth / (float) this.width;
 			float v = (float) this.viewHeight / (float) this.height;
@@ -838,12 +842,12 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 	class CustomTrailParticle extends TrailParticle {
 		@SuppressWarnings("deprecation")
 		protected CustomTrailParticle(Joint joint, StaticAnimation animation, TrailInfo trailInfo) {
-			super(AnimatedModelPlayer.this.getArmature(), joint, animation, trailInfo);
+			super(ModelPreviewer.this.getArmature(), joint, animation, trailInfo);
 		}
 		
 		@Override
 		public void tick() {
-			AnimationPlayer animPlayer = AnimatedModelPlayer.this.animator.getPlayerFor(null);
+			AnimationPlayer animPlayer = ModelPreviewer.this.animator.getPlayerFor(null);
 			this.visibleTrailEdges.removeIf(v -> !v.isAlive());
 			
 			if (this.animationEnd) {
@@ -871,12 +875,12 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 			}
 			
 			TrailInfo trailInfo = this.trailInfo;
-			Pose prevPose = AnimatedModelPlayer.this.getArmature().getPrevPose();
-			Pose middlePose = AnimatedModelPlayer.this.getArmature().getPose(0.5F);
-			Pose currentPose = AnimatedModelPlayer.this.getArmature().getCurrentPose();
-			OpenMatrix4f prevJointTf = AnimatedModelPlayer.this.getArmature().getBindedTransformFor(prevPose, this.joint);
-			OpenMatrix4f middleJointTf = AnimatedModelPlayer.this.getArmature().getBindedTransformFor(middlePose, this.joint);
-			OpenMatrix4f currentJointTf = AnimatedModelPlayer.this.getArmature().getBindedTransformFor(currentPose, this.joint);
+			Pose prevPose = ModelPreviewer.this.getArmature().getPrevPose();
+			Pose middlePose = ModelPreviewer.this.getArmature().getPose(0.5F);
+			Pose currentPose = ModelPreviewer.this.getArmature().getCurrentPose();
+			OpenMatrix4f prevJointTf = ModelPreviewer.this.getArmature().getBindedTransformFor(prevPose, this.joint);
+			OpenMatrix4f middleJointTf = ModelPreviewer.this.getArmature().getBindedTransformFor(middlePose, this.joint);
+			OpenMatrix4f currentJointTf = ModelPreviewer.this.getArmature().getBindedTransformFor(currentPose, this.joint);
 			Vec3 prevStartPos = OpenMatrix4f.transform(prevJointTf, trailInfo.start);
 			Vec3 prevEndPos = OpenMatrix4f.transform(prevJointTf, trailInfo.end);
 			Vec3 middleStartPos = OpenMatrix4f.transform(middleJointTf, trailInfo.start);
@@ -1001,11 +1005,11 @@ public class AnimatedModelPlayer extends AbstractWidget implements ResizableComp
 		
 		@Override
 		protected void setupPoseStack(PoseStack poseStack, Camera camera, float partialTicks) {
-			float x = (float)AnimatedModelPlayer.this.xMove;
-			float y = (float)AnimatedModelPlayer.this.yMove;
-			float z = (float)AnimatedModelPlayer.this.zoom;
-			float xRot = AnimatedModelPlayer.this.xRot;
-			float yRot = AnimatedModelPlayer.this.yRot;
+			float x = (float)ModelPreviewer.this.xMove;
+			float y = (float)ModelPreviewer.this.yMove;
+			float z = (float)ModelPreviewer.this.zoom;
+			float xRot = ModelPreviewer.this.xRot;
+			float yRot = ModelPreviewer.this.yRot;
 			
 			poseStack.translate(x, y - 1.0D, z);
 			poseStack.mulPose(QuaternionUtils.XP.rotationDegrees(xRot));

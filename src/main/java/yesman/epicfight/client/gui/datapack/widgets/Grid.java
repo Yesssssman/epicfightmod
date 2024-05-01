@@ -892,7 +892,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		
 		@Override
 		public ResizableComponent createEditWidget(Screen owner, Font font, int x, int y, int height, Row row, String colName, T value) {
-			PopupBox.RegistryPopupBox<T> popup = new PopupBox.RegistryPopupBox<>(owner, font, x, this.width - 3, y, height, null, null, Component.literal("grid.popupEdit"), this.registry, (item) -> row.setValue(colName, item));
+			PopupBox.RegistryPopupBox<T> popup = new PopupBox.RegistryPopupBox<>(owner, font, x, this.width - 3, y, height, null, null, Component.literal("grid.popupEdit"), this.registry, (name, item) -> row.setValue(colName, item));
 			
 			popup.applyFilter(this.filter);
 			popup.setValue(value);
@@ -919,7 +919,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		
 		@Override
 		public ResizableComponent createEditWidget(Screen owner, Font font, int x, int y, int height, Row row, String colName, T value) {
-			P popup = this.popupBoxProvider.create(owner, font, x, this.width - 3, y, height, null, null, Component.literal("grid.popupEdit"), (item) -> row.setValue(colName, item));
+			P popup = this.popupBoxProvider.create(owner, font, x, this.width - 3, y, height, null, null, Component.literal("grid.popupEdit"), (name, item) -> row.setValue(colName, item));
 			
 			popup.applyFilter(this.filter);
 			popup.setValue(value);

@@ -28,7 +28,7 @@ import yesman.epicfight.api.animation.types.MainFrameAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.utils.ParseUtil;
-import yesman.epicfight.client.gui.datapack.widgets.AnimatedModelPlayer;
+import yesman.epicfight.client.gui.datapack.widgets.ModelPreviewer;
 import yesman.epicfight.client.gui.datapack.widgets.Grid;
 import yesman.epicfight.client.gui.datapack.widgets.PopupBox;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.HorizontalSizing;
@@ -44,7 +44,7 @@ public class LivingAnimationsScreen extends Screen {
 	private final Screen parentScreen;
 	private final Grid stylesGrid;
 	private Grid animationsGrid;
-	private final AnimatedModelPlayer animationModelPlayer;
+	private final ModelPreviewer modelPreviewer;
 	
 	private final List<PackEntry<String, CompoundTag>> styles = Lists.newArrayList();
 	private final CompoundTag rootTag;
@@ -56,7 +56,7 @@ public class LivingAnimationsScreen extends Screen {
 		this.rootTag = rootTag;
 		this.font = parentScreen.getMinecraft().font;
 		
-		this.animationModelPlayer = new AnimatedModelPlayer(106, 200, 60, 49, HorizontalSizing.LEFT_RIGHT, VerticalSizing.TOP_BOTTOM, Armatures.BIPED, Meshes.BIPED);
+		this.modelPreviewer = new ModelPreviewer(106, 200, 60, 49, HorizontalSizing.LEFT_RIGHT, VerticalSizing.TOP_BOTTOM, Armatures.BIPED, Meshes.BIPED);
 		
 		this.stylesGrid = Grid.builder(this, parentScreen.getMinecraft())
 								.xy1(12, 60)
@@ -69,8 +69,8 @@ public class LivingAnimationsScreen extends Screen {
 								.rowpositionChanged((rowposition, values) -> {
 									Grid.PackImporter importer = new Grid.PackImporter();
 									
-									for (Map.Entry<String, Tag> entry : this.styles.get(rowposition).getPackValue().tags.entrySet()) {
-										importer.newRow().newValue("living_motion", LivingMotion.ENUM_MANAGER.get(entry.getKey())).newValue("living_animation", ImportAnimationsScreen.byKey(entry.getValue().getAsString()));
+									for (Map.Entry<String, Tag> entry : this.styles.get(rowposition).getValue().tags.entrySet()) {
+										importer.newRow().newValue("living_motion", LivingMotion.ENUM_MANAGER.get(entry.getKey())).newValue("living_animation", DatapackEditScreen.byKey(entry.getValue().getAsString()));
 									}
 									
 									this.animationsGrid._setActive(true);
@@ -101,71 +101,72 @@ public class LivingAnimationsScreen extends Screen {
 									.rowHeight(21)
 									.rowEditable(true)
 									.transparentBackground(false)
-									.addColumn(Grid.combo("living_motion", LivingMotion.ENUM_MANAGER.universalValues())
+									.addColumn(Grid.combo("living_motion", List.of(LivingMotions.IDLE, LivingMotions.WALK, LivingMotions.RUN, LivingMotions.SNEAK, LivingMotions.SWIM, LivingMotions.FLOAT, LivingMotions.KNEEL, LivingMotions.FALL,
+											LivingMotions.SIT, LivingMotions.FLY, LivingMotions.CREATIVE_FLY, LivingMotions.CREATIVE_IDLE, LivingMotions.RELOAD, LivingMotions.AIM, LivingMotions.SHOT))
 													.valueChanged((event) -> {
-														CompoundTag tag = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
+														CompoundTag tag = this.styles.get(this.stylesGrid.getRowposition()).getValue();
 														String oldMotion = ParseUtil.nullParam(event.prevValue).toLowerCase(Locale.ROOT);
 														Tag animationTag = tag.get(oldMotion);
 														tag.remove(oldMotion);
 														tag.put(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT), animationTag == null ? StringTag.valueOf("") : animationTag);
 														
-														this.animationModelPlayer.clearAnimations();
-														this.animationModelPlayer.animator.getEntityPatch().currentLivingMotion = event.postValue;
-														this.animationModelPlayer.animator.getEntityPatch().currentCompositeMotion = event.postValue;
+														this.modelPreviewer.clearAnimations();
+														this.modelPreviewer.animator.getEntityPatch().currentLivingMotion = event.postValue;
+														this.modelPreviewer.animator.getEntityPatch().currentCompositeMotion = event.postValue;
 														
 														if (LIVING_ANIMTIONS.containsKey(event.postValue)) {
-															this.animationModelPlayer.addAnimationToPlay(LIVING_ANIMTIONS.get(event.postValue));
+															this.modelPreviewer.addAnimationToPlay(LIVING_ANIMTIONS.get(event.postValue));
 														}
 														
 														StaticAnimation livingAnimation = this.animationsGrid.getValue(event.rowposition, "living_animation");
 														
 														if (livingAnimation != null) {
-															this.animationModelPlayer.animator.playAnimation(livingAnimation, 0.0F);
+															this.modelPreviewer.animator.playAnimation(livingAnimation, 0.0F);
 														}
 													}).defaultVal(LivingMotions.IDLE))
 									.addColumn(Grid.popup("living_animation", PopupBox.AnimationPopupBox::new)
 													.filter((animation) -> !(animation instanceof MainFrameAnimation))
 													.editWidgetCreated((popupBox) -> popupBox.setModel(() -> Armatures.BIPED, () -> Meshes.BIPED))
 													.valueChanged((event) -> {
-														this.animationModelPlayer.clearAnimations();
+														this.modelPreviewer.clearAnimations();
 														
 														LivingMotion livingMotion = event.grid.getValue(event.rowposition, "living_motion");
-														CompoundTag tag = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
+														CompoundTag tag = this.styles.get(this.stylesGrid.getRowposition()).getValue();
 														tag.put(ParseUtil.nullParam(livingMotion).toLowerCase(Locale.ROOT), StringTag.valueOf(ParseUtil.nullOrToString(event.postValue, (animation) -> animation.getRegistryName().toString())));
 														
 														if (LIVING_ANIMTIONS.containsKey(livingMotion)) {
-															this.animationModelPlayer.addAnimationToPlay(LIVING_ANIMTIONS.get(livingMotion));
+															this.modelPreviewer.addAnimationToPlay(LIVING_ANIMTIONS.get(livingMotion));
 														}
 														
 														if (event.postValue != null) {
-															this.animationModelPlayer.addAnimationToPlay(event.postValue);
+															this.modelPreviewer.addAnimationToPlay(event.postValue);
 														}
 													})
 													.toDisplayText((animation) -> animation == null ? "" : animation.getRegistryName().toString())
 													.width(150))
 									.pressAdd((grid, button) -> {
-										this.styles.get(this.stylesGrid.getRowposition()).getPackValue().put("", StringTag.valueOf(""));
+										this.styles.get(this.stylesGrid.getRowposition()).getValue().put("", StringTag.valueOf(""));
 										int rowposition = grid.addRow();
 										grid.setGridFocus(rowposition, "living_animation");
 									})
 									.pressRemove((grid, button) -> {
-										this.styles.get(this.stylesGrid.getRowposition()).getPackValue().remove(ParseUtil.nullParam(grid.getValue(grid.getRowposition(), "living_motion")).toLowerCase(Locale.ROOT));
+										this.styles.get(this.stylesGrid.getRowposition()).getValue().remove(ParseUtil.nullParam(grid.getValue(grid.getRowposition(), "living_motion")).toLowerCase(Locale.ROOT));
 										grid.removeRow();
 									})
 									.rowpositionChanged((rowposition, values) -> {
-										this.animationModelPlayer.clearAnimations();
+										this.modelPreviewer.clearAnimations();
 										LivingMotion livingMotion = (LivingMotion)values.get("living_motion");
-										this.animationModelPlayer.animator.getEntityPatch().currentLivingMotion = livingMotion;
-										this.animationModelPlayer.animator.getEntityPatch().currentCompositeMotion = livingMotion;
+										this.modelPreviewer.animator.getEntityPatch().currentLivingMotion = livingMotion;
+										this.modelPreviewer.animator.getEntityPatch().currentCompositeMotion = livingMotion;
 										
 										if (LIVING_ANIMTIONS.containsKey(livingMotion)) {
-											this.animationModelPlayer.addAnimationToPlay(LIVING_ANIMTIONS.get(livingMotion));
+											this.modelPreviewer.addAnimationToPlay(LIVING_ANIMTIONS.get(livingMotion));
 										}
 										
 										StaticAnimation animation = (StaticAnimation)values.get("living_animation");
 										
 										if (animation != null) {
-											this.animationModelPlayer.animator.playAnimation(animation, 0.0F);
+											this.modelPreviewer.animator.playAnimation(animation, 0.0F);
 										}
 									})
 									.build();
@@ -190,25 +191,25 @@ public class LivingAnimationsScreen extends Screen {
 		
 		this.stylesGrid.resize(screenRectangle);
 		this.animationsGrid.resize(screenRectangle);
-		this.animationModelPlayer.resize(screenRectangle);
+		this.modelPreviewer.resize(screenRectangle);
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {
 			Set<String> styles = Sets.newHashSet();
 			
 			for (PackEntry<String, CompoundTag> entry : this.styles) {
-				if (styles.contains(entry.getPackKey())) {
-					this.minecraft.setScreen(new MessageScreen<>("Save Failed", "Unable to save because of duplicated style: " + entry.getPackKey(), this, (button2) -> {
+				if (styles.contains(entry.getKey())) {
+					this.minecraft.setScreen(new MessageScreen<>("Save Failed", "Unable to save because of duplicated style: " + entry.getKey(), this, (button2) -> {
 						this.minecraft.setScreen(this);
 					}, 180, 90));
 					return;
 				}
-				styles.add(entry.getPackKey());
+				styles.add(entry.getKey());
 			}
 			
 			this.rootTag.tags.clear();
 			
 			for (PackEntry<String, CompoundTag> entry : this.styles) {
-				this.rootTag.put(entry.getPackKey(), entry.getPackValue());
+				this.rootTag.put(entry.getKey(), entry.getValue());
 			}
 			
 			this.onClose();
@@ -223,22 +224,22 @@ public class LivingAnimationsScreen extends Screen {
 														}, 180, 70));
 		}).pos(this.width / 2 + 2, this.height - 32).size(160, 21).build());
 		
-		this.addRenderableWidget(new Static(this.font, 14, 100, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.styles")));
+		this.addRenderableWidget(new Static(this.font, 14, 100, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.styles"), Component.translatable("datapack_edit.styles.tooltip.mandatory")));
 		this.addRenderableWidget(this.stylesGrid);
-		this.addRenderableWidget(this.animationModelPlayer);
-		this.addRenderableWidget(new Static(this.font, this.width - 188, 100, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.living_animations.modifiers")));
+		this.addRenderableWidget(this.modelPreviewer);
+		this.addRenderableWidget(new Static(this.font, this.width - 188, 100, 40, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.living_animations.modifiers"));
 		this.addRenderableWidget(this.animationsGrid);
 	}
 	
 	@Override
 	public void onClose() {
-		this.animationModelPlayer.onDestroy();
+		this.modelPreviewer.onDestroy();
 		this.minecraft.setScreen(this.parentScreen);
 	}
 	
 	@Override
 	public void tick() {
-		this.animationModelPlayer._tick();
+		this.modelPreviewer._tick();
 	}
 	
 	@Override

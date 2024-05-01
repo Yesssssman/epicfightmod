@@ -50,6 +50,11 @@ public class Static extends AbstractWidget implements ResizableComponent {
 	}
 	
 	@Override
+	public boolean isMouseOver(double mouseX, double mouseY) {
+		return mouseX >= (double) this.getX() && mouseY >= (double) this.getY() && mouseX < (double) (this.getX() + this.font.width(this._getMessage())) && mouseY < (double) (this.getY() + this.height);
+	}
+	
+	@Override
 	public boolean mouseClicked(double mouseX, double mouseY, int action) {
 		return false;
 	}
@@ -179,6 +184,6 @@ public class Static extends AbstractWidget implements ResizableComponent {
 
 	@Override
 	public void _renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-		this.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
+		this.render(guiGraphics, mouseX, mouseY, partialTicks);
 	}
 }

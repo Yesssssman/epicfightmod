@@ -18,6 +18,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraftforge.fml.ModLoader;
 import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.api.animation.types.datapack.ClipHoldingAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimationDataReader;
 import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
@@ -111,6 +112,13 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		}
 		
 		return -1;
+	}
+	
+	/**
+	 * Registers animations created by datapack edit screen
+	 */
+	public void registerUserAnimation(ClipHoldingAnimation animation) {
+		this.animationRegistry.put(animation.getCreator().getRegistryName(), animation.cast());
 	}
 	
 	public StaticAnimation refreshAnimation(StaticAnimation staticAnimation) {

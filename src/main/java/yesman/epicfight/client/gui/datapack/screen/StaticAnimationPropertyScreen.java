@@ -202,7 +202,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 						.addColumn(Grid.combo("living_motion", LivingMotion.ENUM_MANAGER.universalValues())
 										.valueChanged((event) -> this.compositeLayerMasks.get(event.rowposition).setPackKey(event.postValue)).defaultVal(LivingMotions.IDLE))
 						.addColumn(Grid.popup("joint_mask", PopupBox.JointMaskPopupBox::new)
-										.valueChanged((event) -> this.compositeLayerMasks.get(event.rowposition).setPackValue(event.postValue))
+										.valueChanged((event) -> this.compositeLayerMasks.get(event.rowposition).setValue(event.postValue))
 										.toDisplayText((jointMask) -> ParseUtil.nullOrToString(jointMask, (m) -> JointMaskReloadListener.getKey(m).toString()))
 										.width(150))
 						.pressAdd((grid, button) -> {
@@ -241,7 +241,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 					.addColumn(Grid.combo("living_motion", LivingMotion.ENUM_MANAGER.universalValues())
 							.valueChanged((event) -> this.baseLayerMasks.get(event.rowposition).setPackKey(event.postValue)).defaultVal(LivingMotions.IDLE))
 					.addColumn(Grid.popup("joint_mask", PopupBox.JointMaskPopupBox::new)
-							.valueChanged((event) -> this.baseLayerMasks.get(event.rowposition).setPackValue(event.postValue))
+							.valueChanged((event) -> this.baseLayerMasks.get(event.rowposition).setValue(event.postValue))
 							.toDisplayText((jointMask) -> ParseUtil.nullOrToString(jointMask, (m) -> JointMaskReloadListener.getKey(m).toString()))
 							.width(150))
 					.pressAdd((grid, button) -> {
@@ -279,7 +279,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 					.addColumn(Grid.combo("living_motion", LivingMotion.ENUM_MANAGER.universalValues())
 									.valueChanged((event) -> this.compositeLayerMasks.get(event.rowposition).setPackKey(event.postValue)).defaultVal(LivingMotions.IDLE))
 					.addColumn(Grid.popup("joint_mask", PopupBox.JointMaskPopupBox::new)
-									.valueChanged((event) -> this.compositeLayerMasks.get(event.rowposition).setPackValue(event.postValue))
+									.valueChanged((event) -> this.compositeLayerMasks.get(event.rowposition).setValue(event.postValue))
 									.toDisplayText((jointMask) -> ParseUtil.nullOrToString(jointMask, (m) -> JointMaskReloadListener.getKey(m).toString()))
 									.width(150))
 					.pressAdd((grid, button) -> {
@@ -353,16 +353,16 @@ public class StaticAnimationPropertyScreen extends Screen {
 				
 				JsonObject jointEntryTag = new JsonObject();
 				
-				if (entry.getPackKey() == null) {
+				if (entry.getKey() == null) {
 					throw new IllegalStateException(String.format("Row %s: Living motion is not defined!", idx));
 				}
 				
-				if (entry.getPackValue() == null) {
+				if (entry.getValue() == null) {
 					throw new IllegalStateException(String.format("Row %s: Joint mask is not defined!", idx));
 				}
 				
-				jointEntryTag.addProperty("livingmotion", entry.getPackKey().toString());
-				jointEntryTag.addProperty("type", JointMaskReloadListener.getKey(entry.getPackValue()).toString());
+				jointEntryTag.addProperty("livingmotion", entry.getKey().toString());
+				jointEntryTag.addProperty("type", JointMaskReloadListener.getKey(entry.getValue()).toString());
 				baseMasks.add(jointEntryTag);
 			}
 			
@@ -374,16 +374,16 @@ public class StaticAnimationPropertyScreen extends Screen {
 				
 				JsonObject jointEntryTag = new JsonObject();
 				
-				if (entry.getPackKey() == null) {
+				if (entry.getKey() == null) {
 					throw new IllegalStateException(String.format("Row %s: Living motion is not defined!", idx));
 				}
 				
-				if (entry.getPackValue() == null) {
+				if (entry.getValue() == null) {
 					throw new IllegalStateException(String.format("Row %s: Joint mask is not defined!", idx));
 				}
 				
-				jointEntryTag.addProperty("livingmotion", entry.getPackKey().toString());
-				jointEntryTag.addProperty("type", JointMaskReloadListener.getKey(entry.getPackValue()).toString());
+				jointEntryTag.addProperty("livingmotion", entry.getKey().toString());
+				jointEntryTag.addProperty("type", JointMaskReloadListener.getKey(entry.getValue()).toString());
 				
 				compositeMasks.add(jointEntryTag);
 			}
@@ -406,16 +406,16 @@ public class StaticAnimationPropertyScreen extends Screen {
 				
 				JsonObject jointEntryTag = new JsonObject();
 				
-				if (entry.getPackKey() == null) {
+				if (entry.getKey() == null) {
 					throw new IllegalStateException(String.format("Row %s: Living motion is not defined!", idx));
 				}
 				
-				if (entry.getPackValue() == null) {
+				if (entry.getValue() == null) {
 					throw new IllegalStateException(String.format("Row %s: Joint mask is not defined!", idx));
 				}
 				
-				jointEntryTag.addProperty("livingmotion", entry.getPackKey().toString());
-				jointEntryTag.addProperty("type", JointMaskReloadListener.getKey(entry.getPackValue()).toString());
+				jointEntryTag.addProperty("livingmotion", entry.getKey().toString());
+				jointEntryTag.addProperty("type", JointMaskReloadListener.getKey(entry.getValue()).toString());
 				masks.add(jointEntryTag);
 			}
 			

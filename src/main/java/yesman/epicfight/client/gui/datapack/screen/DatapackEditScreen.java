@@ -3,6 +3,7 @@ package yesman.epicfight.client.gui.datapack.screen;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
@@ -11,15 +12,18 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import javax.annotation.Nullable;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
@@ -59,6 +63,7 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.repository.FolderRepositorySource;
 import net.minecraft.server.packs.repository.Pack;
 import net.minecraft.server.packs.repository.PackSource;
+import net.minecraft.server.packs.resources.IoSupplier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
@@ -66,20 +71,28 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
+import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.AnimationProvider;
+import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.api.animation.types.datapack.ClipHoldingAnimation;
+import yesman.epicfight.api.animation.types.datapack.FakeAnimation;
+import yesman.epicfight.api.client.animation.ClientAnimationDataReader;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
 import yesman.epicfight.api.client.model.Meshes;
+import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.collider.MultiOBBCollider;
 import yesman.epicfight.api.collider.OBBCollider;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 import yesman.epicfight.api.data.reloader.SkillManager;
+import yesman.epicfight.api.model.JsonModelLoader;
+import yesman.epicfight.api.utils.InstantiateInvoker;
 import yesman.epicfight.api.utils.ParseUtil;
-import yesman.epicfight.client.gui.datapack.widgets.AnimatedModelPlayer;
 import yesman.epicfight.client.gui.datapack.widgets.ColorPreviewWidget;
 import yesman.epicfight.client.gui.datapack.widgets.ComboBox;
 import yesman.epicfight.client.gui.datapack.widgets.Grid;
 import yesman.epicfight.client.gui.datapack.widgets.InputComponentList;
+import yesman.epicfight.client.gui.datapack.widgets.ModelPreviewer;
 import yesman.epicfight.client.gui.datapack.widgets.PopupBox;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.HorizontalSizing;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableEditBox;
@@ -97,8 +110,40 @@ import yesman.epicfight.world.capabilities.item.WeaponTypeReloadListener;
 
 @OnlyIn(Dist.CLIENT)
 public class DatapackEditScreen extends Screen {
-	private static DatapackEditScreen unsavedLastScreen;
 	public static final Component GUI_EXPORT = Component.translatable("gui.epicfight.export");
+	private static DatapackEditScreen workingPackScreen;
+	
+	public static DatapackEditScreen getCurrentScreen() {
+		return workingPackScreen;
+	}
+	
+	public static StaticAnimation byKey(String path) {
+		ResourceLocation rl = new ResourceLocation(path);
+		StaticAnimation animation = AnimationManager.getInstance().byKey(rl);
+		
+		if (animation == null && workingPackScreen.userAnimations.containsKey(rl)) {
+			animation = workingPackScreen.userAnimations.get(rl).getValue().cast();
+		}
+		
+		return animation;
+	}
+	
+	public static Set<Map.Entry<ResourceLocation, Function<Item, CapabilityItem.Builder>>> getSerializableWeaponTypes() {
+		return workingPackScreen.weaponTab.packList.stream().reduce(Sets.<Map.Entry<ResourceLocation, Function<Item, CapabilityItem.Builder>>>newHashSet(), (set, entry) -> {
+			try {
+				WeaponCapability.Builder builder = WeaponTypeReloadListener.deserializeWeaponCapabilityBuilder(entry.getValue());
+				set.add(PackEntry.ofValue(entry.getKey(), (itemstack) -> builder));
+			} catch (Exception e) {
+				e.printStackTrace();
+				return set;
+			}
+			
+			return set;
+		}, (set1, set2) -> {
+			set1.addAll(set2);
+			return set1;
+		});
+	}
 	
 	private GridLayout bottomButtons;
 	private TabNavigationBar tabNavigationBar;
@@ -106,6 +151,7 @@ public class DatapackEditScreen extends Screen {
 	private final DatapackEditScreen.WeaponTypeTab weaponTab;
 	private final DatapackEditScreen.ItemCapabilityTab itemCapabilityTab;
 	private final DatapackEditScreen.MobPatchTab mobPatchTab;
+	private final Map<ResourceLocation, PackEntry<FakeAnimation, ClipHoldingAnimation>> userAnimations = Maps.newLinkedHashMap();
 	
 	private final TabManager tabManager = new TabManager(this::addRenderableWidget, (p_267853_) -> {
 		this.removeWidget(p_267853_);
@@ -136,6 +182,10 @@ public class DatapackEditScreen extends Screen {
 		this.weaponTab = new DatapackEditScreen.WeaponTypeTab();
 		this.itemCapabilityTab = new DatapackEditScreen.ItemCapabilityTab();
 		this.mobPatchTab = new DatapackEditScreen.MobPatchTab();
+		
+		if (workingPackScreen == null) {
+			workingPackScreen = this;
+		}
 	}
 	
 	public boolean importDataPack(Path path) {
@@ -146,10 +196,12 @@ public class DatapackEditScreen extends Screen {
 			Pack pack = Pack.readMetaAndCreate("file/" + s, Component.literal(s), false, pack$resourcessupplier, PackType.SERVER_DATA, Pack.Position.TOP, PackSource.WORLD);
 			PackResources packResources = pack.open();
 			
+			this.importAnimations(packResources);
 			this.weaponTab.importEntries(packResources);
 			this.itemCapabilityTab.importEntries(packResources);
 			this.mobPatchTab.importEntries(packResources);
-			ImportAnimationsScreen.importAnimations(packResources);
+			
+			packResources.close();
 			
 			return true;
 		} else {
@@ -159,21 +211,31 @@ public class DatapackEditScreen extends Screen {
 	}
 	
 	public boolean exportDataPack(String packName) {
+		ZipOutputStream out = null;
+		File zipFile = null;
+		
 		try {
 			File resourcePackDirectory = Minecraft.getInstance().getResourcePackDirectory().toFile();
-			File zipFile = new File(resourcePackDirectory, packName + ".zip");
-			ZipOutputStream out = new ZipOutputStream(new FileOutputStream(zipFile));
+			zipFile = new File(resourcePackDirectory, packName + ".zip");
+			
+			int duplicateCount = 1;
+			
+			while (zipFile.exists()) {
+				zipFile = new File(resourcePackDirectory, packName + String.format(" (%d).zip", duplicateCount));
+				duplicateCount++;
+			}
+			
+			out = new ZipOutputStream(new FileOutputStream(zipFile));
 			
 			this.weaponTab.exportEntries(out);
 			this.itemCapabilityTab.exportEntries(out);
 			this.mobPatchTab.exportEntries(out);
-			ImportAnimationsScreen.export(out);
+			this.exportAnimations(out);
 			
 			ZipEntry zipEntry = new ZipEntry("pack.mcmeta");
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 			JsonObject root = new JsonObject();
 			JsonObject pack = new JsonObject();
-			
 			int datapackVersion = SharedConstants.getCurrentVersion().getPackVersion(PackType.SERVER_DATA);
 			int resourcepackVersion = SharedConstants.getCurrentVersion().getPackVersion(PackType.CLIENT_RESOURCES);
 			
@@ -193,8 +255,16 @@ public class DatapackEditScreen extends Screen {
 			
 			return true;
 		} catch (Exception e) {
-			this.minecraft.setScreen(new MessageScreen<>("Failed to export datapack", e.getMessage(), this, (button2) -> this.minecraft.setScreen(this), 200, 110));
+			this.minecraft.setScreen(new MessageScreen<>("Failed to export datapack", e.getMessage(), this, (button2) -> this.minecraft.setScreen(this), 400, 110).autoCalculateHeight());
 			e.printStackTrace();
+			
+			try {
+				out.close();
+			} catch (IOException e1) {
+				e1.printStackTrace();
+			}
+			
+			zipFile.delete();
 			
 			return false;
 		}
@@ -260,17 +330,14 @@ public class DatapackEditScreen extends Screen {
 		
 		this.repositionElements();
 		
-		if (!this.initialized && unsavedLastScreen != null && unsavedLastScreen != this) {
+		if (!this.initialized && workingPackScreen != null && workingPackScreen != this) {
 			this.initialized = true;
 			
 			this.minecraft.setScreen(new MessageScreen<>("", "Would you like to load the previous pack?", this, (button) -> {
-				this.minecraft.setScreen(unsavedLastScreen);
-				ImportAnimationsScreen.clearUserAnimation();
-				unsavedLastScreen = null;
+				this.minecraft.setScreen(workingPackScreen);
 			}, (button) -> {
 				this.minecraft.setScreen(this);
-				ImportAnimationsScreen.clearUserAnimation();
-				unsavedLastScreen = null;
+				workingPackScreen = this;
 			}, 180, 70));
 		}
 	}
@@ -296,11 +363,15 @@ public class DatapackEditScreen extends Screen {
 	@Override
 	public void onClose() {
 		if (this.weaponTab.packList.size() > 0 || this.itemCapabilityTab.packList.size() > 0 || this.mobPatchTab.packList.size() > 0) {
-			unsavedLastScreen = this;
+			workingPackScreen = this;
+		} else {
+			workingPackScreen = null;
 		}
 		
 		this.minecraft.setScreen(this.parentScreen);
-		this.itemCapabilityTab.modelPlayer.onDestroy();
+		
+		this.weaponTab.modelPreviewer.onDestroy();
+		this.itemCapabilityTab.modelPreviewer.onDestroy();
 	}
 	
 	@Override
@@ -337,6 +408,98 @@ public class DatapackEditScreen extends Screen {
 		this.renderBackground(guiGraphics);
 		guiGraphics.blit(CreateWorldScreen.FOOTER_SEPERATOR, 0, Mth.roundToward(this.height - 36 - 2, 2), 0.0F, 0.0F, this.width, 2, 32, 2);
 		super.render(guiGraphics, mouseX, mouseY, partialTick);
+	}
+	
+	private void importAnimations(PackResources packResources) {
+		packResources.getNamespaces(PackType.CLIENT_RESOURCES).stream().distinct().forEach((namespace) -> {
+			packResources.listResources(PackType.CLIENT_RESOURCES, namespace, "animmodels/animations", (resourceLocation, stream) -> {
+				if (resourceLocation.getPath().contains("/data/")) {
+					return;
+				}
+				
+				try {
+					JsonReader jsonReader = new JsonReader(new InputStreamReader(stream.get(), StandardCharsets.UTF_8));
+					jsonReader.setLenient(true);
+					
+					JsonObject jsonObject = Streams.parse(jsonReader).getAsJsonObject();
+					ResourceLocation rl = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll("animmodels/animations", "").replaceAll(".json", ""));
+					ResourceLocation datapath = AnimationManager.getAnimationDataFileLocation(resourceLocation);
+					
+					readAnimation(rl, jsonObject, packResources.getResource(PackType.CLIENT_RESOURCES, datapath).get());
+				} catch (Exception e) {
+					EpicFightMod.LOGGER.error("Failed to read animation " + resourceLocation);
+					e.printStackTrace();
+				}
+			});
+		});
+	}
+	
+	@SuppressWarnings({ "unchecked" })
+	private void readAnimation(ResourceLocation rl, JsonObject json, InputStream dataReader) throws Exception {
+		JsonElement constructorElement = json.getAsJsonObject().get("constructor");
+		
+		if (constructorElement == null) {
+			throw new IllegalStateException(String.format("No constructor information has provided in User animation %s", rl));
+		}
+		
+		JsonObject constructorObject = constructorElement.getAsJsonObject();
+		String invocationCommand = constructorObject.get("invocation_command").getAsString();
+		
+		if (invocationCommand.lastIndexOf('#') == -1) {
+			throw new IllegalStateException(String.format("Invocation command exception: Missing separator %s in animation %s", invocationCommand, rl));
+		}
+		
+		String className = invocationCommand.substring(invocationCommand.lastIndexOf('#') + 1);
+		Class<? extends ClipHoldingAnimation> animationClass = FakeAnimation.switchType((Class<? extends StaticAnimation>)Class.forName(className));
+		ClipHoldingAnimation animation = InstantiateInvoker.invoke(invocationCommand, animationClass).getResult();
+		
+		if (dataReader != null) {
+			ClientAnimationDataReader.readAndApply(animation.cast(), dataReader);
+		}
+		
+		JsonModelLoader modelLoader = new JsonModelLoader(json.getAsJsonObject());
+		animation.setAnimationClip(modelLoader.loadAnimationClip(animation.cast().getArmature()));
+		
+		this.userAnimations.put(rl, PackEntry.ofValue(animation.buildAnimation(modelLoader.getRootJson().get("animation").getAsJsonArray()), animation));
+		AnimationManager.getInstance().registerUserAnimation(animation);
+	}
+	
+	private void exportAnimations(ZipOutputStream out) throws Exception {
+		for (Map.Entry<ResourceLocation, PackEntry<FakeAnimation, ClipHoldingAnimation>> entry : this.userAnimations.entrySet()) {
+			String exportPath = String.format("assets/%s/animmodels/animations/%s.json", entry.getKey().getNamespace(), entry.getKey().getPath());
+			ResourceLocation clientData = AnimationManager.getAnimationDataFileLocation(new ResourceLocation(entry.getKey().getNamespace(), exportPath));
+			
+			ZipEntry asResource = new ZipEntry(exportPath);
+			ZipEntry asResourceClientData = new ZipEntry(clientData.getPath());
+			ZipEntry asData = new ZipEntry(String.format("data/%s/animmodels/animations/%s.json", entry.getKey().getNamespace(), entry.getKey().getPath()));
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			FakeAnimation animation = entry.getValue().getValue().getCreator();
+			
+			JsonObject root = new JsonObject();
+			JsonObject constructorInfo = new JsonObject();
+			constructorInfo.addProperty("invocation_command", animation.getInvocationCommand());
+			
+			root.add("constructor", constructorInfo);
+			root.add("animation", animation.getRawAnimationJson());
+			
+			out.putNextEntry(asResource);
+			out.write(gson.toJson(root).getBytes());
+			out.closeEntry();
+			
+			if (animation.getPropertiesJson().size() > 0) {
+				out.putNextEntry(asResourceClientData);
+				out.write(gson.toJson(animation.getPropertiesJson()).getBytes());
+				out.closeEntry();
+			}
+			
+			out.putNextEntry(asData);
+			out.write(gson.toJson(root).getBytes());
+			out.closeEntry();
+		}
+	}
+	
+	public Map<ResourceLocation, PackEntry<FakeAnimation, ClipHoldingAnimation>> getUserAniamtions() {
+		return this.userAnimations;
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -423,47 +586,26 @@ public class DatapackEditScreen extends Screen {
 		}
 		
 		public void packGridRowpositionChanged(int rowposition, Map<String, Object> values) {
-			this.inputComponentsList.importTag(this.packList.get(rowposition).getPackValue());
+			this.inputComponentsList.importTag(this.packList.get(rowposition).getValue());
 		}
 		
-		public void importEntries(PackResources packResources) {
-			packResources.getNamespaces(PackType.SERVER_DATA).stream().distinct().forEach((namespace) -> {
-				packResources.listResources(PackType.SERVER_DATA, namespace, this.directory, (resourceLocation, stream) -> {
-					try {
-						JsonReader jsonReader = new JsonReader(new InputStreamReader(stream.get(), StandardCharsets.UTF_8));
-						jsonReader.setLenient(true);
-						JsonObject jsonObject = Streams.parse(jsonReader).getAsJsonObject();
-						CompoundTag compTag = TagParser.parseTag(jsonObject.toString());
-						ResourceLocation rl = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll(this.directory, "").replaceAll(".json", ""));
-						
-						this.packList.add(PackEntry.of(rl, () -> compTag));
-						this.packListGrid.addRowWithDefaultValues("pack_item", rl.toString());
-					} catch (IOException | CommandSyntaxException e) {
-						e.printStackTrace();
-					}
-				});
-			});
-		}
-		
-		public void exportEntries(ZipOutputStream out) throws IOException {
-			for (PackEntry<ResourceLocation, CompoundTag> packEntry : this.packList) {
-				ZipEntry zipEntry = new ZipEntry(String.format("data/%s/" + this.directory + "/%s.json", packEntry.getPackKey().getNamespace(), packEntry.getPackKey().getPath()));
-				Gson gson = new GsonBuilder().setPrettyPrinting().create();
-				out.putNextEntry(zipEntry);
-				out.write(gson.toJson(CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, packEntry.getPackValue()).get().left().get()).getBytes());
-				out.closeEntry();
-			}
-		}
+		public abstract void importEntries(PackResources packResources) throws Exception;
+		public abstract void exportEntries(ZipOutputStream out) throws Exception;
 	}
 	
 	@OnlyIn(Dist.CLIENT)
 	class WeaponTypeTab extends DatapackTab<ResourceLocation> {
+		private final ModelPreviewer modelPreviewer;
+		
 		public WeaponTypeTab() {
 			super(Component.translatable("gui." + EpicFightMod.MODID + ".tab.datapack.weapon_type"), WeaponTypeReloadListener.DIRECTORY, null);
 			
 			Screen parentScreen = DatapackEditScreen.this;
 			Font font = DatapackEditScreen.this.font;
 			ScreenRectangle rect = DatapackEditScreen.this.getRectangle();
+			
+			this.modelPreviewer = new ModelPreviewer(9, 15, 0, 140, HorizontalSizing.LEFT_RIGHT, null, Armatures.BIPED, Meshes.BIPED);
+			this.modelPreviewer.setColliderJoint(Armatures.BIPED.searchJointByName("Tool_R"));
 			
 			this.inputComponentsList = new InputComponentList<>(DatapackEditScreen.this, 0, 0, 0, 0, 30) {
 				@Override
@@ -504,13 +646,13 @@ public class DatapackEditScreen extends Screen {
 						ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation(tag.getString("hit_sound"))),
 						ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation(tag.getString("swing_sound"))),
 						null,
-						ParseUtil.nullParam(colliderTag.get("number")),
-						centerInit ? ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(0), Tag::getAsString) : "",
-						centerInit ? ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(1), Tag::getAsString) : "",
-						centerInit ? ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(2), Tag::getAsString) : "",
-						sizeInit ? ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(0), Tag::getAsString) : "",
-						sizeInit ? ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(1), Tag::getAsString) : "",
-						sizeInit ? ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(2), Tag::getAsString) : "",
+						ParseUtil.nullOrToString(colliderTag.get("number"), Tag::getAsString),
+						centerInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
+						centerInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
+						centerInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
+						sizeInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
+						sizeInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
+						sizeInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
 						packImporter
 					});
 				}
@@ -519,39 +661,39 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.setLeftPos(164);
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.category")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.category"));
 			this.inputComponentsList.addComponentCurrentRow(new ComboBox<>(parentScreen, parentScreen.getMinecraft().font, this.inputComponentsList.nextStart(5), 124, 100, 15, HorizontalSizing.LEFT_WIDTH, null, 8,
 																			Component.translatable("datapack_edit.weapon_type.category"), new ArrayList<>(WeaponCategory.ENUM_MANAGER.universalValues()), ParseUtil::snakeToSpacedCamel,
-																			(weaponCategory) -> this.packList.get(this.packListGrid.getRowposition()).getPackValue().putString("category", ParseUtil.nullParam(weaponCategory).toLowerCase(Locale.ROOT))));
+																			(weaponCategory) -> this.packList.get(this.packListGrid.getRowposition()).getValue().putString("category", ParseUtil.nullParam(weaponCategory).toLowerCase(Locale.ROOT))));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.hit_particle")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.hit_particle"));
 			this.inputComponentsList.addComponentCurrentRow(new PopupBox.RegistryPopupBox<>(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 																			Component.translatable("datapack_edit.weapon_type.hit_particle"), ForgeRegistries.PARTICLE_TYPES,
-																			(item) -> this.packList.get(this.packListGrid.getRowposition()).getPackValue().putString("hit_particle", ParseUtil.getRegistryName(item, ForgeRegistries.PARTICLE_TYPES))));
+																			(name, item) -> this.packList.get(this.packListGrid.getRowposition()).getValue().putString("hit_particle", ParseUtil.getRegistryName(item, ForgeRegistries.PARTICLE_TYPES))));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.hit_sound")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.hit_sound"));
 			this.inputComponentsList.addComponentCurrentRow(new PopupBox.SoundPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 																			Component.translatable("datapack_edit.weapon_type.hit_sound"),
-																			(item) -> this.packList.get(this.packListGrid.getRowposition()).getPackValue().putString("hit_sound", ParseUtil.getRegistryName(item, ForgeRegistries.SOUND_EVENTS))));
+																			(name, item) -> this.packList.get(this.packListGrid.getRowposition()).getValue().putString("hit_sound", ParseUtil.getRegistryName(item, ForgeRegistries.SOUND_EVENTS))));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.swing_sound")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.swing_sound"));
 			this.inputComponentsList.addComponentCurrentRow(new PopupBox.SoundPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 																			Component.translatable("datapack_edit.weapon_type.swing_sound"),
-																			(item) -> this.packList.get(this.packListGrid.getRowposition()).getPackValue().putString("swing_sound", ParseUtil.getRegistryName(item, ForgeRegistries.SOUND_EVENTS))));
+																			(name, item) -> this.packList.get(this.packListGrid.getRowposition()).getValue().putString("swing_sound", ParseUtil.getRegistryName(item, ForgeRegistries.SOUND_EVENTS))));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.styles")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.styles"));
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
-				return new StylesScreen(DatapackEditScreen.this, ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "styles", new CompoundTag()));
+				return new StylesScreen(DatapackEditScreen.this, ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "styles", new CompoundTag()));
 			}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.offhand_validator")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 100, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.offhand_validator"));
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
-				return new OffhandValidatorScreen(DatapackEditScreen.this, ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "offhand_item_compatible_predicate", new CompoundTag()));
+				return new OffhandValidatorScreen(DatapackEditScreen.this, this.packList.get(this.packListGrid.getRowposition()).getValue());
 			}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			final ResizableEditBox colliderCount = new ResizableEditBox(font, 0, 40, 0, 15, Component.translatable("datapack_edit.collider.count"), HorizontalSizing.LEFT_WIDTH, null);
@@ -562,68 +704,97 @@ public class DatapackEditScreen extends Screen {
 			final ResizableEditBox colliderSizeY = new ResizableEditBox(font, 0, 35, 0, 15, Component.translatable("datapack_edit.collider.size.y"), HorizontalSizing.LEFT_WIDTH, null);
 			final ResizableEditBox colliderSizeZ = new ResizableEditBox(font, 0, 35, 0, 15, Component.translatable("datapack_edit.collider.size.z"), HorizontalSizing.LEFT_WIDTH, null);
 			
+			final Runnable setColliderToPreviewer = () -> {
+				CompoundTag comp = this.packList.get(this.packListGrid.getRowposition()).getValue();
+				
+				Collider collider = null;
+				
+				if (comp.contains("collider")) {
+					try {
+						collider = ColliderPreset.deserializeSimpleCollider(comp.getCompound("collider"));
+					} catch (IllegalArgumentException e) {
+					}
+				}
+				
+				this.modelPreviewer.setCollider(collider);
+			};
+			
 			colliderCount.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
 				
 				if (StringUtil.isNullOrEmpty(input)) {
 					collider.remove("number");
 				} else {
 					collider.put("number", IntTag.valueOf(Integer.valueOf(input)));
 				}
+				
+				setColliderToPreviewer.run();
 			});
 			
 			colliderCenterX.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("center", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
 				centerVec.remove(0);
 				centerVec.add(0, DoubleTag.valueOf(i));
+				
+				setColliderToPreviewer.run();
 			});
 			
 			colliderCenterY.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("center", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
 				centerVec.remove(1);
 				centerVec.add(1, DoubleTag.valueOf(i));
+				
+				setColliderToPreviewer.run();
 			});
 			
 			colliderCenterZ.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("center", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
 				centerVec.remove(2);
 				centerVec.add(2, DoubleTag.valueOf(i));
+				
+				setColliderToPreviewer.run();
 			});
 			
 			colliderSizeX.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("size", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
 				centerVec.remove(0);
 				centerVec.add(0, DoubleTag.valueOf(i));
+				
+				setColliderToPreviewer.run();
 			});
 			
 			colliderSizeY.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("size", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
 				centerVec.remove(1);
 				centerVec.add(1, DoubleTag.valueOf(i));
+				
+				setColliderToPreviewer.run();
 			});
 			
 			colliderSizeZ.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("size", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
 				centerVec.remove(2);
 				centerVec.add(2, DoubleTag.valueOf(i));
+				
+				setColliderToPreviewer.run();
 			});
 			
 			colliderCount.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Integer::parseInt));
@@ -635,11 +806,11 @@ public class DatapackEditScreen extends Screen {
 			colliderSizeZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.collider")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider"));
 			this.inputComponentsList.addComponentCurrentRow(new PopupBox.ColliderPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.collider"),
-																							(collider) -> {
+																							(name, collider) -> {
 																								if (collider != null) {
-																									CompoundTag colliderTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
+																									CompoundTag colliderTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
 																									collider.serialize(colliderTag);
 																									
 																									colliderCount.setValue(String.valueOf(colliderTag.getInt("number")));
@@ -654,14 +825,16 @@ public class DatapackEditScreen extends Screen {
 																									colliderSizeY.setValue(String.valueOf(sizeVec.getDouble(1)));
 																									colliderSizeZ.setValue(String.valueOf(sizeVec.getDouble(2)));
 																								}
+																								
+																								this.modelPreviewer.setCollider(collider);
 																							}).applyFilter((collider) -> collider instanceof OBBCollider || collider instanceof MultiOBBCollider));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.collider.count")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider.count"));
 			this.inputComponentsList.addComponentCurrentRow(colliderCount.relocateX(rect, this.inputComponentsList.nextStart(5)));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.collider.center")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider.center"));
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
 			this.inputComponentsList.addComponentCurrentRow(colliderCenterX.relocateX(rect, this.inputComponentsList.nextStart(5)));
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
@@ -670,7 +843,7 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.addComponentCurrentRow(colliderCenterZ.relocateX(rect, this.inputComponentsList.nextStart(5)));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.collider.size")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider.size"));
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
 			this.inputComponentsList.addComponentCurrentRow(colliderSizeX.relocateX(rect, this.inputComponentsList.nextStart(5)));
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
@@ -679,13 +852,20 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.addComponentCurrentRow(colliderSizeZ.relocateX(rect, this.inputComponentsList.nextStart(5)));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.combos")));
+			this.inputComponentsList.newRow();
+			this.inputComponentsList.newRow();
+			this.inputComponentsList.addComponentCurrentRow(this.modelPreviewer);
+			this.inputComponentsList.newRow();
+			this.inputComponentsList.newRow();
+			
+			this.inputComponentsList.newRow();
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.combos"));
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
-				return new ComboScreen(DatapackEditScreen.this, this.packList.get(this.packListGrid.getRowposition()).getPackValue());
+				return new ComboScreen(DatapackEditScreen.this, this.packList.get(this.packListGrid.getRowposition()).getValue());
 			}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.innate_skill")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.innate_skill"));
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.newRow();
@@ -697,12 +877,12 @@ public class DatapackEditScreen extends Screen {
 																.rowEditable(true)
 																.transparentBackground(false)
 																.addColumn(Grid.combo("style", Style.ENUM_MANAGER.universalValues()).valueChanged((event) -> {
-																				CompoundTag innateSkillsTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "innate_skills", new CompoundTag());
+																				CompoundTag innateSkillsTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "innate_skills", new CompoundTag());
 																				innateSkillsTag.remove(ParseUtil.nullParam(event.prevValue).toLowerCase(Locale.ROOT));
 																				innateSkillsTag.putString(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT), ParseUtil.nullParam(event.grid.getValue(event.rowposition, "skill")));
 																			}).editable(true).width(100))
 																.addColumn(Grid.registryPopup("skill", SkillManager.getSkillRegistry()).filter((skill) -> skill.getCategory() == SkillCategories.WEAPON_INNATE).valueChanged((event) -> {
-																				CompoundTag innateSkillsTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "innate_skills", new CompoundTag());
+																				CompoundTag innateSkillsTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "innate_skills", new CompoundTag());
 																				innateSkillsTag.putString(ParseUtil.nullParam(event.grid.getValue(event.rowposition, "style")).toLowerCase(Locale.ROOT), ParseUtil.nullParam(event.postValue));
 																			}).toDisplayText((item) -> item == null ? "" : item.getRegistryName().toString()).width(150))
 																.pressAdd((grid, button) -> {
@@ -715,7 +895,7 @@ public class DatapackEditScreen extends Screen {
 																	int rowposition = grid.getRowposition();
 																	
 																	if (rowposition > -1) {
-																		CompoundTag innateSkillsTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "innate_skills", new CompoundTag());
+																		CompoundTag innateSkillsTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "innate_skills", new CompoundTag());
 																		innateSkillsTag.remove(ParseUtil.nullParam(grid.getValue(rowposition, "style")).toLowerCase(Locale.ROOT));
 																		grid.removeRow(rowposition);
 																	}
@@ -724,19 +904,60 @@ public class DatapackEditScreen extends Screen {
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 80, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.living_animations")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 80, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.living_animations"));
 			
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
-				return new LivingAnimationsScreen(DatapackEditScreen.this, ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "livingmotion_modifier", new CompoundTag()));
+				return new LivingAnimationsScreen(DatapackEditScreen.this, ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "livingmotion_modifier", new CompoundTag()));
 			}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.setComponentsActive(false);
+		}
+		
+		@Override
+		public void importEntries(PackResources packResources) {
+			packResources.getNamespaces(PackType.SERVER_DATA).stream().distinct().forEach((namespace) -> {
+				packResources.listResources(PackType.SERVER_DATA, namespace, this.directory, (resourceLocation, stream) -> {
+					try {
+						JsonReader jsonReader = new JsonReader(new InputStreamReader(stream.get(), StandardCharsets.UTF_8));
+						jsonReader.setLenient(true);
+						JsonObject jsonObject = Streams.parse(jsonReader).getAsJsonObject();
+						CompoundTag compTag = TagParser.parseTag(jsonObject.toString());
+						ResourceLocation rl = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll(this.directory + "/", "").replaceAll(".json", ""));
+						
+						WeaponCapability.Builder builder = WeaponTypeReloadListener.deserializeWeaponCapabilityBuilder(compTag);
+						WeaponTypeReloadListener.register(rl, builder);
+						
+						this.packList.add(PackEntry.of(rl, () -> compTag));
+						this.packListGrid.addRowWithDefaultValues("pack_item", rl.toString());
+					} catch (IOException | CommandSyntaxException e) {
+						e.printStackTrace();
+					}
+				});
+			});
+		}
+		
+		@Override
+		public void exportEntries(ZipOutputStream out) throws Exception {
+			for (PackEntry<ResourceLocation, CompoundTag> packEntry : this.packList) {
+				try {
+					WeaponTypeReloadListener.deserializeWeaponCapabilityBuilder(packEntry.getValue());
+					
+					ZipEntry zipEntry = new ZipEntry(String.format("data/%s/" + this.directory + "/%s.json", packEntry.getKey().getNamespace(), packEntry.getKey().getPath()));
+					Gson gson = new GsonBuilder().setPrettyPrinting().create();
+					out.putNextEntry(zipEntry);
+					out.write(gson.toJson(CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, packEntry.getValue()).get().left().get()).getBytes());
+					out.closeEntry();
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw new IllegalStateException("Failded to export " + packEntry.getKey() +". "+ e.getMessage());
+				}
+			}
 		}
 	}
 	
 	@OnlyIn(Dist.CLIENT)
 	class ItemCapabilityTab extends DatapackTab<Item> {
-		private final AnimatedModelPlayer modelPlayer;
+		private final ModelPreviewer modelPreviewer;
 		
 		public ItemCapabilityTab() {
 			super(Component.translatable("gui." + EpicFightMod.MODID + ".tab.datapack.item_capability"), ItemCapabilityReloadListener.DIRECTORY, ForgeRegistries.ITEMS);
@@ -745,7 +966,7 @@ public class DatapackEditScreen extends Screen {
 			Font font = DatapackEditScreen.this.font;
 			ScreenRectangle rect = DatapackEditScreen.this.getRectangle();
 			
-			this.modelPlayer = new AnimatedModelPlayer(20, 15, 0, 150, HorizontalSizing.LEFT_RIGHT, null, Armatures.BIPED, Meshes.BIPED);
+			this.modelPreviewer = new ModelPreviewer(20, 15, 0, 150, HorizontalSizing.LEFT_RIGHT, null, Armatures.BIPED, Meshes.BIPED);
 			
 			this.inputComponentsList = new InputComponentList<>(DatapackEditScreen.this, 0, 0, 0, 0, 30) {
 				@Override
@@ -804,23 +1025,23 @@ public class DatapackEditScreen extends Screen {
 						WeaponTypeReloadListener.get(tag.getString("type")),
 						null,
 						ParseUtil.nullParam(colliderTag.get("number")),
-						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
-						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
-						centerInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
-						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
-						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
-						sizeInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
+						centerInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
+						centerInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
+						centerInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
+						sizeInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
+						sizeInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
+						sizeInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
 						colorInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("color", Tag.TAG_INT).get(0), Tag::getAsString)) : "",
 						colorInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("color", Tag.TAG_INT).get(1), Tag::getAsString)) : "",
 						colorInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("color", Tag.TAG_INT).get(2), Tag::getAsString)) : "",
-						beginInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
-						beginInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
-						beginInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
-						endInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
-						endInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
-						endInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
+						beginInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
+						beginInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
+						beginInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
+						endInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
+						endInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
+						endInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
 						ParseUtil.nullParam(trailTag.get("lifetime")),
-						ParseUtil.nullParam(trailTag.get("interpolation")),
+						ParseUtil.nullParam(trailTag.get("interpolations")),
 						ParseUtil.nullParam(trailTag.getString("texture_path")),
 						ForgeRegistries.PARTICLE_TYPES.getValue(new ResourceLocation(trailTag.getString("particle_type")))
 					});
@@ -830,23 +1051,16 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.setLeftPos(164);
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.attributes")));
-			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
-				return new AttributeScreen(DatapackEditScreen.this, ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "attributes", new CompoundTag()));
-			}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
-			
-			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.type")));
-			this.inputComponentsList.addComponentCurrentRow(new PopupBox.WeaponTypePopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 15, 15, HorizontalSizing.LEFT_RIGHT, null,
-																			Component.translatable("datapack_edit.item_capability.type"),
-																			(item) -> {
-																				this.packList.get(this.packListGrid.getRowposition()).getPackValue().putString("type", ParseUtil.nullParam(WeaponTypeReloadListener.getKey(item)));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.type"));
+			this.inputComponentsList.addComponentCurrentRow(new PopupBox.WeaponTypePopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 15, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.item_capability.type"),
+																			(name, item) -> {
+																				this.packList.get(this.packListGrid.getRowposition()).getValue().putString("type", name);
 																				
 																				if (item != null) {
-																					CapabilityItem.Builder builder = item.apply(this.registry.getValue(this.packList.get(this.packListGrid.getRowposition()).getPackKey()));
+																					CapabilityItem.Builder builder = item.apply(this.registry.getValue(this.packList.get(this.packListGrid.getRowposition()).getKey()));
 																					
 																					if (builder instanceof WeaponCapability.Builder weaponBuilder) {
-																						this.modelPlayer.clearAnimations();
+																						this.modelPreviewer.clearAnimations();
 																						
 																						List<AnimationProvider<?>> allAnimations = weaponBuilder.getComboAnimations().entrySet().stream().reduce(Lists.newArrayList(), (list, entry) -> {
 																							list.addAll(entry.getValue());
@@ -856,12 +1070,18 @@ public class DatapackEditScreen extends Screen {
 																							return list1;
 																						});
 																						
-																						allAnimations.stream().map((provider) -> provider.get()).forEach(this.modelPlayer::addAnimationToPlay);
+																						allAnimations.stream().map((provider) -> provider.get()).forEach(this.modelPreviewer::addAnimationToPlay);
 																						
-																						this.modelPlayer.setCollider(weaponBuilder.getCollider());
+																						this.modelPreviewer.setCollider(weaponBuilder.getCollider());
 																					}
 																				}
 																			}));
+			
+			this.inputComponentsList.newRow();
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.attributes"));
+			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
+				return new AttributeScreen(DatapackEditScreen.this, ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "attributes", new CompoundTag()));
+			}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.newRow();
 			
@@ -874,7 +1094,7 @@ public class DatapackEditScreen extends Screen {
 			final ResizableEditBox colliderSizeZ = new ResizableEditBox(font, 0, 35, 0, 15, Component.translatable("datapack_edit.collider.size.z"), HorizontalSizing.LEFT_WIDTH, null);
 			
 			colliderCount.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
 				
 				if (StringUtil.isNullOrEmpty(input)) {
 					collider.remove("number");
@@ -883,14 +1103,14 @@ public class DatapackEditScreen extends Screen {
 				}
 				
 				try {
-					this.modelPlayer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
+					this.modelPreviewer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
 				} catch (IllegalArgumentException e) {
-					this.modelPlayer.setCollider(null);
+					this.modelPreviewer.setCollider(null);
 				}
 			});
 			
 			colliderCenterX.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("center", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
@@ -898,14 +1118,14 @@ public class DatapackEditScreen extends Screen {
 				centerVec.add(0, DoubleTag.valueOf(i));
 				
 				try {
-					this.modelPlayer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
+					this.modelPreviewer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
 				} catch (IllegalArgumentException e) {
-					this.modelPlayer.setCollider(null);
+					this.modelPreviewer.setCollider(null);
 				}
 			});
 			
 			colliderCenterY.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("center", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
@@ -913,14 +1133,14 @@ public class DatapackEditScreen extends Screen {
 				centerVec.add(1, DoubleTag.valueOf(i));
 				
 				try {
-					this.modelPlayer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
+					this.modelPreviewer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
 				} catch (IllegalArgumentException e) {
-					this.modelPlayer.setCollider(null);
+					this.modelPreviewer.setCollider(null);
 				}
 			});
 			
 			colliderCenterZ.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("center", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
@@ -928,14 +1148,14 @@ public class DatapackEditScreen extends Screen {
 				centerVec.add(2, DoubleTag.valueOf(i));
 				
 				try {
-					this.modelPlayer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
+					this.modelPreviewer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
 				} catch (IllegalArgumentException e) {
-				this.modelPlayer.setCollider(null);
+				this.modelPreviewer.setCollider(null);
 				}
 			});
 			
 			colliderSizeX.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("size", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
@@ -943,14 +1163,14 @@ public class DatapackEditScreen extends Screen {
 				centerVec.add(0, DoubleTag.valueOf(i));
 				
 				try {
-					this.modelPlayer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
+					this.modelPreviewer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
 				} catch (IllegalArgumentException e) {
-					this.modelPlayer.setCollider(null);
+					this.modelPreviewer.setCollider(null);
 				}
 			});
 			
 			colliderSizeY.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("size", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
@@ -958,14 +1178,14 @@ public class DatapackEditScreen extends Screen {
 				centerVec.add(1, DoubleTag.valueOf(i));
 				
 				try {
-					this.modelPlayer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
+					this.modelPreviewer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
 				} catch (IllegalArgumentException e) {
-					this.modelPlayer.setCollider(null);
+					this.modelPreviewer.setCollider(null);
 				}
 			});
 			
 			colliderSizeZ.setResponder((input) -> {
-				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
+				CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
 				ListTag centerVec = collider.getList("size", Tag.TAG_DOUBLE);
 				
 				double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
@@ -973,9 +1193,9 @@ public class DatapackEditScreen extends Screen {
 				centerVec.add(2, DoubleTag.valueOf(i));
 				
 				try {
-					this.modelPlayer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
+					this.modelPreviewer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
 				} catch (IllegalArgumentException e) {
-					this.modelPlayer.setCollider(null);
+					this.modelPreviewer.setCollider(null);
 				}
 			});
 			
@@ -987,11 +1207,11 @@ public class DatapackEditScreen extends Screen {
 			colliderSizeY.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
 			colliderSizeZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
 			
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.collider")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.collider"), Component.translatable("datapack_edit.item_capability.collider.tooltip")));
 			this.inputComponentsList.addComponentCurrentRow(new PopupBox.ColliderPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.collider"),
-																							(collider) -> {
+																							(name, collider) -> {
 																								if (collider != null) {
-																									CompoundTag colliderTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getPackValue(), "collider", new CompoundTag());
+																									CompoundTag colliderTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
 																									collider.serialize(colliderTag);
 																									
 																									colliderCount.setValue(String.valueOf(colliderTag.getInt("number")));
@@ -1006,16 +1226,16 @@ public class DatapackEditScreen extends Screen {
 																									colliderSizeY.setValue(String.valueOf(sizeVec.getDouble(1)));
 																									colliderSizeZ.setValue(String.valueOf(sizeVec.getDouble(2)));
 																									
-																									this.modelPlayer.setCollider(collider);
+																									this.modelPreviewer.setCollider(collider);
 																								}
 																							}).applyFilter((collider) -> collider instanceof OBBCollider || collider instanceof MultiOBBCollider));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.collider.count")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider.count"));
 			this.inputComponentsList.addComponentCurrentRow(colliderCount.relocateX(rect, this.inputComponentsList.nextStart(5)));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.collider.center")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider.center"));
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
 			this.inputComponentsList.addComponentCurrentRow(colliderCenterX.relocateX(rect, this.inputComponentsList.nextStart(5)));
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
@@ -1024,7 +1244,7 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.addComponentCurrentRow(colliderCenterZ.relocateX(rect, this.inputComponentsList.nextStart(5)));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.collider.size")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider.size"));
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
 			this.inputComponentsList.addComponentCurrentRow(colliderSizeX.relocateX(rect, this.inputComponentsList.nextStart(5)));
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
@@ -1033,7 +1253,7 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.addComponentCurrentRow(colliderSizeZ.relocateX(rect, this.inputComponentsList.nextStart(5)));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.trail")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.trail"));
 			
 			final ResizableEditBox colorR = new ResizableEditBox(font, 0, 30, 0, 15, Component.translatable("datapack_edit.item_capability.trail.color.r"), HorizontalSizing.LEFT_WIDTH, null);
 			final ResizableEditBox colorG = new ResizableEditBox(font, 0, 30, 0, 15, Component.translatable("datapack_edit.item_capability.trail.color.g"), HorizontalSizing.LEFT_WIDTH, null);
@@ -1041,7 +1261,7 @@ public class DatapackEditScreen extends Screen {
 			final ColorPreviewWidget colorWidget = new ColorPreviewWidget(0, 12, 0, 12, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.color"));
 			
 			colorR.setResponder((input) -> {
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
 				ListTag list = trailTag.getList("color", Tag.TAG_INT);
 				int i = StringUtil.isNullOrEmpty(input) ? 0 : Integer.valueOf(input);
 				list.remove(0);
@@ -1049,10 +1269,10 @@ public class DatapackEditScreen extends Screen {
 				colorWidget.setColor(ParseUtil.parseOrGet(input, Integer::valueOf, 0), ParseUtil.parseOrGet(colorG.getValue(), Integer::valueOf, 0), ParseUtil.parseOrGet(colorB.getValue(), Integer::valueOf, 0));
 				
 				TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
-				this.modelPlayer.setTrailInfo(trailInfo);
+				this.modelPreviewer.setTrailInfo(trailInfo);
 			});
 			colorG.setResponder((input) -> {
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
 				ListTag list = trailTag.getList("color", Tag.TAG_INT);
 				int i = StringUtil.isNullOrEmpty(input) ? 0 : Integer.valueOf(input);
 				list.remove(1);
@@ -1060,10 +1280,10 @@ public class DatapackEditScreen extends Screen {
 				colorWidget.setColor(ParseUtil.parseOrGet(colorR.getValue(), Integer::valueOf, 0), ParseUtil.parseOrGet(input, Integer::valueOf, 0), ParseUtil.parseOrGet(colorB.getValue(), Integer::valueOf, 0));
 				
 				TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
-				this.modelPlayer.setTrailInfo(trailInfo);
+				this.modelPreviewer.setTrailInfo(trailInfo);
 			});
 			colorB.setResponder((input) -> {
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
 				ListTag list = trailTag.getList("color", Tag.TAG_INT);
 				int i = StringUtil.isNullOrEmpty(input) ? 0 : Integer.valueOf(input);
 				list.remove(2);
@@ -1071,7 +1291,7 @@ public class DatapackEditScreen extends Screen {
 				colorWidget.setColor(ParseUtil.parseOrGet(colorR.getValue(), Integer::valueOf, 0), ParseUtil.parseOrGet(colorG.getValue(), Integer::valueOf, 0), ParseUtil.parseOrGet(input, Integer::valueOf, 0));
 				
 				TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
-				this.modelPlayer.setTrailInfo(trailInfo);
+				this.modelPreviewer.setTrailInfo(trailInfo);
 			});
 			
 			colorR.setFilter((context) -> StringUtil.isNullOrEmpty(context) || (ParseUtil.isParsable(context, Integer::parseInt) && ParseUtil.parseOrGet(context, Integer::parseInt, 0) < 256));
@@ -1079,7 +1299,7 @@ public class DatapackEditScreen extends Screen {
 			colorB.setFilter((context) -> StringUtil.isNullOrEmpty(context) || (ParseUtil.isParsable(context, Integer::parseInt) && ParseUtil.parseOrGet(context, Integer::parseInt, 0) < 256));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 28, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.color")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 28, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.color"));
 			this.inputComponentsList.addComponentCurrentRow(colorWidget.relocateX(rect, this.inputComponentsList.nextStart(4)));
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(41), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("R: ")));
 			this.inputComponentsList.addComponentCurrentRow(colorR.relocateX(rect, this.inputComponentsList.nextStart(4)));
@@ -1093,34 +1313,34 @@ public class DatapackEditScreen extends Screen {
 			final ResizableEditBox beginZ = new ResizableEditBox(font, 0, 35, 0, 15, Component.translatable("datapack_edit.item_capability.trail.begin_pos.z"), HorizontalSizing.LEFT_WIDTH, null);
 			
 			beginX.setResponder((input) -> {
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
 				ListTag list = trailTag.getList("begin_pos", Tag.TAG_DOUBLE);
 				double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
 				list.remove(0);
 				list.add(0, DoubleTag.valueOf(d));
 				
 				TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
-				this.modelPlayer.setTrailInfo(trailInfo);
+				this.modelPreviewer.setTrailInfo(trailInfo);
 			});
 			beginY.setResponder((input) -> {
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
 				ListTag list = trailTag.getList("begin_pos", Tag.TAG_DOUBLE);
 				double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
 				list.remove(1);
 				list.add(1, DoubleTag.valueOf(d));
 				
 				TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
-				this.modelPlayer.setTrailInfo(trailInfo);
+				this.modelPreviewer.setTrailInfo(trailInfo);
 			});
 			beginZ.setResponder((input) -> {
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
 				ListTag list = trailTag.getList("begin_pos", Tag.TAG_DOUBLE);
 				double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
 				list.remove(2);
 				list.add(2, DoubleTag.valueOf(d));
 				
 				TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
-				this.modelPlayer.setTrailInfo(trailInfo);
+				this.modelPreviewer.setTrailInfo(trailInfo);
 			});
 			
 			beginX.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
@@ -1128,7 +1348,7 @@ public class DatapackEditScreen extends Screen {
 			beginZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.begin_pos")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.begin_pos"));
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
 			this.inputComponentsList.addComponentCurrentRow(beginX.relocateX(rect, this.inputComponentsList.nextStart(4)));
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
@@ -1141,34 +1361,34 @@ public class DatapackEditScreen extends Screen {
 			final ResizableEditBox endZ = new ResizableEditBox(font, 0, 35, 0, 15, Component.translatable("datapack_edit.item_capability.trail.end_pos.z"), HorizontalSizing.LEFT_WIDTH, null);
 			
 			endX.setResponder((input) -> {
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
 				ListTag list =trailTag.getList("end_pos", Tag.TAG_DOUBLE);
 				double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
 				list.remove(0);
 				list.add(0, DoubleTag.valueOf(d));
 				
 				TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
-				this.modelPlayer.setTrailInfo(trailInfo);
+				this.modelPreviewer.setTrailInfo(trailInfo);
 			});
 			endY.setResponder((input) -> {
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
 				ListTag list =trailTag.getList("end_pos", Tag.TAG_DOUBLE);
 				double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
 				list.remove(1);
 				list.add(1, DoubleTag.valueOf(d));
 				
 				TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
-				this.modelPlayer.setTrailInfo(trailInfo);
+				this.modelPreviewer.setTrailInfo(trailInfo);
 			});
 			endZ.setResponder((input) -> {
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
 				ListTag list =trailTag.getList("end_pos", Tag.TAG_DOUBLE);
 				double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
 				list.remove(2);
 				list.add(2, DoubleTag.valueOf(d));
 				
 				TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
-				this.modelPlayer.setTrailInfo(trailInfo);
+				this.modelPreviewer.setTrailInfo(trailInfo);
 			});
 			
 			endX.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
@@ -1176,7 +1396,7 @@ public class DatapackEditScreen extends Screen {
 			endZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.end_pos")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.end_pos"));
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
 			this.inputComponentsList.addComponentCurrentRow(endX.relocateX(rect, this.inputComponentsList.nextStart(4)));
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
@@ -1189,58 +1409,58 @@ public class DatapackEditScreen extends Screen {
 			
 			lifetime.setResponder((input) -> {
 				int i = StringUtil.isNullOrEmpty(input) ? 0 : Integer.valueOf(input);
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
 				trailTag.put("lifetime", IntTag.valueOf(i));
 				
 				TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
-				this.modelPlayer.setTrailInfo(trailInfo);
+				this.modelPreviewer.setTrailInfo(trailInfo);
 			});
 			lifetime.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Integer::parseInt));
 			
 			interpolation.setResponder((input) -> {
 				int i = StringUtil.isNullOrEmpty(input) ? 0 : Integer.valueOf(input);
 				
-				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
+				CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
 				trailTag.put("interpolations", IntTag.valueOf(i));
 				
 				TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
-				this.modelPlayer.setTrailInfo(trailInfo);
+				this.modelPreviewer.setTrailInfo(trailInfo);
 			});
 			interpolation.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Integer::parseInt));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.lifetime")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.lifetime"));
 			this.inputComponentsList.addComponentCurrentRow(lifetime.relocateX(rect, this.inputComponentsList.nextStart(8)));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.interpolations")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.interpolations"));
 			this.inputComponentsList.addComponentCurrentRow(interpolation.relocateX(rect, this.inputComponentsList.nextStart(8)));
 			
 			final ResizableEditBox texturePath = new ResizableEditBox(font, 0, 15, 0, 15, Component.translatable("datapack_edit.item_capability.trail.end_pos.z"), HorizontalSizing.LEFT_RIGHT, null);
-			texturePath.setResponder((input) -> this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail").put("texture_path", StringTag.valueOf(new ResourceLocation(input).toString())));
+			texturePath.setResponder((input) -> this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail").put("texture_path", StringTag.valueOf(new ResourceLocation(input).toString())));
 			texturePath.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ResourceLocation.isValidResourceLocation(context));
 			texturePath.setMaxLength(100);
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.texture_path")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.texture_path"));
 			this.inputComponentsList.addComponentCurrentRow(texturePath.relocateX(rect, this.inputComponentsList.nextStart(8)));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.particle_type")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.particle_type"));
 			this.inputComponentsList.addComponentCurrentRow(new PopupBox.RegistryPopupBox<>(parentScreen, font, this.inputComponentsList.nextStart(8), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 																		Component.translatable("datapack_edit.weapon_type.hit_particle"), ForgeRegistries.PARTICLE_TYPES,
-																		(item) -> {
-																			CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getPackValue().getCompound("trail");
+																		(name, item) -> {
+																			CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
 																			trailTag.putString("particle_type", ParseUtil.getRegistryName(item, ForgeRegistries.PARTICLE_TYPES));
 																			
 																			TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
-																			this.modelPlayer.setTrailInfo(trailInfo);
+																			this.modelPreviewer.setTrailInfo(trailInfo);
 																		}));
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(this.modelPlayer.relocateX(rect, this.inputComponentsList.nextStart(8)));
+			this.inputComponentsList.addComponentCurrentRow(this.modelPreviewer.relocateX(rect, this.inputComponentsList.nextStart(8)));
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.newRow();
 			
@@ -1249,12 +1469,88 @@ public class DatapackEditScreen extends Screen {
 		
 		@Override
 		public void packGridRowpositionChanged(int rowposition, Map<String, Object> values) {
-			this.inputComponentsList.importTag(this.packList.get(rowposition).getPackValue());
+			this.inputComponentsList.importTag(this.packList.get(rowposition).getValue());
 			
 			ResourceLocation rl = new ResourceLocation(ParseUtil.nullParam(values.get("pack_item")));
 			
 			if (this.registry.containsKey(rl)) {
-				this.modelPlayer.setItemToRender(this.registry.getValue(rl));
+				this.modelPreviewer.setItemToRender(this.registry.getValue(rl));
+			}
+		}
+		
+		@Override
+		public void importEntries(PackResources packResources) {
+			packResources.getNamespaces(PackType.SERVER_DATA).stream().distinct().forEach((namespace) -> {
+				packResources.listResources(PackType.SERVER_DATA, namespace, this.directory, (resourceLocation, stream) -> {
+					if (resourceLocation.toString().contains("/types/")) {
+						return;
+					}
+					
+					try {
+						JsonReader jsonReader = new JsonReader(new InputStreamReader(stream.get(), StandardCharsets.UTF_8));
+						jsonReader.setLenient(true);
+						JsonObject jsonObject = Streams.parse(jsonReader).getAsJsonObject();
+						CompoundTag compTag = TagParser.parseTag(jsonObject.toString());
+						ResourceLocation rl = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll(this.directory + "/", "").replaceAll(".json", ""));
+						ResourceLocation itemSkin = new ResourceLocation(rl.getNamespace(), "item_skins/" + rl.getPath() + ".json");
+						IoSupplier<InputStream> supplier = packResources.getResource(PackType.CLIENT_RESOURCES, itemSkin);
+						
+						if (supplier != null) {
+							InputStream inputstream = supplier.get();
+							
+							if (inputstream != null) {
+								jsonReader = new JsonReader(new InputStreamReader(inputstream, StandardCharsets.UTF_8));
+								jsonReader.setLenient(true);
+								
+								CompoundTag comp = TagParser.parseTag(Streams.parse(jsonReader).getAsJsonObject().toString());
+								compTag.put("trail", comp.get("trail"));
+							}
+						}
+						
+						this.packList.add(PackEntry.of(rl, () -> compTag));
+						this.packListGrid.addRowWithDefaultValues("pack_item", rl.toString());
+					} catch (IOException | CommandSyntaxException e) {
+						e.printStackTrace();
+					}
+				});
+			});
+		}
+		
+		@Override
+		public void exportEntries(ZipOutputStream out) throws Exception {
+			for (PackEntry<ResourceLocation, CompoundTag> packEntry : this.packList) {
+				try {
+					ZipEntry zipEntry = new ZipEntry(String.format("data/%s/" + this.directory + "/%s.json", packEntry.getKey().getNamespace(), packEntry.getKey().getPath()));
+					Gson gson = new GsonBuilder().setPrettyPrinting().create();
+					CompoundTag tag = packEntry.getValue();
+					
+					if (tag.contains("trail")) {
+						ZipEntry asItemSkin = new ZipEntry(String.format("assets/%s/item_skins/%s.json", packEntry.getKey().getNamespace(), packEntry.getKey().getPath()));
+						CompoundTag trailTag = new CompoundTag();
+						trailTag.put("trail", tag.getCompound("trail"));
+						
+						out.putNextEntry(asItemSkin);
+						out.write(gson.toJson(CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, trailTag).get().left().get()).getBytes());
+						out.closeEntry();
+						
+						tag.remove("trail");
+					}
+					
+					if (tag.contains("collider")) {
+						try {
+							ColliderPreset.deserializeSimpleCollider(tag.getCompound("collider"));
+						} catch (Exception e) {
+							tag.remove("collider");
+						}
+					}
+					
+					out.putNextEntry(zipEntry);
+					out.write(gson.toJson(CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, tag).get().left().get()).getBytes());
+					out.closeEntry();
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw new IllegalStateException("Failded to export " + packEntry.getKey() +". "+ e.getMessage());
+				}
 			}
 		}
 	}
@@ -1270,6 +1566,22 @@ public class DatapackEditScreen extends Screen {
 					
 				}
 			};
+		}
+		
+		@Override
+		public void importEntries(PackResources packResources) {
+			packResources.getNamespaces(PackType.SERVER_DATA).stream().distinct().forEach((namespace) -> {
+				packResources.listResources(PackType.SERVER_DATA, namespace, this.directory, (resourceLocation, stream) -> {
+					
+				});
+			});
+		}
+		
+		@Override
+		public void exportEntries(ZipOutputStream out) throws Exception {
+			//for (PackEntry<ResourceLocation, CompoundTag> packEntry : this.packList) {
+				
+			//}
 		}
 	}
 }

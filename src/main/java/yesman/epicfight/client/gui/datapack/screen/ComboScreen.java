@@ -26,9 +26,9 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.utils.ParseUtil;
-import yesman.epicfight.client.gui.datapack.widgets.AnimatedModelPlayer;
 import yesman.epicfight.client.gui.datapack.widgets.Grid;
 import yesman.epicfight.client.gui.datapack.widgets.InputComponentList;
+import yesman.epicfight.client.gui.datapack.widgets.ModelPreviewer;
 import yesman.epicfight.client.gui.datapack.widgets.PopupBox;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.HorizontalSizing;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.VerticalSizing;
@@ -46,7 +46,7 @@ public class ComboScreen extends Screen {
 	private PopupBox.AnimationPopupBox dashAttackPopupbox;
 	private PopupBox.AnimationPopupBox airSlashPopupbox;
 	private final InputComponentList<ListTag> inputComponentsList;
-	private final AnimatedModelPlayer animationModelPlayer;
+	private final ModelPreviewer modelPreviewer;
 	private final List<PackEntry<String, ListTag>> styles = Lists.newArrayList();
 	private final CompoundTag rootTag;
 	
@@ -73,19 +73,19 @@ public class ComboScreen extends Screen {
 				
 				if (isMount) {
 					for (int i = 0; i < tagSize; i++) {
-						packImporter.newRow().newValue("combo_animation", ImportAnimationsScreen.byKey(tag.getString(i)));
+						packImporter.newRow().newValue("combo_animation", DatapackEditScreen.byKey(tag.getString(i)));
 					}
 					
 					this.setDataBindingComponenets(new Object[] {packImporter});
 				} else {
 					for (int i = 0; i < tagSize - 2; i++) {
-						packImporter.newRow().newValue("combo_animation", ImportAnimationsScreen.byKey(tag.getString(i)));
+						packImporter.newRow().newValue("combo_animation", DatapackEditScreen.byKey(tag.getString(i)));
 					}
 					
 					this.setDataBindingComponenets(new Object[] {
 						packImporter,
-						ImportAnimationsScreen.byKey(tag.getString(tagSize - 2)),
-						ImportAnimationsScreen.byKey(tag.getString(tagSize - 1))
+						DatapackEditScreen.byKey(tag.getString(tagSize - 2)),
+						DatapackEditScreen.byKey(tag.getString(tagSize - 1))
 					});
 				}
 			}
@@ -103,7 +103,7 @@ public class ComboScreen extends Screen {
 								.rowEditable(true)
 								.transparentBackground(false)
 								.rowpositionChanged((rowposition, values) -> {
-									this.inputComponentsList.importTag(this.styles.get(rowposition).getPackValue());
+									this.inputComponentsList.importTag(this.styles.get(rowposition).getValue());
 									this.reloadAnimationPlayer();
 									
 									if (values.get("style") == Styles.MOUNT) {
@@ -119,7 +119,7 @@ public class ComboScreen extends Screen {
 														this.dashAttackPopupbox._setActive(true);
 														this.airSlashPopupbox._setActive(true);
 														
-														ListTag combosList = this.styles.get(event.rowposition).getPackValue();
+														ListTag combosList = this.styles.get(event.rowposition).getValue();
 														combosList.add(StringTag.valueOf(""));
 														combosList.add(StringTag.valueOf(""));
 														
@@ -129,7 +129,7 @@ public class ComboScreen extends Screen {
 														this.dashAttackPopupbox._setActive(false);
 														this.airSlashPopupbox._setActive(false);
 														
-														ListTag combosList = this.styles.get(event.rowposition).getPackValue();
+														ListTag combosList = this.styles.get(event.rowposition).getValue();
 														combosList.remove(combosList.size() - 1);
 														combosList.remove(combosList.size() - 1);
 													}
@@ -163,7 +163,7 @@ public class ComboScreen extends Screen {
 												.editWidgetCreated((popupBox) -> popupBox.setModel(() -> Armatures.BIPED, () -> Meshes.BIPED))
 												.toDisplayText((animation) -> animation == null ? "" : animation.getRegistryName().toString())
 												.valueChanged((event) -> {
-													ListTag animationList = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
+													ListTag animationList = this.styles.get(this.stylesGrid.getRowposition()).getValue();
 													
 													animationList.remove(event.rowposition);
 													animationList.add(event.rowposition, StringTag.valueOf(ParseUtil.nullOrToString(event.postValue, (animation) -> animation.getRegistryName().toString())));
@@ -174,39 +174,39 @@ public class ComboScreen extends Screen {
 												})
 												.width(150))
 								.pressAdd((grid, button) -> {
-									this.styles.get(this.stylesGrid.getRowposition()).getPackValue().add(grid.children().size(), StringTag.valueOf(""));
+									this.styles.get(this.stylesGrid.getRowposition()).getValue().add(grid.children().size(), StringTag.valueOf(""));
 									int rowposition = grid.addRow();
 									grid.setGridFocus(rowposition, "combo_animation");
 								})
 								.pressRemove((grid, button) -> {
-									grid.removeRow((removedRow) -> this.styles.get(this.stylesGrid.getRowposition()).getPackValue().remove(removedRow));
+									grid.removeRow((removedRow) -> this.styles.get(this.stylesGrid.getRowposition()).getValue().remove(removedRow));
 									this.reloadAnimationPlayer();
 								})
 								.build();
 		
-		this.animationModelPlayer = new AnimatedModelPlayer(110, 200, 45, 49, HorizontalSizing.LEFT_RIGHT, VerticalSizing.TOP_BOTTOM, Armatures.BIPED, Meshes.BIPED);
+		this.modelPreviewer = new ModelPreviewer(110, 200, 45, 49, HorizontalSizing.LEFT_RIGHT, VerticalSizing.TOP_BOTTOM, Armatures.BIPED, Meshes.BIPED);
 		
 		CompoundTag colliderTag = rootTag.getCompound("collider");
 		
 		try {
 			Collider collider = ColliderPreset.deserializeSimpleCollider(colliderTag);
-			this.animationModelPlayer.setCollider(collider);
+			this.modelPreviewer.setCollider(collider);
 		} catch (IllegalArgumentException e) {
 		}
 		
 		this.dashAttackPopupbox = new PopupBox.AnimationPopupBox(this, this.font, 110, 15, -1, 15, HorizontalSizing.WIDTH_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.dash_attak"),
-				(animation) -> {
+				(name, animation) -> {
 					if (animation != null) {
-						ListTag listTag = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
+						ListTag listTag = this.styles.get(this.stylesGrid.getRowposition()).getValue();
 						listTag.remove(listTag.size() - 2);
 						listTag.add(listTag.size() - 1, StringTag.valueOf(ParseUtil.nullOrToString(animation, (animation2) -> animation.getRegistryName().toString())));
 						this.reloadAnimationPlayer();
 					}
 				});
 		this.airSlashPopupbox = new PopupBox.AnimationPopupBox(this, this.font, 110, 15, -1, 15, HorizontalSizing.WIDTH_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.air_slash"),
-				(animation) -> {
+				(name, animation) -> {
 					if (animation != null) {
-						ListTag listTag = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
+						ListTag listTag = this.styles.get(this.stylesGrid.getRowposition()).getValue();
 						listTag.remove(listTag.size() - 1);
 						listTag.add(listTag.size(), StringTag.valueOf(ParseUtil.nullOrToString(animation, (animation2) -> animation.getRegistryName().toString())));
 						this.reloadAnimationPlayer();
@@ -220,7 +220,7 @@ public class ComboScreen extends Screen {
 		this.airSlashPopupbox.applyFilter((animation) -> animation instanceof AttackAnimation);
 		
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, 80, 110, -1, 15, HorizontalSizing.WIDTH_RIGHT, null, Component.translatable("Combo Attacks")));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, 80, 110, -1, 15, HorizontalSizing.WIDTH_RIGHT, null, "datapack_edit.weapon_type.combos.combo_attacks"));
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.newRow();
@@ -229,11 +229,11 @@ public class ComboScreen extends Screen {
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, 60, 130, -1, 15, HorizontalSizing.WIDTH_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.dash_attak")));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, 60, 130, -1, 15, HorizontalSizing.WIDTH_RIGHT, null, "datapack_edit.weapon_type.combos.dash_attak"));
 		this.inputComponentsList.addComponentCurrentRow(this.dashAttackPopupbox);
 		
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, 60, 130, -1, 15, HorizontalSizing.WIDTH_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.air_slash")));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, 60, 130, -1, 15, HorizontalSizing.WIDTH_RIGHT, null, "datapack_edit.weapon_type.combos.air_slash"));
 		this.inputComponentsList.addComponentCurrentRow(this.airSlashPopupbox);
 		
 		this.inputComponentsList.setComponentsActive(false);
@@ -258,25 +258,25 @@ public class ComboScreen extends Screen {
 		
 		this.inputComponentsList.updateSize(205, screenRectangle.height(), screenRectangle.top() + 34, screenRectangle.height() - 45);
 		this.inputComponentsList.setLeftPos(this.width - 205);
-		this.animationModelPlayer.resize(screenRectangle);
+		this.modelPreviewer.resize(screenRectangle);
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {
 			Set<String> styles = Sets.newHashSet();
 			
 			for (PackEntry<String, ListTag> entry : this.styles) {
-				if (styles.contains(entry.getPackKey())) {
-					this.minecraft.setScreen(new MessageScreen<>("Save Failed", "Unable to save because of duplicated style: " + entry.getPackKey(), this, (button2) -> {
+				if (styles.contains(entry.getKey())) {
+					this.minecraft.setScreen(new MessageScreen<>("Save Failed", "Unable to save because of duplicated style: " + entry.getKey(), this, (button2) -> {
 						this.minecraft.setScreen(this);
 					}, 180, 90));
 					return;
 				}
-				styles.add(entry.getPackKey());
+				styles.add(entry.getKey());
 			}
 			
 			this.rootTag.tags.clear();
 			
 			for (PackEntry<String, ListTag> entry : this.styles) {
-				this.rootTag.put(entry.getPackKey(), entry.getPackValue());
+				this.rootTag.put(entry.getKey(), entry.getValue());
 			}
 			
 			this.onClose();
@@ -291,21 +291,21 @@ public class ComboScreen extends Screen {
 														}, 180, 70));
 		}).pos(this.width / 2 + 2, this.height - 32).size(160, 21).build());
 		
-		this.addRenderableWidget(new Static(this.font, 12, 60, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.styles"), Component.translatable("datapack_edit.styles")));
+		this.addRenderableWidget(new Static(this.font, 12, 60, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.styles"), Component.translatable("datapack_edit.styles.tooltip.mandatory")));
 		this.addRenderableWidget(this.stylesGrid);
-		this.addRenderableWidget(this.animationModelPlayer);
+		this.addRenderableWidget(this.modelPreviewer);
 		this.addRenderableWidget(this.inputComponentsList);
 	}
 	
 	@Override
 	public void onClose() {
-		this.animationModelPlayer.onDestroy();
+		this.modelPreviewer.onDestroy();
 		this.minecraft.setScreen(this.parentScreen);
 	}
 	
 	@Override
 	public void tick() {
-		this.animationModelPlayer._tick();
+		this.modelPreviewer._tick();
 	}
 	
 	@Override
@@ -352,7 +352,7 @@ public class ComboScreen extends Screen {
 			animations.add(airSlash);
 		}
 		
-		this.animationModelPlayer.clearAnimations();
-		animations.forEach(this.animationModelPlayer::addAnimationToPlay);
+		this.modelPreviewer.clearAnimations();
+		animations.forEach(this.modelPreviewer::addAnimationToPlay);
 	}
 }

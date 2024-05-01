@@ -24,7 +24,7 @@ import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.types.datapack.FakeAnimation;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
 import yesman.epicfight.api.utils.ParseUtil;
-import yesman.epicfight.client.gui.datapack.widgets.AnimatedModelPlayer;
+import yesman.epicfight.client.gui.datapack.widgets.ModelPreviewer;
 import yesman.epicfight.client.gui.datapack.widgets.ComboBox;
 import yesman.epicfight.client.gui.datapack.widgets.Grid;
 import yesman.epicfight.client.gui.datapack.widgets.InputComponentList;
@@ -59,11 +59,11 @@ public class AttackAnimationPropertyScreen extends Screen {
 	private final ComboBox<InteractionHand> hand;
 	private final ResizableEditBox interpolations;
 	private final ResizableEditBox lifetime;
-	private final AnimatedModelPlayer modelPlayer;
+	private final ModelPreviewer modelPlayer;
 	
 	private JsonArray trailList = new JsonArray();
 	
-	protected AttackAnimationPropertyScreen(Screen parentScreen, FakeAnimation animation, List<Joint> joints, AnimatedModelPlayer modelPlayer) {
+	protected AttackAnimationPropertyScreen(Screen parentScreen, FakeAnimation animation, List<Joint> joints, ModelPreviewer modelPlayer) {
 		super(Component.translatable("datapack_edit.import_animation.client_data"));
 		
 		this.minecraft = parentScreen.getMinecraft();

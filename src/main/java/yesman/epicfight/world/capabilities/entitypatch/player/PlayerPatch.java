@@ -235,6 +235,11 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 			}
 		}
 		
+		if (this.getEntityState().inaction()) {
+			this.original.yBodyRot = this.original.getYRot();
+			this.original.yHeadRot = this.original.getYRot();
+		}
+		
 		if (!this.useModelYRot) {
 			float originalYRot = this.isLogicalClient() ? this.original.yBodyRot : this.original.getYRot();
 			this.modelYRot += Mth.clamp(Mth.wrapDegrees(originalYRot - this.modelYRot), -45.0F, 45.0F);

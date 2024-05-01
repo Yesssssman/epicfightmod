@@ -107,10 +107,11 @@ public class FakeStaticAnimation extends StaticAnimation implements ClipHoldingA
 			});
 			
 			if (!masks.isEmpty()) {
-				propertiesJson.add("layer", propertiesJson);
-				propertiesJson.add("priority", propertiesJson);
 				propertiesJson.add("masks", masks);
 			}
+			
+			propertiesJson.addProperty("layer", this.getLayerType().toString());
+			propertiesJson.addProperty("priority", this.getPriority().toString());
 		});
 		
 		this.fakeAnimation = fakeAnimation;

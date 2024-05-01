@@ -1,5 +1,7 @@
 package yesman.epicfight.client.gui.datapack.screen;
 
+import java.util.function.Supplier;
+
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -17,17 +19,25 @@ import yesman.epicfight.client.gui.datapack.widgets.InputComponentList;
 import yesman.epicfight.client.gui.datapack.widgets.PopupBox;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.HorizontalSizing;
 import yesman.epicfight.client.gui.datapack.widgets.Static;
+import yesman.epicfight.data.conditions.Condition;
 import yesman.epicfight.data.conditions.Condition.LivingEntityCondition;
 import yesman.epicfight.data.conditions.EpicFightConditions;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class OffhandValidatorScreen extends Screen {
 	private final Screen parentScreen;
 	private final InputComponentList<CompoundTag> inputComponentsList;
+	private final CompoundTag rootTag;
+	private final CompoundTag offhandValidatorTag = new CompoundTag();
+	
+	private Grid parameterGrid;
+	private PopupBox<Supplier<Condition<?>>> conditionPopup;
 	
 	public OffhandValidatorScreen(Screen parentScreen, CompoundTag rootTag) {
 		super(Component.translatable("datapack_edit.weapon_type.offhand_validator"));
 		
+		this.rootTag = rootTag;
 		this.parentScreen = parentScreen;
 		this.inputComponentsList = new InputComponentList<>(this, 0, 0, 0, 0, 22) {
 			@Override
@@ -50,34 +60,36 @@ public class OffhandValidatorScreen extends Screen {
 		this.inputComponentsList.setLeftPos(15);
 		this.font = parentScreen.getMinecraft().font;
 		
-		final Grid parameterGrid = Grid.builder(this, parentScreen.getMinecraft())
-										.xy1(4, 40)
-										.xy2(12, 80)
-										.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
-										.rowHeight(26)
-										.rowEditable(false)
-										.transparentBackground(false)
-										.addColumn(Grid.editbox("parameter_key").valueChanged((event) -> {
-											CompoundTag predicate = ParseUtil.getOrDefaultTag(rootTag, "predicate", new CompoundTag());
-											predicate.remove(ParseUtil.nullParam(event.prevValue));
-											predicate.putString(ParseUtil.nullParam(event.postValue), ParseUtil.nullParam(event.grid.getValue(event.rowposition, "parameter_value")));
-										}).editable(false))
-										.addColumn(Grid.editbox("parameter_value").valueChanged((event) -> {
-											CompoundTag predicate = ParseUtil.getOrDefaultTag(rootTag, "predicate", new CompoundTag());
-											predicate.putString(ParseUtil.nullParam(event.grid.getValue(event.rowposition, "parameter_key")), ParseUtil.nullParam(event.postValue));
-										}).width(150))
-										.build();
+		this.parameterGrid = Grid.builder(this, parentScreen.getMinecraft())
+									.xy1(4, 40)
+									.xy2(12, 80)
+									.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
+									.rowHeight(26)
+									.rowEditable(false)
+									.transparentBackground(false)
+									.addColumn(Grid.editbox("parameter_key").valueChanged((event) -> {
+										CompoundTag predicate = ParseUtil.getOrDefaultTag(this.offhandValidatorTag, "predicate", new CompoundTag());
+										predicate.remove(ParseUtil.nullParam(event.prevValue));
+										predicate.putString(ParseUtil.nullParam(event.postValue), ParseUtil.nullParam(event.grid.getValue(event.rowposition, "parameter_value")));
+									}).editable(false))
+									.addColumn(Grid.editbox("parameter_value").valueChanged((event) -> {
+										CompoundTag predicate = ParseUtil.getOrDefaultTag(this.offhandValidatorTag, "predicate", new CompoundTag());
+										predicate.putString(ParseUtil.nullParam(event.grid.getValue(event.rowposition, "parameter_key")), ParseUtil.nullParam(event.postValue));
+									}).width(150))
+									.build();
+		
+		this.conditionPopup = new PopupBox.RegistryPopupBox<>(this, this.font, 0, 13, 60, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.condition"),
+																EpicFightConditions.REGISTRY.get(), (name, conditionProvider) -> {
+																	if (conditionProvider != null) {
+																		parameterGrid.reset();
+																		conditionProvider.get().getAcceptingParameters().forEach((e) -> parameterGrid.addRowWithDefaultValues("parameter_key", e.getKey()));
+																		this.offhandValidatorTag.putString("condition", ParseUtil.getRegistryName(conditionProvider, EpicFightConditions.REGISTRY.get()));
+																	}
+																}).applyFilter((condition) -> condition.get() instanceof LivingEntityCondition);
 		
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 80, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.styles.condition")));
-		this.inputComponentsList.addComponentCurrentRow(new PopupBox.RegistryPopupBox<>(this, this.font, this.inputComponentsList.nextStart(5), 13, 60, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.condition"),
-																		EpicFightConditions.REGISTRY.get(), (conditionProvider) -> {
-																			if (conditionProvider != null) {
-																				parameterGrid.reset();
-																				conditionProvider.get().getAcceptingParameters().forEach((e) -> parameterGrid.addRowWithDefaultValues("parameter_key", e.getKey()));
-																				rootTag.putString("condition", ParseUtil.getRegistryName(conditionProvider, EpicFightConditions.REGISTRY.get()));
-																			}
-																		}).applyFilter((condition) -> condition.get() instanceof LivingEntityCondition));
+		this.inputComponentsList.addComponentCurrentRow(this.conditionPopup.relocateX(this.getRectangle(), this.inputComponentsList.nextStart(5)));
 		
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 80, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.styles.parameters")));
@@ -85,7 +97,7 @@ public class OffhandValidatorScreen extends Screen {
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(parameterGrid);
+		this.inputComponentsList.addComponentCurrentRow(this.parameterGrid);
 		
 		this.inputComponentsList.importTag(rootTag);
 	}
@@ -98,12 +110,30 @@ public class OffhandValidatorScreen extends Screen {
 		this.inputComponentsList.setLeftPos(15);
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_OK, (button) -> {
-			//this.selectCallback.accept(this.registryList.getSelected() == null ? null : this.registryList.getSelected().item);
+			if (this.conditionPopup.getValue() == null) {
+				this.minecraft.setScreen(new MessageScreen<>("", "Condition is not defined!", this, (button2) -> this.minecraft.setScreen(this), 180, 70));
+				return;
+			}
+			
+			try {
+				Supplier<Condition<LivingEntityPatch<?>>> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(this.offhandValidatorTag.getString("condition")));
+				conditionProvider.get().read(offhandValidatorTag.getCompound("predicate"));
+			} catch (Exception e) {
+				this.minecraft.setScreen(new MessageScreen<>("Invalid condition.", e.getMessage(), this, (button2) -> this.minecraft.setScreen(this), 180, 70));
+				return;
+			}
+			
+			this.rootTag.put("offhand_item_compatible_predicate", this.offhandValidatorTag);
 			this.minecraft.setScreen(this.parentScreen);
 		}).pos(this.width / 2 - 162, this.height - 32).size(160, 21).build());
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, (button) -> {
-			this.minecraft.setScreen(this.parentScreen);
+			this.minecraft.setScreen(new MessageScreen<>("", "Do you want to quit without saving changes?", this,
+														(button2) -> {
+															this.onClose();
+														}, (button2) -> {
+															this.minecraft.setScreen(this);
+														}, 180, 70));
 		}).pos(this.width / 2 + 2, this.height - 32).size(160, 21).build());
 		
 		this.addRenderableWidget(this.inputComponentsList);

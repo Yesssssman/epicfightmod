@@ -76,6 +76,7 @@ import yesman.epicfight.world.effect.EpicFightMobEffects;
 import yesman.epicfight.world.effect.EpicFightPotions;
 import yesman.epicfight.world.entity.EpicFightEntities;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+import yesman.epicfight.world.entity.decoration.EpicFightPaintingVariants;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 import yesman.epicfight.world.item.EpicFightCreativeTabs;
 import yesman.epicfight.world.item.EpicFightItems;
@@ -85,7 +86,8 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 /**
  *  TODO
  *  
- *  1. 
+ *  1. Remove prev-currentt pose system and get pose directly from animation
+ *  2. Trail bug
  *  
  *  @author yesman
  */
@@ -145,6 +147,7 @@ public class EpicFightMod {
 		EpicFightDataSerializers.ENTITY_DATA_SERIALIZER.register(bus);
 		EpicFightConditions.CONDITIONS.register(bus);
 		SkillDataKeys.DATA_KEYS.register(bus);
+		EpicFightPaintingVariants.PAINTING_VARIANTS.register(bus);
 		EpicFightCommandArgumentTypes.COMMAND_ARGUMENT_TYPES.register(bus);
         
         ConfigManager.loadConfig(ConfigManager.CLIENT_CONFIG, FMLPaths.CONFIGDIR.get().resolve(MODID + "-client.toml").toString());

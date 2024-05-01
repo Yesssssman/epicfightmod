@@ -113,7 +113,7 @@ public class TrailParticle extends TextureSheetParticle {
 		this.bCol = Math.max(this.trailInfo.bCol, 0.0F);
 	}
 	
-	@Deprecated /** This constructor is only for {@link AnimatedModelPlayer} **/
+	@Deprecated /** This constructor is only for {@link ModelPreviewer} **/
 	protected TrailParticle(Armature armature, Joint joint, StaticAnimation animation, TrailInfo trailInfo) {
 		super(null, 0, 0, 0);
 		

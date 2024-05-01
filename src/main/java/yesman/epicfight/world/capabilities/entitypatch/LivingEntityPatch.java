@@ -141,7 +141,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		}
 	}
 	
-	public void poseTick(DynamicAnimation animation, Pose pose) {
+	public void poseTick(DynamicAnimation animation, Pose pose, float time) {
 		if (pose.getJointTransformData().containsKey("Head") && animation instanceof StaticAnimation) {
 			if (!animation.getProperty(StaticAnimationProperty.FIXED_HEAD_ROTATION).orElse(false)) {
 				Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(-this.original.getXRot(), Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(this.original.yBodyRot - this.original.yHeadRot, Vec3f.Y_AXIS)).toQuaternion();

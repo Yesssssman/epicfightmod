@@ -17,6 +17,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.types.AttackAnimation;
+import yesman.epicfight.api.animation.types.BasicAttackAnimation;
 import yesman.epicfight.api.animation.types.MovementAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimationDataReader;
@@ -107,8 +108,8 @@ public class FakeAnimation extends StaticAnimation {
 		
 		switch (this.animationType) {
 		case STATIC, MOVEMENT:
-			return String.format("(%s#F,%b#Z,%s#java.lang.String,%s#" + Armature.class.getTypeName() + ")#%s", this.constructorParams.get("convertTime"), this.constructorParams.get("isRepeat"), this.constructorParams.get("path"), this.constructorParams.get("armature"), this.animationType.animCls.getSimpleName());
-		case ATTACK:
+			return String.format("(%s#F,%b#Z,%s#java.lang.String,%s#" + Armature.class.getTypeName() + ")#%s", this.constructorParams.get("convertTime"), this.constructorParams.get("isRepeat"), this.constructorParams.get("path"), this.constructorParams.get("armature"), this.animationType.animCls.getTypeName());
+		case ATTACK, BASIC_ATTACK:
 			ListTag phasesTag = this.getParameter("phases");
 			Iterator<Tag> iter = phasesTag.iterator();
 			
@@ -230,10 +231,12 @@ public class FakeAnimation extends StaticAnimation {
 		PARAMETERS.put(AnimationType.STATIC, staticAnimationParameters);
 		PARAMETERS.put(AnimationType.MOVEMENT, staticAnimationParameters);
 		PARAMETERS.put(AnimationType.ATTACK, attackAnimationParameters);
+		PARAMETERS.put(AnimationType.BASIC_ATTACK, attackAnimationParameters);
 		
 		FAKE_ANIMATIONS.put(AnimationType.STATIC, FakeStaticAnimation.class);
 		FAKE_ANIMATIONS.put(AnimationType.MOVEMENT, FakeMovementAnimation.class);
 		FAKE_ANIMATIONS.put(AnimationType.ATTACK, FakeAttackAnimation.class);
+		FAKE_ANIMATIONS.put(AnimationType.BASIC_ATTACK, FakeBasicAttackAnimation.class);
 	}
 	
 	public static Class<? extends ClipHoldingAnimation> switchType(AnimationType cls) {
@@ -252,7 +255,7 @@ public class FakeAnimation extends StaticAnimation {
 	
 	@OnlyIn(Dist.CLIENT)
 	public static enum AnimationType {
-		STATIC(StaticAnimation.class), MOVEMENT(MovementAnimation.class), ATTACK(AttackAnimation.class);
+		STATIC(StaticAnimation.class), MOVEMENT(MovementAnimation.class), ATTACK(AttackAnimation.class), BASIC_ATTACK(BasicAttackAnimation.class);
 		
 		final Class<? extends StaticAnimation> animCls;
 		

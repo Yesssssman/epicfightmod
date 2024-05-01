@@ -145,7 +145,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	}
 	
 	@Override
-	public void poseTick(DynamicAnimation animation, Pose pose) {
+	public void poseTick(DynamicAnimation animation, Pose pose, float time) {
 		if (pose.getJointTransformData().containsKey("Head_M")) {
 			Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(-this.original.getXRot(), Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(this.original.yBodyRot - this.original.yHeadRot, Vec3f.Y_AXIS)).toQuaternion();
 			pose.getOrDefaultTransform("Head_M").frontResult(JointTransform.getRotation(headRotation), OpenMatrix4f::mul);

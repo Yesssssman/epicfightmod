@@ -65,12 +65,12 @@ public class WeaponCapability extends CapabilityItem {
 	
 	@Override
 	public final List<AnimationProvider<?>> getAutoAttckMotion(PlayerPatch<?> playerpatch) {
-		return this.autoAttackMotions.get(this.getStyle(playerpatch));
+		return this.autoAttackMotions.getOrDefault(this.getStyle(playerpatch), this.autoAttackMotions.get(Styles.COMMON));
 	}
 	
 	@Override
 	public final Skill getInnateSkill(PlayerPatch<?> playerpatch, ItemStack itemstack) {
-		return this.innateSkill.getOrDefault(this.getStyle(playerpatch), (s) -> null).apply(itemstack);
+		return this.innateSkill.getOrDefault(this.getStyle(playerpatch), this.innateSkill.get(Styles.COMMON)).apply(itemstack);
 	}
 	
 	@Override

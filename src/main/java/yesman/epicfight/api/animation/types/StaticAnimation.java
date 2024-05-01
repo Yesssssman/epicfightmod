@@ -242,7 +242,7 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 	
 	@Override
 	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
-		entitypatch.poseTick(animation, pose);
+		entitypatch.poseTick(animation, pose, time);
 		
 		AnimationProperty.PoseModifier modifier = this.getProperty(StaticAnimationProperty.POSE_MODIFIER).orElse(null);
 		

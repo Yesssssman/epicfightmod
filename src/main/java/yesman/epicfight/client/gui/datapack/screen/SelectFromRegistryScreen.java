@@ -2,6 +2,7 @@ package yesman.epicfight.client.gui.datapack.screen;
 
 import java.util.Map;
 import java.util.Set;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -30,17 +31,17 @@ public class SelectFromRegistryScreen<T> extends Screen {
 	private final RegistryList registryList;
 	private final Screen parentScreen;
 	private final Consumer<T> onPressRow;
-	private final Consumer<T> onAccept;
+	private final BiConsumer<String, T> onAccept;
 	
 	public SelectFromRegistryScreen(Screen parentScreen, IForgeRegistry<T> registry, Consumer<T> onPressRow) {
 		this(parentScreen, registry, onPressRow, (item) -> true);
 	}
 	
 	public SelectFromRegistryScreen(Screen parentScreen, IForgeRegistry<T> registry, Consumer<T> onPressRow, Predicate<T> filter) {
-		this(parentScreen, registry, (select) -> {}, onPressRow, filter);
+		this(parentScreen, registry, (name, select) -> {}, onPressRow, filter);
 	}
 	
-	public SelectFromRegistryScreen(Screen parentScreen, IForgeRegistry<T> registry, Consumer<T> onAccept, Consumer<T> selectCallback, Predicate<T> filter) {
+	public SelectFromRegistryScreen(Screen parentScreen, IForgeRegistry<T> registry, BiConsumer<String, T> onAccept, Consumer<T> selectCallback, Predicate<T> filter) {
 		super(Component.translatable("gui.epicfight.select", ParseUtil.snakeToSpacedCamel(registry.getRegistryName().getPath())));
 		
 		final Map<ResourceLocation, T> filteredItems = Maps.newHashMap();
@@ -52,7 +53,7 @@ public class SelectFromRegistryScreen<T> extends Screen {
 		this.onAccept = onAccept;
 	}
 	
-	public SelectFromRegistryScreen(Screen parentScreen, Set<Map.Entry<ResourceLocation, T>> entries, String title, Consumer<T> onAccept, Consumer<T> selectCallback, Predicate<T> filter) {
+	public SelectFromRegistryScreen(Screen parentScreen, Set<Map.Entry<ResourceLocation, T>> entries, String title, BiConsumer<String, T> onAccept, Consumer<T> selectCallback, Predicate<T> filter) {
 		super(Component.translatable("gui.epicfight.select", ParseUtil.snakeToSpacedCamel(title)));
 		
 		Map<ResourceLocation, T> filteredItems = entries.stream().filter((entry) -> filter.test(entry.getValue())).reduce(Maps.newHashMap(), (map, element) -> {
@@ -110,14 +111,12 @@ public class SelectFromRegistryScreen<T> extends Screen {
 			
 			this.registry = registry;
 			
-			for (Map.Entry<ResourceLocation, T> entry : registry.entrySet()) {
-				this.addEntry(new RegistryEntry(entry.getValue(), entry.getKey().toString()));
-			}
+			registry.entrySet().stream().sorted((entry1, entry2) -> entry1.getKey().toString().compareTo(entry2.getKey().toString())).forEach((entry) -> this.addEntry(new RegistryEntry(entry.getValue(), entry.getKey().toString())));
 		}
 		
 		@Override
 		public void setSelected(@Nullable RegistryEntry selEntry) {
-			SelectFromRegistryScreen.this.onAccept.accept(selEntry.item);
+			SelectFromRegistryScreen.this.onAccept.accept(selEntry.name, selEntry.item);
 			super.setSelected(selEntry);
 		}
 
@@ -135,8 +134,8 @@ public class SelectFromRegistryScreen<T> extends Screen {
 			this.setScrollAmount(0.0D);
 			this.children().clear();
 			
-			this.registry.entrySet().stream().filter((entry) -> StringUtil.isNullOrEmpty(keyward) ? true : entry.getKey().toString().contains(keyward))
-												.map((entry) -> new RegistryEntry(entry.getValue(), entry.getKey().toString())) .forEach(this::addEntry);
+			this.registry.entrySet().stream().sorted((entry1, entry2) -> entry1.getKey().toString().compareTo(entry2.getKey().toString())).filter((entry) -> StringUtil.isNullOrEmpty(keyward) ? true : entry.getKey().toString().contains(keyward))
+												.map((entry) -> new RegistryEntry(entry.getValue(), entry.getKey().toString())).forEach(this::addEntry);
 		}
 		
 		@OnlyIn(Dist.CLIENT)

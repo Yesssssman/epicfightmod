@@ -9,6 +9,7 @@ import org.apache.commons.compress.utils.Lists;
 
 import com.google.common.collect.Sets;
 
+import io.netty.util.internal.StringUtil;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
@@ -56,7 +57,7 @@ public class AttributeScreen extends Screen {
 								.rowpositionChanged((rowposition, values) -> {
 									Grid.PackImporter packImporter = new Grid.PackImporter();
 									
-									for (Map.Entry<String, Tag> entry : this.styles.get(rowposition).getPackValue().tags.entrySet()) {
+									for (Map.Entry<String, Tag> entry : this.styles.get(rowposition).getValue().tags.entrySet()) {
 										packImporter.newRow().newValue("attribute", entry.getKey()).newValue("amount", entry.getValue().getAsString());
 									}
 									
@@ -91,7 +92,7 @@ public class AttributeScreen extends Screen {
 									.addColumn(Grid.combo("attribute", EPICFIGHT_ATTRIBUTES)
 													.toDisplayText(ParseUtil::snakeToSpacedCamel)
 													.valueChanged((event) -> {
-														CompoundTag attributesCompound = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
+														CompoundTag attributesCompound = this.styles.get(this.stylesGrid.getRowposition()).getValue();
 														Tag tag = attributesCompound.get(ParseUtil.nullParam(event.prevValue));
 														
 														attributesCompound.remove(ParseUtil.nullParam(event.prevValue));
@@ -99,19 +100,19 @@ public class AttributeScreen extends Screen {
 													})
 													.width(100))
 									.addColumn(Grid.editbox("amount")
-													.editWidgetCreated((editbox) -> editbox.setFilter((context) -> ParseUtil.isParsable(context, Double::parseDouble)))
+													.editWidgetCreated((editbox) -> editbox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble)))
 													.valueChanged((event) -> {
-														CompoundTag attributesCompound = this.styles.get(this.stylesGrid.getRowposition()).getPackValue();
+														CompoundTag attributesCompound = this.styles.get(this.stylesGrid.getRowposition()).getValue();
 														attributesCompound.put(event.grid.getValue(event.rowposition, "attribute"), StringTag.valueOf(ParseUtil.nullParam(event.postValue)));
 													})
 													.width(150))
 									.pressAdd((grid, button) -> {
-										this.styles.get(this.stylesGrid.getRowposition()).getPackValue().put("", StringTag.valueOf(""));
+										this.styles.get(this.stylesGrid.getRowposition()).getValue().put("", StringTag.valueOf(""));
 										int rowposition = grid.addRow();
 										grid.setGridFocus(rowposition, "attribute");
 									})
 									.pressRemove((grid, button) -> {
-										this.styles.get(this.stylesGrid.getRowposition()).getPackValue().remove(grid.getValue(grid.getRowposition(), "attribute"));
+										this.styles.get(this.stylesGrid.getRowposition()).getValue().remove(grid.getValue(grid.getRowposition(), "attribute"));
 										grid.removeRow((removedRow) -> {});
 									})
 									.build();
@@ -143,19 +144,19 @@ public class AttributeScreen extends Screen {
 			Set<String> styles = Sets.newHashSet();
 			
 			for (PackEntry<String, CompoundTag> entry : this.styles) {
-				if (styles.contains(entry.getPackKey())) {
-					this.minecraft.setScreen(new MessageScreen<>("Save Failed", "Unable to save because of duplicated style: " + entry.getPackKey(), this, (button2) -> {
+				if (styles.contains(entry.getKey())) {
+					this.minecraft.setScreen(new MessageScreen<>("Save Failed", "Unable to save because of duplicated style: " + entry.getKey(), this, (button2) -> {
 						this.minecraft.setScreen(this);
 					}, 180, 90));
 					return;
 				}
-				styles.add(entry.getPackKey());
+				styles.add(entry.getKey());
 			}
 			
 			this.rootTag.tags.clear();
 			
 			for (PackEntry<String, CompoundTag> entry : this.styles) {
-				this.rootTag.put(entry.getPackKey(), entry.getPackValue());
+				this.rootTag.put(entry.getKey(), entry.getValue());
 			}
 			
 			this.onClose();

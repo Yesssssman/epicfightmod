@@ -1,18 +1,19 @@
 package yesman.epicfight.client.gui.datapack.screen;
 
+import java.util.Map;
 import java.util.function.Supplier;
 
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class PackEntry<K, T> {
+public class PackEntry<K, T> implements Map.Entry<K, T> {
 	public static <K, T> PackEntry<K, T> of(K packKey, Supplier<T> valueGetter) {
 		return new PackEntry<>(packKey, valueGetter.get());
 	}
 	
-	public static <K, T> PackEntry<K, T> ofValue(K packKey, T valueGetter) {
-		return new PackEntry<>(packKey, valueGetter);
+	public static <K, T> PackEntry<K, T> ofValue(K packKey, T value) {
+		return new PackEntry<>(packKey, value);
 	}
 	
 	private K packKey;
@@ -27,15 +28,19 @@ public class PackEntry<K, T> {
 		this.packKey = packKey;
 	}
 	
-	public void setPackValue(T packValue) {
-		this.packValue = packValue;
-	}
-	
-	public K getPackKey() {
+	@Override
+	public K getKey() {
 		return this.packKey;
 	}
-	
-	public T getPackValue() {
+
+	@Override
+	public T getValue() {
 		return this.packValue;
+	}
+
+	@Override
+	public T setValue(T value) {
+		this.packValue = value;
+		return value;
 	}
 }

@@ -83,7 +83,7 @@ public class ColliderPreset implements PreparableReloadListener {
 	public static final Collider WITHER_CHARGE = registerCollider(new ResourceLocation(EpicFightMod.MODID, "wither_charge"), new MultiOBBCollider(5, 0.7D, 0.9D, 0.7D, 0D, 1.0D, -0.35D));
 	public static final Collider VEX_CHARGE = registerCollider(new ResourceLocation(EpicFightMod.MODID, "vex_charge"), new MultiOBBCollider(3, 0.4D, 0.4D, 0.95D, 0D, 1.0D, -0.85D));
 	
-	public static Collider deserializeSimpleCollider(CompoundTag tag) {
+	public static Collider deserializeSimpleCollider(CompoundTag tag) throws IllegalArgumentException {
 		int number = tag.getInt("number");
 		
 		if (number < 1) {

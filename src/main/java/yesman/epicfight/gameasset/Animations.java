@@ -1992,22 +1992,17 @@ public class Animations {
 				}
 			}
 		};
-
+		
 		public static final AnimationEvent.AnimationEventConsumer PLAY_SOUND = (entitypatch, animation, params) -> entitypatch.playSound((SoundEvent)params[0], 0, 0);
 		
 		public static final AnimationProperty.PoseModifier COMBO_ATTACK_DIRECTION_MODIFIER = (self, pose, entitypatch, time, partialTicks) -> {
 			if (!self.isStaticAnimation() || entitypatch instanceof PlayerPatch<?> playerpatch && playerpatch.isFirstPerson()) {
 				return;
 			}
-
+			
 			float pitch = entitypatch.getAttackDirectionPitch();
 			JointTransform chest = pose.getOrDefaultTransform("Chest");
 			chest.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginFront);
-			
-			if (entitypatch instanceof PlayerPatch) {
-				JointTransform head = pose.getOrDefaultTransform("Head");
-				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(-pitch), head.rotation(), head.rotation());
-			}
 		};
 		
 		public static final AnimationProperty.PoseModifier ROOT_X_MODIFIER = (self, pose, entitypatch, time, partialTicks) -> {

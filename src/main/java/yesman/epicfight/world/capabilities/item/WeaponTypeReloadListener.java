@@ -6,8 +6,6 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -71,7 +69,7 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 	public static final String DIRECTORY = "capabilities/weapons/types";
 	
 	private static final Gson GSON = (new GsonBuilder()).create();
-	private static final BiMap<ResourceLocation, Function<Item, CapabilityItem.Builder>> PRESETS = HashBiMap.create();
+	private static final Map<ResourceLocation, Function<Item, CapabilityItem.Builder>> PRESETS = Maps.newHashMap();
 	private static final Map<ResourceLocation, CompoundTag> TAGMAP = Maps.newHashMap();
 	
 	public WeaponTypeReloadListener() {
@@ -80,7 +78,7 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 	
 	@Override
 	protected void apply(Map<ResourceLocation, JsonElement> packEntry, ResourceManager resourceManager, ProfilerFiller profilerFiller) {
-		registerDefaultWeaponTypes();
+		clear();
 		
 		for (Map.Entry<ResourceLocation, JsonElement> entry : packEntry.entrySet()) {
 			CompoundTag nbt = null;
@@ -118,8 +116,13 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 		return PRESETS.get(rl);
 	}
 	
-	private static WeaponCapability.Builder deserializeWeaponCapabilityBuilder(CompoundTag tag) {
+	public static void register(ResourceLocation rl, CapabilityItem.Builder builder) {
+		PRESETS.put(rl, (item) -> builder);
+	}
+	
+	public static WeaponCapability.Builder deserializeWeaponCapabilityBuilder(CompoundTag tag) {
 		WeaponCapability.Builder builder = WeaponCapability.builder();
+		
 		builder.category(WeaponCategory.ENUM_MANAGER.getOrThrow(tag.getString("category")));
 		builder.collider(ColliderPreset.deserializeSimpleCollider(tag.getCompound("collider")));
 		
@@ -127,7 +130,7 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 			ParticleType<?> particleType = ForgeRegistries.PARTICLE_TYPES.getValue(new ResourceLocation(tag.getString("hit_particle")));
 			
 			if (particleType == null) {
-				EpicFightMod.LOGGER.warn("Can't find particle type " + tag.getString("hit_particle"));
+				EpicFightMod.LOGGER.warn("Can't find a particle type " + tag.getString("hit_particle"));
 			} else if (!(particleType instanceof HitParticleType)) {
 				EpicFightMod.LOGGER.warn(tag.getString("hit_particle") + " is not a hit particle type");
 			} else {
@@ -139,7 +142,7 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 			SoundEvent sound = ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation(tag.getString("swing_sound")));
 			
 			if (sound == null) {
-				EpicFightMod.LOGGER.warn("Can't find swing sound " + tag.getString("swing_sound"));
+				EpicFightMod.LOGGER.warn("Can't find a swing sound " + tag.getString("swing_sound"));
 			} else {
 				builder.swingSound(sound);
 			}
@@ -149,7 +152,7 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 			SoundEvent sound = ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation(tag.getString("hit_sound")));
 			
 			if (sound == null) {
-				EpicFightMod.LOGGER.warn("Can't find hit sound " + tag.getString("hit_sound"));
+				EpicFightMod.LOGGER.warn("Can't find a hit sound " + tag.getString("hit_sound"));
 			} else {
 				builder.hitSound(sound);
 			}
@@ -209,10 +212,11 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 		styleEntry.elseStyle = Style.ENUM_MANAGER.getOrThrow(stylesTag.getString("default"));
 		builder.styleProvider(styleEntry::getStyle);
 		
-		CompoundTag offhandValidatorTag = tag.getCompound("offhand_item_compatible_predicate");
-		
-		Supplier<Condition<LivingEntityPatch<?>>> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(offhandValidatorTag.getString("condition")));
-		builder.weaponCombinationPredicator(conditionProvider.get().read(offhandValidatorTag.getCompound("predicate"))::predicate);
+		if (tag.contains("offhand_item_compatible_predicate")) {
+			CompoundTag offhandValidatorTag = tag.getCompound("offhand_item_compatible_predicate");
+			Supplier<Condition<LivingEntityPatch<?>>> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(offhandValidatorTag.getString("condition")));
+			builder.weaponCombinationPredicator(conditionProvider.get().read(offhandValidatorTag.getCompound("predicate"))::predicate);
+		}
 		
 		return builder;
 	}
@@ -227,10 +231,6 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 			return entry.getValue();
 		});
 		return tagStream;
-	}
-	
-	public static ResourceLocation getKey(Function<Item, CapabilityItem.Builder> builder) {
-		return PRESETS.inverse().get(builder);
 	}
 	
 	public static Set<Map.Entry<ResourceLocation, Function<Item, CapabilityItem.Builder>>> entries() {

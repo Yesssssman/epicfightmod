@@ -1,5 +1,8 @@
 package yesman.epicfight.api.utils;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 import java.util.function.Function;
@@ -7,16 +10,15 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
 import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -188,6 +190,12 @@ public class ParseUtil {
 		} catch (NumberFormatException e) {
 			return defaultValue;
 		}
+	}
+	
+	public static <T> List<T> remove(Collection<T> collection, T object) {
+		List<T> copied = new ArrayList<> (collection);
+		copied.remove(object);
+		return copied;
 	}
 	
 	private ParseUtil() {}
