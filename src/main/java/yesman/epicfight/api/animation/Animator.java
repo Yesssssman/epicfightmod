@@ -39,7 +39,7 @@ public abstract class Animator {
 	public abstract AnimationPlayer getPlayerFor(@Nullable DynamicAnimation playingAnimation);
 	public abstract <T> Pair<AnimationPlayer, T> findFor(Class<T> animationType);
 	public abstract void init();
-	public abstract void poseTick();
+	//public abstract void poseTick();
 	
 	public final void playAnimation(int id, float convertTimeModifier) {
 		this.playAnimation(AnimationManager.getInstance().byId(id), convertTimeModifier);
