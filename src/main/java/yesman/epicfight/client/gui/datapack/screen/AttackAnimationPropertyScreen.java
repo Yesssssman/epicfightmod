@@ -15,40 +15,24 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.types.datapack.FakeAnimation;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
 import yesman.epicfight.api.utils.ParseUtil;
-import yesman.epicfight.client.gui.datapack.widgets.ModelPreviewer;
 import yesman.epicfight.client.gui.datapack.widgets.ComboBox;
 import yesman.epicfight.client.gui.datapack.widgets.Grid;
 import yesman.epicfight.client.gui.datapack.widgets.InputComponentList;
+import yesman.epicfight.client.gui.datapack.widgets.ModelPreviewer;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.HorizontalSizing;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.VerticalSizing;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableEditBox;
 import yesman.epicfight.client.gui.datapack.widgets.Static;
-import yesman.epicfight.main.EpicFightMod;
-import yesman.epicfight.particle.EpicFightParticles;
 
 @OnlyIn(Dist.CLIENT)
 public class AttackAnimationPropertyScreen extends Screen {
-	public static final TrailInfo DEFAULT_TRAIL = TrailInfo.builder()
-		.startPos(new Vec3(0.0D, 0.0D, 0.0D))
-		.endPos(new Vec3(0.0D, 0.0D, -1.0D))
-		.interpolations(4)
-		.lifetime(4)
-		.r(0.75F)
-		.g(0.75F)
-		.b(0.75F)
-		.texture(new ResourceLocation(EpicFightMod.MODID, "textures/particle/swing_trail.png"))
-		.type(EpicFightParticles.SWING_TRAIL.get())
-		.create();
-	
 	private final Screen parentScreen;
 	private final FakeAnimation animation;
 	private final Grid trailGrid;
@@ -298,7 +282,7 @@ public class AttackAnimationPropertyScreen extends Screen {
 				builder.interpolations(trailObj.get("interpolations").getAsInt());
 			}
 			
-			trailArr[i] = DEFAULT_TRAIL.overwrite(builder.create());
+			trailArr[i] = TrailInfo.PREVIEWER_DEFAULT_TRAIL.overwrite(builder.create());
 			
 			jsonArr.add(element);
 			i++;

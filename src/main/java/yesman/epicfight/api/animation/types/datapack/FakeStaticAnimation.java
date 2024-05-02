@@ -9,6 +9,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.property.JointMask.JointMaskSet;
@@ -52,15 +53,12 @@ public class FakeStaticAnimation extends StaticAnimation implements ClipHoldingA
 		fakeAnimation.setParameter("isRepeat", this.isRepeat());
 		fakeAnimation.setParameter("path", this.registryName.toString());
 		fakeAnimation.setParameter("armature", this.armature);
-		
 		final JsonObject propertiesJson = fakeAnimation.getPropertiesJson();
 		
 		this.getProperty(ClientAnimationProperties.MULTILAYER_ANIMATION).ifPresentOrElse((multilayer) -> {
 			JsonObject multilayerJson = new JsonObject();
 			JsonObject baseJson = new JsonObject();
-			
 			baseJson.addProperty("priority", multilayer.getPriority().toString());
-			
 			final JsonArray baseMasks = new JsonArray();
 			
 			this.getProperty(ClientAnimationProperties.JOINT_MASK).ifPresent((jointMaskEntry) -> {
@@ -70,14 +68,17 @@ public class FakeStaticAnimation extends StaticAnimation implements ClipHoldingA
 					maskObj.addProperty("type", JointMaskReloadListener.getKey(entry.getValue()).toString());
 					baseMasks.add(maskObj);
 				}
+				
+				JsonObject maskObj = new JsonObject();
+				JointMaskSet defaultMask = jointMaskEntry.getDefaultMask();
+				maskObj.addProperty("livingmotion", LivingMotions.ALL.toString());
+				maskObj.addProperty("type", JointMaskReloadListener.getKey(defaultMask).toString());
+				baseMasks.add(maskObj);
 			});
 			
 			baseJson.add("masks", baseMasks);
-			
 			JsonObject compositeJson = new JsonObject();
-			
 			compositeJson.addProperty("priority", this.getPriority().toString());
-			
 			final JsonArray compositeMasks = new JsonArray();
 			
 			multilayer.getProperty(ClientAnimationProperties.JOINT_MASK).ifPresent((jointMaskEntry) -> {
@@ -87,10 +88,15 @@ public class FakeStaticAnimation extends StaticAnimation implements ClipHoldingA
 					maskObj.addProperty("type", JointMaskReloadListener.getKey(entry.getValue()).toString());
 					compositeMasks.add(maskObj);
 				}
+				
+				JsonObject maskObj = new JsonObject();
+				JointMaskSet defaultMask = jointMaskEntry.getDefaultMask();
+				maskObj.addProperty("livingmotion", LivingMotions.ALL.toString());
+				maskObj.addProperty("type", JointMaskReloadListener.getKey(defaultMask).toString());
+				compositeMasks.add(maskObj);
 			});
 			
 			baseJson.add("masks", compositeMasks);
-			
 			multilayerJson.add("base", baseJson);
 			multilayerJson.add("composite", compositeJson);
 			propertiesJson.add("multilayer", multilayerJson);
@@ -104,6 +110,12 @@ public class FakeStaticAnimation extends StaticAnimation implements ClipHoldingA
 					maskObj.addProperty("type", JointMaskReloadListener.getKey(entry.getValue()).toString());
 					masks.add(maskObj);
 				}
+				
+				JsonObject maskObj = new JsonObject();
+				JointMaskSet defaultMask = jointMaskEntry.getDefaultMask();
+				maskObj.addProperty("livingmotion", LivingMotions.ALL.toString());
+				maskObj.addProperty("type", JointMaskReloadListener.getKey(defaultMask).toString());
+				masks.add(maskObj);
 			});
 			
 			if (!masks.isEmpty()) {

@@ -71,11 +71,9 @@ public class ImportAnimationsScreen extends Screen {
 		
 		this.userAnimations = DatapackEditScreen.getCurrentScreen().getUserAniamtions();
 		this.fakeAnimations.addAll(this.userAnimations.values().stream().map(PackEntry::getKey).map(FakeAnimation::deepCopy).toList());
-		
 		this.caller = caller;
 		this.modelPreviewer = new ModelPreviewer(10, 15, 0, 140, HorizontalSizing.LEFT_RIGHT, null, armature, mesh);
 		this.modelPreviewer.setCollider(ColliderPreset.FIST);
-		
 		this.minecraft = caller.getMinecraft();
 		this.font = caller.getMinecraft().font;
 		
@@ -83,73 +81,70 @@ public class ImportAnimationsScreen extends Screen {
 		int split = screenRect.width() / 2 - 60;
 		
 		this.animationGrid = Grid.builder(this, caller.getMinecraft())
-						.xy1(8, screenRect.top() + 14)
-						.xy2(split - 10, screenRect.height() - 21)
-						.rowHeight(26)
-						.rowEditable(false)
-						.transparentBackground(true)
-						.rowpositionChanged((rowposition, values) -> {
-							this.inputComponentsList.importTag(this.fakeAnimations.get(rowposition));
-							this.modelPreviewer.setTrailInfo();
-							
-							if (this.fakeAnimations.get(rowposition).getAnimationClass() == FakeAnimation.AnimationType.ATTACK || this.fakeAnimations.get(rowposition).getAnimationClass() == FakeAnimation.AnimationType.BASIC_ATTACK) {
-								this.inputComponentsList.getComponent(7, 1)._setActive(false);
-								this.inputComponentsList.getComponent(8, 1)._setActive(false);
-								this.inputComponentsList.getComponent(9, 1)._setActive(false);
-								this.inputComponentsList.getComponent(10, 1)._setActive(false);
-								this.inputComponentsList.getComponent(11, 1)._setActive(false);
-								this.inputComponentsList.getComponent(12, 1)._setActive(false);
-								this.inputComponentsList.getComponent(13, 1)._setActive(false);
-								this.inputComponentsList.getComponent(14, 2)._setActive(false);
-								this.inputComponentsList.getComponent(14, 4)._setActive(false);
-								this.inputComponentsList.getComponent(14, 6)._setActive(false);
-								this.inputComponentsList.getComponent(15, 2)._setActive(false);
-								this.inputComponentsList.getComponent(15, 4)._setActive(false);
-								this.inputComponentsList.getComponent(15, 6)._setActive(false);
-								this.inputComponentsList.getComponent(16, 1)._setActive(false);
-								
-								if (this.fakeAnimations.get(rowposition).getPropertiesJson().has("trail_effects")) {
-									JsonArray trailArr = this.fakeAnimations.get(rowposition).getPropertiesJson().getAsJsonArray("trail_effects");
-									TrailInfo[] trailInfos = new TrailInfo[trailArr.size()];
-									
-									int i = 0;
-									
-									for (JsonElement element : trailArr) {
-										JsonObject trailObj = element.getAsJsonObject();
+									.xy1(8, screenRect.top() + 14)
+									.xy2(split - 10, screenRect.height() - 21)
+									.rowHeight(26)
+									.rowEditable(false)
+									.transparentBackground(true)
+									.rowpositionChanged((rowposition, values) -> {
+										this.inputComponentsList.importTag(this.fakeAnimations.get(rowposition));
+										this.modelPreviewer.setTrailInfo();
 										
-										TrailInfo.Builder builder = TrailInfo.builder()
-												.time(trailObj.get("start_time").getAsFloat(), trailObj.get("end_time").getAsFloat())
-												.joint(trailObj.get("joint").getAsString())
-												.itemSkinHand(InteractionHand.valueOf(trailObj.get("item_skin_hand").getAsString().toUpperCase(Locale.ROOT)));
-		
-										if (trailObj.has("lifetime")) {
-											builder.lifetime(trailObj.get("lifetime").getAsInt());
+										if (this.fakeAnimations.get(rowposition).getAnimationClass() == FakeAnimation.AnimationType.ATTACK || this.fakeAnimations.get(rowposition).getAnimationClass() == FakeAnimation.AnimationType.BASIC_ATTACK) {
+											this.inputComponentsList.getComponent(7, 1)._setActive(false);
+											this.inputComponentsList.getComponent(8, 1)._setActive(false);
+											this.inputComponentsList.getComponent(9, 1)._setActive(false);
+											this.inputComponentsList.getComponent(10, 1)._setActive(false);
+											this.inputComponentsList.getComponent(11, 1)._setActive(false);
+											this.inputComponentsList.getComponent(12, 1)._setActive(false);
+											this.inputComponentsList.getComponent(13, 1)._setActive(false);
+											this.inputComponentsList.getComponent(14, 2)._setActive(false);
+											this.inputComponentsList.getComponent(14, 4)._setActive(false);
+											this.inputComponentsList.getComponent(14, 6)._setActive(false);
+											this.inputComponentsList.getComponent(15, 2)._setActive(false);
+											this.inputComponentsList.getComponent(15, 4)._setActive(false);
+											this.inputComponentsList.getComponent(15, 6)._setActive(false);
+											this.inputComponentsList.getComponent(16, 1)._setActive(false);
+											
+											if (this.fakeAnimations.get(rowposition).getPropertiesJson().has("trail_effects")) {
+												JsonArray trailArr = this.fakeAnimations.get(rowposition).getPropertiesJson().getAsJsonArray("trail_effects");
+												TrailInfo[] trailInfos = new TrailInfo[trailArr.size()];
+												
+												int i = 0;
+												
+												for (JsonElement element : trailArr) {
+													JsonObject trailObj = element.getAsJsonObject();
+													TrailInfo.Builder builder = TrailInfo.builder()
+														.time(trailObj.get("start_time").getAsFloat(), trailObj.get("end_time").getAsFloat())
+														.joint(trailObj.get("joint").getAsString())
+														.itemSkinHand(InteractionHand.valueOf(trailObj.get("item_skin_hand").getAsString().toUpperCase(Locale.ROOT)));
+					
+													if (trailObj.has("lifetime")) {
+														builder.lifetime(trailObj.get("lifetime").getAsInt());
+													}
+													
+													if (trailObj.has("interpolations")) {
+														builder.interpolations(trailObj.get("interpolations").getAsInt());
+													}
+													
+													trailInfos[i] = TrailInfo.PREVIEWER_DEFAULT_TRAIL.overwrite(builder.create());
+													i++;
+												}
+												
+												this.modelPreviewer.setTrailInfo(trailInfos);
+											}
 										}
-										
-										if (trailObj.has("interpolations")) {
-											builder.interpolations(trailObj.get("interpolations").getAsInt());
-										}
-										
-										trailInfos[i] = AttackAnimationPropertyScreen.DEFAULT_TRAIL.overwrite(builder.create());
-										i++;
-									}
-									
-									this.modelPreviewer.setTrailInfo(trailInfos);
-								}
-							}
-						})
-						.addColumn(Grid.editbox("animation_name")
-										.editWidgetCreated((editbox) -> editbox.setFilter(ResourceLocation::isValidResourceLocation))
-										.editable(true)
-										.valueChanged((event) -> this.fakeAnimations.get(event.rowposition).setParameter("path", event.postValue))
-										.width(180))
-						.build();
+									})
+									.addColumn(Grid.editbox("animation_name")
+													.editWidgetCreated((editbox) -> editbox.setFilter(ResourceLocation::isValidResourceLocation))
+													.editable(true)
+													.valueChanged((event) -> this.fakeAnimations.get(event.rowposition).setParameter("path", event.postValue))
+													.width(180))
+									.build();
 		
 		this.inputComponentsList = new InputComponentList<>(this, 0, 0, 0, 0, 30) {
 			@Override
 			public void importTag(FakeAnimation fakeAnim) {
-				this.clearComponents();
-				
 				ImportAnimationsScreen.this.rearrangeComponents(fakeAnim.getAnimationClass());
 				this.setComponentsActive(true);
 				
@@ -165,10 +160,8 @@ public class ImportAnimationsScreen extends Screen {
 					});
 					
 					ImportAnimationsScreen.this.animationType.setResponder(ImportAnimationsScreen.this.responder);
-					
 					break;
 				case ATTACK, BASIC_ATTACK:
-					
 					CompoundTag colliderTag = new CompoundTag();
 					Collider collider = (Collider)fakeAnim.getParameter("collider");
 					
@@ -229,7 +222,7 @@ public class ImportAnimationsScreen extends Screen {
 								builder.interpolations(trailObj.get("interpolations").getAsInt());
 							}
 							
-							trailArr[i] = AttackAnimationPropertyScreen.DEFAULT_TRAIL.overwrite(builder.create());
+							trailArr[i] = TrailInfo.PREVIEWER_DEFAULT_TRAIL.overwrite(builder.create());
 							i++;
 						}
 						
@@ -278,7 +271,7 @@ public class ImportAnimationsScreen extends Screen {
 		this.modelPreviewer.clearAnimations();
 		this.modelPreviewer.addAnimationToPlay(this.fakeAnimations.get(this.animationGrid.getRowposition()));
 		
-		this.inputComponentsList.children().clear();
+		this.inputComponentsList.clearComponents();
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.type")));
 		this.inputComponentsList.addComponentCurrentRow(this.animationType.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
@@ -288,7 +281,13 @@ public class ImportAnimationsScreen extends Screen {
 		case STATIC, MOVEMENT:
 		{
 			final ResizableEditBox convertTime = new ResizableEditBox(this.font, 0, 35, 0, 15, Component.translatable("datapack_edit.import_animation.convert_time"), HorizontalSizing.LEFT_WIDTH, null);
-			final CheckBox repeat = new CheckBox(this.font, 0, 60, 0, 10, HorizontalSizing.LEFT_WIDTH, null, false, Component.literal(""), (value) -> this.fakeAnimations.get(this.animationGrid.getRowposition()).setParameter("isRepeat", value));
+			Boolean isRepeat = this.fakeAnimations.get(this.animationGrid.getRowposition()).getParameter("isRepeat");
+			
+			if (isRepeat == null) {
+				isRepeat = Boolean.valueOf(false);
+			}
+			
+			final CheckBox repeat = new CheckBox(this.font, 0, 60, 0, 10, HorizontalSizing.LEFT_WIDTH, null, isRepeat, Component.literal(""), (value) -> this.fakeAnimations.get(this.animationGrid.getRowposition()).setParameter("isRepeat", value));
 			
 			convertTime.setResponder((input) -> {
 				Object f = StringUtil.isNullOrEmpty(input) ? null : Float.valueOf(input);

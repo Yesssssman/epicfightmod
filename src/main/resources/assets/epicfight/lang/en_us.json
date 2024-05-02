@@ -379,6 +379,8 @@
 	"datapack_edit.weapon_type.combos.air_slash": "Air Slash",
 	"datapack_edit.weapon_type.combos.air_slash.tooltip": "Defines a jump attack of a weapon\n(mandatory)",
 	
+	"datapack_edit.item_capability.item_type": "Item Type",
+	"datapack_edit.item_capability.item_type.tooltip": "Defines if an item is armor or weapon\n(mandatory)",
 	"datapack_edit.item_capability.attributes": "Attributes",
 	"datapack_edit.item_capability.attributes.tooltip": "Defines attributes of an item",
 	"datapack_edit.item_capability.type": "Weapon Type",

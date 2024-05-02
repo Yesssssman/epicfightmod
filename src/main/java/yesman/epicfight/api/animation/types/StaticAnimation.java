@@ -116,7 +116,6 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 			loadClip(resourceManager, this);
 		} catch (Exception e) {
 			AnimationManager.getInstance().onFailed(this);
-			
 			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
 			e.printStackTrace();
 		}

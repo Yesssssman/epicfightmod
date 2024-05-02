@@ -99,10 +99,12 @@ public class FakeAttackAnimation extends AttackAnimation implements ClipHoldingA
 		for (AttackAnimation.Phase phase : this.phases) {
 			CompoundTag compTag = new CompoundTag();
 			
+			compTag.putFloat("start", phase.start);
 			compTag.putFloat("antic", phase.antic);
 			compTag.putFloat("preDelay", phase.preDelay);
 			compTag.putFloat("contact", phase.contact);
 			compTag.putFloat("recovery", phase.recovery);
+			compTag.putFloat("end", phase.end);
 			compTag.putString("hand", phase.hand.toString());
 			
 			if (phase.colliders[0].getSecond() != null) {

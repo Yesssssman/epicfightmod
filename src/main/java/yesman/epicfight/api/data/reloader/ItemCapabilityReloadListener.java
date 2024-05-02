@@ -78,23 +78,23 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 					return;
 				}
 				
-				CompoundTag nbt = null;
+				CompoundTag tag = null;
 				
 				try {
-					nbt = TagParser.parseTag(entry.getValue().toString());
+					tag = TagParser.parseTag(entry.getValue().toString());
 				} catch (CommandSyntaxException e) {
 					e.printStackTrace();
 				}
 				
 				try {
 					if (str[0].equals("armors")) {
-						CapabilityItem capability = deserializeArmor(item, nbt);
+						CapabilityItem capability = deserializeArmor(item, tag);
 						ItemCapabilityProvider.put(item, capability);
-						CAPABILITY_ARMOR_DATA_MAP.put(item, nbt);
+						CAPABILITY_ARMOR_DATA_MAP.put(item, tag);
 					} else if (str[0].equals("weapons")) {
-						CapabilityItem capability = deserializeWeapon(item, nbt);
+						CapabilityItem capability = deserializeWeapon(item, tag);
 						ItemCapabilityProvider.put(item, capability);
-						CAPABILITY_WEAPON_DATA_MAP.put(item, nbt);
+						CAPABILITY_WEAPON_DATA_MAP.put(item, tag);
 					}
 				} catch (Exception e) {
 					EpicFightMod.LOGGER.warn("Error while deserializing datapack for " + registryName);

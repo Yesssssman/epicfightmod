@@ -20,9 +20,29 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.particle.EpicFightParticles;
 
 @OnlyIn(Dist.CLIENT)
 public class TrailInfo {
+	public static final TrailInfo PREVIEWER_DEFAULT_TRAIL = TrailInfo.builder()
+			.startPos(new Vec3(0.0D, 0.0D, 0.0D))
+			.endPos(new Vec3(0.0D, 0.0D, -1.0D))
+			.interpolations(4)
+			.lifetime(4)
+			.r(0.75F)
+			.g(0.75F)
+			.b(0.75F)
+			.texture(new ResourceLocation(EpicFightMod.MODID, "textures/particle/swing_trail.png"))
+			.type(EpicFightParticles.SWING_TRAIL.get())
+			.create();
+	
+	public static final TrailInfo ANIMATION_DEFAULT_TRAIL = TrailInfo.builder()
+			.time(0.1F, 0.2F)
+			.joint("Tool_R")
+			.itemSkinHand(InteractionHand.MAIN_HAND)
+			.create();
+	
 	public final Vec3 start;
 	public final Vec3 end;
 	public final SimpleParticleType particle;

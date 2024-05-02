@@ -112,7 +112,6 @@ public class FakeAnimation extends StaticAnimation {
 		case ATTACK, BASIC_ATTACK:
 			ListTag phasesTag = this.getParameter("phases");
 			Iterator<Tag> iter = phasesTag.iterator();
-			
 			StringBuilder sb = new StringBuilder("[");
 			float start = 0.0F;
 			
@@ -122,7 +121,15 @@ public class FakeAnimation extends StaticAnimation {
 				float preDelay = phaseCompound.getFloat("preDelay");
 				float contact = phaseCompound.getFloat("contact");
 				float recovery = phaseCompound.getFloat("recovery");
-				float end = phaseCompound.getFloat("end");
+				float end;
+				
+				if (iter.hasNext()) {
+					CompoundTag nextTag = (CompoundTag)iter.next();
+					end = nextTag.getFloat("antic");
+				} else {
+					end = recovery;
+				}
+				
 				String hand = phaseCompound.getString("hand");
 				String joint = phaseCompound.getString("joint");
 				String colliderInvokeCommand;

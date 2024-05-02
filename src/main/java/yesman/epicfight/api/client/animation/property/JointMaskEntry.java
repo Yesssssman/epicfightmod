@@ -64,6 +64,10 @@ public class JointMaskEntry {
 		return this.masks.entrySet();
 	}
 	
+	public JointMaskSet getDefaultMask() {
+		return this.defaultMask;
+	}
+	
 	public boolean isValid() {
 		return this.defaultMask != null;
 	}
