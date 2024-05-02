@@ -57,11 +57,13 @@ public class ServerAnimator extends Animator {
 		
 	}
 	
+	/**
 	@Override
 	public void poseTick() {
 		Pose currentPose = this.animationPlayer.getCurrentPose(this.entitypatch, 1.0F);
 		this.entitypatch.getArmature().setPose(currentPose);
 	}
+	**/
 	
 	@Override
 	public void tick() {
@@ -71,7 +73,7 @@ public class ServerAnimator extends Animator {
 		}
 		
 		this.animationPlayer.tick(this.entitypatch);
-		this.poseTick();
+		//this.poseTick();
 		this.entitypatch.updateEntityState();
 		this.animationPlayer.getAnimation().tick(this.entitypatch);
 		

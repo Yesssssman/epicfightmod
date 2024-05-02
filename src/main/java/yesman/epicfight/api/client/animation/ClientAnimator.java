@@ -138,17 +138,17 @@ public class ClientAnimator extends Animator {
 		StaticAnimation idleMotion = this.livingAnimations.get(this.currentMotion);
 		this.baseLayer.playAnimationInstant(idleMotion, this.entitypatch);
 	}
-	
+	/**
 	@Override
 	public void poseTick() {
 		Pose currentPose = this.getComposedLayerPose(1.0F);
 		this.entitypatch.getArmature().setPose(currentPose);
 	}
-	
+	**/
 	@Override
 	public void tick() {
 		this.baseLayer.update(this.entitypatch);
-		this.poseTick();
+		//this.poseTick();
 		
 		if (this.baseLayer.animationPlayer.isEnd() && this.baseLayer.nextAnimation == null && this.currentMotion != LivingMotions.DEATH) {
 			this.entitypatch.updateMotion(false);

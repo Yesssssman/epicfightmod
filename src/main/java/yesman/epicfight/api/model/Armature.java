@@ -25,8 +25,9 @@ public class Armature {
 	private final int jointNumber;
 	public final Joint rootJoint;
 	private final TransformSheet actionAnimationCoord = new TransformSheet();
-	private Pose prevPose = new Pose();
-	private Pose currentPose = new Pose();
+	
+	//private Pose prevPose = new Pose();
+	//private Pose currentPose = new Pose();
 	
 	public Armature(String name, int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
 		this.name = name;
@@ -50,6 +51,7 @@ public class Armature {
 		return jointMap.get(name);
 	}
 	
+	/**
 	public Pose getPose(float partialTicks) {
 		return Pose.interpolatePose(this.prevPose, this.currentPose, partialTicks);
 	}
@@ -66,6 +68,7 @@ public class Armature {
 		this.prevPose = this.currentPose;
 		this.currentPose = pose;
 	}
+	**/
 	
 	public void initializeTransform() {
 		this.rootJoint.resetPoseTransforms();

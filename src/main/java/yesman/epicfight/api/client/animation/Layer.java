@@ -44,13 +44,13 @@ public class Layer {
 	}
 	
 	public void playAnimation(StaticAnimation nextAnimation, LivingEntityPatch<?> entitypatch, float convertTimeModifier) {
-		Pose lastPose = entitypatch.getArmature().getPose(1.0F);
+		//Pose lastPose = entitypatch.getArmature().getPose(1.0F);
 		this.animationPlayer.getAnimation().end(entitypatch, nextAnimation, this.animationPlayer.isEnd());
 		this.resume();
 		nextAnimation.begin(entitypatch);
 		
 		if (!nextAnimation.isMetaAnimation()) {
-			this.setLinkAnimation(nextAnimation, entitypatch, lastPose, convertTimeModifier);
+			this.setLinkAnimation(nextAnimation, entitypatch, entitypatch.getClientAnimator().getComposedLayerPose(1.0F), convertTimeModifier);
 			this.linkAnimation.putOnPlayer(this.animationPlayer);
 			entitypatch.updateEntityState();
 			this.nextAnimation = nextAnimation;
