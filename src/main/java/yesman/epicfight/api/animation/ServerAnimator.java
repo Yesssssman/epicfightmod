@@ -31,7 +31,7 @@ public class ServerAnimator extends Animator {
 		this.pause = false;
 		this.animationPlayer.getAnimation().end(this.entitypatch, nextAnimation, this.animationPlayer.isEnd());
 		nextAnimation.begin(this.entitypatch);
-		nextAnimation.setLinkAnimation(nextAnimation.getPoseByTime(this.entitypatch, 0.0F, 0.0F), modifyTime, this.entitypatch, this.linkAnimation);
+		nextAnimation.setLinkAnimation(this.animationPlayer.getAnimation(), nextAnimation.getPoseByTime(this.entitypatch, 0.0F, 0.0F), true, modifyTime, this.entitypatch, this.linkAnimation);
 		this.linkAnimation.putOnPlayer(this.animationPlayer);
 		this.entitypatch.updateEntityState();
 		this.nextPlaying = nextAnimation;
@@ -57,14 +57,6 @@ public class ServerAnimator extends Animator {
 		
 	}
 	
-	/**
-	@Override
-	public void poseTick() {
-		Pose currentPose = this.animationPlayer.getCurrentPose(this.entitypatch, 1.0F);
-		this.entitypatch.getArmature().setPose(currentPose);
-	}
-	**/
-	
 	@Override
 	public void tick() {
 		if (this.pause) {
@@ -73,7 +65,6 @@ public class ServerAnimator extends Animator {
 		}
 		
 		this.animationPlayer.tick(this.entitypatch);
-		//this.poseTick();
 		this.entitypatch.updateEntityState();
 		this.animationPlayer.getAnimation().tick(this.entitypatch);
 		
@@ -93,6 +84,11 @@ public class ServerAnimator extends Animator {
 				this.nextPlaying = null;
 			}
 		}
+	}
+	
+	@Override
+	public Pose getPose(float partialTicks) {
+		return this.animationPlayer.getCurrentPose(this.entitypatch, partialTicks);
 	}
 	
 	@Override

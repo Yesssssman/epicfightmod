@@ -88,8 +88,7 @@ public class MoveCoordFunctions {
 		Vec3f model = rootCoord.getInterpolatedTransform(player.getElapsedTime()).translation();
 		Vec3f world = OpenMatrix4f.transform3v(OpenMatrix4f.createRotatorDeg(-target.getYRot(), Vec3f.Y_AXIS), model, null);
 		Vec3f dst = Vec3f.fromDoubleVector(target.position()).add(world);
-		
-		livingentity.setYRot(Mth.wrapDegrees(target.getYRot() + 180.0F));
+		entitypatch.setYRot(Mth.wrapDegrees(target.getYRot() + 180.0F));
 		
 		return dst.sub(Vec3f.fromDoubleVector(livingentity.position()));
 	};
@@ -109,7 +108,7 @@ public class MoveCoordFunctions {
 			
 			Vec3 dst = attackTarget.position().add(modelDst.x, modelDst.y, modelDst.z);
 			float clampedXRot = MathUtils.rotlerp(entitypatch.getOriginal().getXRot(), (float)MathUtils.getXRotOfVector(toTarget), 20.0F);
-			float clampedYRot = MathUtils.rotlerp(entitypatch.getOriginal().getYRot(), yRot, entitypatch.getYRotLimit());
+			float clampedYRot = MathUtils.rotlerp(entitypatch.getYRot(), yRot, entitypatch.getYRotLimit());
 			TransformSheet newTransform = transform.getCorrectedWorldCoord(entitypatch, start, dst, -clampedXRot, clampedYRot, 0, rootKeyframes.length);
 			
 			transformSheet.readFrom(newTransform);
@@ -121,7 +120,7 @@ public class MoveCoordFunctions {
 				LivingEntity original = entitypatch.getOriginal();
 				Vec3 pos = original.position();
 				
-				jt.translation().rotate(-original.getYRot(), Vec3f.Y_AXIS);
+				jt.translation().rotate(-entitypatch.getYRot(), Vec3f.Y_AXIS);
 				jt.translation().multiply(-1.0F, 1.0F, -1.0F);
 				jt.translation().add(Vec3f.fromDoubleVector(pos));
 			});
@@ -139,16 +138,15 @@ public class MoveCoordFunctions {
 			Vec3 start = entitypatch.getArmature().getActionAnimationCoord().getKeyframes()[0].transform().translation().toDoubleVector();
 			Vec3 toTarget = attackTarget.position().subtract(start);
 			Vec3f modelDst = rootKeyframes[rootKeyframes.length - 1].transform().translation().copy().multiply(1.0F, 1.0F, -1.0F);
-			float yRot = (float)MathUtils.getYRotOfVector(toTarget);
-			
+			float yRot = (float)Mth.wrapDegrees(MathUtils.getYRotOfVector(toTarget));
 			modelDst.rotate(-yRot, Vec3f.Y_AXIS);
 			
 			Vec3 dst = attackTarget.position().add(modelDst.toDoubleVector());
 			float clampedXRot = (float)MathUtils.getXRotOfVector(toTarget);
-			float clampedYRot = MathUtils.rotlerp(entitypatch.getOriginal().getYRot(), yRot, entitypatch.getYRotLimit());
+			float clampedYRot = MathUtils.rotlerp(entitypatch.getYRot(), yRot, entitypatch.getYRotLimit());
 			TransformSheet newTransform = transform.getCorrectedWorldCoord(entitypatch, start, dst, -clampedXRot, clampedYRot, 0, rootKeyframes.length);
 			
-			entitypatch.getOriginal().setYRot(clampedYRot);
+			entitypatch.setYRot(clampedYRot);
 			transformSheet.readFrom(newTransform);
 		}
 	};
@@ -204,11 +202,9 @@ public class MoveCoordFunctions {
 			float horizontalDistance = Math.max((float)toTarget.horizontalDistance() - (attackTarget.getBbWidth() + entitypatch.getOriginal().getBbWidth()) * 0.75F, 0.0F);
 			Vec3f worldPosition = new Vec3f(keyLast.x, 0.0F, -horizontalDistance);
 			float scale = Math.min(worldPosition.length() / keyLast.length(), 2.0F);
-			
 			float yRot = (float)MathUtils.getYRotOfVector(toTarget);
-			float clampedYRot = MathUtils.rotlerp(entitypatch.getOriginal().getYRot(), yRot, entitypatch.getYRotLimit());
-			
-			entitypatch.getOriginal().setYRot(clampedYRot);
+			float clampedYRot = MathUtils.rotlerp(entitypatch.getYRot(), yRot, entitypatch.getYRotLimit());
+			entitypatch.setYRot(clampedYRot);
 			
 			for (int i = startFrame; i <= endFrame; i++) {
 				Vec3f translation = keyframes[i].transform().translation();

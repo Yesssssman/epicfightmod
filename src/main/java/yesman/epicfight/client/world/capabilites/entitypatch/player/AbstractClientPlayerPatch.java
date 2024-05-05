@@ -1,5 +1,9 @@
 package yesman.epicfight.client.world.capabilites.entitypatch.player;
 
+import javax.annotation.Nonnull;
+
+import org.joml.Quaternionf;
+
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -7,9 +11,12 @@ import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.PlayerRideableJumping;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.*;
+import net.minecraft.world.item.CrossbowItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.ProjectileWeaponItem;
+import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
@@ -21,8 +28,11 @@ import net.minecraftforge.common.ForgeConfig;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.LivingMotions;
+import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.types.ActionAnimation;
+import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.animation.Layer;
@@ -36,8 +46,6 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.RangedWeaponCapability;
-
-import javax.annotation.Nonnull;
 
 @OnlyIn(Dist.CLIENT)
 public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends PlayerPatch<T> {
@@ -221,36 +229,19 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 		return false;
 	}
 	
-	/**
-	@OnlyIn(Dist.CLIENT)
 	@Override
-	public OpenMatrix4f getHeadMatrix(float partialTick) {
-        float yaw = 0;
-        float pitch = 0;
-        float prvePitch = 0;
-        
-        UseAnim useAnim = this.original.getUseItem().getUseAnimation();
-        
-        if (this.getOriginal().isUsingItem() && (useAnim == UseAnim.DRINK || useAnim == UseAnim.EAT || useAnim == UseAnim.SPYGLASS)) {
-        	
-        } else {
-        	if (this.getEntityState().inaction() || (this.original.getVehicle() != null && this.original.getVehicle() instanceof LivingEntity) || (!this.original.onGround() && this.original.onClimbable())) {
-    	        yaw = 0;
-    		} else {
-    			float f = MathUtils.lerpBetween(this.original.yBodyRotO, this.original.yBodyRot, partialTick);
-    			float f1 = MathUtils.lerpBetween(this.original.yHeadRotO, this.original.yHeadRot, partialTick);
-    	        yaw = f1 - f;
-    		}
-            
-    		if (!(this.original.isFallFlying() || this.original.isVisuallySwimming())) {
-    			prvePitch = this.original.xRotO;
-    			pitch = this.original.getXRot();
-    		}
-        }
-        
-		return MathUtils.getModelMatrixIntegral(0, 0, 0, 0, 0, 0, prvePitch, pitch, yaw, yaw, partialTick, 1, 1, 1);
+	public void poseTick(DynamicAnimation animation, Pose pose, float elapsedTime, float partialTicks) {
+		if (pose.getJointTransformData().containsKey("Head")) {
+			if (animation.doesHeadRotFollowEntityHead()) {
+				float headRotO = this.modelYRotO - this.original.yHeadRotO;
+				float headRot = this.modelYRot - this.original.yHeadRot;
+				float partialHeadRot = MathUtils.lerpBetween(headRotO, headRot, partialTicks);
+				
+				Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(-this.original.getXRot(), Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(partialHeadRot, Vec3f.Y_AXIS)).toQuaternion();
+				pose.getOrDefaultTransform("Head").frontResult(JointTransform.getRotation(headRotation), OpenMatrix4f::mul);
+			}
+		}
 	}
-	**/
 	
 	@Override
 	public OpenMatrix4f getModelMatrix(float partialTick) {
@@ -328,28 +319,28 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			
 			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yRot, yRot, 0.0F, 0.9375F, 0.9375F, 0.9375F);
 		} else {
-			float oYRot;
+			float yRotO;
 			float yRot;
-			float oXRot = 0;
+			float xRotO = 0;
 			float xRot = 0;
 			
 			if (this.original.getVehicle() instanceof LivingEntity ridingEntity) {
-				oYRot = ridingEntity.yBodyRotO;
+				yRotO = ridingEntity.yBodyRotO;
 				yRot = ridingEntity.yBodyRot;
 			} else {
-				oYRot = this.oModelYRot;
+				yRotO = this.modelYRotO;
 				yRot = this.modelYRot;
 			}
 			
-			if (!this.getEntityState().inaction() && this.original.getPose() == Pose.SWIMMING) {
+			if (!this.getEntityState().inaction() && this.original.getPose() == net.minecraft.world.entity.Pose.SWIMMING) {
 				float f = this.original.getSwimAmount(partialTick);
 				float f3 = this.original.isInWater() ? this.original.getXRot() : 0;
 		        float f4 = Mth.lerp(f, 0.0F, f3);
-		        oXRot = f4;
+		        xRotO = f4;
 		        xRot = f4;
 			}
 			
-			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, oXRot, xRot, oYRot, yRot, partialTick, 0.9375F, 0.9375F, 0.9375F);
+			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, xRotO, xRot, yRotO, yRot, partialTick, 0.9375F, 0.9375F, 0.9375F);
 		}
 	}
 	

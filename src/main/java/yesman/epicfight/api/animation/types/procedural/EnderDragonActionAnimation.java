@@ -48,7 +48,6 @@ public class EnderDragonActionAnimation extends ActionAnimation implements Proce
 		
 		this.tipPointTransforms = Maps.newHashMap();
 		this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransforms, this.getArmature(), this.getProperty(ActionAnimationProperty.MOVE_VERTICAL).orElse(false), true);
-		this.onLoaded();
 	}
 	
 	@Override

@@ -47,7 +47,6 @@ public class EnderDraonWalkAnimation extends StaticAnimation implements Procedur
 		
 		this.tipPointTransform = Maps.newHashMap();
 		this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransform, this.getArmature(), false, false);
-		this.onLoaded();
 	}
 	
 	@Override

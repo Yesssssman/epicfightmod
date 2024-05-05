@@ -57,7 +57,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	protected double xo;
 	protected double yo;
 	protected double zo;
-	protected float oModelYRot;
+	protected float modelYRotO;
 	protected float modelYRot;
 	protected boolean useModelYRot;
 	protected int tickSinceLastAction;
@@ -177,7 +177,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 			oYRot = ridingEntity.yBodyRotO;
 			yRot = ridingEntity.yBodyRot;
 		} else {
-			oYRot = this.oModelYRot;
+			oYRot = this.modelYRotO;
 			yRot = this.modelYRot;
 		}
 		
@@ -223,7 +223,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		
 		super.tick(event);
 		
-		this.oModelYRot = this.modelYRot;
+		this.modelYRotO = this.modelYRot;
 		
 		if (this.getEntityState().turningLocked()) {
 			if (!this.useModelYRot) {
@@ -548,6 +548,25 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	@Override
 	public double getZOld() {
 		return this.zo;
+	}
+	
+	@Override
+	public float getYRot() {
+		return this.modelYRot;
+	}
+	
+	@Override
+	public void setYRot(float yRot) {
+		if (this.useModelYRot) {
+			this.setModelYRot(yRot, true);
+		} else {
+			this.original.setYRot(yRot);
+		}
+	}
+	
+	@Override
+	public float getYRotLimit() {
+		return 180.0F;
 	}
 	
 	@Override

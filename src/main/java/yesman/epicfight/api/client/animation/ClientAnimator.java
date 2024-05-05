@@ -28,7 +28,6 @@ import yesman.epicfight.api.client.animation.Layer.Priority;
 import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
-import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
@@ -129,7 +128,7 @@ public class ClientAnimator extends Animator {
 	}
 	
 	public StaticAnimation getCompositeLivingMotion(LivingMotion motion) {
-		return this.compositeLivingAnimations.getOrDefault(motion, Animations.DUMMY_ANIMATION);
+		return this.compositeLivingAnimations.get(motion);
 	}
 	
 	@Override
@@ -138,39 +137,39 @@ public class ClientAnimator extends Animator {
 		StaticAnimation idleMotion = this.livingAnimations.get(this.currentMotion);
 		this.baseLayer.playAnimationInstant(idleMotion, this.entitypatch);
 	}
-	/**
-	@Override
-	public void poseTick() {
-		Pose currentPose = this.getComposedLayerPose(1.0F);
-		this.entitypatch.getArmature().setPose(currentPose);
-	}
-	**/
+	
 	@Override
 	public void tick() {
 		this.baseLayer.update(this.entitypatch);
-		//this.poseTick();
 		
 		if (this.baseLayer.animationPlayer.isEnd() && this.baseLayer.nextAnimation == null && this.currentMotion != LivingMotions.DEATH) {
 			this.entitypatch.updateMotion(false);
-			this.playAnimation(this.getCompositeLivingMotion(this.entitypatch.currentCompositeMotion), 0.0F);
+			
+			if (this.compositeLivingAnimations.containsKey(this.entitypatch.currentCompositeMotion)) {
+				this.playAnimation(this.getCompositeLivingMotion(this.entitypatch.currentCompositeMotion), 0.0F);
+			}
+			
 			this.baseLayer.playAnimation(this.getLivingMotion(this.entitypatch.currentLivingMotion), this.entitypatch, 0.0F);
 		}
-		
-		// Layer debug
 		/**
+		// Layer debugging
 		for (Layer layer : this.getAllLayers()) {
 			System.out.println(layer);
 		}
 		System.out.println();
 		**/
 		if (!this.compareCompositeMotion(this.entitypatch.currentCompositeMotion)) {
-			/* Turns off the composite motion's layer */
-			this.getCompositeLayer(this.getCompositeLivingMotion(this.currentCompositeMotion).getPriority()).off(this.entitypatch);
-			
 			/* Turns off the multilayer of the base layer */
 			this.getLivingMotion(this.currentCompositeMotion).getProperty(ClientAnimationProperties.MULTILAYER_ANIMATION).ifPresent((multilayerAnimation) -> {
-				this.getCompositeLayer(multilayerAnimation.getPriority()).off(this.entitypatch);
+				if (!this.compositeLivingAnimations.containsKey(this.entitypatch.currentCompositeMotion)) {
+					this.getCompositeLayer(multilayerAnimation.getPriority()).off(this.entitypatch);
+				}
 			});
+			
+			if (this.compositeLivingAnimations.containsKey(this.currentCompositeMotion)) {
+				/* Turns off the composite motion's layer */
+				this.getCompositeLayer(this.getCompositeLivingMotion(this.currentCompositeMotion).getPriority()).off(this.entitypatch);
+			}
 			
 			if (this.compositeLivingAnimations.containsKey(this.entitypatch.currentCompositeMotion)) {
 				this.playAnimation(this.getCompositeLivingMotion(this.entitypatch.currentCompositeMotion), 0.0F);
@@ -211,11 +210,11 @@ public class ClientAnimator extends Animator {
 		return layerList;
 	}
 	
-	public Pose getComposedLayerPose(float partialTicks) {
+	@Override
+	public Pose getPose(float partialTicks) {
 		Pose composedPose = new Pose();
 		Pose baseLayerPose = this.baseLayer.getEnabledPose(this.entitypatch, partialTicks);
 		Map<Layer.Priority, Pair<DynamicAnimation, Pose>> layerPoses = Maps.newLinkedHashMap();
-		
 		composedPose.putJointData(baseLayerPose);
 		
 		for (Layer.Priority priority : this.baseLayer.baseLayerPriority.uppers()) {
@@ -273,8 +272,8 @@ public class ClientAnimator extends Animator {
 		for (Layer.Priority priority : list) {
 			DynamicAnimation nowPlaying = poses.get(priority).getFirst();
 			
-			if (nowPlaying.isJointEnabled(entitypatch, priority, joint.getName())) {
-				BindModifier bindModifier = nowPlaying.getBindModifier(entitypatch, priority, joint.getName());
+			if (nowPlaying.isJointEnabled(entitypatch, joint.getName())) {
+				BindModifier bindModifier = nowPlaying.getBindModifier(entitypatch, joint.getName());
 				
 				if (bindModifier != null) {
 					bindModifier.modify(entitypatch, basePose, result, priority, joint, poses);
@@ -334,6 +333,27 @@ public class ClientAnimator extends Animator {
 		}
 		
 		return this.baseLayer.animationPlayer;
+	}
+	
+	public Layer.Priority getPriorityFor(DynamicAnimation playingAnimation) {
+		for (Layer layer : this.baseLayer.compositeLayers.values()) {
+			if (layer.animationPlayer.getAnimation().getRealAnimation().equals(playingAnimation)) {
+				return layer.priority;
+			}
+		}
+		
+		return this.baseLayer.priority;
+	}
+	
+	public LivingMotion getLivingMotionFor(DynamicAnimation animation) {
+		Layer.LayerType layerType = animation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER);
+		
+		if (layerType == Layer.LayerType.BASE_LAYER) {
+			return animation == this.baseLayer.animationPlayer.getAnimation() ? this.currentMotion : this.entitypatch.currentLivingMotion;
+		} else {
+			Layer.Priority priority = animation.getProperty(ClientAnimationProperties.PRIORITY).orElse(Layer.Priority.LOWEST);
+			return animation == this.baseLayer.compositeLayers.get(priority).animationPlayer.getAnimation() ? this.currentCompositeMotion : this.entitypatch.currentCompositeMotion;
+		}
 	}
 	
 	@SuppressWarnings("unchecked")

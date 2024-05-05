@@ -9,6 +9,7 @@ import com.google.common.collect.Maps;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationPlayer;
+import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.types.ConcurrentLinkAnimation;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
@@ -44,22 +45,25 @@ public class Layer {
 	}
 	
 	public void playAnimation(StaticAnimation nextAnimation, LivingEntityPatch<?> entitypatch, float convertTimeModifier) {
-		//Pose lastPose = entitypatch.getArmature().getPose(1.0F);
 		this.animationPlayer.getAnimation().end(entitypatch, nextAnimation, this.animationPlayer.isEnd());
 		this.resume();
 		nextAnimation.begin(entitypatch);
 		
 		if (!nextAnimation.isMetaAnimation()) {
-			this.setLinkAnimation(nextAnimation, entitypatch, entitypatch.getClientAnimator().getComposedLayerPose(1.0F), convertTimeModifier);
+			this.setLinkAnimation(nextAnimation, entitypatch, entitypatch.getClientAnimator().getPose(0.0F), convertTimeModifier);
 			this.linkAnimation.putOnPlayer(this.animationPlayer);
 			entitypatch.updateEntityState();
 			this.nextAnimation = nextAnimation;
 		}
 	}
 	
+	/**
+	 * Plays an animation without a link animation
+	 */
 	public void playAnimationInstant(DynamicAnimation nextAnimation, LivingEntityPatch<?> entitypatch) {
 		this.animationPlayer.getAnimation().end(entitypatch, nextAnimation, this.animationPlayer.isEnd());
 		this.resume();
+		
 		nextAnimation.begin(entitypatch);
 		nextAnimation.putOnPlayer(this.animationPlayer);
 		entitypatch.updateEntityState();
@@ -80,7 +84,13 @@ public class Layer {
 	}
 	
 	protected void setLinkAnimation(DynamicAnimation nextAnimation, LivingEntityPatch<?> entitypatch, Pose lastPose, float convertTimeModifier) {
-		nextAnimation.setLinkAnimation(lastPose, convertTimeModifier, entitypatch, this.linkAnimation);
+		DynamicAnimation fromAnimation = this.animationPlayer.isEmpty() ? entitypatch.getClientAnimator().baseLayer.animationPlayer.getAnimation() : this.animationPlayer.getAnimation();
+		
+		if (fromAnimation instanceof LinkAnimation linkAnimation) {
+			fromAnimation = linkAnimation.getFromAnimation();
+		}
+		
+		nextAnimation.setLinkAnimation(fromAnimation, lastPose, !this.animationPlayer.isEmpty(), convertTimeModifier, entitypatch, this.linkAnimation);
 	}
 	
 	public void update(LivingEntityPatch<?> entitypatch) {
@@ -153,7 +163,15 @@ public class Layer {
 	public Pose getEnabledPose(LivingEntityPatch<?> entitypatch, float partialTick) {
 		Pose pose = this.animationPlayer.getCurrentPose(entitypatch, partialTick);
 		DynamicAnimation animation = this.animationPlayer.getAnimation();
-		pose.removeJointIf((entry) -> !animation.isJointEnabled(entitypatch, this.priority, entry.getKey()));
+		pose.removeJointIf((entry) -> !animation.isJointEnabled(entitypatch, entry.getKey()));
+		
+		return pose;
+	}
+	
+	public Pose getEnabledPoseFor(LivingEntityPatch<?> entitypatch, LivingMotion livingMotion, float partialTick) {
+		Pose pose = this.animationPlayer.getCurrentPose(entitypatch, partialTick);
+		DynamicAnimation animation = this.animationPlayer.getAnimation();
+		pose.removeJointIf((entry) -> !animation.isJointEnabled(entitypatch, entry.getKey()));
 		
 		return pose;
 	}
@@ -184,11 +202,9 @@ public class Layer {
 			sb.append(this.priority);
 		}
 		
-		sb.append(this.isBaseLayer() ? " Base Layer : " : " Composite Layer : ");
+		sb.append(this.isBaseLayer() ? " Base Layer(" + ((BaseLayer)this).baseLayerPriority + ") : " : " Composite Layer : ");
 		sb.append(this.animationPlayer.getAnimation() + " ");
 		sb.append(this.animationPlayer.getElapsedTime() + " ");
-		sb.append(this.animationPlayer.getAnimation() + " ");
-		sb.append(this.getClass());
 		
 		return sb.toString();
 	}
@@ -213,8 +229,7 @@ public class Layer {
 		
 		@Override
 		public void playAnimation(StaticAnimation nextAnimation, LivingEntityPatch<?> entitypatch, float convertTimeModifier) {
-			Priority priority = nextAnimation.getPriority();
-			this.baseLayerPriority = priority;
+			this.baseLayerPriority = nextAnimation.getPriority();
 			this.offCompositeLayerLowerThan(entitypatch, nextAnimation);
 			super.playAnimation(nextAnimation, entitypatch, convertTimeModifier);
 		}

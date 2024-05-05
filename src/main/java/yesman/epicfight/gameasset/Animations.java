@@ -627,7 +627,8 @@ public class Animations {
 		BIPED_HIT_SHIELD = new MirrorAnimation(0.05F, false, "biped/combat/hit_shield", "biped/combat/hit_shield_mainhand", "biped/combat/hit_shield_offhand", biped);
 
 		BIPED_CLIMBING = new MovementAnimation(0.16F, true, "biped/living/climb", biped)
-				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE);
+				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE)
+				.addProperty(StaticAnimationProperty.FIXED_HEAD_ROTATION, true);
 		BIPED_SLEEPING = new StaticAnimation(0.16F, true, "biped/living/sleep", biped);
 		
 		BIPED_JAVELIN_AIM = new AimAnimation(false, "biped/combat/javelin_aim_mid", "biped/combat/javelin_aim_up", "biped/combat/javelin_aim_down", "biped/combat/javelin_aim_lying", biped);
@@ -786,7 +787,7 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
 		SWORD_AUTO3 = new BasicAttackAnimation(0.1F, 0.05F, 0.15F, 0.6F, null, biped.toolR, "biped/combat/sword_auto3", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
-		SWORD_DASH = new DashAttackAnimation(0.1F, 0.1F, 0.1F, 0.2F, 0.65F, null, biped.toolR, "biped/combat/sword_dash", biped)
+		SWORD_DASH = new DashAttackAnimation(0.1F, 0.1F, 0.1F, 0.2F, 0.65F, null, biped.toolR, "biped/combat/sword_dash", biped, true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F);
 		GREATSWORD_AUTO1 = new BasicAttackAnimation(0.25F, 0.15F, 0.25F, 0.65F, null, biped.toolR, "biped/combat/greatsword_auto1", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.0F);
@@ -803,14 +804,14 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		SPEAR_TWOHAND_AUTO2 = new BasicAttackAnimation(0.1F, 0.2F, 0.3F, 0.7F, null, biped.toolR, "biped/combat/spear_twohand_auto2", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		SPEAR_DASH = new DashAttackAnimation(0.1F, 0.25F, 0.3F, 0.4F, 0.8F, null, biped.toolR, "biped/combat/spear_dash", biped);
+		SPEAR_DASH = new DashAttackAnimation(0.1F, 0.25F, 0.3F, 0.4F, 0.8F, null, biped.toolR, "biped/combat/spear_dash", biped, true)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		TOOL_AUTO1 = new BasicAttackAnimation(0.13F, 0.05F, 0.15F, 0.3F, null, biped.toolR, "biped/combat/tool_auto1", biped)
 				.setResourceLocation("biped/combat/sword_auto1");
-		
 		TOOL_AUTO2 = new BasicAttackAnimation(0.13F, 0.05F, 0.15F, 0.4F, null, biped.toolR, "biped/combat/sword_auto4", biped);
-		TOOL_DASH = new DashAttackAnimation(0.16F, 0.08F, 0.15F, 0.25F, 0.58F, null, biped.toolR, "biped/combat/tool_dash", biped)
+		TOOL_DASH = new DashAttackAnimation(0.16F, 0.08F, 0.15F, 0.25F, 0.58F, null, biped.toolR, "biped/combat/tool_dash", biped, true)
 				.addProperty(AttackPhaseProperty.MAX_STRIKES_MODIFIER, ValueModifier.adder(1));
-		AXE_DASH = new DashAttackAnimation(0.25F, 0.08F, 0.4F, 0.46F, 0.9F, null, biped.toolR, "biped/combat/axe_dash", biped);
+		AXE_DASH = new DashAttackAnimation(0.25F, 0.08F, 0.4F, 0.46F, 0.9F, null, biped.toolR, "biped/combat/axe_dash", biped, true);
 		SWORD_DUAL_AUTO1 = new BasicAttackAnimation(0.08F, 0.1F, 0.2F, 0.3F, null, biped.toolR, "biped/combat/sword_dual_auto1", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.6F)
 				.newTimePair(0.0F, 0.2F)
@@ -833,7 +834,7 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
 		UCHIGATANA_AUTO3 = new BasicAttackAnimation(0.1F, 0.15F, 0.25F, 0.5F, null, biped.toolR, "biped/combat/uchigatana_auto3", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
-		UCHIGATANA_DASH = new DashAttackAnimation(0.1F, 0.05F, 0.05F, 0.15F, 0.6F, null, biped.toolR, "biped/combat/uchigatana_dash", biped)
+		UCHIGATANA_DASH = new DashAttackAnimation(0.1F, 0.05F, 0.05F, 0.15F, 0.6F, null, biped.toolR, "biped/combat/uchigatana_dash", biped, true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.0F);
 		UCHIGATANA_SHEATHING_AUTO = new BasicAttackAnimation(0.05F, 0.0F, 0.06F, 0.65F, ColliderPreset.BATTOJUTSU, biped.rootJoint, "biped/combat/uchigatana_sheath_auto", biped)
 				.addProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER, ValueModifier.adder(30.0F))
@@ -854,7 +855,7 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		LONGSWORD_AUTO3 = new BasicAttackAnimation(0.05F, 0.2F, 0.3F, 1.0F, null, biped.toolR, "biped/combat/longsword_auto3", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		LONGSWORD_DASH = new DashAttackAnimation(0.1F, 0.1F, 0.25F, 0.4F, 0.75F, null, biped.toolR, "biped/combat/longsword_dash", biped)
+		LONGSWORD_DASH = new DashAttackAnimation(0.1F, 0.1F, 0.25F, 0.4F, 0.75F, null, biped.toolR, "biped/combat/longsword_dash", biped, true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 
 		LONGSWORD_LIECHTENAUER_AUTO1 = new BasicAttackAnimation(0.1F, 0.15F, 0.25F, 0.5F, null, biped.toolR, "biped/combat/longsword_liechtenauer_auto1", biped)
@@ -871,7 +872,7 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		TACHI_AUTO3 = new BasicAttackAnimation(0.15F, 0.2F, 0.3F, 0.85F, null, biped.toolR, "biped/combat/tachi_auto3", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
-		TACHI_DASH = new DashAttackAnimation(0.1F, 0.3F, 0.3F, 0.4F, 1.0F, null, biped.toolR, "biped/combat/tachi_dash", biped, false)
+		TACHI_DASH = new DashAttackAnimation(0.1F, 0.3F, 0.3F, 0.4F, 1.0F, null, biped.toolR, "biped/combat/tachi_dash", biped, true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 1.2F);
 		DAGGER_AUTO1 = new BasicAttackAnimation(0.05F, 0.05F, 0.15F, 0.25F, null, biped.toolR, "biped/combat/dagger_auto1", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
@@ -879,7 +880,7 @@ public class Animations {
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
 		DAGGER_AUTO3 = new BasicAttackAnimation(0.05F, 0.2F, 0.25F, 0.4F, null, biped.toolR, "biped/combat/dagger_auto3", biped)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
-		DAGGER_DASH = new DashAttackAnimation(0.05F, 0.1F, 0.2F, 0.25F, 0.6F, null, biped.toolR, "biped/combat/dagger_dash", biped)
+		DAGGER_DASH = new DashAttackAnimation(0.05F, 0.1F, 0.2F, 0.25F, 0.6F, null, biped.toolR, "biped/combat/dagger_dash", biped, true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F)
 				.newTimePair(0.0F, 0.4F)
 				.addStateRemoveOld(EntityState.CAN_BASIC_ATTACK, false)
@@ -897,7 +898,7 @@ public class Animations {
 					, new Phase(0.2F, 0.2F, 0.3F, 0.6F, 0.6F, biped.toolR, null))
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F);
 
-		DAGGER_DUAL_DASH = new DashAttackAnimation(0.1F, 0.1F, 0.25F, 0.3F, 0.65F, ColliderPreset.DUAL_DAGGER_DASH, biped.rootJoint, "biped/combat/dagger_dual_dash", biped)
+		DAGGER_DUAL_DASH = new DashAttackAnimation(0.1F, 0.1F, 0.25F, 0.3F, 0.65F, ColliderPreset.DUAL_DAGGER_DASH, biped.rootJoint, "biped/combat/dagger_dual_dash", biped, true)
 				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 2.4F)
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, true);
 		
@@ -2001,8 +2002,15 @@ public class Animations {
 			}
 			
 			float pitch = entitypatch.getAttackDirectionPitch();
+			
 			JointTransform chest = pose.getOrDefaultTransform("Chest");
 			chest.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginFront);
+			
+			if (entitypatch instanceof PlayerPatch) {
+				JointTransform head = pose.getOrDefaultTransform("Head");
+				float xRot = MathUtils.lerpBetween(entitypatch.getOriginal().xRotO, entitypatch.getOriginal().getXRot(), partialTicks);
+				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(pitch + xRot), head.rotation(), head.rotation());
+			}
 		};
 		
 		public static final AnimationProperty.PoseModifier ROOT_X_MODIFIER = (self, pose, entitypatch, time, partialTicks) -> {

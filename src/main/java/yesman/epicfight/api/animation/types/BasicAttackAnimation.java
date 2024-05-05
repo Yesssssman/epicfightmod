@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
 import yesman.epicfight.api.animation.Joint;
+import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
@@ -77,8 +78,8 @@ public class BasicAttackAnimation extends AttackAnimation {
 	}
 	
 	@Override
-	protected void onLoaded() {
-		super.onLoaded();
+	public void postInit() {
+		super.postInit();
 		
 		if (!this.properties.containsKey(AttackAnimationProperty.BASIS_ATTACK_SPEED)) {
 			float basisSpeed = Float.parseFloat(String.format(Locale.US, "%.2f", (1.0F / this.getTotalTime())));
@@ -122,21 +123,25 @@ public class BasicAttackAnimation extends AttackAnimation {
 	}
 	
 	@Override
-	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
-		if (layer == Layer.Priority.HIGHEST) {
-			return !JointMaskEntry.BASIC_ATTACK_MASK.isMasked(entitypatch.getCurrentLivingMotion(), joint);
-		} else {
-			return super.isJointEnabled(entitypatch, layer, joint);
+	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, String joint) {
+		if (entitypatch.isLogicalClient()) {
+			if (entitypatch.getClientAnimator().getPriorityFor(this) == Layer.Priority.HIGHEST) {
+				return !JointMaskEntry.BASIC_ATTACK_MASK.isMasked(LivingMotions.ALL, joint);
+			}
 		}
+		
+		return super.isJointEnabled(entitypatch, joint);
 	}
 	
 	@Override
-	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
-		if (layer == Layer.Priority.HIGHEST) {
-			return JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT.getBindModifier(joint);
-		} else {
-			return super.getBindModifier(entitypatch, layer, joint);
+	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, String joint) {
+		if (entitypatch.isLogicalClient()) {
+			if (entitypatch.getClientAnimator().getPriorityFor(this) == Layer.Priority.HIGHEST) {
+				return JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT.getBindModifier(joint);
+			}
 		}
+		
+		return super.getBindModifier(entitypatch, joint);
 	}
 	
 	@Override

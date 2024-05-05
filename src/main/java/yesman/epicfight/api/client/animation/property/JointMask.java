@@ -36,7 +36,9 @@ public class JointMask {
 		OpenMatrix4f currentToLowest = OpenMatrix4f.mul(OpenMatrix4f.invert(currentMatrix, null), lowestMatrix, null);
 		
 		for (Joint subJoint : joint.getSubJoints()) {
-			if (!poses.get(priority).getFirst().isJointEnabled(entitypatch, priority, subJoint.getName())) {
+			DynamicAnimation animation = poses.get(priority).getFirst();
+			
+			if (!animation.isJointEnabled(entitypatch, subJoint.getName())) {
 				OpenMatrix4f lowestLocalTransform = OpenMatrix4f.mul(joint.getLocalTrasnform(), lowestMatrix, null);
 				OpenMatrix4f currentLocalTransform = OpenMatrix4f.mul(joint.getLocalTrasnform(), currentMatrix, null);
 				OpenMatrix4f childTransform = OpenMatrix4f.mul(subJoint.getLocalTrasnform(), result.getOrDefaultTransform(subJoint.getName()).toMatrix(), null);

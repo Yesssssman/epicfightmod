@@ -112,15 +112,10 @@ public class AimAnimation extends StaticAnimation {
 			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
 			e.printStackTrace();
 		}
-		
-		this.onLoaded();
-		this.lookUp.onLoaded();
-		this.lookDown.onLoaded();
-		this.lying.onLoaded();
 	}
 	
 	@Override
-	public List<StaticAnimation> getAllClipAnimations() {
+	public List<StaticAnimation> getClipHolders() {
 		return List.of(this, this.lookUp, this.lookDown, this.lying);
 	}
 	

@@ -30,7 +30,6 @@ public class AnimationPlayer {
 		}
 		
 		this.elapsedTime += EpicFightOptions.A_TICK * playbackSpeed * (this.isReversed() && this.getAnimation().canBePlayedReverse() ? -1.0F : 1.0F);
-		
 		PlaybackTimeModifier playTimeModifier = this.getAnimation().getRealAnimation().getProperty(StaticAnimationProperty.ELAPSED_TIME_MODIFIER).orElse(null);
 		
 		if (playTimeModifier != null) {

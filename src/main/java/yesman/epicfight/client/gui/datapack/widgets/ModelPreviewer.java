@@ -277,15 +277,13 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 		this.modelRenderTarget.bindWrite(true);
 		this.getArmature().initializeTransform();
 		
-		Pose pose = this.getArmature().getPose(partialTicks);
-		
-		OpenMatrix4f[] poseMatrices = this.getArmature().getAllPoseTransform(partialTicks);
+		Pose pose = this.animator.getPose(partialTicks);
+		OpenMatrix4f[] poseMatrices = this.getArmature().getPoseAsTransformMatrix(pose);
 		guiGraphics.pose().pushPose();
 		
 		ShaderInstance prevShader = RenderSystem.getShader();
 		Matrix4f oldProjection = RenderSystem.getProjectionMatrix();
 		RenderSystem.setShader(EpicFightShaders::getPositionColorNormalShader);
-		
 		Matrix4f perspective = (new Matrix4f()).setPerspective(70.0F, (float)this.width / (float)this.height, 0.05F, 100.0F);
 		
 		RenderSystem.setProjectionMatrix(perspective, VertexSorting.DISTANCE_TO_ORIGIN);
@@ -356,8 +354,8 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 			RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
 			
 			if (this.colliderJoint != null) {
-				Pose prevPose = this.getArmature().getPrevPose();
-				Pose currentPose = this.getArmature().getCurrentPose();
+				Pose prevPose = this.animator.getPose(0.0F);
+				Pose currentPose = this.animator.getPose(1.0F);
 				this.collider.drawInternal(guiGraphics.pose(), bufferbuilder, this.getArmature(), this.colliderJoint, prevPose, currentPose, partialTicks, -1);
 			} else {
 				AnimationPlayer player = this.animator.getPlayerFor(null);
@@ -500,7 +498,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 		}
 		
 		@Override
-		public void poseTick(DynamicAnimation animation, Pose pose, float time) {
+		public void poseTick(DynamicAnimation animation, Pose pose, float time, float partialTicks) {
 		}
 		
 		@Override
@@ -550,8 +548,6 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 				
 				ModelPreviewer.this.index = (ModelPreviewer.this.index + 1) % ModelPreviewer.this.animationsToPlay.size();
 			}
-			
-			this.poseTick();
 		}
 		
 		public LivingEntityPatch<?> getEntityPatch() {
@@ -592,7 +588,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 			}
 			
 			public void playAnimation(StaticAnimation nextAnimation, LivingEntityPatch<?> entitypatch, float convertTimeModifier) {
-				Pose lastPose = entitypatch.getArmature().getPose(1.0F);
+				Pose lastPose = entitypatch.getAnimator().getPose(1.0F);
 				this.resume();
 				
 				if (!nextAnimation.isMetaAnimation()) {
@@ -608,14 +604,21 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 				this.nextAnimation = null;
 			}
 			
+			@Override
 			protected void setLinkAnimation(DynamicAnimation nextAnimation, LivingEntityPatch<?> entitypatch, Pose lastPose, float convertTimeModifier) {
 				Pose currentPose = this.animationPlayer.getAnimation().getRawPose(this.animationPlayer.getElapsedTime());
 				Pose nextAnimationPose = nextAnimation.getRawPose(0.0F);
 				float totalTime = nextAnimation.getConvertTime();
 				
+				DynamicAnimation fromAnimation = this.animationPlayer.isEmpty() ? entitypatch.getClientAnimator().baseLayer.animationPlayer.getAnimation() : this.animationPlayer.getAnimation();
+				
+				if (fromAnimation instanceof LinkAnimation linkAnimation) {
+					fromAnimation = linkAnimation.getFromAnimation();
+				}
+				
 				this.linkAnimation.getTransfroms().clear();
 				this.linkAnimation.setTotalTime(totalTime);
-				this.linkAnimation.setNextAnimation(nextAnimation);
+				this.linkAnimation.setConnectedAnimations(fromAnimation, nextAnimation);
 				
 				Map<String, JointTransform> data1 = currentPose.getJointTransformData();
 				Map<String, JointTransform> data2 = nextAnimationPose.getJointTransformData();
@@ -655,9 +658,9 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 			}
 			
 			public Pose getEnabledPose(LivingEntityPatch<?> entitypatch, float partialTick) {
-				Pose pose = this.animationPlayer.getAnimation().getRawPose(this.animationPlayer.getPrevElapsedTime() + (this.animationPlayer.getElapsedTime() - this.animationPlayer.getPrevElapsedTime()) * partialTick);
 				DynamicAnimation animation = this.animationPlayer.getAnimation();
-				pose.removeJointIf((entry) -> !animation.isJointEnabled(entitypatch, this.priority, entry.getKey()));
+				Pose pose = animation.getRawPose(this.animationPlayer.getPrevElapsedTime() + (this.animationPlayer.getElapsedTime() - this.animationPlayer.getPrevElapsedTime()) * partialTick);
+				pose.removeJointIf((entry) -> !animation.isJointEnabled(entitypatch, entry.getKey()));
 				
 				return pose;
 			}
@@ -688,7 +691,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 				this.baseLayerPriority = priority;
 				this.offCompositeLayerLowerThan(entitypatch, nextAnimation);
 				
-				Pose lastPose = entitypatch.getArmature().getPose(1.0F);
+				Pose lastPose = entitypatch.getAnimator().getPose(1.0F);
 				this.resume();
 				
 				if (!nextAnimation.isMetaAnimation()) {
@@ -743,14 +746,21 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 				}
 			}
 			
+			@Override
 			protected void setLinkAnimation(DynamicAnimation nextAnimation, LivingEntityPatch<?> entitypatch, Pose lastPose, float convertTimeModifier) {
 				Pose currentPose = this.animationPlayer.getAnimation().getRawPose(this.animationPlayer.getElapsedTime());
 				Pose nextAnimationPose = nextAnimation.getRawPose(0.0F);
 				float totalTime = nextAnimation.getConvertTime();
 				
+				DynamicAnimation fromAnimation = this.animationPlayer.isEmpty() ? entitypatch.getClientAnimator().baseLayer.animationPlayer.getAnimation() : this.animationPlayer.getAnimation();
+				
+				if (fromAnimation instanceof LinkAnimation linkAnimation) {
+					fromAnimation = linkAnimation.getFromAnimation();
+				}
+				
 				this.linkAnimation.getTransfroms().clear();
 				this.linkAnimation.setTotalTime(totalTime);
-				this.linkAnimation.setNextAnimation(nextAnimation);
+				this.linkAnimation.setConnectedAnimations(fromAnimation, nextAnimation);
 				
 				Map<String, JointTransform> data1 = currentPose.getJointTransformData();
 				Map<String, JointTransform> data2 = nextAnimationPose.getJointTransformData();
@@ -842,7 +852,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 	class CustomTrailParticle extends TrailParticle {
 		@SuppressWarnings("deprecation")
 		protected CustomTrailParticle(Joint joint, StaticAnimation animation, TrailInfo trailInfo) {
-			super(ModelPreviewer.this.getArmature(), joint, animation, trailInfo);
+			super(ModelPreviewer.this.getArmature(), ModelPreviewer.this.animator.getEntityPatch(), joint, animation, trailInfo);
 		}
 		
 		@Override
@@ -875,9 +885,9 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 			}
 			
 			TrailInfo trailInfo = this.trailInfo;
-			Pose prevPose = ModelPreviewer.this.getArmature().getPrevPose();
-			Pose middlePose = ModelPreviewer.this.getArmature().getPose(0.5F);
-			Pose currentPose = ModelPreviewer.this.getArmature().getCurrentPose();
+			Pose prevPose = this.entitypatch.getAnimator().getPose(0.0F);
+			Pose middlePose = this.entitypatch.getAnimator().getPose(0.5F);
+			Pose currentPose = this.entitypatch.getAnimator().getPose(1.0F);
 			OpenMatrix4f prevJointTf = ModelPreviewer.this.getArmature().getBindedTransformFor(prevPose, this.joint);
 			OpenMatrix4f middleJointTf = ModelPreviewer.this.getArmature().getBindedTransformFor(middlePose, this.joint);
 			OpenMatrix4f currentJointTf = ModelPreviewer.this.getArmature().getBindedTransformFor(currentPose, this.joint);

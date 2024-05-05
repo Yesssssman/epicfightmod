@@ -145,25 +145,26 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	}
 	
 	@Override
-	public void poseTick(DynamicAnimation animation, Pose pose, float time) {
+	public void poseTick(DynamicAnimation animation, Pose pose, float time, float partialTicks) {
 		if (pose.getJointTransformData().containsKey("Head_M")) {
-			Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(-this.original.getXRot(), Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(this.original.yBodyRot - this.original.yHeadRot, Vec3f.Y_AXIS)).toQuaternion();
+			float headRotO = this.original.yBodyRotO - this.original.yHeadRotO;
+			float headRot = this.original.yBodyRot - this.original.yHeadRot;
+			float partialHeadRot = MathUtils.lerpBetween(headRotO, headRot, partialTicks);
+			Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(-this.original.getXRot(), Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(partialHeadRot, Vec3f.Y_AXIS)).toQuaternion();
 			pose.getOrDefaultTransform("Head_M").frontResult(JointTransform.getRotation(headRotation), OpenMatrix4f::mul);
 		}
 		
 		if (pose.getJointTransformData().containsKey("Head_R")) {
-			float rightHeadYRot = this.original.yRotHeads[1];
-			float rightHeadXRot = this.original.xRotHeads[1];
-			
-			Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(this.original.yBodyRot - rightHeadYRot, Vec3f.Y_AXIS).rotateDeg(-rightHeadXRot, Vec3f.X_AXIS).toQuaternion();
+			float rightHeadYRot = MathUtils.lerpBetween(this.original.yBodyRotO, this.original.yBodyRot, partialTicks) - MathUtils.lerpBetween(this.original.yRotOHeads[1], this.original.yRotHeads[1], partialTicks);
+			float rightHeadXRot = MathUtils.lerpBetween(this.original.xRotOHeads[1], this.original.xRotHeads[1], partialTicks);
+			Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(rightHeadYRot, Vec3f.Y_AXIS).rotateDeg(-rightHeadXRot, Vec3f.X_AXIS).toQuaternion();
 			pose.getOrDefaultTransform("Head_R").frontResult(JointTransform.getRotation(headRotation), OpenMatrix4f::mul);
 		}
 		
 		if (pose.getJointTransformData().containsKey("Head_L")) {
-			float leftHeadYRot = this.original.yRotHeads[0];
-			float leftHeadXRot = this.original.xRotHeads[0];
-			
-			Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(this.original.yBodyRot - leftHeadYRot, Vec3f.Y_AXIS).rotateDeg(-leftHeadXRot, Vec3f.X_AXIS).toQuaternion();
+			float leftHeadYRot = MathUtils.lerpBetween(this.original.yBodyRotO, this.original.yBodyRot, partialTicks) - MathUtils.lerpBetween(this.original.yRotOHeads[0], this.original.yRotHeads[0], partialTicks);
+			float leftHeadXRot = MathUtils.lerpBetween(this.original.xRotOHeads[0], this.original.xRotHeads[0], partialTicks);
+			Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(leftHeadYRot, Vec3f.Y_AXIS).rotateDeg(-leftHeadXRot, Vec3f.X_AXIS).toQuaternion();
 			pose.getOrDefaultTransform("Head_L").frontResult(JointTransform.getRotation(headRotation), OpenMatrix4f::mul);
 		}
 	}

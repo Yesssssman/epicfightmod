@@ -175,15 +175,13 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 			this.currentWorkingModid = null;
 		});
 		
-		if (EpicFightMod.isPhysicalClient()) {
-			this.animationRegistry.values().stream().reduce(Lists.<StaticAnimation>newArrayList(), (list, anim) -> {
-				list.addAll(anim.getAllClipAnimations());
-				return list;
-			}, (list1, list2) -> {
-				list1.addAll(list2);
-				return list1;
-			});
-		}
+		this.animationRegistry.values().stream().reduce(Lists.<StaticAnimation>newArrayList(), (list, anim) -> {
+			list.addAll(anim.getClipHolders());
+			return list;
+		}, (list1, list2) -> {
+			list1.addAll(list2);
+			return list1;
+		}).forEach(StaticAnimation::postInit);
 		
 		return super.prepare(resourceManager, profilerIn);
 	}
@@ -191,7 +189,7 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	@Override
 	protected void apply(Map<ResourceLocation, JsonElement> objectIn, ResourceManager resourceManager, ProfilerFiller profilerIn) {
 		final Map<ResourceLocation, StaticAnimation> registeredAnimation = Maps.newHashMap();
-		this.animationRegistry.values().forEach(a1 -> a1.getAllClipAnimations().forEach((a2) -> registeredAnimation.put(a2.getRegistryName(), a2)));
+		this.animationRegistry.values().forEach(a1 -> a1.getClipHolders().forEach((a2) -> registeredAnimation.put(a2.getRegistryName(), a2)));
 		
 		/**
 		 * Load animations that are not registered from {@link AnimationRegistryEvent}
@@ -216,7 +214,7 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		
 		if (EpicFightMod.isPhysicalClient()) {
 			this.animationRegistry.values().stream().reduce(Lists.<StaticAnimation>newArrayList(), (list, anim) -> {
-				list.addAll(anim.getAllClipAnimations());
+				list.addAll(anim.getClipHolders());
 				return list;
 			}, (list1, list2) -> {
 				list1.addAll(list2);

@@ -208,7 +208,18 @@ public class TransformSheet {
 	
 	@Override
 	public String toString() {
-		return "total " + this.keyframes.length + " frames";
+		StringBuilder sb = new StringBuilder();
+		int idx = 0;
+		
+		for (Keyframe kf : this.keyframes) {
+			sb.append(kf);
+			
+			if (++idx < this.keyframes.length) {
+				sb.append("\n");
+			}
+		}
+		
+		return sb.toString();
 	}
 	
 	private static class InterpolationInfo {
