@@ -50,8 +50,6 @@ public class EnderDragonAttackAnimation extends AttackAnimation implements Proce
 		try {
 			JsonModelLoader modelLoader = (new JsonModelLoader(resourceManager, this.resourceLocation));
 			AnimationManager.getInstance().loadAnimationClip(this, modelLoader::loadAllJointsClipForAnimation);
-			
-			this.onLoaded();
 		} catch (Exception e) {
 			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
 			e.printStackTrace();
@@ -59,7 +57,6 @@ public class EnderDragonAttackAnimation extends AttackAnimation implements Proce
 		
 		this.tipPointTransform = Maps.newHashMap();
 		this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransform, this.getArmature(), false, true);
-		this.onLoaded();
 	}
 	
 	@Override

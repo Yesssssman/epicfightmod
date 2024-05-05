@@ -1,6 +1,8 @@
 package yesman.epicfight.api.animation.types;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
@@ -135,7 +137,7 @@ public class ActionAnimation extends MainFrameAnimation {
 	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		super.modifyPose(animation, pose, entitypatch, time, partialTicks);
 		
-		if (this.getProperty(ActionAnimationProperty.COORD).isEmpty()) {
+		//if (this.getProperty(ActionAnimationProperty.COORD).isEmpty()) {
 			JointTransform jt = pose.getOrDefaultTransform("Root");
 			Vec3f jointPosition = jt.translation();
 			OpenMatrix4f toRootTransformApplied = entitypatch.getArmature().searchJointByName("Root").getLocalTrasnform().removeTranslation();
@@ -148,13 +150,11 @@ public class ActionAnimation extends MainFrameAnimation {
 			jointPosition.x = worldPosition.x;
 			jointPosition.y = worldPosition.y;
 			jointPosition.z = worldPosition.z;
-		}
-		
-		super.modifyPose(animation, pose, entitypatch, time, partialTicks);
+		//}
 	}
 	
 	@Override
-	public void setLinkAnimation(Pose pose1, float convertTimeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
+	public void setLinkAnimation(DynamicAnimation fromAnimation, Pose pose1, boolean isOnSameLayer, float convertTimeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
 		float totalTime = convertTimeModifier > 0.0F ? convertTimeModifier : 0.0F + this.convertTime;
 		float nextStart = 0.0F;
 		
@@ -165,9 +165,8 @@ public class ActionAnimation extends MainFrameAnimation {
 		
 		dest.getTransfroms().clear();
 		dest.setTotalTime(totalTime);
-		dest.setNextAnimation(this);
+		dest.setConnectedAnimations(fromAnimation, this);
 		
-		Map<String, JointTransform> data1 = pose1.getJointTransformData();
 		Pose pose = this.getPoseByTime(entitypatch, nextStart, 1.0F);
 		
 		if (entitypatch.shouldMoveOnCurrentSide(this) && this.getProperty(ActionAnimationProperty.MOVE_ON_LINK).orElse(true)) {
@@ -183,13 +182,19 @@ public class ActionAnimation extends MainFrameAnimation {
 			}
 		}
 		
+		Map<String, JointTransform> data1 = pose1.getJointTransformData();
 		Map<String, JointTransform> data2 = pose.getJointTransformData();
 		
-		for (String jointName : data2.keySet()) {
+		Set<String> joint1 = new HashSet<> (isOnSameLayer ? data1.keySet() : Set.of());
+		joint1.removeIf((jointName) -> !fromAnimation.isJointEnabled(entitypatch, jointName));
+		Set<String> joint2 = new HashSet<> (data2.keySet());
+		joint2.removeIf((jointName) -> !this.isJointEnabled(entitypatch, jointName));
+		joint1.addAll(joint2);
+		
+		for (String jointName : joint1) {
 			Keyframe[] keyframes = new Keyframe[2];
 			keyframes[0] = new Keyframe(0, data1.getOrDefault(jointName, JointTransform.empty()));
 			keyframes[1] = new Keyframe(totalTime, data2.get(jointName));
-			
 			TransformSheet sheet = new TransformSheet(keyframes);
 			dest.getAnimationClip().addJointTransform(jointName, sheet);
 		}
@@ -201,15 +206,16 @@ public class ActionAnimation extends MainFrameAnimation {
 		boolean isCoordUpdateTime = coordUpdateTime == null || coordUpdateTime.isTimeInPairs(player.getElapsedTime());
 
 		MoveCoordSetter moveCoordsetter = isCoordUpdateTime ? this.getProperty(ActionAnimationProperty.COORD_SET_TICK).orElse(null) : MoveCoordFunctions.RAW_COORD;
+		boolean isLinkAnimation = animation instanceof LinkAnimation;
 		
 		if (moveCoordsetter != null) {
-			TransformSheet transformSheet = (animation instanceof LinkAnimation) ? animation.getCoord() : entitypatch.getArmature().getActionAnimationCoord();
+			TransformSheet transformSheet = isLinkAnimation ? animation.getCoord() : entitypatch.getArmature().getActionAnimationCoord();
 			moveCoordsetter.set(animation, entitypatch, transformSheet);
 		}
 		
 		TransformSheet rootCoord;
 		
-		if (animation instanceof LinkAnimation) {
+		if (isLinkAnimation) {
 			rootCoord = animation.getCoord();
 		} else {
 			rootCoord = entitypatch.getArmature().getActionAnimationCoord();

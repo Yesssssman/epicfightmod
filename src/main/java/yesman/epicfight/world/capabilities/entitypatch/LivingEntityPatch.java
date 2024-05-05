@@ -43,7 +43,6 @@ import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.ServerAnimator;
-import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
@@ -141,10 +140,13 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		}
 	}
 	
-	public void poseTick(DynamicAnimation animation, Pose pose, float time) {
-		if (pose.getJointTransformData().containsKey("Head") && animation instanceof StaticAnimation) {
-			if (!animation.getProperty(StaticAnimationProperty.FIXED_HEAD_ROTATION).orElse(false)) {
-				Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(-this.original.getXRot(), Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(this.original.yBodyRot - this.original.yHeadRot, Vec3f.Y_AXIS)).toQuaternion();
+	public void poseTick(DynamicAnimation animation, Pose pose, float elapsedTime, float partialTicks) {
+		if (pose.getJointTransformData().containsKey("Head")) {
+			if (animation.doesHeadRotFollowEntityHead()) {
+				float headRotO = this.original.yBodyRotO - this.original.yHeadRotO;
+				float headRot = this.original.yBodyRot - this.original.yHeadRot;
+				float partialHeadRot = MathUtils.lerpBetween(headRotO, headRot, partialTicks);
+				Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(-this.original.getXRot(), Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(partialHeadRot, Vec3f.Y_AXIS)).toQuaternion();
 				pose.getOrDefaultTransform("Head").frontResult(JointTransform.getRotation(headRotation), OpenMatrix4f::mul);
 			}
 		}
@@ -393,19 +395,19 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	
 	@Override
 	public OpenMatrix4f getModelMatrix(float partialTicks) {
-		float prevYRot;
+		float yRotO;
 		float yRot;
 		float scale = this.original.isBaby() ? 0.5F : 1.0F;
 		
 		if (this.original.getVehicle() instanceof LivingEntity ridingEntity) {
-			prevYRot = ridingEntity.yBodyRotO;
+			yRotO = ridingEntity.yBodyRotO;
 			yRot = ridingEntity.yBodyRot;
 		} else {
-			prevYRot = this.isLogicalClient() ? this.original.yBodyRotO : this.original.getYRot();
+			yRotO = this.isLogicalClient() ? this.original.yBodyRotO : this.original.getYRot();
 			yRot = this.isLogicalClient() ? this.original.yBodyRot : this.original.getYRot();
 		}
 		
-		return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, prevYRot, yRot, partialTicks, scale, scale, scale);
+		return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yRotO, yRot, partialTicks, scale, scale, scale);
 	}
 	
 	public void reserveAnimation(StaticAnimation animation) {
@@ -486,11 +488,9 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	public void notifyGrapplingWarning() {
-		
 	}
 	
 	public void onDodgeSuccess(DamageSource damageSource) {
-		
 	}
 	
 	@Override
@@ -665,6 +665,10 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		return false;
 	}
 	
+	/**
+	 * Returns a value that the entity can trace a target in rotation by a tick
+	 * @return
+	 */
 	public float getYRotLimit() {
 		return 20.0F;
 	}
@@ -679,6 +683,14 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	
 	public double getZOld() {
 		return this.original.zOld;
+	}
+	
+	public float getYRot() {
+		return this.original.getYRot();
+	}
+	
+	public void setYRot(float yRot) {
+		this.original.setYRot(yRot);
 	}
 	
 	@Override

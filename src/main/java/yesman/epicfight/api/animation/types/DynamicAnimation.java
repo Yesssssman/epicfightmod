@@ -1,7 +1,9 @@
 package yesman.epicfight.api.animation.types;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import com.mojang.blaze3d.vertex.PoseStack;
 
@@ -17,7 +19,6 @@ import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.types.EntityState.StateFactor;
-import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.config.EpicFightOptions;
@@ -53,9 +54,9 @@ public abstract class DynamicAnimation {
 	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 	}
 	
-	public void setLinkAnimation(Pose pose1, float convertTimeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
+	public void setLinkAnimation(final DynamicAnimation fromAnimation, Pose pose, boolean isOnSameLayer, float convertTimeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
 		if (!entitypatch.isLogicalClient()) {
-			pose1 = Animations.DUMMY_ANIMATION.getPoseByTime(entitypatch, 0.0F, 1.0F);
+			pose = Animations.DUMMY_ANIMATION.getPoseByTime(entitypatch, 0.0F, 1.0F);
 		}
 		
 		float totalTime = convertTimeModifier >= 0.0F ? convertTimeModifier + this.convertTime : this.convertTime;
@@ -68,12 +69,18 @@ public abstract class DynamicAnimation {
 		
 		dest.getTransfroms().clear();
 		dest.setTotalTime(totalTime);
-		dest.setNextAnimation(this);
+		dest.setConnectedAnimations(fromAnimation, this);
 		
-		Map<String, JointTransform> data1 = pose1.getJointTransformData();
+		Map<String, JointTransform> data1 = pose.getJointTransformData();
 		Map<String, JointTransform> data2 = this.getPoseByTime(entitypatch, nextStart, 1.0F).getJointTransformData();
 		
-		for (String jointName : data1.keySet()) {
+		Set<String> joint1 = new HashSet<> (isOnSameLayer ? data1.keySet() : Set.of());
+		joint1.removeIf((jointName) -> !fromAnimation.isJointEnabled(entitypatch, jointName));
+		Set<String> joint2 = new HashSet<> (data2.keySet());
+		joint2.removeIf((jointName) -> !this.isJointEnabled(entitypatch, jointName));
+		joint1.addAll(joint2);
+		
+		for (String jointName : joint1) {
 			if (data1.containsKey(jointName) && data2.containsKey(jointName)) {
 				Keyframe[] keyframes = new Keyframe[2];
 				keyframes[0] = new Keyframe(0.0F, data1.get(jointName));
@@ -93,13 +100,12 @@ public abstract class DynamicAnimation {
 	public void end(LivingEntityPatch<?> entitypatch, DynamicAnimation nextAnimation, boolean isEnd) {}
 	public void linkTick(LivingEntityPatch<?> entitypatch, DynamicAnimation linkAnimation) {};
 	
-	@OnlyIn(Dist.CLIENT)
-	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
+	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, String joint) {
 		return this.getTransfroms().containsKey(joint);
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
+	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, String joint) {
 		return null;
 	}
 	
@@ -186,6 +192,10 @@ public abstract class DynamicAnimation {
 	}
 	
 	public boolean isStaticAnimation() {
+		return false;
+	}
+	
+	public boolean doesHeadRotFollowEntityHead() {
 		return false;
 	}
 	

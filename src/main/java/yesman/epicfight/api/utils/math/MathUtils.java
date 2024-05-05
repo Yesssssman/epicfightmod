@@ -1,20 +1,21 @@
 package yesman.epicfight.api.utils.math;
 
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.util.Mth;
 import net.minecraft.world.phys.Vec3;
 
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
-
 public class MathUtils {
-	public static OpenMatrix4f getModelMatrixIntegral(float prevPosX, float posX, float prevPosY, float posY, float prevPosZ, float posZ, float prevPitch, float pitch, float prevYaw, float yaw, float partialTick, float scaleX, float scaleY, float scaleZ) {
+	public static OpenMatrix4f getModelMatrixIntegral(float xPosO, float xPos, float yPosO, float yPos, float zPosO, float zPos, float xRotO, float pitch, float yRotO, float yRot, float partialTick, float scaleX, float scaleY, float scaleZ) {
 		OpenMatrix4f modelMatrix = new OpenMatrix4f();
-		Vec3f entityPosition = new Vec3f(-(prevPosX + (posX - prevPosX) * partialTick), ((prevPosY + (posY - prevPosY) * partialTick)), -(prevPosZ + (posZ - prevPosZ) * partialTick));
-		float pitchDegree = lerpBetween(prevPitch, pitch, partialTick);
-		float yawDegree = lerpBetween(prevYaw, yaw, partialTick);
-		modelMatrix.translate(entityPosition).rotateDeg(-yawDegree, Vec3f.Y_AXIS).rotateDeg(-pitchDegree, Vec3f.X_AXIS).scale(scaleX, scaleY, scaleZ);
+		Vec3f entityPosition = new Vec3f(-(xPosO + (xPos - xPosO) * partialTick), ((yPosO + (yPos - yPosO) * partialTick)), -(zPosO + (zPos - zPosO) * partialTick));
+		float partialXRot = lerpBetween(xRotO, pitch, partialTick);
+		float partialYRot = lerpBetween(yRotO, yRot, partialTick);
+		modelMatrix.translate(entityPosition).rotateDeg(-partialYRot, Vec3f.Y_AXIS).rotateDeg(-partialXRot, Vec3f.X_AXIS).scale(scaleX, scaleY, scaleZ);
+		
 		return modelMatrix;
 	}
 	

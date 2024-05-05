@@ -26,9 +26,6 @@ public class Armature {
 	public final Joint rootJoint;
 	private final TransformSheet actionAnimationCoord = new TransformSheet();
 	
-	//private Pose prevPose = new Pose();
-	//private Pose currentPose = new Pose();
-	
 	public Armature(String name, int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
 		this.name = name;
 		this.jointNumber = jointNumber;
@@ -51,31 +48,8 @@ public class Armature {
 		return jointMap.get(name);
 	}
 	
-	/**
-	public Pose getPose(float partialTicks) {
-		return Pose.interpolatePose(this.prevPose, this.currentPose, partialTicks);
-	}
-	
-	public Pose getPrevPose() {
-		return this.prevPose;
-	}
-	
-	public Pose getCurrentPose() {
-		return this.currentPose;
-	}
-	
-	public void setPose(Pose pose) {
-		this.prevPose = this.currentPose;
-		this.currentPose = pose;
-	}
-	**/
-	
 	public void initializeTransform() {
 		this.rootJoint.resetPoseTransforms();
-	}
-	
-	public OpenMatrix4f[] getAllPoseTransform(float partialTicks) {
-		return this.getPoseAsTransformMatrix(this.getPose(partialTicks));
 	}
 	
 	public OpenMatrix4f[] getPoseAsTransformMatrix(Pose pose) {
@@ -91,10 +65,6 @@ public class Armature {
 		for (Joint joints : joint.getSubJoints()) {
 			this.getPoseTransform(joints, result, pose, jointMatrices);
 		}
-	}
-	
-	public OpenMatrix4f getBindedTransformForCurrentPose(Joint joint) {
-		return this.getBindedTransformByJointIndex(this.getCurrentPose(), this.searchPathIndex(joint.getName()));
 	}
 	
 	public OpenMatrix4f getBindedTransformFor(Pose pose, Joint joint) {

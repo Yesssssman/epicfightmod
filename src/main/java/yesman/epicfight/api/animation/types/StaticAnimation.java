@@ -119,11 +119,9 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
 			e.printStackTrace();
 		}
-		
-		this.onLoaded();
 	}
 	
-	protected void onLoaded() {
+	public void postInit() {
 		this.stateSpectrum.readFrom(this.stateSpectrumBlueprint);
 	}
 	
@@ -224,35 +222,40 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 	}
 	
 	@Override
-	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
-		if (!super.isJointEnabled(entitypatch, layer, joint)) {
-			return false;
+	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, String joint) {
+		if (!entitypatch.isLogicalClient()) {
+			return super.isJointEnabled(entitypatch, joint);
 		} else {
-			return this.getProperty(ClientAnimationProperties.JOINT_MASK).map((bindModifier) -> !bindModifier.isMasked(entitypatch.getCurrentLivingMotion(), joint)).orElse(true);
+			return super.isJointEnabled(entitypatch, joint) && this.getProperty(ClientAnimationProperties.JOINT_MASK).map((bindModifier) -> {
+				return !bindModifier.isMasked(entitypatch.getClientAnimator().getLivingMotionFor(this), joint);
+			}).orElse(true);
 		}
 	}
 	
 	@Override
-	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
+	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, String joint) {
 		return this.getProperty(ClientAnimationProperties.JOINT_MASK).map((jointMaskEntry) -> {
-			return jointMaskEntry.getMask(entitypatch.getCurrentLivingMotion()).getBindModifier(joint);
+			return jointMaskEntry.getMask(entitypatch.getClientAnimator().getLivingMotionFor(this)).getBindModifier(joint);
 		}).orElse(null);
 	}
 	
 	@Override
 	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
-		entitypatch.poseTick(animation, pose, time);
+		entitypatch.poseTick(animation, pose, time, partialTicks);
 		
-		AnimationProperty.PoseModifier modifier = this.getProperty(StaticAnimationProperty.POSE_MODIFIER).orElse(null);
-		
-		if (modifier != null) {
-			modifier.modify(animation, pose, entitypatch, time, partialTicks);
-		}
+		this.getProperty(StaticAnimationProperty.POSE_MODIFIER).ifPresent((poseModifier) -> {
+			poseModifier.modify(animation, pose, entitypatch, time, partialTicks);
+		}); 
 	}
 	
 	@Override
 	public boolean isStaticAnimation() {
 		return true;
+	}
+	
+	@Override
+	public boolean doesHeadRotFollowEntityHead() {
+		return !this.getProperty(StaticAnimationProperty.FIXED_HEAD_ROTATION).orElse(false);
 	}
 	
 	@Override
@@ -419,7 +422,7 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		return AnimationManager.getInstance().getStaticAnimationClip(this);
 	}
 	
-	public List<StaticAnimation> getAllClipAnimations() {
+	public List<StaticAnimation> getClipHolders() {
 		return List.of(this);
 	}
 	

@@ -81,7 +81,7 @@ public class SelectiveAnimation extends StaticAnimation {
 	}
 	
 	@Override
-	public List<StaticAnimation> getAllClipAnimations() {
+	public List<StaticAnimation> getClipHolders() {
 		return List.of(this.animations);
 	}
 	

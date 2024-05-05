@@ -76,9 +76,9 @@ public class TrailParticle extends TextureSheetParticle {
 		this.setSize(size, size);
 		this.setSpriteFromAge(spriteSet);
 		
-		Pose prevPose = this.entitypatch.getArmature().getPrevPose();
-		Pose middlePose = this.entitypatch.getArmature().getPose(0.5F);
-		Pose currentPose = this.entitypatch.getArmature().getCurrentPose();
+		Pose prevPose = this.entitypatch.getAnimator().getPose(0.0F);
+		Pose middlePose = this.entitypatch.getAnimator().getPose(0.5F);
+		Pose currentPose = this.entitypatch.getAnimator().getPose(1.0F);
 		Vec3 posOld = this.entitypatch.getOriginal().getPosition(0.0F);
 		Vec3 posMid = this.entitypatch.getOriginal().getPosition(0.5F);
 		Vec3 posCur = this.entitypatch.getOriginal().getPosition(1.0F);
@@ -114,10 +114,10 @@ public class TrailParticle extends TextureSheetParticle {
 	}
 	
 	@Deprecated /** This constructor is only for {@link ModelPreviewer} **/
-	protected TrailParticle(Armature armature, Joint joint, StaticAnimation animation, TrailInfo trailInfo) {
+	protected TrailParticle(Armature armature, LivingEntityPatch<?> entitypatch, Joint joint, StaticAnimation animation, TrailInfo trailInfo) {
 		super(null, 0, 0, 0);
 		
-		this.entitypatch = null;
+		this.entitypatch = entitypatch;
 		this.joint = joint;
 		this.animation = animation;
 		this.invisibleTrailEdges = Lists.newLinkedList();
@@ -128,9 +128,9 @@ public class TrailParticle extends TextureSheetParticle {
 		float size = (float)Math.max(this.trailInfo.start.length(), this.trailInfo.end.length()) * 2.0F;
 		this.setSize(size, size);
 		
-		Pose prevPose = armature.getPrevPose();
-		Pose middlePose = armature.getPose(0.5F);
-		Pose currentPose = armature.getCurrentPose();
+		Pose prevPose = this.entitypatch.getAnimator().getPose(0.0F);
+		Pose middlePose = this.entitypatch.getAnimator().getPose(0.5F);
+		Pose currentPose = this.entitypatch.getAnimator().getPose(1.0F);
 		
 		OpenMatrix4f prevJointTf = armature.getBindedTransformFor(prevPose, this.joint);
 		OpenMatrix4f middleJointTf = armature.getBindedTransformFor(middlePose, this.joint);
@@ -188,9 +188,9 @@ public class TrailParticle extends TextureSheetParticle {
 		}
 		
 		TrailInfo trailInfo = this.trailInfo;
-		Pose prevPose = this.entitypatch.getArmature().getPrevPose();
-		Pose middlePose = this.entitypatch.getArmature().getPose(0.5F);
-		Pose currentPose = this.entitypatch.getArmature().getCurrentPose();
+		Pose prevPose = this.entitypatch.getAnimator().getPose(0.0F);
+		Pose middlePose = this.entitypatch.getAnimator().getPose(0.5F);
+		Pose currentPose = this.entitypatch.getAnimator().getPose(1.0F);
 		Vec3 posOld = this.entitypatch.getOriginal().getPosition(0.0F);
 		Vec3 posMid = this.entitypatch.getOriginal().getPosition(0.5F);
 		Vec3 posCur = this.entitypatch.getOriginal().getPosition(1.0F);

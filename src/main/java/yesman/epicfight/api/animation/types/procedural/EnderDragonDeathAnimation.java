@@ -21,8 +21,6 @@ public class EnderDragonDeathAnimation extends LongHitAnimation {
 			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
 			e.printStackTrace();
 		}
-		
-		this.onLoaded();
 	}
 	
 	@Override

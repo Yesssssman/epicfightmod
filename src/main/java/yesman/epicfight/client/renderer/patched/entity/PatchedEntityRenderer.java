@@ -1,6 +1,10 @@
 package yesman.epicfight.client.renderer.patched.entity;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+
 import com.mojang.blaze3d.vertex.PoseStack;
+
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
@@ -19,13 +23,10 @@ import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
-import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
-
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class PatchedEntityRenderer<E extends Entity, T extends EntityPatch<E>, R extends EntityRenderer<E>, AM extends AnimatedMesh> {
+public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, R extends EntityRenderer<E>, AM extends AnimatedMesh> {
 	protected static Method shouldShowName;
 	protected static Method renderNameTag;
 	
@@ -63,8 +64,8 @@ public abstract class PatchedEntityRenderer<E extends Entity, T extends EntityPa
         MathUtils.rotateStack(poseStack, transpose);
         MathUtils.scaleStack(poseStack, transpose);
         
-        if (entitypatch.getOriginal() instanceof LivingEntity livingEntity && LivingEntityRenderer.isEntityUpsideDown(livingEntity)) {
-        	poseStack.translate(0.0D, livingEntity.getBbHeight() + 0.1F, 0.0D);
+        if (LivingEntityRenderer.isEntityUpsideDown(entityIn)) {
+        	poseStack.translate(0.0D, entityIn.getBbHeight() + 0.1F, 0.0D);
         	poseStack.mulPose(QuaternionUtils.ZP.rotationDegrees(180.0F));
 		}
 	}
@@ -72,7 +73,7 @@ public abstract class PatchedEntityRenderer<E extends Entity, T extends EntityPa
 	public OpenMatrix4f[] getPoseMatrices(T entitypatch, Armature armature, float partialTicks) {
 		armature.initializeTransform();
         this.setJointTransforms(entitypatch, armature, partialTicks);
-		OpenMatrix4f[] poseMatrices = armature.getAllPoseTransform(partialTicks);
+		OpenMatrix4f[] poseMatrices = armature.getPoseAsTransformMatrix(entitypatch.getAnimator().getPose(partialTicks));
 		
 		return poseMatrices;
 	}

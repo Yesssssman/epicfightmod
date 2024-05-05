@@ -1,6 +1,8 @@
 package yesman.epicfight.api.animation.types;
 
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
@@ -31,15 +33,22 @@ public class HitAnimation extends MainFrameAnimation {
 	}
 	
 	@Override
-	public void setLinkAnimation(Pose pose1, float convertTimeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
+	public void setLinkAnimation(DynamicAnimation fromAnimation, Pose pose1, boolean isOnSameLayer, float convertTimeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
 		dest.getTransfroms().clear();
 		dest.setTotalTime(convertTimeModifier + this.convertTime);
-		dest.setNextAnimation(this);
+		dest.setConnectedAnimations(fromAnimation, this);
+		
 		Map<String, JointTransform> data1 = pose1.getJointTransformData();
 		Map<String, JointTransform> data2 = super.getPoseByTime(entitypatch, 0.0F, 0.0F).getJointTransformData();
 		Map<String, JointTransform> data3 = super.getPoseByTime(entitypatch, this.getTotalTime() - 0.00001F, 0.0F).getJointTransformData();
 		
-		for (String jointName : data1.keySet()) {
+		Set<String> joint1 = new HashSet<> (data1.keySet());
+		joint1.removeIf((jointName) -> !fromAnimation.isJointEnabled(entitypatch, jointName));
+		Set<String> joint2 = new HashSet<> (data2.keySet());
+		joint2.removeIf((jointName) -> !this.isJointEnabled(entitypatch, jointName));
+		joint1.addAll(joint2);
+		
+		for (String jointName : joint1) {
 			if (data1.containsKey(jointName) && data2.containsKey(jointName)) {
 				Keyframe[] keyframes = new Keyframe[4];
 				keyframes[0] = new Keyframe(0, data1.get(jointName));

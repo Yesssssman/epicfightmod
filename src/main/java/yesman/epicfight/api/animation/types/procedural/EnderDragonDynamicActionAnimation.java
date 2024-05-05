@@ -46,7 +46,6 @@ public class EnderDragonDynamicActionAnimation extends ActionAnimation implement
 		
 		this.tipPointTransform = Maps.newHashMap();
 		this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransform, this.getArmature(), true, true);
-		this.onLoaded();
 	}
 	
 	@Override
