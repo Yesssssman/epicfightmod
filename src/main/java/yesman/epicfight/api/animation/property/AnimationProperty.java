@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 
 import com.google.common.collect.Maps;
 import com.google.gson.JsonElement;
+import com.ibm.icu.impl.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
 
@@ -110,7 +111,7 @@ public abstract class AnimationProperty<T> {
 		/**
 		 * You can modify the playback speed of the animation.
 		 */
-		public static final StaticAnimationProperty<PlaybackTimeModifier> PLAY_SPEED_MODIFIER = new StaticAnimationProperty<PlaybackTimeModifier> ();
+		public static final StaticAnimationProperty<PlaybackSppedModifier> PLAY_SPEED_MODIFIER = new StaticAnimationProperty<PlaybackSppedModifier> ();
 		
 		/**
 		 * You can modify the playback speed of the animation.
@@ -273,7 +274,12 @@ public abstract class AnimationProperty<T> {
 	}
 	
 	@FunctionalInterface
+	public interface PlaybackSppedModifier {
+		float modify(DynamicAnimation self, LivingEntityPatch<?> entitypatch, float speed, float prevElapsedTime, float elapsedTime);
+	}
+	
+	@FunctionalInterface
 	public interface PlaybackTimeModifier {
-		float modify(DynamicAnimation self, LivingEntityPatch<?> entitypatch, float speed, float elapsedTime);
+		Pair<Float, Float> modify(DynamicAnimation self, LivingEntityPatch<?> entitypatch, float speed, float prevElapsedTime, float elapsedTime);
 	}
 }

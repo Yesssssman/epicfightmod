@@ -117,9 +117,6 @@ dependencies {
   	// at runtime, use the full JEI jar for Forge
   	runtimeOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}"))
     
-    //compileOnly(fg.deobf("curse.maven:framework-549225:5180972"))
-    //compileOnly(fg.deobf("curse.maven:controllable-317269:4598985"))
-    
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }
 

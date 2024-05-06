@@ -175,14 +175,6 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 			this.currentWorkingModid = null;
 		});
 		
-		this.animationRegistry.values().stream().reduce(Lists.<StaticAnimation>newArrayList(), (list, anim) -> {
-			list.addAll(anim.getClipHolders());
-			return list;
-		}, (list1, list2) -> {
-			list1.addAll(list2);
-			return list1;
-		}).forEach(StaticAnimation::postInit);
-		
 		return super.prepare(resourceManager, profilerIn);
 	}
 	
@@ -212,15 +204,19 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		
 		SkillManager.reloadAllSkillsAnimations();
 		
-		if (EpicFightMod.isPhysicalClient()) {
-			this.animationRegistry.values().stream().reduce(Lists.<StaticAnimation>newArrayList(), (list, anim) -> {
-				list.addAll(anim.getClipHolders());
-				return list;
-			}, (list1, list2) -> {
-				list1.addAll(list2);
-				return list1;
-			}).forEach(AnimationManager::readAnimationProperties);
-		}
+		this.animationRegistry.values().stream().reduce(Lists.<StaticAnimation>newArrayList(), (list, anim) -> {
+			list.addAll(anim.getClipHolders());
+			return list;
+		}, (list1, list2) -> {
+			list1.addAll(list2);
+			return list1;
+		}).forEach((animation) -> {
+			animation.postInit();
+			
+			if (EpicFightMod.isPhysicalClient()) {
+				AnimationManager.readAnimationProperties(animation);
+			}
+		});
 	}
 	
 	public static ResourceLocation getAnimationDataFileLocation(ResourceLocation location) {

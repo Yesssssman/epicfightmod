@@ -1,5 +1,8 @@
 package yesman.epicfight.api.animation;
 
+import com.ibm.icu.impl.Pair;
+
+import yesman.epicfight.api.animation.property.AnimationProperty.PlaybackSppedModifier;
 import yesman.epicfight.api.animation.property.AnimationProperty.PlaybackTimeModifier;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
@@ -23,17 +26,19 @@ public class AnimationPlayer {
 		this.prevElapsedTime = this.elapsedTime;
 		
 		float playbackSpeed = this.getAnimation().getPlaySpeed(entitypatch);
-		PlaybackTimeModifier playSpeedModifier = this.getAnimation().getRealAnimation().getProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER).orElse(null);
+		PlaybackSppedModifier playSpeedModifier = this.getAnimation().getRealAnimation().getProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER).orElse(null);
 		
 		if (playSpeedModifier != null) {
-			playbackSpeed = playSpeedModifier.modify(this.getAnimation(), entitypatch, playbackSpeed, this.elapsedTime);
+			playbackSpeed = playSpeedModifier.modify(this.getAnimation(), entitypatch, playbackSpeed, this.prevElapsedTime, this.elapsedTime);
 		}
 		
 		this.elapsedTime += EpicFightOptions.A_TICK * playbackSpeed * (this.isReversed() && this.getAnimation().canBePlayedReverse() ? -1.0F : 1.0F);
 		PlaybackTimeModifier playTimeModifier = this.getAnimation().getRealAnimation().getProperty(StaticAnimationProperty.ELAPSED_TIME_MODIFIER).orElse(null);
 		
 		if (playTimeModifier != null) {
-			this.elapsedTime = playTimeModifier.modify(this.getAnimation(), entitypatch, playbackSpeed, this.elapsedTime);
+			Pair<Float, Float> time = playTimeModifier.modify(this.getAnimation(), entitypatch, playbackSpeed, this.prevElapsedTime, this.elapsedTime);
+			this.prevElapsedTime = time.first;
+			this.elapsedTime = time.second;
 		}
 		
 		if (this.elapsedTime >= this.play.getTotalTime()) {
