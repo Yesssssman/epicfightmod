@@ -18,6 +18,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.reflect.TypeToken;
+import com.ibm.icu.impl.Pair;
 
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.util.GsonHelper;
@@ -80,18 +81,18 @@ public class ClientAnimationDataReader {
 
 			multilayerAnimation.addProperty(ClientAnimationProperties.LAYER_TYPE, this.multilayerInfo.layerType);
 			multilayerAnimation.addProperty(ClientAnimationProperties.PRIORITY, this.multilayerInfo.priority);
-			multilayerAnimation.addProperty(StaticAnimationProperty.ELAPSED_TIME_MODIFIER, (self, entitypatch, speed, elapsedTime) -> {
+			multilayerAnimation.addProperty(StaticAnimationProperty.ELAPSED_TIME_MODIFIER, (self, entitypatch, speed, prevElapsedTime, elapsedTime) -> {
 				Layer baseLayer = entitypatch.getClientAnimator().baseLayer;
 				
 				if (baseLayer.animationPlayer.getAnimation().getRealAnimation() != animation) {
-					return elapsedTime;
+					return Pair.of(prevElapsedTime, elapsedTime);
 				}
 				
 				if (!self.isStaticAnimation() && baseLayer.animationPlayer.getAnimation().isStaticAnimation()) {
-					return elapsedTime + speed;
+					return Pair.of(prevElapsedTime + speed, elapsedTime + speed);
 				}
 				
-				return baseLayer.animationPlayer.getElapsedTime();
+				return Pair.of(baseLayer.animationPlayer.getPrevElapsedTime(), baseLayer.animationPlayer.getElapsedTime());
 			});
 			
 			animation.addProperty(ClientAnimationProperties.MULTILAYER_ANIMATION, multilayerAnimation);

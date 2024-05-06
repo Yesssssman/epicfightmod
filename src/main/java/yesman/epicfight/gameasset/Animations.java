@@ -558,7 +558,7 @@ public class Animations {
 		BIPED_DRINK = new MirrorAnimation(0.35F, true, "biped/living/drink", "biped/living/drink_mainhand", "biped/living/drink_offhand", biped).addProperty(StaticAnimationProperty.FIXED_HEAD_ROTATION, true);
 		BIPED_EAT = new MirrorAnimation(0.35F, true, "biped/living/eat", "biped/living/eat_mainhand", "biped/living/eat_offhand", biped).addProperty(StaticAnimationProperty.FIXED_HEAD_ROTATION, true);
 		BIPED_SPYGLASS_USE = new MirrorAnimation(0.15F, true, "biped/living/spyglass", "biped/living/spyglass_mainhand", "biped/living/spyglass_offhand", biped)
-				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, (self, entitypatch, speed, elapsedTime) -> {
+				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, (self, entitypatch, speed, prevElapsedTime, elapsedTime) -> {
 					if (self instanceof LinkAnimation) {
 						return speed;
 					}
@@ -1016,7 +1016,7 @@ public class Animations {
 					transformSheet.readFrom(correctedCoord);
 				})
 				.addProperty(ActionAnimationProperty.COORD_SET_TICK, null)
-				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, (self, entitypatch, speed, elapsedTime) -> {
+				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, (self, entitypatch, speed, prevElapsedTime, elapsedTime) -> {
 					if (0.2F > elapsedTime) {
 						if (entitypatch instanceof PlayerPatch<?> playerpatch) {
 							SkillContainer skill = playerpatch.getSkill(EpicFightSkills.METEOR_STRIKE);
@@ -1679,7 +1679,7 @@ public class Animations {
 				.addProperty(ActionAnimationProperty.COORD_SET_TICK, null)
 				.addProperty(ActionAnimationProperty.MOVE_VERTICAL, false)
 				.addProperty(StaticAnimationProperty.POSE_MODIFIER, Animations.ReusableSources.COMBO_ATTACK_DIRECTION_MODIFIER)
-				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, (self, entitypatch, speed, elapsedTime) -> {
+				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, (self, entitypatch, speed, prevElapsedTime, elapsedTime) -> {
 					if (elapsedTime < 1.05F) {
 						if (entitypatch instanceof PlayerPatch<?> playerpatch) {
 							int chargingPower = SteelWhirlwindSkill.getChargingPower(playerpatch.getSkill(SkillSlots.WEAPON_INNATE));
@@ -2071,9 +2071,9 @@ public class Animations {
 			shoulderR.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(xRot)), OpenMatrix4f::mulAsOriginFront);
 		};
 		
-		public static final AnimationProperty.PlaybackTimeModifier CONSTANT_ONE = (self, entitypatch, speed, elapsedTime) -> 1.0F;
+		public static final AnimationProperty.PlaybackSppedModifier CONSTANT_ONE = (self, entitypatch, speed, prevElapsedTime, elapsedTime) -> 1.0F;
 		
-		public static final AnimationProperty.PlaybackTimeModifier CHARGING = (self, entitypatch, speed, elapsedTime) -> {
+		public static final AnimationProperty.PlaybackSppedModifier CHARGING = (self, entitypatch, speed, prevElapsedTime, elapsedTime) -> {
 			if (self instanceof LinkAnimation) {
 				return 1.0F;
 			} else {

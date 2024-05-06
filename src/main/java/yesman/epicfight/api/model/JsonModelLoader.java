@@ -392,7 +392,7 @@ public class JsonModelLoader {
 					root = false;
 					continue;
 				} else {
-					EpicFightMod.LOGGER.warn("[EpicFightMod] Can't find the joint " + name + " in the animation file, " + animation);
+					EpicFightMod.LOGGER.debug("[EpicFightMod] No joint named " + name + " in " + animation);
 					continue;
 				}
 			}
