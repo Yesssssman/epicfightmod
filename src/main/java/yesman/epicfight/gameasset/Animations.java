@@ -2071,9 +2071,9 @@ public class Animations {
 			shoulderR.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(xRot)), OpenMatrix4f::mulAsOriginFront);
 		};
 		
-		public static final AnimationProperty.PlaybackSppedModifier CONSTANT_ONE = (self, entitypatch, speed, prevElapsedTime, elapsedTime) -> 1.0F;
+		public static final AnimationProperty.PlaybackSpeedModifier CONSTANT_ONE = (self, entitypatch, speed, prevElapsedTime, elapsedTime) -> 1.0F;
 		
-		public static final AnimationProperty.PlaybackSppedModifier CHARGING = (self, entitypatch, speed, prevElapsedTime, elapsedTime) -> {
+		public static final AnimationProperty.PlaybackSpeedModifier CHARGING = (self, entitypatch, speed, prevElapsedTime, elapsedTime) -> {
 			if (self instanceof LinkAnimation) {
 				return 1.0F;
 			} else {

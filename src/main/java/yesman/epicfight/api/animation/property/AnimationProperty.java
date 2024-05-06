@@ -111,7 +111,7 @@ public abstract class AnimationProperty<T> {
 		/**
 		 * You can modify the playback speed of the animation.
 		 */
-		public static final StaticAnimationProperty<PlaybackSppedModifier> PLAY_SPEED_MODIFIER = new StaticAnimationProperty<PlaybackSppedModifier> ();
+		public static final StaticAnimationProperty<PlaybackSpeedModifier> PLAY_SPEED_MODIFIER = new StaticAnimationProperty<PlaybackSpeedModifier> ();
 		
 		/**
 		 * You can modify the playback speed of the animation.
@@ -274,7 +274,7 @@ public abstract class AnimationProperty<T> {
 	}
 	
 	@FunctionalInterface
-	public interface PlaybackSppedModifier {
+	public interface PlaybackSpeedModifier {
 		float modify(DynamicAnimation self, LivingEntityPatch<?> entitypatch, float speed, float prevElapsedTime, float elapsedTime);
 	}
 	

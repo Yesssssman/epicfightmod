@@ -2,7 +2,7 @@ package yesman.epicfight.api.animation;
 
 import com.ibm.icu.impl.Pair;
 
-import yesman.epicfight.api.animation.property.AnimationProperty.PlaybackSppedModifier;
+import yesman.epicfight.api.animation.property.AnimationProperty.PlaybackSpeedModifier;
 import yesman.epicfight.api.animation.property.AnimationProperty.PlaybackTimeModifier;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
@@ -26,7 +26,7 @@ public class AnimationPlayer {
 		this.prevElapsedTime = this.elapsedTime;
 		
 		float playbackSpeed = this.getAnimation().getPlaySpeed(entitypatch);
-		PlaybackSppedModifier playSpeedModifier = this.getAnimation().getRealAnimation().getProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER).orElse(null);
+		PlaybackSpeedModifier playSpeedModifier = this.getAnimation().getRealAnimation().getProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER).orElse(null);
 		
 		if (playSpeedModifier != null) {
 			playbackSpeed = playSpeedModifier.modify(this.getAnimation(), entitypatch, playbackSpeed, this.prevElapsedTime, this.elapsedTime);
