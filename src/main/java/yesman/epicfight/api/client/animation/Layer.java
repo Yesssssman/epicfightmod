@@ -50,7 +50,7 @@ public class Layer {
 		nextAnimation.begin(entitypatch);
 		
 		if (!nextAnimation.isMetaAnimation()) {
-			this.setLinkAnimation(nextAnimation, entitypatch, entitypatch.getClientAnimator().getPose(0.0F), convertTimeModifier);
+			this.setLinkAnimation(nextAnimation, entitypatch, entitypatch.getClientAnimator().getPoseOnLink(0.0F), convertTimeModifier);
 			this.linkAnimation.putOnPlayer(this.animationPlayer);
 			entitypatch.updateEntityState();
 			this.nextAnimation = nextAnimation;
@@ -204,7 +204,8 @@ public class Layer {
 		
 		sb.append(this.isBaseLayer() ? " Base Layer(" + ((BaseLayer)this).baseLayerPriority + ") : " : " Composite Layer : ");
 		sb.append(this.animationPlayer.getAnimation() + " ");
-		sb.append(this.animationPlayer.getElapsedTime() + " ");
+		sb.append(", elapsed time: " + this.animationPlayer.getElapsedTime() + " ");
+		sb.append(", total time: " + this.animationPlayer.getAnimation().getTotalTime() + " ");
 		
 		return sb.toString();
 	}
@@ -229,9 +230,9 @@ public class Layer {
 		
 		@Override
 		public void playAnimation(StaticAnimation nextAnimation, LivingEntityPatch<?> entitypatch, float convertTimeModifier) {
-			this.baseLayerPriority = nextAnimation.getPriority();
 			this.offCompositeLayerLowerThan(entitypatch, nextAnimation);
 			super.playAnimation(nextAnimation, entitypatch, convertTimeModifier);
+			this.baseLayerPriority = nextAnimation.getPriority();
 		}
 		
 		@Override

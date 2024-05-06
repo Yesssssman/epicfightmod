@@ -1606,7 +1606,7 @@ public class DatapackEditScreen extends Screen {
 						throw new IllegalStateException("Item type not specified");
 					}
 					
-					if (!packEntry.getValue().contains("type")) {
+					if (sItemType == ItemType.WEAPON.toString() && !packEntry.getValue().contains("type")) {
 						throw new IllegalStateException("Weapon type not specified");
 					}
 					

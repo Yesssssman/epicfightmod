@@ -134,6 +134,8 @@ public class AttributeScreen extends Screen {
 			this.stylesGrid.setValue(packImporter);
 			this.attributesGrid._setActive(false);
 		} else if (itemType == ItemType.ARMOR) {
+			this.styles.add(PackEntry.of("armor", CompoundTag::new));
+			
 			this.attributesGrid = Grid.builder(this, parentScreen.getMinecraft())
 										.xy1(20, 60)
 										.xy2(20, 50)
@@ -145,7 +147,7 @@ public class AttributeScreen extends Screen {
 										.addColumn(Grid.combo("attribute", ARMOR_ATTRIBUTES)
 														.toDisplayText(ParseUtil::snakeToSpacedCamel)
 														.valueChanged((event) -> {
-															CompoundTag attributesCompound = this.styles.get(this.stylesGrid.getRowposition()).getValue();
+															CompoundTag attributesCompound = this.styles.get(0).getValue();
 															Tag tag = attributesCompound.get(ParseUtil.nullParam(event.prevValue));
 															
 															attributesCompound.remove(ParseUtil.nullParam(event.prevValue));
@@ -155,28 +157,29 @@ public class AttributeScreen extends Screen {
 										.addColumn(Grid.editbox("amount")
 														.editWidgetCreated((editbox) -> editbox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble)))
 														.valueChanged((event) -> {
-															CompoundTag attributesCompound = this.styles.get(this.stylesGrid.getRowposition()).getValue();
+															CompoundTag attributesCompound = this.styles.get(0).getValue();
 															attributesCompound.put(event.grid.getValue(event.rowposition, "attribute"), StringTag.valueOf(ParseUtil.nullParam(event.postValue)));
 														})
 														.width(150))
 										.pressAdd((grid, button) -> {
-											this.styles.get(this.stylesGrid.getRowposition()).getValue().put("", StringTag.valueOf(""));
+											this.styles.get(0).getValue().put("", StringTag.valueOf(""));
 											int rowposition = grid.addRow();
 											grid.setGridFocus(rowposition, "attribute");
 										})
 										.pressRemove((grid, button) -> {
-											this.styles.get(this.stylesGrid.getRowposition()).getValue().remove(grid.getValue(grid.getRowposition(), "attribute"));
+											this.styles.get(0).getValue().remove(grid.getValue(grid.getRowposition(), "attribute"));
 											grid.removeRow((removedRow) -> {});
 										})
 										.build();
 			
+			this.styles.add(PackEntry.of("attributes", CompoundTag::new));
+			
 			Grid.PackImporter packImporter = new Grid.PackImporter();
 			
 			for (Map.Entry<String, Tag> entry : rootTag.tags.entrySet()) {
-				this.styles.add(PackEntry.of(entry.getKey(), () -> (CompoundTag)entry.getValue()));
-				
 				packImporter.newRow();
-				packImporter.newValue("style", Style.ENUM_MANAGER.get(entry.getKey()));
+				packImporter.newValue("attribute", entry.getKey());
+				packImporter.newValue("amount", entry.getValue().getAsString());
 			}
 			
 			this.attributesGrid.setValue(packImporter);
@@ -192,43 +195,47 @@ public class AttributeScreen extends Screen {
 		}
 		
 		this.attributesGrid.resize(this.getRectangle());
-		this.addRenderableWidget(new Static(this.font, 120, 60, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.attributes")));
+		this.addRenderableWidget(new Static(this.font, this.itemType == ItemType.WEAPON ? 120 : 20, 60, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.attributes")));
 		this.addRenderableWidget(this.attributesGrid);
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {
-				if (this.itemType == ItemType.WEAPON) {
-					Set<String> styles = Sets.newHashSet();
-					
-					for (PackEntry<String, CompoundTag> entry : this.styles) {
-						if (styles.contains(entry.getKey())) {
-							this.minecraft.setScreen(new MessageScreen<>("Save Failed", "Unable to save because of duplicated style: " + entry.getKey(), this, (button2) -> {
-								this.minecraft.setScreen(this);
-							}, 180, 90));
-							return;
-						}
-						styles.add(entry.getKey());
+			if (this.itemType == ItemType.WEAPON) {
+				Set<String> styles = Sets.newHashSet();
+				
+				for (PackEntry<String, CompoundTag> entry : this.styles) {
+					if (styles.contains(entry.getKey())) {
+						this.minecraft.setScreen(new MessageScreen<>("Save Failed", "Unable to save because of duplicated style: " + entry.getKey(), this, (button2) -> {
+							this.minecraft.setScreen(this);
+						}, 180, 90));
+						return;
 					}
-					
-					this.rootTag.tags.clear();
-					
-					for (PackEntry<String, CompoundTag> entry : this.styles) {
-						this.rootTag.put(entry.getKey(), entry.getValue());
-					}
-				} else if (this.itemType == ItemType.ARMOR) {
-					
+					styles.add(entry.getKey());
 				}
 				
-				this.onClose();
-			}).pos(this.width / 2 - 162, this.height - 32).size(160, 21).build());
+				this.rootTag.tags.clear();
+				
+				for (PackEntry<String, CompoundTag> entry : this.styles) {
+					this.rootTag.put(entry.getKey(), entry.getValue());
+				}
+			} else if (this.itemType == ItemType.ARMOR) {
+				CompoundTag attributesTag = this.styles.get(0).getValue();
+				
+				for (Map.Entry<String, Tag> tag : attributesTag.tags.entrySet()) {
+					this.rootTag.put(tag.getKey(), tag.getValue());
+				}
+			}
+			
+			this.onClose();
+		}).pos(this.width / 2 - 162, this.height - 32).size(160, 21).build());
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, (button) -> {
-				this.minecraft.setScreen(new MessageScreen<>("", "Do you want to quit without saving changes?", this,
-															(button2) -> {
-																this.onClose();
-															}, (button2) -> {
-																this.minecraft.setScreen(this);
-															}, 180, 70));
-			}).pos(this.width / 2 + 2, this.height - 32).size(160, 21).build());
+			this.minecraft.setScreen(new MessageScreen<>("", "Do you want to quit without saving changes?", this,
+														(button2) -> {
+															this.onClose();
+														}, (button2) -> {
+															this.minecraft.setScreen(this);
+														}, 180, 70));
+		}).pos(this.width / 2 + 2, this.height - 32).size(160, 21).build());
 	}
 	
 	@Override

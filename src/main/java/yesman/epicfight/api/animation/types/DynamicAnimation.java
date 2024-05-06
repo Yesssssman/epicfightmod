@@ -18,6 +18,8 @@ import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.property.AnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.PlaybackSpeedModifier;
+import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.types.EntityState.StateFactor;
 import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
@@ -59,11 +61,34 @@ public abstract class DynamicAnimation {
 			pose = Animations.DUMMY_ANIMATION.getPoseByTime(entitypatch, 0.0F, 1.0F);
 		}
 		
+		boolean skipFirstPose = convertTimeModifier < 0.0F;
 		float totalTime = convertTimeModifier >= 0.0F ? convertTimeModifier + this.convertTime : this.convertTime;
-		boolean isNeg = convertTimeModifier < 0.0F;
-		float nextStart = isNeg ? -convertTimeModifier : 0.0F;
+		float playbackSpeed = this.getPlaySpeed(entitypatch);
+		PlaybackSpeedModifier playSpeedModifier = this.getRealAnimation().getProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER).orElse(null);
 		
-		if (isNeg) {
+		if (playSpeedModifier != null) {
+			playbackSpeed = playSpeedModifier.modify(this, entitypatch, playbackSpeed, 0.0F, playbackSpeed);
+		}
+		
+		float progressionPerTick = playbackSpeed * EpicFightOptions.A_TICK;
+		float previousTotalTime = 0.0F;
+		boolean insertFirstPose = false;
+		
+		if (totalTime <= progressionPerTick) {
+			convertTimeModifier -= (progressionPerTick - totalTime);
+			
+			if (!skipFirstPose) {
+				previousTotalTime = totalTime;
+				insertFirstPose = true;
+			}
+			
+			totalTime = progressionPerTick + 0.001F;
+		}
+		
+		float nextStart = 0.0F;
+		
+		if (convertTimeModifier < 0.0F) {
+			nextStart -= convertTimeModifier;
 			dest.startsAt = nextStart;
 		}
 		
@@ -80,8 +105,19 @@ public abstract class DynamicAnimation {
 		joint2.removeIf((jointName) -> !this.isJointEnabled(entitypatch, jointName));
 		joint1.addAll(joint2);
 		
-		for (String jointName : joint1) {
-			if (data1.containsKey(jointName) && data2.containsKey(jointName)) {
+		if (insertFirstPose) {
+			Map<String, JointTransform> firstPose = this.getPoseByTime(entitypatch, 0.0F, 0.0F).getJointTransformData();
+			
+			for (String jointName : joint1) {
+				Keyframe[] keyframes = new Keyframe[3];
+				keyframes[0] = new Keyframe(0.0F, data1.get(jointName));
+				keyframes[1] = new Keyframe(previousTotalTime, firstPose.get(jointName));
+				keyframes[2] = new Keyframe(totalTime, data2.get(jointName));
+				TransformSheet sheet = new TransformSheet(keyframes);
+				dest.getAnimationClip().addJointTransform(jointName, sheet);
+			}
+		} else {
+			for (String jointName : joint1) {
 				Keyframe[] keyframes = new Keyframe[2];
 				keyframes[0] = new Keyframe(0.0F, data1.get(jointName));
 				keyframes[1] = new Keyframe(totalTime, data2.get(jointName));
@@ -144,7 +180,7 @@ public abstract class DynamicAnimation {
 	}
 	
 	public float getTotalTime() {
-		return this.getAnimationClip().getClipTime() - 0.001F;
+		return this.getAnimationClip().getClipTime();
 	}
 	
 	public float getConvertTime() {
