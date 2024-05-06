@@ -157,6 +157,8 @@ public class ActionAnimation extends MainFrameAnimation {
 	
 	@Override
 	public void setLinkAnimation(DynamicAnimation fromAnimation, Pose pose1, boolean isOnSameLayer, float convertTimeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
+		dest.resetNextStartTime();
+		
 		float totalTime = convertTimeModifier >= 0.0F ? convertTimeModifier + this.convertTime : this.convertTime;
 		float playbackSpeed = this.getPlaySpeed(entitypatch);
 		PlaybackSpeedModifier playSpeedModifier = this.getRealAnimation().getProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER).orElse(null);

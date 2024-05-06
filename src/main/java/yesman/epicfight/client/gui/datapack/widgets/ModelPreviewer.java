@@ -593,14 +593,14 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 				
 				if (!nextAnimation.isMetaAnimation()) {
 					this.setLinkAnimation(nextAnimation, entitypatch, lastPose, convertTimeModifier);
-					this.linkAnimation.putOnPlayer(this.animationPlayer);
+					this.linkAnimation.putOnPlayer(this.animationPlayer, entitypatch);
 					this.nextAnimation = nextAnimation;
 				}
 			}
 			
 			public void playAnimationInstant(DynamicAnimation nextAnimation, LivingEntityPatch<?> entitypatch) {
 				this.resume();
-				nextAnimation.putOnPlayer(this.animationPlayer);
+				nextAnimation.putOnPlayer(this.animationPlayer, entitypatch);
 				this.nextAnimation = null;
 			}
 			
@@ -645,7 +645,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 				
 				if (!this.paused && this.animationPlayer.isEnd()) {
 					if (this.nextAnimation != null) {
-						this.nextAnimation.putOnPlayer(this.animationPlayer);
+						this.nextAnimation.putOnPlayer(this.animationPlayer, entitypatch);
 						this.nextAnimation = null;
 					} else {
 						if (this.animationPlayer.getAnimation() instanceof LayerOffAnimation) {
@@ -696,7 +696,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 				
 				if (!nextAnimation.isMetaAnimation()) {
 					this.setLinkAnimation(nextAnimation, entitypatch, lastPose, convertTimeModifier);
-					this.linkAnimation.putOnPlayer(this.animationPlayer);
+					this.linkAnimation.putOnPlayer(this.animationPlayer, entitypatch);
 					entitypatch.updateEntityState();
 					this.nextAnimation = nextAnimation;
 				}
@@ -705,7 +705,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 			@Override
 			public void playAnimationInstant(DynamicAnimation nextAnimation, LivingEntityPatch<?> entitypatch) {
 				this.resume();
-				nextAnimation.putOnPlayer(this.animationPlayer);
+				nextAnimation.putOnPlayer(this.animationPlayer, entitypatch);
 				this.nextAnimation = null;
 			}
 			
@@ -715,7 +715,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 				
 				if (!nextAnimation.isMetaAnimation()) {
 					this.concurrentLinkAnimation.acceptFrom(this.animationPlayer.getAnimation().getRealAnimation(), nextAnimation, this.animationPlayer.getElapsedTime());
-					this.concurrentLinkAnimation.putOnPlayer(this.animationPlayer);
+					this.concurrentLinkAnimation.putOnPlayer(this.animationPlayer, entitypatch);
 					this.nextAnimation = nextAnimation;
 				}
 			}
@@ -730,7 +730,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 				
 				if (!this.paused && this.animationPlayer.isEnd()) {
 					if (this.nextAnimation != null) {
-						this.nextAnimation.putOnPlayer(this.animationPlayer);
+						this.nextAnimation.putOnPlayer(this.animationPlayer, entitypatch);
 						this.nextAnimation = null;
 					} else {
 						if (this.animationPlayer.getAnimation() instanceof LayerOffAnimation) {

@@ -32,7 +32,7 @@ public class ServerAnimator extends Animator {
 		this.animationPlayer.getAnimation().end(this.entitypatch, nextAnimation, this.animationPlayer.isEnd());
 		nextAnimation.begin(this.entitypatch);
 		nextAnimation.setLinkAnimation(this.animationPlayer.getAnimation(), nextAnimation.getPoseByTime(this.entitypatch, 0.0F, 0.0F), true, modifyTime, this.entitypatch, this.linkAnimation);
-		this.linkAnimation.putOnPlayer(this.animationPlayer);
+		this.linkAnimation.putOnPlayer(this.animationPlayer, this.entitypatch);
 		this.entitypatch.updateEntityState();
 		this.nextPlaying = nextAnimation;
 	}
@@ -42,7 +42,7 @@ public class ServerAnimator extends Animator {
 		this.pause = false;
 		this.animationPlayer.getAnimation().end(this.entitypatch, nextAnimation, this.animationPlayer.isEnd());
 		nextAnimation.begin(this.entitypatch);
-		nextAnimation.putOnPlayer(this.animationPlayer);
+		nextAnimation.putOnPlayer(this.animationPlayer, this.entitypatch);
 		this.entitypatch.updateEntityState();
 	}
 	
@@ -73,14 +73,14 @@ public class ServerAnimator extends Animator {
 			this.animationPlayer.getAnimation().end(this.entitypatch, nextAnimation, true);
 			
 			if (this.nextPlaying == null) {
-				Animations.DUMMY_ANIMATION.putOnPlayer(this.animationPlayer);
+				Animations.DUMMY_ANIMATION.putOnPlayer(this.animationPlayer, this.entitypatch);
 				this.pause = true;
 			} else {
 				if (!(this.animationPlayer.getAnimation() instanceof LinkAnimation) && !(this.nextPlaying instanceof LinkAnimation)) {
 					this.nextPlaying.begin(this.entitypatch);
 				}
 				
-				this.nextPlaying.putOnPlayer(this.animationPlayer);
+				this.nextPlaying.putOnPlayer(this.animationPlayer, this.entitypatch);
 				this.nextPlaying = null;
 			}
 		}

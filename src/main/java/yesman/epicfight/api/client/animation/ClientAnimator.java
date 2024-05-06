@@ -152,13 +152,6 @@ public class ClientAnimator extends Animator {
 			this.baseLayer.playAnimation(this.getLivingMotion(this.entitypatch.currentLivingMotion), this.entitypatch, 0.0F);
 		}
 		
-		// Layer debugging
-		/**
-		for (Layer layer : this.getAllLayers()) {
-			System.out.println(layer);
-		}
-		System.out.println();
-		**/
 		if (!this.compareCompositeMotion(this.entitypatch.currentCompositeMotion)) {
 			/* Turns off the multilayer of the base layer */
 			this.getLivingMotion(this.currentCompositeMotion).getProperty(ClientAnimationProperties.MULTILAYER_ANIMATION).ifPresent((multilayerAnimation) -> {
@@ -185,6 +178,13 @@ public class ClientAnimator extends Animator {
 		
 		this.currentMotion = this.entitypatch.currentLivingMotion;
 		this.currentCompositeMotion = this.entitypatch.currentCompositeMotion;
+		/**
+		// Layer debugging
+		for (Layer layer : this.getAllLayers()) {
+			System.out.println(layer);
+		}
+		System.out.println();
+		**/
 	}
 	
 	@Override

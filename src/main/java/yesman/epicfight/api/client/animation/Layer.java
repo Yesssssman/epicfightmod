@@ -51,7 +51,7 @@ public class Layer {
 		
 		if (!nextAnimation.isMetaAnimation()) {
 			this.setLinkAnimation(nextAnimation, entitypatch, entitypatch.getClientAnimator().getPoseOnLink(0.0F), convertTimeModifier);
-			this.linkAnimation.putOnPlayer(this.animationPlayer);
+			this.linkAnimation.putOnPlayer(this.animationPlayer, entitypatch);
 			entitypatch.updateEntityState();
 			this.nextAnimation = nextAnimation;
 		}
@@ -65,7 +65,7 @@ public class Layer {
 		this.resume();
 		
 		nextAnimation.begin(entitypatch);
-		nextAnimation.putOnPlayer(this.animationPlayer);
+		nextAnimation.putOnPlayer(this.animationPlayer, entitypatch);
 		entitypatch.updateEntityState();
 		this.nextAnimation = null;
 	}
@@ -77,7 +77,7 @@ public class Layer {
 		
 		if (!nextAnimation.isMetaAnimation()) {
 			this.concurrentLinkAnimation.acceptFrom(this.animationPlayer.getAnimation().getRealAnimation(), nextAnimation, this.animationPlayer.getElapsedTime());
-			this.concurrentLinkAnimation.putOnPlayer(this.animationPlayer);
+			this.concurrentLinkAnimation.putOnPlayer(this.animationPlayer, entitypatch);
 			entitypatch.updateEntityState();
 			this.nextAnimation = nextAnimation;
 		}
@@ -115,7 +115,7 @@ public class Layer {
 					this.nextAnimation.begin(entitypatch);
 				}
 				
-				this.nextAnimation.putOnPlayer(this.animationPlayer);
+				this.nextAnimation.putOnPlayer(this.animationPlayer, entitypatch);
 				this.nextAnimation = null;
 			} else {
 				if (this.animationPlayer.getAnimation() instanceof LayerOffAnimation) {
@@ -198,12 +198,9 @@ public class Layer {
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 		
-		if (!this.isBaseLayer()) {
-			sb.append(this.priority);
-		}
-		
-		sb.append(this.isBaseLayer() ? " Base Layer(" + ((BaseLayer)this).baseLayerPriority + ") : " : " Composite Layer : ");
+		sb.append(this.isBaseLayer() ? "Base Layer(" + ((BaseLayer)this).baseLayerPriority + ") : " : " Composite Layer(" + this.priority + ") : ");
 		sb.append(this.animationPlayer.getAnimation() + " ");
+		sb.append(", prev elapsed time: " + this.animationPlayer.getPrevElapsedTime() + " ");
 		sb.append(", elapsed time: " + this.animationPlayer.getElapsedTime() + " ");
 		sb.append(", total time: " + this.animationPlayer.getAnimation().getTotalTime() + " ");
 		
@@ -243,7 +240,7 @@ public class Layer {
 			
 			if (!nextAnimation.isMetaAnimation()) {
 				this.concurrentLinkAnimation.acceptFrom(this.animationPlayer.getAnimation().getRealAnimation(), nextAnimation, this.animationPlayer.getElapsedTime());
-				this.concurrentLinkAnimation.putOnPlayer(this.animationPlayer);
+				this.concurrentLinkAnimation.putOnPlayer(this.animationPlayer, entitypatch);
 				entitypatch.updateEntityState();
 				this.nextAnimation = nextAnimation;
 			}
@@ -251,7 +248,9 @@ public class Layer {
 		
 		@Override
 		public void update(LivingEntityPatch<?> entitypatch) {
+			//System.out.println("before update " + this);
 			super.update(entitypatch);
+			//System.out.println("after update " + this);
 			
 			for (Layer layer : this.compositeLayers.values()) {
 				layer.update(entitypatch);
@@ -271,7 +270,7 @@ public class Layer {
 		public void disableLayer(Priority priority) {
 			Layer layer = this.compositeLayers.get(priority);
 			layer.disabled = true;
-			Animations.DUMMY_ANIMATION.putOnPlayer(layer.animationPlayer);
+			layer.animationPlayer.setPlayAnimation(Animations.DUMMY_ANIMATION);
 		}
 		
 		public Layer getLayer(Priority priority) {

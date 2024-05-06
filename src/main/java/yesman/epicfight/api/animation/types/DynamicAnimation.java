@@ -61,6 +61,8 @@ public abstract class DynamicAnimation {
 			pose = Animations.DUMMY_ANIMATION.getPoseByTime(entitypatch, 0.0F, 1.0F);
 		}
 		
+		dest.resetNextStartTime();
+		
 		boolean skipFirstPose = convertTimeModifier < 0.0F;
 		float totalTime = convertTimeModifier >= 0.0F ? convertTimeModifier + this.convertTime : this.convertTime;
 		float playbackSpeed = this.getPlaySpeed(entitypatch);
@@ -127,8 +129,10 @@ public abstract class DynamicAnimation {
 		}
 	}
 	
-	public void putOnPlayer(AnimationPlayer player) {
-		player.setPlayAnimation(this);
+	public void putOnPlayer(AnimationPlayer animationPlayer, LivingEntityPatch<?> entitypatch) {
+		animationPlayer.setPlayAnimation(this);
+		animationPlayer.tick(entitypatch);
+		this.tick(entitypatch);
 	}
 	
 	public void begin(LivingEntityPatch<?> entitypatch) {}

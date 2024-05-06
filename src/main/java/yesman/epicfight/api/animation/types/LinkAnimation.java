@@ -133,6 +133,10 @@ public class LinkAnimation extends DynamicAnimation {
 		trnasforms.putAll(this.getTransfroms());
 	}
 	
+	public void resetNextStartTime() {
+		this.startsAt = 0.0F;
+	}
+	
 	@Override
 	public String toString() {
 		return "From " + this.fromAnimation + " to " + this.toAnimation;
