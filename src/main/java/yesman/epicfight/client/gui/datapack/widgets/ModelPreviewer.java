@@ -660,7 +660,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 			public Pose getEnabledPose(LivingEntityPatch<?> entitypatch, float partialTick) {
 				DynamicAnimation animation = this.animationPlayer.getAnimation();
 				Pose pose = animation.getRawPose(this.animationPlayer.getPrevElapsedTime() + (this.animationPlayer.getElapsedTime() - this.animationPlayer.getPrevElapsedTime()) * partialTick);
-				pose.removeJointIf((entry) -> !animation.isJointEnabled(entitypatch, entry.getKey()));
+				pose.removeJointIf((entry) -> !animation.hasTransformFor(entry.getKey()));
 				
 				return pose;
 			}
@@ -875,7 +875,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 				return;
 			}
 			
-			boolean isTrailInvisible = animPlayer.getAnimation() instanceof LinkAnimation || animPlayer.getElapsedTime() <= this.trailInfo.startTime;
+			boolean isTrailInvisible = animPlayer.getAnimation().isLinkAnimation() || animPlayer.getElapsedTime() <= this.trailInfo.startTime;
 			boolean isFirstTrail = this.visibleTrailEdges.isEmpty();
 			boolean needCorrection = (!isTrailInvisible && isFirstTrail);
 			

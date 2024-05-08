@@ -236,7 +236,6 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 				float headRotO = this.modelYRotO - this.original.yHeadRotO;
 				float headRot = this.modelYRot - this.original.yHeadRot;
 				float partialHeadRot = MathUtils.lerpBetween(headRotO, headRot, partialTicks);
-				
 				Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(-this.original.getXRot(), Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(partialHeadRot, Vec3f.Y_AXIS)).toQuaternion();
 				pose.getOrDefaultTransform("Head").frontResult(JointTransform.getRotation(headRotation), OpenMatrix4f::mul);
 			}

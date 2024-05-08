@@ -3,14 +3,17 @@ package yesman.epicfight.api.animation.types;
 import java.util.Optional;
 
 import net.minecraft.client.Minecraft;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.client.animation.Layer.Priority;
-import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
+import yesman.epicfight.api.client.animation.property.JointMaskEntry;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
+@OnlyIn(Dist.CLIENT)
 public class LayerOffAnimation extends DynamicAnimation {
 	private final AnimationClip animationClip = new AnimationClip();
 	private DynamicAnimation lastAnimation;
@@ -35,17 +38,15 @@ public class LayerOffAnimation extends DynamicAnimation {
 	@Override
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 		Pose lowerLayerPose = entitypatch.getClientAnimator().getComposedLayerPoseBelow(this.layerPriority, Minecraft.getInstance().getFrameTime());
-		return Pose.interpolatePose(this.lastPose, lowerLayerPose, time / this.getTotalTime());
+		Pose interpolatedPose = Pose.interpolatePose(this.lastPose, lowerLayerPose, time / this.getTotalTime());
+		interpolatedPose.removeJointIf((joint) -> !this.lastPose.getJointTransformData().containsKey(joint.getKey()));
+		
+		return interpolatedPose;
 	}
 	
 	@Override
-	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, String joint) {
-		return this.lastPose.getJointTransformData().containsKey(joint);
-	}
-	
-	@Override
-	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, String joint) {
-		return this.lastAnimation.getBindModifier(entitypatch, joint);
+	public Optional<JointMaskEntry> getJointMaskEntry(LivingEntityPatch<?> entitypatch, boolean useCurrentMotion) {
+		return this.lastAnimation.getJointMaskEntry(entitypatch, useCurrentMotion);
 	}
 	
 	@Override
@@ -70,5 +71,15 @@ public class LayerOffAnimation extends DynamicAnimation {
 	@Override
 	public AnimationClip getAnimationClip() {
 		return this.animationClip;
+	}
+	
+	@Override
+	public boolean hasTransformFor(String joint) {
+		return this.lastPose.getJointTransformData().containsKey(joint);
+	}
+	
+	@Override
+	public boolean isLinkAnimation() {
+		return true;
 	}
 }

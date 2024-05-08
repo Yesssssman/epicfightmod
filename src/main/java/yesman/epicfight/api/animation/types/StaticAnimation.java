@@ -28,7 +28,7 @@ import yesman.epicfight.api.animation.types.EntityState.StateFactor;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.animation.Layer.LayerType;
 import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
-import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
+import yesman.epicfight.api.client.animation.property.JointMaskEntry;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
 import yesman.epicfight.api.client.model.ItemSkin;
 import yesman.epicfight.api.client.model.ItemSkins;
@@ -222,21 +222,8 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 	}
 	
 	@Override
-	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, String joint) {
-		if (!entitypatch.isLogicalClient()) {
-			return super.isJointEnabled(entitypatch, joint);
-		} else {
-			return super.isJointEnabled(entitypatch, joint) && this.getProperty(ClientAnimationProperties.JOINT_MASK).map((bindModifier) -> {
-				return !bindModifier.isMasked(entitypatch.getClientAnimator().getLivingMotionFor(this), joint);
-			}).orElse(true);
-		}
-	}
-	
-	@Override
-	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, String joint) {
-		return this.getProperty(ClientAnimationProperties.JOINT_MASK).map((jointMaskEntry) -> {
-			return jointMaskEntry.getMask(entitypatch.getClientAnimator().getLivingMotionFor(this)).getBindModifier(joint);
-		}).orElse(null);
+	public Optional<JointMaskEntry> getJointMaskEntry(LivingEntityPatch<?> entitypatch, boolean useCurrentMotion) {
+		return this.getProperty(ClientAnimationProperties.JOINT_MASK);
 	}
 	
 	@Override
@@ -321,7 +308,7 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 	}
 	
 	@Override
-	public float getPlaySpeed(LivingEntityPatch<?> entitypatch) {
+	public float getPlaySpeed(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
 		return 1.0F;
 	}
 	
@@ -333,7 +320,6 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 	@Override
 	public String toString() {
 		String classPath = this.getClass().toString();
-		
 		return classPath.substring(classPath.lastIndexOf(".") + 1) + " " + this.getLocation();
 	}
 	

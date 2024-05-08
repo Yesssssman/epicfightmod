@@ -21,7 +21,9 @@ import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.PlaybackSpeedModifier;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.types.EntityState.StateFactor;
-import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
+import yesman.epicfight.api.client.animation.Layer;
+import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
+import yesman.epicfight.api.client.animation.property.JointMaskEntry;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.gameasset.Animations;
@@ -56,64 +58,66 @@ public abstract class DynamicAnimation {
 	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
 	}
 	
-	public void setLinkAnimation(final DynamicAnimation fromAnimation, Pose pose, boolean isOnSameLayer, float convertTimeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
+	public void setLinkAnimation(final DynamicAnimation fromAnimation, Pose startPose, boolean isOnSameLayer, float convertTimeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
 		if (!entitypatch.isLogicalClient()) {
-			pose = Animations.DUMMY_ANIMATION.getPoseByTime(entitypatch, 0.0F, 1.0F);
+			startPose = Animations.DUMMY_ANIMATION.getPoseByTime(entitypatch, 0.0F, 1.0F);
 		}
 		
 		dest.resetNextStartTime();
 		
-		boolean skipFirstPose = convertTimeModifier < 0.0F;
-		float totalTime = convertTimeModifier >= 0.0F ? convertTimeModifier + this.convertTime : this.convertTime;
-		float playbackSpeed = this.getPlaySpeed(entitypatch);
+		float playTime = this.getPlaySpeed(entitypatch, dest);
 		PlaybackSpeedModifier playSpeedModifier = this.getRealAnimation().getProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER).orElse(null);
 		
 		if (playSpeedModifier != null) {
-			playbackSpeed = playSpeedModifier.modify(this, entitypatch, playbackSpeed, 0.0F, playbackSpeed);
+			playTime = playSpeedModifier.modify(this, entitypatch, playTime, 0.0F, playTime);
 		}
 		
-		float progressionPerTick = playbackSpeed * EpicFightOptions.A_TICK;
-		float previousTotalTime = 0.0F;
-		boolean insertFirstPose = false;
+		playTime *= EpicFightOptions.A_TICK;
 		
-		if (totalTime <= progressionPerTick) {
-			convertTimeModifier -= (progressionPerTick - totalTime);
-			
-			if (!skipFirstPose) {
-				previousTotalTime = totalTime;
-				insertFirstPose = true;
-			}
-			
-			totalTime = progressionPerTick + 0.001F;
+		float linkTime = convertTimeModifier > 0.0F ? convertTimeModifier + this.convertTime : this.convertTime;
+		float totalTime = playTime;
+		
+		while (totalTime < linkTime) {
+			totalTime += playTime;
 		}
 		
-		float nextStart = 0.0F;
+		float nextStartTime = Math.max(0.0F, -convertTimeModifier);
+		nextStartTime += totalTime - linkTime;
 		
-		if (convertTimeModifier < 0.0F) {
-			nextStart -= convertTimeModifier;
-			dest.startsAt = nextStart;
-		}
-		
+		dest.setNextStartTime(nextStartTime);
 		dest.getTransfroms().clear();
 		dest.setTotalTime(totalTime);
 		dest.setConnectedAnimations(fromAnimation, this);
 		
-		Map<String, JointTransform> data1 = pose.getJointTransformData();
-		Map<String, JointTransform> data2 = this.getPoseByTime(entitypatch, nextStart, 1.0F).getJointTransformData();
-		
+		Map<String, JointTransform> data1 = startPose.getJointTransformData();
+		Map<String, JointTransform> data2 = this.getPoseByTime(entitypatch, nextStartTime, 0.0F).getJointTransformData();
 		Set<String> joint1 = new HashSet<> (isOnSameLayer ? data1.keySet() : Set.of());
-		joint1.removeIf((jointName) -> !fromAnimation.isJointEnabled(entitypatch, jointName));
 		Set<String> joint2 = new HashSet<> (data2.keySet());
-		joint2.removeIf((jointName) -> !this.isJointEnabled(entitypatch, jointName));
+		
+		if (entitypatch.isLogicalClient()) {
+			JointMaskEntry entry = fromAnimation.getJointMaskEntry(entitypatch, false).orElse(null);
+			JointMaskEntry entry2 = this.getJointMaskEntry(entitypatch, true).orElse(null);
+			
+			if (entry != null) {
+				joint1.removeIf((jointName) -> entry.isMasked(fromAnimation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
+						entitypatch.getClientAnimator().currentMotion() : entitypatch.getClientAnimator().currentCompositeMotion(), jointName));
+			}
+			
+			if (entry2 != null) {
+				joint2.removeIf((jointName) -> entry2.isMasked(this.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
+						entitypatch.getCurrentLivingMotion() : entitypatch.currentCompositeMotion, jointName));
+			}
+		}
+		
 		joint1.addAll(joint2);
 		
-		if (insertFirstPose) {
+		if (linkTime != totalTime) {
 			Map<String, JointTransform> firstPose = this.getPoseByTime(entitypatch, 0.0F, 0.0F).getJointTransformData();
 			
 			for (String jointName : joint1) {
 				Keyframe[] keyframes = new Keyframe[3];
 				keyframes[0] = new Keyframe(0.0F, data1.get(jointName));
-				keyframes[1] = new Keyframe(previousTotalTime, firstPose.get(jointName));
+				keyframes[1] = new Keyframe(linkTime, firstPose.get(jointName));
 				keyframes[2] = new Keyframe(totalTime, data2.get(jointName));
 				TransformSheet sheet = new TransformSheet(keyframes);
 				dest.getAnimationClip().addJointTransform(jointName, sheet);
@@ -140,13 +144,13 @@ public abstract class DynamicAnimation {
 	public void end(LivingEntityPatch<?> entitypatch, DynamicAnimation nextAnimation, boolean isEnd) {}
 	public void linkTick(LivingEntityPatch<?> entitypatch, DynamicAnimation linkAnimation) {};
 	
-	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, String joint) {
+	public boolean hasTransformFor(String joint) {
 		return this.getTransfroms().containsKey(joint);
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, String joint) {
-		return null;
+	public Optional<JointMaskEntry> getJointMaskEntry(LivingEntityPatch<?> entitypatch, boolean useCurrentMotion) {
+		return Optional.empty();
 	}
 	
 	public EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
@@ -167,7 +171,7 @@ public abstract class DynamicAnimation {
 		return this.getAnimationClip().getJointTransforms();
 	}
 	
-	public float getPlaySpeed(LivingEntityPatch<?> entitypatch) {
+	public float getPlaySpeed(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
 		return 1.0F;
 	}
 	
@@ -232,6 +236,10 @@ public abstract class DynamicAnimation {
 	}
 	
 	public boolean isStaticAnimation() {
+		return false;
+	}
+	
+	public boolean isLinkAnimation() {
 		return false;
 	}
 	

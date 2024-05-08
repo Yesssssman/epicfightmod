@@ -25,7 +25,7 @@ public class AnimationPlayer {
 	public void tick(LivingEntityPatch<?> entitypatch) {
 		this.prevElapsedTime = this.elapsedTime;
 		
-		float playbackSpeed = this.getAnimation().getPlaySpeed(entitypatch);
+		float playbackSpeed = this.getAnimation().getPlaySpeed(entitypatch, this.getAnimation());
 		PlaybackSpeedModifier playSpeedModifier = this.getAnimation().getRealAnimation().getProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER).orElse(null);
 		
 		if (playSpeedModifier != null) {
@@ -41,7 +41,7 @@ public class AnimationPlayer {
 			this.elapsedTime = time.second;
 		}
 		
-		if (this.elapsedTime >= this.play.getTotalTime()) {
+		if (this.elapsedTime > this.play.getTotalTime()) {
 			if (this.play.isRepeat()) {
 				this.prevElapsedTime = 0;
 				this.elapsedTime %= this.play.getTotalTime();

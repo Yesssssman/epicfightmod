@@ -71,7 +71,7 @@ public class GrapplingTryAnimation extends AttackAnimation {
 				AnimationPlayer player = entitypatch.getAnimator().getPlayerFor(this);
 				float prevPoseTime = player.getPrevElapsedTime();
 				float poseTime = player.getElapsedTime();
-				List<Entity> list = phase.getCollidingEntities(entitypatch, this, prevPoseTime, poseTime, this.getPlaySpeed(entitypatch));
+				List<Entity> list = phase.getCollidingEntities(entitypatch, this, prevPoseTime, poseTime, this.getPlaySpeed(entitypatch, this));
 				
 				if (list.contains(hitEntity)) {
 					DamageSource dmgSource = this.getEpicFightDamageSource(entitypatch, hitEntity, phase);

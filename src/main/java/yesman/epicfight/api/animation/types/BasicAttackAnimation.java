@@ -1,19 +1,18 @@
 package yesman.epicfight.api.animation.types;
 
 import java.util.Locale;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.phys.Vec3;
 import yesman.epicfight.api.animation.Joint;
-import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.types.EntityState.StateFactor;
 import yesman.epicfight.api.client.animation.Layer;
-import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
 import yesman.epicfight.api.client.animation.property.JointMaskEntry;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Armature;
@@ -94,7 +93,7 @@ public class BasicAttackAnimation extends AttackAnimation {
 		boolean stiffAttack = entitypatch.getOriginal().level().getGameRules().getRule(EpicFightGamerules.STIFF_COMBO_ATTACKS).get();
 		
 		if (!isEnd && !nextAnimation.isMainFrameAnimation() && entitypatch.isLogicalClient() && !stiffAttack) {
-			float playbackSpeed = EpicFightOptions.A_TICK * this.getPlaySpeed(entitypatch);
+			float playbackSpeed = EpicFightOptions.A_TICK * this.getPlaySpeed(entitypatch, this);
 			entitypatch.getClientAnimator().baseLayer.copyLayerTo(entitypatch.getClientAnimator().baseLayer.getLayer(Layer.Priority.HIGHEST), playbackSpeed);
 		}
 	}
@@ -123,25 +122,14 @@ public class BasicAttackAnimation extends AttackAnimation {
 	}
 	
 	@Override
-	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, String joint) {
+	public Optional<JointMaskEntry> getJointMaskEntry(LivingEntityPatch<?> entitypatch, boolean useCurrentMotion) {
 		if (entitypatch.isLogicalClient()) {
 			if (entitypatch.getClientAnimator().getPriorityFor(this) == Layer.Priority.HIGHEST) {
-				return !JointMaskEntry.BASIC_ATTACK_MASK.isMasked(LivingMotions.ALL, joint);
+				return Optional.of(JointMaskEntry.BASIC_ATTACK_MASK);
 			}
 		}
 		
-		return super.isJointEnabled(entitypatch, joint);
-	}
-	
-	@Override
-	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, String joint) {
-		if (entitypatch.isLogicalClient()) {
-			if (entitypatch.getClientAnimator().getPriorityFor(this) == Layer.Priority.HIGHEST) {
-				return JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT.getBindModifier(joint);
-			}
-		}
-		
-		return super.getBindModifier(entitypatch, joint);
+		return super.getJointMaskEntry(entitypatch, useCurrentMotion);
 	}
 	
 	@Override

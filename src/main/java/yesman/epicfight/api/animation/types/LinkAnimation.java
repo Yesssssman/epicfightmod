@@ -1,14 +1,17 @@
 package yesman.epicfight.api.animation.types;
 
 import java.util.Map;
+import java.util.Optional;
 
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.types.EntityState.StateFactor;
-import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
+import yesman.epicfight.api.client.animation.property.JointMaskEntry;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -16,7 +19,7 @@ public class LinkAnimation extends DynamicAnimation {
 	private final AnimationClip animationClip = new AnimationClip();
 	protected DynamicAnimation fromAnimation;
 	protected DynamicAnimation toAnimation;
-	protected float startsAt;
+	protected float nextStartTime;
 	
 	@Override
 	public void tick(LivingEntityPatch<?> entitypatch) {
@@ -28,10 +31,9 @@ public class LinkAnimation extends DynamicAnimation {
 		if (!isEnd) {
 			this.toAnimation.end(entitypatch, nextAnimation, isEnd);
 		} else {
-			if (this.startsAt > 0.0F) {
-				entitypatch.getAnimator().getPlayerFor(this).setElapsedTime(this.startsAt);
+			if (this.nextStartTime > 0.0F) {
+				entitypatch.getAnimator().getPlayerFor(this).setElapsedTime(this.nextStartTime);
 				entitypatch.getAnimator().getPlayerFor(this).markToDoNotReset();
-				this.startsAt = 0.0F;
 			}
 		}
 	}
@@ -53,7 +55,7 @@ public class LinkAnimation extends DynamicAnimation {
 	
 	@Override
 	public Pose getPoseByTime(LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
-		Pose nextStartingPose = this.toAnimation.getPoseByTime(entitypatch, this.startsAt, 1.0F);
+		Pose nextStartingPose = this.toAnimation.getPoseByTime(entitypatch, this.nextStartTime, 1.0F);
 		
 		/**
 		 * Update dest pose
@@ -68,6 +70,7 @@ public class LinkAnimation extends DynamicAnimation {
 			}
 		}
 		
+		//return this.animationClip.getPoseInTime(0.0F);
 		return super.getPoseByTime(entitypatch, time, partialTicks);
 	}
 	
@@ -77,8 +80,8 @@ public class LinkAnimation extends DynamicAnimation {
 	}
 	
 	@Override
-	public float getPlaySpeed(LivingEntityPatch<?> entitypatch) {
-		return this.toAnimation.getPlaySpeed(entitypatch);
+	public float getPlaySpeed(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
+		return this.toAnimation.getPlaySpeed(entitypatch, animation);
 	}
 	
 	public void setConnectedAnimations(DynamicAnimation from, DynamicAnimation to) {
@@ -90,14 +93,9 @@ public class LinkAnimation extends DynamicAnimation {
 		return this.toAnimation;
 	}
 	
-	@Override
-	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, String joint) {
-		return this.animationClip.hasJointTransform(joint);
-	}
-	
-	@Override
-	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, String joint) {
-		return this.toAnimation.getBindModifier(entitypatch, joint);
+	@OnlyIn(Dist.CLIENT)
+	public Optional<JointMaskEntry> getJointMaskEntry(LivingEntityPatch<?> entitypatch, boolean useCurrentMotion) {
+		return useCurrentMotion ? this.toAnimation.getJointMaskEntry(entitypatch, true) : this.fromAnimation.getJointMaskEntry(entitypatch, false);
 	}
 	
 	@Override
@@ -119,7 +117,7 @@ public class LinkAnimation extends DynamicAnimation {
 	public DynamicAnimation getRealAnimation() {
 		return this.toAnimation;
 	}
-	
+		
 	public DynamicAnimation getFromAnimation() {
 		return this.fromAnimation;
 	} 
@@ -133,8 +131,17 @@ public class LinkAnimation extends DynamicAnimation {
 		trnasforms.putAll(this.getTransfroms());
 	}
 	
+	public void setNextStartTime(float nextStartTime) {
+		this.nextStartTime = nextStartTime;
+	}
+	
 	public void resetNextStartTime() {
-		this.startsAt = 0.0F;
+		this.nextStartTime = 0.0F;
+	}
+	
+	@Override
+	public boolean isLinkAnimation() {
+		return true;
 	}
 	
 	@Override

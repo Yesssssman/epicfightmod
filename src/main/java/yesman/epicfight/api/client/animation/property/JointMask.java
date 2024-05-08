@@ -10,6 +10,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
+import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.client.animation.Layer;
@@ -22,10 +23,10 @@ public class JointMask {
 	@OnlyIn(Dist.CLIENT)
 	@FunctionalInterface
 	public interface BindModifier {
-		public void modify(LivingEntityPatch<?> entitypatch, Pose baseLayerPose, Pose resultPose, Layer.Priority priority, Joint joint, Map<Layer.Priority, Pair<DynamicAnimation, Pose>> poses);
+		public void modify(LivingEntityPatch<?> entitypatch, Pose baseLayerPose, Pose resultPose, LivingMotion livingMotion, JointMaskEntry wholeEntry, Layer.Priority priority, Joint joint, Map<Layer.Priority, Pair<DynamicAnimation, Pose>> poses);
 	}
 	
-	public static final BindModifier KEEP_CHILD_LOCROT = (entitypatch, baseLayerPose, result, priority, joint, poses) -> {
+	public static final BindModifier KEEP_CHILD_LOCROT = (entitypatch, baseLayerPose, result, livingMotion, wholeEntry, priority, joint, poses) -> {
 		Pose currentPose = poses.get(priority).getSecond();
 		JointTransform lowestTransform = baseLayerPose.getOrDefaultTransform(joint.getName());
 		JointTransform currentTransform = currentPose.getOrDefaultTransform(joint.getName());
@@ -36,9 +37,7 @@ public class JointMask {
 		OpenMatrix4f currentToLowest = OpenMatrix4f.mul(OpenMatrix4f.invert(currentMatrix, null), lowestMatrix, null);
 		
 		for (Joint subJoint : joint.getSubJoints()) {
-			DynamicAnimation animation = poses.get(priority).getFirst();
-			
-			if (!animation.isJointEnabled(entitypatch, subJoint.getName())) {
+			if (wholeEntry.isMasked(livingMotion, subJoint.getName())) {
 				OpenMatrix4f lowestLocalTransform = OpenMatrix4f.mul(joint.getLocalTrasnform(), lowestMatrix, null);
 				OpenMatrix4f currentLocalTransform = OpenMatrix4f.mul(joint.getLocalTrasnform(), currentMatrix, null);
 				OpenMatrix4f childTransform = OpenMatrix4f.mul(subJoint.getLocalTrasnform(), result.getOrDefaultTransform(subJoint.getName()).toMatrix(), null);

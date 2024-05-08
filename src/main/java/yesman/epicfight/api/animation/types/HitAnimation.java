@@ -45,9 +45,9 @@ public class HitAnimation extends MainFrameAnimation {
 		Map<String, JointTransform> data3 = super.getPoseByTime(entitypatch, this.getTotalTime() - 0.00001F, 0.0F).getJointTransformData();
 		
 		Set<String> joint1 = new HashSet<> (data1.keySet());
-		joint1.removeIf((jointName) -> !fromAnimation.isJointEnabled(entitypatch, jointName));
+		joint1.removeIf((jointName) -> !fromAnimation.hasTransformFor(jointName));
 		Set<String> joint2 = new HashSet<> (data2.keySet());
-		joint2.removeIf((jointName) -> !this.isJointEnabled(entitypatch, jointName));
+		joint2.removeIf((jointName) -> !this.hasTransformFor(jointName));
 		joint1.addAll(joint2);
 		
 		for (String jointName : joint1) {

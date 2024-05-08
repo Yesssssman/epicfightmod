@@ -86,11 +86,15 @@ public class ConditionalWeaponInnateSkill extends WeaponInnateSkill {
 	
 	@Override
 	public void executeOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
-		executer.playAnimationSynchronized(this.attackAnimations[this.getAnimationInCondition(executer)].get(), 0);
+		this.playSkillAnimation(executer);
 		super.executeOnServer(executer, args);
 	}
 	
-	public int getAnimationInCondition(ServerPlayerPatch executer) {
-		return selector.apply(executer);
+	protected int getAnimationInCondition(ServerPlayerPatch executer) {
+		return this.selector.apply(executer);
+	}
+	
+	protected void playSkillAnimation(ServerPlayerPatch executer) {
+		executer.playAnimationSynchronized(this.attackAnimations[this.getAnimationInCondition(executer)].get(), 0);
 	}
 }

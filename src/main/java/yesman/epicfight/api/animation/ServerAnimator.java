@@ -76,7 +76,7 @@ public class ServerAnimator extends Animator {
 				Animations.DUMMY_ANIMATION.putOnPlayer(this.animationPlayer, this.entitypatch);
 				this.pause = true;
 			} else {
-				if (!(this.animationPlayer.getAnimation() instanceof LinkAnimation) && !(this.nextPlaying instanceof LinkAnimation)) {
+				if (!(this.animationPlayer.getAnimation().isLinkAnimation()) && !(this.nextPlaying.isLinkAnimation())) {
 					this.nextPlaying.begin(this.entitypatch);
 				}
 				

@@ -50,7 +50,7 @@ public class Layer {
 		nextAnimation.begin(entitypatch);
 		
 		if (!nextAnimation.isMetaAnimation()) {
-			this.setLinkAnimation(nextAnimation, entitypatch, entitypatch.getClientAnimator().getPoseOnLink(0.0F), convertTimeModifier);
+			this.setLinkAnimation(nextAnimation, entitypatch, entitypatch.getClientAnimator().getPose(0.0F, false), convertTimeModifier);
 			this.linkAnimation.putOnPlayer(this.animationPlayer, entitypatch);
 			entitypatch.updateEntityState();
 			this.nextAnimation = nextAnimation;
@@ -111,7 +111,7 @@ public class Layer {
 			if (this.nextAnimation != null) {
 				this.animationPlayer.getAnimation().end(entitypatch, this.nextAnimation, true);
 				
-				if (!(this.animationPlayer.getAnimation() instanceof LinkAnimation) && !(this.nextAnimation instanceof LinkAnimation)) {
+				if (!this.animationPlayer.getAnimation().isLinkAnimation() && !this.nextAnimation.isLinkAnimation()) {
 					this.nextAnimation.begin(entitypatch);
 				}
 				
@@ -160,18 +160,19 @@ public class Layer {
 		layer.resume();
 	}
 	
-	public Pose getEnabledPose(LivingEntityPatch<?> entitypatch, float partialTick) {
-		Pose pose = this.animationPlayer.getCurrentPose(entitypatch, partialTick);
-		DynamicAnimation animation = this.animationPlayer.getAnimation();
-		pose.removeJointIf((entry) -> !animation.isJointEnabled(entitypatch, entry.getKey()));
+	public LivingMotion getLivingMotion(LivingEntityPatch<?> entitypatch, boolean current) {
+		ClientAnimator animator = entitypatch.getClientAnimator();
 		
-		return pose;
+		if (this.isBaseLayer()) {
+			return current ? entitypatch.currentLivingMotion : animator.currentMotion();
+		} else {
+			return current ? entitypatch.currentCompositeMotion : animator.currentCompositeMotion();
+		}
 	}
 	
-	public Pose getEnabledPoseFor(LivingEntityPatch<?> entitypatch, LivingMotion livingMotion, float partialTick) {
+	public Pose getEnabledPose(LivingEntityPatch<?> entitypatch, boolean useCurrentMotion, float partialTick) {
 		Pose pose = this.animationPlayer.getCurrentPose(entitypatch, partialTick);
-		DynamicAnimation animation = this.animationPlayer.getAnimation();
-		pose.removeJointIf((entry) -> !animation.isJointEnabled(entitypatch, entry.getKey()));
+		this.animationPlayer.getAnimation().getJointMaskEntry(entitypatch, useCurrentMotion).ifPresent((jointEntry) -> pose.removeJointIf((entry) -> jointEntry.isMasked(this.getLivingMotion(entitypatch, useCurrentMotion), entry.getKey())));
 		
 		return pose;
 	}
@@ -179,7 +180,7 @@ public class Layer {
 	public void off(LivingEntityPatch<?> entitypatch) {
 		if (!this.isDisabled() && !(this.animationPlayer.getAnimation() instanceof LayerOffAnimation)) {
 			float convertTime = entitypatch.getClientAnimator().baseLayer.animationPlayer.getAnimation().getConvertTime();
-			setLayerOffAnimation(this.animationPlayer.getAnimation(), this.getEnabledPose(entitypatch, 1.0F), this.layerOffAnimation, convertTime);
+			setLayerOffAnimation(this.animationPlayer.getAnimation(), this.getEnabledPose(entitypatch, false, 1.0F), this.layerOffAnimation, convertTime);
 			this.playAnimationInstant(this.layerOffAnimation, entitypatch);
 		}
 	}
@@ -248,9 +249,7 @@ public class Layer {
 		
 		@Override
 		public void update(LivingEntityPatch<?> entitypatch) {
-			//System.out.println("before update " + this);
 			super.update(entitypatch);
-			//System.out.println("after update " + this);
 			
 			for (Layer layer : this.compositeLayers.values()) {
 				layer.update(entitypatch);
