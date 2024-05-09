@@ -157,7 +157,9 @@ public class AttackAnimation extends ActionAnimation {
 			}
 		}
 		
-		this.attackTick(entitypatch, linkAnimation);
+		if (!entitypatch.isLogicalClient()) {
+			this.attackTick(entitypatch, linkAnimation);
+		}
 	}
 	
 	@Override

@@ -1,6 +1,10 @@
 package yesman.epicfight.world.capabilities.entitypatch;
 
+import java.util.Optional;
+import java.util.Set;
+
 import com.google.common.collect.Sets;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -29,9 +33,6 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 
-import java.util.Optional;
-import java.util.Set;
-
 public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	protected final Faction mobFaction;
 	
@@ -44,10 +45,10 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	}
 	
 	@Override
-	public void onJoinWorld(T entityIn, EntityJoinLevelEvent event) {
-		super.onJoinWorld(entityIn, event);
+	public void onJoinWorld(T entity, EntityJoinLevelEvent event) {
+		super.onJoinWorld(entity, event);
 		
-		if (!entityIn.level().isClientSide() && !this.original.isNoAi()) {
+		if (!entity.level().isClientSide() && !this.original.isNoAi()) {
 			this.initAI();
 		}
 	}
