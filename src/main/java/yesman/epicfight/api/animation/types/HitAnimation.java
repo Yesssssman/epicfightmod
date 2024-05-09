@@ -33,16 +33,16 @@ public class HitAnimation extends MainFrameAnimation {
 	}
 	
 	@Override
-	public void setLinkAnimation(DynamicAnimation fromAnimation, Pose pose1, boolean isOnSameLayer, float convertTimeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
+	public void setLinkAnimation(DynamicAnimation fromAnimation, Pose startPose, boolean isOnSameLayer, float convertTimeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
 		dest.resetNextStartTime();
 		
 		dest.getTransfroms().clear();
 		dest.setTotalTime(convertTimeModifier + this.convertTime);
 		dest.setConnectedAnimations(fromAnimation, this);
 		
-		Map<String, JointTransform> data1 = pose1.getJointTransformData();
+		Map<String, JointTransform> data1 = startPose.getJointTransformData();
 		Map<String, JointTransform> data2 = super.getPoseByTime(entitypatch, 0.0F, 0.0F).getJointTransformData();
-		Map<String, JointTransform> data3 = super.getPoseByTime(entitypatch, this.getTotalTime() - 0.00001F, 0.0F).getJointTransformData();
+		Map<String, JointTransform> data3 = super.getPoseByTime(entitypatch, this.getTotalTime(), 0.0F).getJointTransformData();
 		
 		Set<String> joint1 = new HashSet<> (data1.keySet());
 		joint1.removeIf((jointName) -> !fromAnimation.hasTransformFor(jointName));

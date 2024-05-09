@@ -83,7 +83,7 @@ public class Layer {
 		}
 	}
 	
-	protected void setLinkAnimation(DynamicAnimation nextAnimation, LivingEntityPatch<?> entitypatch, Pose lastPose, float convertTimeModifier) {
+	protected void setLinkAnimation(StaticAnimation nextAnimation, LivingEntityPatch<?> entitypatch, Pose lastPose, float convertTimeModifier) {
 		DynamicAnimation fromAnimation = this.animationPlayer.isEmpty() ? entitypatch.getClientAnimator().baseLayer.animationPlayer.getAnimation() : this.animationPlayer.getAnimation();
 		
 		if (fromAnimation instanceof LinkAnimation linkAnimation) {

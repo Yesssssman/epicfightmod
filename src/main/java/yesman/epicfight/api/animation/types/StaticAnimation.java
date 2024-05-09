@@ -1,8 +1,10 @@
 package yesman.epicfight.api.animation.types;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 import com.google.common.collect.Maps;
@@ -16,6 +18,8 @@ import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.animation.AnimationProvider;
+import yesman.epicfight.api.animation.JointTransform;
+import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.property.AnimationEvent;
@@ -23,6 +27,7 @@ import yesman.epicfight.api.animation.property.AnimationEvent.TimePeriodEvent;
 import yesman.epicfight.api.animation.property.AnimationEvent.TimeStampedEvent;
 import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.PlaybackSpeedModifier;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.types.EntityState.StateFactor;
 import yesman.epicfight.api.client.animation.Layer;
@@ -36,11 +41,16 @@ import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.model.JsonModelLoader;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.config.EpicFightOptions;
+import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class StaticAnimation extends DynamicAnimation implements AnimationProvider<StaticAnimation> {
 	protected final Map<AnimationProperty<?>, Object> properties = Maps.newHashMap();
+	
+	/**
+	 * States will bind into animation on {@link AnimationManager#apply}
+	 */
 	protected final StateSpectrum.Blueprint stateSpectrumBlueprint = new StateSpectrum.Blueprint();
 	protected final Armature armature;
 	protected final int animationId;
@@ -125,6 +135,81 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		this.stateSpectrum.readFrom(this.stateSpectrumBlueprint);
 	}
 	
+	public void setLinkAnimation(final DynamicAnimation fromAnimation, Pose startPose, boolean isOnSameLayer, float convertTimeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
+		if (!entitypatch.isLogicalClient()) {
+			startPose = Animations.DUMMY_ANIMATION.getPoseByTime(entitypatch, 0.0F, 1.0F);
+		}
+		
+		dest.resetNextStartTime();
+		
+		float playTime = this.getPlaySpeed(entitypatch, dest);
+		PlaybackSpeedModifier playSpeedModifier = this.getRealAnimation().getProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER).orElse(null);
+		
+		if (playSpeedModifier != null) {
+			playTime = playSpeedModifier.modify(this, entitypatch, playTime, 0.0F, playTime);
+		}
+		
+		playTime *= EpicFightOptions.A_TICK;
+		
+		float linkTime = convertTimeModifier > 0.0F ? convertTimeModifier + this.convertTime : this.convertTime;
+		float totalTime = playTime;
+		
+		while (totalTime < linkTime) {
+			totalTime += playTime;
+		}
+		
+		float nextStartTime = Math.max(0.0F, -convertTimeModifier);
+		nextStartTime += totalTime - linkTime;
+		
+		dest.setNextStartTime(nextStartTime);
+		dest.getTransfroms().clear();
+		dest.setTotalTime(totalTime);
+		dest.setConnectedAnimations(fromAnimation, this);
+		
+		Map<String, JointTransform> data1 = startPose.getJointTransformData();
+		Map<String, JointTransform> data2 = this.getPoseByTime(entitypatch, nextStartTime, 0.0F).getJointTransformData();
+		Set<String> joint1 = new HashSet<> (isOnSameLayer ? data1.keySet() : Set.of());
+		Set<String> joint2 = new HashSet<> (data2.keySet());
+		
+		if (entitypatch.isLogicalClient()) {
+			JointMaskEntry entry = fromAnimation.getJointMaskEntry(entitypatch, false).orElse(null);
+			JointMaskEntry entry2 = this.getJointMaskEntry(entitypatch, true).orElse(null);
+			
+			if (entry != null) {
+				joint1.removeIf((jointName) -> entry.isMasked(fromAnimation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
+						entitypatch.getClientAnimator().currentMotion() : entitypatch.getClientAnimator().currentCompositeMotion(), jointName));
+			}
+			
+			if (entry2 != null) {
+				joint2.removeIf((jointName) -> entry2.isMasked(this.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
+						entitypatch.getCurrentLivingMotion() : entitypatch.currentCompositeMotion, jointName));
+			}
+		}
+		
+		joint1.addAll(joint2);
+		
+		if (linkTime != totalTime) {
+			Map<String, JointTransform> firstPose = this.getPoseByTime(entitypatch, 0.0F, 0.0F).getJointTransformData();
+			
+			for (String jointName : joint1) {
+				Keyframe[] keyframes = new Keyframe[3];
+				keyframes[0] = new Keyframe(0.0F, data1.get(jointName));
+				keyframes[1] = new Keyframe(linkTime, firstPose.get(jointName));
+				keyframes[2] = new Keyframe(totalTime, data2.get(jointName));
+				TransformSheet sheet = new TransformSheet(keyframes);
+				dest.getAnimationClip().addJointTransform(jointName, sheet);
+			}
+		} else {
+			for (String jointName : joint1) {
+				Keyframe[] keyframes = new Keyframe[2];
+				keyframes[0] = new Keyframe(0.0F, data1.get(jointName));
+				keyframes[1] = new Keyframe(totalTime, data2.get(jointName));
+				TransformSheet sheet = new TransformSheet(keyframes);
+				dest.getAnimationClip().addJointTransform(jointName, sheet);
+			}
+		}
+	}
+	
 	@Override
 	public void begin(LivingEntityPatch<?> entitypatch) {
 		this.getProperty(StaticAnimationProperty.ON_BEGIN_EVENTS).ifPresent((events) -> {
@@ -206,19 +291,31 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		});
 	}
 	
-	@Override
-	public EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
+	protected EntityState getState(LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
 		return new EntityState(this.getStatesMap(entitypatch, time));
 	}
 	
-	@Override
-	public TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
+	protected TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
 		return this.stateSpectrum.getStateMap(entitypatch, time);
 	}
 	
-	@Override
-	public <T> T getState(StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
+	protected <T> T getState(StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
 		return this.stateSpectrum.getSingleState(stateFactor, entitypatch, time);
+	}
+	
+	@Override
+	public final EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
+		return this.getState(entitypatch, this, time);
+	}
+	
+	@Override
+	public final TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
+		return this.getStatesMap(entitypatch, this, time);
+	}
+	
+	@Override
+	public final <T> T getState(StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
+		return this.getState(stateFactor, entitypatch, this, time);
 	}
 	
 	@Override

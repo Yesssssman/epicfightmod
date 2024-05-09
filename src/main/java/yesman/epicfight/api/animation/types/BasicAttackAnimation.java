@@ -53,14 +53,10 @@ public class BasicAttackAnimation extends AttackAnimation {
 	protected void bindPhaseState(Phase phase) {
 		float preDelay = phase.preDelay;
 		
-		if (preDelay == 0.0F) {
-			preDelay += 0.01F;
-		}
-		
 		this.stateSpectrumBlueprint
 			.newTimePair(phase.start, preDelay)
 			.addState(EntityState.PHASE_LEVEL, 1)
-			.newTimePair(phase.start, phase.contact + 0.01F)
+			.newTimePair(phase.start, phase.contact)
 			.addState(EntityState.CAN_SKILL_EXECUTION, false)
 			.newTimePair(phase.start, phase.recovery)
 			.addState(EntityState.MOVEMENT_LOCKED, true)
@@ -68,10 +64,10 @@ public class BasicAttackAnimation extends AttackAnimation {
 			.addState(EntityState.CAN_BASIC_ATTACK, false)
 			.newTimePair(phase.start, phase.end)
 			.addState(EntityState.INACTION, true)
-			.newTimePair(preDelay, phase.contact + 0.01F)
+			.newTimePair(preDelay, phase.contact)
 			.addState(EntityState.ATTACKING, true)
 			.addState(EntityState.PHASE_LEVEL, 2)
-			.newTimePair(phase.contact + 0.01F, phase.end)
+			.newTimePair(phase.contact, phase.end)
 			.addState(EntityState.PHASE_LEVEL, 3)
 			.addState(EntityState.TURNING_LOCKED, true);
 	}
@@ -99,8 +95,8 @@ public class BasicAttackAnimation extends AttackAnimation {
 	}
 	
 	@Override
-	public TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
-		TypeFlexibleHashMap<StateFactor<?>> stateMap = super.getStatesMap(entitypatch, time);
+	protected TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
+		TypeFlexibleHashMap<StateFactor<?>> stateMap = super.getStatesMap(entitypatch, animation, time);
 		
 		if (!entitypatch.getOriginal().level().getGameRules().getRule(EpicFightGamerules.STIFF_COMBO_ATTACKS).get()) {
 			stateMap.put(EntityState.MOVEMENT_LOCKED, (Object)false);

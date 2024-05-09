@@ -18,7 +18,7 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 public class LinkAnimation extends DynamicAnimation {
 	private final AnimationClip animationClip = new AnimationClip();
 	protected DynamicAnimation fromAnimation;
-	protected DynamicAnimation toAnimation;
+	protected StaticAnimation toAnimation;
 	protected float nextStartTime;
 	
 	@Override
@@ -40,17 +40,17 @@ public class LinkAnimation extends DynamicAnimation {
 	
 	@Override
 	public TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
-		return this.toAnimation.getStatesMap(entitypatch, time);
+		return this.toAnimation.getStatesMap(entitypatch, this, 0.0F);
 	}
 	
 	@Override
 	public EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
-		return this.toAnimation.getState(entitypatch, 0.0F);
+		return this.toAnimation.getState(entitypatch, this, 0.0F);
 	}
 	
 	@Override
 	public <T> T getState(StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
-		return this.toAnimation.getState(stateFactor, entitypatch, 0.0F);
+		return this.toAnimation.getState(stateFactor, entitypatch, this, 0.0F);
 	}
 	
 	@Override
@@ -70,7 +70,6 @@ public class LinkAnimation extends DynamicAnimation {
 			}
 		}
 		
-		//return this.animationClip.getPoseInTime(0.0F);
 		return super.getPoseByTime(entitypatch, time, partialTicks);
 	}
 	
@@ -84,7 +83,7 @@ public class LinkAnimation extends DynamicAnimation {
 		return this.toAnimation.getPlaySpeed(entitypatch, animation);
 	}
 	
-	public void setConnectedAnimations(DynamicAnimation from, DynamicAnimation to) {
+	public void setConnectedAnimations(DynamicAnimation from, StaticAnimation to) {
 		this.fromAnimation = from.getRealAnimation();
 		this.toAnimation = to;
 	}

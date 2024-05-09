@@ -96,6 +96,6 @@ public class GrapplingTryAnimation extends AttackAnimation {
 	}
 	
 	@Override
-	protected void attackTick(LivingEntityPatch<?> entitypatch) {
+	protected void attackTick(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
 	}
 }

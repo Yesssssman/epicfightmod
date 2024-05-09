@@ -33,7 +33,7 @@ public class StateSpectrum {
 			}
 		}
 		
-		return null;
+		return stateFactor.defaultValue();
 	}
 	
 	public TypeFlexibleHashMap<StateFactor<?>> getStateMap(LivingEntityPatch<?> entitypatch, float time) {
@@ -280,6 +280,17 @@ public class StateSpectrum {
 			this.currentState = null;
 			this.timePairs.clear();
 			return this;
+		}
+		
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			
+			for (StatesInTime state : this.timePairs) {
+				sb.append(state + "\n");
+			}
+			
+			return sb.toString();
 		}
 	}
 }

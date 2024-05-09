@@ -38,14 +38,10 @@ public class DashAttackAnimation extends AttackAnimation {
 	protected void bindPhaseState(Phase phase) {
 		float preDelay = phase.preDelay;
 		
-		if (preDelay == 0.0F) {
-			preDelay += 0.01F;
-		}
-		
 		this.stateSpectrumBlueprint
 			.newTimePair(phase.start, preDelay)
 			.addState(EntityState.PHASE_LEVEL, 1)
-			.newTimePair(phase.start, phase.contact + 0.01F)
+			.newTimePair(phase.start, phase.contact)
 			.addState(EntityState.CAN_SKILL_EXECUTION, false)
 			.addState(EntityState.CAN_BASIC_ATTACK, false)
 			.newTimePair(phase.start, phase.recovery)
@@ -55,13 +51,13 @@ public class DashAttackAnimation extends AttackAnimation {
 			.addState(EntityState.INACTION, true)
 			.newTimePair(phase.antic, phase.end)
 			.addState(EntityState.TURNING_LOCKED, true)
-			.newTimePair(preDelay, phase.contact + 0.01F)
+			.newTimePair(preDelay, phase.contact)
 			.addState(EntityState.ATTACKING, true)
 			.addState(EntityState.PHASE_LEVEL, 2)
-			.newConditionalTimePair((entitypatch) -> (entitypatch.isLastAttackSuccess() ? 1 : 0 ), phase.contact + 0.01F, phase.recovery)
+			.newConditionalTimePair((entitypatch) -> (entitypatch.isLastAttackSuccess() ? 1 : 0), phase.contact, phase.recovery)
 			.addConditionalState(0, EntityState.CAN_BASIC_ATTACK, false)
 			.addConditionalState(1, EntityState.CAN_BASIC_ATTACK, true)
-			.newTimePair(phase.contact + 0.01F, phase.end)
+			.newTimePair(phase.contact, phase.end)
 			.addState(EntityState.PHASE_LEVEL, 3)
 			;
 	}

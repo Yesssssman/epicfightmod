@@ -31,12 +31,15 @@ import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackPhaseProperty;
+import yesman.epicfight.api.animation.types.EntityState.StateFactor;
 import yesman.epicfight.api.animation.property.MoveCoordFunctions;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.HitEntityList;
+import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap.TypeKey;
+import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
@@ -106,14 +109,10 @@ public class AttackAnimation extends ActionAnimation {
 	protected void bindPhaseState(Phase phase) {
 		float preDelay = phase.preDelay;
 		
-		if (preDelay == 0.0F) {
-			preDelay += 0.01F;
-		}
-		
 		this.stateSpectrumBlueprint
 			.newTimePair(phase.start, preDelay)
 			.addState(EntityState.PHASE_LEVEL, 1)
-			.newTimePair(phase.start, phase.contact + 0.01F)
+			.newTimePair(phase.start, phase.contact)
 			.addState(EntityState.CAN_SKILL_EXECUTION, false)
 			.newTimePair(phase.start, phase.recovery)
 			.addState(EntityState.MOVEMENT_LOCKED, true)
@@ -123,10 +122,10 @@ public class AttackAnimation extends ActionAnimation {
 			.addState(EntityState.INACTION, true)
 			.newTimePair(phase.antic, phase.end)
 			.addState(EntityState.TURNING_LOCKED, true)
-			.newTimePair(preDelay, phase.contact + 0.01F)
+			.newTimePair(preDelay, phase.contact)
 			.addState(EntityState.ATTACKING, true)
 			.addState(EntityState.PHASE_LEVEL, 2)
-			.newTimePair(phase.contact + 0.01F, phase.end)
+			.newTimePair(phase.contact, phase.end)
 			.addState(EntityState.PHASE_LEVEL, 3)
 			;
 	}
@@ -145,7 +144,7 @@ public class AttackAnimation extends ActionAnimation {
 		if (!entitypatch.isLogicalClient() && entitypatch instanceof MobPatch<?> mobpatch) {
 			AnimationPlayer player = entitypatch.getAnimator().getPlayerFor(this);
 			float elapsedTime = player.getElapsedTime();
-			EntityState state = this.getState(entitypatch, elapsedTime);
+			EntityState state = this.getState(entitypatch, linkAnimation, elapsedTime);
 			
 			if (state.getLevel() == 1 && !state.turningLocked()) {
 				mobpatch.getOriginal().getNavigation().stop();
@@ -157,6 +156,8 @@ public class AttackAnimation extends ActionAnimation {
 				}
 			}
 		}
+		
+		this.attackTick(entitypatch, linkAnimation);
 	}
 	
 	@Override
@@ -164,7 +165,7 @@ public class AttackAnimation extends ActionAnimation {
 		super.tick(entitypatch);
 		
 		if (!entitypatch.isLogicalClient()) {
-			this.attackTick(entitypatch);
+			this.attackTick(entitypatch, this);
 		}
 	}
 	
@@ -185,13 +186,13 @@ public class AttackAnimation extends ActionAnimation {
 		}
 	}
 	
-	protected void attackTick(LivingEntityPatch<?> entitypatch) {
+	protected void attackTick(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
 		AnimationPlayer player = entitypatch.getAnimator().getPlayerFor(this);
-		float elapsedTime = player.getElapsedTime();
 		float prevElapsedTime = player.getPrevElapsedTime();
-		EntityState state = this.getState(entitypatch, elapsedTime);
-		EntityState prevState = this.getState(entitypatch, prevElapsedTime);
-		Phase phase = this.getPhaseByTime(elapsedTime);
+		float elapsedTime = player.getElapsedTime();
+		EntityState prevState = this.getState(entitypatch, animation, prevElapsedTime);
+		EntityState state = this.getState(entitypatch, animation, elapsedTime);
+		Phase phase = this.getPhaseByTime(animation.isLinkAnimation() ? 0.0F : elapsedTime);
 		
 		if (state.getLevel() == 1 && !state.turningLocked()) {
 			if (entitypatch instanceof MobPatch<?> mobpatch) {
@@ -206,7 +207,7 @@ public class AttackAnimation extends ActionAnimation {
 		}
 		
 		if (prevState.attacking() || state.attacking() || (prevState.getLevel() < 2 && state.getLevel() > 2)) {
-			if (!prevState.attacking() || (phase != this.getPhaseByTime(prevElapsedTime) && (state.attacking() || (prevState.getLevel() <= 2 && state.getLevel() > 2)))) {
+			if (!prevState.attacking() || (phase != this.getPhaseByTime(prevElapsedTime) && (state.attacking() || (prevState.getLevel() < 2 && state.getLevel() > 2)))) {
 				entitypatch.playSound(this.getSwingSound(entitypatch, phase), 0.0F, 0.0F);
 				entitypatch.removeHurtEntities();
 			}
@@ -269,6 +270,50 @@ public class AttackAnimation extends ActionAnimation {
 		}
 		
 		return null;
+	}
+	
+	@Override
+	protected EntityState getState(LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
+		if (animation.isLinkAnimation()) {
+			EntityState state = super.getState(entitypatch, animation, 0.0F);
+			
+			if (time + animation.getPlaySpeed(entitypatch, animation) * EpicFightOptions.A_TICK < animation.getTotalTime()) {
+				state.setState(EntityState.ATTACKING, false);
+			}
+			
+			return state;
+		}
+		
+		return super.getState(entitypatch, animation, time);
+	}
+	
+	@Override
+	protected TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
+		if (animation.isLinkAnimation()) {
+			TypeFlexibleHashMap<StateFactor<?>> stateMap = super.getStatesMap(entitypatch, animation, 0.0F);
+			
+			if (time + animation.getPlaySpeed(entitypatch, animation) * EpicFightOptions.A_TICK < animation.getTotalTime()) {
+				stateMap.put((StateFactor<?>)EntityState.ATTACKING, Boolean.valueOf(false));
+			}
+			
+			return stateMap;
+		}
+		
+		return super.getStatesMap(entitypatch, animation, time);
+	}
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	protected <T> T getState(StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
+		if (animation.isLinkAnimation()) {
+			if (stateFactor == EntityState.ATTACKING && time + animation.getPlaySpeed(entitypatch, animation) * EpicFightOptions.A_TICK < animation.getTotalTime()) {
+				return (T)Boolean.valueOf(false);
+			}
+			
+			return super.getState(stateFactor, entitypatch, animation, 0.0F);
+		}
+		
+		return super.getState(stateFactor, entitypatch, animation, time);
 	}
 	
 	protected int getMaxStrikes(LivingEntityPatch<?> entitypatch, Phase phase) {

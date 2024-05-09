@@ -605,7 +605,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 			}
 			
 			@Override
-			protected void setLinkAnimation(DynamicAnimation nextAnimation, LivingEntityPatch<?> entitypatch, Pose lastPose, float convertTimeModifier) {
+			protected void setLinkAnimation(StaticAnimation nextAnimation, LivingEntityPatch<?> entitypatch, Pose lastPose, float convertTimeModifier) {
 				Pose currentPose = this.animationPlayer.getAnimation().getRawPose(this.animationPlayer.getElapsedTime());
 				Pose nextAnimationPose = nextAnimation.getRawPose(0.0F);
 				float totalTime = nextAnimation.getConvertTime();
@@ -747,7 +747,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 			}
 			
 			@Override
-			protected void setLinkAnimation(DynamicAnimation nextAnimation, LivingEntityPatch<?> entitypatch, Pose lastPose, float convertTimeModifier) {
+			protected void setLinkAnimation(StaticAnimation nextAnimation, LivingEntityPatch<?> entitypatch, Pose lastPose, float convertTimeModifier) {
 				Pose currentPose = this.animationPlayer.getAnimation().getRawPose(this.animationPlayer.getElapsedTime());
 				Pose nextAnimationPose = nextAnimation.getRawPose(0.0F);
 				float totalTime = nextAnimation.getConvertTime();
