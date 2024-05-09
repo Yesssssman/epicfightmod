@@ -50,13 +50,13 @@ public class EnderDragonAttackAnimation extends AttackAnimation implements Proce
 		try {
 			JsonModelLoader modelLoader = (new JsonModelLoader(resourceManager, this.resourceLocation));
 			AnimationManager.getInstance().loadAnimationClip(this, modelLoader::loadAllJointsClipForAnimation);
+			
+			this.tipPointTransform = Maps.newHashMap();
+			this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransform, this.getArmature(), false, true);
 		} catch (Exception e) {
 			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
 			e.printStackTrace();
 		}
-		
-		this.tipPointTransform = Maps.newHashMap();
-		this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransform, this.getArmature(), false, true);
 	}
 	
 	@Override
@@ -86,6 +86,9 @@ public class EnderDragonAttackAnimation extends AttackAnimation implements Proce
 	
 	@Override
 	public void begin(LivingEntityPatch<?> entitypatch) {
+		// Load if null
+		this.getAnimationClip();
+		
 		MoveCoordSetter actionAnimCoordSetter = this.getProperty(ActionAnimationProperty.COORD_SET_BEGIN).orElse((self, entitypatch$2, transformSheet) -> {
 			transformSheet.readFrom(self.getTransfroms().get("Root"));
 		});

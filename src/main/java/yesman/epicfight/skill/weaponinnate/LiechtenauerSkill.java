@@ -56,7 +56,7 @@ public class LiechtenauerSkill extends WeaponInnateSkill {
 	public void onInitiate(SkillContainer container) {
 		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID, (event) -> {
 			if (container.isActivated() && !container.isDisabled()) {
-				if (!event.getTarget().isAlive()) {
+				if (event.getAttackDamage() > event.getTarget().getHealth()) {
 					this.setDurationSynchronize(event.getPlayerPatch(), Math.min(this.maxDuration, container.getRemainDuration() + this.returnDuration));
 				}
 			}

@@ -28,7 +28,7 @@ import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.EnderDra
 
 public class EnderDragonDynamicActionAnimation extends ActionAnimation implements ProceduralAnimation {
 	private final IKInfo[] ikInfos;
-	private Map<String, TransformSheet> tipPointTransform;
+	private Map<String, TransformSheet> tipPointTransform = Maps.newHashMap();
 	
 	public EnderDragonDynamicActionAnimation(float convertTime, String path, Armature armature, IKInfo[] ikInfos) {
 		super(convertTime, path, armature);
@@ -39,13 +39,11 @@ public class EnderDragonDynamicActionAnimation extends ActionAnimation implement
 	public void loadAnimation(ResourceManager resourceManager) {
 		try {
 			loadAllJointsClip(resourceManager, this);
+			this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransform, this.getArmature(), true, true);
 		} catch (Exception e) {
 			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
 			e.printStackTrace();
 		}
-		
-		this.tipPointTransform = Maps.newHashMap();
-		this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransform, this.getArmature(), true, true);
 	}
 	
 	@Override

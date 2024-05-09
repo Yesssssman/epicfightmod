@@ -41,13 +41,12 @@ public class EnderDragonActionAnimation extends ActionAnimation implements Proce
 	public void loadAnimation(ResourceManager resourceManager) {
 		try {
 			loadAllJointsClip(resourceManager, this);
+			this.tipPointTransforms = Maps.newHashMap();
+			this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransforms, this.getArmature(), this.getProperty(ActionAnimationProperty.MOVE_VERTICAL).orElse(false), true);
 		} catch (Exception e) {
 			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
 			e.printStackTrace();
 		}
-		
-		this.tipPointTransforms = Maps.newHashMap();
-		this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransforms, this.getArmature(), this.getProperty(ActionAnimationProperty.MOVE_VERTICAL).orElse(false), true);
 	}
 	
 	@Override

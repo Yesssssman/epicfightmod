@@ -29,7 +29,7 @@ import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.EnderDra
 
 public class EnderDraonWalkAnimation extends StaticAnimation implements ProceduralAnimation {
 	private final IKInfo[] ikInfos;
-	private Map<String, TransformSheet> tipPointTransform;
+	private Map<String, TransformSheet> tipPointTransform = Maps.newHashMap();
 	
 	public EnderDraonWalkAnimation(float convertTime, String path, Armature armature, IKInfo[] ikInfos) {
 		super(convertTime, true, path, armature);
@@ -40,13 +40,11 @@ public class EnderDraonWalkAnimation extends StaticAnimation implements Procedur
 	public void loadAnimation(ResourceManager resourceManager) {
 		try {
 			loadAllJointsClip(resourceManager, this);
+			this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransform, this.getArmature(), false, false);
 		} catch (Exception e) {
 			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
 			e.printStackTrace();
 		}
-		
-		this.tipPointTransform = Maps.newHashMap();
-		this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransform, this.getArmature(), false, false);
 	}
 	
 	@Override

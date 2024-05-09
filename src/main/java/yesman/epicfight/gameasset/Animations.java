@@ -257,7 +257,6 @@ public class Animations {
 	public static StaticAnimation CREEPER_DEATH;
 	public static StaticAnimation DRAGON_IDLE;
 	public static StaticAnimation DRAGON_WALK;
-	public static StaticAnimation DRAGON_WALK_PROCEDURAL;
 	public static StaticAnimation DRAGON_FLY;
 	public static StaticAnimation DRAGON_DEATH;
 	public static StaticAnimation DRAGON_GROUND_TO_FLY;

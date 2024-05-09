@@ -30,7 +30,7 @@ public class StaminaPillagerSkill extends PassiveSkill {
 		super.onInitiate(container);
 		
 		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID, (event) -> {
-			if (!event.getTarget().isAlive()) {
+			if (event.getAttackDamage() > event.getTarget().getHealth()) {
 				float stamina = event.getPlayerPatch().getStamina();
 				float missingStamina = event.getPlayerPatch().getMaxStamina() - stamina;
 				event.getPlayerPatch().setStamina(stamina + missingStamina * this.regenRate * 0.01F);

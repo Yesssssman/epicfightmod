@@ -212,6 +212,9 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 	
 	@Override
 	public void begin(LivingEntityPatch<?> entitypatch) {
+		// Load if null
+		this.getAnimationClip();
+		
 		this.getProperty(StaticAnimationProperty.ON_BEGIN_EVENTS).ifPresent((events) -> {
 			for (AnimationEvent event : events) {
 				event.executeIfRightSide(entitypatch, this);

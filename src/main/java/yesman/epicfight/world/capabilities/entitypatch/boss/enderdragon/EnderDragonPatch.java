@@ -286,10 +286,6 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 		return this.original.getDragonFight() != null ? this.original.getDragonFight().getCrystalsAlive() : 0;
 	}
 	
-	public void resetTipAnimations() {
-		this.tipPointAnimations.clear();
-	}
-	
 	public void setFlyingPhase() {
 		this.groundPhase = false;
 		this.original.horizontalCollision = false;
@@ -340,6 +336,10 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 		double cos = (a.x * b.x + a.y * b.y + a.z * b.z);
 		
 		return Math.toDegrees(Math.acos(cos));
+	}
+	
+	public void resetTipAnimations() {
+		this.tipPointAnimations.clear();
 	}
 	
 	public TipPointAnimation getTipPointAnimation(String jointName) {

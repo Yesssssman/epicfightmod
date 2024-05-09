@@ -29,9 +29,11 @@ public class ServerAnimator extends Animator {
 	@Override
 	public void playAnimation(StaticAnimation nextAnimation, float modifyTime) {
 		this.pause = false;
+		Pose lastPose = this.animationPlayer.getAnimation().getPoseByTime(this.entitypatch, 0.0F, 0.0F);
+		
 		this.animationPlayer.getAnimation().end(this.entitypatch, nextAnimation, this.animationPlayer.isEnd());
 		nextAnimation.begin(this.entitypatch);
-		nextAnimation.setLinkAnimation(this.animationPlayer.getAnimation(), nextAnimation.getPoseByTime(this.entitypatch, 0.0F, 0.0F), true, modifyTime, this.entitypatch, this.linkAnimation);
+		nextAnimation.setLinkAnimation(this.animationPlayer.getAnimation(), lastPose, true, modifyTime, this.entitypatch, this.linkAnimation);
 		this.linkAnimation.putOnPlayer(this.animationPlayer, this.entitypatch);
 		this.entitypatch.updateEntityState();
 		this.nextPlaying = nextAnimation;

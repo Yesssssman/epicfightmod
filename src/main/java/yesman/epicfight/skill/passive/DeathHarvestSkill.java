@@ -29,7 +29,7 @@ public class DeathHarvestSkill extends PassiveSkill {
 			Player original = playerpatch.getOriginal();
 			LivingEntity target = event.getTarget();
 			
-			if (event.getDamageSource().is(EpicFightDamageType.WEAPON_INNATE) && !target.isAlive()) {
+			if (event.getDamageSource().is(EpicFightDamageType.WEAPON_INNATE) && event.getAttackDamage() > target.getHealth()) {
 				original.level().playSound(null, original.getX(), original.getY(), original.getZ(), SoundEvents.WITHER_AMBIENT, original.getSoundSource(), 0.3F, 1.25F);
 				
 				int damage = (int)original.getAttributeValue(Attributes.ATTACK_DAMAGE);
