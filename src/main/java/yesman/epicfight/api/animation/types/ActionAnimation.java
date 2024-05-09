@@ -185,7 +185,7 @@ public class ActionAnimation extends MainFrameAnimation {
 		Pose nextStartPose = this.getPoseByTime(entitypatch, nextStartTime, 1.0F);
 		
 		if (entitypatch.shouldMoveOnCurrentSide(this) && this.getProperty(ActionAnimationProperty.MOVE_ON_LINK).orElse(true)) {
-			this.removeRootMove(entitypatch, nextStartPose, nextStartTime);
+			this.removeRootTranslation(entitypatch, nextStartPose, nextStartTime);
 		}
 		
 		Map<String, JointTransform> data1 = startPose.getJointTransformData();
@@ -215,12 +215,12 @@ public class ActionAnimation extends MainFrameAnimation {
 			Map<String, JointTransform> poseData = pose.getJointTransformData();
 			
 			if (entitypatch.shouldMoveOnCurrentSide(this) && this.getProperty(ActionAnimationProperty.MOVE_ON_LINK).orElse(true)) {
-				this.removeRootMove(entitypatch, pose, 0.0F);
+				this.removeRootTranslation(entitypatch, pose, 0.0F);
 			}
 			
 			for (String jointName : joint1) {
 				Keyframe[] keyframes = new Keyframe[3];
-				keyframes[0] = new Keyframe(0.0F, data1.get(jointName));
+				keyframes[0] = new Keyframe(0.0F, data1.getOrDefault(jointName, JointTransform.empty()));
 				keyframes[1] = new Keyframe(linkTime, poseData.get(jointName));
 				keyframes[2] = new Keyframe(totalTime, data2.get(jointName));
 				TransformSheet sheet = new TransformSheet(keyframes);
@@ -229,7 +229,7 @@ public class ActionAnimation extends MainFrameAnimation {
 		} else {
 			for (String jointName : joint1) {
 				Keyframe[] keyframes = new Keyframe[2];
-				keyframes[0] = new Keyframe(0.0F, data1.get(jointName));
+				keyframes[0] = new Keyframe(0.0F, data1.getOrDefault(jointName, JointTransform.empty()));
 				keyframes[1] = new Keyframe(totalTime, data2.get(jointName));
 				TransformSheet sheet = new TransformSheet(keyframes);
 				dest.getAnimationClip().addJointTransform(jointName, sheet);
@@ -237,7 +237,7 @@ public class ActionAnimation extends MainFrameAnimation {
 		}
 	}
 	
-	public void removeRootMove(LivingEntityPatch<?> entitypatch, Pose pose, float poseTime) {
+	public void removeRootTranslation(LivingEntityPatch<?> entitypatch, Pose pose, float poseTime) {
 		JointTransform jt = pose.getOrDefaultTransform("Root");
 		
 		if (this.getProperty(ActionAnimationProperty.COORD).isEmpty()) {
@@ -256,16 +256,15 @@ public class ActionAnimation extends MainFrameAnimation {
 		boolean isCoordUpdateTime = coordUpdateTime == null || coordUpdateTime.isTimeInPairs(player.getElapsedTime());
 
 		MoveCoordSetter moveCoordsetter = isCoordUpdateTime ? this.getProperty(ActionAnimationProperty.COORD_SET_TICK).orElse(null) : MoveCoordFunctions.RAW_COORD;
-		boolean isLinkAnimation = animation.isLinkAnimation();
 		
 		if (moveCoordsetter != null) {
-			TransformSheet transformSheet = isLinkAnimation ? animation.getCoord() : entitypatch.getArmature().getActionAnimationCoord();
+			TransformSheet transformSheet = animation.isLinkAnimation() ? animation.getCoord() : entitypatch.getArmature().getActionAnimationCoord();
 			moveCoordsetter.set(animation, entitypatch, transformSheet);
 		}
 		
 		TransformSheet rootCoord;
 		
-		if (isLinkAnimation) {
+		if (animation.isLinkAnimation()) {
 			rootCoord = animation.getCoord();
 		} else {
 			rootCoord = entitypatch.getArmature().getActionAnimationCoord();
@@ -284,7 +283,7 @@ public class ActionAnimation extends MainFrameAnimation {
 		Vec3 motion = livingentity.getDeltaMovement();
 		
 		this.getProperty(ActionAnimationProperty.NO_GRAVITY_TIME).ifPresentOrElse((noGravityTime) -> {
-			if (noGravityTime.isTimeInPairs(isLinkAnimation ? 0.0F : player.getElapsedTime())) {
+			if (noGravityTime.isTimeInPairs(animation.isLinkAnimation() ? 0.0F : player.getElapsedTime())) {
 				livingentity.setDeltaMovement(motion.x, 0.0D, motion.z);
 			} else {
 				move.y = 0.0F;
