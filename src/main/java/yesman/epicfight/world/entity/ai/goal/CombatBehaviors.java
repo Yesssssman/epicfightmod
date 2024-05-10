@@ -10,8 +10,14 @@ import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.minecraft.world.entity.Entity;
 import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.data.conditions.Condition;
+import yesman.epicfight.data.conditions.entity.CustomCondition;
+import yesman.epicfight.data.conditions.entity.HealthPoint;
+import yesman.epicfight.data.conditions.entity.RandomChance;
+import yesman.epicfight.data.conditions.entity.TargetInDistance;
+import yesman.epicfight.data.conditions.entity.TargetInEyeHeight;
+import yesman.epicfight.data.conditions.entity.TargetInPov;
 import yesman.epicfight.network.server.SPPlayAnimation;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch.AnimationPacketProvider;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
@@ -265,16 +271,16 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 	
 	public static class Behavior<T extends MobPatch<?>> {
 		private final Consumer<T> behavior;
-		private final List<BehaviorPredicate<T>> predicates;
+		private final List<Condition<T>> conditions;
 		
 		private Behavior(Behavior.Builder<T> builder) {
 			this.behavior = builder.behavior;
-			this.predicates = builder.predicate;
+			this.conditions = builder.conditions;
 		}
 		
 		private boolean checkPredicates(T mobpatch) {
-			for (BehaviorPredicate<T> predicate : this.predicates) {
-				if (!predicate.test(mobpatch)) {
+			for (Condition<T> condition : this.conditions) {
+				if (!condition.predicate(mobpatch)) {
 					return false;
 				}
 			}
@@ -293,7 +299,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 		
 		public static class Builder<T extends MobPatch<?>> {
 			private Consumer<T> behavior;
-			private final List<BehaviorPredicate<T>> predicate = Lists.newArrayList();
+			private final List<Condition<T>> conditions = Lists.newArrayList();
 			private AnimationPacketProvider packetProvider = SPPlayAnimation::new;
 			
 			public Behavior.Builder<T> behavior(Consumer<T> behavior) {
@@ -315,42 +321,47 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 			}
 			
 			public Behavior.Builder<T> withinEyeHeight() {
-				this.predicate(new TargetWithinEyeHeight<T>());
+				this.condition(new TargetInEyeHeight());
 				return this;
 			}
 			
 			public Behavior.Builder<T> randomChance(float chance) {
-				this.predicate(new RandomChance<T>(chance));
+				this.condition(new RandomChance(chance));
 				return this;
 			}
 			
 			public Behavior.Builder<T> withinDistance(double minDistance, double maxDistance) {
-				this.predicate(new TargetWithinDistance<T>(minDistance, maxDistance));
+				this.condition(new TargetInDistance(minDistance, maxDistance));
 				return this;
 			}
 			
 			public Behavior.Builder<T> withinAngle(double minDegree, double maxDegree) {
-				this.predicate(new TargetWithinAngle<T>(minDegree, maxDegree));
+				this.condition(new TargetInPov(minDegree, maxDegree));
 				return this;
 			}
 			
 			public Behavior.Builder<T> withinAngleHorizontal(double minDegree, double maxDegree) {
-				this.predicate(new TargetWithinAngle.Horizontal<T>(minDegree, maxDegree));
+				this.condition(new TargetInPov.TargetInPovHorizontal(minDegree, maxDegree));
 				return this;
 			}
 			
-			public Behavior.Builder<T> health(float health, Health.Comparator comparator) {
-				this.predicate(new Health<T>(health, comparator));
+			public Behavior.Builder<T> health(float health, HealthPoint.Comparator comparator) {
+				this.condition(new HealthPoint(health, comparator));
 				return this;
 			}
 			
 			public Behavior.Builder<T> custom(Function<T, Boolean> customPredicate) {
-				this.predicate(new CustomPredicate<T>(customPredicate));
+				this.condition(new CustomCondition<T>(customPredicate));
 				return this;
 			}
 			
-			public Behavior.Builder<T> predicate(BehaviorPredicate<T> predicate) {
-				this.predicate.add(predicate);
+			@SuppressWarnings("unchecked")
+			public void condition(Condition<?> predicate) {
+				this.conditions.add((Condition<T>)predicate);
+			}
+			
+			public Behavior.Builder<T> predicate(Condition<T> predicate) {
+				this.conditions.add(predicate);
 				return this;
 			}
 			
@@ -362,115 +373,6 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 			public Behavior<T> build() {
 				return new Behavior<T>(this);
 			}
-		}
-	}
-	
-	public static abstract class BehaviorPredicate<T extends MobPatch<?>> {
-		public abstract boolean test(T mobpatch);
-	}
-	
-	public static class CustomPredicate<T extends MobPatch<?>> extends BehaviorPredicate<T> {
-		Function<T, Boolean> test;
-		
-		public CustomPredicate(Function<T, Boolean> test) {
-			this.test = test;
-		}
-		
-		public boolean test(T mobpatch) {
-			return this.test.apply(mobpatch);
-		}
-	}
-	
-	public static class RandomChance<T extends MobPatch<?>> extends BehaviorPredicate<T> {
-		private final float chance;
-		
-		public RandomChance(float chance) {
-			this.chance = chance;
-		}
-		
-		public boolean test(T mobpatch) {
-			return mobpatch.getOriginal().getRandom().nextFloat() < this.chance;
-		}
-	}
-	
-	public static class TargetWithinEyeHeight<T extends MobPatch<?>> extends BehaviorPredicate<T> {
-		public boolean test(T mobpatch) {
-			double veticalDistance = Math.abs(mobpatch.getOriginal().getY() - mobpatch.getTarget().getY());
-			return veticalDistance < mobpatch.getOriginal().getEyeHeight();
-		}
-	}
-	
-	public static class TargetWithinDistance<T extends MobPatch<?>> extends BehaviorPredicate<T> {
-		private final double minDistance;
-		private final double maxDistance;
-		
-		public TargetWithinDistance(double minDistance, double maxDistance) {
-			this.minDistance = minDistance * minDistance;
-			this.maxDistance = maxDistance * maxDistance;
-		}
-		
-		public boolean test(T mobpatch) {
-			double distanceSqr = mobpatch.getOriginal().distanceToSqr(mobpatch.getTarget());
-			
-			return this.minDistance < distanceSqr && distanceSqr < this.maxDistance;
-		}
-	}
-	
-	public static class TargetWithinAngle<T extends MobPatch<?>> extends BehaviorPredicate<T> {
-		protected final double minDegree;
-		protected final double maxDegree;
-		
-		public TargetWithinAngle(double minDegree, double maxDegree) {
-			this.minDegree = minDegree;
-			this.maxDegree = maxDegree;
-		}
-		
-		public boolean test(T mobpatch) {
-			Entity target = mobpatch.getTarget();
-			double degree = mobpatch.getAngleTo(target);
-			return this.minDegree < degree && degree < this.maxDegree;
-		}
-		
-		public static class Horizontal<T extends MobPatch<?>> extends TargetWithinAngle<T> {
-			public Horizontal(double minDegree, double maxDegree) {
-				super(minDegree, maxDegree);
-			}
-			
-			@Override
-			public boolean test(T mobpatch) {
-				Entity target = mobpatch.getTarget();
-				double degree = mobpatch.getAngleToHorizontal(target);
-				return this.minDegree < degree && degree < this.maxDegree;
-			}
-		}
-	}
-	
-	public static class Health<T extends MobPatch<?>> extends BehaviorPredicate<T> {
-		private final float value;
-		private final Comparator comparator;
-		
-		public Health(float value, Comparator comparator) {
-			this.value = value;
-			this.comparator = comparator;
-		}
-		
-		public boolean test(T mobpatch) {
-			switch (this.comparator) {
-			case LESS_ABSOLUTE:
-				return this.value > mobpatch.getOriginal().getHealth();
-			case GREATER_ABSOLUTE:
-				return this.value < mobpatch.getOriginal().getHealth();
-			case LESS_RATIO:
-				return this.value > mobpatch.getOriginal().getHealth() / mobpatch.getOriginal().getMaxHealth();
-			case GREATER_RATIO:
-				return this.value < mobpatch.getOriginal().getHealth() / mobpatch.getOriginal().getMaxHealth();
-			}
-			
-			return true;
-		}
-		
-		public enum Comparator {
-			GREATER_ABSOLUTE, LESS_ABSOLUTE, GREATER_RATIO, LESS_RATIO
 		}
 	}
 }

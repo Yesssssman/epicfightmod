@@ -14,11 +14,11 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
 
-public class OffhandCategoryCondition extends LivingEntityCondition {
+public class OffhandCategory extends LivingEntityCondition {
 	private WeaponCategory category;
 	
 	@Override
-	public OffhandCategoryCondition read(CompoundTag tag) {
+	public OffhandCategory read(CompoundTag tag) {
 		this.category = WeaponCategory.ENUM_MANAGER.getOrThrow(tag.getString("category"));
 		
 		if (this.category == null) {

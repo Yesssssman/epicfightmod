@@ -1654,6 +1654,8 @@ public class DatapackEditScreen extends Screen {
 	
 	@OnlyIn(Dist.CLIENT)
 	class MobPatchTab extends DatapackTab<EntityType<?>> {
+		private final ModelPreviewer modelPreviewer;
+		
 		public MobPatchTab() {
 			super(Component.translatable("gui." + EpicFightMod.MODID + ".tab.datapack.mob_patch"), MobPatchReloadListener.DIRECTORY, ForgeRegistries.ENTITY_TYPES);
 			
@@ -1663,6 +1665,18 @@ public class DatapackEditScreen extends Screen {
 					
 				}
 			};
+			
+			this.modelPreviewer = new ModelPreviewer(9, 15, 0, 140, HorizontalSizing.LEFT_RIGHT, null, Armatures.BIPED, Meshes.BIPED);
+			this.modelPreviewer.setColliderJoint(Armatures.BIPED.searchJointByName("Tool_R"));
+			
+			this.inputComponentsList.setLeftPos(164);
+			
+			this.inputComponentsList.newRow();
+			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.disabled"));
+		}
+		
+		private void rearrangeElements(boolean disable, boolean usePreset, CompoundTag tag) {
+			
 		}
 		
 		@Override

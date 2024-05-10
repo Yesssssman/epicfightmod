@@ -168,7 +168,13 @@ public class SkillBookScreen extends Screen {
 			for (Map.Entry<Attribute, AttributeModifier> stat : this.skill.getModfierEntry()) {
 				String attrName = Component.translatable(stat.getKey().getDescriptionId()).getString();
 				String amountString = "";
+				String operator = "+";
 				double amount = stat.getValue().getAmount();
+				
+				if (amount < 0) {
+					operator = "-";
+					amount = Math.abs(amount);
+				}
 				
 				switch (stat.getValue().getOperation()) {
 				case ADDITION:
@@ -182,7 +188,7 @@ public class SkillBookScreen extends Screen {
 					break;
 				}
 				
-				guiGraphics.drawString(this.font, "+" + amountString + " " + attrName, posX + 23 - width / 2, posY + i, 0, false);
+				guiGraphics.drawString(this.font, operator + amountString + " " + attrName, posX + 23 - width / 2, posY + i, 0, false);
 				i += 10;
 			}
 		}

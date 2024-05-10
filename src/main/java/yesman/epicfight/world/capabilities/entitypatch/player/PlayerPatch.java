@@ -405,6 +405,10 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		return this.consumeForSkill(skill, consumeResource, skill.getDefaultConsumeptionAmount(this));
 	}
 	
+	public boolean consumeForSkill(Skill skill, Skill.Resource consumeResource, float amount) {
+		return this.consumeForSkill(skill, consumeResource, amount, false);
+	}
+	
 	/**
 	 * Client : Checks if a player has enough resource
 	 * Server : Checks and consumes the resource if it meets the condition
@@ -412,7 +416,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	 * @return check result
 	 * Use this 
 	 */
-	public boolean consumeForSkill(Skill skill, Skill.Resource consumeResource, float amount) {
+	public boolean consumeForSkill(Skill skill, Skill.Resource consumeResource, float amount, boolean activateConsumeForce) {
 		SkillConsumeEvent skillConsumeEvent = new SkillConsumeEvent(this, skill, consumeResource, amount);
 		this.getEventListener().triggerEvents(EventType.SKILL_CONSUME_EVENT, skillConsumeEvent);
 		
@@ -426,6 +430,10 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 			}
 			
 			return true;
+		} else if (activateConsumeForce) {
+			if (!this.isLogicalClient()) {
+				skillConsumeEvent.getResourceType().consumer.consume(skill, (ServerPlayerPatch)this, amount);
+			}
 		}
 		
 		return false;

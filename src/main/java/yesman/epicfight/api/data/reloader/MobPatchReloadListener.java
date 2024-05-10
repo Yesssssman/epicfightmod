@@ -45,6 +45,7 @@ import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.mesh.HumanoidMesh;
+import yesman.epicfight.data.conditions.Condition;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.model.armature.HumanoidArmature;
@@ -62,7 +63,6 @@ import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors.Behavior;
-import yesman.epicfight.world.entity.ai.goal.CombatBehaviors.BehaviorPredicate;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors.BehaviorSeries;
 
 public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
@@ -424,7 +424,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 				
 				for (int k = 0; k < conditionList.size(); k++) {
 					CompoundTag condition = conditionList.getCompound(k);
-					BehaviorPredicate<T> predicate = deserializeBehaviorPredicate(condition.getString("predicate"), condition);
+					Condition<T> predicate = deserializeBehaviorPredicate(condition.getString("predicate"), condition);
 					behaviorBuilder.predicate(predicate);
 				}
 				
@@ -437,8 +437,12 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 		return builder;
 	}
 	
-	public static <T extends MobPatch<?>> BehaviorPredicate<T> deserializeBehaviorPredicate(String type, CompoundTag args) {
-		BehaviorPredicate<T> predicate = null;
+	public static <T extends MobPatch<?>> Condition<T> deserializeBehaviorPredicate(String type, CompoundTag args) {
+		Condition<T> predicate = null;
+		
+		return predicate;
+		
+		/**
 		List<String[]> loggerNote = Lists.newArrayList();
 		
 		switch (type) {
@@ -506,7 +510,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 			throw new IllegalArgumentException("[Custom Entity Error] No predicate type: " + type);
 		}
 		
-		return predicate;
+		return predicate;**/
 	}
 	
 	public static CompoundTag filterClientData(CompoundTag tag) {
