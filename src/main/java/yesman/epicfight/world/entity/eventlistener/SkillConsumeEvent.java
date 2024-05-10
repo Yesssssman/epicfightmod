@@ -3,22 +3,25 @@ package yesman.epicfight.world.entity.eventlistener;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
+/**
+ * Canceling this event will make skill failed to predicate resource check
+ * See also {@link Skill#resourcePredicate(PlayerPatch)}
+ */
 public class SkillConsumeEvent extends PlayerEvent<PlayerPatch<?>> {
 	private final Skill skill;
-	private Skill.Resource resource;
 	private float amount;
-	private final boolean consume;
+	private Skill.Resource resource;
 	
-	public SkillConsumeEvent(PlayerPatch<?> playerpatch, Skill skill, Skill.Resource resource, boolean consume) {
-		this(playerpatch, skill, resource, skill.getDefaultConsumeptionAmount(playerpatch), consume);
+	public SkillConsumeEvent(PlayerPatch<?> playerpatch, Skill skill, Skill.Resource resource) {
+		this(playerpatch, skill, resource, skill.getDefaultConsumeptionAmount(playerpatch));
 	}
 	
-	public SkillConsumeEvent(PlayerPatch<?> playerpatch, Skill skill, Skill.Resource resource, float amount, boolean consume) {
+	public SkillConsumeEvent(PlayerPatch<?> playerpatch, Skill skill, Skill.Resource resource, float amount) {
 		super(playerpatch, true);
+		
 		this.skill = skill;
 		this.resource = resource;
 		this.amount = amount;
-		this.consume = consume;
 	}
 	
 	public Skill getSkill() {
@@ -31,10 +34,6 @@ public class SkillConsumeEvent extends PlayerEvent<PlayerPatch<?>> {
 	
 	public float getAmount() {
 		return this.amount;
-	}
-	
-	public boolean shouldConsume() {
-		return this.consume;
 	}
 	
 	public void setResourceType(Skill.Resource resource) {

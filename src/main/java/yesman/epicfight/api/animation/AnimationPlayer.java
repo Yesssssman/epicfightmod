@@ -128,4 +128,9 @@ public class AnimationPlayer {
 	public boolean isEmpty() {
 		return this.play == Animations.DUMMY_ANIMATION;
 	}
+	
+	@Override
+	public String toString() {
+		return this.getAnimation() + " " + this.prevElapsedTime + " " + this.elapsedTime;
+	}
 }

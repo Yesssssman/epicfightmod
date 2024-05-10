@@ -21,6 +21,7 @@ import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.world.entity.player.Player;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.client.CPChangeSkill;
@@ -68,7 +69,7 @@ public class SkillEditScreen extends Screen {
 					int k = this.width / 2 - 69;
 					int l = this.height / 2 - 78;
 					
-					Collection<Skill> learnedSkillCollection = this.skills.getLearnedSkills(skillSlot.category());
+					Collection<Skill> learnedSkillCollection = this.player.isCreative() ? SkillManager.getSkills((skill) -> skill.getCategory() == skillSlot.category()) : this.skills.getLearnedSkills(skillSlot.category());
 					
 					for (Skill learnedSkill : learnedSkillCollection) {
 						this.learnedSkillButtons.add(new LearnSkillButton(k, l, 147, 24, learnedSkill, Component.translatable(learnedSkill.getTranslationKey()), (pressedButton) -> {

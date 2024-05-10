@@ -106,9 +106,9 @@ public class ParryingSkill extends GuardSkill {
 				
 				event.getPlayerPatch().knockBackEntity(damageSource.getDirectEntity().position(), knockback);
 				float consumeAmount = penalty * impact;
-				event.getPlayerPatch().consumeStaminaAlways(consumeAmount);
+				boolean canAfford = event.getPlayerPatch().consumeForSkill(this, Skill.Resource.STAMINA, consumeAmount);
 				
-				BlockType blockType = successParrying ? BlockType.ADVANCED_GUARD : event.getPlayerPatch().hasStamina(0.0F) ? BlockType.GUARD : BlockType.GUARD_BREAK;
+				BlockType blockType = successParrying ? BlockType.ADVANCED_GUARD : (canAfford ? BlockType.GUARD : BlockType.GUARD_BREAK);
 				StaticAnimation animation = this.getGuardMotion(event.getPlayerPatch(), itemCapability, blockType);
 				
 				if (animation != null) {

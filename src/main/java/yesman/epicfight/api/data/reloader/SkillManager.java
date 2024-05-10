@@ -1,5 +1,6 @@
 package yesman.epicfight.api.data.reloader;
 
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -86,7 +87,11 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 		}
 	}
 	
-	public static Stream<ResourceLocation> getSkills(Predicate<Skill> predicate) {
+	public static Collection<Skill> getSkills(Predicate<Skill> predicate) {
+		return getSkillRegistry().getValues().stream().filter(skill -> predicate.test(skill)).toList();
+	}
+	
+	public static Stream<ResourceLocation> getSkillNames(Predicate<Skill> predicate) {
 		return getSkillRegistry().getValues().stream().filter(skill -> predicate.test(skill)).map(builder -> builder.getRegistryName());
 	}
 	

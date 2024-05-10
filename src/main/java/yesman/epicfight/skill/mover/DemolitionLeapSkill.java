@@ -171,7 +171,7 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 		int chargingTicks = caster.getSkillChargingTicks();
 		
 		if (chargingTicks % 5 == 0 && caster.getAccumulatedChargeAmount() < this.getMaxChargingTicks()) {
-			if (caster.consumeStamina(this.consumption)) {
+			if (caster.consumeForSkill(this, Skill.Resource.STAMINA, this.consumption)) {
 				caster.setChargingAmount(caster.getChargingAmount() + 5);
 			}
 		}

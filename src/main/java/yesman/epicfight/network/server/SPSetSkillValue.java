@@ -44,7 +44,7 @@ public class SPSetSkillValue {
 			
 			if (playerpatch != null) {
 				switch (msg.target) {
-				case COOLDOWN:
+				case RESOURCE:
 					playerpatch.getSkill(msg.index).setResource(msg.floatType);
 					break;
 				case DURATION:
@@ -67,6 +67,6 @@ public class SPSetSkillValue {
 	}
 	
 	public enum Target {
-		COOLDOWN, DURATION, MAX_DURATION, STACK, MAX_RESOURCE
+		RESOURCE, DURATION, MAX_DURATION, STACK, MAX_RESOURCE
 	}
 }

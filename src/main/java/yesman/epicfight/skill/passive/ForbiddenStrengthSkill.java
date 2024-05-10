@@ -22,17 +22,19 @@ public class ForbiddenStrengthSkill extends PassiveSkill {
 		super.onInitiate(container);
 		
 		container.getExecuter().getEventListener().addEventListener(EventType.SKILL_CONSUME_EVENT, EVENT_UUID, (event) -> {
-			if (event.getResourceType() == Skill.Resource.STAMINA) {
-				float staminaConsume = event.getAmount();
-				
-				if (!container.getExecuter().hasStamina(staminaConsume) && !container.getExecuter().getOriginal().isCreative()) {
+			if (event.getResourceType() == Skill.Resource.STAMINA && event.getSkill() != this) {
+				if (!container.getExecuter().hasStamina(event.getAmount()) && !container.getExecuter().getOriginal().isCreative()) {
 					event.setResourceType(Skill.Resource.HEALTH);
-					event.setAmount(staminaConsume);
 					
-					if (event.shouldConsume()) {
+					float healthConsumeAmount = event.getAmount() - container.getExecuter().getStamina();
+					event.setAmount(healthConsumeAmount);
+					
+					if (!container.getExecuter().isLogicalClient() && event.getResourceType().predicate.canExecute(this, container.getExecuter(), healthConsumeAmount)) {
+						container.getExecuter().setStamina(0.0F);
+						
 						Player player = container.getExecuter().getOriginal();
 						player.level().playSound(null, player.getX(), player.getY(), player.getZ(), EpicFightSounds.FORBIDDEN_STRENGTH.get(), player.getSoundSource(), 1.0F, 1.0F);
-						((ServerLevel)player.level()).sendParticles(ParticleTypes.DAMAGE_INDICATOR, player.getX(), player.getY(0.5D), player.getZ(), (int)staminaConsume, 0.1D, 0.0D, 0.1D, 0.2D);
+						((ServerLevel)player.level()).sendParticles(ParticleTypes.DAMAGE_INDICATOR, player.getX(), player.getY(0.5D), player.getZ(), (int)healthConsumeAmount, 0.1D, 0.0D, 0.1D, 0.2D);
 					}
 				}
 			}

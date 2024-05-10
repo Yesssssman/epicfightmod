@@ -210,7 +210,7 @@ public class SkillContainer {
 			SkillExecuteEvent event = new SkillExecuteEvent(executer, this);
 			
 			if (this.canExecute(executer, event)) {
-				SkillConsumeEvent consumeEvent = new SkillConsumeEvent(executer, this.containingSkill, this.containingSkill.resource, true);
+				SkillConsumeEvent consumeEvent = new SkillConsumeEvent(executer, this.containingSkill, this.containingSkill.resource);
 				executer.getEventListener().triggerEvents(EventType.SKILL_CONSUME_EVENT, consumeEvent);
 				
 				if (!consumeEvent.isCanceled()) {

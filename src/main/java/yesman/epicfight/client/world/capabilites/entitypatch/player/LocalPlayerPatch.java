@@ -286,12 +286,6 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		
 		return actionAnimation.shouldPlayerMove(this);
 	}
-
-	@Override
-	public boolean consumeStamina(float amount) {
-		float currentStamina = this.getStamina();
-		return currentStamina >= amount;
-	}
 	
 	public float getPrevStamina() {
 		return this.prevStamina;

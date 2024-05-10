@@ -165,15 +165,11 @@ public class ActionAnimation extends MainFrameAnimation {
 			playTime = playSpeedModifier.modify(this, entitypatch, playTime, 0.0F, playTime);
 		}
 		
+		playTime = Math.abs(playTime);
 		playTime *= EpicFightOptions.A_TICK;
 		
 		float linkTime = convertTimeModifier > 0.0F ? convertTimeModifier + this.convertTime : this.convertTime;
-		float totalTime = playTime;
-		
-		while (totalTime < linkTime) {
-			totalTime += playTime;
-		}
-		
+		float totalTime = playTime * (int)Math.ceil(linkTime / playTime);
 		float nextStartTime = Math.max(0.0F, -convertTimeModifier);
 		nextStartTime += totalTime - linkTime;
 		

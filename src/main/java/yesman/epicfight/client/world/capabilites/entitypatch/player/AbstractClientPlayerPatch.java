@@ -220,11 +220,6 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	}
 	
 	@Override
-	public boolean consumeStamina(float amount) {
-		return true;
-	}
-	
-	@Override
 	public boolean shouldMoveOnCurrentSide(ActionAnimation actionAnimation) {
 		return false;
 	}

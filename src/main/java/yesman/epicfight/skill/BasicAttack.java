@@ -67,7 +67,7 @@ public class BasicAttack extends Skill {
 	
 	@Override
 	public void executeOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
-		SkillConsumeEvent event = new SkillConsumeEvent(executer, this, this.resource, true);
+		SkillConsumeEvent event = new SkillConsumeEvent(executer, this, this.resource);
 		executer.getEventListener().triggerEvents(EventType.SKILL_CONSUME_EVENT, event);
 		
 		if (!event.isCanceled()) {

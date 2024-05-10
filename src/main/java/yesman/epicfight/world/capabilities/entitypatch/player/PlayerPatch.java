@@ -47,6 +47,7 @@ import yesman.epicfight.world.entity.eventlistener.FallEvent;
 import yesman.epicfight.world.entity.eventlistener.ModifyBaseDamageEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
+import yesman.epicfight.world.entity.eventlistener.SkillConsumeEvent;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T> {
@@ -390,30 +391,46 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 
 		return ((weight / 40.0F - 1.0F) * attenuation + 1.0F) * amount;
 	}
-
+	
+	public boolean hasStamina(float amount) {
+		return this.getStamina() > amount;
+	}
+	
 	public void setStamina(float value) {
 		float f1 = Math.max(Math.min(value, this.getMaxStamina()), 0.0F);
 		this.original.getEntityData().set(STAMINA, f1);
 	}
 	
+	public boolean consumeForSkill(Skill skill, Skill.Resource consumeResource) {
+		return this.consumeForSkill(skill, consumeResource, skill.getDefaultConsumeptionAmount(this));
+	}
+	
 	/**
-	 * Client : Compare if the current stamina is bigger than amount
-	 * Server : Consumes the stamina if current stamina is bigger than amount
+	 * Client : Checks if a player has enough resource
+	 * Server : Checks and consumes the resource if it meets the condition
 	 * @param amount
-	 * @return Result of comparison
+	 * @return check result
+	 * Use this 
 	 */
-	public abstract boolean consumeStamina(float amount);
-	
-	public void consumeStaminaAlways(float amount) {
-		float currentStamina = this.getStamina();
-		this.setStamina(currentStamina - amount);
-		this.resetActionTick();
+	public boolean consumeForSkill(Skill skill, Skill.Resource consumeResource, float amount) {
+		SkillConsumeEvent skillConsumeEvent = new SkillConsumeEvent(this, skill, consumeResource, amount);
+		this.getEventListener().triggerEvents(EventType.SKILL_CONSUME_EVENT, skillConsumeEvent);
+		
+		if (skillConsumeEvent.isCanceled()) {
+			return false;
+		}
+		
+		if (skillConsumeEvent.getResourceType().predicate.canExecute(skill, this, amount)) {
+			if (!this.isLogicalClient()) {
+				skillConsumeEvent.getResourceType().consumer.consume(skill, (ServerPlayerPatch)this, amount);
+			}
+			
+			return true;
+		}
+		
+		return false;
 	}
 	
-	public boolean hasStamina(float amount) {
-		return this.getStamina() > amount;
-	}
-
 	public void resetActionTick() {
 		this.tickSinceLastAction = 0;
 	}

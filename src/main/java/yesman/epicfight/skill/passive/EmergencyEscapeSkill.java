@@ -87,10 +87,7 @@ public class EmergencyEscapeSkill extends PassiveSkill {
 		listener.addEventListener(EventType.SKILL_CONSUME_EVENT, EVENT_UUID, (event) -> {
 			if (event.getSkill().getCategory() == SkillCategories.DODGE) {
 				if (!container.getExecuter().getOriginal().isCreative() && event.getSkill().getConsumption() > container.getExecuter().getStamina() && container.getStack() > 0) {
-					if (event.shouldConsume()) {
-						this.setStackSynchronize((ServerPlayerPatch)container.getExecuter(), container.getStack() - 1);
-					}
-					
+					this.setStackSynchronize((ServerPlayerPatch)container.getExecuter(), container.getStack() - 1);
 					event.setResourceType(Skill.Resource.NONE);
 				}
 			}

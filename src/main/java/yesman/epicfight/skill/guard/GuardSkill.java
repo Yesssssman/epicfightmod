@@ -226,10 +226,12 @@ public class GuardSkill extends Skill {
 			
 			float penalty = container.getDataManager().getDataValue(SkillDataKeys.PENALTY.get()) + this.getPenalizer(itemCapability);
 			float consumeAmount = penalty * impact;
+			boolean canAfford = event.getPlayerPatch().consumeForSkill(this, Skill.Resource.STAMINA, consumeAmount);
+			
 			event.getPlayerPatch().knockBackEntity(damageSource.getDirectEntity().position(), knockback);
-			event.getPlayerPatch().consumeStaminaAlways(consumeAmount);
 			container.getDataManager().setDataSync(SkillDataKeys.PENALTY.get(), penalty, event.getPlayerPatch().getOriginal());
-			BlockType blockType = event.getPlayerPatch().hasStamina(0.0F) ? BlockType.GUARD : BlockType.GUARD_BREAK;
+			
+			BlockType blockType = canAfford ? BlockType.GUARD : BlockType.GUARD_BREAK;
 			StaticAnimation animation = this.getGuardMotion(event.getPlayerPatch(), itemCapability, blockType);
 			
 			if (animation != null) {
