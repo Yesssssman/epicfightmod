@@ -46,6 +46,7 @@ import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.mesh.HumanoidMesh;
 import yesman.epicfight.data.conditions.Condition;
+import yesman.epicfight.data.conditions.EpicFightConditions;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.model.armature.HumanoidArmature;
@@ -438,79 +439,19 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 	}
 	
 	public static <T extends MobPatch<?>> Condition<T> deserializeBehaviorPredicate(String type, CompoundTag args) {
-		Condition<T> predicate = null;
+		ResourceLocation rl;
 		
-		return predicate;
-		
-		/**
-		List<String[]> loggerNote = Lists.newArrayList();
-		
-		switch (type) {
-		case "random_chance":
-			if (!args.contains("chance", 6)) {
-				loggerNote.add(new String[] {"random_chance", "chance", "double", "0.0"});
-			}
-			
-			predicate = new CombatBehaviors.RandomChance<T>((float)args.getDouble("chance"));
-			break;
-		case "within_eye_height":
-			predicate = new CombatBehaviors.TargetWithinEyeHeight<T>();
-			break;
-		case "within_distance":
-			if (!args.contains("min", 6)) {
-				loggerNote.add(new String[] {"within_distance", "min", "double", "0.0"});
-			}
-			
-			if (!args.contains("max", 6)) {
-				loggerNote.add(new String[] {"within_distance", "max", "double", "0.0"});
-			}
-			
-			predicate = new CombatBehaviors.TargetWithinDistance<T>(args.getDouble("min"), args.getDouble("max"));
-			break;
-		case "within_angle":
-			if (!args.contains("min", 6)) {
-				loggerNote.add(new String[] {"within_angle", "within_distance", "min", "double", "0.0F"});
-			}
-			
-			if (!args.contains("max", 6)) {
-				loggerNote.add(new String[] {"within_angle", "max", "double", "0.0F"});
-			}
-			
-			predicate = new CombatBehaviors.TargetWithinAngle<T>(args.getDouble("min"), args.getDouble("max"));
-			break;
-		case "within_angle_horizontal":
-			if (!args.contains("min", 6)) {
-				loggerNote.add(new String[] {"within_angle_horizontal", "min", "double", "0.0F"});
-			}
-			
-			if (!args.contains("max", 6)) {
-				loggerNote.add(new String[] {"within_angle_horizontal", "max", "double", "0.0F"});
-			}
-			
-			predicate = new CombatBehaviors.TargetWithinAngle.Horizontal<T>(args.getDouble("min"), args.getDouble("max"));
-			break;
-		case "health":
-			if (!args.contains("health", 6)) {
-				loggerNote.add(new String[] {"health", "health", "double", "0.0F"});
-			}
-			
-			if (!args.contains("comparator", 8)) {
-				loggerNote.add(new String[] {"health", "comparator", "string", ""});
-			}
-			
-			predicate = new CombatBehaviors.Health<T>((float)args.getDouble("health"), CombatBehaviors.Health.Comparator.valueOf(args.getString("comparator").toUpperCase(Locale.ROOT)));
-			break;
+		if (type.contains(":")) {
+			rl = new ResourceLocation(type);
+		} else {
+			rl = new ResourceLocation(EpicFightMod.MODID, type);
 		}
 		
-		for (String[] formatArgs : loggerNote) {
-			EpicFightMod.LOGGER.info(String.format("[Custom Entity Error] can't find a proper argument for %s. [name: %s, type: %s, default: %s]", (Object[])formatArgs));
-		}
+		Supplier<Condition<T>> predicateProvider = EpicFightConditions.getConditionOrNull(rl);
+		Condition<T> condition = predicateProvider.get();
+		condition.read(args);
 		
-		if (predicate == null) {
-			throw new IllegalArgumentException("[Custom Entity Error] No predicate type: " + type);
-		}
-		
-		return predicate;**/
+		return condition;
 	}
 	
 	public static CompoundTag filterClientData(CompoundTag tag) {

@@ -402,7 +402,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	public boolean consumeForSkill(Skill skill, Skill.Resource consumeResource) {
-		return this.consumeForSkill(skill, consumeResource, skill.getDefaultConsumeptionAmount(this));
+		return this.consumeForSkill(skill, consumeResource, skill.getDefaultConsumptionAmount(this));
 	}
 	
 	public boolean consumeForSkill(Skill skill, Skill.Resource consumeResource, float amount) {

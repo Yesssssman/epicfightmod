@@ -179,20 +179,20 @@ public abstract class Skill {
 		executor.getEventListener().triggerEvents(EventType.SKILL_CANCEL_EVENT, skillCancelEvent);
 		EpicFightNetworkManager.sendToPlayer(SPSkillExecutionFeedback.expired(executor.getSkill(this).getSlotId()), executor.getOriginal());
 	}
-
-	public final float getDefaultConsumeptionAmount(PlayerPatch<?> executer) {
+	
+	public final float getDefaultConsumptionAmount(PlayerPatch<?> executer) {
 		switch (this.resource) {
 		case STAMINA:
 			return executer.getModifiedStaminaConsume(this.consumption);
 		case WEAPON_INNATE_ENERGY:
-			return 0;
+			return 1;
 		case COOLDOWN:
-			return 0;
+			return 1;
 		default:
 			return 0.0F;
 		}
 	}
-
+	
 	/**
 	 * Instant feedback when the skill is executed successfully
 	 * @param executor
@@ -411,17 +411,7 @@ public abstract class Skill {
 	}
 	
 	public boolean resourcePredicate(PlayerPatch<?> playerpatch) {
-		/**
-		float consumption = this.getDefaultConsumeptionAmount(playerpatch);
-		
-		SkillConsumeEvent event = new SkillConsumeEvent(playerpatch, this, this.resource, consumption, false);
-		playerpatch.getEventListener().triggerEvents(EventType.SKILL_CONSUME_EVENT, event);
-		
-		if (event.isCanceled()) {
-			return false;
-		}
-		**/
-		return playerpatch.consumeForSkill(this, this.resource);//;event.getResourceType().predicate.canExecute(playerpatch, event.getAmount());
+		return playerpatch.consumeForSkill(this, this.resource);
 	}
 	
 	public boolean shouldDeactivateAutomatically(PlayerPatch<?> executer) {
@@ -494,17 +484,15 @@ public abstract class Skill {
 		),
 		
 		WEAPON_INNATE_ENERGY(
-			(skill, playerpatch, amount) -> playerpatch.getSkill(skill).getStack() > amount,
+			(skill, playerpatch, amount) -> playerpatch.getSkill(skill).getStack() >= amount,
 			(skill, playerpatch, amount) -> {
-				skill.setConsumptionSynchronize(playerpatch, 0);
 				skill.setStackSynchronize(playerpatch, playerpatch.getSkill(skill).getStack() - 1);
 			}
 		),
 		
 		COOLDOWN(
-			(skill, playerpatch, amount) -> playerpatch.getSkill(skill).getStack() > amount,
+			(skill, playerpatch, amount) -> playerpatch.getSkill(skill).getStack() >= amount,
 			(skill, playerpatch, amount) -> {
-				skill.setConsumptionSynchronize(playerpatch, 0);
 				skill.setStackSynchronize(playerpatch, playerpatch.getSkill(skill).getStack() - 1);
 			}
 		),

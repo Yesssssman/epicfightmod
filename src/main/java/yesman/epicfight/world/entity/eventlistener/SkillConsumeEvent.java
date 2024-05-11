@@ -13,7 +13,7 @@ public class SkillConsumeEvent extends PlayerEvent<PlayerPatch<?>> {
 	private Skill.Resource resource;
 	
 	public SkillConsumeEvent(PlayerPatch<?> playerpatch, Skill skill, Skill.Resource resource) {
-		this(playerpatch, skill, resource, skill.getDefaultConsumeptionAmount(playerpatch));
+		this(playerpatch, skill, resource, skill.getDefaultConsumptionAmount(playerpatch));
 	}
 	
 	public SkillConsumeEvent(PlayerPatch<?> playerpatch, Skill skill, Skill.Resource resource, float amount) {
