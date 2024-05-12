@@ -90,6 +90,7 @@ import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.api.model.JsonModelLoader;
 import yesman.epicfight.api.utils.InstantiateInvoker;
 import yesman.epicfight.api.utils.ParseUtil;
+import yesman.epicfight.client.gui.datapack.widgets.CheckBox;
 import yesman.epicfight.client.gui.datapack.widgets.ColorPreviewWidget;
 import yesman.epicfight.client.gui.datapack.widgets.ComboBox;
 import yesman.epicfight.client.gui.datapack.widgets.Grid;
@@ -105,11 +106,13 @@ import yesman.epicfight.gameasset.ColliderPreset;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.skill.SkillCategories;
+import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.capabilities.item.WeaponCapability;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.capabilities.item.WeaponTypeReloadListener;
+import yesman.epicfight.world.capabilities.provider.EntityPatchProvider;
 
 @OnlyIn(Dist.CLIENT)
 public class DatapackEditScreen extends Screen {
@@ -1655,6 +1658,18 @@ public class DatapackEditScreen extends Screen {
 	@OnlyIn(Dist.CLIENT)
 	class MobPatchTab extends DatapackTab<EntityType<?>> {
 		private final ModelPreviewer modelPreviewer;
+		private final ComboBox<EntityType<?>> presetCombo = new ComboBox<>(parentScreen, parentScreen.getMinecraft().font, 0, 124, 100, 15, HorizontalSizing.LEFT_WIDTH, null, 8,
+				Component.translatable("datapack_edit.mob_patch.preset"), EntityPatchProvider.getPatchedEntities(), (entityType) -> ParseUtil.nullOrToString(entityType, (type) -> EntityType.getKey(type).toString()), null);
+		
+		private final Consumer<EntityType<?>> comboResponder = (entityType) -> {
+			if (entityType == null) {
+				this.packList.get(this.packListGrid.getRowposition()).getValue().remove("preset");
+			} else {
+				this.packList.get(this.packListGrid.getRowposition()).getValue().putString("preset", EntityType.getKey(entityType).toString());
+			}
+			
+			this.rearrangeComponents(false, entityType == null ? false : true);
+		};
 		
 		public MobPatchTab() {
 			super(Component.translatable("gui." + EpicFightMod.MODID + ".tab.datapack.mob_patch"), MobPatchReloadListener.DIRECTORY, ForgeRegistries.ENTITY_TYPES);
@@ -1662,21 +1677,139 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList = new InputComponentList<>(DatapackEditScreen.this, 0, 0, 0, 0, 30) {
 				@Override
 				public void importTag(CompoundTag tag) {
+					boolean disabled = tag.getBoolean("disabled");
+					boolean preset = tag.contains("preset", Tag.TAG_STRING);
 					
+					MobPatchTab.this.rearrangeComponents(disabled, preset);
+					this.setComponentsActive(true);
+					
+					if (preset) {
+						MobPatchTab.this.presetCombo.setResponder(null);
+						
+						this.setDataBindingComponenets(new Object[] {
+							EntityType.byString(tag.getString("preset")).orElse(null)
+						});
+						
+						MobPatchTab.this.presetCombo.setResponder(MobPatchTab.this.comboResponder);
+					} else if (!disabled) {
+						MobPatchTab.this.presetCombo.setResponder(null);
+						
+						this.setDataBindingComponenets(new Object[] {
+							false,
+						});
+						
+						MobPatchTab.this.presetCombo.setResponder(MobPatchTab.this.comboResponder);
+					}
 				}
 			};
 			
 			this.modelPreviewer = new ModelPreviewer(9, 15, 0, 140, HorizontalSizing.LEFT_RIGHT, null, Armatures.BIPED, Meshes.BIPED);
 			this.modelPreviewer.setColliderJoint(Armatures.BIPED.searchJointByName("Tool_R"));
-			
-			this.inputComponentsList.setLeftPos(164);
-			
-			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.disabled"));
 		}
 		
-		private void rearrangeElements(boolean disable, boolean usePreset, CompoundTag tag) {
+		private void rearrangeComponents(boolean disable, boolean usePreset) {
+			Screen parentScreen = DatapackEditScreen.this;
 			
+			this.inputComponentsList.clearComponents();
+			
+			final CheckBox disableCheckBox = new CheckBox(font, 0, 60, 0, 10, HorizontalSizing.LEFT_WIDTH, null, disable, Component.literal(""), null);
+			final ScreenRectangle screen = getRectangle();
+			
+			disableCheckBox.setResponder((value) -> {
+				this.packList.get(this.packListGrid.getRowposition()).getValue().putBoolean("disabled", value);
+				this.rearrangeComponents(value, false);
+			});
+			
+			if (disable) {
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.disabled"));
+				this.inputComponentsList.addComponentCurrentRow(disableCheckBox.relocateX(screen, this.inputComponentsList.nextStart(5)));
+			} else if (usePreset) {
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.preset"));
+				this.inputComponentsList.addComponentCurrentRow(this.presetCombo.relocateX(screen, this.inputComponentsList.nextStart(4)));
+				this.presetCombo.setResponder(this.comboResponder);
+			} else {
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.disabled"));
+				this.inputComponentsList.addComponentCurrentRow(disableCheckBox.relocateX(screen, this.inputComponentsList.nextStart(5)));
+				
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.preset"));
+				this.inputComponentsList.addComponentCurrentRow(this.presetCombo.relocateX(screen, this.inputComponentsList.nextStart(4)));
+				this.presetCombo.setResponder(this.comboResponder);
+				
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.model"));
+				this.inputComponentsList.addComponentCurrentRow(new PopupBox.MeshPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
+					Component.translatable("datapack_edit.weapon_type.model"), (name, item) -> {
+						this.packList.get(this.packListGrid.getRowposition()).getValue().putString("model", name);
+					}));
+				
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.armature"));
+				this.inputComponentsList.addComponentCurrentRow(new PopupBox.ArmaturePopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
+					Component.translatable("datapack_edit.weapon_type.armature"), (name, item) -> {
+						this.packList.get(this.packListGrid.getRowposition()).getValue().putString("armature", name);
+					}));
+				
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.renderer"));
+				this.inputComponentsList.addComponentCurrentRow(new PopupBox.RendererPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
+					Component.translatable("datapack_edit.weapon_type.renderer"), (name, item) -> {
+						this.packList.get(this.packListGrid.getRowposition()).getValue().putString("renderer", name);
+					}));
+				
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.humanoid"));
+				this.inputComponentsList.addComponentCurrentRow(new CheckBox(font, this.inputComponentsList.nextStart(5), 60, 0, 10, HorizontalSizing.LEFT_WIDTH, null, disable, Component.literal(""), (value) -> {
+						this.packList.get(this.packListGrid.getRowposition()).getValue().putBoolean("humanoid", value);
+					}));
+				
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.faction"));
+				this.inputComponentsList.addComponentCurrentRow(new ComboBox<>(parentScreen, parentScreen.getMinecraft().font, this.inputComponentsList.nextStart(5), 124, 100, 15, HorizontalSizing.LEFT_WIDTH, null, 8,
+					Component.translatable("datapack_edit.mob_patch.faction"), List.of(Faction.values()), (faction) -> ParseUtil.snakeToSpacedCamel(faction), (faction) -> {
+						this.packList.get(this.packListGrid.getRowposition()).getValue().putString("faction", ParseUtil.nullOrToString(faction, (value) -> value.toString().toUpperCase(Locale.ROOT)));
+					}));
+				
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.attributes"));
+				this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
+					return DatapackEditScreen.this;
+				}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+				
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.default_livingmotions"));
+				this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
+					return DatapackEditScreen.this;
+				}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+				
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.stun_animations"));
+				this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
+					return DatapackEditScreen.this;
+				}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+				
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior"));
+				this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
+					return DatapackEditScreen.this;
+				}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+			}
+			
+			this.inputComponentsList.setLeftPos(164);
+		}
+		
+		@Override
+		public void packGridRowpositionChanged(int rowposition, Map<String, Object> values) {
+			this.inputComponentsList.importTag(this.packList.get(rowposition).getValue());
+			
+			/**
+			ResourceLocation rl = new ResourceLocation(ParseUtil.nullParam(values.get("pack_item")));
+			if (this.registry.containsKey(rl)) {
+				//this.modelPreviewer.setItemToRender(this.registry.getValue(rl));
+			}**/
 		}
 		
 		@Override

@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 import com.google.common.collect.Maps;
+import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -53,11 +54,11 @@ public class SelectFromRegistryScreen<T> extends Screen {
 		this.onAccept = onAccept;
 	}
 	
-	public SelectFromRegistryScreen(Screen parentScreen, Set<Map.Entry<ResourceLocation, T>> entries, String title, BiConsumer<String, T> onAccept, Consumer<T> selectCallback, Predicate<T> filter) {
+	public SelectFromRegistryScreen(Screen parentScreen, Set<Pair<ResourceLocation, T>> entries, String title, BiConsumer<String, T> onAccept, Consumer<T> selectCallback, Predicate<T> filter) {
 		super(Component.translatable("gui.epicfight.select", ParseUtil.snakeToSpacedCamel(title)));
 		
-		Map<ResourceLocation, T> filteredItems = entries.stream().filter((entry) -> filter.test(entry.getValue())).reduce(Maps.newHashMap(), (map, element) -> {
-			map.put(element.getKey(), element.getValue());
+		Map<ResourceLocation, T> filteredItems = entries.stream().filter((entry) -> filter.test(entry.getSecond())).reduce(Maps.newHashMap(), (map, element) -> {
+			map.put(element.getFirst(), element.getSecond());
 			return map;
 		}, (map1, map2) -> {
 			map1.putAll(map2);

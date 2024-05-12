@@ -4,14 +4,18 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.mojang.datafixers.util.Pair;
 
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
@@ -190,6 +194,10 @@ public class ParseUtil {
 		} catch (NumberFormatException e) {
 			return defaultValue;
 		}
+	}
+	
+	public static <K, V> Set<Pair<K, V>> mapEntryToPair(Set<Map.Entry<K, V>> entrySet) {
+		return entrySet.stream().map((entry) -> Pair.of(entry.getKey(), entry.getValue())).collect(Collectors.toSet());
 	}
 	
 	public static <T> List<T> remove(Collection<T> collection, T object) {

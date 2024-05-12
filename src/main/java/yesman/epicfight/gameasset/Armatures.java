@@ -1,6 +1,7 @@
 package yesman.epicfight.gameasset;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 
 import com.google.common.collect.Maps;
@@ -133,6 +134,10 @@ public class Armatures {
 			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, wrappedLocation);
 			return jsonModelLoader.loadArmature(constructor);
 		});
+	}
+	
+	public static Set<Map.Entry<ResourceLocation, Armature>> entries() {
+		return ARMATURES.entrySet();
 	}
 	
 	public static ResourceLocation wrapLocation(ResourceLocation rl) {

@@ -27,6 +27,7 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 	private final int maxRows;
 	
 	private Consumer<T> responder;
+	private boolean useResponder = true;
 	private boolean listOpened;
 	
 	public ComboBox(Screen parent, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, int maxRows, Component title, Collection<T> items, Function<T, String> displayStringMapper, Consumer<T> responder) {
@@ -165,7 +166,6 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 		guiGraphics.fill(this._getX(), this._getY(), this._getX() + this.width, this._getY() + this.height, -16777216);
 		
 		String correctedString = this.font.plainSubstrByWidth(this.comboItemList.getSelected() == null ? "" : this.comboItemList.getSelected().displayName, this.width - 10);
-		
 		int fontColor = this.isActive() ? 16777215 : 4210752;
 		
 		guiGraphics.drawString(this.font, Component.literal(correctedString), this._getX() + 4, this._getY() + this.height / 2 - this.font.lineHeight / 2 + 1, fontColor, false);
@@ -361,7 +361,7 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 	public void setValue(T value) {
 		this.comboItemList.setSelected(value);
 		
-		if (this.responder != null) {
+		if (this.responder != null && this.useResponder) {
 			this.responder.accept(value);
 		}
 	}

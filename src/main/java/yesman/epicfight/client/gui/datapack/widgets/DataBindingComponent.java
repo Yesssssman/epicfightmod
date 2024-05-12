@@ -9,8 +9,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public interface DataBindingComponent<T> extends ResizableComponent {
-	public void setResponder(Consumer<T> responder);
-	public void setValue(@Nullable T value);
 	public T getValue();
+	public void setValue(@Nullable T value);
 	public void reset();
+	public void setResponder(Consumer<T> responder);
 }

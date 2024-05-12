@@ -15,7 +15,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class CheckBox extends AbstractWidget implements DataBindingComponent<Boolean> {
 	private final Font font;
 	private final boolean defaultVal;
-	
 	private Consumer<Boolean> responder;
 	private Boolean value;
 	

@@ -2,6 +2,7 @@ package yesman.epicfight.client.events.engine;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import com.google.common.collect.Maps;
@@ -282,6 +283,10 @@ public class RenderEngine {
 	
 	public boolean hasRendererFor(Entity entity) {
 		return this.entityRendererCache.computeIfAbsent(entity.getType(), (key) -> this.entityRendererProvider.containsKey(key) ? this.entityRendererProvider.get(entity.getType()).get() : null) != null;
+	}
+	
+	public Set<EntityType<?>> getRendererEntities() {
+		return this.entityRendererProvider.keySet();
 	}
 	
 	//Nothing happens if player is already zooming-in

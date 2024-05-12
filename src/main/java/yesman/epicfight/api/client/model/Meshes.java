@@ -1,6 +1,7 @@
 package yesman.epicfight.api.client.model;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
@@ -131,6 +132,10 @@ public class Meshes implements PreparableReloadListener {
 	
 	public static void addMesh(ResourceLocation rl, AnimatedMesh animatedMesh) {
 		MESHES.put(rl, animatedMesh);
+	}
+	
+	public static Set<Map.Entry<ResourceLocation, Mesh<?>>> entries() {
+		return MESHES.entrySet();
 	}
 	
 	public static ResourceLocation wrapLocation(ResourceLocation rl) {
