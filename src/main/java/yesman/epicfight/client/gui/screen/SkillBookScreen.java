@@ -10,7 +10,6 @@ import javax.annotation.Nullable;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
-import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -80,7 +79,7 @@ public class SkillBookScreen extends Screen {
 	protected final InteractionHand hand;
 	protected final Screen parentScreen;
 	protected final SkillTooltipList skillTooltipList;
-	protected final AvailableItemsList itemList = new AvailableItemsList(0, 0);
+	protected final AvailableItemsList availableWeaponCategoryList = new AvailableItemsList(0, 0);
 	
 	public SkillBookScreen(Player opener, ItemStack stack, InteractionHand hand) {
 		this(opener, SkillBookItem.getContainSkill(stack), hand, null);
@@ -96,11 +95,11 @@ public class SkillBookScreen extends Screen {
 		this.parentScreen = parentScreen;
 		this.skillTooltipList = new SkillTooltipList(Minecraft.getInstance(), 0, 0, 0 ,0, Minecraft.getInstance().font.lineHeight);
 		
-		List<FormattedCharSequence> list = Minecraft.getInstance().font.split(Component.translatable(this.skill.getTranslationKey() + ".tooltip", this.skill.getTooltipArgsOfScreen(Lists.newArrayList()).toArray(new Object[0])), 144);
+		List<FormattedCharSequence> list = Minecraft.getInstance().font.split(Component.translatable(this.skill.getTranslationKey() + ".tooltip", this.skill.getTooltipArgsOfScreen(Lists.newArrayList()).toArray(new Object[0])), 130);
 		list.forEach(this.skillTooltipList::add);
 		
 		if (this.skill.getAvailableWeaponCategories() != null) {
-			this.skill.getAvailableWeaponCategories().forEach(this.itemList::addWeaponCategory);
+			this.skill.getAvailableWeaponCategories().forEach(this.availableWeaponCategoryList::addWeaponCategory);
 		}
 	}
 	
@@ -132,7 +131,7 @@ public class SkillBookScreen extends Screen {
 				SlotSelectScreen slotSelectScreen = new SlotSelectScreen(skillContainers, this);
 				this.minecraft.setScreen(slotSelectScreen);
 			}
-		}).bounds((this.width + 150) / 2, (this.height + 120) / 2, 46, 20).tooltip(Tooltip.create(tooltip, null)).build();
+		}).bounds((this.width) / 2 + 100, (this.height) / 2 + 75, 46, 20).tooltip(Tooltip.create(tooltip, null)).build();
 		
 		if (isUsing || !condition) {
 			changeButton.active = false;
@@ -142,15 +141,15 @@ public class SkillBookScreen extends Screen {
 			changeButton.visible = false;
 		}
 		
-		this.itemList.setX((this.width - 45) / 2);
-		this.itemList.setY((this.height + 58) / 2);
+		this.availableWeaponCategoryList.setX(this.width / 2 + 17);
+		this.availableWeaponCategoryList.setY(this.height / 2 + 40);
 		
-		this.skillTooltipList.updateSize(150, 400, (this.height - 200) / 2, (this.height + (this.itemList.availableCategories.size() == 0 ? 100 : 40)) / 2);
-		this.skillTooltipList.setLeftPos((this.width - 45) / 2);
+		this.skillTooltipList.updateSize(175, 400, (this.height - 180) / 2, (this.height + (this.availableWeaponCategoryList.availableCategories.size() == 0 ? 130 : 60)) / 2);
+		this.skillTooltipList.setLeftPos(this.width / 2 - 20);
 		
 		this.addRenderableWidget(changeButton);
 		this.addRenderableWidget(this.skillTooltipList);
-		this.addRenderableWidget(this.itemList);
+		this.addRenderableWidget(this.availableWeaponCategoryList);
 	}
 	
 	protected void learnSkill(SkillContainer skillContainer) {
@@ -181,39 +180,26 @@ public class SkillBookScreen extends Screen {
 			this.renderBackground(guiGraphics);
 		}
 		
-		PoseStack poseStack = guiGraphics.pose();
-
-		int posX = (this.width - 256) / 2;
-		int posY = (this.height - 200) / 2;
+		int posX = (this.width - 274) / 2;
+		int posY = (this.height - 165) / 2;
 		
 		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 
-		poseStack.pushPose();
-		poseStack.translate(posX + 128, posY + 90, 0.0F);
-		poseStack.scale(1.2F, 1.2F, 1.0F);
-		guiGraphics.blit(BACKGROUND, -128, -90, 0, 0, 256, 181);
-		
-		poseStack.popPose();
-		poseStack.pushPose();
-		
-		poseStack.translate(posX + 5, posY + 12, 0.0F);
-		poseStack.scale(1.2F, 1.2F, 1.0F);
+		guiGraphics.blit(BACKGROUND, this.width / 2 - 175, this.height / 2 - 120, 0, 0, 350, 243, 350, 290);
 		
 		RenderSystem.enableBlend();
-		guiGraphics.blit(this.skill.getSkillTexture(), 0, 0, 50, 50, 0, 0, 64, 64, 64, 64);
+		guiGraphics.blit(this.skill.getSkillTexture(), this.width / 2 - 112, this.height / 2 - 83, 60, 60, 0, 0, 64, 64, 64, 64);
 		RenderSystem.disableBlend();
-		
-		poseStack.popPose();
 		
 		String translationName = this.skill.getTranslationKey();
 		String skillName = Component.translatable(translationName).getString();
 		int width = this.font.width(skillName);
-		guiGraphics.drawString(font, skillName, posX + 36 - width / 2, posY + 85, 0, false);
+		guiGraphics.drawString(font, skillName, posX + 36 + /**/20 - width / 2, posY + 85, 0, false);
 
 		String skillCategory = String.format("(%s)", Component.translatable("skill." + EpicFightMod.MODID + "." + this.skill.getCategory().toString().toLowerCase() + ".category").getString());
 		width = this.font.width(skillCategory);
-		guiGraphics.drawString(font, skillCategory, posX + 36 - width / 2, posY + 100, 0, false);
-
+		guiGraphics.drawString(font, skillCategory, posX + 36 + /**/20 - width / 2, posY + 100, 0, false);
+		
 		if (!this.skill.getModfierEntry().isEmpty()) {
 			int i = 135;
 			
@@ -240,7 +226,7 @@ public class SkillBookScreen extends Screen {
 					break;
 				}
 				
-				guiGraphics.drawString(this.font, operator + amountString + " " + attrName, posX + 23 - width / 2, posY + i, 0, false);
+				guiGraphics.drawString(this.font, operator + amountString + " " + attrName, posX + 20 - width / 2, posY + i, 0, false);
 				i += 10;
 			}
 		}
@@ -281,7 +267,7 @@ public class SkillBookScreen extends Screen {
 			
 			@Override
 			public void render(GuiGraphics guiGraphics, int index, int top, int left, int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
-				guiGraphics.drawString(SkillBookScreen.this.font, this.tooltip, left + 33, top, 0, false);
+				guiGraphics.drawString(SkillBookScreen.this.font, this.tooltip, left + 33 + /**/26, top, 0, false);
 			}
 			
 			@Override

@@ -527,9 +527,11 @@ public class DatapackEditScreen extends Screen {
 		}
 		
 		for (Map.Entry<ResourceLocation, AnimatedMesh> entry : this.userMeshes.entrySet()) {
+			
 		}
 		
 		for (Map.Entry<ResourceLocation, Armature> entry : this.userArmatures.entrySet()) {
+			
 		}
 	}
 	

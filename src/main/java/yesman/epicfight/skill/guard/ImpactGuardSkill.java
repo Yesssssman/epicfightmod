@@ -9,6 +9,8 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSkills;
@@ -124,6 +126,13 @@ public class ImpactGuardSkill extends GuardSkill {
 	@Override
 	protected boolean isAdvancedGuard() {
 		return true;
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	@Override
+	public List<Object> getTooltipArgsOfScreen(List<Object> list) {
+		list.add(String.format("%.1f", 100.0F - this.damageReducer));
+		return list;
 	}
 	
 	@Override
