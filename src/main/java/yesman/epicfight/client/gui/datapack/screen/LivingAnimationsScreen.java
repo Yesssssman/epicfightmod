@@ -34,6 +34,7 @@ import yesman.epicfight.client.gui.datapack.widgets.PopupBox;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.HorizontalSizing;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.VerticalSizing;
 import yesman.epicfight.client.gui.datapack.widgets.Static;
+import yesman.epicfight.client.gui.datapack.widgets.Grid.GridBuilder.RowEditButton;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
@@ -64,17 +65,17 @@ public class LivingAnimationsScreen extends Screen {
 								.horizontalSizing(HorizontalSizing.LEFT_WIDTH)
 								.verticalSizing(VerticalSizing.TOP_BOTTOM)
 								.rowHeight(21)
-								.rowEditable(true)
+								.rowEditable(RowEditButton.ADD_REMOVE)
 								.transparentBackground(false)
 								.rowpositionChanged((rowposition, values) -> {
 									Grid.PackImporter importer = new Grid.PackImporter();
 									
 									for (Map.Entry<String, Tag> entry : this.styles.get(rowposition).getValue().tags.entrySet()) {
-										importer.newRow().newValue("living_motion", LivingMotion.ENUM_MANAGER.get(entry.getKey())).newValue("living_animation", DatapackEditScreen.byKey(entry.getValue().getAsString()));
+										importer.newRow().newValue("living_motion", LivingMotion.ENUM_MANAGER.get(entry.getKey())).newValue("living_animation", DatapackEditScreen.animationByKey(entry.getValue().getAsString()));
 									}
 									
 									this.animationsGrid._setActive(true);
-									this.animationsGrid.setValue(importer);
+									this.animationsGrid._setValue(importer);
 								})
 								.addColumn(Grid.combo("style", Style.ENUM_MANAGER.universalValues())
 												.valueChanged((event) -> this.styles.get(event.rowposition).setPackKey(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT)))
@@ -99,7 +100,7 @@ public class LivingAnimationsScreen extends Screen {
 									.horizontalSizing(HorizontalSizing.WIDTH_RIGHT)
 									.verticalSizing(VerticalSizing.TOP_BOTTOM)
 									.rowHeight(21)
-									.rowEditable(true)
+									.rowEditable(RowEditButton.ADD_REMOVE)
 									.transparentBackground(false)
 									.addColumn(Grid.combo("living_motion", List.of(LivingMotions.IDLE, LivingMotions.WALK, LivingMotions.RUN, LivingMotions.SNEAK, LivingMotions.SWIM, LivingMotions.FLOAT, LivingMotions.KNEEL, LivingMotions.FALL,
 											LivingMotions.SIT, LivingMotions.FLY, LivingMotions.CREATIVE_FLY, LivingMotions.CREATIVE_IDLE, LivingMotions.RELOAD, LivingMotions.AIM, LivingMotions.SHOT))
@@ -111,8 +112,8 @@ public class LivingAnimationsScreen extends Screen {
 														tag.put(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT), animationTag == null ? StringTag.valueOf("") : animationTag);
 														
 														this.modelPreviewer.clearAnimations();
-														this.modelPreviewer.animator.getEntityPatch().currentLivingMotion = event.postValue;
-														this.modelPreviewer.animator.getEntityPatch().currentCompositeMotion = event.postValue;
+														this.modelPreviewer.getAnimator().getEntityPatch().currentLivingMotion = event.postValue;
+														this.modelPreviewer.getAnimator().getEntityPatch().currentCompositeMotion = event.postValue;
 														
 														if (LIVING_ANIMTIONS.containsKey(event.postValue)) {
 															this.modelPreviewer.addAnimationToPlay(LIVING_ANIMTIONS.get(event.postValue));
@@ -121,7 +122,7 @@ public class LivingAnimationsScreen extends Screen {
 														StaticAnimation livingAnimation = this.animationsGrid.getValue(event.rowposition, "living_animation");
 														
 														if (livingAnimation != null) {
-															this.modelPreviewer.animator.playAnimation(livingAnimation, 0.0F);
+															this.modelPreviewer.getAnimator().playAnimation(livingAnimation, 0.0F);
 														}
 													}).defaultVal(LivingMotions.IDLE))
 									.addColumn(Grid.popup("living_animation", PopupBox.AnimationPopupBox::new)
@@ -156,8 +157,8 @@ public class LivingAnimationsScreen extends Screen {
 									.rowpositionChanged((rowposition, values) -> {
 										this.modelPreviewer.clearAnimations();
 										LivingMotion livingMotion = (LivingMotion)values.get("living_motion");
-										this.modelPreviewer.animator.getEntityPatch().currentLivingMotion = livingMotion;
-										this.modelPreviewer.animator.getEntityPatch().currentCompositeMotion = livingMotion;
+										this.modelPreviewer.getAnimator().getEntityPatch().currentLivingMotion = livingMotion;
+										this.modelPreviewer.getAnimator().getEntityPatch().currentCompositeMotion = livingMotion;
 										
 										if (LIVING_ANIMTIONS.containsKey(livingMotion)) {
 											this.modelPreviewer.addAnimationToPlay(LIVING_ANIMTIONS.get(livingMotion));
@@ -166,7 +167,7 @@ public class LivingAnimationsScreen extends Screen {
 										StaticAnimation animation = (StaticAnimation)values.get("living_animation");
 										
 										if (animation != null) {
-											this.modelPreviewer.animator.playAnimation(animation, 0.0F);
+											this.modelPreviewer.getAnimator().playAnimation(animation, 0.0F);
 										}
 									})
 									.build();
@@ -182,7 +183,7 @@ public class LivingAnimationsScreen extends Screen {
 			packImporter.newValue("style", Style.ENUM_MANAGER.get(entry.getKey()));
 		}
 		
-		this.stylesGrid.setValue(packImporter);
+		this.stylesGrid._setValue(packImporter);
 	}
 	
 	@Override

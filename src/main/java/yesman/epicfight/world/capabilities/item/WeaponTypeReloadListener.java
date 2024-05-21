@@ -12,6 +12,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
+import io.netty.util.internal.StringUtil;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -123,8 +124,13 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 	public static WeaponCapability.Builder deserializeWeaponCapabilityBuilder(CompoundTag tag) {
 		WeaponCapability.Builder builder = WeaponCapability.builder();
 		
+		if (!tag.contains("category") || StringUtil.isNullOrEmpty(tag.getString("category"))) {
+			throw new IllegalArgumentException("Define weapon category.");
+		}
+		
 		builder.category(WeaponCategory.ENUM_MANAGER.getOrThrow(tag.getString("category")));
 		builder.collider(ColliderPreset.deserializeSimpleCollider(tag.getCompound("collider")));
+		builder.canBePlacedOffhand(tag.contains("usable_in_offhand") ? tag.getBoolean("usable_in_offhand") : true);
 		
 		if (tag.contains("hit_particle")) {
 			ParticleType<?> particleType = ForgeRegistries.PARTICLE_TYPES.getValue(new ResourceLocation(tag.getString("hit_particle")));

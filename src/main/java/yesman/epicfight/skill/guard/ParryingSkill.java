@@ -1,6 +1,5 @@
 package yesman.epicfight.skill.guard;
 
-import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -12,8 +11,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSkills;
@@ -167,22 +164,8 @@ public class ParryingSkill extends GuardSkill {
 		return true;
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
-	public List<Object> getTooltipArgsOfScreen(List<Object> list) {
-		list.clear();
-
-		StringBuilder sb = new StringBuilder();
-		Iterator<WeaponCategory> iter = this.advancedGuardMotions.keySet().iterator();
-
-		while (iter.hasNext()) {
-			sb.append(WeaponCategory.ENUM_MANAGER.toTranslated(iter.next()));
-			if (iter.hasNext())
-				sb.append(", ");
-		}
-
-		list.add(sb.toString());
-
-		return list;
+	public List<WeaponCategory> getAvailableWeaponCategories() {
+		return List.copyOf(this.advancedGuardMotions.keySet());
 	}
 }

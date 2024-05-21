@@ -1,9 +1,12 @@
 package yesman.epicfight.gameasset;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
 
 import net.minecraft.resources.ResourceLocation;
@@ -15,6 +18,8 @@ import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.forgeevent.ModelBuildEvent;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.model.JsonModelLoader;
+import yesman.epicfight.client.gui.datapack.screen.DatapackEditScreen;
+import yesman.epicfight.client.gui.datapack.screen.PackEntry;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.model.armature.CreeperArmature;
 import yesman.epicfight.model.armature.DragonArmature;
@@ -38,7 +43,7 @@ public class Armatures {
 		T invoke(String name, int jointNumber, Joint joint, Map<String, Joint> jointMap);
 	}
 	
-	private static final Map<ResourceLocation, Armature> ARMATURES = Maps.newHashMap();
+	private static final BiMap<ResourceLocation, Armature> ARMATURES = HashBiMap.create();
 	private static final Map<EntityType<?>, Function<EntityPatch<?>, Armature>> ENTITY_TYPE_ARMATURE = Maps.newHashMap();
 	
 	public static HumanoidArmature BIPED;
@@ -122,16 +127,27 @@ public class Armatures {
 		return (A)ENTITY_TYPE_ARMATURE.get(entitypatch.getOriginal().getType()).apply(entitypatch).deepCopy();
 	}
 	
+	public static ResourceLocation getKey(Armature armature) {
+		return ARMATURES.inverse().get(armature);
+	}
+	
+	public static Armature getArmatureOrNull(ResourceLocation rl) {
+		return ARMATURES.get(rl);
+	}
+	
+	public static void refreshUserArmatures(List<PackEntry<String, Armature>> userMeshes) {
+		DatapackEditScreen.getCurrentScreen().getUserMeshes().keySet().forEach(ARMATURES::remove);
+		userMeshes.forEach((entry) -> ARMATURES.put(new ResourceLocation(entry.getKey()), entry.getValue()));
+	}
+	
 	public static Function<EntityPatch<?>, Armature> getRegistry(EntityType<?> entityType) {
 		return ENTITY_TYPE_ARMATURE.get(entityType);
 	}
 	
 	@SuppressWarnings("unchecked")
 	public static <A extends Armature> A getOrCreateArmature(ResourceManager rm, ResourceLocation rl, ArmatureContructor<A> constructor) {
-		final ResourceLocation wrappedLocation = wrapLocation(rl);
-		
-		return (A) ARMATURES.computeIfAbsent(wrappedLocation, (key) -> {
-			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, wrappedLocation);
+		return (A) ARMATURES.computeIfAbsent(rl, (key) -> {
+			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, wrapLocation(rl));
 			return jsonModelLoader.loadArmature(constructor);
 		});
 	}

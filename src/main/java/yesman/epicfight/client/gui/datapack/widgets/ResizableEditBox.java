@@ -1,5 +1,7 @@
 package yesman.epicfight.client.gui.datapack.widgets;
 
+import java.util.function.Consumer;
+
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.EditBox;
@@ -8,7 +10,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class ResizableEditBox extends EditBox implements DataBindingComponent<String> {
+public class ResizableEditBox extends EditBox implements DataBindingComponent<String, String> {
 	public ResizableEditBox(Font font, int x1, int x2, int y1, int y2, Component title, HorizontalSizing horizontalSizingOption, VerticalSizing verticalSizingOption) {
 		super(font, x1, y1, x2, y2, title);
 		
@@ -87,7 +89,11 @@ public class ResizableEditBox extends EditBox implements DataBindingComponent<St
 
 	@Override
 	public void reset() {
+		Consumer<String> responder = this.responder;
+		
+		this.setResponder(null);
 		this.setValue("");
+		this.setResponder(responder);
 	}
 
 	@Override
@@ -143,5 +149,29 @@ public class ResizableEditBox extends EditBox implements DataBindingComponent<St
 	@Override
 	public void _renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		this.renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
+	}
+
+	@Override
+	public String _getValue() {
+		return this.getValue();
+	}
+
+	@Override
+	public void _setValue(String value) {
+		if (value == null) {
+			this.setValue("");
+		} else {
+			this.setValue(value);
+		}
+	}
+
+	@Override
+	public void _setResponder(Consumer<String> responder) {
+		this.setResponder(responder);
+	}
+	
+	@Override
+	public Consumer<String> _getResponder() {
+		return this.responder;
 	}
 }

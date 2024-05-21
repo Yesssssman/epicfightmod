@@ -1,17 +1,15 @@
 package yesman.epicfight.data.conditions.entity;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 
-import com.google.common.collect.ImmutableMap;
-
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.data.conditions.Condition.LivingEntityCondition;
-import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+import yesman.epicfight.data.conditions.Condition.MobPatchCondition;
+import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 
-public class TargetInEyeHeight extends LivingEntityCondition {
+public class TargetInEyeHeight extends MobPatchCondition {
 	@Override
 	public TargetInEyeHeight read(CompoundTag tag) {
 		return this;
@@ -23,14 +21,14 @@ public class TargetInEyeHeight extends LivingEntityCondition {
 	}
 	
 	@Override
-	public boolean predicate(LivingEntityPatch<?> target) {
+	public boolean predicate(MobPatch<?> target) {
 		double veticalDistance = Math.abs(target.getOriginal().getY() - target.getTarget().getY());
 		return veticalDistance < target.getOriginal().getEyeHeight();
 	}
 	
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public Set<Map.Entry<String, Object>> getAcceptingParameters() {
-		return ImmutableMap.<String, Object>of().entrySet();
+	public List<ParameterEditor> getAcceptingParameters(Screen screen) {
+		return List.of();
 	}
 }

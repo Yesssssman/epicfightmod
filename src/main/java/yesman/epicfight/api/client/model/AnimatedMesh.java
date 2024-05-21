@@ -104,29 +104,6 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 		this.draw(poseStack, builder, DrawingFunction.ENTITY_PARTICLE, packedLightIn, r, g, b, a, overlayCoord, null, poses);
 	}
 	
-	@FunctionalInterface
-	public interface DrawingFunction {
-		public static final DrawingFunction ENTITY_TRANSLUCENT = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
-			builder.vertex(posVec.x(), posVec.y(), posVec.z(), r, g, b, a, u, v, overlay, packedLightIn, normalVec.x(), normalVec.y(), normalVec.z());
-		};
-		
-		public static final DrawingFunction ENTITY_PARTICLE = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
-			builder.vertex(posVec.x(), posVec.y(), posVec.z());
-			builder.color(r, g, b, a);
-			builder.uv2(packedLightIn);
-			builder.endVertex();
-		};
-		
-		public static final DrawingFunction ENTITY_SOLID = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
-			builder.vertex(posVec.x(), posVec.y(), posVec.z());
-			builder.color(r, g, b, a);
-			builder.normal(normalVec.x(), normalVec.y(), normalVec.z());
-			builder.endVertex();
-		};
-		
-		public void draw(VertexConsumer builder, Vector4f posVec, Vector3f normalVec, int packedLightIn, float r, float g, float b, float a, float u, float v, int overlay);
-	}
-	
 	public JsonObject toJsonObject() {
 		JsonObject root = new JsonObject();
 		JsonObject vertices = new JsonObject();

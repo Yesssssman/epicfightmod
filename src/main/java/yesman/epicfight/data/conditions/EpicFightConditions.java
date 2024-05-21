@@ -8,7 +8,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.RegistryBuilder;
 import net.minecraftforge.registries.RegistryObject;
 import yesman.epicfight.data.conditions.entity.HealthPoint;
-import yesman.epicfight.data.conditions.entity.OffhandCategory;
+import yesman.epicfight.data.conditions.entity.OffhandItemCategory;
 import yesman.epicfight.data.conditions.entity.RandomChance;
 import yesman.epicfight.data.conditions.entity.TargetInDistance;
 import yesman.epicfight.data.conditions.entity.TargetInEyeHeight;
@@ -33,8 +33,10 @@ public class EpicFightConditions {
 		return (Supplier<T>) REGISTRY.get().getValue(key);
 	}
 	
-	//LivingEntityPatch conditions
-	public static final RegistryObject<Supplier<Condition<?>>> OFFHAND_CATEGORY = CONDITIONS.register(new ResourceLocation(EpicFightMod.MODID, "offhand_category").getPath(), () -> OffhandCategory::new);
+	//PlayerPatch conditions
+	public static final RegistryObject<Supplier<Condition<?>>> OFFHAND_ITEM_CATEGORY = CONDITIONS.register(new ResourceLocation(EpicFightMod.MODID, "offhand_category").getPath(), () -> OffhandItemCategory::new);
+	
+	//Mobpatch conditions
 	public static final RegistryObject<Supplier<Condition<?>>> HEALTH_POINT = CONDITIONS.register(new ResourceLocation(EpicFightMod.MODID, "health").getPath(), () -> HealthPoint::new);
 	public static final RegistryObject<Supplier<Condition<?>>> RANDOM = CONDITIONS.register(new ResourceLocation(EpicFightMod.MODID, "random_chance").getPath(), () -> RandomChance::new);
 	public static final RegistryObject<Supplier<Condition<?>>> TARGET_IN_DISTANCE = CONDITIONS.register(new ResourceLocation(EpicFightMod.MODID, "within_distance").getPath(), () -> TargetInDistance::new);

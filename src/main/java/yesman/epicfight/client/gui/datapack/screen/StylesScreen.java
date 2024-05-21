@@ -1,8 +1,16 @@
 package yesman.epicfight.client.gui.datapack.screen;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.function.Supplier;
 
+import org.apache.commons.compress.utils.Lists;
+
+import com.google.common.collect.Sets;
+
+import io.netty.util.internal.StringUtil;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -21,12 +29,17 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.client.gui.datapack.widgets.ComboBox;
 import yesman.epicfight.client.gui.datapack.widgets.Grid;
+import yesman.epicfight.client.gui.datapack.widgets.Grid.GridBuilder.RowEditButton;
 import yesman.epicfight.client.gui.datapack.widgets.InputComponentList;
 import yesman.epicfight.client.gui.datapack.widgets.PopupBox;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.HorizontalSizing;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.VerticalSizing;
+import yesman.epicfight.client.gui.datapack.widgets.ResizableEditBox;
 import yesman.epicfight.client.gui.datapack.widgets.Static;
-import yesman.epicfight.data.conditions.Condition.LivingEntityCondition;
+import yesman.epicfight.data.conditions.Condition;
+import yesman.epicfight.data.conditions.Condition.ParameterEditor;
+import yesman.epicfight.data.conditions.Condition.PlayerPatchCondition;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.data.conditions.EpicFightConditions;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
@@ -38,6 +51,8 @@ public class StylesScreen extends Screen {
 	private final Grid stylesGrid;
 	private final ComboBox<Style> defaultStyle;
 	private final InputComponentList<CompoundTag> inputComponentsList;
+	private final List<CompoundTag> cases = Lists.newArrayList();
+	private final CompoundTag rootTag;
 	
 	public StylesScreen(Screen parentScreen, CompoundTag rootTag) {
 		super(Component.translatable("datapack_edit.weapon_type.styles"));
@@ -45,21 +60,34 @@ public class StylesScreen extends Screen {
 		this.parentScreen = parentScreen;
 		this.minecraft = parentScreen.getMinecraft();
 		this.font = parentScreen.getMinecraft().font;
+		this.rootTag = rootTag;
 		
 		this.inputComponentsList = new InputComponentList<>(this, 0, 0, 0, 0, 22) {
 			@Override
 			public void importTag(CompoundTag tag) {
 				this.setComponentsActive(true);
-				Grid.PackImporter packImporter = new Grid.PackImporter();
 				
-				for (String key : ParseUtil.getOrDefaultTag(tag, "predicate", new CompoundTag()).getAllKeys()) {
-					packImporter.newRow();
-					packImporter.newValue("parameter_key", key);
-					packImporter.newValue("parameter_value", tag.getCompound("predicate").getString(key));
+				Grid.PackImporter packImporter = new Grid.PackImporter();
+				String condtionName = tag.getString("condition");
+				
+				if (!condtionName.contains(":")) {
+					condtionName = EpicFightMod.MODID + ":" + condtionName;
+				}
+				
+				Supplier<Condition<?>> conditionProvider = EpicFightConditions.getConditionOrNull(new ResourceLocation(condtionName));
+				
+				if (conditionProvider != null) {
+					Condition<?> condition = conditionProvider.get();
+					
+					for (ParameterEditor paramEditor : condition.getAcceptingParameters(StylesScreen.this)) {
+						packImporter.newRow();
+						packImporter.newValue("parameter_key", paramEditor);
+						packImporter.newValue("parameter_value", paramEditor.fromTag.apply(tag.getCompound("predicate").get(paramEditor.editWidget.getMessage().getString())));
+					}
 				}
 				
 				this.setDataBindingComponenets(new Object[] {
-					EpicFightConditions.getConditionOrNull(new ResourceLocation(tag.getString("condition"))),
+					conditionProvider,
 					packImporter
 				});
 			}
@@ -73,23 +101,21 @@ public class StylesScreen extends Screen {
 								.horizontalSizing(HorizontalSizing.LEFT_WIDTH)
 								.verticalSizing(VerticalSizing.TOP_BOTTOM)
 								.rowHeight(26)
-								.rowEditable(true)
+								.rowEditable(RowEditButton.ADD_REMOVE)
 								.transparentBackground(false)
-								.rowpositionChanged((rowposition, values) -> this.inputComponentsList.importTag(rootTag.getList("cases", Tag.TAG_COMPOUND).getCompound(rowposition)))
+								.rowpositionChanged((rowposition, values) -> this.inputComponentsList.importTag(this.cases.get(rowposition)))
 								.addColumn(Grid.combo("style", ParseUtil.remove(Style.ENUM_MANAGER.universalValues(), CapabilityItem.Styles.COMMON)).valueChanged((event) -> {
-												ParseUtil.getOrDefaultTag(rootTag, "cases", new ListTag()).getCompound(event.rowposition).put("style", StringTag.valueOf(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT)));
+												this.cases.get(event.rowposition).put("style", StringTag.valueOf(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT)));
 											}).defaultVal(Styles.ONE_HAND))
 								.pressAdd((grid, button) -> {
-									ParseUtil.getOrDefaultTag(rootTag, "cases", new ListTag()).add(grid.children().size(), new CompoundTag());
-									int rowposition = grid.addRow();
+									int rowposition = grid.addRow((addedRow) -> this.cases.add(addedRow, new CompoundTag()));
 									grid.setGridFocus(rowposition, "style");
 								})
 								.pressRemove((grid, button) -> {
 									grid.removeRow((removedRow) -> {
-										ListTag cases = rootTag.getList("cases", Tag.TAG_COMPOUND);
-										cases.remove(removedRow);
+										this.cases.remove(removedRow);
 										
-										if (cases.size() == 0) {
+										if (this.cases.size() == 0) {
 											this.inputComponentsList.setComponentsActive(false);
 										}
 									});
@@ -97,7 +123,7 @@ public class StylesScreen extends Screen {
 								.build();
 		
 		this.defaultStyle = new ComboBox<>(parentScreen, this.font, 55, 116, 15, 53, HorizontalSizing.LEFT_WIDTH, VerticalSizing.HEIGHT_BOTTOM, 8, Component.translatable("datapack_edit.weapon_type.styles.default"),
-											new ArrayList<>(ParseUtil.remove(Style.ENUM_MANAGER.universalValues(), CapabilityItem.Styles.COMMON)), ParseUtil::snakeToSpacedCamel, (style) -> rootTag.putString("default", ParseUtil.nullParam(style).toLowerCase(Locale.ROOT)));
+											new ArrayList<>(ParseUtil.remove(Style.ENUM_MANAGER.universalValues(), CapabilityItem.Styles.COMMON)), ParseUtil::snakeToSpacedCamel, null);
 		
 		this.font = parentScreen.getMinecraft().font;
 		
@@ -106,29 +132,37 @@ public class StylesScreen extends Screen {
 										.xy2(1, 100)
 										.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
 										.rowHeight(26)
-										.rowEditable(false)
+										.rowEditable(RowEditButton.NONE)
 										.transparentBackground(false)
-										.addColumn(Grid.editbox("parameter_key").valueChanged((event) -> {
-											CompoundTag predicate = ParseUtil.getOrDefaultTag(rootTag.getList("cases", Tag.TAG_COMPOUND).getCompound(this.stylesGrid.getRowposition()), "predicate", new CompoundTag());
-											predicate.remove(ParseUtil.nullParam(event.prevValue));
-											predicate.putString(ParseUtil.nullParam(event.postValue), ParseUtil.nullParam(event.grid.getValue(event.rowposition, "parameter_value")));
-										}).editable(false))
-										.addColumn(Grid.editbox("parameter_value").valueChanged((event) -> {
-											CompoundTag predicate = ParseUtil.getOrDefaultTag(rootTag.getList("cases", Tag.TAG_COMPOUND).getCompound(this.stylesGrid.getRowposition()), "predicate", new CompoundTag());
-											predicate.putString(ParseUtil.nullParam(event.grid.getValue(event.rowposition, "parameter_key")), ParseUtil.nullParam(event.postValue));
-										}).width(150))
+										.addColumn(Grid.<ParameterEditor, ResizableEditBox>wildcard("parameter_key")
+														.editable(false)
+														.toDisplayText((editor) -> editor.editWidget.getMessage().getString())
+														.width(100))
+										.addColumn(Grid.wildcard("parameter_value")
+														.editWidgetProvider((row) -> {
+															ParameterEditor editor = row.getValue("parameter_key");
+															return editor.editWidget;
+														})
+														.toDisplayText(ParseUtil::snakeToSpacedCamel)
+														.editable(true)
+														.valueChanged((event) -> {
+															CompoundTag predicate = ParseUtil.getOrDefaultTag(this.cases.get(this.stylesGrid.getRowposition()), "predicate", new CompoundTag());
+															ParameterEditor editor = event.grid.getValue(event.rowposition, "parameter_key");
+															predicate.put(editor.editWidget.getMessage().getString(), editor.toTag.apply(event.postValue));
+														}).width(150))
 										.build();
 		
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 80, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.styles.condition")));
 		this.inputComponentsList.addComponentCurrentRow(new PopupBox.RegistryPopupBox<>(this, this.font, this.inputComponentsList.nextStart(5), 1, 60, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.condition"),
-																		EpicFightConditions.REGISTRY.get(), (name, conditionProvider) -> {
-																			if (conditionProvider != null) {
+																		EpicFightConditions.REGISTRY.get(), (pair) -> {
+																			if (pair.getSecond() != null) {
 																				parameterGrid.reset();
-																				conditionProvider.get().getAcceptingParameters().forEach((e) -> parameterGrid.addRowWithDefaultValues("parameter_key", e.getKey()));
-																				rootTag.getList("cases", Tag.TAG_COMPOUND).getCompound(this.stylesGrid.getRowposition()).putString("condition", ParseUtil.getRegistryName(conditionProvider, EpicFightConditions.REGISTRY.get()));
+																				pair.getSecond().get().getAcceptingParameters(this).forEach((widget) -> parameterGrid.addRowWithDefaultValues("parameter_key", widget));
+																				this.cases.get(this.stylesGrid.getRowposition()).putString("condition", ParseUtil.getRegistryName(pair.getSecond(), EpicFightConditions.REGISTRY.get()));
+																				this.cases.get(this.stylesGrid.getRowposition()).remove("predicate");
 																			}
-																		}).applyFilter((condition) -> condition.get() instanceof LivingEntityCondition));
+																		}).applyFilter((condition) -> condition.get() instanceof PlayerPatchCondition));
 		
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 80, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.styles.parameters")));
@@ -140,23 +174,20 @@ public class StylesScreen extends Screen {
 		
 		this.inputComponentsList.setComponentsActive(false);
 		
-		if (rootTag.contains("cases")) {
+		if (rootTag.contains("styles")) {
+			CompoundTag stylesCompound = rootTag.getCompound("styles");
 			Grid.PackImporter packImporter = new Grid.PackImporter();
 			
-			for (Tag caseTag : rootTag.getList("cases", Tag.TAG_COMPOUND)) {
+			for (Tag caseTag : stylesCompound.getList("cases", Tag.TAG_COMPOUND)) {
 				CompoundTag caseCompTag = (CompoundTag)caseTag;
-				
 				packImporter.newRow();
 				packImporter.newValue("style", Style.ENUM_MANAGER.get(caseCompTag.getString("style")));
+				
+				this.cases.add(caseCompTag);
 			}
 			
-			this.stylesGrid.setValue(packImporter);
-		} else {
-			rootTag.put("cases", new ListTag());
-		}
-		
-		if (rootTag.contains("default")) {
-			this.defaultStyle.setValue(Style.ENUM_MANAGER.get(rootTag.getString("default")));
+			this.stylesGrid._setValue(packImporter);
+			this.defaultStyle._setValue(Style.ENUM_MANAGER.get(stylesCompound.getString("default")));
 		}
 	}
 	
@@ -171,11 +202,60 @@ public class StylesScreen extends Screen {
 		this.inputComponentsList.setLeftPos(180);
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {
-			this.minecraft.setScreen(this.parentScreen);
+			ListTag caseListTag = new ListTag();
+			int idx = 0;
+			
+			if (this.defaultStyle._getValue() == null) {
+				this.minecraft.setScreen(new MessageScreen<>("Save Failed", "Define a default style", this, (button2) -> {
+					this.minecraft.setScreen(this);
+				}, 180, 90).autoCalculateHeight());
+				return;
+			}
+			
+			Set<String> styleNames = Sets.newHashSet();
+			
+			for (CompoundTag tag : this.cases) {
+				try {
+					if (styleNames.contains(tag.getString("style"))) {
+						throw new IllegalStateException("Duplicated style");
+					}
+					
+					if (!tag.contains("condition") || StringUtil.isNullOrEmpty(tag.getString("condition"))) {
+						throw new IllegalStateException("Define a condition");
+					}
+					
+					if (!tag.contains("style") || StringUtil.isNullOrEmpty(tag.getString("style"))) {
+						throw new IllegalStateException("Define a style");
+					}
+					
+					styleNames.add(tag.getString("style"));
+					
+					Condition<?> condition = EpicFightConditions.getConditionOrThrow(new ResourceLocation(tag.getString("condition"))).get();
+					condition.read(tag.getCompound("predicate"));
+					
+					caseListTag.add(tag);
+					idx++;
+				} catch (Exception e) {
+					this.minecraft.setScreen(new MessageScreen<>("Save Failed", "Failed to save " + ParseUtil.snakeToSpacedCamel(this.stylesGrid.getValue(idx, "style")) + ": " + e.getMessage(), this, (button2) -> {
+						this.minecraft.setScreen(this);
+					}, 180, 90).autoCalculateHeight());
+					
+					return;
+				}
+			}
+			
+			CompoundTag stylesCompound = new CompoundTag();
+			stylesCompound.put("cases", caseListTag);
+			stylesCompound.putString("default", ParseUtil.nullParam(this.defaultStyle._getValue()).toLowerCase(Locale.ROOT));
+			
+			this.rootTag.remove("styles");
+			this.rootTag.put("styles", stylesCompound);
+			
+			this.onClose();
 		}).pos(this.width / 2 - 162, this.height - 32).size(160, 21).build());
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, (button) -> {
-			this.minecraft.setScreen(this.parentScreen);
+			this.minecraft.setScreen(new MessageScreen<>("", "Do you want to quit without saving changes?", this, (button2) -> this.onClose(), (button2) -> this.minecraft.setScreen(this), 180, 70));
 		}).pos(this.width / 2 + 2, this.height - 32).size(160, 21).build());
 		
 		Static defaultStyleTitle = new Static(this.font, 12, 116, 15, 53, HorizontalSizing.LEFT_WIDTH, VerticalSizing.HEIGHT_BOTTOM, "datapack_edit.weapon_type.styles.default");

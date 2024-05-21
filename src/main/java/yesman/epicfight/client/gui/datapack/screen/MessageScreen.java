@@ -24,15 +24,15 @@ public class MessageScreen<T> extends Screen {
 	protected final Screen parentScreen;
 	protected final Component message;
 	protected final Consumer<T> onOkPressWithInput;
-	protected final DataBindingComponent<T> inputWidget;
+	protected final DataBindingComponent<T, ?> inputWidget;
 	protected int messageBoxWidth;
 	protected int messageBoxHeight;
 	
-	protected MessageScreen(String title, String message, Screen parentScreen, Button.OnPress onOkPres, int width, int height) {
+	public MessageScreen(String title, String message, Screen parentScreen, Button.OnPress onOkPres, int width, int height) {
 		this(title, message, parentScreen, onOkPres, null, width, height);
 	}
 	
-	protected MessageScreen(String title, String message, Screen parentScreen, Button.OnPress onOkPress, @Nullable Button.OnPress onCancelPress, int width, int height) {
+	public MessageScreen(String title, String message, Screen parentScreen, Button.OnPress onOkPress, @Nullable Button.OnPress onCancelPress, int width, int height) {
 		super(Component.literal(title));
 		
 		this.onOkPress = onOkPress;
@@ -47,7 +47,7 @@ public class MessageScreen<T> extends Screen {
 		this.minecraft = parentScreen.getMinecraft();
 	}
 	
-	protected MessageScreen(String title, String message, Screen parentScreen, Consumer<T> onOkPressWithInput, @Nullable Button.OnPress onCancelPress, DataBindingComponent<T> inputWidget, int width, int height) {
+	public MessageScreen(String title, String message, Screen parentScreen, Consumer<T> onOkPressWithInput, @Nullable Button.OnPress onCancelPress, DataBindingComponent<T, ?> inputWidget, int width, int height) {
 		super(Component.literal(title));
 		
 		this.onOkPress = null;
@@ -63,9 +63,9 @@ public class MessageScreen<T> extends Screen {
 	}
 	
 	public MessageScreen<T> autoCalculateHeight() {
-		List<FormattedCharSequence> messageLines = this.minecraft.font.split(this.message, this.messageBoxWidth - 16);
-		
-		this.messageBoxHeight = 70 + messageLines.size() * 15;
+		int titleLength = this.minecraft.font.split(this.title, this.messageBoxWidth - 16).size();
+		int messageLength = this.minecraft.font.split(this.message, this.messageBoxWidth - 16).size();
+		this.messageBoxHeight = 40 + messageLength * 15 + titleLength * 15;
 		
 		return this;
 	}
@@ -80,7 +80,7 @@ public class MessageScreen<T> extends Screen {
 				if (this.onOkPress != null) {
 					this.onOkPress.onPress(button);
 				} else {
-					this.onOkPressWithInput.accept(this.inputWidget.getValue());
+					this.onOkPressWithInput.accept(this.inputWidget._getValue());
 				}
 			}).bounds(this.width / 2 - 56, this.height / 2 + height - 20, 55 + (this.onCancelPress == null ? 57 : 0), 16).build());
 		}

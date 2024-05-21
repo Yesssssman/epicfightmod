@@ -2,6 +2,7 @@ package yesman.epicfight.client.gui.datapack.screen;
 
 import java.util.function.Supplier;
 
+import io.netty.util.internal.StringUtil;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -15,12 +16,15 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.client.gui.datapack.widgets.Grid;
+import yesman.epicfight.client.gui.datapack.widgets.Grid.GridBuilder.RowEditButton;
 import yesman.epicfight.client.gui.datapack.widgets.InputComponentList;
 import yesman.epicfight.client.gui.datapack.widgets.PopupBox;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.HorizontalSizing;
+import yesman.epicfight.client.gui.datapack.widgets.ResizableEditBox;
 import yesman.epicfight.client.gui.datapack.widgets.Static;
 import yesman.epicfight.data.conditions.Condition;
-import yesman.epicfight.data.conditions.Condition.LivingEntityCondition;
+import yesman.epicfight.data.conditions.Condition.ParameterEditor;
+import yesman.epicfight.data.conditions.Condition.PlayerPatchCondition;
 import yesman.epicfight.data.conditions.EpicFightConditions;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -29,7 +33,7 @@ public class OffhandValidatorScreen extends Screen {
 	private final Screen parentScreen;
 	private final InputComponentList<CompoundTag> inputComponentsList;
 	private final CompoundTag rootTag;
-	private final CompoundTag offhandValidatorTag = new CompoundTag();
+	private final CompoundTag offhandValidatorTag;
 	
 	private Grid parameterGrid;
 	private PopupBox<Supplier<Condition<?>>> conditionPopup;
@@ -37,22 +41,33 @@ public class OffhandValidatorScreen extends Screen {
 	public OffhandValidatorScreen(Screen parentScreen, CompoundTag rootTag) {
 		super(Component.translatable("datapack_edit.weapon_type.offhand_validator"));
 		
+		this.minecraft = parentScreen.getMinecraft();
+		this.font = parentScreen.getMinecraft().font;
+		
 		this.rootTag = rootTag;
+		this.offhandValidatorTag = rootTag.getCompound("offhand_item_compatible_predicate").copy();
+		
 		this.parentScreen = parentScreen;
 		this.inputComponentsList = new InputComponentList<>(this, 0, 0, 0, 0, 22) {
 			@Override
 			public void importTag(CompoundTag tag) {
 				this.setComponentsActive(true);
+				
+				Supplier<Condition<?>> conditionProvider = EpicFightConditions.getConditionOrNull(new ResourceLocation(tag.getString("condition")));
+				Condition<?> condition = conditionProvider == null ? null : conditionProvider.get();
+				
 				Grid.PackImporter packImporter = new Grid.PackImporter();
 				
-				for (String key : ParseUtil.getOrDefaultTag(tag, "predicate", new CompoundTag()).getAllKeys()) {
-					packImporter.newRow();
-					packImporter.newValue("parameter_key", key);
-					packImporter.newValue("parameter_value", tag.getCompound("predicate").getString(key));
+				if (condition != null) {
+					for (ParameterEditor editor : condition.getAcceptingParameters(OffhandValidatorScreen.this)) {
+						packImporter.newRow();
+						packImporter.newValue("parameter_key", editor);
+						packImporter.newValue("parameter_value", editor.fromTag.apply(tag.getCompound("predicate").get(editor.editWidget.getMessage().getString())));
+					}
 				}
 				
 				this.setDataBindingComponenets(new Object[] {
-					EpicFightConditions.getConditionOrNull(new ResourceLocation(tag.getString("condition"))),
+					conditionProvider,
 					packImporter
 				});
 			}
@@ -65,27 +80,39 @@ public class OffhandValidatorScreen extends Screen {
 									.xy2(12, 80)
 									.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
 									.rowHeight(26)
-									.rowEditable(false)
+									.rowEditable(RowEditButton.NONE)
 									.transparentBackground(false)
-									.addColumn(Grid.editbox("parameter_key").valueChanged((event) -> {
-										CompoundTag predicate = ParseUtil.getOrDefaultTag(this.offhandValidatorTag, "predicate", new CompoundTag());
-										predicate.remove(ParseUtil.nullParam(event.prevValue));
-										predicate.putString(ParseUtil.nullParam(event.postValue), ParseUtil.nullParam(event.grid.getValue(event.rowposition, "parameter_value")));
-									}).editable(false))
-									.addColumn(Grid.editbox("parameter_value").valueChanged((event) -> {
-										CompoundTag predicate = ParseUtil.getOrDefaultTag(this.offhandValidatorTag, "predicate", new CompoundTag());
-										predicate.putString(ParseUtil.nullParam(event.grid.getValue(event.rowposition, "parameter_key")), ParseUtil.nullParam(event.postValue));
-									}).width(150))
+									.addColumn(Grid.<ParameterEditor, ResizableEditBox>wildcard("parameter_key")
+													.editable(false)
+													.toDisplayText((widget) -> widget.editWidget.getMessage().getString())
+													.width(100))
+									.addColumn(Grid.wildcard("parameter_value")
+													.editWidgetProvider((row) -> {
+														ParameterEditor editor = row.getValue("parameter_key");
+														return editor.editWidget;
+													})
+													.toDisplayText(ParseUtil::snakeToSpacedCamel)
+													.editable(true)
+													.valueChanged((event) -> {
+														CompoundTag predicate = ParseUtil.getOrDefaultTag(this.offhandValidatorTag, "predicate", new CompoundTag());
+														ParameterEditor editor = event.grid.getValue(event.rowposition, "parameter_key");
+														
+														if (StringUtil.isNullOrEmpty(ParseUtil.nullParam(event.postValue))) {
+															predicate.remove(editor.editWidget.getMessage().getString());
+														} else {
+															predicate.put(editor.editWidget.getMessage().getString(), editor.toTag.apply(event.postValue));
+														}
+													}).width(150))
 									.build();
 		
 		this.conditionPopup = new PopupBox.RegistryPopupBox<>(this, this.font, 0, 13, 60, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.styles.condition"),
-																EpicFightConditions.REGISTRY.get(), (name, conditionProvider) -> {
-																	if (conditionProvider != null) {
-																		parameterGrid.reset();
-																		conditionProvider.get().getAcceptingParameters().forEach((e) -> parameterGrid.addRowWithDefaultValues("parameter_key", e.getKey()));
-																		this.offhandValidatorTag.putString("condition", ParseUtil.getRegistryName(conditionProvider, EpicFightConditions.REGISTRY.get()));
+																EpicFightConditions.REGISTRY.get(), (pair) -> {
+																	if (pair.getSecond() != null) {
+																		this.parameterGrid.reset();
+																		pair.getSecond().get().getAcceptingParameters(this).forEach((widget) -> this.parameterGrid.addRowWithDefaultValues("parameter_key", widget));
+																		this.offhandValidatorTag.putString("condition", ParseUtil.getRegistryName(pair.getSecond(), EpicFightConditions.REGISTRY.get()));
 																	}
-																}).applyFilter((condition) -> condition.get() instanceof LivingEntityCondition);
+																}).applyFilter((condition) -> condition.get() instanceof PlayerPatchCondition);
 		
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 80, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.weapon_type.styles.condition")));
@@ -99,7 +126,7 @@ public class OffhandValidatorScreen extends Screen {
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.addComponentCurrentRow(this.parameterGrid);
 		
-		this.inputComponentsList.importTag(rootTag);
+		this.inputComponentsList.importTag(rootTag.getCompound("offhand_item_compatible_predicate"));
 	}
 	
 	@Override
@@ -110,21 +137,21 @@ public class OffhandValidatorScreen extends Screen {
 		this.inputComponentsList.setLeftPos(15);
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_OK, (button) -> {
-			if (this.conditionPopup.getValue() == null) {
+			if (this.conditionPopup._getValue() == null) {
 				this.minecraft.setScreen(new MessageScreen<>("", "Condition is not defined!", this, (button2) -> this.minecraft.setScreen(this), 180, 70));
 				return;
 			}
 			
 			try {
 				Supplier<Condition<LivingEntityPatch<?>>> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(this.offhandValidatorTag.getString("condition")));
-				conditionProvider.get().read(offhandValidatorTag.getCompound("predicate"));
+				conditionProvider.get().read(this.offhandValidatorTag.getCompound("predicate"));
 			} catch (Exception e) {
 				this.minecraft.setScreen(new MessageScreen<>("Invalid condition.", e.getMessage(), this, (button2) -> this.minecraft.setScreen(this), 180, 70));
 				return;
 			}
 			
 			this.rootTag.put("offhand_item_compatible_predicate", this.offhandValidatorTag);
-			this.minecraft.setScreen(this.parentScreen);
+			this.onClose();
 		}).pos(this.width / 2 - 162, this.height - 32).size(160, 21).build());
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, (button) -> {

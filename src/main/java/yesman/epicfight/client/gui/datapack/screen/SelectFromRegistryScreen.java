@@ -34,15 +34,11 @@ public class SelectFromRegistryScreen<T> extends Screen {
 	private final Consumer<T> onPressRow;
 	private final BiConsumer<String, T> onAccept;
 	
-	public SelectFromRegistryScreen(Screen parentScreen, IForgeRegistry<T> registry, Consumer<T> onPressRow) {
-		this(parentScreen, registry, onPressRow, (item) -> true);
+	public SelectFromRegistryScreen(Screen parentScreen, IForgeRegistry<T> registry, BiConsumer<String, T> onAccept, Predicate<T> filter) {
+		this(parentScreen, registry, onAccept, (select) -> {}, filter);
 	}
 	
-	public SelectFromRegistryScreen(Screen parentScreen, IForgeRegistry<T> registry, Consumer<T> onPressRow, Predicate<T> filter) {
-		this(parentScreen, registry, (name, select) -> {}, onPressRow, filter);
-	}
-	
-	public SelectFromRegistryScreen(Screen parentScreen, IForgeRegistry<T> registry, BiConsumer<String, T> onAccept, Consumer<T> selectCallback, Predicate<T> filter) {
+	public SelectFromRegistryScreen(Screen parentScreen, IForgeRegistry<T> registry, BiConsumer<String, T> onAccept, Consumer<T> onPressRow, Predicate<T> filter) {
 		super(Component.translatable("gui.epicfight.select", ParseUtil.snakeToSpacedCamel(registry.getRegistryName().getPath())));
 		
 		final Map<ResourceLocation, T> filteredItems = Maps.newHashMap();
@@ -50,11 +46,11 @@ public class SelectFromRegistryScreen<T> extends Screen {
 		
 		this.registryList = new RegistryList(parentScreen.getMinecraft(), this.width, this.height, 36, this.height - 16, 21, filteredItems);
 		this.parentScreen = parentScreen;
-		this.onPressRow = selectCallback;
+		this.onPressRow = onPressRow;
 		this.onAccept = onAccept;
 	}
 	
-	public SelectFromRegistryScreen(Screen parentScreen, Set<Pair<ResourceLocation, T>> entries, String title, BiConsumer<String, T> onAccept, Consumer<T> selectCallback, Predicate<T> filter) {
+	public SelectFromRegistryScreen(Screen parentScreen, Set<Pair<ResourceLocation, T>> entries, String title, BiConsumer<String, T> onAccept, Consumer<T> onPressRow, Predicate<T> filter) {
 		super(Component.translatable("gui.epicfight.select", ParseUtil.snakeToSpacedCamel(title)));
 		
 		Map<ResourceLocation, T> filteredItems = entries.stream().filter((entry) -> filter.test(entry.getSecond())).reduce(Maps.newHashMap(), (map, element) -> {
@@ -67,7 +63,7 @@ public class SelectFromRegistryScreen<T> extends Screen {
 		
 		this.registryList = new RegistryList(parentScreen.getMinecraft(), this.width, this.height, 36, this.height - 16, 21, filteredItems);
 		this.parentScreen = parentScreen;
-		this.onPressRow = selectCallback;
+		this.onPressRow = onPressRow;
 		this.onAccept = onAccept;
 	}
 	
@@ -82,8 +78,14 @@ public class SelectFromRegistryScreen<T> extends Screen {
 		this.addRenderableWidget(editBox);
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_OK, (button) -> {
-			this.onPressRow.accept(this.registryList.getSelected() == null ? null : this.registryList.getSelected().item);
-			this.minecraft.setScreen(this.parentScreen);
+			if (this.registryList.getSelected() == null) {
+				this.minecraft.setScreen(new MessageScreen<>("", "Select an item from the list", this, (button2) -> {
+					this.minecraft.setScreen(this);
+				}, 180, 60));
+			} else {
+				this.onAccept.accept(this.registryList.getSelected().name, this.registryList.getSelected().item);
+				this.minecraft.setScreen(this.parentScreen);
+			}
 		}).pos(this.width / 2 - 162, this.height - 28).size(160, 21).build());
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, (button) -> {
@@ -117,10 +119,10 @@ public class SelectFromRegistryScreen<T> extends Screen {
 		
 		@Override
 		public void setSelected(@Nullable RegistryEntry selEntry) {
-			SelectFromRegistryScreen.this.onAccept.accept(selEntry.name, selEntry.item);
+			SelectFromRegistryScreen.this.onPressRow.accept(selEntry.item);
 			super.setSelected(selEntry);
 		}
-
+		
 		@Override
 		public int getRowWidth() {
 			return this.width;
@@ -163,7 +165,7 @@ public class SelectFromRegistryScreen<T> extends Screen {
 			public boolean mouseClicked(double mouseX, double mouseY, int button) {
 				if (button == 0) {
 					if (RegistryList.this.getSelected() == this) {
-						SelectFromRegistryScreen.this.onPressRow.accept(this.item);
+						SelectFromRegistryScreen.this.onAccept.accept(this.name, this.item);
 						SelectFromRegistryScreen.this.minecraft.setScreen(SelectFromRegistryScreen.this.parentScreen);
 						return true;
 					}

@@ -147,17 +147,17 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	}
 	
 	@Override
-	public boolean isTeammate(Entity entityIn) {
-		EntityPatch<?> cap = EpicFightCapabilities.getEntityPatch(entityIn, EntityPatch.class);
+	public boolean isTeammate(Entity entity) {
+		EntityPatch<?> cap = EpicFightCapabilities.getEntityPatch(entity, EntityPatch.class);
 		
-		if (cap != null && cap instanceof MobPatch) {
-			if (((MobPatch<?>) cap).mobFaction.equals(this.mobFaction)) {
+		if (cap != null && cap instanceof MobPatch mobpatch) {
+			if (mobpatch.mobFaction.equals(this.mobFaction)) {
 				Optional<LivingEntity> opt = Optional.ofNullable(this.getTarget());
-				return opt.map((attackTarget) -> !attackTarget.is(entityIn)).orElse(true);
+				return opt.map((attackTarget) -> !attackTarget.is(entity)).orElse(true);
 			}
 		}
 		
-		return super.isTeammate(entityIn);
+		return super.isTeammate(entity);
 	}
 	
 	@Override

@@ -27,11 +27,12 @@ import yesman.epicfight.client.gui.datapack.widgets.Grid;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.HorizontalSizing;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.VerticalSizing;
 import yesman.epicfight.client.gui.datapack.widgets.Static;
+import yesman.epicfight.client.gui.datapack.widgets.Grid.GridBuilder.RowEditButton;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.Style;
 
 @OnlyIn(Dist.CLIENT)
-public class AttributeScreen extends Screen {
+public class WeaponAttributeScreen extends Screen {
 	private static final List<String> WEAPON_ATTRIBUTES = List.of("armor_negation", "impact", "max_strikes", "damage_bonus", "speed_bonus");
 	private static final List<String> ARMOR_ATTRIBUTES = List.of("stun_armor", "weight");
 	
@@ -42,7 +43,7 @@ public class AttributeScreen extends Screen {
 	private final List<PackEntry<String, CompoundTag>> styles = Lists.newArrayList();
 	private final CompoundTag rootTag;
 	
-	public AttributeScreen(Screen parentScreen, CompoundTag rootTag, ItemType itemType) {
+	public WeaponAttributeScreen(Screen parentScreen, CompoundTag rootTag, ItemType itemType) {
 		super(Component.translatable("datapack_edit.item_capability.attributes"));
 		
 		this.itemType = itemType;
@@ -57,7 +58,7 @@ public class AttributeScreen extends Screen {
 									.horizontalSizing(HorizontalSizing.LEFT_WIDTH)
 									.verticalSizing(VerticalSizing.TOP_BOTTOM)
 									.rowHeight(21)
-									.rowEditable(true)
+									.rowEditable(RowEditButton.ADD_REMOVE)
 									.transparentBackground(false)
 									.rowpositionChanged((rowposition, values) -> {
 										Grid.PackImporter packImporter = new Grid.PackImporter();
@@ -67,7 +68,7 @@ public class AttributeScreen extends Screen {
 										}
 										
 										this.attributesGrid._setActive(true);
-										this.attributesGrid.setValue(packImporter);
+										this.attributesGrid._setValue(packImporter);
 									})
 									.addColumn(Grid.combo("style", Style.ENUM_MANAGER.universalValues())
 													.valueChanged((event) -> this.styles.get(event.rowposition).setPackKey(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT)))
@@ -92,7 +93,7 @@ public class AttributeScreen extends Screen {
 										.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
 										.verticalSizing(VerticalSizing.TOP_BOTTOM)
 										.rowHeight(21)
-										.rowEditable(true)
+										.rowEditable(RowEditButton.ADD_REMOVE)
 										.transparentBackground(false)
 										.addColumn(Grid.combo("attribute", WEAPON_ATTRIBUTES)
 														.toDisplayText(ParseUtil::snakeToSpacedCamel)
@@ -131,7 +132,7 @@ public class AttributeScreen extends Screen {
 				packImporter.newValue("style", Style.ENUM_MANAGER.get(entry.getKey()));
 			}
 			
-			this.stylesGrid.setValue(packImporter);
+			this.stylesGrid._setValue(packImporter);
 			this.attributesGrid._setActive(false);
 		} else if (itemType == ItemType.ARMOR) {
 			this.styles.add(PackEntry.of("armor", CompoundTag::new));
@@ -142,7 +143,7 @@ public class AttributeScreen extends Screen {
 										.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
 										.verticalSizing(VerticalSizing.TOP_BOTTOM)
 										.rowHeight(21)
-										.rowEditable(true)
+										.rowEditable(RowEditButton.ADD_REMOVE)
 										.transparentBackground(false)
 										.addColumn(Grid.combo("attribute", ARMOR_ATTRIBUTES)
 														.toDisplayText(ParseUtil::snakeToSpacedCamel)
@@ -182,7 +183,7 @@ public class AttributeScreen extends Screen {
 				packImporter.newValue("amount", entry.getValue().getAsString());
 			}
 			
-			this.attributesGrid.setValue(packImporter);
+			this.attributesGrid._setValue(packImporter);
 		}
 	}
 	

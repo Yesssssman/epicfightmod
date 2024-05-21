@@ -93,9 +93,10 @@ public class JsonModelLoader {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public JsonModelLoader(InputStream inputstream) throws IOException {
+	public JsonModelLoader(InputStream inputstream, ResourceLocation resourceLocation) throws IOException {
 		JsonReader jsonReader = null;
 		this.resourceManager = Minecraft.getInstance().getResourceManager();
+		this.resourceLocation = resourceLocation;
 		
 		jsonReader = new JsonReader(new InputStreamReader(inputstream, StandardCharsets.UTF_8));
 		jsonReader.setLenient(true);

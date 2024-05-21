@@ -106,18 +106,8 @@ public class EmergencyEscapeSkill extends PassiveSkill {
 		return container.getStack() == 0;
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
-	public List<Object> getTooltipArgsOfScreen(List<Object> list) {
-		list.add(String.format("%.1f", this.consumption));
-		String availableWeapons = "";
-		
-		for (WeaponCategory category : this.availableWeapons) {
-			availableWeapons += WeaponCategory.ENUM_MANAGER.toTranslated(category) + ", ";
-		}
-		
-		list.add(availableWeapons);
-		
-		return list;
+	public List<WeaponCategory> getAvailableWeaponCategories() {
+		return List.copyOf(this.availableWeapons);
 	}
 }

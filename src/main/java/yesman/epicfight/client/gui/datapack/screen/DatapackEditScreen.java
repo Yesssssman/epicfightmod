@@ -11,9 +11,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
@@ -68,6 +70,7 @@ import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.IoSupplier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -75,11 +78,17 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.IForgeRegistry;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.AnimationProvider;
+import yesman.epicfight.api.animation.LivingMotion;
+import yesman.epicfight.api.animation.LivingMotions;
+import yesman.epicfight.api.animation.types.HitAnimation;
+import yesman.epicfight.api.animation.types.LongHitAnimation;
+import yesman.epicfight.api.animation.types.MainFrameAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.animation.types.datapack.ClipHoldingAnimation;
 import yesman.epicfight.api.animation.types.datapack.FakeAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimationDataReader;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
+import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.collider.MultiOBBCollider;
@@ -87,6 +96,7 @@ import yesman.epicfight.api.collider.OBBCollider;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 import yesman.epicfight.api.data.reloader.SkillManager;
+import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.model.JsonModelLoader;
 import yesman.epicfight.api.utils.InstantiateInvoker;
 import yesman.epicfight.api.utils.ParseUtil;
@@ -94,6 +104,7 @@ import yesman.epicfight.client.gui.datapack.widgets.CheckBox;
 import yesman.epicfight.client.gui.datapack.widgets.ColorPreviewWidget;
 import yesman.epicfight.client.gui.datapack.widgets.ComboBox;
 import yesman.epicfight.client.gui.datapack.widgets.Grid;
+import yesman.epicfight.client.gui.datapack.widgets.Grid.GridBuilder.RowEditButton;
 import yesman.epicfight.client.gui.datapack.widgets.InputComponentList;
 import yesman.epicfight.client.gui.datapack.widgets.ModelPreviewer;
 import yesman.epicfight.client.gui.datapack.widgets.PopupBox;
@@ -113,6 +124,7 @@ import yesman.epicfight.world.capabilities.item.WeaponCapability;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.capabilities.item.WeaponTypeReloadListener;
 import yesman.epicfight.world.capabilities.provider.EntityPatchProvider;
+import yesman.epicfight.world.damagesource.StunType;
 
 @OnlyIn(Dist.CLIENT)
 public class DatapackEditScreen extends Screen {
@@ -123,7 +135,7 @@ public class DatapackEditScreen extends Screen {
 		return workingPackScreen;
 	}
 	
-	public static StaticAnimation byKey(String path) {
+	public static StaticAnimation animationByKey(String path) {
 		ResourceLocation rl = new ResourceLocation(path);
 		StaticAnimation animation = AnimationManager.getInstance().byKey(rl);
 		
@@ -157,7 +169,10 @@ public class DatapackEditScreen extends Screen {
 	private final DatapackEditScreen.WeaponTypeTab weaponTab;
 	private final DatapackEditScreen.ItemCapabilityTab itemCapabilityTab;
 	private final DatapackEditScreen.MobPatchTab mobPatchTab;
+	
 	private final Map<ResourceLocation, PackEntry<FakeAnimation, ClipHoldingAnimation>> userAnimations = Maps.newLinkedHashMap();
+	private final Map<ResourceLocation, AnimatedMesh> userMeshes = Maps.newLinkedHashMap();
+	private final Map<ResourceLocation, Armature> userArmatures = Maps.newLinkedHashMap();
 	
 	private final TabManager tabManager = new TabManager(this::addRenderableWidget, (p_267853_) -> {
 		this.removeWidget(p_267853_);
@@ -236,7 +251,7 @@ public class DatapackEditScreen extends Screen {
 			this.weaponTab.exportEntries(out);
 			this.itemCapabilityTab.exportEntries(out);
 			this.mobPatchTab.exportEntries(out);
-			this.exportAnimations(out);
+			this.exportUserImportData(out);
 			
 			ZipEntry zipEntry = new ZipEntry("pack.mcmeta");
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -307,6 +322,15 @@ public class DatapackEditScreen extends Screen {
 	    
 		GridLayout.RowHelper gridlayout$rowhelper = this.bottomButtons.createRowHelper(2);
 		gridlayout$rowhelper.addChild(Button.builder(GUI_EXPORT, (button) -> {
+			try {
+				this.weaponTab.validateBeforeExport();
+				this.itemCapabilityTab.validateBeforeExport();
+				this.mobPatchTab.validateBeforeExport();
+			} catch (Exception e) {
+				this.minecraft.setScreen(new MessageScreen<>("", e.getMessage(), this, (button2) -> this.minecraft.setScreen(this), 400, 110).autoCalculateHeight());
+				return;
+			}
+			
 			this.minecraft.setScreen(new MessageScreen<>("", "Enter the pack title", this, null, 180, 70) {
 				@Override
 				protected void init() {
@@ -325,6 +349,7 @@ public class DatapackEditScreen extends Screen {
 				}
 			});
 		}).build());
+		
 		gridlayout$rowhelper.addChild(Button.builder(CommonComponents.GUI_CANCEL, (button) -> {
 			this.onClose();
 		}).build());
@@ -470,7 +495,7 @@ public class DatapackEditScreen extends Screen {
 		AnimationManager.getInstance().registerUserAnimation(animation);
 	}
 	
-	private void exportAnimations(ZipOutputStream out) throws Exception {
+	private void exportUserImportData(ZipOutputStream out) throws Exception {
 		for (Map.Entry<ResourceLocation, PackEntry<FakeAnimation, ClipHoldingAnimation>> entry : this.userAnimations.entrySet()) {
 			String exportPath = String.format("assets/%s/animmodels/animations/%s.json", entry.getKey().getNamespace(), entry.getKey().getPath());
 			ResourceLocation clientData = AnimationManager.getAnimationDataFileLocation(new ResourceLocation(entry.getKey().getNamespace(), exportPath));
@@ -500,10 +525,24 @@ public class DatapackEditScreen extends Screen {
 			out.write(gson.toJson(root).getBytes());
 			out.closeEntry();
 		}
+		
+		for (Map.Entry<ResourceLocation, AnimatedMesh> entry : this.userMeshes.entrySet()) {
+		}
+		
+		for (Map.Entry<ResourceLocation, Armature> entry : this.userArmatures.entrySet()) {
+		}
 	}
 	
 	public Map<ResourceLocation, PackEntry<FakeAnimation, ClipHoldingAnimation>> getUserAniamtions() {
 		return this.userAnimations;
+	}
+	
+	public Map<ResourceLocation, AnimatedMesh> getUserMeshes() {
+		return this.userMeshes;
+	}
+	
+	public Map<ResourceLocation, Armature> getUserArmatures() {
+		return this.userArmatures;
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -516,6 +555,10 @@ public class DatapackEditScreen extends Screen {
 		protected final String directory;
 		
 		public DatapackTab(Component title, String directory, @Nullable IForgeRegistry<T> registry) {
+			this(title, directory, registry, (item) -> true);
+		}
+		
+		public DatapackTab(Component title, String directory, @Nullable IForgeRegistry<T> registry, Predicate<T> filter) {
 			super(title);
 			
 			this.directory = directory;
@@ -526,7 +569,7 @@ public class DatapackEditScreen extends Screen {
 									.xy1(8, screenRect.top() + 14)
 									.xy2(150, screenRect.height() - screenRect.top() - 7)
 									.rowHeight(26)
-									.rowEditable(true)
+									.rowEditable(RowEditButton.ADD_REMOVE)
 									.transparentBackground(true)
 									.rowpositionChanged(this::packGridRowpositionChanged)
 									.addColumn(Grid.editbox("pack_item")
@@ -535,13 +578,13 @@ public class DatapackEditScreen extends Screen {
 									.defaultVal(EpicFightMod.MODID + ":").editable(registry == null ? true : false).width(180))
 									.pressAdd((grid, button) -> {
 										if (registry != null) {
-											DatapackEditScreen.this.minecraft.setScreen(new SelectFromRegistryScreen<>(DatapackEditScreen.this, registry, (selItem) -> {
+											DatapackEditScreen.this.minecraft.setScreen(new SelectFromRegistryScreen<>(DatapackEditScreen.this, registry, (registryName, selItem) -> {
 												grid.setValueChangeEnabled(false);
-												int rowposition = grid.addRowWithDefaultValues("pack_item", ParseUtil.getRegistryName(selItem, registry));
-												this.packList.add(rowposition, PackEntry.of(new ResourceLocation(ParseUtil.getRegistryName(selItem, registry)), CompoundTag::new));
+												int rowposition = grid.addRowWithDefaultValues("pack_item", registryName);
+												this.packList.add(rowposition, PackEntry.of(new ResourceLocation(registryName), CompoundTag::new));
 												grid.setGridFocus(rowposition, "pack_item");
 												grid.setValueChangeEnabled(true);
-											}));
+											}, filter));
 										} else {
 											grid.setValueChangeEnabled(false);
 											int rowposition = grid.addRowWithDefaultValues("pack_item", EpicFightMod.MODID + ":");
@@ -593,6 +636,7 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.importTag(this.packList.get(rowposition).getValue());
 		}
 		
+		public abstract void validateBeforeExport();
 		public abstract void importEntries(PackResources packResources) throws Exception;
 		public abstract void exportEntries(ZipOutputStream out) throws Exception;
 	}
@@ -674,19 +718,19 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.hit_particle"));
 			this.inputComponentsList.addComponentCurrentRow(new PopupBox.RegistryPopupBox<>(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 																			Component.translatable("datapack_edit.weapon_type.hit_particle"), ForgeRegistries.PARTICLE_TYPES,
-																			(name, item) -> this.packList.get(this.packListGrid.getRowposition()).getValue().putString("hit_particle", ParseUtil.getRegistryName(item, ForgeRegistries.PARTICLE_TYPES))));
+																			(pair) -> this.packList.get(this.packListGrid.getRowposition()).getValue().putString("hit_particle", ParseUtil.getRegistryName(pair.getSecond(), ForgeRegistries.PARTICLE_TYPES))));
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.hit_sound"));
 			this.inputComponentsList.addComponentCurrentRow(new PopupBox.SoundPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 																			Component.translatable("datapack_edit.weapon_type.hit_sound"),
-																			(name, item) -> this.packList.get(this.packListGrid.getRowposition()).getValue().putString("hit_sound", ParseUtil.getRegistryName(item, ForgeRegistries.SOUND_EVENTS))));
+																			(pair) -> this.packList.get(this.packListGrid.getRowposition()).getValue().putString("hit_sound", ParseUtil.getRegistryName(pair.getSecond(), ForgeRegistries.SOUND_EVENTS))));
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.swing_sound"));
 			this.inputComponentsList.addComponentCurrentRow(new PopupBox.SoundPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 																			Component.translatable("datapack_edit.weapon_type.swing_sound"),
-																			(name, item) -> this.packList.get(this.packListGrid.getRowposition()).getValue().putString("swing_sound", ParseUtil.getRegistryName(item, ForgeRegistries.SOUND_EVENTS))));
+																			(pair) -> this.packList.get(this.packListGrid.getRowposition()).getValue().putString("swing_sound", ParseUtil.getRegistryName(pair.getSecond(), ForgeRegistries.SOUND_EVENTS))));
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.styles"));
@@ -812,10 +856,10 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider"));
 			this.inputComponentsList.addComponentCurrentRow(new PopupBox.ColliderPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.collider"),
-																							(name, collider) -> {
-																								if (collider != null) {
+																							(pair) -> {
+																								if (pair.getSecond() != null) {
 																									CompoundTag colliderTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
-																									collider.serialize(colliderTag);
+																									pair.getSecond().serialize(colliderTag);
 																									
 																									colliderCount.setValue(String.valueOf(colliderTag.getInt("number")));
 																									
@@ -830,7 +874,7 @@ public class DatapackEditScreen extends Screen {
 																									colliderSizeZ.setValue(String.valueOf(sizeVec.getDouble(2)));
 																								}
 																								
-																								this.modelPreviewer.setCollider(collider);
+																								this.modelPreviewer.setCollider(pair.getSecond());
 																							}).applyFilter((collider) -> collider instanceof OBBCollider || collider instanceof MultiOBBCollider));
 			
 			this.inputComponentsList.newRow();
@@ -865,7 +909,7 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.combos"));
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
-				return new ComboScreen(DatapackEditScreen.this, this.packList.get(this.packListGrid.getRowposition()).getValue());
+				return new WeaponComboScreen(DatapackEditScreen.this, this.packList.get(this.packListGrid.getRowposition()).getValue());
 			}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.newRow();
@@ -878,7 +922,7 @@ public class DatapackEditScreen extends Screen {
 																.xy2(15, 90)
 																.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
 																.rowHeight(26)
-																.rowEditable(true)
+																.rowEditable(RowEditButton.ADD_REMOVE)
 																.transparentBackground(false)
 																.addColumn(Grid.combo("style", Style.ENUM_MANAGER.universalValues()).valueChanged((event) -> {
 																				CompoundTag innateSkillsTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "innate_skills", new CompoundTag());
@@ -918,6 +962,17 @@ public class DatapackEditScreen extends Screen {
 		}
 		
 		@Override
+		public void validateBeforeExport() {
+			for (PackEntry<ResourceLocation, CompoundTag> packEntry : this.packList) {
+				try {
+					WeaponTypeReloadListener.deserializeWeaponCapabilityBuilder(packEntry.getValue());
+				} catch (Exception e) {
+					throw new IllegalStateException("Failed to export weapon type " + packEntry.getKey() + " :\n" + e.getMessage());
+				}
+			}
+		}
+		
+		@Override
 		public void importEntries(PackResources packResources) {
 			packResources.getNamespaces(PackType.SERVER_DATA).stream().distinct().forEach((namespace) -> {
 				packResources.listResources(PackType.SERVER_DATA, namespace, this.directory, (resourceLocation, stream) -> {
@@ -944,8 +999,6 @@ public class DatapackEditScreen extends Screen {
 		public void exportEntries(ZipOutputStream out) throws Exception {
 			for (PackEntry<ResourceLocation, CompoundTag> packEntry : this.packList) {
 				try {
-					WeaponTypeReloadListener.deserializeWeaponCapabilityBuilder(packEntry.getValue());
-					
 					ZipEntry zipEntry = new ZipEntry(String.format("data/%s/" + this.directory + "/%s.json", packEntry.getKey().getNamespace(), packEntry.getKey().getPath()));
 					Gson gson = new GsonBuilder().setPrettyPrinting().create();
 					out.putNextEntry(zipEntry);
@@ -1013,7 +1066,7 @@ public class DatapackEditScreen extends Screen {
 						boolean beginInit = trailTag.contains("begin_pos");
 						boolean endInit = trailTag.contains("end_pos");
 						
-						ItemCapabilityTab.this.itemTypeCombo.setResponder(null);
+						ItemCapabilityTab.this.itemTypeCombo._setResponder(null);
 						
 						this.setDataBindingComponenets(new Object[] {
 							itemType,
@@ -1040,11 +1093,11 @@ public class DatapackEditScreen extends Screen {
 							ParseUtil.nullParam(trailTag.getString("texture_path")),
 							ForgeRegistries.PARTICLE_TYPES.getValue(new ResourceLocation(trailTag.getString("particle_type")))
 						});
-						ItemCapabilityTab.this.itemTypeCombo.setResponder(ItemCapabilityTab.this.responder);
+						ItemCapabilityTab.this.itemTypeCombo._setResponder(ItemCapabilityTab.this.responder);
 					} else {
-						ItemCapabilityTab.this.itemTypeCombo.setResponder(null);
+						ItemCapabilityTab.this.itemTypeCombo._setResponder(null);
 						this.setDataBindingComponenets(new Object[] {itemType});
-						ItemCapabilityTab.this.itemTypeCombo.setResponder(ItemCapabilityTab.this.responder);
+						ItemCapabilityTab.this.itemTypeCombo._setResponder(ItemCapabilityTab.this.responder);
 					}
 				}
 			};
@@ -1119,17 +1172,17 @@ public class DatapackEditScreen extends Screen {
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.attributes"));
 				this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
-					return new AttributeScreen(DatapackEditScreen.this, ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "attributes", new CompoundTag()), itemType);
+					return new WeaponAttributeScreen(DatapackEditScreen.this, ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "attributes", new CompoundTag()), itemType);
 				}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 				
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.type"));
 				this.inputComponentsList.addComponentCurrentRow(new PopupBox.WeaponTypePopupBox(DatapackEditScreen.this, font, this.inputComponentsList.nextStart(5), 15, 15, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.item_capability.type"),
-																				(name, item) -> {
-																					this.packList.get(this.packListGrid.getRowposition()).getValue().putString("type", name);
+																				(pair) -> {
+																					this.packList.get(this.packListGrid.getRowposition()).getValue().putString("type", pair.getFirst());
 																					
-																					if (item != null) {
-																						CapabilityItem.Builder builder = item.apply(this.registry.getValue(this.packList.get(this.packListGrid.getRowposition()).getKey()));
+																					if (pair.getSecond() != null) {
+																						CapabilityItem.Builder builder = pair.getSecond().apply(this.registry.getValue(this.packList.get(this.packListGrid.getRowposition()).getKey()));
 																						
 																						if (builder instanceof WeaponCapability.Builder weaponBuilder) {
 																							this.modelPreviewer.clearAnimations();
@@ -1274,10 +1327,10 @@ public class DatapackEditScreen extends Screen {
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.collider"), Component.translatable("datapack_edit.item_capability.collider.tooltip")));
 				this.inputComponentsList.addComponentCurrentRow(new PopupBox.ColliderPopupBox(DatapackEditScreen.this, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.collider"),
-																								(name, collider) -> {
-																									if (collider != null) {
+																								(pair) -> {
+																									if (pair.getSecond() != null) {
 																										CompoundTag colliderTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
-																										collider.serialize(colliderTag);
+																										pair.getSecond().serialize(colliderTag);
 																										
 																										colliderCount.setValue(String.valueOf(colliderTag.getInt("number")));
 																										
@@ -1291,7 +1344,7 @@ public class DatapackEditScreen extends Screen {
 																										colliderSizeY.setValue(String.valueOf(sizeVec.getDouble(1)));
 																										colliderSizeZ.setValue(String.valueOf(sizeVec.getDouble(2)));
 																										
-																										this.modelPreviewer.setCollider(collider);
+																										this.modelPreviewer.setCollider(pair.getSecond());
 																									}
 																								}).applyFilter((collider) -> collider instanceof OBBCollider || collider instanceof MultiOBBCollider));
 				
@@ -1508,9 +1561,9 @@ public class DatapackEditScreen extends Screen {
 				
 				final PopupBox<ParticleType<?>> particlePopup = new PopupBox.RegistryPopupBox<>(DatapackEditScreen.this, font, 0, 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 																								Component.translatable("datapack_edit.weapon_type.hit_particle"), ForgeRegistries.PARTICLE_TYPES,
-																								(name, item) -> {
+																								(pair) -> {
 																									CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
-																									trailTag.putString("particle_type", ParseUtil.getRegistryName(item, ForgeRegistries.PARTICLE_TYPES));
+																									trailTag.putString("particle_type", ParseUtil.getRegistryName(pair.getSecond(), ForgeRegistries.PARTICLE_TYPES));
 																									
 																									TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
 																									this.modelPreviewer.setTrailInfo(trailInfo);
@@ -1518,7 +1571,7 @@ public class DatapackEditScreen extends Screen {
 				
 				texturePath.setValue("epicfight:textures/particle/swing_trail.png");
 				texturePath.moveCursorToStart();
-				particlePopup.setValue(EpicFightParticles.SWING_TRAIL.get());
+				particlePopup._setValue(EpicFightParticles.SWING_TRAIL.get());
 				
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.texture_path"));
@@ -1538,7 +1591,7 @@ public class DatapackEditScreen extends Screen {
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.attributes"));
 				this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
-					return new AttributeScreen(DatapackEditScreen.this, ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "attributes", new CompoundTag()), itemType);
+					return new WeaponAttributeScreen(DatapackEditScreen.this, ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "attributes", new CompoundTag()), itemType);
 				}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			}
 			
@@ -1552,6 +1605,25 @@ public class DatapackEditScreen extends Screen {
 			
 			if (this.registry.containsKey(rl)) {
 				this.modelPreviewer.setItemToRender(this.registry.getValue(rl));
+			}
+		}
+		
+		@Override
+		public void validateBeforeExport() {
+			for (PackEntry<ResourceLocation, CompoundTag> packEntry : this.packList) {
+				try {
+					String sItemType = packEntry.getValue().getString("item_type");
+					
+					if (StringUtil.isNullOrEmpty(sItemType)) {
+						throw new IllegalStateException("Item type not specified");
+					}
+					
+					if (sItemType == ItemType.WEAPON.toString() && !packEntry.getValue().contains("type")) {
+						throw new IllegalStateException("Weapon type not specified");
+					}
+				} catch (Exception e) {
+					throw new IllegalStateException("Failed to export item capability " + packEntry.getKey() + " :\n" + e.getMessage());
+				}
 			}
 		}
 		
@@ -1604,15 +1676,6 @@ public class DatapackEditScreen extends Screen {
 			for (PackEntry<ResourceLocation, CompoundTag> packEntry : this.packList) {
 				try {
 					String sItemType = packEntry.getValue().getString("item_type");
-					
-					if (StringUtil.isNullOrEmpty(sItemType)) {
-						throw new IllegalStateException("Item type not specified");
-					}
-					
-					if (sItemType == ItemType.WEAPON.toString() && !packEntry.getValue().contains("type")) {
-						throw new IllegalStateException("Weapon type not specified");
-					}
-					
 					ItemType itemType = ItemType.valueOf(sItemType);
 					packEntry.getValue().remove("item_type");
 					
@@ -1658,47 +1721,72 @@ public class DatapackEditScreen extends Screen {
 	@OnlyIn(Dist.CLIENT)
 	class MobPatchTab extends DatapackTab<EntityType<?>> {
 		private final ModelPreviewer modelPreviewer;
-		private final ComboBox<EntityType<?>> presetCombo = new ComboBox<>(parentScreen, parentScreen.getMinecraft().font, 0, 124, 100, 15, HorizontalSizing.LEFT_WIDTH, null, 8,
-				Component.translatable("datapack_edit.mob_patch.preset"), EntityPatchProvider.getPatchedEntities(), (entityType) -> ParseUtil.nullOrToString(entityType, (type) -> EntityType.getKey(type).toString()), null);
+		private final ComboBox<EntityType<?>> presetCombo = new ComboBox<>(DatapackEditScreen.this, DatapackEditScreen.this.font, 0, 124, 100, 15, HorizontalSizing.LEFT_WIDTH, null, 8,
+				Component.translatable("datapack_edit.mob_patch.preset"), EntityPatchProvider.getPatchedEntities(), (entityType) -> entityType == null ? "none" : EntityType.getKey(entityType).toString(), null);
 		
-		private final Consumer<EntityType<?>> comboResponder = (entityType) -> {
+		private final Consumer<EntityType<?>> presetResponder = (entityType) -> {
+			CompoundTag tag = this.packList.get(this.packListGrid.getRowposition()).getValue();
+			
 			if (entityType == null) {
-				this.packList.get(this.packListGrid.getRowposition()).getValue().remove("preset");
+				tag.remove("preset");
 			} else {
-				this.packList.get(this.packListGrid.getRowposition()).getValue().putString("preset", EntityType.getKey(entityType).toString());
+				tag.putString("preset", EntityType.getKey(entityType).toString());
 			}
 			
-			this.rearrangeComponents(false, entityType == null ? false : true);
+			this.rearrangeComponents(false, entityType == null ? false : true, tag.getBoolean("isHumanoid"));
+			
+			if (entityType == null) {
+				this.bindTag(tag);
+			}
+		};
+		
+		private final CheckBox disableCheckBox = new CheckBox(font, 0, 60, 0, 10, HorizontalSizing.LEFT_WIDTH, null, false, Component.literal(""), null);
+		private final Consumer<Boolean> disableResponder = (value) -> {
+			CompoundTag tag = this.packList.get(this.packListGrid.getRowposition()).getValue();
+			tag.putBoolean("disabled", value);
+			boolean preset = tag.contains("preset", Tag.TAG_STRING) && !StringUtil.isNullOrEmpty(tag.getString("preset"));
+			boolean isHumanoid = tag.getBoolean("isHumanoid");
+			
+			this.rearrangeComponents(value, preset, isHumanoid);
+			
+			if (!value) {
+				this.bindTag(tag);
+			}
+		};
+		
+		private final CheckBox isHumanoidCheckbox = new CheckBox(font, 0, 60, 0, 10, HorizontalSizing.LEFT_WIDTH, null, false, Component.literal(""), null);
+		
+		private final Consumer<Boolean> isHumanoidResponder = (value) -> {
+			CompoundTag tag = this.packList.get(this.packListGrid.getRowposition()).getValue();
+			tag.putBoolean("isHumanoid", value);
+			
+			this.rearrangeComponents(false, false, value);
+			this.bindTag(tag);
 		};
 		
 		public MobPatchTab() {
-			super(Component.translatable("gui." + EpicFightMod.MODID + ".tab.datapack.mob_patch"), MobPatchReloadListener.DIRECTORY, ForgeRegistries.ENTITY_TYPES);
+			super(Component.translatable("gui." + EpicFightMod.MODID + ".tab.datapack.mob_patch"), MobPatchReloadListener.DIRECTORY, ForgeRegistries.ENTITY_TYPES, (entityType) -> entityType.getCategory() != MobCategory.MISC);
 			
 			this.inputComponentsList = new InputComponentList<>(DatapackEditScreen.this, 0, 0, 0, 0, 30) {
 				@Override
 				public void importTag(CompoundTag tag) {
 					boolean disabled = tag.getBoolean("disabled");
-					boolean preset = tag.contains("preset", Tag.TAG_STRING);
+					boolean preset = tag.contains("preset", Tag.TAG_STRING) && !StringUtil.isNullOrEmpty(tag.getString("preset"));
+					boolean isHumanoid = tag.getBoolean("isHumanoid");
 					
-					MobPatchTab.this.rearrangeComponents(disabled, preset);
+					MobPatchTab.this.rearrangeComponents(disabled, preset, isHumanoid);
 					this.setComponentsActive(true);
 					
 					if (preset) {
-						MobPatchTab.this.presetCombo.setResponder(null);
+						MobPatchTab.this.presetCombo._setResponder(null);
 						
 						this.setDataBindingComponenets(new Object[] {
 							EntityType.byString(tag.getString("preset")).orElse(null)
 						});
 						
-						MobPatchTab.this.presetCombo.setResponder(MobPatchTab.this.comboResponder);
+						MobPatchTab.this.presetCombo._setResponder(MobPatchTab.this.presetResponder);
 					} else if (!disabled) {
-						MobPatchTab.this.presetCombo.setResponder(null);
-						
-						this.setDataBindingComponenets(new Object[] {
-							false,
-						});
-						
-						MobPatchTab.this.presetCombo.setResponder(MobPatchTab.this.comboResponder);
+						MobPatchTab.this.bindTag(tag);
 					}
 				}
 			};
@@ -1707,109 +1795,306 @@ public class DatapackEditScreen extends Screen {
 			this.modelPreviewer.setColliderJoint(Armatures.BIPED.searchJointByName("Tool_R"));
 		}
 		
-		private void rearrangeComponents(boolean disable, boolean usePreset) {
+		private void rearrangeComponents(boolean disable, boolean usePreset, boolean isHumanoid) {
 			Screen parentScreen = DatapackEditScreen.this;
+			final ScreenRectangle screen = getRectangle();
 			
 			this.inputComponentsList.clearComponents();
 			
-			final CheckBox disableCheckBox = new CheckBox(font, 0, 60, 0, 10, HorizontalSizing.LEFT_WIDTH, null, disable, Component.literal(""), null);
-			final ScreenRectangle screen = getRectangle();
-			
-			disableCheckBox.setResponder((value) -> {
-				this.packList.get(this.packListGrid.getRowposition()).getValue().putBoolean("disabled", value);
-				this.rearrangeComponents(value, false);
-			});
-			
 			if (disable) {
+				this.disableCheckBox._setResponder(null);
+				this.disableCheckBox._setValue(true);
+				this.disableCheckBox._setResponder(MobPatchTab.this.disableResponder);
+				
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.disabled"));
-				this.inputComponentsList.addComponentCurrentRow(disableCheckBox.relocateX(screen, this.inputComponentsList.nextStart(5)));
+				this.inputComponentsList.addComponentCurrentRow(this.disableCheckBox.relocateX(screen, this.inputComponentsList.nextStart(5)));
 			} else if (usePreset) {
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.preset"));
 				this.inputComponentsList.addComponentCurrentRow(this.presetCombo.relocateX(screen, this.inputComponentsList.nextStart(4)));
-				this.presetCombo.setResponder(this.comboResponder);
+				this.presetCombo._setResponder(this.presetResponder);
 			} else {
+				this.disableCheckBox._setResponder(null);
+				this.disableCheckBox._setValue(false);
+				this.disableCheckBox._setResponder(MobPatchTab.this.disableResponder);
+				
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.disabled"));
-				this.inputComponentsList.addComponentCurrentRow(disableCheckBox.relocateX(screen, this.inputComponentsList.nextStart(5)));
+				this.inputComponentsList.addComponentCurrentRow(this.disableCheckBox.relocateX(screen, this.inputComponentsList.nextStart(5)));
 				
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.preset"));
 				this.inputComponentsList.addComponentCurrentRow(this.presetCombo.relocateX(screen, this.inputComponentsList.nextStart(4)));
-				this.presetCombo.setResponder(this.comboResponder);
+				this.presetCombo._setResponder(this.presetResponder);
+				
+				final PopupBox<AnimatedMesh> meshPopupBox = new PopupBox.MeshPopupBox(parentScreen, font, 0, 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
+					Component.translatable("datapack_edit.weapon_type.model"), (pair) -> {
+						this.packList.get(this.packListGrid.getRowposition()).getValue().putString("model", pair.getFirst());
+					});
 				
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.model"));
-				this.inputComponentsList.addComponentCurrentRow(new PopupBox.MeshPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
-					Component.translatable("datapack_edit.weapon_type.model"), (name, item) -> {
-						this.packList.get(this.packListGrid.getRowposition()).getValue().putString("model", name);
-					}));
+				this.inputComponentsList.addComponentCurrentRow(meshPopupBox.relocateX(screen, this.inputComponentsList.nextStart(5)));
+				
+				final PopupBox<Armature> armaturePopupBox = new PopupBox.ArmaturePopupBox(parentScreen, font, 0, 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
+						Component.translatable("datapack_edit.weapon_type.armature"), (pair) -> {
+							this.packList.get(this.packListGrid.getRowposition()).getValue().putString("armature", pair.getFirst());
+						});
 				
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.armature"));
-				this.inputComponentsList.addComponentCurrentRow(new PopupBox.ArmaturePopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
-					Component.translatable("datapack_edit.weapon_type.armature"), (name, item) -> {
-						this.packList.get(this.packListGrid.getRowposition()).getValue().putString("armature", name);
-					}));
+				this.inputComponentsList.addComponentCurrentRow(armaturePopupBox.relocateX(screen, this.inputComponentsList.nextStart(5)));
 				
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.renderer"));
 				this.inputComponentsList.addComponentCurrentRow(new PopupBox.RendererPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
-					Component.translatable("datapack_edit.weapon_type.renderer"), (name, item) -> {
-						this.packList.get(this.packListGrid.getRowposition()).getValue().putString("renderer", name);
+					Component.translatable("datapack_edit.weapon_type.renderer"), (pair) -> {
+						this.packList.get(this.packListGrid.getRowposition()).getValue().putString("renderer", pair.getFirst());
 					}));
 				
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.humanoid"));
-				this.inputComponentsList.addComponentCurrentRow(new CheckBox(font, this.inputComponentsList.nextStart(5), 60, 0, 10, HorizontalSizing.LEFT_WIDTH, null, disable, Component.literal(""), (value) -> {
-						this.packList.get(this.packListGrid.getRowposition()).getValue().putBoolean("humanoid", value);
-					}));
+				this.inputComponentsList.addComponentCurrentRow(this.isHumanoidCheckbox.relocateX(screen, this.inputComponentsList.nextStart(5)));
 				
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.faction"));
 				this.inputComponentsList.addComponentCurrentRow(new ComboBox<>(parentScreen, parentScreen.getMinecraft().font, this.inputComponentsList.nextStart(5), 124, 100, 15, HorizontalSizing.LEFT_WIDTH, null, 8,
 					Component.translatable("datapack_edit.mob_patch.faction"), List.of(Faction.values()), (faction) -> ParseUtil.snakeToSpacedCamel(faction), (faction) -> {
-						this.packList.get(this.packListGrid.getRowposition()).getValue().putString("faction", ParseUtil.nullOrToString(faction, (value) -> value.toString().toUpperCase(Locale.ROOT)));
+						this.packList.get(this.packListGrid.getRowposition()).getValue().putString("faction", ParseUtil.nullOrToString(faction, (value) -> value.toString().toLowerCase(Locale.ROOT)));
 					}));
 				
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.attributes"));
-				this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
-					return DatapackEditScreen.this;
-				}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.addComponentCurrentRow(Grid.builder(parentScreen, parentScreen.getMinecraft())
+																	.xy1(this.inputComponentsList.nextStart(5), 0)
+																	.xy2(15, 90)
+																	.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
+																	.rowHeight(21)
+																	.rowEditable(RowEditButton.ADD_REMOVE)
+																	.transparentBackground(false)
+																	.addColumn(Grid.combo("attribute", List.of("impact", "armor_negation", "max_strikes", "chasing_speed", "scale"))
+																					.toDisplayText(ParseUtil::snakeToSpacedCamel)
+																					.valueChanged((event) -> {
+																						CompoundTag attributesTag = ParseUtil.getOrSupply(this.packList.get(this.packListGrid.getRowposition()).getValue(), "attributes", CompoundTag::new);
+																						attributesTag.remove(ParseUtil.nullParam(event.prevValue));
+																						attributesTag.putString(ParseUtil.nullParam(event.postValue), "");
+																					})
+																					.width(100))
+																	.addColumn(Grid.editbox("amount")
+																					.editWidgetCreated((editbox) -> editbox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble)))
+																					.valueChanged((event) -> {
+																						CompoundTag attributesTag = ParseUtil.getOrSupply(this.packList.get(this.packListGrid.getRowposition()).getValue(), "attributes", CompoundTag::new);
+																						attributesTag.putString(event.grid.getValue(event.rowposition, "attribute"), ParseUtil.nullParam(event.postValue));
+																					})
+																					.width(150))
+																	.pressAdd((grid, button) -> {
+																		CompoundTag attributeTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "attributes", new CompoundTag());
+																		attributeTag.putString("", "");
+																		int rowposition = grid.addRow();
+																		grid.setGridFocus(rowposition, "attribute");
+																	})
+																	.pressRemove((grid, button) -> {
+																		int rowposition = grid.getRowposition();
+																		
+																		if (rowposition > -1) {
+																			CompoundTag attributeTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "attributes", new CompoundTag());
+																			attributeTag.remove(ParseUtil.nullParam(grid.getValue(rowposition, "attribute")));
+																			grid.removeRow(rowposition);
+																		}
+																	})
+																	.build());
+				this.inputComponentsList.newRow();
 				
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.default_livingmotions"));
-				this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
-					return DatapackEditScreen.this;
-				}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.addComponentCurrentRow(Grid.builder(DatapackEditScreen.this)
+																	.xy1(this.inputComponentsList.nextStart(5), 0)
+																	.xy2(15, 90)
+																	.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
+																	.rowHeight(21)
+																	.rowEditable(RowEditButton.ADD_REMOVE)
+																	.transparentBackground(false)
+																	.addColumn(Grid.combo("living_motion", List.of(LivingMotions.IDLE, LivingMotions.WALK, LivingMotions.CHASE, LivingMotions.MOUNT, LivingMotions.FALL, LivingMotions.FLOAT, LivingMotions.DEATH, LivingMotions.RELOAD, LivingMotions.AIM))
+																					.valueChanged((event) -> {
+																						CompoundTag livingMotionTag = ParseUtil.getOrSupply(this.packList.get(this.packListGrid.getRowposition()).getValue(), "default_livingmotions", CompoundTag::new);
+																						livingMotionTag.remove(ParseUtil.nullParam(event.prevValue));
+																						livingMotionTag.putString(ParseUtil.nullOrToString(event.postValue, (livingmotion) -> livingmotion.name().toLowerCase(Locale.ROOT)), "");
+																					}).editable(true).width(100))
+																	.addColumn(Grid.popup("animation", PopupBox.AnimationPopupBox::new).filter((animation) -> !(animation instanceof MainFrameAnimation))
+																					.editWidgetCreated((popupBox) -> popupBox.setModel(() -> armaturePopupBox._getValue(), () -> meshPopupBox._getValue()))
+																					.valueChanged((event) -> {
+																						CompoundTag livingMotionTag = ParseUtil.getOrSupply(this.packList.get(this.packListGrid.getRowposition()).getValue(), "default_livingmotions", CompoundTag::new);
+																						livingMotionTag.putString(ParseUtil.nullOrToString((LivingMotions)event.grid.getValue(event.rowposition, "living_motion"), (livingmotion) -> livingmotion.name().toLowerCase(Locale.ROOT)),
+																													ParseUtil.nullOrToString(event.postValue, (animation) -> animation.getRegistryName().toString()));
+																					}).toDisplayText((item) -> item == null ? "" : item.getRegistryName().toString()).width(150))
+																	.pressAdd((grid, button) -> {
+																		CompoundTag attributeTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "default_livingmotions", new CompoundTag());
+																		attributeTag.putString("", "");
+																		
+																		int rowposition = grid.addRow();
+																		grid.setGridFocus(rowposition, "living_motion");
+																	})
+																	.pressRemove((grid, button) -> {
+																		int rowposition = grid.getRowposition();
+																		
+																		if (rowposition > -1) {
+																			CompoundTag livingMotionTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "default_livingmotions", new CompoundTag());
+																			livingMotionTag.remove(ParseUtil.nullParam(grid.getValue(rowposition, "living_motion")).toLowerCase(Locale.ROOT));
+																			grid.removeRow(rowposition);
+																		}
+																	})
+																	.build());
+				this.inputComponentsList.newRow();
 				
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.stun_animations"));
-				this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
-					return DatapackEditScreen.this;
-				}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.addComponentCurrentRow(Grid.builder(DatapackEditScreen.this)
+																	.xy1(this.inputComponentsList.nextStart(5), 0)
+																	.xy2(15, 90)
+																	.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
+																	.rowHeight(21)
+																	.rowEditable(RowEditButton.ADD_REMOVE)
+																	.transparentBackground(false)
+																	.addColumn(Grid.combo("stun_type", List.of(StunType.values()))
+																					.toDisplayText((stunType) -> ParseUtil.nullOrToString(stunType, (type) -> ParseUtil.snakeToSpacedCamel(type.name())))
+																					.valueChanged((event) -> {
+																						CompoundTag attributesTag = ParseUtil.getOrSupply(this.packList.get(this.packListGrid.getRowposition()).getValue(), "stun_animations", CompoundTag::new);
+																						attributesTag.remove(ParseUtil.nullParam(event.prevValue));
+																						attributesTag.putString(ParseUtil.nullOrToString(event.postValue, (stunType) -> stunType.name().toLowerCase(Locale.ROOT)), "");
+																					}).editable(true).width(100))
+																	.addColumn(Grid.popup("animation", PopupBox.AnimationPopupBox::new)
+																					.filter((animation) -> animation instanceof HitAnimation || animation instanceof LongHitAnimation)
+																					.editWidgetCreated((popupBox) -> popupBox.setModel(() -> armaturePopupBox._getValue(), () -> meshPopupBox._getValue()))
+																					.valueChanged((event) -> {
+																						CompoundTag stunTypeTag = ParseUtil.getOrSupply(this.packList.get(this.packListGrid.getRowposition()).getValue(), "stun_animations", CompoundTag::new);
+																						stunTypeTag.putString(ParseUtil.nullOrToString((StunType)event.grid.getValue(event.rowposition, "stun_type"), (stunType) -> stunType.name().toLowerCase(Locale.ROOT)),
+																												ParseUtil.nullOrToString(event.postValue, (animation) -> animation.getRegistryName().toString()));
+																					}).toDisplayText((item) -> item == null ? "" : item.getRegistryName().toString()).width(150))
+																	.pressAdd((grid, button) -> {
+																		CompoundTag attributeTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "stun_animations", new CompoundTag());
+																		attributeTag.putString("", "");
+																		
+																		int rowposition = grid.addRow();
+																		grid.setGridFocus(rowposition, "stun_type");
+																	})
+																	.pressRemove((grid, button) -> {
+																		int rowposition = grid.getRowposition();
+																		
+																		if (rowposition > -1) {
+																			CompoundTag stunTypeTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "stun_animations", new CompoundTag());
+																			stunTypeTag.remove(ParseUtil.nullOrToString((StunType)grid.getValue(rowposition, "stun_type"), (stunType) -> stunType.name().toLowerCase(Locale.ROOT)));
+																			grid.removeRow(rowposition);
+																		}
+																	})
+																	.build());
+				this.inputComponentsList.newRow();
+				
+				if (isHumanoid) {
+					this.inputComponentsList.newRow();
+					this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 140, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.humanoid_weapon_motions"));
+					this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
+						if (armaturePopupBox._getValue() == null || meshPopupBox._getValue() == null) {
+							return new MessageScreen<>("", "Define model and armature first.", DatapackEditScreen.this, (button2) -> DatapackEditScreen.this.getMinecraft().setScreen(DatapackEditScreen.this), 180, 60);
+						} else {
+							return new HumanoidWeaponMotionScreen(DatapackEditScreen.this, this.packList.get(this.packListGrid.getRowposition()).getValue(), armaturePopupBox._getValue(), meshPopupBox._getValue());
+						}
+					}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+				}
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 140, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior"));
 				this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
-					return DatapackEditScreen.this;
+					if (armaturePopupBox._getValue() == null || meshPopupBox._getValue() == null) {
+						return new MessageScreen<>("", "Define model and armature first.", DatapackEditScreen.this, (button2) -> DatapackEditScreen.this.getMinecraft().setScreen(DatapackEditScreen.this), 180, 60);
+					} else if (isHumanoid) {
+						return new HumanoidCombatBehaviorScreen(DatapackEditScreen.this, this.packList.get(this.packListGrid.getRowposition()).getValue(), armaturePopupBox._getValue(), meshPopupBox._getValue());
+					} else {
+						return new CombatBehaviorScreen(DatapackEditScreen.this, this.packList.get(this.packListGrid.getRowposition()).getValue(), armaturePopupBox._getValue(), meshPopupBox._getValue(), false);
+					}
 				}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			}
 			
 			this.inputComponentsList.setLeftPos(164);
 		}
 		
+		private void bindTag(CompoundTag tag) {
+			MobPatchTab.this.presetCombo._setResponder(null);
+			MobPatchTab.this.disableCheckBox._setResponder(null);
+			MobPatchTab.this.isHumanoidCheckbox._setResponder(null);
+			
+			Grid.PackImporter attributePackImporter = new Grid.PackImporter();
+			Grid.PackImporter livingmotionPackImporter = new Grid.PackImporter();
+			Grid.PackImporter stunPackImporter = new Grid.PackImporter();
+			
+			for (Map.Entry<String, Tag> attributesTag : tag.getCompound("attributes").tags.entrySet()) {
+				attributePackImporter.newRow();
+				attributePackImporter.newValue("attribute", attributesTag.getKey());
+				attributePackImporter.newValue("amount", attributesTag.getValue().getAsString());
+			}
+			
+			for (Map.Entry<String, Tag> livingmotionTag : tag.getCompound("default_livingmotions").tags.entrySet()) {
+				try {
+					LivingMotion livingMotion = LivingMotion.ENUM_MANAGER.getOrThrow(livingmotionTag.getKey().toUpperCase(Locale.ROOT));
+					livingmotionPackImporter.newRow();
+					livingmotionPackImporter.newValue("living_motion", livingMotion);
+					livingmotionPackImporter.newValue("animation", DatapackEditScreen.animationByKey(livingmotionTag.getValue().getAsString()));
+				} finally {}
+			}
+			
+			for (Map.Entry<String, Tag> stunTag : tag.getCompound("stun_animations").tags.entrySet()) {
+				try {
+					StunType stunType = StunType.valueOf(stunTag.getKey().toUpperCase(Locale.ROOT));
+					stunPackImporter.newRow();
+					stunPackImporter.newValue("stun_type", stunType);
+					stunPackImporter.newValue("animation", DatapackEditScreen.animationByKey(stunTag.getValue().getAsString()));
+				} finally {}
+			}
+			
+			this.inputComponentsList.setDataBindingComponenets(new Object[] {
+				false,
+				EntityType.byString(tag.getString("preset")).orElse(null),
+				Meshes.getMeshOrNull(new ResourceLocation(tag.getString("model"))),
+				Armatures.getArmatureOrNull(new ResourceLocation(tag.getString("armature"))),
+				EntityType.byString(tag.getString("renderer")).orElse(null),
+				tag.getBoolean("isHumanoid"),
+				ParseUtil.nullOrApply(tag.get("faction"), (jsonElement) -> Faction.valueOf(jsonElement.getAsString().toUpperCase(Locale.ROOT))),
+				attributePackImporter,
+				livingmotionPackImporter,
+				stunPackImporter
+			});
+			
+			MobPatchTab.this.presetCombo._setResponder(MobPatchTab.this.presetResponder);
+			MobPatchTab.this.disableCheckBox._setResponder(MobPatchTab.this.disableResponder);
+			MobPatchTab.this.isHumanoidCheckbox._setResponder(MobPatchTab.this.isHumanoidResponder);
+		}
+		
 		@Override
 		public void packGridRowpositionChanged(int rowposition, Map<String, Object> values) {
 			this.inputComponentsList.importTag(this.packList.get(rowposition).getValue());
-			
-			/**
-			ResourceLocation rl = new ResourceLocation(ParseUtil.nullParam(values.get("pack_item")));
-			if (this.registry.containsKey(rl)) {
-				//this.modelPreviewer.setItemToRender(this.registry.getValue(rl));
-			}**/
+		}
+		
+		@Override
+		public void validateBeforeExport() {
+			for (PackEntry<ResourceLocation, CompoundTag> packEntry : this.packList) {
+				try {
+					Optional<EntityType<?>> type = EntityType.byString(packEntry.getKey().toString());
+					
+					if (type.isEmpty()) {
+						throw new IllegalStateException("Invalid entity type");
+					}
+					
+					MobPatchReloadListener.deserializeMobPatchProvider(type.get(), packEntry.getValue(), true);
+				} catch (Exception e) {
+					throw new IllegalStateException("Failed to export mobpatch " + packEntry.getKey() + " :\n" + e.getMessage());
+				}
+			}
 		}
 		
 		@Override
@@ -1823,9 +2108,31 @@ public class DatapackEditScreen extends Screen {
 		
 		@Override
 		public void exportEntries(ZipOutputStream out) throws Exception {
-			//for (PackEntry<ResourceLocation, CompoundTag> packEntry : this.packList) {
-				
-			//}
+			for (PackEntry<ResourceLocation, CompoundTag> packEntry : this.packList) {
+				try {
+					CompoundTag packCompound = packEntry.getValue();
+					
+					if (packCompound.getBoolean("disabled")) {
+						packCompound.tags.clear();
+						packCompound.putBoolean("disabled", true);
+					}
+					
+					if (packCompound.contains("preset")) {
+						String preset = packCompound.getString("preset");
+						packCompound.tags.clear();
+						packCompound.putString("preset", preset);
+					}
+					
+					ZipEntry zipEntry = new ZipEntry(String.format("data/%s/" + this.directory + "/%s.json", packEntry.getKey().getNamespace(), packEntry.getKey().getPath()));
+					Gson gson = new GsonBuilder().setPrettyPrinting().create();
+					out.putNextEntry(zipEntry);
+					out.write(gson.toJson(CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, packCompound).get().left().get()).getBytes());
+					out.closeEntry();
+				} catch (Exception e) {
+					e.printStackTrace();
+					throw new IllegalStateException("Failded to export " + packEntry.getKey() +". "+ e.getMessage());
+				}
+			}
 		}
 	}
 }

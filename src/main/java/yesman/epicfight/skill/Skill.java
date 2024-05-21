@@ -37,6 +37,7 @@ import yesman.epicfight.network.server.SPSkillExecutionFeedback;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
+import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.SkillCancelEvent;
 
@@ -469,8 +470,14 @@ public abstract class Skill {
 		return this.getRegistryName().toString();
 	}
 	
+	@OnlyIn(Dist.CLIENT)
 	public Component getDisplayName() {
 		return Component.translatable(String.format("%s.%s.%s", "skill", this.getRegistryName().getNamespace(), this.getRegistryName().getPath()));
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public List<WeaponCategory> getAvailableWeaponCategories() {
+		return null;
 	}
 	
 	public enum ActivateType {

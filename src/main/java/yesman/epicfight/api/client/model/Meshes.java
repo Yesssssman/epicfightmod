@@ -1,11 +1,14 @@
 package yesman.epicfight.api.client.model;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -19,6 +22,8 @@ import yesman.epicfight.api.client.model.Mesh.RenderProperties;
 import yesman.epicfight.api.client.model.VertexIndicator.AnimatedVertexIndicator;
 import yesman.epicfight.api.forgeevent.ModelBuildEvent;
 import yesman.epicfight.api.model.JsonModelLoader;
+import yesman.epicfight.client.gui.datapack.screen.DatapackEditScreen;
+import yesman.epicfight.client.gui.datapack.screen.PackEntry;
 import yesman.epicfight.client.mesh.CreeperMesh;
 import yesman.epicfight.client.mesh.DragonMesh;
 import yesman.epicfight.client.mesh.EndermanMesh;
@@ -42,7 +47,7 @@ public class Meshes implements PreparableReloadListener {
 		M invoke(Map<String, float[]> arrayMap, M parent, RenderProperties properties, Map<String, ModelPart<V>> parts);
 	}
 		
-	private static final Map<ResourceLocation, Mesh<?>> MESHES = Maps.newHashMap();
+	private static final BiMap<ResourceLocation, Mesh<?>> MESHES = HashBiMap.create();
 	
 	public static HumanoidMesh ALEX;
 	public static HumanoidMesh BIPED;
@@ -112,30 +117,40 @@ public class Meshes implements PreparableReloadListener {
 	
 	@SuppressWarnings("unchecked")
 	public static <M extends RawMesh> M getOrCreateRawMesh(ResourceManager rm, ResourceLocation rl, MeshContructor<VertexIndicator, M> constructor) {
-		final ResourceLocation wrappedLocation = wrapLocation(rl);
-		
-		return (M) MESHES.computeIfAbsent(wrappedLocation, (key) -> {
-			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, wrappedLocation);
+		return (M) MESHES.computeIfAbsent(rl, (key) -> {
+			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, wrapLocation(rl));
 			return jsonModelLoader.loadMesh(constructor);
 		});
 	}
 	
 	@SuppressWarnings("unchecked")
 	public static <M extends AnimatedMesh> M getOrCreateAnimatedMesh(ResourceManager rm, ResourceLocation rl, MeshContructor<AnimatedVertexIndicator, M> constructor) {
-		final ResourceLocation wrappedLocation = wrapLocation(rl);
-		
-		return (M) MESHES.computeIfAbsent(wrappedLocation, (key) -> {
-			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, wrappedLocation);
+		return (M) MESHES.computeIfAbsent(rl, (key) -> {
+			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, wrapLocation(rl));
 			return jsonModelLoader.loadAnimatedMesh(constructor);
 		});
 	}
 	
-	public static void addMesh(ResourceLocation rl, AnimatedMesh animatedMesh) {
-		MESHES.put(rl, animatedMesh);
+	public static ResourceLocation getKey(Mesh<?> mesh) {
+		return MESHES.inverse().get(mesh);
 	}
 	
-	public static Set<Map.Entry<ResourceLocation, Mesh<?>>> entries() {
-		return MESHES.entrySet();
+	public static Mesh<?> getMeshOrNull(ResourceLocation rl) {
+		return MESHES.get(rl);
+	}
+	
+	public static Mesh<?> addMesh(ResourceLocation rl, Mesh<?> mesh) {
+		return MESHES.put(rl, mesh);
+	}
+	
+	public static void refreshUserMeshes(List<PackEntry<String, AnimatedMesh>> userMeshes) {
+		DatapackEditScreen.getCurrentScreen().getUserMeshes().keySet().forEach(MESHES::remove);
+		userMeshes.forEach((entry) -> MESHES.put(new ResourceLocation(entry.getKey()), entry.getValue()));
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T extends Mesh<?>> Set<Map.Entry<ResourceLocation, T>> entries(Class<T> filterInstance) {
+		return MESHES.entrySet().stream().filter((entry) -> filterInstance.isAssignableFrom(entry.getValue().getClass())).map((entry) -> (Map.Entry<ResourceLocation, T>)entry).collect(Collectors.toSet());
 	}
 	
 	public static ResourceLocation wrapLocation(ResourceLocation rl) {

@@ -1,9 +1,9 @@
 package yesman.epicfight.data.conditions.entity;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 import java.util.function.Function;
 
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -34,7 +34,7 @@ public class CustomCondition<T extends LivingEntityPatch<?>> implements Conditio
 	
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public Set<Map.Entry<String, Object>> getAcceptingParameters() {
+	public List<ParameterEditor> getAcceptingParameters(Screen screen) {
 		return null;
 	}
 }

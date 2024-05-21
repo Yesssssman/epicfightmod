@@ -1,17 +1,21 @@
 package yesman.epicfight.data.conditions.entity;
 
-import java.util.Map;
-import java.util.Set;
+import java.util.List;
 
-import com.google.common.collect.ImmutableMap;
-
+import io.netty.util.internal.StringUtil;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.FloatTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.data.conditions.Condition.LivingEntityCondition;
-import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+import yesman.epicfight.api.utils.ParseUtil;
+import yesman.epicfight.client.gui.datapack.widgets.ResizableEditBox;
+import yesman.epicfight.data.conditions.Condition.MobPatchCondition;
+import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 
-public class RandomChance extends LivingEntityCondition {
+public class RandomChance extends MobPatchCondition {
 	private float chance;
 	
 	public RandomChance() {
@@ -42,13 +46,16 @@ public class RandomChance extends LivingEntityCondition {
 	}
 	
 	@Override
-	public boolean predicate(LivingEntityPatch<?> target) {
+	public boolean predicate(MobPatch<?> target) {
 		return target.getOriginal().getRandom().nextFloat() < this.chance;
 	}
 	
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public Set<Map.Entry<String, Object>> getAcceptingParameters() {
-		return ImmutableMap.of("chance", (Object)"").entrySet();
+	public List<ParameterEditor> getAcceptingParameters(Screen screen) {
+		ResizableEditBox editbox = new ResizableEditBox(screen.getMinecraft().font, 0, 0, 0, 0, Component.literal("chance"), null, null);
+		editbox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
+		
+		return List.of(ParameterEditor.of((value) -> FloatTag.valueOf(Float.valueOf(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(tag, Tag::getAsString)), editbox));
 	}
 }

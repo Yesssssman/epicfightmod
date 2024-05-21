@@ -206,5 +206,13 @@ public class ParseUtil {
 		return copied;
 	}
 	
+	public static <T extends Enum<T>> T enumValueOfOrNull(Class<T> enumCls, String enumName) {
+		try {
+			return Enum.valueOf(enumCls, enumName.toUpperCase(Locale.ROOT));
+		} catch (IllegalArgumentException | NullPointerException e) {
+			return null;
+		}
+	}
+	
 	private ParseUtil() {}
 }

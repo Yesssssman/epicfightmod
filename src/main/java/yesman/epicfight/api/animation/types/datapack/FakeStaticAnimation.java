@@ -8,6 +8,7 @@ import com.google.gson.JsonObject;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationClip;
+import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -15,6 +16,7 @@ import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.property.JointMask.JointMaskSet;
 import yesman.epicfight.api.client.animation.property.JointMaskReloadListener;
 import yesman.epicfight.api.model.Armature;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class FakeStaticAnimation extends StaticAnimation implements ClipHoldingAnimation {
@@ -43,6 +45,12 @@ public class FakeStaticAnimation extends StaticAnimation implements ClipHoldingA
 	@Override
 	public AnimationClip getAnimationClip() {
 		return this.clip;
+	}
+	
+	@Override
+	public void putOnPlayer(AnimationPlayer animationPlayer, LivingEntityPatch<?> entitypatch) {
+		animationPlayer.setPlayAnimation(this);
+		animationPlayer.tick(entitypatch);
 	}
 	
 	@Override

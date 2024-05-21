@@ -21,7 +21,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<T> {
+public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<T, T> {
 	private final ComboItemList comboItemList;
 	private final Font font;
 	private final int maxRows;
@@ -263,7 +263,10 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 			public boolean mouseClicked(double mouseX, double mouseY, int button) {
 				if (button == 0) {
 					ComboItemList.this.setSelected(this);
-					ComboBox.this.responder.accept(this.item);
+					
+					if (ComboBox.this.responder != null) {
+						ComboBox.this.responder.accept(this.item);
+					}
 					
 					return true;
 				} else {
@@ -353,12 +356,17 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 	}
 	
 	@Override
-	public void setResponder(Consumer<T> responder) {
+	public void _setResponder(Consumer<T> responder) {
 		this.responder = responder;
 	}
 	
 	@Override
-	public void setValue(T value) {
+	public Consumer<T> _getResponder() {
+		return this.responder;
+	}
+	
+	@Override
+	public void _setValue(T value) {
 		this.comboItemList.setSelected(value);
 		
 		if (this.responder != null && this.useResponder) {
@@ -367,7 +375,7 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 	}
 	
 	@Override
-	public T getValue() {
+	public T _getValue() {
 		return this.comboItemList.getSelected() == null ? null : this.comboItemList.getSelected().item;
 	}
 	

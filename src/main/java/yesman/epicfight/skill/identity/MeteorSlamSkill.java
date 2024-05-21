@@ -1,6 +1,5 @@
 package yesman.epicfight.skill.identity;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -14,8 +13,6 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.LevelUtil;
 import yesman.epicfight.gameasset.Animations;
@@ -165,22 +162,8 @@ public class MeteorSlamSkill extends Skill {
 		container.getExecuter().getEventListener().removeListener(EventType.SKILL_EXECUTE_EVENT, EVENT_UUID);
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
-	public List<Object> getTooltipArgsOfScreen(List<Object> list) {
-		StringBuilder sb = new StringBuilder();
-		Iterator<WeaponCategory> iter = this.slamMotions.keySet().iterator();
-		
-        while (iter.hasNext()) {
-            sb.append(WeaponCategory.ENUM_MANAGER.toTranslated(iter.next()));
-            
-            if (iter.hasNext()) {
-                sb.append(", ");
-            }
-        }
-        
-        list.add(sb.toString());
-		
-		return list;
+	public List<WeaponCategory> getAvailableWeaponCategories() {
+		return List.copyOf(this.slamMotions.keySet());
 	}
 }

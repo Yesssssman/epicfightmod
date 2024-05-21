@@ -15,6 +15,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationClip;
+import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.BasicAttackAnimation;
@@ -26,6 +27,7 @@ import yesman.epicfight.api.collider.MultiOBBCollider;
 import yesman.epicfight.api.collider.OBBCollider;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.ParseUtil;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class FakeAnimation extends StaticAnimation {
@@ -95,6 +97,12 @@ public class FakeAnimation extends StaticAnimation {
 	@Override
 	public ResourceLocation getRegistryName() {
 		return new ResourceLocation((String)this.constructorParams.get("path"));
+	}
+	
+	@Override
+	public void putOnPlayer(AnimationPlayer animationPlayer, LivingEntityPatch<?> entitypatch) {
+		animationPlayer.setPlayAnimation(this);
+		animationPlayer.tick(entitypatch);
 	}
 	
 	public JsonArray getRawAnimationJson() {

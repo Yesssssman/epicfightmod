@@ -1,6 +1,5 @@
 package yesman.epicfight.skill.guard;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -362,24 +361,6 @@ public class GuardSkill extends Skill {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	@Override
-	public List<Object> getTooltipArgsOfScreen(List<Object> list) {
-		list.clear();
-
-		StringBuilder sb = new StringBuilder();
-
-		Iterator<WeaponCategory> iter = this.guardMotions.keySet().iterator();
-		while (iter.hasNext()) {
-			sb.append(WeaponCategory.ENUM_MANAGER.toTranslated(iter.next()));
-			if (iter.hasNext())
-				sb.append(", ");
-		}
-
-		list.add(sb.toString());
-		return list;
-	}
-	
-	@OnlyIn(Dist.CLIENT)
 	public boolean shouldDraw(SkillContainer container) {
 		return container.getDataManager().getDataValue(SkillDataKeys.PENALTY.get()) > 0.0F;
 	}
@@ -393,6 +374,11 @@ public class GuardSkill extends Skill {
 		guiGraphics.blit(EpicFightSkills.GUARD.getSkillTexture(), (int)x, (int)y, 24, 24, 0, 0, 1, 1, 1, 1);
 		guiGraphics.drawString(gui.font, String.format("x%.1f", container.getDataManager().getDataValue(SkillDataKeys.PENALTY.get())), x, y + 6, 16777215, true);
 		poseStack.popPose();
+	}
+	
+	@Override
+	public List<WeaponCategory> getAvailableWeaponCategories() {
+		return List.copyOf(this.guardMotions.keySet());
 	}
 	
 	protected boolean isAdvancedGuard() {

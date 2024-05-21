@@ -45,6 +45,11 @@ public class SelectAnimationScreen extends Screen {
 		this.searchBox.setResponder(this.animationList::refreshAniamtionList);
 		
 		this.animationList.refreshAniamtionList(null);
+		
+		if (armature != null) {
+			this.searchBox.setValue(armature.toString().substring(armature.toString().indexOf("/") + 1));
+			this.searchBox.moveCursorTo(0);
+		}
 	}
 	
 	public void refreshAnimationList() {
@@ -96,6 +101,15 @@ public class SelectAnimationScreen extends Screen {
 	@Override
 	public void tick() {
 		this.modelPreviewer._tick();
+	}
+	
+	@Override
+	public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
+		if (this.modelPreviewer.mouseDragged(mouseX, mouseY, button, dx, dy)) {
+			return true;
+		}
+		
+		return super.mouseDragged(mouseX, mouseY, button, dx, dy);
 	}
 	
 	@Override

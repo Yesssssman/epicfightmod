@@ -2,6 +2,7 @@ package yesman.epicfight.client.gui.datapack.widgets;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 import com.google.common.collect.Lists;
 
@@ -15,7 +16,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 @OnlyIn(Dist.CLIENT)
 public abstract class InputComponentList<T> extends ContainerObjectSelectionList<InputComponentList<T>.InputComponentEntry> {
 	private final Screen owner;
-	private final List<DataBindingComponent<?>> dataBindingComponent = Lists.newArrayList();
+	private final List<DataBindingComponent<?, ?>> dataBindingComponent = Lists.newArrayList();
 	private InputComponentList<T>.InputComponentEntry lastEntry;
 	private InputComponentList<T>.InputComponentEntry focusingEntry;
 	
@@ -52,7 +53,7 @@ public abstract class InputComponentList<T> extends ContainerObjectSelectionList
 	public void addComponentCurrentRow(ResizableComponent inputWidget) {
 		this.lastEntry.children.add(inputWidget);
 		
-		if (inputWidget instanceof DataBindingComponent<?> dataBindingComponent) {
+		if (inputWidget instanceof DataBindingComponent<?, ?> dataBindingComponent) {
 			this.dataBindingComponent.add(dataBindingComponent);
 		}
 	}
@@ -60,10 +61,14 @@ public abstract class InputComponentList<T> extends ContainerObjectSelectionList
 	@SuppressWarnings("unchecked")
 	public void setDataBindingComponenets(Object[] values) {
 		for (int i = 0; i < values.length; i++) {
-			DataBindingComponent<Object> dataBinder = (DataBindingComponent<Object>)this.dataBindingComponent.get(i);
+			DataBindingComponent<Object, Object> dataBinder = (DataBindingComponent<Object, Object>)this.dataBindingComponent.get(i);
 			
 			try {
-				dataBinder.setValue(values[i]);
+				Consumer<Object> consumer = dataBinder._getResponder();
+				dataBinder._setResponder(null);
+				dataBinder._setValue(values[i]);
+				dataBinder._setResponder(consumer);
+				
 			} catch (Exception e) {
 				e.printStackTrace();
 				throw new IllegalStateException(String.format("Error while binding %sst component [%s] because of %s", String.valueOf(i), dataBinder._getMessage(), e.getMessage()));

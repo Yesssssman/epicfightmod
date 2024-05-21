@@ -2,7 +2,6 @@ package yesman.epicfight.client.gui.datapack.widgets;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -39,15 +38,16 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.property.JointMask.JointMaskSet;
 import yesman.epicfight.api.client.animation.property.JointMaskReloadListener;
 import yesman.epicfight.api.client.model.AnimatedMesh;
-import yesman.epicfight.api.client.model.Mesh;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.gui.datapack.screen.DatapackEditScreen;
+import yesman.epicfight.client.gui.datapack.screen.MessageScreen;
 import yesman.epicfight.client.gui.datapack.screen.SelectAnimationScreen;
 import yesman.epicfight.client.gui.datapack.screen.SelectFromRegistryScreen;
+import yesman.epicfight.client.gui.datapack.screen.SelectModelScreen;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.gameasset.ColliderPreset;
 import yesman.epicfight.main.EpicFightMod;
@@ -56,7 +56,7 @@ import yesman.epicfight.world.capabilities.item.WeaponTypeReloadListener;
 import yesman.epicfight.world.capabilities.provider.EntityPatchProvider;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class PopupBox<T> extends AbstractWidget implements DataBindingComponent<T> {
+public abstract class PopupBox<T> extends AbstractWidget implements DataBindingComponent<T, Pair<String, T>> {
 	public static final ResourceLocation POPUP_ICON = new ResourceLocation(EpicFightMod.MODID, "textures/gui/popup_icon.png");
 	
 	protected final Screen owner;
@@ -66,9 +66,9 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 	protected T item;
 	protected String itemDisplayName;
 	protected Predicate<T> filter;
-	protected BiConsumer<String, T> responder;
+	protected Consumer<Pair<String, T>> responder;
 	
-	public PopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Function<T, String> displayStringMapper, BiConsumer<String, T> responder) {
+	public PopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Function<T, String> displayStringMapper, Consumer<Pair<String, T>> responder) {
 		super(x1, y1, x2, y2, title);
 		
 		this.owner = owner;
@@ -159,11 +159,11 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 		protected final IForgeRegistry<T> registry;
 		protected final Consumer<T> onPressRow;
 		
-		public RegistryPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, IForgeRegistry<T> registry, BiConsumer<String, T> responder) {
+		public RegistryPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, IForgeRegistry<T> registry, Consumer<Pair<String, T>> responder) {
 			this(owner, font, x1, x2, y1, y2, horizontal, vertical, title, registry, (item) -> {}, responder);
 		}
 		
-		public RegistryPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, IForgeRegistry<T> registry, Consumer<T> onPressRow, BiConsumer<String, T> responder) {
+		public RegistryPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, IForgeRegistry<T> registry, Consumer<T> onPressRow, Consumer<Pair<String, T>> responder) {
 			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (item) -> registry.containsValue(item) ? registry.getKey(item).toString() : ParseUtil.nullParam(item), responder);
 			
 			this.registry = registry;
@@ -173,14 +173,14 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 		@Override
 		public void onClick(double x, double y) {
 			if (this.clickedPopupButton(x, y)) {
-				this.owner.getMinecraft().setScreen(new SelectFromRegistryScreen<>(this.owner, this.registry, (name, item) -> this.setValue(item), this.onPressRow, this.getFilter()));
+				this.owner.getMinecraft().setScreen(new SelectFromRegistryScreen<>(this.owner, this.registry, (name, item) -> this._setValue(item), this.onPressRow, this.getFilter()));
 			}
 		}
 	}
 	
 	@OnlyIn(Dist.CLIENT)
 	public static class SoundPopupBox extends RegistryPopupBox<SoundEvent> {
-		public SoundPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, BiConsumer<String, SoundEvent> responder) {
+		public SoundPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<Pair<String, SoundEvent>> responder) {
 			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, ForgeRegistries.SOUND_EVENTS, (soundevent) -> {
 				Minecraft.getInstance().getSoundManager().play(SimpleSoundInstance.forUI(soundevent, 1.0F));
 			}, responder);
@@ -192,7 +192,7 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 		private Supplier<Armature> armature;
 		private Supplier<AnimatedMesh> mesh;
 		
-		public AnimationPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, BiConsumer<String, StaticAnimation> responder) {
+		public AnimationPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<Pair<String, StaticAnimation>> responder) {
 			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (animation) -> ParseUtil.nullOrToString(animation, (a) -> a.getRegistryName().toString()), responder);
 		}
 		
@@ -204,28 +204,32 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 		@Override
 		public void onClick(double x, double y) {
 			if (this.clickedPopupButton(x, y)) {
-				this.owner.getMinecraft().setScreen(new SelectAnimationScreen(this.owner, this::setValue, this.getFilter(), this.armature.get(), this.mesh.get()));
+				if (this.armature.get() == null || this.mesh.get() == null) {
+					this.owner.getMinecraft().setScreen(new MessageScreen<>("", "Define model and armature first.", this.owner, (button2) -> this.owner.getMinecraft().setScreen(this.owner), 180, 60));
+				} else {
+					this.owner.getMinecraft().setScreen(new SelectAnimationScreen(this.owner, this::_setValue, this.getFilter(), this.armature.get(), this.mesh.get()));
+				}
 			}
 		}
 	}
 	
 	@OnlyIn(Dist.CLIENT)
 	public static class ColliderPopupBox extends PopupBox<Collider> {
-		public ColliderPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, BiConsumer<String, Collider> responder) {
+		public ColliderPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<Pair<String, Collider>> responder) {
 			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (collider) -> ParseUtil.nullOrToString(collider, (c) -> ParseUtil.nullParam(ColliderPreset.getKey(c))), responder);
 		}
 		
 		@Override
 		public void onClick(double x, double y) {
 			if (this.clickedPopupButton(x, y)) {
-				this.owner.getMinecraft().setScreen(new SelectFromRegistryScreen<>(this.owner, ParseUtil.mapEntryToPair(ColliderPreset.entries()), "Collider", (name, item) -> this.setValue(item), (c) -> {}, this.getFilter()));
+				this.owner.getMinecraft().setScreen(new SelectFromRegistryScreen<>(this.owner, ParseUtil.mapEntryToPair(ColliderPreset.entries()), "Collider", (name, item) -> this._setValue(item), (c) -> {}, this.getFilter()));
 			}
 		}
 	}
 	
 	@OnlyIn(Dist.CLIENT)
 	public static class WeaponTypePopupBox extends PopupBox<Function<Item, CapabilityItem.Builder>> {
-		public WeaponTypePopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, BiConsumer<String, Function<Item, CapabilityItem.Builder>> responder) {
+		public WeaponTypePopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<Pair<String, Function<Item, CapabilityItem.Builder>>> responder) {
 			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (builder) -> {
 				Map<Function<Item, CapabilityItem.Builder>, ResourceLocation> map = Maps.newHashMap();
 				
@@ -243,8 +247,8 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 				weaponTypeEntry.addAll(WeaponTypeReloadListener.entries());
 				weaponTypeEntry.addAll(DatapackEditScreen.getSerializableWeaponTypes());
 				
-				this.owner.getMinecraft().setScreen(new SelectFromRegistryScreen<>(this.owner, ParseUtil.mapEntryToPair(weaponTypeEntry), "Weapon Types", (name, item) -> {
-					this.setValue(item);
+				this.owner.getMinecraft().setScreen(new SelectFromRegistryScreen<>(this.owner, ParseUtil.mapEntryToPair(weaponTypeEntry), "Weapon Type", (name, item) -> {
+					this._setValue(item);
 					this.setDisplayText(name);
 				}, (c) -> {}, this.getFilter()));
 			}
@@ -253,21 +257,21 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 	
 	@OnlyIn(Dist.CLIENT)
 	public static class JointMaskPopupBox extends PopupBox<JointMaskSet> {
-		public JointMaskPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, BiConsumer<String, JointMaskSet> responder) {
+		public JointMaskPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<Pair<String, JointMaskSet>> responder) {
 			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (jointMask) -> ParseUtil.nullParam(JointMaskReloadListener.getKey(jointMask)), responder);
 		}
 		
 		@Override
 		public void onClick(double x, double y) {
 			if (this.clickedPopupButton(x, y)) {
-				this.owner.getMinecraft().setScreen(new SelectFromRegistryScreen<>(this.owner, ParseUtil.mapEntryToPair(JointMaskReloadListener.entries()), "Joint Masks", (name, item) -> this.setValue(item), (c) -> {}, this.getFilter()));
+				this.owner.getMinecraft().setScreen(new SelectFromRegistryScreen<>(this.owner, ParseUtil.mapEntryToPair(JointMaskReloadListener.entries()), "Joint Mask", (name, item) -> this._setValue(item), (c) -> {}, this.getFilter()));
 			}
 		}
 	}
 	
 	@OnlyIn(Dist.CLIENT)
 	public static class BuiltinMobpatchPopupBox extends PopupBox<EntityType<?>> {
-		public BuiltinMobpatchPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, BiConsumer<String, EntityType<?>> responder) {
+		public BuiltinMobpatchPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<Pair<String, EntityType<?>>> responder) {
 			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (entityType) -> ParseUtil.nullParam(EntityType.getKey(entityType)), responder);
 		}
 		
@@ -276,42 +280,39 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 			if (this.clickedPopupButton(x, y)) {
 				Set<Pair<ResourceLocation, EntityType<?>>> set = Sets.newHashSet();
 				EntityPatchProvider.getPatchedEntities().forEach((entityType) -> set.add(Pair.of(EntityType.getKey(entityType), entityType)));
-				this.owner.getMinecraft().setScreen(new SelectFromRegistryScreen<>(this.owner, set, "Presets", (name, item) -> this.setValue(item), (c) -> {}, this.getFilter()));
+				this.owner.getMinecraft().setScreen(new SelectFromRegistryScreen<>(this.owner, set, "Preset", (name, item) -> this._setValue(item), (c) -> {}, this.getFilter()));
 			}
 		}
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public static class MeshPopupBox extends PopupBox<Mesh<?>> {
-		public MeshPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, BiConsumer<String, Mesh<?>> responder) {
-			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (mesh) -> "null", responder);
-			this.applyFilter((mesh) -> mesh instanceof AnimatedMesh);
+	public static class MeshPopupBox extends PopupBox<AnimatedMesh> {
+		public MeshPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<Pair<String, AnimatedMesh>> responder) {
+			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (mesh) -> ParseUtil.nullParam(Meshes.getKey(mesh)), responder);
 		}
 		
 		@Override
 		public void onClick(double x, double y) {
 			if (this.clickedPopupButton(x, y)) {
-				Set<Pair<ResourceLocation, Mesh<?>>> sets = ParseUtil.mapEntryToPair(Meshes.entries());
-				
-				this.owner.getMinecraft().setScreen(new SelectFromRegistryScreen<Mesh<?>>(this.owner, sets, "Models", (name, item) -> {
-					this.setValue(item);
+				this.owner.getMinecraft().setScreen(new SelectModelScreen(this.owner, (name, item) -> {
+					this._setValue(item);
 					this.setDisplayText(name);
-				}, (c) -> {}, this.getFilter()));
+				}));
 			}
 		}
 	}
 	
 	@OnlyIn(Dist.CLIENT)
 	public static class ArmaturePopupBox extends PopupBox<Armature> {
-		public ArmaturePopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, BiConsumer<String, Armature> responder) {
-			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (armature) -> "null", responder);
+		public ArmaturePopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<Pair<String, Armature>> responder) {
+			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (armature) -> ParseUtil.nullParam(Armatures.getKey(armature)), responder);
 		}
 		
 		@Override
 		public void onClick(double x, double y) {
 			if (this.clickedPopupButton(x, y)) {
-				this.owner.getMinecraft().setScreen(new SelectFromRegistryScreen<>(this.owner, ParseUtil.mapEntryToPair(Armatures.entries()), "Armatures", (name, item) -> {
-					this.setValue(item);
+				this.owner.getMinecraft().setScreen(new SelectFromRegistryScreen<>(this.owner, ParseUtil.mapEntryToPair(Armatures.entries()), "Armature", (name, item) -> {
+					this._setValue(item);
 					this.setDisplayText(name);
 				}, (c) -> {}, this.getFilter()));
 			}
@@ -320,8 +321,8 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 	
 	@OnlyIn(Dist.CLIENT)
 	public static class RendererPopupBox extends PopupBox<EntityType<?>> {
-		public RendererPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, BiConsumer<String, EntityType<?>> responder) {
-			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (entityType) -> ParseUtil.nullParam(EntityType.getKey(entityType)), responder);
+		public RendererPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<Pair<String, EntityType<?>>> responder) {
+			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (entityType) -> ParseUtil.nullOrToString(entityType, (type) -> EntityType.getKey(type).toString()), responder);
 		}
 		
 		@Override
@@ -329,14 +330,14 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 			if (this.clickedPopupButton(x, y)) {
 				Set<Pair<ResourceLocation, EntityType<?>>> set = Sets.newHashSet();
 				ClientEngine.getInstance().renderEngine.getRendererEntities().forEach((entityType) -> set.add(Pair.of(EntityType.getKey(entityType), entityType)));
-				this.owner.getMinecraft().setScreen(new SelectFromRegistryScreen<EntityType<?>> (this.owner, set, "Armatures", (name, item) -> this.setValue(item), (c) -> {}, this.getFilter()));
+				this.owner.getMinecraft().setScreen(new SelectFromRegistryScreen<EntityType<?>> (this.owner, set, "Renderer", (name, item) -> this._setValue(item), (c) -> {}, this.getFilter()));
 			}
 		}
 	}
 	
 	@FunctionalInterface
 	public static interface PopupBoxProvider<T, P extends PopupBox<T>> {
-		public P create(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, BiConsumer<String, T> responder);
+		public P create(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<Pair<String, T>> responder);
 	}
 	
 	/*******************************************************************
@@ -404,21 +405,23 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 		this.active = active;
 	}
 	
-	public void setResponder(BiConsumer<String, T> responder) {
+	@Override
+	public void _setResponder(Consumer<Pair<String, T>> responder) {
 		this.responder = responder;
 	}
 	
 	@Override
-	public void setResponder(Consumer<T> responder) {
+	public Consumer<Pair<String, T>> _getResponder() {
+		return this.responder;
 	}
 	
 	@Override
-	public void setValue(@Nullable T item) {
+	public void _setValue(@Nullable T item) {
 		this.item = item;
 		this.itemDisplayName = this.toDisplayString.apply(item);
 		
 		if (this.responder != null) {
-			this.responder.accept(this.itemDisplayName, item);
+			this.responder.accept(Pair.of(this.itemDisplayName, item));
 		}
 		
 		if (!StringUtil.isNullOrEmpty(this.itemDisplayName) && !this.itemDisplayName.equals(this.font.plainSubstrByWidth(this.itemDisplayName, this.width - 16))) {
@@ -433,12 +436,14 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 	}
 	
 	@Override
-	public T getValue() {
+	public T _getValue() {
 		return this.item;
 	}
 	
 	@Override
 	public void reset() {
+		this.item = null;
+		this.itemDisplayName = "";
 	}
 	
 	@Override

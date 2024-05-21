@@ -53,6 +53,7 @@ import yesman.epicfight.client.gui.datapack.widgets.ResizableEditBox;
 import yesman.epicfight.client.gui.datapack.widgets.RowSpliter;
 import yesman.epicfight.client.gui.datapack.widgets.Static;
 import yesman.epicfight.client.gui.datapack.widgets.SubScreenOpenButton;
+import yesman.epicfight.client.gui.datapack.widgets.Grid.GridBuilder.RowEditButton;
 import yesman.epicfight.gameasset.ColliderPreset;
 
 @OnlyIn(Dist.CLIENT)
@@ -84,7 +85,7 @@ public class ImportAnimationsScreen extends Screen {
 									.xy1(8, screenRect.top() + 14)
 									.xy2(split - 10, screenRect.height() - 21)
 									.rowHeight(26)
-									.rowEditable(false)
+									.rowEditable(RowEditButton.NONE)
 									.transparentBackground(true)
 									.rowpositionChanged((rowposition, values) -> {
 										this.inputComponentsList.importTag(this.fakeAnimations.get(rowposition));
@@ -151,7 +152,7 @@ public class ImportAnimationsScreen extends Screen {
 				if (fakeAnim.getAnimationClass() != null) {
 				switch (fakeAnim.getAnimationClass()) {
 				case STATIC, MOVEMENT:
-					ImportAnimationsScreen.this.animationType.setResponder(null);
+					ImportAnimationsScreen.this.animationType._setResponder(null);
 					
 					this.setDataBindingComponenets(new Object[] {
 						fakeAnim.getAnimationClass(),
@@ -159,7 +160,7 @@ public class ImportAnimationsScreen extends Screen {
 						fakeAnim.getParameter("isRepeat")
 					});
 					
-					ImportAnimationsScreen.this.animationType.setResponder(ImportAnimationsScreen.this.responder);
+					ImportAnimationsScreen.this.animationType._setResponder(ImportAnimationsScreen.this.responder);
 					break;
 				case ATTACK, BASIC_ATTACK:
 					CompoundTag colliderTag = new CompoundTag();
@@ -169,7 +170,7 @@ public class ImportAnimationsScreen extends Screen {
 						collider.serialize(colliderTag);
 					}
 					
-					ImportAnimationsScreen.this.animationType.setResponder(null);
+					ImportAnimationsScreen.this.animationType._setResponder(null);
 					
 					Grid.PackImporter packImporter = new Grid.PackImporter();
 					ListTag phasesTag = fakeAnim.getParameter("phases");
@@ -199,7 +200,7 @@ public class ImportAnimationsScreen extends Screen {
 						fakeAnim.getParameter("colliderJoint")
 					});
 					
-					ImportAnimationsScreen.this.animationType.setResponder(ImportAnimationsScreen.this.responder);
+					ImportAnimationsScreen.this.animationType._setResponder(ImportAnimationsScreen.this.responder);
 					
 					if (fakeAnim.getPropertiesJson().has("trail_effects")) {
 						JsonArray trailList = fakeAnim.getPropertiesJson().get("trail_effects").getAsJsonArray();
@@ -231,13 +232,13 @@ public class ImportAnimationsScreen extends Screen {
 					
 					break;
 				default:
-					ImportAnimationsScreen.this.animationType.setValue(null);
+					ImportAnimationsScreen.this.animationType._setValue(null);
 					break;
 				}
 				} else {
-					ImportAnimationsScreen.this.animationType.setResponder(null);
-					ImportAnimationsScreen.this.animationType.setValue(null);
-					ImportAnimationsScreen.this.animationType.setResponder(ImportAnimationsScreen.this.responder);
+					ImportAnimationsScreen.this.animationType._setResponder(null);
+					ImportAnimationsScreen.this.animationType._setValue(null);
+					ImportAnimationsScreen.this.animationType._setResponder(ImportAnimationsScreen.this.responder);
 				}
 			}
 		};
@@ -361,7 +362,7 @@ public class ImportAnimationsScreen extends Screen {
 										.xy2(12, 80)
 										.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
 										.rowHeight(26)
-										.rowEditable(true)
+										.rowEditable(RowEditButton.ADD_REMOVE)
 										.transparentBackground(false)
 										.rowpositionChanged((rowposition, values) -> {
 											FakeAnimation fakeAnimation = this.fakeAnimations.get(this.animationGrid.getRowposition());
@@ -376,12 +377,12 @@ public class ImportAnimationsScreen extends Screen {
 											if (tag.contains("joint")) {
 												String armature$joint = tag.getString("joint");
 												String joinName = armature$joint.substring(armature$joint.lastIndexOf('.') + 1);
-												colliderJoint.setValue(this.modelPreviewer.getArmature().searchJointByName(joinName));
+												colliderJoint._setValue(this.modelPreviewer.getArmature().searchJointByName(joinName));
 											} else {
-												colliderJoint.setValue(null);
+												colliderJoint._setValue(null);
 											}
 											
-											interactionHand.setValue(tag.contains("hand") ? InteractionHand.valueOf(tag.getString("hand")) : null);
+											interactionHand._setValue(tag.contains("hand") ? InteractionHand.valueOf(tag.getString("hand")) : null);
 											
 											if (tag.contains("collider")) {
 												CompoundTag colliderTag = tag.getCompound("collider");
@@ -393,7 +394,7 @@ public class ImportAnimationsScreen extends Screen {
 												colliderSizeY.setValue(ParseUtil.valueOfOmittingType(colliderTag.getList("size", Tag.TAG_DOUBLE).get(1)));
 												colliderSizeZ.setValue(ParseUtil.valueOfOmittingType(colliderTag.getList("size", Tag.TAG_DOUBLE).get(2)));
 											} else {
-												colliderPopup.setValue(null);
+												colliderPopup._setValue(null);
 												colliderCount.setValue("");
 												colliderCenterX.setValue("");
 												colliderCenterY.setValue("");
@@ -594,7 +595,7 @@ public class ImportAnimationsScreen extends Screen {
 			colliderSizeY.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
 			colliderSizeZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
 			
-			colliderJoint.setResponder((joint) -> {
+			colliderJoint._setResponder((joint) -> {
 				if (joint != null) {
 					ListTag phases = this.fakeAnimations.get(this.animationGrid.getRowposition()).getParameter("phases");
 					CompoundTag phaseTag = phases.getCompound(phasesGrid.getRowposition());
@@ -604,7 +605,7 @@ public class ImportAnimationsScreen extends Screen {
 				}
 			});
 			
-			interactionHand.setResponder((hand) -> {
+			interactionHand._setResponder((hand) -> {
 				if (hand != null) {
 					ListTag phases = this.fakeAnimations.get(this.animationGrid.getRowposition()).getParameter("phases");
 					CompoundTag phaseTag = phases.getCompound(phasesGrid.getRowposition());
@@ -612,12 +613,12 @@ public class ImportAnimationsScreen extends Screen {
 				}
 			});
 			
-			colliderPopup.setResponder((name, collider) -> {
-				if (collider != null) {
+			colliderPopup._setResponder((pair) -> {
+				if (pair.getSecond() != null) {
 					ListTag phases = this.fakeAnimations.get(this.animationGrid.getRowposition()).getParameter("phases");
 					CompoundTag phaseTag = phases.getCompound(phasesGrid.getRowposition());
 					CompoundTag colliderTag = new CompoundTag();
-					collider.serialize(colliderTag);
+					pair.getSecond().serialize(colliderTag);
 					
 					colliderCount.setValue(String.valueOf(colliderTag.getInt("number")));
 					
@@ -633,7 +634,7 @@ public class ImportAnimationsScreen extends Screen {
 					
 					phaseTag.put("collider", colliderTag);
 					
-					this.modelPreviewer.setCollider(collider, colliderJoint.getValue());
+					this.modelPreviewer.setCollider(pair.getSecond(), colliderJoint._getValue());
 				} else {
 					this.modelPreviewer.setCollider(ColliderPreset.FIST);
 				}
@@ -787,7 +788,7 @@ public class ImportAnimationsScreen extends Screen {
 					try {
 						File file = path.toFile();
 						stream = new FileInputStream(file);
-						JsonModelLoader jsonLoader = new JsonModelLoader(stream);
+						JsonModelLoader jsonLoader = new JsonModelLoader(stream, new ResourceLocation(modid, file.getName()));
 						String armatureName = this.modelPreviewer.getArmature().toString();
 						String animationPath = modid + ":" + armatureName.substring(armatureName.lastIndexOf("/") + 1) + "/" + file.getName().replace(".json", "");
 						FakeAnimation animation = new FakeAnimation(animationPath, this.modelPreviewer.getArmature(), jsonLoader.loadAnimationClip(this.modelPreviewer.getArmature()), jsonLoader.getRootJson().getAsJsonArray("animation"));
@@ -831,7 +832,6 @@ public class ImportAnimationsScreen extends Screen {
 		
 		StringBuilder sb = new StringBuilder();
 		boolean hasException = false;
-		
 		List<Object> uniquepaths = fakeAnimations.stream().map((fakeAnim) -> fakeAnim.getParameter("path")).distinct().toList();
 		
 		if (uniquepaths.size() != fakeAnimations.size()) {

@@ -67,6 +67,7 @@ import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.Mesh;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.CubicBezierCurve;
@@ -83,7 +84,7 @@ import yesman.epicfight.world.damagesource.StunType;
 
 @OnlyIn(Dist.CLIENT)
 public class ModelPreviewer extends AbstractWidget implements ResizableComponent {
-	public final NoEntityAnimator animator;
+	private NoEntityAnimator animator;
 	private final ModelRenderTarget modelRenderTarget;
 	private final List<StaticAnimation> animationsToPlay = Lists.newArrayList();
 	private final List<CustomTrailParticle> trailParticles = Lists.newArrayList();
@@ -103,11 +104,13 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 	private Item item;
 	
 	public ModelPreviewer(int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Armature armature, AnimatedMesh mesh) {
-		super(x1, y1, x2, y2, Component.literal("datapack_edit.weapon_type.combo.animation_player"));
+		super(x1, y1, x2, y2, Component.literal(""));
 		
-		FakeEntityPatch patch = new FakeEntityPatch(armature);
-		this.animator = new NoEntityAnimator(patch);
-		patch.setAnimator();
+		if (armature != null) {
+			FakeEntityPatch patch = new FakeEntityPatch(armature);
+			this.animator = new NoEntityAnimator(patch);
+			patch.setAnimator();
+		}
 		
 		this.x1 = x1;
 		this.x2 = x2;
@@ -118,11 +121,20 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 		this.mesh = mesh;
 		
 		this.modelRenderTarget = new ModelRenderTarget();
-		
 		this.resize(Minecraft.getInstance().screen.getRectangle());
 		
 		this.modelRenderTarget.setClearColor(0.1552F, 0.1552F, 0.1552F, 1.0F);
 		this.modelRenderTarget.clear(Minecraft.ON_OSX);
+	}
+	
+	public void setArmature(Armature armature) {
+		FakeEntityPatch patch = new FakeEntityPatch(armature);
+		this.animator = new NoEntityAnimator(patch);
+		patch.setAnimator();
+	}
+	
+	public void setMesh(AnimatedMesh mesh) {
+		this.mesh = mesh;
 	}
 	
 	public Armature getArmature() {
@@ -131,6 +143,10 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 	
 	public AnimatedMesh getMesh() {
 		return this.mesh;
+	}
+	
+	public NoEntityAnimator getAnimator() {
+		return this.animator;
 	}
 	
 	public void setCollider(Collider collider) {
@@ -198,7 +214,9 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 	
 	@Override
 	public void _tick() {
-		this.animator.tick();
+		if (this.animator != null) {
+			this.animator.tick();
+		}
 		
 		this.trailParticles.forEach((trail) -> trail.tick());
 		this.trailParticles.removeIf((trail) -> !trail.isAlive());
@@ -241,20 +259,24 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 	
 	@Override
 	public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
-		if (button == 0) {
-			this.xRot = (float)Mth.clamp(this.xRot + dy * 2.5D, -180.0D, 180.0D);
-			this.yRot += dx * 2.5D;
-		} else if (button == 2) {
-			this.xMove += (float)dx * 0.015F * -this.zoom;
-			this.yMove += -(float)dy * 0.015F * -this.zoom;
+		if (this.isMouseOver(mouseX, mouseY)) {
+			if (button == 0) {
+				this.xRot = (float)Mth.clamp(this.xRot + dy * 2.5D, -180.0D, 180.0D);
+				this.yRot += dx * 2.5D;
+			} else if (button == 2) {
+				this.xMove += (float)dx * 0.015F * -this.zoom;
+				this.yMove += -(float)dy * 0.015F * -this.zoom;
+			}
+			
+			return true;
 		}
 		
-		return true;
+		return false;
 	}
 	
 	@Override
 	public boolean mouseScrolled(double x, double y, double amount) {
-		this.zoom = Mth.clamp(this.zoom + amount * 0.5D, -10.0D, -0.5D);
+		this.zoom = Mth.clamp(this.zoom + amount * 0.5D, -20.0D, -0.5D);
 		return true;
 	}
 	
@@ -275,121 +297,154 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 		
 		this.modelRenderTarget.clear(true);
 		this.modelRenderTarget.bindWrite(true);
-		this.getArmature().initializeTransform();
 		
-		Pose pose = this.animator.getPose(partialTicks);
-		OpenMatrix4f[] poseMatrices = this.getArmature().getPoseAsTransformMatrix(pose);
-		guiGraphics.pose().pushPose();
-		
-		ShaderInstance prevShader = RenderSystem.getShader();
-		Matrix4f oldProjection = RenderSystem.getProjectionMatrix();
-		RenderSystem.setShader(EpicFightShaders::getPositionColorNormalShader);
-		Matrix4f perspective = (new Matrix4f()).setPerspective(70.0F, (float)this.width / (float)this.height, 0.05F, 100.0F);
-		
-		RenderSystem.setProjectionMatrix(perspective, VertexSorting.DISTANCE_TO_ORIGIN);
-		RenderSystem.getModelViewStack().pushPose();
-		RenderSystem.getModelViewStack().setIdentity();
-		RenderSystem.applyModelViewMatrix();
-		
-		guiGraphics.pose().translate(this.xMove, this.yMove - 1.0D, this.zoom);
-		guiGraphics.pose().mulPose(Axis.XP.rotationDegrees(this.xRot));
-		guiGraphics.pose().mulPose(Axis.YP.rotationDegrees(this.yRot));
-		
-		this.mesh.initialize();
-		
-		Tesselator tesselator = RenderSystem.renderThreadTesselator();
-		BufferBuilder bufferbuilder = tesselator.getBuilder();
-		bufferbuilder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
-		this.mesh.draw(guiGraphics.pose(), bufferbuilder, AnimatedMesh.DrawingFunction.ENTITY_SOLID, -1, 0.9411F, 0.9411F, 0.9411F, 1.0F, -1, this.getArmature(), poseMatrices);
-		BufferUploader.drawWithShader(bufferbuilder.end());
-		
-		if (this.item != null && this.showItemCheckbox.getValue()) {
-			BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
-			ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
-			ItemStack itemstack = new ItemStack(this.item);
+		if (this.animator != null) {
+			this.getArmature().initializeTransform();
 			
-			OpenMatrix4f correction = new OpenMatrix4f().translate(0F, 0F, -0.13F).rotateDeg(-90.0F, Vec3f.X_AXIS);
-			OpenMatrix4f handTransform = correction.mulFront(this.getArmature().getBindedTransformFor(pose, this.getArmature().searchJointByName("Tool_R")));
-			OpenMatrix4f transposed = handTransform.transpose(null);
-			
+			Pose pose = this.animator.getPose(partialTicks);
+			OpenMatrix4f[] poseMatrices = this.getArmature().getPoseAsTransformMatrix(pose);
 			guiGraphics.pose().pushPose();
 			
-			MathUtils.translateStack(guiGraphics.pose(), handTransform);
-			MathUtils.rotateStack(guiGraphics.pose(), transposed);
-			MathUtils.scaleStack(guiGraphics.pose(), transposed);
+			ShaderInstance prevShader = RenderSystem.getShader();
+			Matrix4f oldProjection = RenderSystem.getProjectionMatrix();
+			RenderSystem.setShader(EpicFightShaders::getPositionColorNormalShader);
+			Matrix4f perspective = (new Matrix4f()).setPerspective(70.0F, (float)this.width / (float)this.height, 0.05F, 100.0F);
 			
-			BakedModel model = itemRenderer.getItemModelShaper().getItemModel(this.item);
-			BakedModel overridedModel = model.getOverrides().resolve(model, itemstack, null, null, 0);
-			DynamicTexture light = Minecraft.getInstance().gameRenderer.lightTexture().lightTexture;
+			RenderSystem.setProjectionMatrix(perspective, VertexSorting.DISTANCE_TO_ORIGIN);
+			RenderSystem.getModelViewStack().pushPose();
+			RenderSystem.getModelViewStack().setIdentity();
+			RenderSystem.applyModelViewMatrix();
 			
-			// Update light color
-			light.getPixels().setPixelRGBA(0, 0, 0xFFFFFFFF);
-			light.upload();
+			guiGraphics.pose().translate(this.xMove, this.yMove - 1.0D, this.zoom);
+			guiGraphics.pose().mulPose(Axis.XP.rotationDegrees(this.xRot));
+			guiGraphics.pose().mulPose(Axis.YP.rotationDegrees(this.yRot));
 			
-			itemRenderer.render(itemstack, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, false, guiGraphics.pose(), bufferSource, 0, OverlayTexture.NO_OVERLAY, overridedModel);
-			bufferSource.endBatch();
+			this.mesh.initialize();
+			Tesselator tesselator = RenderSystem.renderThreadTesselator();
+			BufferBuilder bufferbuilder = tesselator.getBuilder();
+			bufferbuilder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+			this.mesh.draw(guiGraphics.pose(), bufferbuilder, AnimatedMesh.DrawingFunction.ENTITY_SOLID, -1, 0.9411F, 0.9411F, 0.9411F, 1.0F, -1, this.getArmature(), poseMatrices);
+			BufferUploader.drawWithShader(bufferbuilder.end());
 			
-			guiGraphics.pose().popPose();
-		}
-		
-		if (!this.trailParticles.isEmpty() && this.showTrailCheckbox.getValue()) {
-			RenderSystem.setShader(GameRenderer::getParticleShader);
-			DynamicTexture light = Minecraft.getInstance().gameRenderer.lightTexture().lightTexture;
-			
-			// Update light color
-			light.getPixels().setPixelRGBA(0, 0, 0xFFFFFFFF);
-			light.upload();
-			
-			for (CustomTrailParticle trail : this.trailParticles) {
-				ParticleRenderType particleRendertype = trail.getRenderType();
-				particleRendertype.begin(bufferbuilder, Minecraft.getInstance().textureManager);
-				trail.render(bufferbuilder, null, partialTicks);
-				particleRendertype.end(tesselator);
-			}
-		}
-		
-		if (this.collider != null && this.showColliderCheckbox.getValue()) {
-			RenderType renderType = this.collider.getRenderType();
-			bufferbuilder.begin(renderType.mode(), renderType.format);
-			RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
-			
-			if (this.colliderJoint != null) {
-				Pose prevPose = this.animator.getPose(0.0F);
-				Pose currentPose = this.animator.getPose(1.0F);
-				this.collider.drawInternal(guiGraphics.pose(), bufferbuilder, this.getArmature(), this.colliderJoint, prevPose, currentPose, partialTicks, -1);
-			} else {
-				AnimationPlayer player = this.animator.getPlayerFor(null);
-				DynamicAnimation animation = player.getAnimation();
+			if (this.item != null && this.showItemCheckbox._getValue()) {
+				BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
+				ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
+				ItemStack itemstack = new ItemStack(this.item);
 				
-				if (animation instanceof AttackAnimation attackanimation) {
-					float elapsedTime = player.getPrevElapsedTime() + (player.getElapsedTime() - player.getPrevElapsedTime()) * partialTicks;
-					Phase phase = attackanimation.getPhaseByTime(elapsedTime);
-					
-					for (AttackAnimation.JointColliderPair pair : phase.getColliders()) {
-						Pose prevPose = animation.getRawPose(player.getPrevElapsedTime());
-						Pose currentPose = animation.getRawPose(player.getElapsedTime());
-						prevPose.getOrDefaultTransform("Root").translation().set(0.0F, 0.0F, 0.0F);
-						currentPose.getOrDefaultTransform("Root").translation().set(0.0F, 0.0F, 0.0F);
-						
-						this.collider.drawInternal(guiGraphics.pose(), bufferbuilder, this.getArmature(), pair.getFirst(), prevPose, currentPose, partialTicks, -1);
-					}
+				OpenMatrix4f correction = new OpenMatrix4f().translate(0F, 0F, -0.13F).rotateDeg(-90.0F, Vec3f.X_AXIS);
+				OpenMatrix4f handTransform = correction.mulFront(this.getArmature().getBindedTransformFor(pose, this.getArmature().searchJointByName("Tool_R")));
+				OpenMatrix4f transposed = handTransform.transpose(null);
+				
+				guiGraphics.pose().pushPose();
+				
+				MathUtils.translateStack(guiGraphics.pose(), handTransform);
+				MathUtils.rotateStack(guiGraphics.pose(), transposed);
+				MathUtils.scaleStack(guiGraphics.pose(), transposed);
+				
+				BakedModel model = itemRenderer.getItemModelShaper().getItemModel(this.item);
+				BakedModel overridedModel = model.getOverrides().resolve(model, itemstack, null, null, 0);
+				DynamicTexture light = Minecraft.getInstance().gameRenderer.lightTexture().lightTexture;
+				
+				// Update light color
+				light.getPixels().setPixelRGBA(0, 0, 0xFFFFFFFF);
+				light.upload();
+				
+				itemRenderer.render(itemstack, ItemDisplayContext.THIRD_PERSON_RIGHT_HAND, false, guiGraphics.pose(), bufferSource, 0, OverlayTexture.NO_OVERLAY, overridedModel);
+				bufferSource.endBatch();
+				
+				guiGraphics.pose().popPose();
+			}
+			
+			if (!this.trailParticles.isEmpty() && this.showTrailCheckbox._getValue()) {
+				RenderSystem.setShader(GameRenderer::getParticleShader);
+				DynamicTexture light = Minecraft.getInstance().gameRenderer.lightTexture().lightTexture;
+				
+				// Update light color
+				light.getPixels().setPixelRGBA(0, 0, 0xFFFFFFFF);
+				light.upload();
+				
+				for (CustomTrailParticle trail : this.trailParticles) {
+					ParticleRenderType particleRendertype = trail.getRenderType();
+					particleRendertype.begin(bufferbuilder, Minecraft.getInstance().textureManager);
+					trail.render(bufferbuilder, null, partialTicks);
+					particleRendertype.end(tesselator);
 				}
 			}
 			
-			RenderSystem.lineWidth(3.0F);
-			RenderSystem.disableCull();
+			if (this.collider != null && this.showColliderCheckbox._getValue()) {
+				RenderType renderType = this.collider.getRenderType();
+				bufferbuilder.begin(renderType.mode(), renderType.format);
+				RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
+				
+				if (this.colliderJoint != null) {
+					Pose prevPose = this.animator.getPose(0.0F);
+					Pose currentPose = this.animator.getPose(1.0F);
+					this.collider.drawInternal(guiGraphics.pose(), bufferbuilder, this.getArmature(), this.colliderJoint, prevPose, currentPose, partialTicks, -1);
+				} else {
+					AnimationPlayer player = this.animator.getPlayerFor(null);
+					DynamicAnimation animation = player.getAnimation();
+					
+					if (animation instanceof AttackAnimation attackanimation) {
+						float elapsedTime = player.getPrevElapsedTime() + (player.getElapsedTime() - player.getPrevElapsedTime()) * partialTicks;
+						Phase phase = attackanimation.getPhaseByTime(elapsedTime);
+						
+						for (AttackAnimation.JointColliderPair pair : phase.getColliders()) {
+							Pose prevPose = animation.getRawPose(player.getPrevElapsedTime());
+							Pose currentPose = animation.getRawPose(player.getElapsedTime());
+							prevPose.getOrDefaultTransform("Root").translation().set(0.0F, 0.0F, 0.0F);
+							currentPose.getOrDefaultTransform("Root").translation().set(0.0F, 0.0F, 0.0F);
+							
+							this.collider.drawInternal(guiGraphics.pose(), bufferbuilder, this.getArmature(), pair.getFirst(), prevPose, currentPose, partialTicks, -1);
+						}
+					}
+				}
+				
+				RenderSystem.lineWidth(3.0F);
+				RenderSystem.disableCull();
+				BufferUploader.drawWithShader(bufferbuilder.end());
+				RenderSystem.lineWidth(1.0F);
+				RenderSystem.enableCull();
+			}
+			
+			guiGraphics.pose().popPose();
+			
+			RenderSystem.setProjectionMatrix(oldProjection, VertexSorting.ORTHOGRAPHIC_Z);
+			RenderSystem.getModelViewStack().popPose();
+			RenderSystem.applyModelViewMatrix();
+			RenderSystem.setShader(() -> prevShader);
+		} else if (this.getMesh() != null) {
+			guiGraphics.pose().pushPose();
+			
+			ShaderInstance prevShader = RenderSystem.getShader();
+			Matrix4f oldProjection = RenderSystem.getProjectionMatrix();
+			RenderSystem.setShader(EpicFightShaders::getPositionColorNormalShader);
+			Matrix4f perspective = (new Matrix4f()).setPerspective(70.0F, (float)this.width / (float)this.height, 0.05F, 100.0F);
+			
+			RenderSystem.setProjectionMatrix(perspective, VertexSorting.DISTANCE_TO_ORIGIN);
+			RenderSystem.getModelViewStack().pushPose();
+			RenderSystem.getModelViewStack().setIdentity();
+			RenderSystem.applyModelViewMatrix();
+			
+			guiGraphics.pose().translate(this.xMove, this.yMove - 1.0D, this.zoom);
+			guiGraphics.pose().mulPose(Axis.XP.rotationDegrees(this.xRot));
+			guiGraphics.pose().mulPose(Axis.YP.rotationDegrees(this.yRot));
+			
+			this.mesh.initialize();
+			
+			Tesselator tesselator = RenderSystem.renderThreadTesselator();
+			BufferBuilder bufferbuilder = tesselator.getBuilder();
+			bufferbuilder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+			this.mesh.draw(guiGraphics.pose(), bufferbuilder, Mesh.DrawingFunction.ENTITY_SOLID, -1, 0.9411F, 0.9411F, 0.9411F, 1.0F, -1);
 			BufferUploader.drawWithShader(bufferbuilder.end());
-			RenderSystem.lineWidth(1.0F);
-			RenderSystem.enableCull();
+			
+			guiGraphics.pose().popPose();
+			
+			RenderSystem.setProjectionMatrix(oldProjection, VertexSorting.ORTHOGRAPHIC_Z);
+			RenderSystem.getModelViewStack().popPose();
+			RenderSystem.applyModelViewMatrix();
+			RenderSystem.setShader(() -> prevShader);
 		}
 		
-		guiGraphics.pose().popPose();
-		
-		RenderSystem.setProjectionMatrix(oldProjection, VertexSorting.ORTHOGRAPHIC_Z);
-		RenderSystem.getModelViewStack().popPose();
-		RenderSystem.applyModelViewMatrix();
-		
-		RenderSystem.setShader(() -> prevShader);
 		this.modelRenderTarget.unbindWrite();
 		
 		minecraft.getMainRenderTarget().bindWrite(true);
@@ -400,32 +455,34 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 		
 		this.modelRenderTarget.blitToScreen(guiGraphics);
 		
-		// Visibility control widget
-		int top = this._getY() + 6;
-		int right = this._getX() + this._getWidth() - 2;
-		
-		if (!this.trailInfoList.isEmpty()) {
-			right -= this.showTrailCheckbox._getWidth();
+		if (this.animator != null) {
+			// Visibility control widgets
+			int top = this._getY() + 6;
+			int right = this._getX() + this._getWidth() - 2;
 			
-			this.showTrailCheckbox._setX(right);
-			this.showTrailCheckbox._setY(top);
-			this.showTrailCheckbox._renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
-		}
-		
-		if (this.item != null) {
-			right -= this.showItemCheckbox._getWidth();
+			if (!this.trailInfoList.isEmpty()) {
+				right -= this.showTrailCheckbox._getWidth();
+				
+				this.showTrailCheckbox._setX(right);
+				this.showTrailCheckbox._setY(top);
+				this.showTrailCheckbox._renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
+			}
 			
-			this.showItemCheckbox._setX(right);
-			this.showItemCheckbox._setY(top);
-			this.showItemCheckbox._renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
-		}
-		
-		if (this.collider != null) {
-			right -= this.showColliderCheckbox._getWidth();
+			if (this.item != null) {
+				right -= this.showItemCheckbox._getWidth();
+				
+				this.showItemCheckbox._setX(right);
+				this.showItemCheckbox._setY(top);
+				this.showItemCheckbox._renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
+			}
 			
-			this.showColliderCheckbox._setX(right);
-			this.showColliderCheckbox._setY(top);
-			this.showColliderCheckbox._renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
+			if (this.collider != null) {
+				right -= this.showColliderCheckbox._getWidth();
+				
+				this.showColliderCheckbox._setX(right);
+				this.showColliderCheckbox._setY(top);
+				this.showColliderCheckbox._renderWidget(guiGraphics, mouseX, mouseY, partialTicks);
+			}
 		}
 	}
 	
@@ -578,6 +635,15 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 						this.isEnd = true;
 					}
 				}
+			}
+			
+			@Override
+			public void begin(DynamicAnimation animation, LivingEntityPatch<?> entitypatch) {
+			}
+			
+			@Override
+			public Pose getCurrentPose(LivingEntityPatch<?> entitypatch, float partialTicks) {
+				return this.play.getRawPose(this.prevElapsedTime + (this.elapsedTime - this.prevElapsedTime) * partialTicks);
 			}
 		}
 		

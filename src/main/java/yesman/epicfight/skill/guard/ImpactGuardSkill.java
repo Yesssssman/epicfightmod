@@ -1,6 +1,5 @@
 package yesman.epicfight.skill.guard;
 
-import java.util.Iterator;
 import java.util.List;
 
 import net.minecraft.nbt.CompoundTag;
@@ -10,8 +9,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageTypes;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSkills;
@@ -129,25 +126,8 @@ public class ImpactGuardSkill extends GuardSkill {
 		return true;
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
-	public List<Object> getTooltipArgsOfScreen(List<Object> list) {
-		list.clear();
-		list.add(String.format("%.1f", 100.0F - this.damageReducer));
-		
-		StringBuilder sb = new StringBuilder();
-		Iterator<WeaponCategory> iter = this.advancedGuardMotions.keySet().iterator();
-
-		while (iter.hasNext()) {
-			sb.append(WeaponCategory.ENUM_MANAGER.toTranslated(iter.next()));
-
-			if (iter.hasNext()) {
-				sb.append(", ");
-			}
-		}
-
-        list.add(sb.toString());
-
-		return list;
+	public List<WeaponCategory> getAvailableWeaponCategories() {
+		return List.copyOf(this.advancedGuardMotions.keySet());
 	}
 }

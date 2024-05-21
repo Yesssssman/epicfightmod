@@ -64,10 +64,6 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		return this.byKey(rl);
 	}
 	
-	public StaticAnimation byKey(String resourceLocation) {
-		return this.byKey(new ResourceLocation(resourceLocation));
-	}
-	
 	public StaticAnimation byKey(ResourceLocation rl) {
 		return this.animationRegistry.get(rl);
 	}

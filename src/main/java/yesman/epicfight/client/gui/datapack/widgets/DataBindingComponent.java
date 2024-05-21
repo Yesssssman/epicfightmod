@@ -8,9 +8,10 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public interface DataBindingComponent<T> extends ResizableComponent {
-	public T getValue();
-	public void setValue(@Nullable T value);
+public interface DataBindingComponent<T, R> extends ResizableComponent {
 	public void reset();
-	public void setResponder(Consumer<T> responder);
+	public T _getValue();
+	public void _setValue(@Nullable T value);
+	public void _setResponder(Consumer<R> responder);
+	public Consumer<R> _getResponder();
 }

@@ -12,6 +12,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationClip;
+import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
@@ -19,6 +20,7 @@ import yesman.epicfight.api.client.animation.property.TrailInfo;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.gameasset.ColliderPreset;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class FakeAttackAnimation extends AttackAnimation implements ClipHoldingAnimation {
@@ -84,6 +86,12 @@ public class FakeAttackAnimation extends AttackAnimation implements ClipHoldingA
 	@Override
 	public AnimationClip getAnimationClip() {
 		return this.clip;
+	}
+	
+	@Override
+	public void putOnPlayer(AnimationPlayer animationPlayer, LivingEntityPatch<?> entitypatch) {
+		animationPlayer.setPlayAnimation(this);
+		animationPlayer.tick(entitypatch);
 	}
 	
 	@Override

@@ -36,7 +36,7 @@ import yesman.epicfight.client.gui.datapack.widgets.PopupBox.PopupBoxProvider;
 import yesman.epicfight.client.gui.datapack.widgets.PopupBox.RegistryPopupBox;
 
 @OnlyIn(Dist.CLIENT)
-public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingComponent<Object> {
+public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingComponent<Object, Object> {
 	private final Screen owner;
 	private final Map<String, Column<?, ?>> columns = Maps.newLinkedHashMap();
 	private final List<ResizableButton> rowEditButtons = Lists.newArrayList();
@@ -72,8 +72,11 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		this.setLeftPos(gb.x1);
 		this.setRenderTopAndBottom(false);
 		
-		if (gb.rowEditable) {
+		if (gb.rowEditButtons.add) {
 			this.rowEditButtons.add(ResizableButton.builder(Component.literal("+"), (button) -> gb.onAddPress.accept(this, button)).pos(0, 0).size(12, 12).build());
+		}
+		
+		if (gb.rowEditButtons.remove) {
 			this.rowEditButtons.add(ResizableButton.builder(Component.literal("-"), (button) -> gb.onRemovePress.accept(this, button)).pos(0, 0).size(12, 12).build());
 		}
 		
@@ -84,11 +87,16 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		return this.addRow(children().size());
 	}
 	
+	public int addRow(IntConsumer onAdd) {
+		return this.addRow(children().size(), onAdd);
+	}
+	
 	public int addRow(int rowposition) {
+		/**
 		this.editingColumn = null;
 		this.editingWidget = null;
-		Row row = new Row();
 		
+		Row row = new Row();
 		this.children().add(rowposition, row);
 		
 		for (Map.Entry<String, Column<?, ?>> entry : this.columns.entrySet()) {
@@ -96,20 +104,24 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		}
 		
 		this.resizeColumnWidth();
-		
-		return rowposition;
+		**/
+		return this.addRow(rowposition, null);
 	}
 	
 	public int addRowWithDefaultValues(Object... defaultValues) {
-		return addRow(this.children().size(), defaultValues);
+		return addRow(this.children().size(), null, defaultValues);
 	}
 	
-	public int addRow(int rowposition, Object... defaultValues) {
+	public int addRow(int rowposition, IntConsumer onAdd, Object... defaultValues) {
 		this.editingColumn = null;
 		this.editingWidget = null;
 		
 		Row row = new Row();
 		this.children().add(rowposition, row);
+		
+		if (onAdd != null) {
+			onAdd.accept(rowposition);
+		}
 		
 		for (Map.Entry<String, Column<?, ?>> entry : this.columns.entrySet()) {
 			row.setValue(entry.getKey(), entry.getValue().defaultVal);
@@ -246,7 +258,8 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 			this.editingWidget = null;
 		} else {
 			if (this.editingColumn.editable) {
-				this.editingWidget = this.editingColumn.createEditWidget(this.owner, this.owner.getMinecraft().font, this.x0 + startX + 2, this.getRowTop(rowposition) + 2, this.itemHeight - 3, this.getSelected(), columnName, this.getSelected().getValue(columnName));
+				this.editingWidget = this.editingColumn.createEditWidget(this.owner, this.owner.getMinecraft().font, this.x0 + startX + 2, this.getRowTop(rowposition) + 2, this.itemHeight - 3, rowposition,
+																			this.getSelected(), columnName, this.getSelected().getValue(columnName));
 				this.editingWidget.setFocused(true);
 			}
 		}
@@ -261,12 +274,12 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 	}
 	
 	private void relocateButtons() {
-		int x = this.x1 - 24;
+		int x = this.x1 - 12;
 		int y = this.y0 - 12;
 		
-		for (Button rowEditButton : this.rowEditButtons) {
+		for (Button rowEditButton : Lists.reverse(this.rowEditButtons)) {
 			rowEditButton.setPosition(x, y);
-			x += 12;
+			x -= 12;
 		}
 	}
 	
@@ -301,6 +314,17 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		}
 		
 		if (this.editingWidget != null) {
+			int width = 0;
+			
+			for (Column<?, ?> column : this.columns.values()) {
+				if (column == this.editingColumn) {
+					break;
+				}
+				
+				width += column.width + 1;
+			}
+			
+			this.editingWidget._setX(this._getX() + width + 1);
 			this.editingWidget._setWidth(this.editingColumn.width - 3);
 		}
 	}
@@ -489,7 +513,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		
 		if (this.editingWidget != null) {
 			if (this.editingWidget.mouseClicked(x, y, button)) {
-				return false;
+				return true;
 			}
 		}
 		
@@ -568,7 +592,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	class Row extends ObjectSelectionList.Entry<Grid.Row> {
+	public class Row extends ObjectSelectionList.Entry<Grid.Row> {
 		private Map<String, Object> values = Maps.newLinkedHashMap();
 		
 		private Row() {
@@ -650,6 +674,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 						Grid.this.setGridFocus(rowposition, null);
 					}
 				} else {
+					Grid.this.editingWidget = null;
 					Grid.this.setGridFocus(rowposition, this.getColumnName(mouseX));
 				}
 				
@@ -714,6 +739,11 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		return new PopupColumnBuilder<>(string, popupBoxProvider);
 	}
 	
+	@SuppressWarnings("rawtypes")
+	public static <T, W extends AbstractWidget & DataBindingComponent> WildcardColumnBuilder<T, W> wildcard(String string) {
+		return new WildcardColumnBuilder<>(string);
+	}
+	
 	@OnlyIn(Dist.CLIENT)
 	public static class GridBuilder {
 		private final Minecraft minecraft;
@@ -725,13 +755,13 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		private int y2;
 		private int rowHeight;
 		private int columnSizeTotal;
-		private boolean rowEditable;
 		private boolean transparentBackground;
 		private BiConsumer<Grid, Button> onAddPress;
 		private BiConsumer<Grid, Button> onRemovePress;
 		private BiConsumer<Integer, Map<String, Object>> onRowpositionChanged;
 		private HorizontalSizing horizontalSizing = null;
 		private VerticalSizing verticalSizing = null;
+		private RowEditButton rowEditButtons = RowEditButton.NONE;
 		
 		private GridBuilder(Screen owner) {
 			this(owner, owner.getMinecraft());
@@ -771,8 +801,8 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 			return this;
 		}
 		
-		public GridBuilder rowEditable(boolean rowEditable) {
-			this.rowEditable = rowEditable;
+		public GridBuilder rowEditable(RowEditButton rowEditButtons) {
+			this.rowEditButtons = rowEditButtons;
 			return this;
 		}
 		
@@ -804,6 +834,18 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		public Grid build() {
 			return new Grid(this);
 		}
+		
+		public enum RowEditButton {
+			ADD(true, false), REMOVE(false, true), ADD_REMOVE(true, true), NONE(false, false);
+			
+			public boolean add;
+			public boolean remove;
+			
+			RowEditButton(boolean add, boolean remove) {
+				this.add = add;
+				this.remove = remove;
+			}
+		}
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -830,7 +872,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 			return this.toDisplayText.apply((T)object);
 		}
 		
-		public abstract ResizableComponent createEditWidget(Screen owner, Font font, int x, int y, int height, Row row, String colName, T value);
+		public abstract ResizableComponent createEditWidget(Screen owner, Font font, int x, int y, int height, int rowposition, Row row, String colName, T value);
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -840,7 +882,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		}
 		
 		@Override
-		public ResizableComponent createEditWidget(Screen owner, Font font, int x, int y, int height, Row row, String colName, String value) {
+		public ResizableComponent createEditWidget(Screen owner, Font font, int x, int y, int height, int rowposition, Row row, String colName, String value) {
 			ResizableEditBox editbox = new ResizableEditBox(font, x, this.width - 3, y, height, Component.literal("grid.editbox"), null, null);
 			
 			editbox.setMaxLength(100);
@@ -857,18 +899,18 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 	
 	@OnlyIn(Dist.CLIENT)
 	private static class ComboColumn<T> extends Column<T, ComboBox<T>> {
-		final Collection<T> enums;
+		final Collection<T> comboItemCollection;
 		
 		private ComboColumn(Function<T, String> toDisplayText, Consumer<ValueChangeEvent<T>> onValueChanged, Consumer<ComboBox<T>> onEditWidgetCreate, T defaultVal, Collection<T> enums, boolean editable, int size) {
 			super(toDisplayText, onValueChanged, onEditWidgetCreate, defaultVal, editable, size);
 			
-			this.enums = enums;
+			this.comboItemCollection = enums;
 		}
 		
 		@Override
-		public ResizableComponent createEditWidget(Screen owner, Font font, int x, int y, int height, Row row, String colName, T value) {
-			ComboBox<T> comboBox = new ComboBox<>(owner, font, x, this.width - 3, y, height, null, null, Math.min(this.enums.size(), 8), Component.literal("grid.comboEdit"), this.enums, ParseUtil::snakeToSpacedCamel, (item) -> row.setValue(colName, item));
-			comboBox.setValue(value);
+		public ResizableComponent createEditWidget(Screen owner, Font font, int x, int y, int height, int rowposition, Row row, String colName, T value) {
+			ComboBox<T> comboBox = new ComboBox<>(owner, font, x, this.width - 3, y, height, null, null, Math.min(this.comboItemCollection.size(), 8), Component.literal("grid.comboEdit"), this.comboItemCollection, this.toDisplayText, (item) -> row.setValue(colName, item));
+			comboBox._setValue(value);
 			
 			if (this.onEditWidgetCreate != null) {
 				this.onEditWidgetCreate.accept(comboBox);
@@ -891,11 +933,11 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		}
 		
 		@Override
-		public ResizableComponent createEditWidget(Screen owner, Font font, int x, int y, int height, Row row, String colName, T value) {
-			PopupBox.RegistryPopupBox<T> popup = new PopupBox.RegistryPopupBox<>(owner, font, x, this.width - 3, y, height, null, null, Component.literal("grid.popupEdit"), this.registry, (name, item) -> row.setValue(colName, item));
+		public ResizableComponent createEditWidget(Screen owner, Font font, int x, int y, int height, int rowposition, Row row, String colName, T value) {
+			PopupBox.RegistryPopupBox<T> popup = new PopupBox.RegistryPopupBox<>(owner, font, x, this.width - 3, y, height, null, null, Component.literal("grid.popupEdit"), this.registry, (pair) -> row.setValue(colName, pair.getSecond()));
 			
 			popup.applyFilter(this.filter);
-			popup.setValue(value);
+			popup._setValue(value);
 			
 			if (this.onEditWidgetCreate != null) {
 				this.onEditWidgetCreate.accept(popup);
@@ -918,17 +960,51 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		}
 		
 		@Override
-		public ResizableComponent createEditWidget(Screen owner, Font font, int x, int y, int height, Row row, String colName, T value) {
-			P popup = this.popupBoxProvider.create(owner, font, x, this.width - 3, y, height, null, null, Component.literal("grid.popupEdit"), (name, item) -> row.setValue(colName, item));
+		public ResizableComponent createEditWidget(Screen owner, Font font, int x, int y, int height, int rowposition, Row row, String colName, T value) {
+			P popup = this.popupBoxProvider.create(owner, font, x, this.width - 3, y, height, null, null, Component.literal("grid.popupEdit"), (pair) -> row.setValue(colName, pair.getSecond()));
 			
 			popup.applyFilter(this.filter);
-			popup.setValue(value);
+			popup._setValue(value);
 			
 			if (this.onEditWidgetCreate != null) {
 				this.onEditWidgetCreate.accept(popup);
 			}
 			
 			return popup;
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@OnlyIn(Dist.CLIENT)
+	private static class WildcardColumn<T, W extends AbstractWidget & DataBindingComponent> extends Column<T, W> {
+		Function<Row, AbstractWidget> editWidgetProvider;
+		
+		private WildcardColumn(Function<T, String> toDisplayText, Consumer<ValueChangeEvent<T>> onValueChanged, Consumer<W> onEditWidgetCreate, T defaultVal, Function<Row, AbstractWidget> editWidgetProvider, boolean editable, int size) {
+			super(toDisplayText, onValueChanged, onEditWidgetCreate, defaultVal, editable, size);
+			this.editWidgetProvider = editWidgetProvider;
+		}
+		
+		@SuppressWarnings("unchecked")
+		@Override
+		public W createEditWidget(Screen owner, Font font, int x, int y, int height, int rowposition, Row row, String colName, T value) {
+			W editWidget = (W)this.editWidgetProvider.apply(row);
+			
+			editWidget.setX(x);
+			editWidget.setY(y);
+			editWidget.setWidth(this.width - 3);
+			editWidget.setHeight(height);
+			editWidget._setValue(value);
+			editWidget._setResponder((val) -> row.setValue(colName, val));
+			
+			if (editWidget instanceof PopupBox<?> popupBox) {
+				popupBox._setResponder((pair) -> row.setValue(colName, pair.getFirst()));
+			}
+			
+			if (this.onEditWidgetCreate != null) {
+				this.onEditWidgetCreate.accept(editWidget);
+			}
+			
+			return editWidget;
 		}
 	}
 	
@@ -999,7 +1075,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 			super(name);
 			
 			this.enums = enums;
-			this.toDisplayText = (enumObj) -> ParseUtil.nullOrToString(enumObj, ParseUtil::snakeToSpacedCamel);
+			this.toDisplayText = ParseUtil::snakeToSpacedCamel;
 		}
 		
 		@Override
@@ -1050,6 +1126,26 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		@Override
 		protected PopupColumn<T, P> create() {
 			return new PopupColumn<>(this.toDisplayText, this.onValueChanged, this.onEditWidgetCreated, this.defaultValue, this.popupProvider, this.filter, this.onEditWidgetCreated, this.editable, this.width);
+		}
+	}
+	
+	@SuppressWarnings("rawtypes")
+	@OnlyIn(Dist.CLIENT)
+	public static class WildcardColumnBuilder<T, W extends AbstractWidget & DataBindingComponent> extends ColumnBuilder<T, WildcardColumn<T, W>, W> {
+		Function<Row, AbstractWidget> editWidgetProvider;
+		
+		protected WildcardColumnBuilder(String name) {
+			super(name);
+		}
+		
+		public WildcardColumnBuilder<T, W> editWidgetProvider(Function<Row, AbstractWidget> editWidgetProvider) {
+			this.editWidgetProvider = editWidgetProvider;
+			return this;
+		}
+		
+		@Override
+		protected WildcardColumn<T, W> create() {
+			return new WildcardColumn<> (this.toDisplayText, this.onValueChanged, this.onEditWidgetCreated, this.defaultValue, this.editWidgetProvider, this.editable, this.width);
 		}
 	}
 	
@@ -1216,11 +1312,16 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 	}
 	
 	@Override
-	public void setResponder(Consumer<Object> responder) {
+	public void _setResponder(Consumer<Object> responder) {
 	}
 	
 	@Override
-	public void setValue(Object value) {
+	public Consumer<Object> _getResponder() {
+		return null;
+	}
+	
+	@Override
+	public void _setValue(Object value) {
 		this.reset();
 		
 		if (value instanceof PackImporter packImporter) {
@@ -1239,7 +1340,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 	}
 	
 	@Override
-	public Object getValue() {
+	public Object _getValue() {
 		return null;
 	}
 	
@@ -1250,12 +1351,13 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 	
 	@Override
 	public void reset() {
+		this.rowposition = -1;
 		this.children().clear();
 		this.setSelected(null);
 		this.editingColumn = null;
 		this.editingWidget = null;
 	}
-
+	
 	@Override
 	public Component _getMessage() {
 		return Component.literal(this.toString());

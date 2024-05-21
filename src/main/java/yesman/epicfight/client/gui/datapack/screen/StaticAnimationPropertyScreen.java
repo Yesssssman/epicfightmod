@@ -31,6 +31,7 @@ import yesman.epicfight.client.gui.datapack.widgets.InputComponentList;
 import yesman.epicfight.client.gui.datapack.widgets.PopupBox;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.HorizontalSizing;
 import yesman.epicfight.client.gui.datapack.widgets.Static;
+import yesman.epicfight.client.gui.datapack.widgets.Grid.GridBuilder.RowEditButton;
 
 @OnlyIn(Dist.CLIENT)
 public class StaticAnimationPropertyScreen extends Screen {
@@ -147,9 +148,9 @@ public class StaticAnimationPropertyScreen extends Screen {
 					};
 				}
 				
-				StaticAnimationPropertyScreen.this.layerTypeCombo.setResponder(null);
+				StaticAnimationPropertyScreen.this.layerTypeCombo._setResponder(null);
 				this.setDataBindingComponenets(data);
-				StaticAnimationPropertyScreen.this.layerTypeCombo.setResponder(StaticAnimationPropertyScreen.this.layerTypeResponder);
+				StaticAnimationPropertyScreen.this.layerTypeCombo._setResponder(StaticAnimationPropertyScreen.this.layerTypeResponder);
 			}
 		};
 		
@@ -197,7 +198,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 						.xy2(16, 80)
 						.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
 						.rowHeight(21)
-						.rowEditable(true)
+						.rowEditable(RowEditButton.ADD_REMOVE)
 						.transparentBackground(false)
 						.addColumn(Grid.combo("living_motion", LivingMotion.ENUM_MANAGER.universalValues())
 										.valueChanged((event) -> this.compositeLayerMasks.get(event.rowposition).setPackKey(event.postValue)).defaultVal(LivingMotions.IDLE))
@@ -236,7 +237,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 					.xy2(16, 80)
 					.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
 					.rowHeight(21)
-					.rowEditable(true)
+					.rowEditable(RowEditButton.ADD_REMOVE)
 					.transparentBackground(false)
 					.addColumn(Grid.combo("living_motion", LivingMotion.ENUM_MANAGER.universalValues())
 							.valueChanged((event) -> this.baseLayerMasks.get(event.rowposition).setPackKey(event.postValue)).defaultVal(LivingMotions.IDLE))
@@ -274,7 +275,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 					.xy2(16, 80)
 					.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
 					.rowHeight(21)
-					.rowEditable(true)
+					.rowEditable(RowEditButton.ADD_REMOVE)
 					.transparentBackground(false)
 					.addColumn(Grid.combo("living_motion", LivingMotion.ENUM_MANAGER.universalValues())
 									.valueChanged((event) -> this.compositeLayerMasks.get(event.rowposition).setPackKey(event.postValue)).defaultVal(LivingMotions.IDLE))
@@ -324,7 +325,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 	
 	public void save() throws IllegalStateException {
 		this.animation.getPropertiesJson().asMap().clear();
-		LayerOptions layerOption = this.layerTypeCombo.getValue();
+		LayerOptions layerOption = this.layerTypeCombo._getValue();
 		
 		if (layerOption == null) {
 			throw new IllegalStateException("Layer type is not defined!");

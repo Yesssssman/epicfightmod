@@ -105,6 +105,10 @@ public class AnimationPlayer {
 		this.isEnd = false;
 	}
 	
+	public void begin(DynamicAnimation animation, LivingEntityPatch<?> entitypatch) {
+		animation.tick(entitypatch);
+	}
+	
 	public DynamicAnimation getAnimation() {
 		return this.play;
 	}

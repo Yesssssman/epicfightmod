@@ -52,7 +52,7 @@ public abstract class DynamicAnimation {
 	public void putOnPlayer(AnimationPlayer animationPlayer, LivingEntityPatch<?> entitypatch) {
 		animationPlayer.setPlayAnimation(this);
 		animationPlayer.tick(entitypatch);
-		this.tick(entitypatch);
+		animationPlayer.begin(this, entitypatch);
 	}
 	
 	public void begin(LivingEntityPatch<?> entitypatch) {}

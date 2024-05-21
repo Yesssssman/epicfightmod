@@ -12,19 +12,24 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class CheckBox extends AbstractWidget implements DataBindingComponent<Boolean> {
+public class CheckBox extends AbstractWidget implements DataBindingComponent<Boolean, Boolean> {
 	private final Font font;
 	private final boolean defaultVal;
 	private Consumer<Boolean> responder;
 	private Boolean value;
 	
-	public CheckBox(Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, boolean defaultVal, Component title, Consumer<Boolean> responder) {
+	public CheckBox(Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Boolean defaultVal, Component title, Consumer<Boolean> responder) {
 		super(x1, y1, x2, y2, title);
 		
 		this.font = font;
-		this.defaultVal = defaultVal;
+		this.defaultVal = defaultVal == null ? false : defaultVal;
 		this.responder = responder;
-		this.setValue(defaultVal);
+		
+		if (defaultVal != null) {
+			this._setValue(defaultVal);
+		} else {
+			this.value = defaultVal;
+		}
 		
 		this.x1 = x1;
 		this.x2 = x2;
@@ -57,7 +62,7 @@ public class CheckBox extends AbstractWidget implements DataBindingComponent<Boo
 	
 	@Override
 	public void onClick(double x, double y) {
-		this.setValue(this.value == null ? !this.defaultVal : !this.value.booleanValue());
+		this._setValue(this.value == null ? !this.defaultVal : !this.value.booleanValue());
 	}
 	
 	@Override
@@ -154,12 +159,17 @@ public class CheckBox extends AbstractWidget implements DataBindingComponent<Boo
 	}
 	
 	@Override
-	public void setResponder(Consumer<Boolean> responder) {
+	public void _setResponder(Consumer<Boolean> responder) {
 		this.responder = responder;
 	}
 	
 	@Override
-	public void setValue(Boolean value) {
+	public Consumer<Boolean> _getResponder() {
+		return this.responder;
+	}
+	
+	@Override
+	public void _setValue(Boolean value) {
 		this.value = value;
 		
 		if (this.responder != null) {
@@ -168,13 +178,13 @@ public class CheckBox extends AbstractWidget implements DataBindingComponent<Boo
 	}
 	
 	@Override
-	public Boolean getValue() {
+	public Boolean _getValue() {
 		return this.value;
 	}
 	
 	@Override
 	public void reset() {
-		this.setValue(this.defaultVal);
+		this.value = this.defaultVal;
 	}
 	
 	@Override

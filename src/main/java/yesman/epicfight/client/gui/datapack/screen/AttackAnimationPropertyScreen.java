@@ -24,6 +24,7 @@ import yesman.epicfight.api.client.animation.property.TrailInfo;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.client.gui.datapack.widgets.ComboBox;
 import yesman.epicfight.client.gui.datapack.widgets.Grid;
+import yesman.epicfight.client.gui.datapack.widgets.Grid.GridBuilder.RowEditButton;
 import yesman.epicfight.client.gui.datapack.widgets.InputComponentList;
 import yesman.epicfight.client.gui.datapack.widgets.ModelPreviewer;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.HorizontalSizing;
@@ -79,7 +80,7 @@ public class AttackAnimationPropertyScreen extends Screen {
 								.xy2(100, 50)
 								.verticalSizing(VerticalSizing.TOP_BOTTOM)
 								.rowHeight(26)
-								.rowEditable(true)
+								.rowEditable(RowEditButton.ADD_REMOVE)
 								.transparentBackground(false)
 								.rowpositionChanged((rowposition, values) -> {
 									this.inputComponentsList.importTag(this.trailList.get(rowposition).getAsJsonObject());

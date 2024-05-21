@@ -69,4 +69,9 @@ public class SwordmasterSkill extends PassiveSkill {
 		
 		return list;
 	}
+	
+	@Override
+	public List<WeaponCategory> getAvailableWeaponCategories() {
+		return List.of(AVAILABLE_WEAPON_TYPES);
+	}
 }
