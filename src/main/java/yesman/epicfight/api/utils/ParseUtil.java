@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
 
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
@@ -49,6 +50,36 @@ public class ParseUtil {
 		}
 		
 		return result.toFloatArray();
+	}
+	
+	public static JsonObject arrayToJsonObject(float[] array, int stride) {
+		JsonObject jsonObject = new JsonObject();
+		jsonObject.addProperty("stride", stride);
+		jsonObject.addProperty("count", array.length / stride);
+		JsonArray jsonArray = new JsonArray();
+		
+		for (float element : array) {
+			jsonArray.add(element);
+		}
+		
+		jsonObject.add("array", jsonArray);
+		
+		return jsonObject;
+	}
+	
+	public static JsonObject arrayToJsonObject(int[] array, int stride) {
+		JsonObject jsonObject = new JsonObject();
+		jsonObject.addProperty("stride", stride);
+		jsonObject.addProperty("count", array.length / stride);
+		JsonArray jsonArray = new JsonArray();
+		
+		for (int element : array) {
+			jsonArray.add(element);
+		}
+		
+		jsonObject.add("array", jsonArray);
+		
+		return jsonObject;
 	}
 	
 	public static Vec3f toVector3f(JsonArray array) {

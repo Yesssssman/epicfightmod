@@ -50,7 +50,7 @@ public class ConditionalWeaponInnateSkill extends WeaponInnateSkill {
 	}
 	
 	public static ConditionalWeaponInnateSkill.Builder createConditionalWeaponInnateBuilder() {
-		return (new ConditionalWeaponInnateSkill.Builder()).setCategory(SkillCategories.WEAPON_INNATE).setResource(Resource.WEAPON_INNATE_ENERGY);
+		return (new ConditionalWeaponInnateSkill.Builder()).setCategory(SkillCategories.WEAPON_INNATE).setResource(Resource.WEAPON_CHARGE);
 	}
 	
 	protected final AttackAnimationProvider[] attackAnimations;

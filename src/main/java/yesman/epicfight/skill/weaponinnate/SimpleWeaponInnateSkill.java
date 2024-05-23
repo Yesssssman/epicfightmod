@@ -41,7 +41,7 @@ public class SimpleWeaponInnateSkill extends WeaponInnateSkill {
 	}
 	
 	public static Builder createSimpleWeaponInnateBuilder() {
-		return (new Builder()).setCategory(SkillCategories.WEAPON_INNATE).setResource(Resource.WEAPON_INNATE_ENERGY);
+		return (new Builder()).setCategory(SkillCategories.WEAPON_INNATE).setResource(Resource.WEAPON_CHARGE);
 	}
 	
 	protected AttackAnimationProvider attackAnimation;

@@ -173,7 +173,7 @@ public class ImportModelScreen extends Screen {
 						File file = path.toFile();
 						stream = new FileInputStream(file);
 						
-						String modelPath = modid + ":entity/" + file.getName().replace(".json", "");
+						String modelPath = modid + ":" + file.getName().replace(".json", "");
 						JsonModelLoader jsonLoader = new JsonModelLoader(stream, new ResourceLocation(modelPath));
 						AnimatedMesh mesh = jsonLoader.loadAnimatedMesh(AnimatedMesh::new);
 						Armature armature = jsonLoader.loadArmature(Armature::new);

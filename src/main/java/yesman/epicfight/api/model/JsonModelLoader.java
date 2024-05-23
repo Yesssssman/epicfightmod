@@ -53,7 +53,7 @@ import yesman.epicfight.gameasset.Armatures.ArmatureContructor;
 import yesman.epicfight.main.EpicFightMod;
 
 public class JsonModelLoader {
-	public static final OpenMatrix4f CORRECTION = OpenMatrix4f.createRotatorDeg(-90.0F, Vec3f.X_AXIS);
+	public static final OpenMatrix4f Z_AXIS_TO_Y = OpenMatrix4f.createRotatorDeg(-90.0F, Vec3f.X_AXIS);
 	
 	private JsonObject rootJson;
 	private ResourceManager resourceManager;
@@ -161,7 +161,7 @@ public class JsonModelLoader {
 			for (int i = 0; i < positionArray.length / 3; i++) {
 				int k = i * 3;
 				Vec4f posVector = new Vec4f(positionArray[k], positionArray[k+1], positionArray[k+2], 1.0F);
-				OpenMatrix4f.transform(CORRECTION, posVector, posVector);
+				OpenMatrix4f.transform(Z_AXIS_TO_Y, posVector, posVector);
 				positionArray[k] = posVector.x;
 				positionArray[k+1] = posVector.y;
 				positionArray[k+2] = posVector.z;
@@ -172,7 +172,7 @@ public class JsonModelLoader {
 			for (int i = 0; i < normalArray.length / 3; i++) {
 				int k = i * 3;
 				Vec4f normVector = new Vec4f(normalArray[k], normalArray[k+1], normalArray[k+2], 1.0F);
-				OpenMatrix4f.transform(CORRECTION, normVector, normVector);
+				OpenMatrix4f.transform(Z_AXIS_TO_Y, normVector, normVector);
 				normalArray[k] = normVector.x;
 				normalArray[k+1] = normVector.y;
 				normalArray[k+2] = normVector.z;
@@ -224,7 +224,7 @@ public class JsonModelLoader {
 			for (int i = 0; i < positionArray.length / 3; i++) {
 				int k = i * 3;
 				Vec4f posVector = new Vec4f(positionArray[k], positionArray[k+1], positionArray[k+2], 1.0F);
-				OpenMatrix4f.transform(CORRECTION, posVector, posVector);
+				OpenMatrix4f.transform(Z_AXIS_TO_Y, posVector, posVector);
 				positionArray[k] = posVector.x;
 				positionArray[k+1] = posVector.y;
 				positionArray[k+2] = posVector.z;
@@ -235,7 +235,7 @@ public class JsonModelLoader {
 			for (int i = 0; i < normalArray.length / 3; i++) {
 				int k = i * 3;
 				Vec4f normVector = new Vec4f(normalArray[k], normalArray[k+1], normalArray[k+2], 1.0F);
-				OpenMatrix4f.transform(CORRECTION, normVector, normVector);
+				OpenMatrix4f.transform(Z_AXIS_TO_Y, normVector, normVector);
 				normalArray[k] = normVector.x;
 				normalArray[k+1] = normVector.y;
 				normalArray[k+2] = normVector.z;
@@ -286,7 +286,7 @@ public class JsonModelLoader {
 		localMatrix.transpose();
 		
 		if (start) {
-			localMatrix.mulFront(CORRECTION);
+			localMatrix.mulFront(Z_AXIS_TO_Y);
 		}
 		
 		String name = object.get("name").getAsString();
@@ -551,7 +551,7 @@ public class JsonModelLoader {
 			matrix.transpose();
 			
 			if (correct) {
-				matrix.mulFront(CORRECTION);
+				matrix.mulFront(Z_AXIS_TO_Y);
 			}
 			
 			matrix.mulFront(invLocalTransform);

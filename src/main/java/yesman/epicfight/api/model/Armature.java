@@ -5,6 +5,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -159,5 +161,44 @@ public class Armature {
 		}
 		
 		return newJoint;
+	}
+	
+	public JsonObject toJsonObject() {
+		JsonObject root = new JsonObject();
+		JsonObject armature = new JsonObject();
+		
+		JsonArray jointNamesArray = new JsonArray();
+		JsonArray jointHierarchy = new JsonArray();
+		
+		this.jointById.int2ObjectEntrySet().stream().sorted((entry1, entry2) -> Integer.compare(entry1.getIntKey(), entry2.getIntKey())).forEach((entry) -> jointNamesArray.add(entry.getValue().getName()));
+		armature.add("joints", jointNamesArray);
+		armature.add("hierarchy", jointHierarchy);
+		
+		exportJoint(jointHierarchy, this.rootJoint, true);
+		
+		root.add("armature", armature);
+		
+		return root;
+	}
+	
+	private static void exportJoint(JsonArray parent, Joint joint, boolean root) {
+		JsonObject jointJson = new JsonObject();
+		jointJson.addProperty("name", joint.getName());
+		
+		JsonArray transformMatrix = new JsonArray();
+		OpenMatrix4f localMatrixInBlender = OpenMatrix4f.transpose(joint.getLocalTrasnform(), null);
+		
+		if (root) {
+			localMatrixInBlender.mulFront(JsonModelLoader.Z_AXIS_TO_Y.invert());
+		}
+		
+		localMatrixInBlender.toList().forEach(transformMatrix::add);
+		jointJson.add("transform", transformMatrix);
+		
+		JsonArray children = new JsonArray();
+		jointJson.add("children", children);
+		
+		parent.add(jointJson);
+		joint.getSubJoints().forEach((joint$2) -> exportJoint(children, joint$2, false));
 	}
 }

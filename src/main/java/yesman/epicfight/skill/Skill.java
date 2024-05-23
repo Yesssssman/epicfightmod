@@ -185,7 +185,7 @@ public abstract class Skill {
 		switch (this.resource) {
 		case STAMINA:
 			return executer.getModifiedStaminaConsume(this.consumption);
-		case WEAPON_INNATE_ENERGY:
+		case WEAPON_CHARGE:
 			return 1;
 		case COOLDOWN:
 			return 1;
@@ -490,7 +490,7 @@ public abstract class Skill {
 			(skill, playerpatch, amount) -> {}
 		),
 		
-		WEAPON_INNATE_ENERGY(
+		WEAPON_CHARGE(
 			(skill, playerpatch, amount) -> playerpatch.getSkill(skill).getStack() >= amount,
 			(skill, playerpatch, amount) -> {
 				skill.setStackSynchronize(playerpatch, playerpatch.getSkill(skill).getStack() - 1);

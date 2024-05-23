@@ -37,7 +37,7 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 
 public class BladeRushSkill extends WeaponInnateSkill {
 	public static Builder createBladeRushBuilder() {
-		return new Builder().setCategory(SkillCategories.WEAPON_INNATE).setResource(Resource.WEAPON_INNATE_ENERGY)
+		return new Builder().setCategory(SkillCategories.WEAPON_INNATE).setResource(Resource.WEAPON_CHARGE)
 				.putTryAnimation(EntityType.ZOMBIE, Animations.BLADE_RUSH_TRY)
 				.putTryAnimation(EntityType.HUSK, Animations.BLADE_RUSH_TRY)
 				.putTryAnimation(EntityType.DROWNED, Animations.BLADE_RUSH_TRY)

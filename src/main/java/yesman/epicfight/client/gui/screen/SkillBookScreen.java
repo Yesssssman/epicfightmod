@@ -7,9 +7,13 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import org.joml.Vector3d;
+import org.joml.Vector3f;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.math.Axis;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -24,6 +28,7 @@ import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -39,6 +44,7 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.client.CPChangeSkill;
 import yesman.epicfight.skill.Skill;
+import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
@@ -48,7 +54,7 @@ import yesman.epicfight.world.item.SkillBookItem;
 
 @OnlyIn(Dist.CLIENT)
 public class SkillBookScreen extends Screen {
-	private static final ResourceLocation BACKGROUND = new ResourceLocation(EpicFightMod.MODID, "textures/gui/screen/skillbook.png");
+	private static final ResourceLocation SKILLBOOK_BACKGROUND = new ResourceLocation(EpicFightMod.MODID, "textures/gui/screen/skillbook.png");
 	private static final Map<WeaponCategory, ItemStack> WEAPON_CATEGORY_ICONS = Maps.newHashMap();
 	
 	public static void registerIconItems() {
@@ -95,7 +101,7 @@ public class SkillBookScreen extends Screen {
 		this.parentScreen = parentScreen;
 		this.skillTooltipList = new SkillTooltipList(Minecraft.getInstance(), 0, 0, 0 ,0, Minecraft.getInstance().font.lineHeight);
 		
-		List<FormattedCharSequence> list = Minecraft.getInstance().font.split(Component.translatable(this.skill.getTranslationKey() + ".tooltip", this.skill.getTooltipArgsOfScreen(Lists.newArrayList()).toArray(new Object[0])), 130);
+		List<FormattedCharSequence> list = Minecraft.getInstance().font.split(Component.translatable(this.skill.getTranslationKey() + ".tooltip", this.skill.getTooltipArgsOfScreen(Lists.newArrayList()).toArray(new Object[0])), 148);
 		list.forEach(this.skillTooltipList::add);
 		
 		if (this.skill.getAvailableWeaponCategories() != null) {
@@ -131,7 +137,7 @@ public class SkillBookScreen extends Screen {
 				SlotSelectScreen slotSelectScreen = new SlotSelectScreen(skillContainers, this);
 				this.minecraft.setScreen(slotSelectScreen);
 			}
-		}).bounds((this.width) / 2 + 100, (this.height) / 2 + 75, 46, 20).tooltip(Tooltip.create(tooltip, null)).build();
+		}).bounds((this.width) / 2 + 54, (this.height) / 2 + 90, 67, 21).tooltip(Tooltip.create(tooltip, null)).build(LearnButton::new);
 		
 		if (isUsing || !condition) {
 			changeButton.active = false;
@@ -141,11 +147,11 @@ public class SkillBookScreen extends Screen {
 			changeButton.visible = false;
 		}
 		
-		this.availableWeaponCategoryList.setX(this.width / 2 + 17);
-		this.availableWeaponCategoryList.setY(this.height / 2 + 40);
+		this.availableWeaponCategoryList.setX(this.width / 2 + 21);
+		this.availableWeaponCategoryList.setY(this.height / 2 + 50);
 		
-		this.skillTooltipList.updateSize(175, 400, (this.height - 180) / 2, (this.height + (this.availableWeaponCategoryList.availableCategories.size() == 0 ? 130 : 60)) / 2);
-		this.skillTooltipList.setLeftPos(this.width / 2 - 20);
+		this.skillTooltipList.updateSize(210, 400, this.height / 2 - 100, (this.height + (this.availableWeaponCategoryList.availableCategories.size() == 0 ? 150 : 80)) / 2);
+		this.skillTooltipList.setLeftPos(this.width / 2 - 40);
 		
 		this.addRenderableWidget(changeButton);
 		this.addRenderableWidget(this.skillTooltipList);
@@ -180,25 +186,50 @@ public class SkillBookScreen extends Screen {
 			this.renderBackground(guiGraphics);
 		}
 		
-		int posX = (this.width - 274) / 2;
+		int posX = (this.width - 284) / 2;
 		int posY = (this.height - 165) / 2;
 		
 		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-
-		guiGraphics.blit(BACKGROUND, this.width / 2 - 175, this.height / 2 - 120, 0, 0, 350, 243, 350, 290);
+		guiGraphics.blit(SKILLBOOK_BACKGROUND, this.width / 2 - 192, this.height / 2 - 140, 384, 279, 0, 0, 256, 186, 256, 256);
+		
+		int iconStartX = 106;
+		int iconStartY = 211;
+		
+		if (this.skill.getCategory() == SkillCategories.DODGE) {
+			iconStartX += 9;
+		} else if (this.skill.getCategory() == SkillCategories.GUARD) {
+			iconStartX += 18;
+		} else if (this.skill.getCategory() == SkillCategories.IDENTITY) {
+			iconStartX += 27;
+		} else if (this.skill.getCategory() == SkillCategories.MOVER) {
+			iconStartX += 36;
+		} else if (this.skill.getCategory() == SkillCategories.PASSIVE) {
+			iconStartX += 45;
+		}
+		
+		guiGraphics.blit(SKILLBOOK_BACKGROUND, this.width / 2 - 158, this.height / 2 - 72, 9, 9, iconStartX, iconStartY, 9, 9, 256, 256);
+		
+		guiGraphics.pose().pushPose();
+		guiGraphics.pose().translate(this.width / 2 - 17, this.height / 2 - 72, 0.0D);
+		
+		guiGraphics.pose().scale(-1.0F, 1.0F, 1.0F);
+		RenderSystem.disableCull();
+		guiGraphics.blit(SKILLBOOK_BACKGROUND, 0, 0, 9, 9, iconStartX, iconStartY, 9, 9, 256, 256);
+		RenderSystem.enableCull();
+		guiGraphics.pose().popPose();
 		
 		RenderSystem.enableBlend();
-		guiGraphics.blit(this.skill.getSkillTexture(), this.width / 2 - 112, this.height / 2 - 83, 60, 60, 0, 0, 64, 64, 64, 64);
+		guiGraphics.blit(this.skill.getSkillTexture(), this.width / 2 - 119, this.height / 2 - 96, 60, 60, 0, 0, 64, 64, 64, 64);
 		RenderSystem.disableBlend();
 		
 		String translationName = this.skill.getTranslationKey();
 		String skillName = Component.translatable(translationName).getString();
 		int width = this.font.width(skillName);
-		guiGraphics.drawString(font, skillName, posX + 36 + /**/20 - width / 2, posY + 85, 0, false);
-
+		guiGraphics.drawString(font, skillName, posX + 56 - width / 2, posY + 85, 0, false);
+		
 		String skillCategory = String.format("(%s)", Component.translatable("skill." + EpicFightMod.MODID + "." + this.skill.getCategory().toString().toLowerCase() + ".category").getString());
 		width = this.font.width(skillCategory);
-		guiGraphics.drawString(font, skillCategory, posX + 36 + /**/20 - width / 2, posY + 100, 0, false);
+		guiGraphics.drawString(font, skillCategory, posX + 56 - width / 2, posY + 100, 0, false);
 		
 		if (!this.skill.getModfierEntry().isEmpty()) {
 			int i = 135;
@@ -226,7 +257,7 @@ public class SkillBookScreen extends Screen {
 					break;
 				}
 				
-				guiGraphics.drawString(this.font, operator + amountString + " " + attrName, posX + 20 - width / 2, posY + i, 0, false);
+				guiGraphics.drawString(this.font, operator + amountString + " " + attrName, posX + 8 - width / 2, posY + i, 0, false);
 				i += 10;
 			}
 		}
@@ -323,6 +354,35 @@ public class SkillBookScreen extends Screen {
 		
 		@Override
 		protected void updateWidgetNarration(NarrationElementOutput p_259858_) {
+		}
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	private class LearnButton extends Button {
+		protected LearnButton(Builder builder) {
+			super(builder);
+		}
+		
+		@Override
+		protected void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+			Minecraft minecraft = Minecraft.getInstance();
+			guiGraphics.setColor(1.0F, 1.0F, 1.0F, this.alpha);
+			RenderSystem.enableBlend();
+			RenderSystem.enableDepthTest();
+			
+			int texX = 106;
+			
+			if (this.isHoveredOrFocused() || !this.isActive()) {
+			   texX = 156;
+			}
+			
+			guiGraphics.pose().pushPose();
+			guiGraphics.blitNineSliced(SKILLBOOK_BACKGROUND, this.getX(), this.getY(), this.getWidth(), this.getHeight(), 20, 4, 45, 15, texX, 193);
+			guiGraphics.setColor(1.0F, 1.0F, 1.0F, 1.0F);
+			guiGraphics.pose().popPose();
+			
+			int i = this.getFGColor();
+			this.renderString(guiGraphics, minecraft.font, i | Mth.ceil(this.alpha * 255.0F) << 24);
 		}
 	}
 }

@@ -7,7 +7,6 @@ import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -20,6 +19,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.VertexIndicator.AnimatedVertexIndicator;
 import yesman.epicfight.api.model.Armature;
+import yesman.epicfight.api.model.JsonModelLoader;
+import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.api.utils.math.Vec4f;
@@ -110,12 +111,10 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 		float[] positions = this.positions.clone();
 		float[] normals = this.normals.clone();
 		
-		OpenMatrix4f toBlenderCoord = OpenMatrix4f.createRotatorDeg(90.0F, Vec3f.X_AXIS);
-		
 		for (int i = 0; i < positions.length / 3; i++) {
 			int k = i * 3;
 			Vec4f posVector = new Vec4f(positions[k], positions[k+1], positions[k+2], 1.0F);
-			OpenMatrix4f.transform(toBlenderCoord, posVector, posVector);
+			OpenMatrix4f.transform(JsonModelLoader.Z_AXIS_TO_Y, posVector, posVector);
 			positions[k] = posVector.x;
 			positions[k+1] = posVector.y;
 			positions[k+2] = posVector.z;
@@ -124,7 +123,7 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 		for (int i = 0; i < normals.length / 3; i++) {
 			int k = i * 3;
 			Vec4f normVector = new Vec4f(normals[k], normals[k+1], normals[k+2], 1.0F);
-			OpenMatrix4f.transform(toBlenderCoord, normVector, normVector);
+			OpenMatrix4f.transform(JsonModelLoader.Z_AXIS_TO_Y, normVector, normVector);
 			normals[k] = normVector.x;
 			normals[k+1] = normVector.y;
 			normals[k+2] = normVector.z;
@@ -157,13 +156,33 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 		}
 		
 		vIndices = vIndexList.toIntArray();
-		vertices.add("positions", arrayToJsonObject(positions, 3));
-		vertices.add("uvs", arrayToJsonObject(this.uvs, 2));
-		vertices.add("normals", arrayToJsonObject(normals, 3));
-		vertices.add("indices", arrayToJsonObject(indices, 3));
-		vertices.add("vcounts", arrayToJsonObject(vcounts, 1));
-		vertices.add("weights", arrayToJsonObject(this.weights, 1));
-		vertices.add("vindices", arrayToJsonObject(vIndices, 1));
+		vertices.add("positions", ParseUtil.arrayToJsonObject(positions, 3));
+		vertices.add("uvs", ParseUtil.arrayToJsonObject(this.uvs, 2));
+		vertices.add("normals", ParseUtil.arrayToJsonObject(normals, 3));
+		
+		if (!this.parts.isEmpty()) {
+			JsonObject parts = new JsonObject();
+			
+			for (Map.Entry<String, ModelPart<VertexIndicator.AnimatedVertexIndicator>> partEntry : this.parts.entrySet()) {
+				IntList indicesArray = new IntArrayList();
+				
+				for (VertexIndicator.AnimatedVertexIndicator vertexIndicator : partEntry.getValue().getVertices()) {
+					indicesArray.add(vertexIndicator.position);
+					indicesArray.add(vertexIndicator.normal);
+					indicesArray.add(vertexIndicator.uv);
+				}
+				
+				parts.add(partEntry.getKey(), ParseUtil.arrayToJsonObject(indicesArray.toIntArray(), 3));
+			}
+			
+			vertices.add("parts", parts);
+		} else {
+			vertices.add("indices", ParseUtil.arrayToJsonObject(indices, 3));
+		}
+		
+		vertices.add("vcounts", ParseUtil.arrayToJsonObject(vcounts, 1));
+		vertices.add("weights", ParseUtil.arrayToJsonObject(this.weights, 1));
+		vertices.add("vindices", ParseUtil.arrayToJsonObject(vIndices, 1));
 		root.add("vertices", vertices);
 		
 		if (this.renderProperties != null) {
@@ -174,35 +193,5 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 		}
 		
 		return root;
-	}
-	
-	public static JsonObject arrayToJsonObject(float[] array, int stride) {
-		JsonObject jsonObject = new JsonObject();
-		jsonObject.addProperty("stride", stride);
-		jsonObject.addProperty("count", array.length / stride);
-		JsonArray jsonArray = new JsonArray();
-		
-		for (float element : array) {
-			jsonArray.add(element);
-		}
-		
-		jsonObject.add("array", jsonArray);
-		
-		return jsonObject;
-	}
-	
-	public static JsonObject arrayToJsonObject(int[] array, int stride) {
-		JsonObject jsonObject = new JsonObject();
-		jsonObject.addProperty("stride", stride);
-		jsonObject.addProperty("count", array.length / stride);
-		JsonArray jsonArray = new JsonArray();
-		
-		for (int element : array) {
-			jsonArray.add(element);
-		}
-		
-		jsonObject.add("array", jsonArray);
-		
-		return jsonObject;
 	}
 }

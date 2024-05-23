@@ -83,6 +83,7 @@ public class Meshes implements PreparableReloadListener {
 		MESHES.clear();
 		ModelBuildEvent.MeshBuild event = new ModelBuildEvent.MeshBuild(resourceManager, MESHES);
 		
+		//Entities
 		ALEX = event.getAnimated(EpicFightMod.MODID, "entity/biped_slim_arm", HumanoidMesh::new);
 		BIPED = event.getAnimated(EpicFightMod.MODID, "entity/biped", HumanoidMesh::new);
 		BIPED_OLD_TEX = event.getAnimated(EpicFightMod.MODID, "entity/biped_old_texture", HumanoidMesh::new);
@@ -101,10 +102,13 @@ public class Meshes implements PreparableReloadListener {
 		HOGLIN = event.getAnimated(EpicFightMod.MODID, "entity/hoglin", HoglinMesh::new);
 		DRAGON = event.getAnimated(EpicFightMod.MODID, "entity/dragon", DragonMesh::new);
 		WITHER = event.getAnimated(EpicFightMod.MODID, "entity/wither", WitherMesh::new);
+		
+		//Particles
 		AIR_BURST = event.getRaw(EpicFightMod.MODID, "particle/air_burst", RawMesh::new);
 		FORCE_FIELD = event.getRaw(EpicFightMod.MODID, "particle/force_field", RawMesh::new);
 		LASER = event.getRaw(EpicFightMod.MODID, "particle/laser", RawMesh::new);
 		
+		//Armors
 		HELMET = event.getAnimated(EpicFightMod.MODID, "armor/helmet", AnimatedMesh::new);
 		HELMET_PIGLIN = event.getAnimated(EpicFightMod.MODID, "armor/piglin_helmet", AnimatedMesh::new);
 		HELMET_VILLAGER = event.getAnimated(EpicFightMod.MODID, "armor/villager_helmet", AnimatedMesh::new);

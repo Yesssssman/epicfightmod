@@ -217,7 +217,7 @@ public class DatapackEditScreen extends Screen {
 			Pack pack = Pack.readMetaAndCreate("file/" + s, Component.literal(s), false, pack$resourcessupplier, PackType.SERVER_DATA, Pack.Position.TOP, PackSource.WORLD);
 			PackResources packResources = pack.open();
 			
-			this.importAnimations(packResources);
+			this.importUserData(packResources);
 			this.weaponTab.importEntries(packResources);
 			this.itemCapabilityTab.importEntries(packResources);
 			this.mobPatchTab.importEntries(packResources);
@@ -251,7 +251,7 @@ public class DatapackEditScreen extends Screen {
 			this.weaponTab.exportEntries(out);
 			this.itemCapabilityTab.exportEntries(out);
 			this.mobPatchTab.exportEntries(out);
-			this.exportUserImportData(out);
+			this.exportUserData(out);
 			
 			ZipEntry zipEntry = new ZipEntry("pack.mcmeta");
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -441,8 +441,38 @@ public class DatapackEditScreen extends Screen {
 		super.render(guiGraphics, mouseX, mouseY, partialTick);
 	}
 	
-	private void importAnimations(PackResources packResources) {
+	private void importUserData(PackResources packResources) {
 		packResources.getNamespaces(PackType.CLIENT_RESOURCES).stream().distinct().forEach((namespace) -> {
+			packResources.listResources(PackType.CLIENT_RESOURCES, namespace, "animmodels/entity/", (resourceLocation, stream) -> {
+				try {
+					JsonReader jsonReader = new JsonReader(new InputStreamReader(stream.get(), StandardCharsets.UTF_8));
+					jsonReader.setLenient(true);
+					
+					JsonObject jsonObject = Streams.parse(jsonReader).getAsJsonObject();
+					ResourceLocation rl = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll("animmodels/entity/", "").replaceAll(".json", ""));
+					JsonModelLoader modelLoader = new JsonModelLoader(jsonObject);
+					
+					AnimatedMesh mesh = null;
+					Armature armature = null;
+					
+					try {
+						mesh = modelLoader.loadAnimatedMesh(AnimatedMesh::new);
+						armature = modelLoader.loadArmature(Armature::new);
+					} finally {}
+					
+					if (mesh != null) {
+						this.userMeshes.put(rl, mesh);
+					}
+					
+					if (armature != null) {
+						this.userArmatures.put(rl, armature);
+					}
+				} catch (Exception e) {
+					EpicFightMod.LOGGER.error("Failed to read model " + resourceLocation);
+					e.printStackTrace();
+				}
+			});
+			
 			packResources.listResources(PackType.CLIENT_RESOURCES, namespace, "animmodels/animations", (resourceLocation, stream) -> {
 				if (resourceLocation.getPath().contains("/data/")) {
 					return;
@@ -455,8 +485,34 @@ public class DatapackEditScreen extends Screen {
 					JsonObject jsonObject = Streams.parse(jsonReader).getAsJsonObject();
 					ResourceLocation rl = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll("animmodels/animations/", "").replaceAll(".json", ""));
 					ResourceLocation datapath = AnimationManager.getAnimationDataFileLocation(resourceLocation);
+					InputStream dataReader = packResources.getResource(PackType.CLIENT_RESOURCES, datapath).get();
+					JsonElement constructorElement = jsonObject.getAsJsonObject().get("constructor");
 					
-					readAnimation(rl, jsonObject, packResources.getResource(PackType.CLIENT_RESOURCES, datapath).get());
+					if (constructorElement == null) {
+						throw new IllegalStateException(String.format("No constructor information has provided in User animation %s", rl));
+					}
+					
+					JsonObject constructorObject = constructorElement.getAsJsonObject();
+					String invocationCommand = constructorObject.get("invocation_command").getAsString();
+					
+					if (invocationCommand.lastIndexOf('#') == -1) {
+						throw new IllegalStateException(String.format("Invocation command exception: Missing separator %s in animation %s", invocationCommand, rl));
+					}
+					
+					String className = invocationCommand.substring(invocationCommand.lastIndexOf('#') + 1);
+					@SuppressWarnings({ "unchecked" })
+					Class<? extends ClipHoldingAnimation> animationClass = FakeAnimation.switchType((Class<? extends StaticAnimation>)Class.forName(className));
+					ClipHoldingAnimation animation = InstantiateInvoker.invoke(invocationCommand, animationClass).getResult();
+					
+					if (dataReader != null) {
+						ClientAnimationDataReader.readAndApply(animation.cast(), dataReader);
+					}
+					
+					JsonModelLoader modelLoader = new JsonModelLoader(jsonObject);
+					animation.setAnimationClip(modelLoader.loadAnimationClip(animation.cast().getArmature()));
+					
+					this.userAnimations.put(rl, PackEntry.ofValue(animation.buildAnimation(modelLoader.getRootJson().get("animation").getAsJsonArray()), animation));
+					AnimationManager.getInstance().registerUserAnimation(animation);
 				} catch (Exception e) {
 					EpicFightMod.LOGGER.error("Failed to read animation " + resourceLocation);
 					e.printStackTrace();
@@ -465,37 +521,31 @@ public class DatapackEditScreen extends Screen {
 		});
 	}
 	
-	@SuppressWarnings({ "unchecked" })
-	private void readAnimation(ResourceLocation rl, JsonObject json, InputStream dataReader) throws Exception {
-		JsonElement constructorElement = json.getAsJsonObject().get("constructor");
+	private void exportUserData(ZipOutputStream out) throws Exception {
+		Map<ResourceLocation, JsonObject> models = Maps.newHashMap();
 		
-		if (constructorElement == null) {
-			throw new IllegalStateException(String.format("No constructor information has provided in User animation %s", rl));
+		for (Map.Entry<ResourceLocation, AnimatedMesh> entry : this.userMeshes.entrySet()) {
+			models.put(entry.getKey(), entry.getValue().toJsonObject());
 		}
 		
-		JsonObject constructorObject = constructorElement.getAsJsonObject();
-		String invocationCommand = constructorObject.get("invocation_command").getAsString();
-		
-		if (invocationCommand.lastIndexOf('#') == -1) {
-			throw new IllegalStateException(String.format("Invocation command exception: Missing separator %s in animation %s", invocationCommand, rl));
+		for (Map.Entry<ResourceLocation, Armature> entry : this.userArmatures.entrySet()) {
+			models.computeIfAbsent(entry.getKey(), (k) -> entry.getValue().toJsonObject());
+			models.computeIfPresent(entry.getKey(), (k, oldVal) -> {
+				oldVal.add("armature", entry.getValue().toJsonObject().get("armature"));
+				return oldVal;
+			});
 		}
 		
-		String className = invocationCommand.substring(invocationCommand.lastIndexOf('#') + 1);
-		Class<? extends ClipHoldingAnimation> animationClass = FakeAnimation.switchType((Class<? extends StaticAnimation>)Class.forName(className));
-		ClipHoldingAnimation animation = InstantiateInvoker.invoke(invocationCommand, animationClass).getResult();
-		
-		if (dataReader != null) {
-			ClientAnimationDataReader.readAndApply(animation.cast(), dataReader);
+		for (Map.Entry<ResourceLocation, JsonObject> entry : models.entrySet()) {
+			String exportPath = String.format("assets/%s/animmodels/entity/%s.json", entry.getKey().getNamespace(), entry.getKey().getPath());
+			ZipEntry zipEntry = new ZipEntry(exportPath);
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			
+			out.putNextEntry(zipEntry);
+			out.write(gson.toJson(entry.getValue()).getBytes());
+			out.closeEntry();
 		}
 		
-		JsonModelLoader modelLoader = new JsonModelLoader(json.getAsJsonObject());
-		animation.setAnimationClip(modelLoader.loadAnimationClip(animation.cast().getArmature()));
-		
-		this.userAnimations.put(rl, PackEntry.ofValue(animation.buildAnimation(modelLoader.getRootJson().get("animation").getAsJsonArray()), animation));
-		AnimationManager.getInstance().registerUserAnimation(animation);
-	}
-	
-	private void exportUserImportData(ZipOutputStream out) throws Exception {
 		for (Map.Entry<ResourceLocation, PackEntry<FakeAnimation, ClipHoldingAnimation>> entry : this.userAnimations.entrySet()) {
 			String exportPath = String.format("assets/%s/animmodels/animations/%s.json", entry.getKey().getNamespace(), entry.getKey().getPath());
 			ResourceLocation clientData = AnimationManager.getAnimationDataFileLocation(new ResourceLocation(entry.getKey().getNamespace(), exportPath));
@@ -525,18 +575,6 @@ public class DatapackEditScreen extends Screen {
 			out.write(gson.toJson(root).getBytes());
 			out.closeEntry();
 		}
-		
-		for (Map.Entry<ResourceLocation, AnimatedMesh> entry : this.userMeshes.entrySet()) {
-			
-		}
-		
-		for (Map.Entry<ResourceLocation, Armature> entry : this.userArmatures.entrySet()) {
-			
-		}
-	}
-	
-	public Map<ResourceLocation, PackEntry<FakeAnimation, ClipHoldingAnimation>> getUserAniamtions() {
-		return this.userAnimations;
 	}
 	
 	public Map<ResourceLocation, AnimatedMesh> getUserMeshes() {
@@ -545,6 +583,10 @@ public class DatapackEditScreen extends Screen {
 	
 	public Map<ResourceLocation, Armature> getUserArmatures() {
 		return this.userArmatures;
+	}
+	
+	public Map<ResourceLocation, PackEntry<FakeAnimation, ClipHoldingAnimation>> getUserAniamtions() {
+		return this.userAnimations;
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -2103,7 +2145,18 @@ public class DatapackEditScreen extends Screen {
 		public void importEntries(PackResources packResources) {
 			packResources.getNamespaces(PackType.SERVER_DATA).stream().distinct().forEach((namespace) -> {
 				packResources.listResources(PackType.SERVER_DATA, namespace, this.directory, (resourceLocation, stream) -> {
-					
+					try {
+						JsonReader jsonReader = new JsonReader(new InputStreamReader(stream.get(), StandardCharsets.UTF_8));
+						jsonReader.setLenient(true);
+						JsonObject jsonObject = Streams.parse(jsonReader).getAsJsonObject();
+						CompoundTag compTag = TagParser.parseTag(jsonObject.toString());
+						ResourceLocation rl = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll(String.format("%s/", this.directory), ""));
+						
+						this.packList.add(PackEntry.of(rl, () -> compTag));
+						this.packListGrid.addRowWithDefaultValues("pack_item", rl.toString());
+					} catch (IOException | CommandSyntaxException e) {
+						e.printStackTrace();
+					}
 				});
 			});
 		}
@@ -2123,6 +2176,12 @@ public class DatapackEditScreen extends Screen {
 						String preset = packCompound.getString("preset");
 						packCompound.tags.clear();
 						packCompound.putString("preset", preset);
+					}
+					
+					if (packCompound.getBoolean("isHumanoid")) {
+						ListTag humanoidCombatBehavior = packCompound.getList("combat_behavior_humanoid", Tag.TAG_COMPOUND);
+						packCompound.remove("combat_behavior_humanoid");
+						packCompound.put("combat_behavior", humanoidCombatBehavior);
 					}
 					
 					ZipEntry zipEntry = new ZipEntry(String.format("data/%s/" + this.directory + "/%s.json", packEntry.getKey().getNamespace(), packEntry.getKey().getPath()));
