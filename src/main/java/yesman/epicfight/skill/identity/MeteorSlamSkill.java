@@ -7,6 +7,7 @@ import java.util.function.BiFunction;
 
 import com.google.common.collect.Maps;
 
+import net.minecraft.network.chat.Component;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.CreativeModeTab;
@@ -15,6 +16,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.LevelUtil;
+import yesman.epicfight.client.gui.screen.SkillBookScreen;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategories;
@@ -165,5 +167,11 @@ public class MeteorSlamSkill extends Skill {
 	@Override
 	public List<WeaponCategory> getAvailableWeaponCategories() {
 		return List.copyOf(this.slamMotions.keySet());
+	}
+	
+	@Override
+	public boolean getCustomConsumptionTooltips(SkillBookScreen.AttributeIconList consumptionList) {
+		consumptionList.add(Component.translatable("attribute.name.epicfight.stamina.consume.tooltip"), Component.translatable("skill.epicfight.meteor_slam.consume.tooltip"), SkillBookScreen.STAMINA_TEXTURE_INFO);
+		return true;
 	}
 }

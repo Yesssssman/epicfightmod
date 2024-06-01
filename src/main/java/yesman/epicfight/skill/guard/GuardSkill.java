@@ -14,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
@@ -24,12 +25,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.gui.BattleModeGui;
+import yesman.epicfight.client.gui.screen.SkillBookScreen;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.gameasset.EpicFightSounds;
@@ -360,12 +360,11 @@ public class GuardSkill extends Skill {
 				&& !damageSource.is(DamageTypeTags.IS_FIRE);
 	}
 	
-	@OnlyIn(Dist.CLIENT)
+	@Override
 	public boolean shouldDraw(SkillContainer container) {
 		return container.getDataManager().getDataValue(SkillDataKeys.PENALTY.get()) > 0.0F;
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void drawOnGui(BattleModeGui gui, SkillContainer container, GuiGraphics guiGraphics, float x, float y) {
 		PoseStack poseStack = guiGraphics.pose();
@@ -379,6 +378,12 @@ public class GuardSkill extends Skill {
 	@Override
 	public List<WeaponCategory> getAvailableWeaponCategories() {
 		return List.copyOf(this.guardMotions.keySet());
+	}
+	
+	@Override
+	public boolean getCustomConsumptionTooltips(SkillBookScreen.AttributeIconList consumptionList) {
+		consumptionList.add(Component.translatable("attribute.name.epicfight.stamina.consume.tooltip"), Component.translatable("skill.epicfight.guard.consume.tooltip"), SkillBookScreen.STAMINA_TEXTURE_INFO);
+		return true;
 	}
 	
 	protected boolean isAdvancedGuard() {

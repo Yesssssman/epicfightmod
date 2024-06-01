@@ -58,6 +58,9 @@ import yesman.epicfight.world.item.SkillBookItem;
 @OnlyIn(Dist.CLIENT)
 public class SkillBookScreen extends Screen {
 	private static final ResourceLocation SKILLBOOK_BACKGROUND = new ResourceLocation(EpicFightMod.MODID, "textures/gui/screen/skillbook.png");
+	public static final TextureInfo COOLDOWN_TEXTURE_INFO = new TextureInfo(SKILLBOOK_BACKGROUND, 72, 206, 10, 10);
+	public static final TextureInfo HEALTH_TEXTURE_INFO = new TextureInfo(SKILLBOOK_BACKGROUND, 22, 206, 10, 10);
+	public static final TextureInfo STAMINA_TEXTURE_INFO = new TextureInfo(SKILLBOOK_BACKGROUND, 42, 206, 10, 10);
 	
 	private static final Map<WeaponCategory, ItemStack> WEAPON_CATEGORY_ICONS = Maps.newHashMap();
 	private static final Map<Attribute, TextureInfo> ATTRIBUTE_ICONS = Maps.newHashMap();
@@ -80,8 +83,8 @@ public class SkillBookScreen extends Screen {
 		WEAPON_CATEGORY_ICONS.put(WeaponCategories.SHIELD, new ItemStack(Items.SHIELD));
 		WEAPON_CATEGORY_ICONS.put(WeaponCategories.RANGED, new ItemStack(Items.BOW));
 		
-		ATTRIBUTE_ICONS.put(Attributes.MAX_HEALTH, new TextureInfo(SKILLBOOK_BACKGROUND, 22, 206, 10, 10));
-		ATTRIBUTE_ICONS.put(EpicFightAttributes.MAX_STAMINA.get(), new TextureInfo(SKILLBOOK_BACKGROUND, 42, 206, 10, 10));
+		ATTRIBUTE_ICONS.put(Attributes.MAX_HEALTH, HEALTH_TEXTURE_INFO);
+		ATTRIBUTE_ICONS.put(EpicFightAttributes.MAX_STAMINA.get(), STAMINA_TEXTURE_INFO);
 		ATTRIBUTE_ICONS.put(Attributes.ATTACK_DAMAGE, new TextureInfo(SKILLBOOK_BACKGROUND, 52, 206, 10, 10));
 		ATTRIBUTE_ICONS.put(EpicFightAttributes.STAMINA_REGEN.get(), new TextureInfo(SKILLBOOK_BACKGROUND, 62, 206, 10, 10));
 		
@@ -99,7 +102,8 @@ public class SkillBookScreen extends Screen {
 	protected final Screen parentScreen;
 	protected final SkillTooltipList skillTooltipList;
 	protected final AvailableItemsList availableWeaponCategoryList;
-	protected final ProvidingAttributeList providingAttributesList;
+	protected final AttributeIconList consumptionList;
+	protected final AttributeIconList providingAttributesList;
 	
 	public SkillBookScreen(Player opener, ItemStack stack, InteractionHand hand) {
 		this(opener, SkillBookItem.getContainSkill(stack), hand, null);
@@ -118,13 +122,35 @@ public class SkillBookScreen extends Screen {
 		this.parentScreen = parentScreen;
 		this.skillTooltipList = new SkillTooltipList(Minecraft.getInstance(), 0, 0, 0 ,0, Minecraft.getInstance().font.lineHeight);
 		this.availableWeaponCategoryList = new AvailableItemsList(0, 0);
-		this.providingAttributesList = new ProvidingAttributeList(Minecraft.getInstance(), 0, 0, 100, 100, 16);
+		this.consumptionList = new AttributeIconList(Minecraft.getInstance(), 0, 0, 100, 100, 16);
+		this.providingAttributesList = new AttributeIconList(Minecraft.getInstance(), 0, 0, 100, 100, 16);
 		
 		List<FormattedCharSequence> list = Minecraft.getInstance().font.split(Component.translatable(this.skill.getTranslationKey() + ".tooltip", this.skill.getTooltipArgsOfScreen(Lists.newArrayList()).toArray(new Object[0])), 148);
 		list.forEach(this.skillTooltipList::add);
 		
 		if (this.skill.getAvailableWeaponCategories() != null) {
 			this.skill.getAvailableWeaponCategories().forEach(this.availableWeaponCategoryList::addWeaponCategory);
+		}
+		
+		if (!this.skill.getCustomConsumptionTooltips(this.consumptionList)) {
+			this.consumptionList.children().clear();
+			
+			switch (this.skill.getResourceType()) {
+				case WEAPON_CHARGE -> {
+					
+				}
+				case COOLDOWN -> {
+					this.consumptionList.add(Component.translatable("attribute.name.epicfight.cooldown.consume.tooltip"), Component.translatable("attribute.name.epicfight.cooldown.consume", String.format("%.1f", this.skill.getConsumption())), COOLDOWN_TEXTURE_INFO);
+				}
+				case STAMINA -> {
+					this.consumptionList.add(Component.translatable("attribute.name.epicfight.stamina.consume.tooltip"), Component.translatable("attribute.name.epicfight.stamina.consume", String.format("%.1f", this.skill.getConsumption())), STAMINA_TEXTURE_INFO);
+				}
+				case HEALTH -> {
+					this.consumptionList.add(Component.translatable("attribute.name.epicfight.health.consume.tooltip"), Component.translatable("attribute.name.epicfight.health.consume"), HEALTH_TEXTURE_INFO);
+				}
+				default -> {
+				}
+			}
 		}
 		
 		this.skill.getModfierEntry().forEach((entry) -> {
@@ -176,13 +202,25 @@ public class SkillBookScreen extends Screen {
 		this.skillTooltipList.updateSize(210, 400, this.height / 2 - 100, (this.height + (this.availableWeaponCategoryList.availableCategories.size() == 0 ? 150 : 80)) / 2);
 		this.skillTooltipList.setLeftPos(this.width / 2 - 40);
 		
-		this.providingAttributesList.updateSize(200, 300, this.height / 2 + 40, this.height / 2 + 100);
-		this.providingAttributesList.setLeftPos(this.width / 2 - 155);
+		int consumptionEndPos = this.height / 2 + 20 + (20 * Math.min(2, this.consumptionList.children().size()));
+		
+		this.consumptionList.updateSize(140, 300, this.height / 2 + 20, consumptionEndPos);
+		this.consumptionList.setLeftPos(this.width / 2 - 160);
+		
+		this.providingAttributesList.updateSize(140, 300, consumptionEndPos, consumptionEndPos + 60);
+		this.providingAttributesList.setLeftPos(this.width / 2 - 160);
 		
 		this.addRenderableWidget(changeButton);
 		this.addRenderableWidget(this.skillTooltipList);
 		this.addRenderableWidget(this.availableWeaponCategoryList);
-		this.addRenderableWidget(this.providingAttributesList);
+		
+		if (this.consumptionList.children().size() > 0) {
+			this.addRenderableWidget(this.consumptionList);
+		}
+		
+		if (this.providingAttributesList.children().size() > 0) {
+			this.addRenderableWidget(this.providingAttributesList);
+		}
 	}
 	
 	protected void learnSkill(SkillContainer skillContainer) {
@@ -252,11 +290,11 @@ public class SkillBookScreen extends Screen {
 		String translationName = this.skill.getTranslationKey();
 		String skillName = Component.translatable(translationName).getString();
 		int width = this.font.width(skillName);
-		guiGraphics.drawString(font, skillName, posX + 56 - width / 2, posY + 85, 0, false);
+		guiGraphics.drawString(font, skillName, posX + 56 - width / 2, posY + 75, 0, false);
 		
 		String skillCategory = String.format("(%s)", Component.translatable("skill." + EpicFightMod.MODID + "." + this.skill.getCategory().toString().toLowerCase() + ".category").getString());
 		width = this.font.width(skillCategory);
-		guiGraphics.drawString(font, skillCategory, posX + 56 - width / 2, posY + 100, 0, false);
+		guiGraphics.drawString(font, skillCategory, posX + 56 - width / 2, posY + 90, 0, false);
 		
 		super.render(guiGraphics, mouseX, mouseY, partialTicks);
 		
@@ -388,8 +426,8 @@ public class SkillBookScreen extends Screen {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	private class ProvidingAttributeList extends ContainerObjectSelectionList<ProvidingAttributeList.ProvidingAttributeEntry> {
-		public ProvidingAttributeList(Minecraft minecraft, int width, int height, int y0, int y1, int itemHeight) {
+	public class AttributeIconList extends ContainerObjectSelectionList<AttributeIconList.ProvidingAttributeEntry> {
+		public AttributeIconList(Minecraft minecraft, int width, int height, int y0, int y1, int itemHeight) {
 			super(minecraft, width, height, y0, y1, itemHeight);
 			
 			this.setRenderBackground(false);
@@ -399,6 +437,10 @@ public class SkillBookScreen extends Screen {
 		
 		public void add(Attribute attribute, AttributeModifier ability, TextureInfo textureInfo) {
 			this.addEntry(new ProvidingAttributeEntry(attribute, ability, textureInfo));
+		}
+		
+		public void add(Component tooltip, Component descriptor, TextureInfo textureInfo) {
+			this.addEntry(new ProvidingAttributeEntry(tooltip, descriptor, textureInfo));
 		}
 		
 		@Override
@@ -412,7 +454,7 @@ public class SkillBookScreen extends Screen {
 		}
 		
 		@OnlyIn(Dist.CLIENT)
-		private class ProvidingAttributeEntry extends ContainerObjectSelectionList.Entry<ProvidingAttributeList.ProvidingAttributeEntry> {
+		private class ProvidingAttributeEntry extends ContainerObjectSelectionList.Entry<AttributeIconList.ProvidingAttributeEntry> {
 			private List<AbstractWidget> icons = Lists.newArrayList();
 			
 			private ProvidingAttributeEntry(Attribute attribute, AttributeModifier ability, TextureInfo textureInfo) {
@@ -430,18 +472,18 @@ public class SkillBookScreen extends Screen {
 				case MULTIPLY_BASE, MULTIPLY_TOTAL -> amountString = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(amount * 100.0D) + "%";
 				}
 				
-				this.icons.add(new AttributeIcon(0, 0, 14, 14, attribute, textureInfo));
+				this.icons.add(new AttributeIcon(0, 0, 12, 12, attribute, textureInfo));
 				
-				Static abilityString = new Static(SkillBookScreen.this.font, 0, 100, 0, 15, null, null, Component.literal(operator + amountString + " " + Component.translatable(attribute.getDescriptionId()).getString()));
+				Static abilityString = new Static(SkillBookScreen.this.font, 0, 140, 0, 15, null, null, Component.literal(operator + amountString + " " + Component.translatable(attribute.getDescriptionId()).getString()));
 				abilityString.setColor(0, 0, 0);
 				
 				this.icons.add(abilityString);
 			}
 			
 			private ProvidingAttributeEntry(Component customTooltip, Component customDescription, TextureInfo textureInfo) {
-				this.icons.add(new AttributeIcon(0, 0, 14, 14, customTooltip, textureInfo));
+				this.icons.add(new AttributeIcon(0, 0, 12, 12, customTooltip, textureInfo));
 				
-				Static abilityString = new Static(SkillBookScreen.this.font, 0, 100, 0, 15, null, null, customDescription);
+				Static abilityString = new Static(SkillBookScreen.this.font, 0, 140, 0, 15, null, null, customDescription);
 				abilityString.setColor(0, 0, 0);
 				
 				this.icons.add(abilityString);

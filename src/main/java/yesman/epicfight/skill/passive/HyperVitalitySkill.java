@@ -6,10 +6,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.client.gui.BattleModeGui;
+import yesman.epicfight.client.gui.screen.SkillBookScreen;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPSkillExecutionFeedback;
@@ -86,13 +86,11 @@ public class HyperVitalitySkill extends PassiveSkill {
 		executer.getSkill(this).deactivate();
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
 	public boolean shouldDraw(SkillContainer container) {
 		return container.isActivated() || container.getStack() == 0;
 	}
-
-	@OnlyIn(Dist.CLIENT)
+	
 	@Override
 	public void drawOnGui(BattleModeGui gui, SkillContainer container, GuiGraphics guiGraphics, float x, float y) {
 		PoseStack poseStack = new PoseStack();
@@ -106,5 +104,11 @@ public class HyperVitalitySkill extends PassiveSkill {
 		}
 		
 		poseStack.popPose();
+	}
+	
+	@Override
+	public boolean getCustomConsumptionTooltips(SkillBookScreen.AttributeIconList consumptionList) {
+		consumptionList.add(Component.translatable("attribute.name.epicfight.stamina.consume.tooltip"), Component.translatable("skill.epicfight.hypervitality.consume.tooltip"), SkillBookScreen.STAMINA_TEXTURE_INFO);
+		return true;
 	}
 }

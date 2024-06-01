@@ -2,6 +2,7 @@ package yesman.epicfight.api.data.reloader;
 
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -71,13 +72,13 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 			if (path.contains("/") && !path.contains("types")) {
 				String[] str = path.split("/", 2);
 				ResourceLocation registryName = new ResourceLocation(rl.getNamespace(), str[1]);
-				Item item = ForgeRegistries.ITEMS.getValue(registryName);
 				
-				if (item == null) {
-					EpicFightMod.LOGGER.warn("Tried to add a capability for item " + registryName + ", but it doesn't exist!");
-					return;
+				if (!ForgeRegistries.ITEMS.containsKey(registryName)) {
+					new NoSuchElementException("Item Capability Exception: No Item named " + registryName).printStackTrace();
+					continue;
 				}
 				
+				Item item = ForgeRegistries.ITEMS.getValue(registryName);
 				CompoundTag tag = null;
 				
 				try {

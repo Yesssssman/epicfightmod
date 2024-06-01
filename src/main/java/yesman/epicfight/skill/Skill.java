@@ -27,6 +27,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.client.events.engine.ControllEngine;
 import yesman.epicfight.client.gui.BattleModeGui;
+import yesman.epicfight.client.gui.screen.SkillBookScreen;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.network.EpicFightNetworkManager;
@@ -478,6 +479,11 @@ public abstract class Skill {
 	@OnlyIn(Dist.CLIENT)
 	public List<WeaponCategory> getAvailableWeaponCategories() {
 		return null;
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public boolean getCustomConsumptionTooltips(SkillBookScreen.AttributeIconList consumeIconList) {
+		return false;
 	}
 	
 	public enum ActivateType {
