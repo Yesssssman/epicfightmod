@@ -1,5 +1,8 @@
 package yesman.epicfight.world.capabilities.entitypatch.mob;
 
+import java.util.EnumSet;
+import java.util.UUID;
+
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.server.level.ServerPlayer;
@@ -16,10 +19,9 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -43,9 +45,6 @@ import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
-
-import java.util.EnumSet;
-import java.util.UUID;
 
 public class EndermanPatch extends MobPatch<EnderMan> {
 	private static final UUID SPEED_MODIFIER_RAGE_UUID = UUID.fromString("dc362d1a-8424-11ec-a8a3-0242ac120002");
@@ -114,13 +113,11 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 		}
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.ENDERMAN_DEATH);
-		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.ENDERMAN_WALK);
-		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.ENDERMAN_IDLE);
-		clientAnimator.setCurrentMotionsAsDefault();
+	public void initAnimator(Animator animator) {
+		animator.addLivingAnimation(LivingMotions.DEATH, Animations.ENDERMAN_DEATH);
+		animator.addLivingAnimation(LivingMotions.WALK, Animations.ENDERMAN_WALK);
+		animator.addLivingAnimation(LivingMotions.IDLE, Animations.ENDERMAN_IDLE);
 	}
 	
 	@Override

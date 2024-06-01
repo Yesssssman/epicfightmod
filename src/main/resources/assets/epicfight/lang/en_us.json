@@ -10,6 +10,11 @@
 	"attribute.name.epicfight.stamina_regen": "Stamina Regen",
 	"attribute.name.epicfight.max_execution_resistance": "Execution Resistance",
 	
+	"attribute.name.generic.max_health.tooltip": "Increases player's max health",
+	"attribute.name.generic.attack_damage.tooltip": "Increases player's attack damage",
+	"attribute.name.epicfight.staminar.tooltip": "Increases player's max stamina",
+	"attribute.name.epicfight.stamina_regen.tooltip": "Reduces the amount of time taken for stamina to regen",
+	
 	"commands.epicfight.skill.add.success.single": "Added skill %s to %s",
 	"commands.epicfight.skill.add.success.multiple": "Added skill %s to %s targets",
 	"commands.epicfight.skill.add.failed": "Unable to add this skill (skill already applied)",
@@ -150,7 +155,7 @@
 	"gui.epicfight.unusable": "Unusable",
 	"gui.epicfight.changing_cost": "Cost: %d",
 	"gui.epicfight.no_skills": "You have not learned any skills yet! You can learn skills by acquiring skill books from looting mobs and chests.",
-	"gui.epicfight.select_slot_tooltip": "Choose the slot to apply the skill.",
+	"gui.epicfight.select_slot_tooltip": "Choose a slot to apply the skill.",
 	
 	"gui.epicfight.save": "Save",
 	"gui.epicfight.export": "Export",
@@ -164,7 +169,7 @@
 	"gui.epicfight.tab.datapack.mob_patch": "Mob Patch",
 	
 	"gui.epicfight.select": "%s List",
-	"gui.epicfight.weapon_types_available": "Available Weapon Types",
+	"gui.epicfight.available_weapon_types": "Available Weapon Types",
 	
 	"item.epicfight.bokken": "Bokken",
 	"item.epicfight.uchigatana": "Uchigatana",
@@ -202,7 +207,6 @@
 	"item.minecraft.lingering_potion.effect.blooming": "Lingering potion of Blooming",
 	
 	"item.epicfight.uchigatana.tooltip": "Sheathe Uchigatana after 5 seconds of inactivity and your next attack will be empowered.",
-	
 	"itemGroup.epicfight.items": "EpicFight Items",
 	
 	"key.epicfight.gui": "Epic Fight GUI",
@@ -256,7 +260,7 @@
 	"skill.epicfight.guard": "Guard",
 	"skill.epicfight.guard.tooltip": "Right-click to guard against frontal attacks. Continued guarding will consume more stamina.\n\n(Stamina: based on your current guard penalty)",
 	"skill.epicfight.parrying": "Parrying",
-	"skill.epicfight.parrying.tooltip": "Allows player to time guards accordingly to prevent stamina use. Player is able to guard against ranged attacks.",
+	"skill.epicfight.parrying.tooltip": "Allows a player to time guards accordingly to prevent stamina use. Player is able to guard against ranged attacks.",
 	"skill.epicfight.impact_guard": "Impact Guard",
 	"skill.epicfight.impact_guard.tooltip": "Reduces stamina consumption on guarding. Player can now guard against explosions, fire, magic, and projectiles with %d%% efficiency.",
 	"skill.epicfight.berserker": "Berserker",
@@ -272,9 +276,9 @@
 	"skill.epicfight.forbidden_strength": "Forbidden Strength",
 	"skill.epicfight.forbidden_strength.tooltip": "Consumes health instead of stamina when it's insufficient.",
 	"skill.epicfight.endurance": "Endurance",
-	"skill.epicfight.endurance.tooltip": "Gain a stun resistance for %s seconds for the amount of stamina consumed when player is hit while player prepares an attack. \n\n(Cooldown: %ss)\n\n(Stamina: %s%% of current stamina)",
+	"skill.epicfight.endurance.tooltip": "Grants stun resistance as an amount of stamina consumed for %s seconds if a player is hit while preparing an attack. \n\n(Cooldown: %ss)\n\n(Stamina: %s%% of current stamina)",
 	"skill.epicfight.emergency_escape": "Emergency Escape",
-	"skill.epicfight.emergency_escape.tooltip": "Allows dodging when out of stamina. (Cooldown: %ss)\n\nAllows a player to cancel attack motions and dodge",
+	"skill.epicfight.emergency_escape.tooltip": "Allows a player dodging when out of stamina. (Cooldown: %ss)\n\nAllows a player canceling attack motions and dodge",
 	"skill.epicfight.death_harvest": "Death Harvest",
 	"skill.epicfight.death_harvest.tooltip": "Regain innate weapon charge when killing an enemy with an innate weapon skill.",
 	"skill.epicfight.meteor_slam": "Meteor Slam",
@@ -284,7 +288,7 @@
 	"skill.epicfight.demolition_leap": "Demolition Leap",
 	"skill.epicfight.demolition_leap.tooltip": "Gather energy to launch yourself into a targeted direction, reducing next fall damage by 50%.",
 	"skill.epicfight.phantom_ascent": "Phantom Ascent",
-	"skill.epicfight.phantom_ascent.tooltip": "Allows player to jump %d times more in the air.",
+	"skill.epicfight.phantom_ascent.tooltip": "Allows a player to jump %d times more in the air.",
 	"skill.epicfight.passive.category": "Passive",
 	"skill.epicfight.dodge.category": "Dodge",
 	"skill.epicfight.guard.category": "Guard",
@@ -424,6 +428,12 @@
 	"datapack_edit.mob_patch.humanoid.tooltip": "Defines if an entity is human based or not\n(mandatory)",
 	"datapack_edit.mob_patch.faction": "Faction",
 	"datapack_edit.mob_patch.faction.tooltip": "Defines a faction of an entity. Mobs that have the same factions don't hurt each other\n(mandatory)",
+	"datapack_edit.mob_patch.swing_sound": "Swing Sound",
+	"datapack_edit.mob_patch.swing_sound.tooltip": "Defines a swing sound when an entity holds nothing in hands\n(optional)",
+	"datapack_edit.mob_patch.hit_sound": "Hit Sound",
+	"datapack_edit.mob_patch.hit_sound.tooltip": "Defines a hit sound when an entity holds nothing in hands\n(optional)",
+	"datapack_edit.mob_patch.hit_particle": "Hit Particle",
+	"datapack_edit.mob_patch.hit_particle.tooltip": "Defines a hit particle when an entity holds nothing in hands\n(optional)",
 	"datapack_edit.mob_patch.attributes": "Attributes",
 	"datapack_edit.mob_patch.attributes.tooltip": "Defines attributes of an entity\n(mandatory)",
 	"datapack_edit.mob_patch.default_livingmotions": "Living Animations",

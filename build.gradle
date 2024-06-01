@@ -108,7 +108,7 @@ dependencies {
     
     //implementation fg.deobf("local:epcfight:20.x.x")
     compileOnly fg.deobf("curse.maven:geckolib-388172:4822252")
-    compileOnly fg.deobf("curse.maven:azurelib-817423:4906772")
+    compileOnly fg.deobf("curse.maven:azurelib-817423:4812417")
     compileOnly fg.deobf("curse.maven:azurelibarmor-912767:4866792")
     
     // compile against the JEI API but do not include it at runtime

@@ -92,19 +92,6 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 	}
 	
 	public int addRow(int rowposition) {
-		/**
-		this.editingColumn = null;
-		this.editingWidget = null;
-		
-		Row row = new Row();
-		this.children().add(rowposition, row);
-		
-		for (Map.Entry<String, Column<?, ?>> entry : this.columns.entrySet()) {
-			row.setValue(entry.getKey(), entry.getValue().defaultVal);
-		}
-		
-		this.resizeColumnWidth();
-		**/
 		return this.addRow(rowposition, null);
 	}
 	
@@ -260,7 +247,10 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 			if (this.editingColumn.editable) {
 				this.editingWidget = this.editingColumn.createEditWidget(this.owner, this.owner.getMinecraft().font, this.x0 + startX + 2, this.getRowTop(rowposition) + 2, this.itemHeight - 3, rowposition,
 																			this.getSelected(), columnName, this.getSelected().getValue(columnName));
-				this.editingWidget.setFocused(true);
+				
+				if (this.editingWidget != null) {
+					this.editingWidget.setFocused(true);
+				}
 			}
 		}
 	}
@@ -531,8 +521,8 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 	@Override
 	public boolean mouseScrolled(double x, double y, double button) {
 		if (this.editingWidget != null) {
-			if (this.editingWidget.mouseScrolled(x, y, button)) {
-				return false;
+			if (this.editingWidget.isMouseOver(x, y) && this.editingWidget.mouseScrolled(x, y, button)) {
+				return true;
 			}
 		}
 		
@@ -618,7 +608,11 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 			Column<T, ?> column = (Column<T, ?>) Grid.this.columns.get(columnName);
 			
 			if (column.onValueChanged != null && Grid.this.valueChangeEnabled && !ParseUtil.compareNullables(oldVal, value)) {
-				column.onValueChanged.accept(new ValueChangeEvent<> (Grid.this, Grid.this.children().indexOf(this), oldVal, value));
+				int idx = Grid.this.children().indexOf(this);
+				
+				if (idx >= 0) {
+					column.onValueChanged.accept(new ValueChangeEvent<> (Grid.this, Grid.this.children().indexOf(this), oldVal, value));
+				}
 			}
 		}
 		
@@ -988,6 +982,10 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		@Override
 		public W createEditWidget(Screen owner, Font font, int x, int y, int height, int rowposition, Row row, String colName, T value) {
 			W editWidget = (W)this.editWidgetProvider.apply(row);
+			
+			if (editWidget == null) {
+				return null;
+			}
 			
 			editWidget.setX(x);
 			editWidget.setY(y);

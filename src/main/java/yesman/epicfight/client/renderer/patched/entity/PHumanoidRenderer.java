@@ -40,11 +40,6 @@ public class PHumanoidRenderer<E extends LivingEntity, T extends LivingEntityPat
 	}
 	
 	@Override
-	protected int getRootJointIndex() {
-		return 7;
-	}
-	
-	@Override
 	protected double getLayerCorrection() {
 		return 0.75F;
 	}

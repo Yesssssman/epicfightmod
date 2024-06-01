@@ -162,6 +162,16 @@ public class ImportAnimationsScreen extends Screen {
 					
 					ImportAnimationsScreen.this.animationType._setResponder(ImportAnimationsScreen.this.responder);
 					break;
+				case LONG_HIT, SHORT_HIT:
+					ImportAnimationsScreen.this.animationType._setResponder(null);
+					
+					this.setDataBindingComponenets(new Object[] {
+						fakeAnim.getAnimationClass(),
+						ParseUtil.nullParam(fakeAnim.getParameter("convertTime")),
+					});
+					
+					ImportAnimationsScreen.this.animationType._setResponder(ImportAnimationsScreen.this.responder);
+					break;
 				case ATTACK, BASIC_ATTACK:
 					CompoundTag colliderTag = new CompoundTag();
 					Collider collider = (Collider)fakeAnim.getParameter("collider");
@@ -304,6 +314,28 @@ public class ImportAnimationsScreen extends Screen {
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.repeat")));
 			this.inputComponentsList.addComponentCurrentRow(repeat.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
+			
+			this.inputComponentsList.newRow();
+			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.client_data")));
+			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
+				return new StaticAnimationPropertyScreen(this, this.fakeAnimations.get(this.animationGrid.getRowposition()));
+			}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+		}
+		break;
+		case SHORT_HIT, LONG_HIT:
+		{
+			final ResizableEditBox convertTime = new ResizableEditBox(this.font, 0, 35, 0, 15, Component.translatable("datapack_edit.import_animation.convert_time"), HorizontalSizing.LEFT_WIDTH, null);
+			
+			convertTime.setResponder((input) -> {
+				Object f = StringUtil.isNullOrEmpty(input) ? null : Float.valueOf(input);
+				this.fakeAnimations.get(this.animationGrid.getRowposition()).setParameter("convertTime", f);
+			});
+			
+			convertTime.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Float::parseFloat));
+			
+			this.inputComponentsList.newRow();
+			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.convert_time")));
+			this.inputComponentsList.addComponentCurrentRow(convertTime.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.client_data")));
@@ -486,7 +518,10 @@ public class ImportAnimationsScreen extends Screen {
 				if (!StringUtil.isNullOrEmpty(input)) {
 					ListTag phases = this.fakeAnimations.get(this.animationGrid.getRowposition()).getParameter("phases");
 					CompoundTag phaseTag = phases.getCompound(phasesGrid.getRowposition());
-					phaseTag.putFloat("preDelay", Float.valueOf(input));
+					float f = Float.valueOf(input);
+					
+					phaseTag.putFloat("preDelay", f);
+					this.modelPreviewer.setAttackTimeBegin(f);
 				}
 			});
 			
@@ -494,7 +529,10 @@ public class ImportAnimationsScreen extends Screen {
 				if (!StringUtil.isNullOrEmpty(input)) {
 					ListTag phases = this.fakeAnimations.get(this.animationGrid.getRowposition()).getParameter("phases");
 					CompoundTag phaseTag = phases.getCompound(phasesGrid.getRowposition());
-					phaseTag.putFloat("contact", Float.valueOf(input));
+					float f = Float.valueOf(input);
+					
+					phaseTag.putFloat("contact", f);
+					this.modelPreviewer.setAttackTimeEnd(f);
 				}
 			});
 			
@@ -790,6 +828,8 @@ public class ImportAnimationsScreen extends Screen {
 						stream = new FileInputStream(file);
 						JsonModelLoader jsonLoader = new JsonModelLoader(stream, new ResourceLocation(modid, file.getName()));
 						String armatureName = this.modelPreviewer.getArmature().toString();
+						armatureName = armatureName.substring(armatureName.indexOf(":") + 1);
+						
 						String animationPath = modid + ":" + armatureName.substring(armatureName.lastIndexOf("/") + 1) + "/" + file.getName().replace(".json", "");
 						FakeAnimation animation = new FakeAnimation(animationPath, this.modelPreviewer.getArmature(), jsonLoader.loadAnimationClip(this.modelPreviewer.getArmature()), jsonLoader.getRootJson().getAsJsonArray("animation"));
 						

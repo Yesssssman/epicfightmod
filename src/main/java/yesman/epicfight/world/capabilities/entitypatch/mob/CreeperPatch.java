@@ -7,12 +7,10 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.SwellGoal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.monster.Creeper;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.gameasset.Animations;
@@ -51,13 +49,11 @@ public class CreeperPatch extends MobPatch<Creeper> {
         this.original.goalSelector.addGoal(2, new CreeperSwellStoppableGoal(this, this.original));
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.CREEPER_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.CREEPER_WALK);
-		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.CREEPER_DEATH);
-		clientAnimator.setCurrentMotionsAsDefault();
+	public void initAnimator(Animator animator) {
+		animator.addLivingAnimation(LivingMotions.IDLE, Animations.CREEPER_IDLE);
+		animator.addLivingAnimation(LivingMotions.WALK, Animations.CREEPER_WALK);
+		animator.addLivingAnimation(LivingMotions.DEATH, Animations.CREEPER_DEATH);
 	}
 	
 	@Override

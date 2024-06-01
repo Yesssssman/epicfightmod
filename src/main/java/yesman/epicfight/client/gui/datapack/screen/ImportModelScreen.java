@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.navigation.ScreenRectangle;
@@ -64,8 +65,8 @@ public class ImportModelScreen extends Screen {
 								})
 								.addColumn(Grid.editbox("mesh_name")
 												.editWidgetCreated((editbox) -> editbox.setFilter(ResourceLocation::isValidResourceLocation))
+												.valueChanged((event) -> this.userMeshes.get(event.rowposition).setPackKey(event.postValue))
 												.editable(true)
-												.valueChanged((event) -> this.modelPreviewer.setMesh(this.userMeshes.get(event.rowposition).getValue()))
 												.width(180))
 								.pressRemove((grid, button) -> {
 									grid.removeRow((rowposition) -> this.userMeshes.remove(rowposition));
@@ -80,6 +81,7 @@ public class ImportModelScreen extends Screen {
 								.transparentBackground(true)
 								.addColumn(Grid.editbox("armature_name")
 												.editWidgetCreated((editbox) -> editbox.setFilter(ResourceLocation::isValidResourceLocation))
+												.valueChanged((event) -> this.userArmatures.get(event.rowposition).setPackKey(event.postValue))
 												.editable(true)
 												.width(180))
 								.pressRemove((grid, button) -> {
@@ -130,8 +132,11 @@ public class ImportModelScreen extends Screen {
 			this.userMeshes.forEach((packEntry) -> userMeshes.put(new ResourceLocation(packEntry.getKey()), packEntry.getValue()));
 			this.userArmatures.forEach((packEntry) -> userArmatures.put(new ResourceLocation(packEntry.getKey()), packEntry.getValue()));
 			
-			Meshes.refreshUserMeshes(this.userMeshes);
-			Armatures.refreshUserArmatures(this.userArmatures);
+			Meshes.build(Minecraft.getInstance().getResourceManager());
+			Armatures.build(Minecraft.getInstance().getResourceManager());
+			
+			userMeshes.forEach(Meshes::addMesh);
+			userArmatures.forEach(Armatures::addArmature);
 			
 			this.onClose();
 		}).pos(this.width / 2 - 162, this.height - 26).size(160, 21).build());

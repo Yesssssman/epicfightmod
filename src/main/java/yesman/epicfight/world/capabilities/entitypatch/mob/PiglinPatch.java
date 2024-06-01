@@ -15,9 +15,8 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.CrossbowItem;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationManager;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.gameasset.Animations;
@@ -43,21 +42,19 @@ public class PiglinPatch extends HumanoidMobPatch<Piglin> {
 		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(1.0F);
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.PIGLIN_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
-		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
-		clientAnimator.addLivingAnimation(LivingMotions.CELEBRATE, AnimationManager.getInstance().byId(Animations.PIGLIN_CELEBRATE1.getId() + this.original.getRandom().nextInt(3)));
-		clientAnimator.addLivingAnimation(LivingMotions.ADMIRE, Animations.PIGLIN_ADMIRE);
-		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.PIGLIN_WALK);
-		clientAnimator.addLivingAnimation(LivingMotions.CHASE, Animations.PIGLIN_WALK);
-		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.PIGLIN_DEATH);
-		clientAnimator.addLivingAnimation(LivingMotions.RELOAD, Animations.BIPED_CROSSBOW_RELOAD);
-		clientAnimator.addLivingAnimation(LivingMotions.AIM, Animations.BIPED_CROSSBOW_AIM);
-		clientAnimator.addLivingAnimation(LivingMotions.SHOT, Animations.BIPED_CROSSBOW_SHOT);
-		clientAnimator.setCurrentMotionsAsDefault();
+	public void initAnimator(Animator animator) {
+		animator.addLivingAnimation(LivingMotions.IDLE, Animations.PIGLIN_IDLE);
+		animator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
+		animator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
+		animator.addLivingAnimation(LivingMotions.CELEBRATE, AnimationManager.getInstance().byId(Animations.PIGLIN_CELEBRATE1.getId() + this.original.getRandom().nextInt(3)));
+		animator.addLivingAnimation(LivingMotions.ADMIRE, Animations.PIGLIN_ADMIRE);
+		animator.addLivingAnimation(LivingMotions.WALK, Animations.PIGLIN_WALK);
+		animator.addLivingAnimation(LivingMotions.CHASE, Animations.PIGLIN_WALK);
+		animator.addLivingAnimation(LivingMotions.DEATH, Animations.PIGLIN_DEATH);
+		animator.addLivingAnimation(LivingMotions.RELOAD, Animations.BIPED_CROSSBOW_RELOAD);
+		animator.addLivingAnimation(LivingMotions.AIM, Animations.BIPED_CROSSBOW_AIM);
+		animator.addLivingAnimation(LivingMotions.SHOT, Animations.BIPED_CROSSBOW_SHOT);
 	}
 	
 	@Override

@@ -54,11 +54,6 @@ public class ServerAnimator extends Animator {
 	}
 	
 	@Override
-	public void init() {
-		
-	}
-	
-	@Override
 	public void tick() {
 		if (this.pause) {
 			this.entitypatch.updateEntityState();

@@ -51,6 +51,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationPlayer;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Keyframe;
@@ -97,6 +98,8 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 	private float xMove = 0.0F;
 	private float yMove = 0.0F;
 	private int index;
+	private float attackTimeBegin;
+	private float attackTimeEnd;
 	private AnimatedMesh mesh;
 	private Joint colliderJoint;
 	private Collider collider;
@@ -172,6 +175,14 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 	
 	public void setItemToRender(Item item) {
 		this.item = item;
+	}
+	
+	public void setAttackTimeBegin(float attackTimeBegin) {
+		this.attackTimeBegin = attackTimeBegin;
+	}
+	
+	public void setAttackTimeEnd(float attackTimeEnd) {
+		this.attackTimeEnd = attackTimeEnd;
 	}
 	
 	public void addAnimationToPlay(StaticAnimation animation) {
@@ -376,16 +387,18 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 				bufferbuilder.begin(renderType.mode(), renderType.format);
 				RenderSystem.setShader(GameRenderer::getRendertypeLinesShader);
 				
+				AnimationPlayer player = this.animator.getPlayerFor(null);
+				float elapsedTime = player.getPrevElapsedTime() + (player.getElapsedTime() - player.getPrevElapsedTime()) * partialTicks;
+				boolean red = elapsedTime >= this.attackTimeBegin && elapsedTime <= this.attackTimeEnd;
+				
 				if (this.colliderJoint != null) {
 					Pose prevPose = this.animator.getPose(0.0F);
 					Pose currentPose = this.animator.getPose(1.0F);
-					this.collider.drawInternal(guiGraphics.pose(), bufferbuilder, this.getArmature(), this.colliderJoint, prevPose, currentPose, partialTicks, -1);
+					this.collider.drawInternal(guiGraphics.pose(), bufferbuilder, this.getArmature(), this.colliderJoint, prevPose, currentPose, partialTicks, red ? 0xFFFF0000 : -1);
 				} else {
-					AnimationPlayer player = this.animator.getPlayerFor(null);
 					DynamicAnimation animation = player.getAnimation();
 					
 					if (animation instanceof AttackAnimation attackanimation) {
-						float elapsedTime = player.getPrevElapsedTime() + (player.getElapsedTime() - player.getPrevElapsedTime()) * partialTicks;
 						Phase phase = attackanimation.getPhaseByTime(elapsedTime);
 						
 						for (AttackAnimation.JointColliderPair pair : phase.getColliders()) {
@@ -521,7 +534,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 		}
 		
 		@Override
-		public void initAnimator(ClientAnimator clientAnimator) {
+		public void initAnimator(Animator clientAnimator) {
 			
 		}
 		
@@ -574,9 +587,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 			this.baseLayer.update(this.entitypatch);
 			
 			if (this.baseLayer.animationPlayer.isEnd() && this.baseLayer.getNextAnimation() == null) {
-				StaticAnimation toPlay = ModelPreviewer.this.index > -1 && ModelPreviewer.this.index < ModelPreviewer.this.animationsToPlay.size() ?
-											ModelPreviewer.this.animationsToPlay.get(ModelPreviewer.this.index) : Animations.DUMMY_ANIMATION;
-				
+				StaticAnimation toPlay = ModelPreviewer.this.index > -1 && ModelPreviewer.this.index < ModelPreviewer.this.animationsToPlay.size() ? ModelPreviewer.this.animationsToPlay.get(ModelPreviewer.this.index) : Animations.DUMMY_ANIMATION;
 				this.baseLayer.playAnimation(toPlay, this.entitypatch, 0.0F);
 				
 				if (!ModelPreviewer.this.trailInfoList.isEmpty()) {

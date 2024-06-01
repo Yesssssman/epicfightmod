@@ -15,6 +15,7 @@ import com.google.common.collect.Maps;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
+import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Armature;
@@ -40,10 +41,10 @@ public class InstantiateInvoker {
 		registerKeyword(Collider.class, (s) -> ColliderPreset.get(new ResourceLocation(s)));
 		registerKeyword(Joint.class, (s) -> {
 			String[] armature$joint = s.split("\\.");
-			Armature armature = Armatures.getOrCreateArmature(EpicFightMod.getResourceManager(), new ResourceLocation(armature$joint[0]), Armature::new);
+			Armature armature = Armatures.getOrCreateArmature(AnimationManager.getAnimationResourceManager(), new ResourceLocation(armature$joint[0]), Armature::new);
 			return armature.searchJointByName(armature$joint[1]);
 		});
-		registerKeyword(Armature.class, (s) -> Armatures.getOrCreateArmature(EpicFightMod.getResourceManager(), new ResourceLocation(s), Armature::new));
+		registerKeyword(Armature.class, (s) -> Armatures.getOrCreateArmature(AnimationManager.getAnimationResourceManager(), new ResourceLocation(s), Armature::new));
 		registerKeyword(InteractionHand.class, InteractionHand::valueOf);
 	}
 	
@@ -107,6 +108,12 @@ public class InstantiateInvoker {
 			Result<?> result = invoke(params[i], null);
 			oArgs[i] = result.result;
 			oArgClss[i] = result.type;
+			
+			for (Class<?> reservedClass : STRING_TO_OBJECT_PARSER.keySet()) {
+				if (!result.type.equals(reservedClass) && reservedClass.isAssignableFrom(result.type)) {
+					oArgClss[i] = reservedClass;
+				}
+			}
 		}
 		
 		Constructor constructor = null;

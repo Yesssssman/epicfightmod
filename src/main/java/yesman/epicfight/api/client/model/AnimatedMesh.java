@@ -22,7 +22,6 @@ import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.model.JsonModelLoader;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
-import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.api.utils.math.Vec4f;
 import yesman.epicfight.main.EpicFightMod;
 
@@ -110,11 +109,12 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 		JsonObject vertices = new JsonObject();
 		float[] positions = this.positions.clone();
 		float[] normals = this.normals.clone();
+		OpenMatrix4f correctRevert = OpenMatrix4f.invert(JsonModelLoader.BLENDER_TO_MINECRAFT_COORD, null);
 		
 		for (int i = 0; i < positions.length / 3; i++) {
 			int k = i * 3;
 			Vec4f posVector = new Vec4f(positions[k], positions[k+1], positions[k+2], 1.0F);
-			OpenMatrix4f.transform(JsonModelLoader.Z_AXIS_TO_Y, posVector, posVector);
+			posVector.transform(correctRevert);
 			positions[k] = posVector.x;
 			positions[k+1] = posVector.y;
 			positions[k+2] = posVector.z;
@@ -123,7 +123,7 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 		for (int i = 0; i < normals.length / 3; i++) {
 			int k = i * 3;
 			Vec4f normVector = new Vec4f(normals[k], normals[k+1], normals[k+2], 1.0F);
-			OpenMatrix4f.transform(JsonModelLoader.Z_AXIS_TO_Y, normVector, normVector);
+			normVector.transform(correctRevert);
 			normals[k] = normVector.x;
 			normals[k+1] = normVector.y;
 			normals[k+2] = normVector.z;
@@ -168,8 +168,8 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 				
 				for (VertexIndicator.AnimatedVertexIndicator vertexIndicator : partEntry.getValue().getVertices()) {
 					indicesArray.add(vertexIndicator.position);
-					indicesArray.add(vertexIndicator.normal);
 					indicesArray.add(vertexIndicator.uv);
+					indicesArray.add(vertexIndicator.normal);
 				}
 				
 				parts.add(partEntry.getKey(), ParseUtil.arrayToJsonObject(indicesArray.toIntArray(), 3));

@@ -31,6 +31,7 @@ import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.EntityTeleportEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
+import net.minecraftforge.event.entity.ProjectileImpactEvent.ImpactResult;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
@@ -209,7 +210,6 @@ public class EntityEvents {
 						StunType stunType = epicFightDamageSource.getStunType();
 						float stunTime = 0.0F;
 						float knockBackAmount = 0.0F;
-						float weight = 40.0F / hitHurtableEntityPatch.getWeight();
 						float stunShield = hitHurtableEntityPatch.getStunShield();
 						
 						if (stunShield > epicFightDamageSource.getImpact()) {
@@ -226,15 +226,14 @@ public class EntityEvents {
 							stunType = StunType.NONE;
 							
 							if (!hitEntity.hasEffect(EpicFightMobEffects.STUN_IMMUNITY.get()) && (hitHurtableEntityPatch.getStunShield() == 0.0F)) {
-								float totalStunTime = (0.25F + (epicFightDamageSource.getImpact()) * 0.1F) * weight;
-								totalStunTime *= (1.0F - hitHurtableEntityPatch.getStunReduction());
+								float totalStunTime = (0.25F + epicFightDamageSource.getImpact() * 0.1F) * (1.0F - hitHurtableEntityPatch.getStunReduction());
 								
 								if (totalStunTime >= 0.075F) {
 									stunTime = totalStunTime - 0.1F;
-									boolean flag = totalStunTime >= 0.83F;
-									stunTime = flag ? 0.83F : stunTime;
-									stunType = flag ? StunType.LONG : StunType.SHORT;
-									knockBackAmount = Math.min(flag ? epicFightDamageSource.getImpact() * 0.05F : totalStunTime, 2.0F);
+									boolean isLongStun = totalStunTime >= 0.83F;
+									stunTime = isLongStun ? 0.83F : stunTime;
+									stunType = isLongStun ? StunType.LONG : StunType.SHORT;
+									knockBackAmount = Math.min(isLongStun ? epicFightDamageSource.getImpact() * 0.05F : totalStunTime, 2.0F);
 								}
 								
 								stunTime *= 1.0F - hitEntity.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
@@ -242,7 +241,7 @@ public class EntityEvents {
 							break;
 						case LONG:
 							stunType = hitEntity.hasEffect(EpicFightMobEffects.STUN_IMMUNITY.get()) ? StunType.NONE : StunType.LONG;
-							knockBackAmount = Math.min(epicFightDamageSource.getImpact() * 0.05F * weight, 5.0F);
+							knockBackAmount = Math.min(epicFightDamageSource.getImpact() * 0.05F, 5.0F);
 							stunTime = 0.83F;
 							break;
 						case HOLD:
@@ -274,6 +273,8 @@ public class EntityEvents {
 							}
 							
 							if (knockBackAmount > 0.0F) {
+								knockBackAmount *= 40.0F / hitHurtableEntityPatch.getWeight();
+								
 								hitHurtableEntityPatch.knockBackEntity(sourcePosition, knockBackAmount);
 							}
 						}
@@ -416,20 +417,20 @@ public class EntityEvents {
 					boolean canceled = playerpatch.getEventListener().triggerEvents(EventType.PROJECTILE_HIT_EVENT, new ProjectileHitEvent(playerpatch, event));
 					
 					if (canceled) {
-						event.setCanceled(true);
+						event.setImpactResult(ImpactResult.SKIP_ENTITY);
 					}
 				}
 				
 				if (event.getProjectile().getOwner() != null) {
 					if (rayresult.getEntity().equals(event.getProjectile().getOwner().getVehicle())) {
-						event.setCanceled(true);
+						event.setImpactResult(ImpactResult.SKIP_ENTITY);
 					}
 					
 					if (rayresult.getEntity() instanceof PartEntity<?> partEntity) {
 						Entity parent = partEntity.getParent();
 						
 						if (event.getProjectile().getOwner().is(parent)) {
-							event.setCanceled(true);
+							event.setImpactResult(ImpactResult.SKIP_ENTITY);
 						}
 					}
 				}

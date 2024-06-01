@@ -77,9 +77,9 @@ public class SlotSelectScreen extends Screen {
 		int posY = (this.height - 150) / 2;
 		
 		this.parent.render(guiGraphics, mouseX, mouseY, partialTicks, true);
-
+		
 		// move z level, to prevent the button text displayed above the screen.
-		guiGraphics.pose().translate(0, 0, 50);
+		guiGraphics.pose().translate(0, 0, 5000);
 		
 		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 		guiGraphics.blit(BACKGROUND, posX, posY, 0, 0, 191, 154);

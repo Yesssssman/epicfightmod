@@ -13,7 +13,11 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class HitAnimation extends MainFrameAnimation {
 	public HitAnimation(float convertTime, String path, Armature armature) {
-		super(convertTime, path, armature);
+		this(convertTime, path, armature, false);
+	}
+	
+	public HitAnimation(float convertTime, String path, Armature armature, boolean noRegister) {
+		super(convertTime, path, armature, noRegister);
 		
 		this.stateSpectrumBlueprint.clear()
 			.newTimePair(0.0F, Float.MAX_VALUE)

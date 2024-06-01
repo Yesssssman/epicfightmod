@@ -4,11 +4,9 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.monster.Ravager;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
@@ -32,13 +30,11 @@ public class RavagerPatch extends MobPatch<Ravager> {
 		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(6.0D);
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.RAVAGER_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.RAVAGER_WALK);
-		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.RAVAGER_DEATH);
-		clientAnimator.setCurrentMotionsAsDefault();
+	public void initAnimator(Animator animator) {
+		animator.addLivingAnimation(LivingMotions.IDLE, Animations.RAVAGER_IDLE);
+		animator.addLivingAnimation(LivingMotions.WALK, Animations.RAVAGER_WALK);
+		animator.addLivingAnimation(LivingMotions.DEATH, Animations.RAVAGER_DEATH);
 	}
 	
 	@Override

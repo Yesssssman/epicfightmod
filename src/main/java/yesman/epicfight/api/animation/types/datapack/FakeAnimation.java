@@ -19,6 +19,8 @@ import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.BasicAttackAnimation;
+import yesman.epicfight.api.animation.types.HitAnimation;
+import yesman.epicfight.api.animation.types.LongHitAnimation;
 import yesman.epicfight.api.animation.types.MovementAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimationDataReader;
@@ -117,6 +119,8 @@ public class FakeAnimation extends StaticAnimation {
 		switch (this.animationType) {
 		case STATIC, MOVEMENT:
 			return String.format("(%s#F,%b#Z,%s#java.lang.String,%s#" + Armature.class.getTypeName() + ")#%s", this.constructorParams.get("convertTime"), this.constructorParams.get("isRepeat"), this.constructorParams.get("path"), this.constructorParams.get("armature"), this.animationType.animCls.getTypeName());
+		case SHORT_HIT, LONG_HIT:
+			return String.format("(%s#F,%s#java.lang.String,%s#" + Armature.class.getTypeName() + ")#%s", this.constructorParams.get("convertTime"), this.constructorParams.get("path"), this.constructorParams.get("armature"), this.animationType.animCls.getTypeName());
 		case ATTACK, BASIC_ATTACK:
 			ListTag phasesTag = this.getParameter("phases");
 			Iterator<Tag> iter = phasesTag.iterator();
@@ -149,9 +153,9 @@ public class FakeAnimation extends StaticAnimation {
 					ListTag size = colliderTag.getList("size", Tag.TAG_DOUBLE);
 					
 					if (colliderCount == 1) {
-						colliderInvokeCommand = String.format("(%s#D,%s#D,%s#D,%s#D,%s#D,%s#D)#%s", center.get(0), center.get(1), center.get(2), size.get(0), size.get(1), size.get(2), OBBCollider.class.getTypeName());
+						colliderInvokeCommand = String.format("(%s#D,%s#D,%s#D,%s#D,%s#D,%s#D)#%s", size.get(0), size.get(1), size.get(2), center.get(0), center.get(1), center.get(2), OBBCollider.class.getTypeName());
 					} else {
-						colliderInvokeCommand = String.format("(%d#I,%s#D,%s#D,%s#D,%s#D,%s#D,%s#D)#%s", colliderCount, center.get(0), center.get(1), center.get(2), size.get(0), size.get(1), size.get(2), MultiOBBCollider.class.getTypeName());
+						colliderInvokeCommand = String.format("(%d#I,%s#D,%s#D,%s#D,%s#D,%s#D,%s#D)#%s", colliderCount, size.get(0), size.get(1), size.get(2), center.get(0), center.get(1), center.get(2), MultiOBBCollider.class.getTypeName());
 					}
 				} else {
 					colliderInvokeCommand = "null#" + Collider.class.getTypeName();
@@ -237,6 +241,11 @@ public class FakeAnimation extends StaticAnimation {
 		staticAnimationParameters.put("path", String.class);
 		staticAnimationParameters.put("armature", Armature.class);
 		
+		Map<String, Class<?>> hitAnimationParameters = Maps.newLinkedHashMap();
+		hitAnimationParameters.put("convertTime", float.class);
+		hitAnimationParameters.put("path", String.class);
+		hitAnimationParameters.put("armature", Armature.class);
+		
 		Map<String, Class<?>> attackAnimationParameters = Maps.newLinkedHashMap();
 		attackAnimationParameters.put("convertTime", float.class);
 		attackAnimationParameters.put("path", String.class);
@@ -247,11 +256,15 @@ public class FakeAnimation extends StaticAnimation {
 		PARAMETERS.put(AnimationType.MOVEMENT, staticAnimationParameters);
 		PARAMETERS.put(AnimationType.ATTACK, attackAnimationParameters);
 		PARAMETERS.put(AnimationType.BASIC_ATTACK, attackAnimationParameters);
+		PARAMETERS.put(AnimationType.SHORT_HIT, hitAnimationParameters);
+		PARAMETERS.put(AnimationType.LONG_HIT, hitAnimationParameters);
 		
 		FAKE_ANIMATIONS.put(AnimationType.STATIC, FakeStaticAnimation.class);
 		FAKE_ANIMATIONS.put(AnimationType.MOVEMENT, FakeMovementAnimation.class);
 		FAKE_ANIMATIONS.put(AnimationType.ATTACK, FakeAttackAnimation.class);
 		FAKE_ANIMATIONS.put(AnimationType.BASIC_ATTACK, FakeBasicAttackAnimation.class);
+		FAKE_ANIMATIONS.put(AnimationType.SHORT_HIT, FakeHitAnimation.class);
+		FAKE_ANIMATIONS.put(AnimationType.LONG_HIT, FakeLongHitAnimation.class);
 	}
 	
 	public static Class<? extends ClipHoldingAnimation> switchType(AnimationType cls) {
@@ -270,7 +283,7 @@ public class FakeAnimation extends StaticAnimation {
 	
 	@OnlyIn(Dist.CLIENT)
 	public static enum AnimationType {
-		STATIC(StaticAnimation.class), MOVEMENT(MovementAnimation.class), ATTACK(AttackAnimation.class), BASIC_ATTACK(BasicAttackAnimation.class);
+		STATIC(StaticAnimation.class), MOVEMENT(MovementAnimation.class), ATTACK(AttackAnimation.class), BASIC_ATTACK(BasicAttackAnimation.class), SHORT_HIT(HitAnimation.class), LONG_HIT(LongHitAnimation.class);
 		
 		final Class<? extends StaticAnimation> animCls;
 		

@@ -320,17 +320,20 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public static class RendererPopupBox extends PopupBox<EntityType<?>> {
-		public RendererPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<Pair<String, EntityType<?>>> responder) {
-			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (entityType) -> ParseUtil.nullOrToString(entityType, (type) -> EntityType.getKey(type).toString()), responder);
+	public static class RendererPopupBox extends PopupBox<ResourceLocation> {
+		public RendererPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<Pair<String, ResourceLocation>> responder) {
+			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (entityType) -> ParseUtil.nullOrToString(entityType, (rl) -> rl.toString()), responder);
 		}
 		
 		@Override
 		public void onClick(double x, double y) {
 			if (this.clickedPopupButton(x, y)) {
-				Set<Pair<ResourceLocation, EntityType<?>>> set = Sets.newHashSet();
-				ClientEngine.getInstance().renderEngine.getRendererEntities().forEach((entityType) -> set.add(Pair.of(EntityType.getKey(entityType), entityType)));
-				this.owner.getMinecraft().setScreen(new SelectFromRegistryScreen<EntityType<?>> (this.owner, set, "Renderer", (name, item) -> this._setValue(item), (c) -> {}, this.getFilter()));
+				Set<Pair<ResourceLocation, ResourceLocation>> set = Sets.newHashSet();
+				ClientEngine.getInstance().renderEngine.getRendererEntries().forEach((rl) -> set.add(Pair.of(rl, rl)));
+				
+				this.owner.getMinecraft().setScreen(new SelectFromRegistryScreen<>(this.owner, set, "Renderer", (name, item) -> {
+					this._setValue(item);
+				}, (c) -> {}, this.getFilter()));
 			}
 		}
 	}

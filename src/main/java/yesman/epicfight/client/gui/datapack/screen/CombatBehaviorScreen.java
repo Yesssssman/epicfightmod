@@ -204,6 +204,14 @@ public class CombatBehaviorScreen extends Screen {
 					behaviorSet.newValue("behavior", "behavior" + (i+1));
 				}
 				
+				if (!tag.contains("canBeInterrupted")) {
+					tag.putBoolean("canBeInterrupted", false);
+				}
+				
+				if (!tag.contains("looping")) {
+					tag.putBoolean("looping", false);
+				}
+				
 				this.setDataBindingComponenets(new Object[] {
 					tag.contains("weight") ? ParseUtil.valueOfOmittingType(tag.getDouble("weight")) : "",
 					tag.getBoolean("canBeInterrupted"),
@@ -456,6 +464,15 @@ public class CombatBehaviorScreen extends Screen {
 	public void onClose() {
 		this.modelPreviewer.onDestroy();
 		this.minecraft.setScreen(this.caller);
+	}
+	
+	@Override
+	public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
+		if (this.modelPreviewer.mouseDragged(mouseX, mouseY, button, dx, dy)) {
+			return true;
+		}
+		
+		return super.mouseDragged(mouseX, mouseY, button, dx, dy);
 	}
 	
 	@Override

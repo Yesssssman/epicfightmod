@@ -17,6 +17,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.JsonOps;
 
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
@@ -24,6 +25,7 @@ import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
+import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -243,6 +245,19 @@ public class ParseUtil {
 		} catch (IllegalArgumentException | NullPointerException e) {
 			return null;
 		}
+	}
+	
+	public static JsonObject convertToJsonObject(CompoundTag compoundtag) {
+		JsonObject root = CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, compoundtag).get().left().get().getAsJsonObject();
+		
+		for (Map.Entry<String, Tag> entry : compoundtag.tags.entrySet()) {
+			if (entry.getValue() instanceof ByteTag byteTag && (byteTag.getAsByte() == 0 || byteTag.getAsByte() == 1)) {
+				root.remove(entry.getKey());
+				root.addProperty(entry.getKey(), byteTag.getAsByte() == 1);
+			}
+		}
+		
+		return root;
 	}
 	
 	private ParseUtil() {}

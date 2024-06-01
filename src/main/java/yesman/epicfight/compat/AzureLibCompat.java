@@ -1,30 +1,83 @@
 package yesman.epicfight.compat;
 
+import mod.azure.azurelib.event.GeoRenderEvent;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.loading.FMLEnvironment;
 import yesman.epicfight.api.client.model.armor.AzureGeoArmor;
 import yesman.epicfight.api.client.model.armor.CustomModelBakery;
+import yesman.epicfight.client.ClientEngine;
+import yesman.epicfight.client.events.engine.RenderEngine;
+import yesman.epicfight.client.gui.EntityIndicator;
+import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
+import yesman.epicfight.world.capabilities.EpicFightCapabilities;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 public class AzureLibCompat implements ICompatModule {
 	@Override
 	public void onModEventBus(IEventBus eventBus) {
-		if (FMLEnvironment.dist.isClient()) {
-			CustomModelBakery.registerNewTransformer(new AzureGeoArmor());
-		}
 	}
 	
 	@Override
 	public void onForgeEventBus(IEventBus eventBus) {
-		if (FMLEnvironment.dist.isClient()) {
-			eventBus.addListener(AzureGeoArmor::getGeoArmorTexturePath);
-		}
 	}
 	
 	@Override
 	public void onModEventBusClient(IEventBus eventBus) {
+		CustomModelBakery.registerNewTransformer(new AzureGeoArmor());
 	}
 	
 	@Override
 	public void onForgeEventBusClient(IEventBus eventBus) {
+		eventBus.addListener(AzureGeoArmor::getGeoArmorTexturePath);
+		eventBus.addListener(this::geoEntityRenderEvent);
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public void geoEntityRenderEvent(GeoRenderEvent.Entity.Pre event) {
+		Entity entity = event.getEntity();
+		
+		if (entity.level() == null) {
+			return;
+		}
+		
+		if (entity instanceof LivingEntity livingentity) {
+			RenderEngine renderEngine = ClientEngine.getInstance().renderEngine;
+			
+			if (renderEngine.hasRendererFor(livingentity)) {
+				LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(livingentity, LivingEntityPatch.class);
+				LocalPlayerPatch playerpatch = null;
+				float originalYRot = 0.0F;
+				
+				if ((event.getPartialTick() == 0.0F || event.getPartialTick() == 1.0F) && entitypatch instanceof LocalPlayerPatch localPlayerPatch) {
+					playerpatch = localPlayerPatch;
+					originalYRot = playerpatch.getModelYRot();
+					playerpatch.setModelYRotInGui(livingentity.getYRot());
+					event.getPoseStack().translate(0, 0.1D, 0);
+				}
+				
+				if (entitypatch != null && entitypatch.overrideRender()) {
+					event.setCanceled(true);
+					renderEngine.renderEntityArmatureModel(livingentity, entitypatch, event.getRenderer(), event.getBufferSource(), event.getPoseStack(), event.getPackedLight(), event.getPartialTick());
+				}
+				
+				if (playerpatch != null) {
+					playerpatch.disableModelYRotInGui(originalYRot);
+				}
+			}
+			
+			if (ClientEngine.getInstance().getPlayerPatch() != null && !renderEngine.minecraft.options.hideGui && !livingentity.level().getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI)) {
+				LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(livingentity, LivingEntityPatch.class);
+				
+				for (EntityIndicator entityIndicator : EntityIndicator.ENTITY_INDICATOR_RENDERERS) {
+					if (entityIndicator.shouldDraw(livingentity, entitypatch, ClientEngine.getInstance().getPlayerPatch())) {
+						entityIndicator.drawIndicator(livingentity, entitypatch, ClientEngine.getInstance().getPlayerPatch(), event.getPoseStack(), event.getBufferSource(), event.getPartialTick());
+					}
+				}
+			}
+		}
 	}
 }

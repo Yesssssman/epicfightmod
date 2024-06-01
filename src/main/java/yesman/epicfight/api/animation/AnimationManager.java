@@ -11,6 +11,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.ibm.icu.impl.locale.XCldrStub.ImmutableMap;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
@@ -153,7 +154,6 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	@Override
 	protected Map<ResourceLocation, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profilerIn) {
 		reloadResourceManager(resourceManager);
-		
 		Armatures.build(resourceManager);
 		
 		this.animationClips.clear();
@@ -229,6 +229,10 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		if (resourceManager != pResourceManager) {
 			resourceManager = pResourceManager;
 		}
+	}
+	
+	public static ResourceManager getAnimationResourceManager() {
+		return EpicFightMod.isPhysicalClient() ? Minecraft.getInstance().getResourceManager() : resourceManager;
 	}
 	
 	/**************************************************

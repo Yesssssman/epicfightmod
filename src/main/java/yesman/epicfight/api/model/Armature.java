@@ -186,19 +186,21 @@ public class Armature {
 		jointJson.addProperty("name", joint.getName());
 		
 		JsonArray transformMatrix = new JsonArray();
-		OpenMatrix4f localMatrixInBlender = OpenMatrix4f.transpose(joint.getLocalTrasnform(), null);
+		OpenMatrix4f localMatrixInBlender = new OpenMatrix4f(joint.getLocalTrasnform());
 		
 		if (root) {
-			localMatrixInBlender.mulFront(JsonModelLoader.Z_AXIS_TO_Y.invert());
+			localMatrixInBlender.mulFront(OpenMatrix4f.invert(JsonModelLoader.BLENDER_TO_MINECRAFT_COORD, null));
 		}
 		
+		localMatrixInBlender.transpose();
 		localMatrixInBlender.toList().forEach(transformMatrix::add);
 		jointJson.add("transform", transformMatrix);
-		
-		JsonArray children = new JsonArray();
-		jointJson.add("children", children);
-		
 		parent.add(jointJson);
-		joint.getSubJoints().forEach((joint$2) -> exportJoint(children, joint$2, false));
+		
+		if (!joint.getSubJoints().isEmpty()) {
+			JsonArray children = new JsonArray();
+			jointJson.add("children", children);
+			joint.getSubJoints().forEach((joint$2) -> exportJoint(children, joint$2, false));
+		}
 	}
 }

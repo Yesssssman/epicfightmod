@@ -19,10 +19,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -103,35 +103,33 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
+	public void initAnimator(Animator animator) {
 		/* Living Animations */
-		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK);
-		clientAnimator.addLivingAnimation(LivingMotions.RUN, Animations.BIPED_RUN);
-		clientAnimator.addLivingAnimation(LivingMotions.SNEAK, Animations.BIPED_SNEAK);
-		clientAnimator.addLivingAnimation(LivingMotions.SWIM, Animations.BIPED_SWIM);
-		clientAnimator.addLivingAnimation(LivingMotions.FLOAT, Animations.BIPED_FLOAT);
-		clientAnimator.addLivingAnimation(LivingMotions.KNEEL, Animations.BIPED_KNEEL);
-		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
-		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
-		clientAnimator.addLivingAnimation(LivingMotions.SIT, Animations.BIPED_SIT);
-		clientAnimator.addLivingAnimation(LivingMotions.FLY, Animations.BIPED_FLYING);
-		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
-		clientAnimator.addLivingAnimation(LivingMotions.JUMP, Animations.BIPED_JUMP);
-		clientAnimator.addLivingAnimation(LivingMotions.CLIMB, Animations.BIPED_CLIMBING);
-		clientAnimator.addLivingAnimation(LivingMotions.SLEEP, Animations.BIPED_SLEEPING);
-		clientAnimator.addLivingAnimation(LivingMotions.CREATIVE_FLY, Animations.BIPED_CREATIVE_FLYING);
-		clientAnimator.addLivingAnimation(LivingMotions.CREATIVE_IDLE, Animations.BIPED_CREATIVE_IDLE);
+		animator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE);
+		animator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK);
+		animator.addLivingAnimation(LivingMotions.RUN, Animations.BIPED_RUN);
+		animator.addLivingAnimation(LivingMotions.SNEAK, Animations.BIPED_SNEAK);
+		animator.addLivingAnimation(LivingMotions.SWIM, Animations.BIPED_SWIM);
+		animator.addLivingAnimation(LivingMotions.FLOAT, Animations.BIPED_FLOAT);
+		animator.addLivingAnimation(LivingMotions.KNEEL, Animations.BIPED_KNEEL);
+		animator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
+		animator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
+		animator.addLivingAnimation(LivingMotions.SIT, Animations.BIPED_SIT);
+		animator.addLivingAnimation(LivingMotions.FLY, Animations.BIPED_FLYING);
+		animator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
+		animator.addLivingAnimation(LivingMotions.JUMP, Animations.BIPED_JUMP);
+		animator.addLivingAnimation(LivingMotions.CLIMB, Animations.BIPED_CLIMBING);
+		animator.addLivingAnimation(LivingMotions.SLEEP, Animations.BIPED_SLEEPING);
+		animator.addLivingAnimation(LivingMotions.CREATIVE_FLY, Animations.BIPED_CREATIVE_FLYING);
+		animator.addLivingAnimation(LivingMotions.CREATIVE_IDLE, Animations.BIPED_CREATIVE_IDLE);
 
 		/* Mix Animations */
-		clientAnimator.addLivingAnimation(LivingMotions.DIGGING, Animations.BIPED_DIG);
-		clientAnimator.addLivingAnimation(LivingMotions.AIM, Animations.BIPED_BOW_AIM);
-		clientAnimator.addLivingAnimation(LivingMotions.SHOT, Animations.BIPED_BOW_SHOT);
-		clientAnimator.addLivingAnimation(LivingMotions.DRINK, Animations.BIPED_DRINK);
-		clientAnimator.addLivingAnimation(LivingMotions.EAT, Animations.BIPED_EAT);
-		clientAnimator.addLivingAnimation(LivingMotions.SPECTATE, Animations.BIPED_SPYGLASS_USE);
-
-		clientAnimator.setCurrentMotionsAsDefault();
+		animator.addLivingAnimation(LivingMotions.DIGGING, Animations.BIPED_DIG);
+		animator.addLivingAnimation(LivingMotions.AIM, Animations.BIPED_BOW_AIM);
+		animator.addLivingAnimation(LivingMotions.SHOT, Animations.BIPED_BOW_SHOT);
+		animator.addLivingAnimation(LivingMotions.DRINK, Animations.BIPED_DRINK);
+		animator.addLivingAnimation(LivingMotions.EAT, Animations.BIPED_EAT);
+		animator.addLivingAnimation(LivingMotions.SPECTATE, Animations.BIPED_SPYGLASS_USE);
 	}
 	
 	public void copySkillsFrom(PlayerPatch<?> old) {

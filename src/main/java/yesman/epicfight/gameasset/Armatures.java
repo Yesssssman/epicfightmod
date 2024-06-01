@@ -1,6 +1,5 @@
 package yesman.epicfight.gameasset;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
@@ -18,8 +17,6 @@ import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.forgeevent.ModelBuildEvent;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.model.JsonModelLoader;
-import yesman.epicfight.client.gui.datapack.screen.DatapackEditScreen;
-import yesman.epicfight.client.gui.datapack.screen.PackEntry;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.model.armature.CreeperArmature;
 import yesman.epicfight.model.armature.DragonArmature;
@@ -135,9 +132,8 @@ public class Armatures {
 		return ARMATURES.get(rl);
 	}
 	
-	public static void refreshUserArmatures(List<PackEntry<String, Armature>> userMeshes) {
-		DatapackEditScreen.getCurrentScreen().getUserMeshes().keySet().forEach(ARMATURES::remove);
-		userMeshes.forEach((entry) -> ARMATURES.put(new ResourceLocation(entry.getKey()), entry.getValue()));
+	public static void addArmature(ResourceLocation rl, Armature armature) {
+		ARMATURES.put(rl, armature);
 	}
 	
 	public static Function<EntityPatch<?>, Armature> getRegistry(EntityType<?> entityType) {

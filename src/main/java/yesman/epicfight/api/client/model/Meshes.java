@@ -1,6 +1,5 @@
 package yesman.epicfight.api.client.model;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -22,8 +21,6 @@ import yesman.epicfight.api.client.model.Mesh.RenderProperties;
 import yesman.epicfight.api.client.model.VertexIndicator.AnimatedVertexIndicator;
 import yesman.epicfight.api.forgeevent.ModelBuildEvent;
 import yesman.epicfight.api.model.JsonModelLoader;
-import yesman.epicfight.client.gui.datapack.screen.DatapackEditScreen;
-import yesman.epicfight.client.gui.datapack.screen.PackEntry;
 import yesman.epicfight.client.mesh.CreeperMesh;
 import yesman.epicfight.client.mesh.DragonMesh;
 import yesman.epicfight.client.mesh.EndermanMesh;
@@ -143,13 +140,8 @@ public class Meshes implements PreparableReloadListener {
 		return MESHES.get(rl);
 	}
 	
-	public static Mesh<?> addMesh(ResourceLocation rl, Mesh<?> mesh) {
-		return MESHES.put(rl, mesh);
-	}
-	
-	public static void refreshUserMeshes(List<PackEntry<String, AnimatedMesh>> userMeshes) {
-		DatapackEditScreen.getCurrentScreen().getUserMeshes().keySet().forEach(MESHES::remove);
-		userMeshes.forEach((entry) -> MESHES.put(new ResourceLocation(entry.getKey()), entry.getValue()));
+	public static void addMesh(ResourceLocation rl, Mesh<?> mesh) {
+		MESHES.put(rl, mesh);
 	}
 	
 	@SuppressWarnings("unchecked")

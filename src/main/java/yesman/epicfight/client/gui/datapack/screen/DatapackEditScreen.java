@@ -21,6 +21,8 @@ import java.util.zip.ZipOutputStream;
 
 import javax.annotation.Nullable;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
@@ -31,7 +33,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.serialization.JsonOps;
 
 import io.netty.util.internal.StringUtil;
 import net.minecraft.SharedConstants;
@@ -112,6 +113,7 @@ import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.Horizonta
 import yesman.epicfight.client.gui.datapack.widgets.ResizableEditBox;
 import yesman.epicfight.client.gui.datapack.widgets.Static;
 import yesman.epicfight.client.gui.datapack.widgets.SubScreenOpenButton;
+import yesman.epicfight.data.conditions.Condition.ParameterEditor;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.gameasset.ColliderPreset;
 import yesman.epicfight.main.EpicFightMod;
@@ -135,6 +137,10 @@ public class DatapackEditScreen extends Screen {
 		return workingPackScreen;
 	}
 	
+	public static boolean hasEditingScreen() {
+		return workingPackScreen != null;
+	}
+	
 	public static StaticAnimation animationByKey(String path) {
 		ResourceLocation rl = new ResourceLocation(path);
 		StaticAnimation animation = AnimationManager.getInstance().byKey(rl);
@@ -144,6 +150,14 @@ public class DatapackEditScreen extends Screen {
 		}
 		
 		return animation;
+	}
+	
+	public static Set<Map.Entry<ResourceLocation, AnimatedMesh>> getUserMeshEntries() {
+		return workingPackScreen == null ? Set.of() : workingPackScreen.userMeshes.entrySet();
+	}
+	
+	public static Set<Map.Entry<ResourceLocation, Armature>> getUserArmatureEntries() {
+		return workingPackScreen == null ? Set.of() : workingPackScreen.userArmatures.entrySet();
 	}
 	
 	public static Set<Map.Entry<ResourceLocation, Function<Item, CapabilityItem.Builder>>> getSerializableWeaponTypes() {
@@ -171,8 +185,8 @@ public class DatapackEditScreen extends Screen {
 	private final DatapackEditScreen.MobPatchTab mobPatchTab;
 	
 	private final Map<ResourceLocation, PackEntry<FakeAnimation, ClipHoldingAnimation>> userAnimations = Maps.newLinkedHashMap();
-	private final Map<ResourceLocation, AnimatedMesh> userMeshes = Maps.newLinkedHashMap();
-	private final Map<ResourceLocation, Armature> userArmatures = Maps.newLinkedHashMap();
+	private final BiMap<ResourceLocation, AnimatedMesh> userMeshes = HashBiMap.create();
+	private final BiMap<ResourceLocation, Armature> userArmatures = HashBiMap.create();
 	
 	private final TabManager tabManager = new TabManager(this::addRenderableWidget, (p_267853_) -> {
 		this.removeWidget(p_267853_);
@@ -305,6 +319,7 @@ public class DatapackEditScreen extends Screen {
 															}
 														}, (button) -> this.minecraft.setScreen(this), 200, 90));
 		} else {
+			workingPackScreen = this;
 			this.importDataPack(filePath.get(0));
 		}
 	}
@@ -327,6 +342,7 @@ public class DatapackEditScreen extends Screen {
 				this.itemCapabilityTab.validateBeforeExport();
 				this.mobPatchTab.validateBeforeExport();
 			} catch (Exception e) {
+				e.printStackTrace();
 				this.minecraft.setScreen(new MessageScreen<>("", e.getMessage(), this, (button2) -> this.minecraft.setScreen(this), 400, 110).autoCalculateHeight());
 				return;
 			}
@@ -369,6 +385,9 @@ public class DatapackEditScreen extends Screen {
 			}, (button) -> {
 				this.minecraft.setScreen(this);
 				workingPackScreen = this;
+				
+				Meshes.build(Minecraft.getInstance().getResourceManager());
+				Armatures.build(Minecraft.getInstance().getResourceManager());
 			}, 180, 70));
 		}
 	}
@@ -443,29 +462,32 @@ public class DatapackEditScreen extends Screen {
 	
 	private void importUserData(PackResources packResources) {
 		packResources.getNamespaces(PackType.CLIENT_RESOURCES).stream().distinct().forEach((namespace) -> {
-			packResources.listResources(PackType.CLIENT_RESOURCES, namespace, "animmodels/entity/", (resourceLocation, stream) -> {
+			packResources.listResources(PackType.CLIENT_RESOURCES, namespace, "animmodels/entity", (resourceLocation, stream) -> {
 				try {
 					JsonReader jsonReader = new JsonReader(new InputStreamReader(stream.get(), StandardCharsets.UTF_8));
 					jsonReader.setLenient(true);
-					
 					JsonObject jsonObject = Streams.parse(jsonReader).getAsJsonObject();
-					ResourceLocation rl = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll("animmodels/entity/", "").replaceAll(".json", ""));
-					JsonModelLoader modelLoader = new JsonModelLoader(jsonObject);
 					
+					ResourceLocation rl = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll("animmodels/", "").replaceAll(".json", ""));
+					JsonModelLoader modelLoader = new JsonModelLoader(jsonObject, resourceLocation);
 					AnimatedMesh mesh = null;
 					Armature armature = null;
 					
 					try {
 						mesh = modelLoader.loadAnimatedMesh(AnimatedMesh::new);
 						armature = modelLoader.loadArmature(Armature::new);
+					} catch(Exception e) {
+						e.printStackTrace();
 					} finally {}
 					
 					if (mesh != null) {
 						this.userMeshes.put(rl, mesh);
+						Meshes.addMesh(rl, mesh);
 					}
 					
 					if (armature != null) {
 						this.userArmatures.put(rl, armature);
+						Armatures.addArmature(rl, armature);
 					}
 				} catch (Exception e) {
 					EpicFightMod.LOGGER.error("Failed to read model " + resourceLocation);
@@ -485,7 +507,7 @@ public class DatapackEditScreen extends Screen {
 					JsonObject jsonObject = Streams.parse(jsonReader).getAsJsonObject();
 					ResourceLocation rl = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll("animmodels/animations/", "").replaceAll(".json", ""));
 					ResourceLocation datapath = AnimationManager.getAnimationDataFileLocation(resourceLocation);
-					InputStream dataReader = packResources.getResource(PackType.CLIENT_RESOURCES, datapath).get();
+					IoSupplier<InputStream> streamSupplier = packResources.getResource(PackType.CLIENT_RESOURCES, datapath);
 					JsonElement constructorElement = jsonObject.getAsJsonObject().get("constructor");
 					
 					if (constructorElement == null) {
@@ -504,11 +526,11 @@ public class DatapackEditScreen extends Screen {
 					Class<? extends ClipHoldingAnimation> animationClass = FakeAnimation.switchType((Class<? extends StaticAnimation>)Class.forName(className));
 					ClipHoldingAnimation animation = InstantiateInvoker.invoke(invocationCommand, animationClass).getResult();
 					
-					if (dataReader != null) {
-						ClientAnimationDataReader.readAndApply(animation.cast(), dataReader);
+					if (streamSupplier != null) {
+						ClientAnimationDataReader.readAndApply(animation.cast(), streamSupplier.get());
 					}
 					
-					JsonModelLoader modelLoader = new JsonModelLoader(jsonObject);
+					JsonModelLoader modelLoader = new JsonModelLoader(jsonObject, resourceLocation);
 					animation.setAnimationClip(modelLoader.loadAnimationClip(animation.cast().getArmature()));
 					
 					this.userAnimations.put(rl, PackEntry.ofValue(animation.buildAnimation(modelLoader.getRootJson().get("animation").getAsJsonArray()), animation));
@@ -529,15 +551,24 @@ public class DatapackEditScreen extends Screen {
 		}
 		
 		for (Map.Entry<ResourceLocation, Armature> entry : this.userArmatures.entrySet()) {
+			String exportPath = String.format("data/%s/animmodels/%s.json", entry.getKey().getNamespace(), entry.getKey().getPath());
+			ZipEntry zipEntry = new ZipEntry(exportPath);
+			Gson gson = new GsonBuilder().setPrettyPrinting().create();
+			JsonObject armatureJson = entry.getValue().toJsonObject();
+			
+			out.putNextEntry(zipEntry);
+			out.write(gson.toJson(armatureJson).getBytes());
+			out.closeEntry();
+			
 			models.computeIfAbsent(entry.getKey(), (k) -> entry.getValue().toJsonObject());
 			models.computeIfPresent(entry.getKey(), (k, oldVal) -> {
-				oldVal.add("armature", entry.getValue().toJsonObject().get("armature"));
+				oldVal.add("armature", armatureJson.get("armature"));
 				return oldVal;
 			});
 		}
 		
 		for (Map.Entry<ResourceLocation, JsonObject> entry : models.entrySet()) {
-			String exportPath = String.format("assets/%s/animmodels/entity/%s.json", entry.getKey().getNamespace(), entry.getKey().getPath());
+			String exportPath = String.format("assets/%s/animmodels/%s.json", entry.getKey().getNamespace(), entry.getKey().getPath());
 			ZipEntry zipEntry = new ZipEntry(exportPath);
 			Gson gson = new GsonBuilder().setPrettyPrinting().create();
 			
@@ -1046,7 +1077,7 @@ public class DatapackEditScreen extends Screen {
 					ZipEntry zipEntry = new ZipEntry(String.format("data/%s/" + this.directory + "/%s.json", packEntry.getKey().getNamespace(), packEntry.getKey().getPath()));
 					Gson gson = new GsonBuilder().setPrettyPrinting().create();
 					out.putNextEntry(zipEntry);
-					out.write(gson.toJson(CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, packEntry.getValue()).get().left().get()).getBytes());
+					out.write(gson.toJson(ParseUtil.convertToJsonObject(packEntry.getValue())).getBytes());
 					out.closeEntry();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -1732,11 +1763,11 @@ public class DatapackEditScreen extends Screen {
 						
 						if (result.playable()) {
 							ZipEntry asItemSkin = new ZipEntry(String.format("assets/%s/item_skins/%s.json", packEntry.getKey().getNamespace(), packEntry.getKey().getPath()));
-							CompoundTag trailTag = new CompoundTag();
-							trailTag.put("trail", tag.getCompound("trail"));
+							CompoundTag itemSkinsTag = new CompoundTag();
+							itemSkinsTag.put("trail", tag.getCompound("trail"));
 							
 							out.putNextEntry(asItemSkin);
-							out.write(gson.toJson(CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, trailTag).get().left().get()).getBytes());
+							out.write(gson.toJson(ParseUtil.convertToJsonObject(itemSkinsTag)).getBytes());
 							out.closeEntry();
 						}
 						
@@ -1752,7 +1783,7 @@ public class DatapackEditScreen extends Screen {
 					}
 					
 					out.putNextEntry(zipEntry);
-					out.write(gson.toJson(CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, tag).get().left().get()).getBytes());
+					out.write(gson.toJson(ParseUtil.convertToJsonObject(tag)).getBytes());
 					out.closeEntry();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -1808,6 +1839,8 @@ public class DatapackEditScreen extends Screen {
 			this.bindTag(tag);
 		};
 		
+		private final Map<String, ParameterEditor> attributeEditors = Maps.newLinkedHashMap();
+		
 		public MobPatchTab() {
 			super(Component.translatable("gui." + EpicFightMod.MODID + ".tab.datapack.mob_patch"), MobPatchReloadListener.DIRECTORY, ForgeRegistries.ENTITY_TYPES, (entityType) -> entityType.getCategory() != MobCategory.MISC);
 			
@@ -1816,6 +1849,11 @@ public class DatapackEditScreen extends Screen {
 				public void importTag(CompoundTag tag) {
 					boolean disabled = tag.getBoolean("disabled");
 					boolean preset = tag.contains("preset", Tag.TAG_STRING) && !StringUtil.isNullOrEmpty(tag.getString("preset"));
+					
+					if (!tag.contains("isHumanoid")) {
+						tag.putBoolean("isHumanoid", false);
+					}
+					
 					boolean isHumanoid = tag.getBoolean("isHumanoid");
 					
 					MobPatchTab.this.rearrangeComponents(disabled, preset, isHumanoid);
@@ -1837,6 +1875,27 @@ public class DatapackEditScreen extends Screen {
 			
 			this.modelPreviewer = new ModelPreviewer(9, 15, 0, 140, HorizontalSizing.LEFT_RIGHT, null, Armatures.BIPED, Meshes.BIPED);
 			this.modelPreviewer.setColliderJoint(Armatures.BIPED.searchJointByName("Tool_R"));
+			
+			final ResizableEditBox impactEditBox = new ResizableEditBox(DatapackEditScreen.this.getMinecraft().font, 0, 0, 0, 0, Component.literal("impact"), null, null);
+			final ResizableEditBox armorNegationEditBox = new ResizableEditBox(DatapackEditScreen.this.getMinecraft().font, 0, 0, 0, 0, Component.literal("armor_negation"), null, null);
+			final ResizableEditBox maxStrikesEditBox = new ResizableEditBox(DatapackEditScreen.this.getMinecraft().font, 0, 0, 0, 0, Component.literal("max_strikes"), null, null);
+			final ResizableEditBox chasingSpeedEditBox = new ResizableEditBox(DatapackEditScreen.this.getMinecraft().font, 0, 0, 0, 0, Component.literal("chasing_speed"), null, null);
+			final ResizableEditBox scaleEditBox = new ResizableEditBox(DatapackEditScreen.this.getMinecraft().font, 0, 0, 0, 0, Component.literal("scale"), null, null);
+			final ResizableEditBox stunArmorBox = new ResizableEditBox(DatapackEditScreen.this.getMinecraft().font, 0, 0, 0, 0, Component.literal("stun_armor"), null, null);
+			
+			impactEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
+			armorNegationEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
+			maxStrikesEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Integer::parseInt));
+			chasingSpeedEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
+			scaleEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
+			stunArmorBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
+			
+			this.attributeEditors.put("impact", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), impactEditBox));
+			this.attributeEditors.put("armor_negation", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), armorNegationEditBox));
+			this.attributeEditors.put("max_strikes", ParameterEditor.of((value) -> IntTag.valueOf(Integer.parseInt(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), maxStrikesEditBox));
+			this.attributeEditors.put("chasing_speed", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), chasingSpeedEditBox));
+			this.attributeEditors.put("scale", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), scaleEditBox));
+			this.attributeEditors.put("stun_armor", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), stunArmorBox));
 		}
 		
 		private void rearrangeComponents(boolean disable, boolean usePreset, boolean isHumanoid) {
@@ -1909,6 +1968,27 @@ public class DatapackEditScreen extends Screen {
 					}));
 				
 				this.inputComponentsList.newRow();
+				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.swing_sound"));
+				this.inputComponentsList.addComponentCurrentRow(new PopupBox.SoundPopupBox(parentScreen, parentScreen.getMinecraft().font, this.inputComponentsList.nextStart(5), 15, 0, 15, HorizontalSizing.LEFT_RIGHT, null,
+					Component.translatable("datapack_edit.mob_patch.swing_sound"), (soundevent) -> {
+						this.packList.get(this.packListGrid.getRowposition()).getValue().putString("swing_sound", ParseUtil.getRegistryName(soundevent.getSecond(), ForgeRegistries.SOUND_EVENTS));
+					}));
+				
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.hit_sound"));
+				this.inputComponentsList.addComponentCurrentRow(new PopupBox.SoundPopupBox(parentScreen, parentScreen.getMinecraft().font, this.inputComponentsList.nextStart(5), 15, 0, 15, HorizontalSizing.LEFT_RIGHT, null,
+					Component.translatable("datapack_edit.mob_patch.hit_sound"), (soundevent) -> {
+						this.packList.get(this.packListGrid.getRowposition()).getValue().putString("hit_sound", ParseUtil.getRegistryName(soundevent.getSecond(), ForgeRegistries.SOUND_EVENTS));
+					}));
+				
+				this.inputComponentsList.newRow();
+				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.hit_particle"));
+				this.inputComponentsList.addComponentCurrentRow(new PopupBox.RegistryPopupBox<>(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 0, 15, HorizontalSizing.LEFT_RIGHT, null,
+					Component.translatable("datapack_edit.weapon_type.hit_particle"), ForgeRegistries.PARTICLE_TYPES, (pair) -> {
+						this.packList.get(this.packListGrid.getRowposition()).getValue().putString("hit_particle", ParseUtil.getRegistryName(pair.getSecond(), ForgeRegistries.PARTICLE_TYPES));
+					}));
+				
+				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.attributes"));
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.newRow();
@@ -1919,19 +1999,34 @@ public class DatapackEditScreen extends Screen {
 																	.rowHeight(21)
 																	.rowEditable(RowEditButton.ADD_REMOVE)
 																	.transparentBackground(false)
-																	.addColumn(Grid.combo("attribute", List.of("impact", "armor_negation", "max_strikes", "chasing_speed", "scale"))
-																					.toDisplayText(ParseUtil::snakeToSpacedCamel)
+																	.addColumn(Grid.combo("attribute", List.copyOf(this.attributeEditors.values()))
+																					.toDisplayText((editor) -> ParseUtil.nullOrToString(editor, (editor$1) -> ParseUtil.snakeToSpacedCamel(editor.editWidget.getMessage().getString())))
 																					.valueChanged((event) -> {
 																						CompoundTag attributesTag = ParseUtil.getOrSupply(this.packList.get(this.packListGrid.getRowposition()).getValue(), "attributes", CompoundTag::new);
-																						attributesTag.remove(ParseUtil.nullParam(event.prevValue));
-																						attributesTag.putString(ParseUtil.nullParam(event.postValue), "");
+																						
+																						if (event.prevValue != null) {
+																							attributesTag.remove(event.prevValue.editWidget.getMessage().getString());
+																						} else {
+																							attributesTag.remove("");
+																						}
+																						
+																						attributesTag.putString(ParseUtil.nullParam(event.postValue.editWidget.getMessage().getString()), "");
 																					})
 																					.width(100))
-																	.addColumn(Grid.editbox("amount")
-																					.editWidgetCreated((editbox) -> editbox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble)))
+																	.addColumn(Grid.wildcard("amount")
+																					.editWidgetProvider((row) -> {
+																						ParameterEditor editor = row.getValue("attribute");
+																						return editor == null ? null : editor.editWidget;
+																					})
 																					.valueChanged((event) -> {
 																						CompoundTag attributesTag = ParseUtil.getOrSupply(this.packList.get(this.packListGrid.getRowposition()).getValue(), "attributes", CompoundTag::new);
-																						attributesTag.putString(event.grid.getValue(event.rowposition, "attribute"), ParseUtil.nullParam(event.postValue));
+																						ParameterEditor editor = event.grid.getValue(event.rowposition, "attribute");
+																						
+																						if (!StringUtil.isNullOrEmpty(ParseUtil.nullParam(event.postValue))) {
+																							attributesTag.put(editor.editWidget.getMessage().getString(), editor.toTag.apply(event.postValue));
+																						} else {
+																							attributesTag.remove(editor.editWidget.getMessage().getString());
+																						}
 																					})
 																					.width(150))
 																	.pressAdd((grid, button) -> {
@@ -1969,7 +2064,7 @@ public class DatapackEditScreen extends Screen {
 																						livingMotionTag.remove(ParseUtil.nullParam(event.prevValue));
 																						livingMotionTag.putString(ParseUtil.nullOrToString(event.postValue, (livingmotion) -> livingmotion.name().toLowerCase(Locale.ROOT)), "");
 																					}).editable(true).width(100))
-																	.addColumn(Grid.popup("animation", PopupBox.AnimationPopupBox::new).filter((animation) -> !(animation instanceof MainFrameAnimation))
+																	.addColumn(Grid.popup("animation", PopupBox.AnimationPopupBox::new).filter((animation) -> !(animation instanceof MainFrameAnimation) || animation instanceof LongHitAnimation)
 																					.editWidgetCreated((popupBox) -> popupBox.setModel(() -> armaturePopupBox._getValue(), () -> meshPopupBox._getValue()))
 																					.valueChanged((event) -> {
 																						CompoundTag livingMotionTag = ParseUtil.getOrSupply(this.packList.get(this.packListGrid.getRowposition()).getValue(), "default_livingmotions", CompoundTag::new);
@@ -2078,9 +2173,11 @@ public class DatapackEditScreen extends Screen {
 			Grid.PackImporter stunPackImporter = new Grid.PackImporter();
 			
 			for (Map.Entry<String, Tag> attributesTag : tag.getCompound("attributes").tags.entrySet()) {
+				ParameterEditor editor = this.attributeEditors.get(attributesTag.getKey());
+				
 				attributePackImporter.newRow();
-				attributePackImporter.newValue("attribute", attributesTag.getKey());
-				attributePackImporter.newValue("amount", attributesTag.getValue().getAsString());
+				attributePackImporter.newValue("attribute", editor);
+				attributePackImporter.newValue("amount", ParseUtil.valueOfOmittingType(attributesTag.getValue().getAsString()));
 			}
 			
 			for (Map.Entry<String, Tag> livingmotionTag : tag.getCompound("default_livingmotions").tags.entrySet()) {
@@ -2106,9 +2203,12 @@ public class DatapackEditScreen extends Screen {
 				EntityType.byString(tag.getString("preset")).orElse(null),
 				Meshes.getMeshOrNull(new ResourceLocation(tag.getString("model"))),
 				Armatures.getArmatureOrNull(new ResourceLocation(tag.getString("armature"))),
-				EntityType.byString(tag.getString("renderer")).orElse(null),
+				new ResourceLocation(tag.getString("renderer")),
 				tag.getBoolean("isHumanoid"),
 				ParseUtil.nullOrApply(tag.get("faction"), (jsonElement) -> Faction.valueOf(jsonElement.getAsString().toUpperCase(Locale.ROOT))),
+				ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation(tag.getString("swing_sound"))),
+				ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation(tag.getString("hit_sound"))),
+				ForgeRegistries.PARTICLE_TYPES.getValue(new ResourceLocation(tag.getString("hit_particle"))),
 				attributePackImporter,
 				livingmotionPackImporter,
 				stunPackImporter
@@ -2134,8 +2234,9 @@ public class DatapackEditScreen extends Screen {
 						throw new IllegalStateException("Invalid entity type");
 					}
 					
-					MobPatchReloadListener.deserializeMobPatchProvider(type.get(), packEntry.getValue(), true);
+					MobPatchReloadListener.deserializeMobPatchProvider(type.get(), packEntry.getValue(), true, Minecraft.getInstance().getResourceManager());
 				} catch (Exception e) {
+					e.printStackTrace();
 					throw new IllegalStateException("Failed to export mobpatch " + packEntry.getKey() + " :\n" + e.getMessage());
 				}
 			}
@@ -2150,7 +2251,7 @@ public class DatapackEditScreen extends Screen {
 						jsonReader.setLenient(true);
 						JsonObject jsonObject = Streams.parse(jsonReader).getAsJsonObject();
 						CompoundTag compTag = TagParser.parseTag(jsonObject.toString());
-						ResourceLocation rl = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll(String.format("%s/", this.directory), ""));
+						ResourceLocation rl = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll(String.format("%s/", this.directory), "").replaceAll(".json", ""));
 						
 						this.packList.add(PackEntry.of(rl, () -> compTag));
 						this.packListGrid.addRowWithDefaultValues("pack_item", rl.toString());
@@ -2170,12 +2271,12 @@ public class DatapackEditScreen extends Screen {
 					if (packCompound.getBoolean("disabled")) {
 						packCompound.tags.clear();
 						packCompound.putBoolean("disabled", true);
-					}
-					
-					if (packCompound.contains("preset")) {
+					} else if (packCompound.contains("preset")) {
 						String preset = packCompound.getString("preset");
 						packCompound.tags.clear();
 						packCompound.putString("preset", preset);
+					} else {
+						packCompound.remove("disabled");
 					}
 					
 					if (packCompound.getBoolean("isHumanoid")) {
@@ -2187,7 +2288,7 @@ public class DatapackEditScreen extends Screen {
 					ZipEntry zipEntry = new ZipEntry(String.format("data/%s/" + this.directory + "/%s.json", packEntry.getKey().getNamespace(), packEntry.getKey().getPath()));
 					Gson gson = new GsonBuilder().setPrettyPrinting().create();
 					out.putNextEntry(zipEntry);
-					out.write(gson.toJson(CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, packCompound).get().left().get()).getBytes());
+					out.write(gson.toJson(ParseUtil.convertToJsonObject(packCompound)).getBytes());
 					out.closeEntry();
 				} catch (Exception e) {
 					e.printStackTrace();

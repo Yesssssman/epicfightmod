@@ -5,15 +5,12 @@ import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
-import net.minecraftforge.event.server.ServerStartingEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
@@ -85,10 +82,25 @@ import yesman.epicfight.world.level.block.EpicFightBlocks;
 import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 
 /**
- *  TODO
+ *  Changes from 20.7.4 -> 20.8.1
  *  
- *  1. Remove prev-currentt pose system and get pose directly from animation
- *  2. Trail bug
+ *  1. Datapack Edit Screen added
+ *  
+ *  2. Skillbook screen revamped
+ *  
+ *  3. Skill Consume event changed
+ *  
+ *  4. Armor Negation calculation changed
+ *  
+ *  5. Weight base value calculation changed to (entity dimension width * height * {@link LivingEntityPatch#WEIGHT_CORRECTION})
+ *  
+ *  6. Animations now won't be interpolated from between the previous and current pose but from animation clip resulting in increased animation accuracy
+ *  
+ *  TO DO
+ *  
+ *  2. Trail texture bug
+ *  
+ *  3. 
  *  
  *  @author yesman
  */
@@ -124,7 +136,6 @@ public class EpicFightMod {
     	bus.addListener(EpicFightCapabilities::registerCapabilities);
     	bus.addListener(EpicFightEntities::onSpawnPlacementRegister);
     	
-    	MinecraftForge.EVENT_BUS.addListener(this::serverStart);
     	MinecraftForge.EVENT_BUS.addListener(this::command);
         MinecraftForge.EVENT_BUS.addListener(this::registerDatapackReloadListnerEvent);
     	
@@ -155,18 +166,18 @@ public class EpicFightMod {
         ConfigManager.loadConfig(ConfigManager.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve(CONFIG_FILE_PATH).toString());
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory(IngameConfigurationScreen::new));
         
-		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-			if (ModList.get().isLoaded("geckolib")) {
-				ICompatModule.loadCompatModuleClient(GeckolibCompat.class);
-			}
-			
-			if (ModList.get().isLoaded("azurelib")) {
-				ICompatModule.loadCompatModule(AzureLibCompat.class);
-			}
-			
-			if (ModList.get().isLoaded("azurelibarmor")) {
-				ICompatModule.loadCompatModule(AzureLibArmorCompat.class);
-			}
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+        	if (ModList.get().isLoaded("geckolib")) {
+    			ICompatModule.loadCompatModule(GeckolibCompat.class);
+    		}
+    		
+    		if (ModList.get().isLoaded("azurelib")) {
+    			ICompatModule.loadCompatModule(AzureLibCompat.class);
+    		}
+    		
+    		if (ModList.get().isLoaded("azurelibarmor")) {
+    			ICompatModule.loadCompatModule(AzureLibArmorCompat.class);
+    		}
 		});
 	}
     
@@ -206,12 +217,6 @@ public class EpicFightMod {
 		event.enqueueWork(EpicFightMobEffects::addOffhandModifier);
     }
 	
-	private void serverStart(final ServerStartingEvent event) {
-		if (event.getServer().isDedicatedServer()) {
-			serverResourceManager = event.getServer().getResourceManager();
-		}
-	}
-	
 	/**
 	 * Register Etc
 	 */
@@ -249,14 +254,4 @@ public class EpicFightMod {
 	public static boolean isPhysicalClient() {
     	return FMLEnvironment.dist == Dist.CLIENT;
     }
-	
-	static ResourceManager serverResourceManager = null;
-	
-	public static ResourceManager getResourceManager() {
-		if (isPhysicalClient()) {
-			return Minecraft.getInstance().getResourceManager();
-		} else {
-			return serverResourceManager;
-		}
-	}
 }

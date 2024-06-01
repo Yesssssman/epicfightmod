@@ -38,8 +38,11 @@ public abstract class Animator {
 	/** Give a null value as a parameter to get an animation that is highest priority on client **/
 	public abstract AnimationPlayer getPlayerFor(@Nullable DynamicAnimation playingAnimation);
 	public abstract <T> Pair<AnimationPlayer, T> findFor(Class<T> animationType);
-	public abstract void init();
 	public abstract Pose getPose(float partialTicks);
+	
+	public void init() {
+		this.entitypatch.initAnimator(this);
+	}
 	
 	public final void playAnimation(int id, float convertTimeModifier) {
 		this.playAnimation(AnimationManager.getInstance().byId(id), convertTimeModifier);
@@ -54,7 +57,7 @@ public abstract class Animator {
 	}
 	
 	public void playDeathAnimation() {
-		this.playAnimation(Animations.BIPED_DEATH, 0);
+		this.playAnimation(this.livingAnimations.getOrDefault(LivingMotions.DEATH, Animations.BIPED_DEATH), 0);
 	}
 	
 	public void addLivingAnimation(LivingMotion livingMotion, StaticAnimation animation) {

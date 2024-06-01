@@ -53,7 +53,7 @@ import yesman.epicfight.gameasset.Armatures.ArmatureContructor;
 import yesman.epicfight.main.EpicFightMod;
 
 public class JsonModelLoader {
-	public static final OpenMatrix4f Z_AXIS_TO_Y = OpenMatrix4f.createRotatorDeg(-90.0F, Vec3f.X_AXIS);
+	public static final OpenMatrix4f BLENDER_TO_MINECRAFT_COORD = OpenMatrix4f.createRotatorDeg(-90.0F, Vec3f.X_AXIS);
 	
 	private JsonObject rootJson;
 	private ResourceManager resourceManager;
@@ -73,8 +73,14 @@ public class JsonModelLoader {
 			} catch (NoSuchElementException e) {
 				// In this case, reads the animation data from mod.jar (Especially in a server)
 				Class<?> modClass = ModList.get().getModObjectById(resourceLocation.getNamespace()).get().getClass();
-				BufferedInputStream inputstream = new BufferedInputStream(modClass.getResourceAsStream("/assets/" + resourceLocation.getNamespace() + "/" + resourceLocation.getPath()));
-				Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
+				InputStream inputStream = modClass.getResourceAsStream("/assets/" + resourceLocation.getNamespace() + "/" + resourceLocation.getPath());
+				
+				if (inputStream == null) {
+					throw new NoSuchElementException("Can't find specified file in mod resource " + resourceLocation);
+				}
+				
+				BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
+				Reader reader = new InputStreamReader(bufferedInputStream, StandardCharsets.UTF_8);
 				jsonReader = new JsonReader(reader);
 				jsonReader.setLenient(true);
 				this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
@@ -105,13 +111,18 @@ public class JsonModelLoader {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public JsonModelLoader(JsonObject rootJson) throws IOException {
+	public JsonModelLoader(JsonObject rootJson, ResourceLocation rl) throws IOException {
 		this.resourceManager = Minecraft.getInstance().getResourceManager();
 		this.rootJson = rootJson;
+		this.resourceLocation = rl;
 	}
 	
 	@OnlyIn(Dist.CLIENT)
 	public AnimatedMesh.RenderProperties getRenderProperties() {
+		if (!this.rootJson.has("render_properties")) {
+			return null;
+		}
+		
 		JsonObject properties = this.rootJson.getAsJsonObject("render_properties");
 		AnimatedMesh.RenderProperties renderProperties = AnimatedMesh.RenderProperties.create();
 		
@@ -161,7 +172,7 @@ public class JsonModelLoader {
 			for (int i = 0; i < positionArray.length / 3; i++) {
 				int k = i * 3;
 				Vec4f posVector = new Vec4f(positionArray[k], positionArray[k+1], positionArray[k+2], 1.0F);
-				OpenMatrix4f.transform(Z_AXIS_TO_Y, posVector, posVector);
+				OpenMatrix4f.transform(BLENDER_TO_MINECRAFT_COORD, posVector, posVector);
 				positionArray[k] = posVector.x;
 				positionArray[k+1] = posVector.y;
 				positionArray[k+2] = posVector.z;
@@ -172,7 +183,7 @@ public class JsonModelLoader {
 			for (int i = 0; i < normalArray.length / 3; i++) {
 				int k = i * 3;
 				Vec4f normVector = new Vec4f(normalArray[k], normalArray[k+1], normalArray[k+2], 1.0F);
-				OpenMatrix4f.transform(Z_AXIS_TO_Y, normVector, normVector);
+				OpenMatrix4f.transform(BLENDER_TO_MINECRAFT_COORD, normVector, normVector);
 				normalArray[k] = normVector.x;
 				normalArray[k+1] = normVector.y;
 				normalArray[k+2] = normVector.z;
@@ -224,7 +235,7 @@ public class JsonModelLoader {
 			for (int i = 0; i < positionArray.length / 3; i++) {
 				int k = i * 3;
 				Vec4f posVector = new Vec4f(positionArray[k], positionArray[k+1], positionArray[k+2], 1.0F);
-				OpenMatrix4f.transform(Z_AXIS_TO_Y, posVector, posVector);
+				OpenMatrix4f.transform(BLENDER_TO_MINECRAFT_COORD, posVector, posVector);
 				positionArray[k] = posVector.x;
 				positionArray[k+1] = posVector.y;
 				positionArray[k+2] = posVector.z;
@@ -235,7 +246,7 @@ public class JsonModelLoader {
 			for (int i = 0; i < normalArray.length / 3; i++) {
 				int k = i * 3;
 				Vec4f normVector = new Vec4f(normalArray[k], normalArray[k+1], normalArray[k+2], 1.0F);
-				OpenMatrix4f.transform(Z_AXIS_TO_Y, normVector, normVector);
+				OpenMatrix4f.transform(BLENDER_TO_MINECRAFT_COORD, normVector, normVector);
 				normalArray[k] = normVector.x;
 				normalArray[k+1] = normVector.y;
 				normalArray[k+2] = normVector.z;
@@ -273,20 +284,20 @@ public class JsonModelLoader {
 		JsonObject hierarchy = obj.get("hierarchy").getAsJsonArray().get(0).getAsJsonObject();
 		JsonArray nameAsVertexGroups = obj.getAsJsonArray("joints");
 		Map<String, Joint> jointMap = Maps.newHashMap();
-		Joint joint = this.getJoint(hierarchy, nameAsVertexGroups, jointMap, true);
+		Joint joint = getJoint(hierarchy, nameAsVertexGroups, jointMap, true);
 		joint.initOriginTransform(new OpenMatrix4f());
 		String armatureName = this.resourceLocation.toString().replaceAll("(animmodels/|\\.json)", "");
 		
 		return constructor.invoke(armatureName, jointMap.size(), joint, jointMap);
 	}
 	
-	public Joint getJoint(JsonObject object, JsonArray nameAsVertexGroups, Map<String, Joint> jointMap, boolean start) {
+	public static Joint getJoint(JsonObject object, JsonArray nameAsVertexGroups, Map<String, Joint> jointMap, boolean start) {
 		float[] floatArray = ParseUtil.toFloatArray(object.get("transform").getAsJsonArray());
 		OpenMatrix4f localMatrix = OpenMatrix4f.load(null, floatArray);
 		localMatrix.transpose();
 		
 		if (start) {
-			localMatrix.mulFront(Z_AXIS_TO_Y);
+			localMatrix.mulFront(BLENDER_TO_MINECRAFT_COORD);
 		}
 		
 		String name = object.get("name").getAsString();
@@ -300,14 +311,16 @@ public class JsonModelLoader {
 		}
 		
 		if (index == -1) {
-			throw new IllegalStateException("[ModelParsingError]: Joint name " + name + " not exist!");
+			throw new IllegalStateException("[ModelParsingError]: Joint name " + name + " doesn't exist!");
 		}
 		
 		Joint joint = new Joint(name, index, localMatrix);
 		jointMap.put(name, joint);
 		
-		for (JsonElement children : object.get("children").getAsJsonArray()) {
-			joint.addSubJoint(this.getJoint(children.getAsJsonObject(), nameAsVertexGroups, jointMap, false));
+		if (object.has("children")) {
+			for (JsonElement children : object.get("children").getAsJsonArray()) {
+				joint.addSubJoint(getJoint(children.getAsJsonObject(), nameAsVertexGroups, jointMap, false));
+			}
 		}
 		
 		return joint;
@@ -551,7 +564,7 @@ public class JsonModelLoader {
 			matrix.transpose();
 			
 			if (correct) {
-				matrix.mulFront(Z_AXIS_TO_Y);
+				matrix.mulFront(BLENDER_TO_MINECRAFT_COORD);
 			}
 			
 			matrix.mulFront(invLocalTransform);

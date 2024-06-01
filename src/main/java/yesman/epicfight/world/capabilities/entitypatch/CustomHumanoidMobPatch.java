@@ -2,7 +2,11 @@ package yesman.epicfight.world.capabilities.entitypatch;
 
 import com.mojang.datafixers.util.Pair;
 
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.behavior.MeleeAttack;
@@ -12,13 +16,14 @@ import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.UseAnim;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.damagesource.StunType;
@@ -78,10 +83,12 @@ public class CustomHumanoidMobPatch<T extends PathfinderMob> extends HumanoidMob
 	
 	@Override
 	protected void initAttributes() {
-		this.original.getAttribute(EpicFightAttributes.WEIGHT.get()).setBaseValue(this.original.getAttribute(Attributes.MAX_HEALTH).getBaseValue() * 2.0D);
+		EntityDimensions dimension = this.original.getDimensions(Pose.STANDING);
+		this.original.getAttribute(EpicFightAttributes.WEIGHT.get()).setBaseValue(dimension.width * dimension.height * WEIGHT_CORRECTION);
 		this.original.getAttribute(EpicFightAttributes.MAX_STRIKES.get()).setBaseValue(this.provider.getAttributeValues().getDouble(EpicFightAttributes.MAX_STRIKES.get()));
 		this.original.getAttribute(EpicFightAttributes.ARMOR_NEGATION.get()).setBaseValue(this.provider.getAttributeValues().getDouble(EpicFightAttributes.ARMOR_NEGATION.get()));
 		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(this.provider.getAttributeValues().getDouble(EpicFightAttributes.IMPACT.get()));
+		this.original.getAttribute(EpicFightAttributes.STUN_ARMOR.get()).setBaseValue(this.provider.getAttributeValues().getDouble(EpicFightAttributes.STUN_ARMOR.get()));
 		
 		if (this.provider.getAttributeValues().containsKey(Attributes.ATTACK_DAMAGE)) {
 			this.original.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(this.provider.getAttributeValues().getDouble(Attributes.ATTACK_DAMAGE));
@@ -89,12 +96,10 @@ public class CustomHumanoidMobPatch<T extends PathfinderMob> extends HumanoidMob
 	}
 	
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
+	public void initAnimator(Animator clientAnimator) {
 		for (Pair<LivingMotion, StaticAnimation> pair : this.provider.getDefaultAnimations()) {
 			clientAnimator.addLivingAnimation(pair.getFirst(), pair.getSecond());
 		}
-		
-		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
 	@Override
@@ -136,6 +141,39 @@ public class CustomHumanoidMobPatch<T extends PathfinderMob> extends HumanoidMob
 	@Override
 	public StaticAnimation getHitAnimation(StunType stunType) {
 		return this.provider.getStunAnimations().get(stunType);
+	}
+	
+	@Override
+	public SoundEvent getWeaponHitSound(InteractionHand hand) {
+		CapabilityItem itemCap = this.getAdvancedHoldingItemCapability(hand);
+		
+		if (itemCap.isEmpty()) {
+			return this.provider.getHitSound();
+		}
+		
+		return itemCap.getHitSound();
+	}
+	
+	@Override
+	public SoundEvent getSwingSound(InteractionHand hand) {
+		CapabilityItem itemCap = this.getAdvancedHoldingItemCapability(hand);
+		
+		if (itemCap.isEmpty()) {
+			return this.provider.getSwingSound();
+		}
+		
+		return itemCap.getSmashingSound();
+	}
+	
+	@Override
+	public HitParticleType getWeaponHitParticle(InteractionHand hand) {
+		CapabilityItem itemCap = this.getAdvancedHoldingItemCapability(hand);
+		
+		if (itemCap.isEmpty()) {
+			return this.provider.getHitParticle();
+		}
+		
+		return itemCap.getHitParticle();
 	}
 	
 	@Override

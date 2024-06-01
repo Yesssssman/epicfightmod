@@ -37,20 +37,20 @@ public class OBBCollider extends Collider {
 	 * @param pos4 right_back
 	 * @param modelCenter central position
 	 */
-	public OBBCollider(double posX, double posY, double posZ, double center_x, double center_y, double center_z) {
-		this(getInitialAABB(posX, posY, posZ, center_x, center_y, center_z), posX, posY, posZ, center_x, center_y, center_z);
+	public OBBCollider(double vertexX, double vertexY, double vertexZ, double centerX, double centerY, double centerZ) {
+		this(getInitialAABB(vertexX, vertexY, vertexZ, centerX, centerY, centerZ), vertexX, vertexY, vertexZ, centerX, centerY, centerZ);
 	}
 	
-	protected OBBCollider(AABB outerAABB, double posX, double posY, double posZ, double center_x, double center_y, double center_z) {
-		super(new Vec3(center_x, center_y, center_z), outerAABB);
+	protected OBBCollider(AABB outerAABB, double vertexX, double vertexY, double vertexZ, double centerX, double centerY, double centerZ) {
+		super(new Vec3(centerX, centerY, centerZ), outerAABB);
 		this.modelVertex = new Vec3[4];
 		this.modelNormal = new Vec3[3];
 		this.rotatedVertex = new Vec3[4];
 		this.rotatedNormal = new Vec3[3];
-		this.modelVertex[0] = new Vec3(posX, posY, -posZ);
-		this.modelVertex[1] = new Vec3(posX, posY, posZ);
-		this.modelVertex[2] = new Vec3(-posX, posY, posZ);
-		this.modelVertex[3] = new Vec3(-posX, posY, -posZ);
+		this.modelVertex[0] = new Vec3(vertexX, vertexY, -vertexZ);
+		this.modelVertex[1] = new Vec3(vertexX, vertexY, vertexZ);
+		this.modelVertex[2] = new Vec3(-vertexX, vertexY, vertexZ);
+		this.modelVertex[3] = new Vec3(-vertexX, vertexY, -vertexZ);
 		this.modelNormal[0] = new Vec3(1, 0, 0);
 		this.modelNormal[1] = new Vec3(0, 1, 0);
 		this.modelNormal[2] = new Vec3(0, 0, -1);
@@ -223,7 +223,7 @@ public class OBBCollider extends Collider {
 	
 	@Override
 	public String toString() {
-		return super.toString() + " worldCenter : " + this.worldCenter + " direction : " + this.rotatedVertex[0];
+		return super.toString() + " worldCenter : " + this.modelCenter + " direction : " + this.modelVertex[0];
 	}
 	
 	@Override

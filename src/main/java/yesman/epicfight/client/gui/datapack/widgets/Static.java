@@ -13,6 +13,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 public class Static extends AbstractWidget implements ResizableComponent {
 	private Font font;
 	private Component tooltip;
+	private int fontColor = 0xFFFFFFFF;
 	
 	public Static(Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, String translateKey) {
 		this(font, x1, x2, y1, y2, horizontal, vertical, Component.translatable(translateKey), Component.translatable(translateKey + ".tooltip"));
@@ -38,7 +39,8 @@ public class Static extends AbstractWidget implements ResizableComponent {
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		String correctedString = this._getMessage() == null ? "" : this.font.plainSubstrByWidth(this._getMessage().getString(), this._getWidth());
-		guiGraphics.drawString(this.font, correctedString, this._getX(), this._getY() + this.height / 2 - this.font.lineHeight / 2, 16777215, false);
+		//16777215
+		guiGraphics.drawString(this.font, correctedString, this._getX(), this._getY() + this.height / 2 - this.font.lineHeight / 2, this.fontColor, false);
 		
 		if (this.tooltip != null) {
 			this.setTooltip(this.isMouseOver(mouseX, mouseY) ? Tooltip.create(this.tooltip) : null);
@@ -66,6 +68,10 @@ public class Static extends AbstractWidget implements ResizableComponent {
 	
 	public boolean mouseDragged(double mouseX, double mouseY, int action, double p_93648_, double p_93649_) {
 		return false;
+	}
+	
+	public void setColor(int r, int g, int b) {
+		this.fontColor = 0xFF000000 | r << 24 | g << 16 | b << 8;
 	}
 	
 	/*******************************************************************

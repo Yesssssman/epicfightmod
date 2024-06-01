@@ -25,12 +25,8 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 	protected final List<T> colliders = Lists.newArrayList();
 	protected final int numberOfColliders;
 	
-	public static enum Usage {
-		INTERPOLATION, MULTI_BONES
-	}
-	
-	public MultiCollider(int arrayLength, double posX, double posY, double posZ, AABB outerAABB) {
-		super(new Vec3(posX, posY, posZ), outerAABB);
+	public MultiCollider(int arrayLength, double centerX, double centerY, double centerZ, AABB outerAABB) {
+		super(new Vec3(centerX, centerY, centerZ), outerAABB);
 		this.numberOfColliders = arrayLength;
 	}
 	
@@ -39,7 +35,6 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 		super(null, null);
 
 		Collections.addAll(this.colliders, colliders);
-		
 		this.numberOfColliders = colliders.length;
 	}
 	
@@ -148,6 +143,6 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 	
 	@Override
 	public String toString() {
-		return super.toString() + " collider count: " + this.numberOfColliders;
+		return super.toString() + " collider count: " + this.numberOfColliders + " " + this.colliders.get(0);
 	}
 }

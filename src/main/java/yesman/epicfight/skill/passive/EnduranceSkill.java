@@ -69,6 +69,7 @@ public class EnduranceSkill extends PassiveSkill {
 	public void cancelOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
 		executer.setStunShield(0.0F);
 		executer.setMaxStunShield(0.0F);
+		
 		super.cancelOnServer(executer, args);
 	}
 	
@@ -81,9 +82,9 @@ public class EnduranceSkill extends PassiveSkill {
 	@OnlyIn(Dist.CLIENT)
 	@Override
 	public List<Object> getTooltipArgsOfScreen(List<Object> list) {
-		list.add(String.format("%.0f", this.consumption));
-		list.add(String.format("%.1f", this.staminaRatio * 100.0F));
 		list.add(String.format("%d", this.maxDuration / 20));
+		list.add(String.format("%.0f", this.consumption));
+		list.add(String.format("%.0f", this.staminaRatio * 100.0F));
 
 		return list;
 	}

@@ -2,9 +2,9 @@ package yesman.epicfight.world.capabilities.entitypatch.boss;
 
 import net.minecraft.sounds.SoundEvents;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 import yesman.epicfight.world.damagesource.StunType;
@@ -26,10 +26,9 @@ public class WitherGhostPatch extends MobPatch<WitherGhostClone> {
 	}
 	
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.WITHER_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.WITHER_IDLE);
-		clientAnimator.setCurrentMotionsAsDefault();
+	public void initAnimator(Animator animator) {
+		animator.addLivingAnimation(LivingMotions.IDLE, Animations.WITHER_IDLE);
+		animator.addLivingAnimation(LivingMotions.DEATH, Animations.WITHER_IDLE);
 	}
 	
 	@Override

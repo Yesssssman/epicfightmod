@@ -27,11 +27,11 @@ import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class MultiOBBCollider extends MultiCollider<OBBCollider> {
-	public MultiOBBCollider(int arrayLength, double vecX, double vecY, double vecZ, double centerX, double centerY, double centerZ) {
+	public MultiOBBCollider(int arrayLength, double vertexX, double vertexY, double vertexZ, double centerX, double centerY, double centerZ) {
 		super(arrayLength, centerX, centerY, centerZ, null);
 		
-		AABB aabb = OBBCollider.getInitialAABB(vecX, vecY, vecZ, centerX, centerY, centerZ);
-		OBBCollider colliderForAll = new OBBCollider(aabb, vecX, vecY, vecZ, centerX, centerY, centerZ);
+		AABB aabb = OBBCollider.getInitialAABB(vertexX, vertexY, vertexZ, centerX, centerY, centerZ);
+		OBBCollider colliderForAll = new OBBCollider(aabb, vertexX, vertexY, vertexZ, centerX, centerY, centerZ);
 		
 		for (int i = 0; i < arrayLength; i++) {
 			this.colliders.add(colliderForAll);

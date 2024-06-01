@@ -30,6 +30,7 @@ import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
 import yesman.epicfight.api.client.animation.property.JointMask.JointMaskSet;
 import yesman.epicfight.api.client.animation.property.JointMaskEntry;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
+import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
@@ -135,7 +136,10 @@ public class ClientAnimator extends Animator {
 	
 	@Override
 	public void init() {
-		this.entitypatch.initAnimator(this);
+		super.init();
+		
+		this.setCurrentMotionsAsDefault();
+		
 		StaticAnimation idleMotion = this.livingAnimations.get(this.currentMotion);
 		this.baseLayer.playAnimationInstant(idleMotion, this.entitypatch);
 	}
@@ -195,7 +199,7 @@ public class ClientAnimator extends Animator {
 	@Override
 	public void playDeathAnimation() {
 		if (!this.getPlayerFor(null).getAnimation().getProperty(ActionAnimationProperty.IS_DEATH_ANIMATION).orElse(false)) {
-			this.playAnimation(this.livingAnimations.get(LivingMotions.DEATH), 0.0F);
+			this.playAnimation(this.livingAnimations.getOrDefault(LivingMotions.DEATH, Animations.DUMMY_ANIMATION), 0.0F);
 			this.currentMotion = LivingMotions.DEATH;
 		}
 	}

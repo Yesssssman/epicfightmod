@@ -76,6 +76,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	public static final EntityDataAccessor<Float> MAX_STUN_SHIELD = new EntityDataAccessor<Float> (252, EntityDataSerializers.FLOAT);
 	public static final EntityDataAccessor<Integer> EXECUTION_RESISTANCE = new EntityDataAccessor<Integer> (254, EntityDataSerializers.INT);
 	public static final EntityDataAccessor<Boolean> AIRBORNE = new EntityDataAccessor<Boolean> (250, EntityDataSerializers.BOOLEAN);
+	protected static final double WEIGHT_CORRECTION = 37.037D;
 	
 	private ItemStack tempOffhandHolder = ItemStack.EMPTY;
 	private ResultType lastResultType;
@@ -111,8 +112,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		this.initAttributes();
 	}
 	
-	@OnlyIn(Dist.CLIENT)
-	public abstract void initAnimator(ClientAnimator clientAnimator);
+	public abstract void initAnimator(Animator clientAnimator);
 	public abstract void updateMotion(boolean considerInaction);
 	
 	public Armature getArmature() {
@@ -120,7 +120,8 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	protected void initAttributes() {
-		this.original.getAttribute(EpicFightAttributes.WEIGHT.get()).setBaseValue(this.original.getAttribute(Attributes.MAX_HEALTH).getBaseValue() * 2.0D);
+		EntityDimensions dimension = this.original.getDimensions(net.minecraft.world.entity.Pose.STANDING);
+		this.original.getAttribute(EpicFightAttributes.WEIGHT.get()).setBaseValue(dimension.width * dimension.height * WEIGHT_CORRECTION);
 		this.original.getAttribute(EpicFightAttributes.MAX_STRIKES.get()).setBaseValue(1.0D);
 		this.original.getAttribute(EpicFightAttributes.ARMOR_NEGATION.get()).setBaseValue(0.0D);
 		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(0.5D);
@@ -128,6 +129,16 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	
 	@Override
 	public void tick(LivingEvent.LivingTickEvent event) {
+		if (this.original.getHealth() <= 0.0F) {
+			this.original.setXRot(0);
+			
+			AnimationPlayer animPlayer = this.getAnimator().getPlayerFor(null);
+			
+			if (this.original.deathTime >= 19 && !animPlayer.isEmpty() && !animPlayer.isEnd()) {
+				this.original.deathTime--;
+			}
+		}
+		
 		this.animator.tick();
 		super.tick(event);
 		
