@@ -5,11 +5,13 @@ import java.util.function.Function;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
@@ -78,6 +80,7 @@ import yesman.epicfight.world.entity.decoration.EpicFightPaintingVariants;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 import yesman.epicfight.world.item.EpicFightCreativeTabs;
 import yesman.epicfight.world.item.EpicFightItems;
+import yesman.epicfight.world.item.SkillBookItem;
 import yesman.epicfight.world.level.block.EpicFightBlocks;
 import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 
@@ -96,11 +99,13 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  
  *  6. Animations now won't be interpolated from between the previous and current pose but from animation clip resulting in increased animation accuracy
  *  
+ *  7. Skill registration changed
+ *  
+ *  8. Added EpicFightExtensions. Now you can decide a creative tab that you want to display your skills of your mod
+ *  
  *  TO DO
  *  
- *  2. Trail texture bug
- *  
- *  3. 
+ *  1. Trail texture bug
  *  
  *  @author yesman
  */
@@ -129,6 +134,7 @@ public class EpicFightMod {
     	bus.addListener(this::doCommonStuff);
     	bus.addListener(this::doServerStuff);
     	bus.addListener(this::registerResourcepackReloadListnerEvent);
+    	bus.addListener(this::buildCreativeTabWithSkillBooks);
     	bus.addListener(EpicFightAttributes::registerNewMobs);
     	bus.addListener(EpicFightAttributes::modifyExistingMobs);
     	bus.addListener(SkillManager::createSkillRegistry);
@@ -165,6 +171,7 @@ public class EpicFightMod {
         ConfigManager.loadConfig(ConfigManager.CLIENT_CONFIG, FMLPaths.CONFIGDIR.get().resolve(MODID + "-client.toml").toString());
         ConfigManager.loadConfig(ConfigManager.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve(CONFIG_FILE_PATH).toString());
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory(IngameConfigurationScreen::new));
+        ModLoadingContext.get().registerExtensionPoint(EpicFightExtensions.class, () -> new EpicFightExtensions(EpicFightCreativeTabs.ITEMS.get()));
         
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
         	if (ModList.get().isLoaded("geckolib")) {
@@ -242,6 +249,21 @@ public class EpicFightMod {
 		event.addListener(new WeaponTypeReloadListener());
 		event.addListener(new ItemCapabilityReloadListener());
 		event.addListener(new MobPatchReloadListener());
+	}
+	
+	private void buildCreativeTabWithSkillBooks(final BuildCreativeModeTabContentsEvent event) {
+		SkillManager.getNamespaces().forEach((modid) -> {
+			ModList.get().getModContainerById(modid).flatMap((mc) -> mc.getCustomExtension(EpicFightExtensions.class)).ifPresent((extension) -> {
+				if (extension.skillBookCreativeTab() == event.getTab()) {
+					
+					SkillManager.getSkillNames((skill) -> skill.getCategory().learnable() && skill.getRegistryName().getNamespace() == modid).forEach((rl) -> {
+						ItemStack stack = new ItemStack(EpicFightItems.SKILLBOOK.get());
+						SkillBookItem.setContainingSkill(rl.toString(), stack);
+						event.accept(stack);
+					});
+				}
+			});
+		});
 	}
 	
 	/**

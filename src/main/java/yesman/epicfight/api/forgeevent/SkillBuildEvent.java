@@ -1,7 +1,9 @@
 package yesman.epicfight.api.forgeevent;
 
 import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import com.google.common.collect.Lists;
 
@@ -18,6 +20,10 @@ public class SkillBuildEvent extends Event implements IModBusEvent {
 		this.modRegisterWorkers.add(modRegisterWorker);
 		
 		return modRegisterWorker;
+	}
+	
+	public Set<String> getNamespaces() {
+		return this.modRegisterWorkers.stream().map((worker) -> worker.modid).collect(Collectors.toSet());
 	}
 	
 	public List<Skill> getAllSkills() {

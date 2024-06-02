@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -12,6 +13,7 @@ import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.ibm.icu.impl.locale.XCldrStub.ImmutableSet;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.datafixers.util.Pair;
 
@@ -45,9 +47,9 @@ import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 
 public class SkillManager extends SimpleJsonResourceReloadListener {
 	public static final ResourceKey<Registry<Skill>> SKILL_REGISTRY_KEY = ResourceKey.createRegistryKey(new ResourceLocation(EpicFightMod.MODID, "skill"));
-	
 	private static final List<CompoundTag> SKILL_PARAMS = Lists.newArrayList();
 	private static final Gson GSON = (new GsonBuilder()).create();
+	private static Set<String> namespaces;
 	
 	public static List<CompoundTag> getSkillParams() {
 		return Collections.unmodifiableList(SKILL_PARAMS);
@@ -61,6 +63,8 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 		if (event.getRegistryKey().equals(SKILL_REGISTRY_KEY)) {
 			final SkillBuildEvent skillBuildEvnet = new SkillBuildEvent();
 			ModLoader.get().postEvent(skillBuildEvnet);
+			
+			namespaces = ImmutableSet.copyOf(skillBuildEvnet.getNamespaces());
 			
 			event.register(SKILL_REGISTRY_KEY, (helper) -> {
 				skillBuildEvnet.getAllSkills().forEach((skill) -> {
@@ -92,7 +96,11 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 	}
 	
 	public static Stream<ResourceLocation> getSkillNames(Predicate<Skill> predicate) {
-		return getSkillRegistry().getValues().stream().filter(skill -> predicate.test(skill)).map(builder -> builder.getRegistryName());
+		return getSkillRegistry().getValues().stream().filter(skill -> predicate.test(skill)).map(skill -> skill.getRegistryName());
+	}
+	
+	public static Set<String> getNamespaces() {
+		return namespaces;
 	}
 	
 	public static void reloadAllSkillsAnimations() {
