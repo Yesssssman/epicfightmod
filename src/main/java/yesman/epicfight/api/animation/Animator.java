@@ -1,12 +1,12 @@
 package yesman.epicfight.api.animation;
 
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.ibm.icu.impl.locale.XCldrStub.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
 
 import yesman.epicfight.api.animation.types.AttackAnimation;
@@ -68,8 +68,8 @@ public abstract class Animator {
 		return this.livingAnimations.getOrDefault(livingMotion, defaultGetter);
 	}
 	
-	public Set<Map.Entry<LivingMotion, StaticAnimation>> getLivingAnimationEntrySet() {
-		return this.livingAnimations.entrySet();
+	public Map<LivingMotion, StaticAnimation> getLivingAnimations() {
+		return ImmutableMap.copyOf(this.livingAnimations);
 	}
 	
 	public void removeAnimationVariables(TypeKey<?> typeKey) {

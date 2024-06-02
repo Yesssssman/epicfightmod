@@ -283,6 +283,7 @@
 	"skill.epicfight.hypervitality.consume.tooltip": "20% of weapon charge",
 	"skill.epicfight.forbidden_strength": "Forbidden Strength",
 	"skill.epicfight.forbidden_strength.tooltip": "Consumes health instead of stamina when it's insufficient.",
+	"skill.epicfight.forbidden_strength.consume.tooltip": "Stamina requirement",
 	"skill.epicfight.endurance": "Endurance",
 	"skill.epicfight.endurance.tooltip": "Grants stun resistance as an amount of stamina consumed for %s seconds if a player is hit while preparing an attack.",
 	"skill.epicfight.emergency_escape": "Emergency Escape",

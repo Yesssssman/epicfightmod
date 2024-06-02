@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 
 import net.minecraft.server.level.ServerPlayer;
@@ -93,7 +94,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 	@Override
 	public void onStartTracking(ServerPlayer trackingPlayer) {
 		SPChangeLivingMotion msg = new SPChangeLivingMotion(this.getOriginal().getId());
-		msg.putEntries(this.getAnimator().getLivingAnimationEntrySet());
+		msg.putEntries(this.getAnimator().getLivingAnimations().entrySet());
 		
 		for (SkillContainer container : this.getSkillCapability().skillContainers) {
 			for (SkillDataKey<?> key : container.getDataManager().keySet()) {
@@ -170,21 +171,43 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 			return;
 		}
 		
-		this.getAnimator().resetLivingAnimations();
+		Map<LivingMotion, StaticAnimation> oldLivingAnimations = this.getAnimator().getLivingAnimations();
+		Map<LivingMotion, StaticAnimation> newLivingAnimations = Maps.newHashMap();
+		
 		CapabilityItem mainhandCap = this.getHoldingItemCapability(InteractionHand.MAIN_HAND);
 		CapabilityItem offhandCap = this.getAdvancedHoldingItemCapability(InteractionHand.OFF_HAND);
-		Map<LivingMotion, AnimationProvider<?>> motionModifier = new HashMap<>(mainhandCap.getLivingMotionModifier(this, InteractionHand.MAIN_HAND));
-		motionModifier.putAll(offhandCap.getLivingMotionModifier(this, InteractionHand.OFF_HAND));
 		
-		for (Map.Entry<LivingMotion, AnimationProvider<?>> entry : motionModifier.entrySet()) {
-			this.getAnimator().addLivingAnimation(entry.getKey(), entry.getValue().get());
+		Map<LivingMotion, AnimationProvider<?>> livingMotionModifiers = new HashMap<>(mainhandCap.getLivingMotionModifier(this, InteractionHand.MAIN_HAND));
+		livingMotionModifiers.putAll(offhandCap.getLivingMotionModifier(this, InteractionHand.OFF_HAND));
+		
+		for (Map.Entry<LivingMotion, AnimationProvider<?>> entry : livingMotionModifiers.entrySet()) {
+			StaticAnimation aniamtion = entry.getValue().get();
+			
+			if (!oldLivingAnimations.containsKey(entry.getKey())) {
+				this.updatedMotionCurrentTick = true;
+			} else if (oldLivingAnimations.get(entry.getKey()) != aniamtion) {
+				this.updatedMotionCurrentTick = true;
+			}
+			
+			newLivingAnimations.put(entry.getKey(), aniamtion);
 		}
 		
-		SPChangeLivingMotion msg = new SPChangeLivingMotion(this.original.getId());
-		msg.putEntries(this.getAnimator().getLivingAnimationEntrySet());
+		for (LivingMotion oldLivingMotion : oldLivingAnimations.keySet()) {
+			if (!newLivingAnimations.containsKey(oldLivingMotion)) {
+				this.updatedMotionCurrentTick = true;
+				break;
+			}
+		}
 		
-		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(msg, this.original);
-		this.updatedMotionCurrentTick = true;
+		if (this.updatedMotionCurrentTick) {
+			this.getAnimator().resetLivingAnimations();
+			newLivingAnimations.forEach(this.getAnimator()::addLivingAnimation);
+			
+			SPChangeLivingMotion msg = new SPChangeLivingMotion(this.original.getId());
+			msg.putEntries(newLivingAnimations.entrySet());
+			
+			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntityWithSelf(msg, this.original);
+		}
 	}
 	
 	@Override

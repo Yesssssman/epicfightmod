@@ -57,13 +57,13 @@ import yesman.epicfight.world.item.SkillBookItem;
 
 @OnlyIn(Dist.CLIENT)
 public class SkillBookScreen extends Screen {
-	private static final ResourceLocation SKILLBOOK_BACKGROUND = new ResourceLocation(EpicFightMod.MODID, "textures/gui/screen/skillbook.png");
-	public static final TextureInfo COOLDOWN_TEXTURE_INFO = new TextureInfo(SKILLBOOK_BACKGROUND, 72, 206, 10, 10);
-	public static final TextureInfo HEALTH_TEXTURE_INFO = new TextureInfo(SKILLBOOK_BACKGROUND, 22, 206, 10, 10);
-	public static final TextureInfo STAMINA_TEXTURE_INFO = new TextureInfo(SKILLBOOK_BACKGROUND, 42, 206, 10, 10);
-	
 	private static final Map<WeaponCategory, ItemStack> WEAPON_CATEGORY_ICONS = Maps.newHashMap();
 	private static final Map<Attribute, TextureInfo> ATTRIBUTE_ICONS = Maps.newHashMap();
+	private static final ResourceLocation SKILLBOOK_BACKGROUND = new ResourceLocation(EpicFightMod.MODID, "textures/gui/screen/skillbook.png");
+	
+	public static final TextureInfo HEALTH_TEXTURE_INFO = new TextureInfo(SKILLBOOK_BACKGROUND, 22, 205, 10, 10);
+	public static final TextureInfo STAMINA_TEXTURE_INFO = new TextureInfo(SKILLBOOK_BACKGROUND, 32, 205, 10, 10);
+	public static final TextureInfo COOLDOWN_TEXTURE_INFO = new TextureInfo(SKILLBOOK_BACKGROUND, 42, 205, 10, 10);
 	
 	public static void registerIconItems() {
 		WEAPON_CATEGORY_ICONS.put(WeaponCategories.NOT_WEAPON, new ItemStack(Items.AIR));
@@ -83,10 +83,10 @@ public class SkillBookScreen extends Screen {
 		WEAPON_CATEGORY_ICONS.put(WeaponCategories.SHIELD, new ItemStack(Items.SHIELD));
 		WEAPON_CATEGORY_ICONS.put(WeaponCategories.RANGED, new ItemStack(Items.BOW));
 		
-		ATTRIBUTE_ICONS.put(Attributes.MAX_HEALTH, HEALTH_TEXTURE_INFO);
-		ATTRIBUTE_ICONS.put(EpicFightAttributes.MAX_STAMINA.get(), STAMINA_TEXTURE_INFO);
-		ATTRIBUTE_ICONS.put(Attributes.ATTACK_DAMAGE, new TextureInfo(SKILLBOOK_BACKGROUND, 52, 206, 10, 10));
-		ATTRIBUTE_ICONS.put(EpicFightAttributes.STAMINA_REGEN.get(), new TextureInfo(SKILLBOOK_BACKGROUND, 62, 206, 10, 10));
+		ATTRIBUTE_ICONS.put(Attributes.MAX_HEALTH, new TextureInfo(SKILLBOOK_BACKGROUND, 22, 195, 10, 10));
+		ATTRIBUTE_ICONS.put(EpicFightAttributes.MAX_STAMINA.get(), new TextureInfo(SKILLBOOK_BACKGROUND, 42, 195, 10, 10));
+		ATTRIBUTE_ICONS.put(Attributes.ATTACK_DAMAGE, new TextureInfo(SKILLBOOK_BACKGROUND, 52, 195, 10, 10));
+		ATTRIBUTE_ICONS.put(EpicFightAttributes.STAMINA_REGEN.get(), new TextureInfo(SKILLBOOK_BACKGROUND, 62, 195, 10, 10));
 		
 		WeaponCategoryIconRegisterEvent weaponCategoryIconRegisterEvent = new WeaponCategoryIconRegisterEvent(WEAPON_CATEGORY_ICONS);
 		ModLoader.get().postEvent(weaponCategoryIconRegisterEvent);
