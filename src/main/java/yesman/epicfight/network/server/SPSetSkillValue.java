@@ -10,13 +10,14 @@ import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class SPSetSkillValue {
 	private final float floatType;
-	private boolean booleanType;
+	private final boolean booleanType;
 	private final int index;
 	private Target target;
 
 	public SPSetSkillValue() {
 		this.floatType = 0;
 		this.index = 0;
+		this.booleanType = false;
 	}
 
 	public SPSetSkillValue(Target target, int slot, float amount, boolean boolset) {
@@ -44,21 +45,11 @@ public class SPSetSkillValue {
 			
 			if (playerpatch != null) {
 				switch (msg.target) {
-				case RESOURCE:
-					playerpatch.getSkill(msg.index).setResource(msg.floatType);
-					break;
-				case DURATION:
-					playerpatch.getSkill(msg.index).setDuration((int) msg.floatType);
-					break;
-				case MAX_DURATION:
-					playerpatch.getSkill(msg.index).setMaxDuration((int) msg.floatType);
-					break;
-				case STACK:
-					playerpatch.getSkill(msg.index).setStack((int) msg.floatType);
-					break;
-				case MAX_RESOURCE:
-					playerpatch.getSkill(msg.index).setMaxResource(msg.floatType);
-					break;
+				case RESOURCE -> playerpatch.getSkill(msg.index).setResource(msg.floatType);
+				case DURATION -> playerpatch.getSkill(msg.index).setDuration((int)msg.floatType);
+				case MAX_DURATION -> playerpatch.getSkill(msg.index).setMaxDuration((int)msg.floatType);
+				case STACK -> playerpatch.getSkill(msg.index).setStack((int)msg.floatType);
+				case MAX_RESOURCE -> playerpatch.getSkill(msg.index).setMaxResource(msg.floatType);
 				}
 			}
 		});

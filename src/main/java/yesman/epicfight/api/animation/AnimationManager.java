@@ -1,6 +1,7 @@
 package yesman.epicfight.api.animation;
 
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
@@ -47,7 +48,7 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	
 	public StaticAnimation byId(int animationId) {
 		if (!this.animationIdMap.contains(animationId)) {
-			throw new IllegalArgumentException("No animation id " + animationId);
+			throw new NoSuchElementException("No animation id " + animationId);
 		}
 		
 		return this.animationIdMap.byId(animationId);
@@ -59,7 +60,7 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	
 	public StaticAnimation byKeyOrThrow(ResourceLocation rl) {
 		if (!this.animationRegistry.containsKey(rl)) {
-			throw new IllegalArgumentException("No animation with registry name " + rl);
+			throw new NoSuchElementException("No animation with registry name " + rl);
 		}
 		
 		return this.byKey(rl);
@@ -116,6 +117,13 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	 */
 	public void registerUserAnimation(ClipHoldingAnimation animation) {
 		this.animationRegistry.put(animation.getCreator().getRegistryName(), animation.cast());
+	}
+	
+	/**
+	 * Remove user animations created by datapack edit screen
+	 */
+	public void removeUserAnimation(ClipHoldingAnimation animation) {
+		this.animationRegistry.remove(animation.getCreator().getRegistryName());
 	}
 	
 	public StaticAnimation refreshAnimation(StaticAnimation staticAnimation) {

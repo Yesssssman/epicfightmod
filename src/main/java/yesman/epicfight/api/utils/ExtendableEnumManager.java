@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import com.google.common.collect.Maps;
 
@@ -80,7 +81,7 @@ public class ExtendableEnumManager<T extends ExtendableEnum> {
 	
 	public T getOrThrow(int id) {
 		if (!this.enumMapByOrdinal.containsKey(id)) {
-			throw new IllegalArgumentException("Enum id " + id + " does not exist in " + this.enumName);
+			throw new NoSuchElementException("Enum id " + id + " does not exist in " + this.enumName);
 		}
 		
 		return this.enumMapByOrdinal.get(id);
@@ -90,7 +91,7 @@ public class ExtendableEnumManager<T extends ExtendableEnum> {
 		String key = name.toLowerCase(Locale.ROOT);
 		
 		if (!this.enumMapByName.containsKey(key)) {
-			throw new IllegalArgumentException("Enum name " + key + " does not exist in " + this.enumName);
+			throw new NoSuchElementException("Enum name " + key + " does not exist in " + this.enumName);
 		}
 		
 		return this.enumMapByName.get(key);

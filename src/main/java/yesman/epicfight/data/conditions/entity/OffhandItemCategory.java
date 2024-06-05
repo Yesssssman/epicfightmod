@@ -15,11 +15,11 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.client.gui.datapack.widgets.ComboBox;
-import yesman.epicfight.data.conditions.Condition.PlayerPatchCondition;
-import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
+import yesman.epicfight.data.conditions.Condition.EntityPatchCondition;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
 
-public class OffhandItemCategory extends PlayerPatchCondition {
+public class OffhandItemCategory extends EntityPatchCondition {
 	private WeaponCategory category;
 	
 	@Override
@@ -43,7 +43,7 @@ public class OffhandItemCategory extends PlayerPatchCondition {
 	}
 	
 	@Override
-	public boolean predicate(PlayerPatch<?> target) {
+	public boolean predicate(LivingEntityPatch<?> target) {
 		return target.getHoldingItemCapability(InteractionHand.OFF_HAND).getWeaponCategory() == this.category;
 	}
 	

@@ -52,8 +52,8 @@ public class CombatBehaviorScreen extends Screen {
 	
 	private Grid movesetGrid;
 	private Grid behaviorGrid;
-	private Grid conditionsGrid;
-	private Grid parametersGrid;
+	private Grid conditionGrid;
+	private Grid parameterGrid;
 	
 	protected CombatBehaviorScreen(Screen caller, CompoundTag rootTag, Armature armature, AnimatedMesh mesh, boolean isHumanoidSubTag) {
 		super(Component.translatable("datapack_edit.mob_patch.combat_behavior"));
@@ -87,8 +87,8 @@ public class CombatBehaviorScreen extends Screen {
 									.transparentBackground(false)
 									.rowpositionChanged((rowposition, values) -> {
 										this.inputComponentsList.importTag(this.movesetList.get(rowposition));
-										this.conditionsGrid._setActive(false);
-										this.parametersGrid._setActive(false);
+										this.conditionGrid._setActive(false);
+										this.parameterGrid._setActive(false);
 										animationPopupBox._setActive(false);
 										
 										this.rearrangeAttackAnimation();
@@ -106,8 +106,8 @@ public class CombatBehaviorScreen extends Screen {
 										
 										if (grid.children().size() > 0) {
 											this.inputComponentsList.setComponentsActive(true);
-											this.conditionsGrid._setActive(false);
-											this.parametersGrid._setActive(false);
+											this.conditionGrid._setActive(false);
+											this.parameterGrid._setActive(false);
 											animationPopupBox._setActive(false);
 										}
 									})
@@ -147,17 +147,17 @@ public class CombatBehaviorScreen extends Screen {
 						conditionImporter.newValue("condition", EpicFightConditions.getConditionOrNull(new ResourceLocation(condtionName)));
 					}
 					
-					this.parametersGrid.reset();
-					this.conditionsGrid._setValue(conditionImporter);
+					this.parameterGrid.reset();
+					this.conditionGrid._setValue(conditionImporter);
 					
-					if (this.conditionsGrid.children().size() > 0) {
-						this.conditionsGrid.setGridFocus(0, "condition");
+					if (this.conditionGrid.children().size() > 0) {
+						this.conditionGrid.setGridFocus(0, "condition");
 					}
 					
 					animationPopupBox._setValue(DatapackEditScreen.animationByKey(animation));
 					
-					this.conditionsGrid._setActive(true);
-					this.parametersGrid._setActive(true);
+					this.conditionGrid._setActive(true);
+					this.parameterGrid._setActive(true);
 					animationPopupBox._setActive(true);
 				})
 				.addColumn(Grid.editbox("behavior")
@@ -173,8 +173,8 @@ public class CombatBehaviorScreen extends Screen {
 					this.setFocused(grid);
 					
 					if (grid.children().size() > 0) {
-						this.conditionsGrid._setActive(true);
-						this.parametersGrid._setActive(true);
+						this.conditionGrid._setActive(true);
+						this.parameterGrid._setActive(true);
 						animationPopupBox._setActive(true);
 					}
 				})
@@ -185,8 +185,8 @@ public class CombatBehaviorScreen extends Screen {
 					});
 					
 					if (grid.children().size() == 0) {
-						this.conditionsGrid._setActive(false);
-						this.parametersGrid._setActive(false);
+						this.conditionGrid._setActive(false);
+						this.parameterGrid._setActive(false);
 						animationPopupBox._setActive(false);
 					}
 				})
@@ -238,7 +238,7 @@ public class CombatBehaviorScreen extends Screen {
 		
 		weightEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
 		
-		this.conditionsGrid = Grid.builder(this, caller.getMinecraft())
+		this.conditionGrid = Grid.builder(this, caller.getMinecraft())
 									.xy1(63, 0)
 									.xy2(10, 80)
 									.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
@@ -246,7 +246,7 @@ public class CombatBehaviorScreen extends Screen {
 									.rowEditable(RowEditButton.ADD_REMOVE)
 									.transparentBackground(false)
 									.rowpositionChanged((rowposition, values) -> {
-										this.parametersGrid.reset();
+										this.parameterGrid.reset();
 										
 										@SuppressWarnings("unchecked")
 										Supplier<Condition<?>> conditionProvider = (Supplier<Condition<?>>)values.get("condition");
@@ -264,7 +264,7 @@ public class CombatBehaviorScreen extends Screen {
 												parameters.newValue("parameter_value", editor.fromTag.apply(comp.get(editor.editWidget.getMessage().getString())));
 											}
 											
-											this.parametersGrid._setValue(parameters);
+											this.parameterGrid._setValue(parameters);
 										}
 									})
 									.addColumn(Grid.registryPopup("condition", EpicFightConditions.REGISTRY.get())
@@ -277,7 +277,7 @@ public class CombatBehaviorScreen extends Screen {
 														CompoundTag comp = (CompoundTag)conditionsList.get(event.rowposition);
 														comp.putString("predicate", ParseUtil.getRegistryName(event.postValue, EpicFightConditions.REGISTRY.get()));
 														
-														this.parametersGrid.reset();
+														this.parameterGrid.reset();
 														
 														if (event.postValue != null) {
 															Condition<?> condition = event.postValue.get();
@@ -289,7 +289,7 @@ public class CombatBehaviorScreen extends Screen {
 																parameters.newValue("parameter_value", editor.fromTag.apply(comp.get(editor.editWidget.getMessage().getString())));
 															}
 															
-															this.parametersGrid._setValue(parameters);
+															this.parameterGrid._setValue(parameters);
 														}
 													})
 													.width(180))
@@ -312,12 +312,12 @@ public class CombatBehaviorScreen extends Screen {
 										});
 										
 										if (grid.children().size() == 0) {
-											this.parametersGrid.reset();
+											this.parameterGrid.reset();
 										}
 									})
 									.build();
 		
-		this.parametersGrid = Grid.builder(this, caller.getMinecraft())
+		this.parameterGrid = Grid.builder(this, caller.getMinecraft())
 									.xy1(63, 0)
 									.xy2(10, 80)
 									.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
@@ -338,7 +338,7 @@ public class CombatBehaviorScreen extends Screen {
 													.valueChanged((event) -> {
 														ListTag behaviorListTag = ParseUtil.getOrDefaultTag(this.movesetList.get(this.movesetGrid.getRowposition()), "behaviors", new ListTag());
 														ListTag conditionsList = ParseUtil.getOrDefaultTag(behaviorListTag.getCompound(this.behaviorGrid.getRowposition()), "conditions", new ListTag());
-														CompoundTag conditionTag = conditionsList.getCompound(this.conditionsGrid.getRowposition());
+														CompoundTag conditionTag = conditionsList.getCompound(this.conditionGrid.getRowposition());
 														ParameterEditor editor = event.grid.getValue(event.rowposition, "parameter_key");
 														
 														if (StringUtil.isNullOrEmpty(ParseUtil.nullParam(event.postValue))) {
@@ -373,7 +373,7 @@ public class CombatBehaviorScreen extends Screen {
 		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(63), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior.conditions"));
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(this.conditionsGrid.relocateX(caller.getRectangle(), this.inputComponentsList.nextStart(60)));
+		this.inputComponentsList.addComponentCurrentRow(this.conditionGrid.relocateX(caller.getRectangle(), this.inputComponentsList.nextStart(60)));
 		this.inputComponentsList.newRow();
 		
 		this.inputComponentsList.newRow();
@@ -382,7 +382,7 @@ public class CombatBehaviorScreen extends Screen {
 		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(7), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior.parameters"));
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(this.parametersGrid.relocateX(caller.getRectangle(), this.inputComponentsList.nextStart(60)));
+		this.inputComponentsList.addComponentCurrentRow(this.parameterGrid.relocateX(caller.getRectangle(), this.inputComponentsList.nextStart(60)));
 		this.inputComponentsList.newRow();
 		
 		this.inputComponentsList.newRow();

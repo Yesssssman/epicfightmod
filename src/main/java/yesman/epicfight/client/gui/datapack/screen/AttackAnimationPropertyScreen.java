@@ -172,24 +172,24 @@ public class AttackAnimationPropertyScreen extends Screen {
 		this.lifetime.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Integer::parseInt));
 		
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.model_player.trail")));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.model_player.trail"));
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(12), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.client_data.start_time")));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(12), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data.start_time"));
 		this.inputComponentsList.addComponentCurrentRow(this.startTime.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(12), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.client_data.end_time")));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(12), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data.end_time"));
 		this.inputComponentsList.addComponentCurrentRow(this.endTime.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(12), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.client_data.joint")));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(12), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data.joint"));
 		this.inputComponentsList.addComponentCurrentRow(this.joint.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(12), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.hand")));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(12), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.hand"));
 		this.inputComponentsList.addComponentCurrentRow(this.hand.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(12), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.interpolations")));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(12), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.interpolations"));
 		this.inputComponentsList.addComponentCurrentRow(this.interpolations.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(12), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.lifetime")));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(12), 80, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.lifetime"));
 		this.inputComponentsList.addComponentCurrentRow(this.lifetime.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 		
 		this.inputComponentsList.setComponentsActive(false);

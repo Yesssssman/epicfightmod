@@ -404,9 +404,6 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 						for (AttackAnimation.JointColliderPair pair : phase.getColliders()) {
 							Pose prevPose = animation.getRawPose(player.getPrevElapsedTime());
 							Pose currentPose = animation.getRawPose(player.getElapsedTime());
-							prevPose.getOrDefaultTransform("Root").translation().set(0.0F, 0.0F, 0.0F);
-							currentPose.getOrDefaultTransform("Root").translation().set(0.0F, 0.0F, 0.0F);
-							
 							this.collider.drawInternal(guiGraphics.pose(), bufferbuilder, this.getArmature(), pair.getFirst(), prevPose, currentPose, partialTicks, -1);
 						}
 					}

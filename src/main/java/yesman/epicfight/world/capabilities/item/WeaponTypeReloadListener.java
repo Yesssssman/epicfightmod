@@ -1,16 +1,21 @@
 package yesman.epicfight.world.capabilities.item;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+
+import org.apache.commons.compress.utils.Lists;
 
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Pair;
 
 import io.netty.util.internal.StringUtil;
 import net.minecraft.core.particles.ParticleType;
@@ -34,7 +39,7 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
 import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.api.forgeevent.WeaponCapabilityPresetRegistryEvent;
-import yesman.epicfight.data.conditions.Condition;
+import yesman.epicfight.data.conditions.Condition.EntityPatchCondition;
 import yesman.epicfight.data.conditions.EpicFightConditions;
 import yesman.epicfight.gameasset.ColliderPreset;
 import yesman.epicfight.main.EpicFightMod;
@@ -201,27 +206,63 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 		}
 		
 		CompoundTag stylesTag = tag.getCompound("styles");
-		StyleEntry styleEntry = new StyleEntry();
-		
-		stylesTag.getList("cases", Tag.TAG_COMPOUND);
+		final List<Pair<Predicate<LivingEntityPatch<?>>, Style>> conditions = Lists.newArrayList();
+		final Style defaultStyle = Style.ENUM_MANAGER.getOrThrow(stylesTag.getString("default"));
 		
 		for (Tag caseTag : stylesTag.getList("cases", Tag.TAG_COMPOUND)) {
 			CompoundTag caseCompTag = (CompoundTag)caseTag;
+			List<EntityPatchCondition> conditionList = Lists.newArrayList();
 			
-			Supplier<Condition<LivingEntityPatch<?>>> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(caseCompTag.getString("condition")));
-			Condition<LivingEntityPatch<?>> condition = conditionProvider.get().read(caseCompTag.getCompound("predicate"));
+			for (Tag offhandTag : caseCompTag.getList("conditions", Tag.TAG_COMPOUND)) {
+				CompoundTag offhandCompound = (CompoundTag)offhandTag;
+				Supplier<EntityPatchCondition> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(offhandCompound.getString("predicate")));
+				EntityPatchCondition condition = conditionProvider.get();
+				condition.read(offhandCompound);
+				conditionList.add(condition);
+			}
 			
-			Style style = Style.ENUM_MANAGER.getOrThrow(caseCompTag.getString("style"));
-			styleEntry.putNewEntry(condition, style);
+			conditions.add(Pair.of((entitypatch) -> {
+				for (EntityPatchCondition condition : conditionList) {
+					if (!condition.predicate(entitypatch)) {
+						return false;
+					}
+				}
+				
+				return true;
+			}, Style.ENUM_MANAGER.getOrThrow(caseCompTag.getString("style"))));
 		}
 		
-		styleEntry.elseStyle = Style.ENUM_MANAGER.getOrThrow(stylesTag.getString("default"));
-		builder.styleProvider(styleEntry::getStyle);
+		builder.styleProvider((entitypatch) -> {
+			for (Pair<Predicate<LivingEntityPatch<?>>, Style> entry : conditions) {
+				if (entry.getFirst().test(entitypatch)) {
+					return entry.getSecond();
+				}
+			}
+			
+			return defaultStyle;
+		});
 		
 		if (tag.contains("offhand_item_compatible_predicate")) {
-			CompoundTag offhandValidatorTag = tag.getCompound("offhand_item_compatible_predicate");
-			Supplier<Condition<LivingEntityPatch<?>>> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(offhandValidatorTag.getString("condition")));
-			builder.weaponCombinationPredicator(conditionProvider.get().read(offhandValidatorTag.getCompound("predicate"))::predicate);
+			ListTag offhandValidatorList = tag.getList("offhand_item_compatible_predicate", Tag.TAG_COMPOUND);
+			List<EntityPatchCondition> conditionList = Lists.newArrayList();
+			
+			for (Tag offhandTag : offhandValidatorList) {
+				CompoundTag offhandCompound = (CompoundTag)offhandTag;
+				Supplier<EntityPatchCondition> conditionProvider = EpicFightConditions.getConditionOrThrow(new ResourceLocation(offhandCompound.getString("predicate")));
+				EntityPatchCondition condition = conditionProvider.get();
+				condition.read(offhandCompound);
+				conditionList.add(condition);
+			}
+			
+			builder.weaponCombinationPredicator((entitypatch) -> {
+				for (EntityPatchCondition condition : conditionList) {
+					if (!condition.predicate(entitypatch)) {
+						return false;
+					}
+				}
+				
+				return true;
+			});
 		}
 		
 		return builder;

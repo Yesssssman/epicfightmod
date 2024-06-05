@@ -16,6 +16,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.gui.components.ObjectSelectionList;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.screens.Screen;
@@ -36,8 +37,9 @@ public class EditItemListScreen extends Screen {
 	private final EditSwitchingItemScreen.RegisteredItemList opponentList;
 	private final List<Item> registered;
 	private final List<Item> opponentRegistered;
-	private EditItemListScreen.ButtonList itemButtonList;
-	private EditItemListScreen.ButtonList selectedItemList;
+	private EditItemListScreen.ItemList allItemsList;
+	private EditItemListScreen.ItemList selectedItemList;
+	private final EditBox searchBox;
 	
 	protected EditItemListScreen(Screen parentScreen, EditSwitchingItemScreen.RegisteredItemList targetList, EditSwitchingItemScreen.RegisteredItemList opponentList) {
 		super(Component.empty());
@@ -46,34 +48,42 @@ public class EditItemListScreen extends Screen {
 		this.opponentList = opponentList;
 		this.registered = targetList.toList();
 		this.opponentRegistered = opponentList.toList();
+		
+		this.allItemsList = new EditItemListScreen.ItemList(this.minecraft, 0, 0, 0, 0, Lists.newArrayList(ForgeRegistries.ITEMS.getValues()), Type.SELECTABLES);
+		this.selectedItemList = new EditItemListScreen.ItemList(this.minecraft, 0, 0, 0, 0, Lists.newArrayList(), Type.SELECTED);
+		this.searchBox = new EditBox(parentScreen.getMinecraft().font, 0, 0, 150, 16, Component.literal("datapack_edit.keyword"));
+		this.searchBox.setResponder(this.allItemsList::refreshItems);
 	}
 	
 	@Override
 	protected void init() {
-		List<Item> itemList = Lists.newArrayList(ForgeRegistries.ITEMS.getValues());
-		List<Item> selectedItemList = this.selectedItemList == null ? Lists.newArrayList() : this.selectedItemList.toList();
-		this.itemButtonList = new EditItemListScreen.ButtonList(this.minecraft, this.width - 50, this.height, 24, this.height - 120, itemList, Type.LIST);
-		this.selectedItemList = new EditItemListScreen.ButtonList(this.minecraft, this.width - 50, this.height, this.height - 100, this.height - 30, selectedItemList, Type.SELECTED);
-		this.itemButtonList.setLeftPos(25);
+		this.allItemsList.updateSize(this.width - 50, this.height, 36, this.height - 120);
+		this.selectedItemList.updateSize(this.width - 50, this.height, this.height - 100, this.height - 30);
+		this.allItemsList.setLeftPos(25);
 		this.selectedItemList.setLeftPos(25);
-		this.addRenderableWidget(this.itemButtonList);
+		
+		this.searchBox.setPosition(this.width - 176, 16);
+		
+		this.addRenderableWidget(this.allItemsList);
 		this.addRenderableWidget(this.selectedItemList);
+		this.addRenderableWidget(this.searchBox);
+		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {
 			for (Item item : this.selectedItemList.toList()) {
 				this.targetList.addEntry(item);
 				this.opponentList.removeIfPresent(item);
 			}
 			this.onClose();
-		}).bounds(this.width / 2 + 125, this.height - 26, 60, 20).build());
+		}).bounds(this.width - 85, this.height - 26, 60, 20).build());
 	}
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		this.renderDirtBackground(guiGraphics);
-		this.itemButtonList.render(guiGraphics, mouseX, mouseY, partialTicks);
+		this.allItemsList.render(guiGraphics, mouseX, mouseY, partialTicks);
 		this.selectedItemList.render(guiGraphics, mouseX, mouseY, partialTicks);
 		super.render(guiGraphics, mouseX, mouseY, partialTicks);
-		guiGraphics.drawString(this.font, Component.literal("Item List").withStyle(ChatFormatting.UNDERLINE), 28, 10, 16777215, false);
+		guiGraphics.drawString(this.font, Component.literal("Item List").withStyle(ChatFormatting.UNDERLINE), 28, 18, 16777215, false);
 		guiGraphics.drawString(this.font, Component.literal("Seleted Items").withStyle(ChatFormatting.UNDERLINE), 28, this.height-114, 16777215, false);
 	}
 	
@@ -83,25 +93,31 @@ public class EditItemListScreen extends Screen {
 	}
 	
 	private enum Type {
-		LIST, SELECTED
+		SELECTABLES, SELECTED
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	class ButtonList extends ObjectSelectionList<EditItemListScreen.ButtonList.ButtonEntry> {
+	class ItemList extends ObjectSelectionList<EditItemListScreen.ItemList.ButtonEntry> {
 		private final Type type;
-		private final int itemsInColumn;
+		private int itemsInColumn;
+		private List<Item> items;
 		
-		public ButtonList(Minecraft mcIn, int width, int height, int top, int bottom, List<Item> items, Type type) {
-			super(mcIn, width, height, top, bottom, 18);
+		public ItemList(Minecraft minecraft, int width, int height, int top, int bottom, List<Item> items, Type type) {
+			super(minecraft, width, height, top, bottom, 18);
+			
 			this.itemsInColumn = width / 17;
 			this.type = type;
-			this.addEntry(new ButtonEntry());
+			this.items = items;
 			
-			for (Item item : items) {
-				if (this.type != Type.LIST || !EditItemListScreen.this.registered.contains(item)) {
+			for (Item item : this.items) {
+				if (this.type != Type.SELECTABLES || !EditItemListScreen.this.registered.contains(item)) {
 					this.addItem(item);
 				}
 			}
+			
+			this.setRenderBackground(false);
+			this.setRenderHeader(false, 0);
+			this.setRenderTopAndBottom(false);
 		}
 		
 		public boolean has(Item item) {
@@ -116,7 +132,12 @@ public class EditItemListScreen extends Screen {
 		}
 		
 		public void addItem(Item item) {
+			if (this.children().size() == 0) {
+				this.addEntry(new ButtonEntry());
+			}
+			
 			ButtonEntry entry = this.getEntry(this.children().size() - 1);
+			
 			if (entry.buttonList.size() > this.itemsInColumn) {
 				this.addEntry(new ButtonEntry());
 				entry = this.getEntry(this.children().size() - 1);
@@ -124,13 +145,13 @@ public class EditItemListScreen extends Screen {
 			
 			IPressableExtended pressAction = null;
 			
-			if (ButtonList.this.type == Type.LIST) {
+			if (ItemList.this.type == Type.SELECTABLES) {
 				pressAction = (screen, button, x, y) -> {
 					if (!screen.selectedItemList.has(item)) {
 						screen.selectedItemList.addItem(button.itemStack.getItem());
 					}
 				};
-			} else if (ButtonList.this.type == Type.SELECTED) {
+			} else if (ItemList.this.type == Type.SELECTED) {
 				pressAction = (screen, button, x, y) -> {
 					screen.selectedItemList.removeAndRearrange(x, y);
 				};
@@ -143,13 +164,21 @@ public class EditItemListScreen extends Screen {
 			this.getEntry(y).buttonList.remove(x);
 		}
 		
+		private void refreshItems(String keyword) {
+			this.children().clear();
+			this.items.stream().filter((item) -> item.getDescriptionId().contains(keyword)).forEach(this::addItem);
+			this.setScrollAmount(0.0D);
+		}
+		
 		public List<Item> toList() {
 			List<Item> result = Lists.newArrayList();
+			
 			for (ButtonEntry entry : this.children()) {
 				for (ItemButton button : entry.buttonList) {
 					result.add(button.itemStack.getItem());
 				}
 			}
+			
 			return result;
 		}
 		
@@ -167,7 +196,9 @@ public class EditItemListScreen extends Screen {
 			if (mouseX < this.x0 + 2 || mouseX > this.x1 - 8 || mouseY < this.y0 + 2 || mouseY > this.y1 - 2) {
 				return null;
 			}
+			
 			int column = (int)((this.getScrollAmount() + mouseY - this.y0 - 4) / this.itemHeight);
+			
 			if (this.children().size() > column) {
 				return this.getEntry(column);
 			}
@@ -271,9 +302,17 @@ public class EditItemListScreen extends Screen {
 			return this.x1 - 6;
 		}
 		
+		@Override
+		public void updateSize(int width, int height, int top, int bottom) {
+			super.updateSize(width, height, top, bottom);
+			
+			this.itemsInColumn = width / 17;
+			this.refreshItems(EditItemListScreen.this.searchBox.getValue());
+		}
+
 		@OnlyIn(Dist.CLIENT)
-		class ButtonEntry extends ObjectSelectionList.Entry<EditItemListScreen.ButtonList.ButtonEntry> {
-			private final List<ItemButton> buttonList;
+		class ButtonEntry extends ObjectSelectionList.Entry<EditItemListScreen.ItemList.ButtonEntry> {
+			final List<ItemButton> buttonList;
 			
 			public ButtonEntry() {
 				this.buttonList = Lists.newArrayList();
@@ -293,8 +332,8 @@ public class EditItemListScreen extends Screen {
 			@Override
 			public boolean mouseClicked(double mouseX, double mouseY, int button) {
 				if (button == 0) {
-					int row = (int)((mouseX - ButtonList.this.x0 - 2) / 16);
-					int column = (int)((ButtonList.this.getScrollAmount() + mouseY - ButtonList.this.y0 - 4) / ButtonList.this.itemHeight);
+					int row = (int)((mouseX - ItemList.this.x0 - 2) / 16);
+					int column = (int)((ItemList.this.getScrollAmount() + mouseY - ItemList.this.y0 - 4) / ItemList.this.itemHeight);
 					ItemButton itembutton = this.getButton(row);
 					if (itembutton != null) {
 						itembutton = itembutton.isMouseOver(mouseX, mouseY) ? itembutton : null;

@@ -269,6 +269,9 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 				try {
 					CapabilityItem itemCap = deserializeWeapon(item, tag);
 					ItemCapabilityProvider.put(item, itemCap);
+				} catch (NoSuchElementException e) {
+					e.printStackTrace();
+					throw e;
 				} catch (Exception e) {
 					EpicFightMod.LOGGER.warn("Can't read item capability for " + item);
 					e.printStackTrace();
@@ -279,6 +282,9 @@ public class ItemCapabilityReloadListener extends SimpleJsonResourceReloadListen
 				try {
 					CapabilityItem itemCap = deserializeWeapon(item, tag);
 					ItemCapabilityProvider.put(item, itemCap);
+				} catch (NoSuchElementException e) {
+					e.printStackTrace();
+					throw e;
 				} catch (Exception e) {
 					EpicFightMod.LOGGER.warn("Can't read item capability for " + item);
 					e.printStackTrace();

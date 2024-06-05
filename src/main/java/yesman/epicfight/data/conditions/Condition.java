@@ -11,8 +11,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
-import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public interface Condition<T> {
 	public Condition<T> read(CompoundTag tag);
@@ -22,7 +22,7 @@ public interface Condition<T> {
 	@OnlyIn(Dist.CLIENT)
 	public List<ParameterEditor> getAcceptingParameters(Screen screen);
 	
-	public static abstract class PlayerPatchCondition implements Condition<PlayerPatch<?>> {
+	public static abstract class EntityPatchCondition implements Condition<LivingEntityPatch<?>> {
 	}
 	
 	public static abstract class EntityCondition implements Condition<Entity> {

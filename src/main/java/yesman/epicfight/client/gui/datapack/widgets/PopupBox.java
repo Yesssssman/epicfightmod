@@ -248,7 +248,13 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 				weaponTypeEntry.addAll(DatapackEditScreen.getSerializableWeaponTypes());
 				
 				this.owner.getMinecraft().setScreen(new SelectFromRegistryScreen<>(this.owner, ParseUtil.mapEntryToPair(weaponTypeEntry), "Weapon Type", (name, item) -> {
+					var responder = this.responder;
+					
+					this._setResponder(null);
 					this._setValue(item);
+					responder.accept(Pair.of(name, item));
+					this._setResponder(responder);
+					
 					this.setDisplayText(name);
 				}, (c) -> {}, this.getFilter()));
 			}

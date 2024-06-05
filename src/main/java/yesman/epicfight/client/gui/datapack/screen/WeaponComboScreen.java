@@ -311,6 +311,15 @@ public class WeaponComboScreen extends Screen {
 	}
 	
 	@Override
+	public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
+		if (this.modelPreviewer.mouseDragged(mouseX, mouseY, button, dx, dy)) {
+			return true;
+		}
+		
+		return super.mouseDragged(mouseX, mouseY, button, dx, dy);
+	}
+	
+	@Override
 	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTick) {
 		int yBegin = 32;
 		int yEnd = this.height - 45;

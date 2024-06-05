@@ -382,12 +382,13 @@ public class DatapackEditScreen extends Screen {
 			
 			this.minecraft.setScreen(new MessageScreen<>("", "Would you like to load the previous pack?", this, (button) -> {
 				this.minecraft.setScreen(workingPackScreen);
+				
+				workingPackScreen.userMeshes.forEach(Meshes::addMesh);
+				workingPackScreen.userArmatures.forEach(Armatures::addArmature);
+				workingPackScreen.userAnimations.values().forEach((packEntry) -> AnimationManager.getInstance().registerUserAnimation(packEntry.getValue()));
 			}, (button) -> {
 				this.minecraft.setScreen(this);
 				workingPackScreen = this;
-				
-				Meshes.build(Minecraft.getInstance().getResourceManager());
-				Armatures.build(Minecraft.getInstance().getResourceManager());
 			}, 180, 70));
 		}
 	}
@@ -606,6 +607,10 @@ public class DatapackEditScreen extends Screen {
 			out.write(gson.toJson(root).getBytes());
 			out.closeEntry();
 		}
+		
+		this.userAnimations.values().forEach((packEntry) -> AnimationManager.getInstance().removeUserAnimation(packEntry.getValue()));
+		Meshes.build(Minecraft.getInstance().getResourceManager());
+		Armatures.build(Minecraft.getInstance().getResourceManager());
 	}
 	
 	public Map<ResourceLocation, AnimatedMesh> getUserMeshes() {
@@ -810,7 +815,7 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.styles"));
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
-				return new StylesScreen(DatapackEditScreen.this, ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "styles", new CompoundTag()));
+				return new StylesScreen(DatapackEditScreen.this, this.packList.get(this.packListGrid.getRowposition()).getValue());
 			}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.newRow();
@@ -1037,11 +1042,25 @@ public class DatapackEditScreen extends Screen {
 		}
 		
 		@Override
+		public void packGridRowpositionChanged(int rowposition, Map<String, Object> values) {
+			super.packGridRowpositionChanged(rowposition, values);
+			
+			try {
+				CompoundTag tag = this.packList.get(rowposition).getValue();
+				Collider collider = ColliderPreset.deserializeSimpleCollider(tag.getCompound("collider"));
+				this.modelPreviewer.setCollider(collider);
+			} catch (IllegalArgumentException e) {
+				this.modelPreviewer.setCollider(null);
+			}
+		}
+		
+		@Override
 		public void validateBeforeExport() {
 			for (PackEntry<ResourceLocation, CompoundTag> packEntry : this.packList) {
 				try {
 					WeaponTypeReloadListener.deserializeWeaponCapabilityBuilder(packEntry.getValue());
 				} catch (Exception e) {
+					e.printStackTrace();
 					throw new IllegalStateException("Failed to export weapon type " + packEntry.getKey() + " :\n" + e.getMessage());
 				}
 			}
@@ -1058,11 +1077,16 @@ public class DatapackEditScreen extends Screen {
 						CompoundTag compTag = TagParser.parseTag(jsonObject.toString());
 						ResourceLocation rl = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll(this.directory + "/", "").replaceAll(".json", ""));
 						
-						WeaponCapability.Builder builder = WeaponTypeReloadListener.deserializeWeaponCapabilityBuilder(compTag);
-						WeaponTypeReloadListener.register(rl, builder);
-						
-						this.packList.add(PackEntry.of(rl, () -> compTag));
-						this.packListGrid.addRowWithDefaultValues("pack_item", rl.toString());
+						try {
+							WeaponCapability.Builder builder = WeaponTypeReloadListener.deserializeWeaponCapabilityBuilder(compTag);
+							WeaponTypeReloadListener.register(rl, builder);
+							
+							this.packList.add(PackEntry.of(rl, () -> compTag));
+							this.packListGrid.addRowWithDefaultValues("pack_item", rl.toString());
+						} catch (Exception e) {
+							EpicFightMod.LOGGER.info("Failed to import " + rl + " because of " + e.getMessage());
+							e.printStackTrace();
+						}
 					} catch (IOException | CommandSyntaxException e) {
 						e.printStackTrace();
 					}
@@ -1135,6 +1159,7 @@ public class DatapackEditScreen extends Screen {
 					if (itemType == ItemType.WEAPON) {
 						CompoundTag trailTag = ParseUtil.getOrSupply(tag, "trail", CompoundTag::new);
 						CompoundTag colliderTag = ParseUtil.getOrSupply(tag, "collider", CompoundTag::new);
+						
 						boolean centerInit = colliderTag.contains("center");
 						boolean sizeInit = colliderTag.contains("size");
 						boolean colorInit = trailTag.contains("color");
@@ -1184,56 +1209,6 @@ public class DatapackEditScreen extends Screen {
 		}
 		
 		private void rearrangeElements(ItemType itemType, CompoundTag tag) {
-			if (itemType == ItemType.WEAPON) {
-				CompoundTag trailTag = ParseUtil.getOrSupply(tag, "trail", CompoundTag::new);
-				CompoundTag colliderTag = ParseUtil.getOrSupply(tag, "collider", CompoundTag::new);
-				boolean centerInit = colliderTag.contains("center");
-				boolean sizeInit = colliderTag.contains("size");
-				boolean colorInit = trailTag.contains("color");
-				boolean beginInit = trailTag.contains("begin_pos");
-				boolean endInit = trailTag.contains("end_pos");
-				
-				if (!centerInit) {
-					ListTag list = new ListTag();
-					list.add(DoubleTag.valueOf(0.0D));
-					list.add(DoubleTag.valueOf(0.0D));
-					list.add(DoubleTag.valueOf(0.0D));
-					colliderTag.put("center", list);
-				}
-				
-				if (!sizeInit) {
-					ListTag list = new ListTag();
-					list.add(DoubleTag.valueOf(0.0D));
-					list.add(DoubleTag.valueOf(0.0D));
-					list.add(DoubleTag.valueOf(0.0D));
-					colliderTag.put("size", list);
-				}
-				
-				if (!colorInit) {
-					ListTag list = new ListTag();
-					list.add(IntTag.valueOf(0));
-					list.add(IntTag.valueOf(0));
-					list.add(IntTag.valueOf(0));
-					trailTag.put("color", list);
-				}
-				
-				if (!beginInit) {
-					ListTag list = new ListTag();
-					list.add(DoubleTag.valueOf(0.0D));
-					list.add(DoubleTag.valueOf(0.0D));
-					list.add(DoubleTag.valueOf(0.0D));
-					trailTag.put("begin_pos", list);
-				}
-				
-				if (!endInit) {
-					ListTag list = new ListTag();
-					list.add(DoubleTag.valueOf(0.0D));
-					list.add(DoubleTag.valueOf(0.0D));
-					list.add(DoubleTag.valueOf(0.0D));
-					trailTag.put("end_pos", list);
-				}
-			}
-			
 			this.inputComponentsList.clearComponents();
 			
 			Font font = DatapackEditScreen.this.font;
@@ -1254,7 +1229,8 @@ public class DatapackEditScreen extends Screen {
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.type"));
 				this.inputComponentsList.addComponentCurrentRow(new PopupBox.WeaponTypePopupBox(DatapackEditScreen.this, font, this.inputComponentsList.nextStart(5), 15, 15, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.item_capability.type"),
 																				(pair) -> {
-																					this.packList.get(this.packListGrid.getRowposition()).getValue().putString("type", pair.getFirst());
+																					CompoundTag currentTag = this.packList.get(this.packListGrid.getRowposition()).getValue();
+																					currentTag.putString("type", pair.getFirst());
 																					
 																					if (pair.getSecond() != null) {
 																						CapabilityItem.Builder builder = pair.getSecond().apply(this.registry.getValue(this.packList.get(this.packListGrid.getRowposition()).getKey()));
@@ -1272,7 +1248,19 @@ public class DatapackEditScreen extends Screen {
 																							
 																							allAnimations.stream().map((provider) -> provider.get()).forEach(this.modelPreviewer::addAnimationToPlay);
 																							
-																							this.modelPreviewer.setCollider(weaponBuilder.getCollider());
+																							boolean hasCustomCollider = false;
+																							
+																							if (currentTag.contains("collider")) {
+																								try {
+																									ColliderPreset.deserializeSimpleCollider(currentTag.getCompound("collider"));
+																									hasCustomCollider = true;
+																								} finally {
+																								}
+																							}
+																							
+																							if (!hasCustomCollider) {
+																								this.modelPreviewer.setCollider(weaponBuilder.getCollider());
+																							}
 																						}
 																					}
 																				}));
@@ -1303,11 +1291,16 @@ public class DatapackEditScreen extends Screen {
 				
 				colliderCenterX.setResponder((input) -> {
 					CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
-					ListTag centerVec = collider.getList("center", Tag.TAG_DOUBLE);
+					ListTag centerVec = ParseUtil.getOrDefaultTag(collider, "center", new ListTag());
+					
+					if (centerVec.isEmpty()) {
+						centerVec.add(DoubleTag.valueOf(0.0D));
+						centerVec.add(DoubleTag.valueOf(0.0D));
+						centerVec.add(DoubleTag.valueOf(0.0D));
+					}
 					
 					double i = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
-					centerVec.remove(0);
-					centerVec.add(0, DoubleTag.valueOf(i));
+					centerVec.set(0, DoubleTag.valueOf(i));
 					
 					try {
 						this.modelPreviewer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
@@ -1318,11 +1311,16 @@ public class DatapackEditScreen extends Screen {
 				
 				colliderCenterY.setResponder((input) -> {
 					CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
-					ListTag centerVec = collider.getList("center", Tag.TAG_DOUBLE);
+					ListTag centerVec = ParseUtil.getOrDefaultTag(collider, "center", new ListTag());
+					
+					if (centerVec.isEmpty()) {
+						centerVec.add(DoubleTag.valueOf(0.0D));
+						centerVec.add(DoubleTag.valueOf(0.0D));
+						centerVec.add(DoubleTag.valueOf(0.0D));
+					}
 					
 					double i = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
-					centerVec.remove(1);
-					centerVec.add(1, DoubleTag.valueOf(i));
+					centerVec.set(1, DoubleTag.valueOf(i));
 					
 					try {
 						this.modelPreviewer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
@@ -1333,11 +1331,16 @@ public class DatapackEditScreen extends Screen {
 				
 				colliderCenterZ.setResponder((input) -> {
 					CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
-					ListTag centerVec = collider.getList("center", Tag.TAG_DOUBLE);
+					ListTag centerVec = ParseUtil.getOrDefaultTag(collider, "center", new ListTag());
+					
+					if (centerVec.isEmpty()) {
+						centerVec.add(DoubleTag.valueOf(0.0D));
+						centerVec.add(DoubleTag.valueOf(0.0D));
+						centerVec.add(DoubleTag.valueOf(0.0D));
+					}
 					
 					double i = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
-					centerVec.remove(2);
-					centerVec.add(2, DoubleTag.valueOf(i));
+					centerVec.set(2, DoubleTag.valueOf(i));
 					
 					try {
 						this.modelPreviewer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
@@ -1348,11 +1351,16 @@ public class DatapackEditScreen extends Screen {
 				
 				colliderSizeX.setResponder((input) -> {
 					CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
-					ListTag centerVec = collider.getList("size", Tag.TAG_DOUBLE);
+					ListTag sizeVec = ParseUtil.getOrDefaultTag(collider, "size", new ListTag());
+					
+					if (sizeVec.isEmpty()) {
+						sizeVec.add(DoubleTag.valueOf(0.0D));
+						sizeVec.add(DoubleTag.valueOf(0.0D));
+						sizeVec.add(DoubleTag.valueOf(0.0D));
+					}
 					
 					double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
-					centerVec.remove(0);
-					centerVec.add(0, DoubleTag.valueOf(i));
+					sizeVec.set(0, DoubleTag.valueOf(i));
 					
 					try {
 						this.modelPreviewer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
@@ -1363,11 +1371,16 @@ public class DatapackEditScreen extends Screen {
 				
 				colliderSizeY.setResponder((input) -> {
 					CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
-					ListTag centerVec = collider.getList("size", Tag.TAG_DOUBLE);
+					ListTag sizeVec = ParseUtil.getOrDefaultTag(collider, "size", new ListTag());
+					
+					if (sizeVec.isEmpty()) {
+						sizeVec.add(DoubleTag.valueOf(0.0D));
+						sizeVec.add(DoubleTag.valueOf(0.0D));
+						sizeVec.add(DoubleTag.valueOf(0.0D));
+					}
 					
 					double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
-					centerVec.remove(1);
-					centerVec.add(1, DoubleTag.valueOf(i));
+					sizeVec.set(1, DoubleTag.valueOf(i));
 					
 					try {
 						this.modelPreviewer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
@@ -1378,11 +1391,16 @@ public class DatapackEditScreen extends Screen {
 				
 				colliderSizeZ.setResponder((input) -> {
 					CompoundTag collider = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "collider", new CompoundTag());
-					ListTag centerVec = collider.getList("size", Tag.TAG_DOUBLE);
+					ListTag sizeVec = ParseUtil.getOrDefaultTag(collider, "size", new ListTag());
+					
+					if (sizeVec.isEmpty()) {
+						sizeVec.add(DoubleTag.valueOf(0.0D));
+						sizeVec.add(DoubleTag.valueOf(0.0D));
+						sizeVec.add(DoubleTag.valueOf(0.0D));
+					}
 					
 					double i = StringUtil.isNullOrEmpty(input) ? 0 : Double.valueOf(input);
-					centerVec.remove(2);
-					centerVec.add(2, DoubleTag.valueOf(i));
+					sizeVec.set(2, DoubleTag.valueOf(i));
 					
 					try {
 						this.modelPreviewer.setCollider(ColliderPreset.deserializeSimpleCollider(collider));
@@ -1455,10 +1473,16 @@ public class DatapackEditScreen extends Screen {
 				
 				colorR.setResponder((input) -> {
 					CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
-					ListTag list = trailTag.getList("color", Tag.TAG_INT);
+					ListTag list = ParseUtil.getOrDefaultTag(trailTag, "color", new ListTag());
+					
+					if (list.isEmpty()) {
+						list.add(IntTag.valueOf(0));
+						list.add(IntTag.valueOf(0));
+						list.add(IntTag.valueOf(0));
+					}
+					
 					int i = StringUtil.isNullOrEmpty(input) ? 0 : Integer.valueOf(input);
-					list.remove(0);
-					list.add(0, IntTag.valueOf(i));
+					list.set(0, IntTag.valueOf(i));
 					colorWidget.setColor(ParseUtil.parseOrGet(input, Integer::valueOf, 0), ParseUtil.parseOrGet(colorG.getValue(), Integer::valueOf, 0), ParseUtil.parseOrGet(colorB.getValue(), Integer::valueOf, 0));
 					
 					TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
@@ -1466,10 +1490,16 @@ public class DatapackEditScreen extends Screen {
 				});
 				colorG.setResponder((input) -> {
 					CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
-					ListTag list = trailTag.getList("color", Tag.TAG_INT);
+					ListTag list = ParseUtil.getOrDefaultTag(trailTag, "color", new ListTag());
+					
+					if (list.isEmpty()) {
+						list.add(IntTag.valueOf(0));
+						list.add(IntTag.valueOf(0));
+						list.add(IntTag.valueOf(0));
+					}
+					
 					int i = StringUtil.isNullOrEmpty(input) ? 0 : Integer.valueOf(input);
-					list.remove(1);
-					list.add(1, IntTag.valueOf(i));
+					list.set(1, IntTag.valueOf(i));
 					colorWidget.setColor(ParseUtil.parseOrGet(colorR.getValue(), Integer::valueOf, 0), ParseUtil.parseOrGet(input, Integer::valueOf, 0), ParseUtil.parseOrGet(colorB.getValue(), Integer::valueOf, 0));
 					
 					TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
@@ -1477,10 +1507,16 @@ public class DatapackEditScreen extends Screen {
 				});
 				colorB.setResponder((input) -> {
 					CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
-					ListTag list = trailTag.getList("color", Tag.TAG_INT);
+					ListTag list = ParseUtil.getOrDefaultTag(trailTag, "color", new ListTag());
+					
+					if (list.isEmpty()) {
+						list.add(IntTag.valueOf(0));
+						list.add(IntTag.valueOf(0));
+						list.add(IntTag.valueOf(0));
+					}
+					
 					int i = StringUtil.isNullOrEmpty(input) ? 0 : Integer.valueOf(input);
-					list.remove(2);
-					list.add(2, IntTag.valueOf(i));
+					list.set(2, IntTag.valueOf(i));
 					colorWidget.setColor(ParseUtil.parseOrGet(colorR.getValue(), Integer::valueOf, 0), ParseUtil.parseOrGet(colorG.getValue(), Integer::valueOf, 0), ParseUtil.parseOrGet(input, Integer::valueOf, 0));
 					
 					TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
@@ -1507,30 +1543,48 @@ public class DatapackEditScreen extends Screen {
 				
 				beginX.setResponder((input) -> {
 					CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
-					ListTag list = trailTag.getList("begin_pos", Tag.TAG_DOUBLE);
+					ListTag list = ParseUtil.getOrDefaultTag(trailTag, "begin_pos", new ListTag());
+					
+					if (list.isEmpty()) {
+						list.add(IntTag.valueOf(0));
+						list.add(IntTag.valueOf(0));
+						list.add(IntTag.valueOf(0));
+					}
+					
 					double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
-					list.remove(0);
-					list.add(0, DoubleTag.valueOf(d));
+					list.set(0, DoubleTag.valueOf(d));
 					
 					TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
 					this.modelPreviewer.setTrailInfo(trailInfo);
 				});
 				beginY.setResponder((input) -> {
 					CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
-					ListTag list = trailTag.getList("begin_pos", Tag.TAG_DOUBLE);
+					ListTag list = ParseUtil.getOrDefaultTag(trailTag, "begin_pos", new ListTag());
+					
+					if (list.isEmpty()) {
+						list.add(IntTag.valueOf(0));
+						list.add(IntTag.valueOf(0));
+						list.add(IntTag.valueOf(0));
+					}
+					
 					double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
-					list.remove(1);
-					list.add(1, DoubleTag.valueOf(d));
+					list.set(1, DoubleTag.valueOf(d));
 					
 					TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
 					this.modelPreviewer.setTrailInfo(trailInfo);
 				});
 				beginZ.setResponder((input) -> {
 					CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
-					ListTag list = trailTag.getList("begin_pos", Tag.TAG_DOUBLE);
+					ListTag list = ParseUtil.getOrDefaultTag(trailTag, "begin_pos", new ListTag());
+					
+					if (list.isEmpty()) {
+						list.add(IntTag.valueOf(0));
+						list.add(IntTag.valueOf(0));
+						list.add(IntTag.valueOf(0));
+					}
+					
 					double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
-					list.remove(2);
-					list.add(2, DoubleTag.valueOf(d));
+					list.set(2, DoubleTag.valueOf(d));
 					
 					TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
 					this.modelPreviewer.setTrailInfo(trailInfo);
@@ -1555,7 +1609,14 @@ public class DatapackEditScreen extends Screen {
 				
 				endX.setResponder((input) -> {
 					CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
-					ListTag list =trailTag.getList("end_pos", Tag.TAG_DOUBLE);
+					ListTag list = ParseUtil.getOrDefaultTag(trailTag, "end_pos", new ListTag());
+					
+					if (list.isEmpty()) {
+						list.add(IntTag.valueOf(0));
+						list.add(IntTag.valueOf(0));
+						list.add(IntTag.valueOf(0));
+					}
+					
 					double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
 					list.remove(0);
 					list.add(0, DoubleTag.valueOf(d));
@@ -1565,7 +1626,14 @@ public class DatapackEditScreen extends Screen {
 				});
 				endY.setResponder((input) -> {
 					CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
-					ListTag list =trailTag.getList("end_pos", Tag.TAG_DOUBLE);
+					ListTag list = ParseUtil.getOrDefaultTag(trailTag, "end_pos", new ListTag());
+					
+					if (list.isEmpty()) {
+						list.add(IntTag.valueOf(0));
+						list.add(IntTag.valueOf(0));
+						list.add(IntTag.valueOf(0));
+					}
+					
 					double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
 					list.remove(1);
 					list.add(1, DoubleTag.valueOf(d));
@@ -1575,7 +1643,14 @@ public class DatapackEditScreen extends Screen {
 				});
 				endZ.setResponder((input) -> {
 					CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
-					ListTag list =trailTag.getList("end_pos", Tag.TAG_DOUBLE);
+					ListTag list = ParseUtil.getOrDefaultTag(trailTag, "end_pos", new ListTag());
+					
+					if (list.isEmpty()) {
+						list.add(IntTag.valueOf(0));
+						list.add(IntTag.valueOf(0));
+						list.add(IntTag.valueOf(0));
+					}
+					
 					double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
 					list.remove(2);
 					list.add(2, DoubleTag.valueOf(d));
@@ -1675,11 +1750,45 @@ public class DatapackEditScreen extends Screen {
 		
 		@Override
 		public void packGridRowpositionChanged(int rowposition, Map<String, Object> values) {
-			this.inputComponentsList.importTag(this.packList.get(rowposition).getValue());
+			CompoundTag tag = this.packList.get(rowposition).getValue();
+			this.inputComponentsList.importTag(tag);
 			ResourceLocation rl = new ResourceLocation(ParseUtil.nullParam(values.get("pack_item")));
 			
 			if (this.registry.containsKey(rl)) {
 				this.modelPreviewer.setItemToRender(this.registry.getValue(rl));
+			}
+			
+			Function<Item, CapabilityItem.Builder> builderProvider = WeaponTypeReloadListener.get(tag.getString("type"));
+			
+			if (builderProvider != null) {
+				CapabilityItem.Builder builder = builderProvider.apply(this.registry.getValue(this.packList.get(rowposition).getKey()));
+				
+				if (builder instanceof WeaponCapability.Builder weaponBuilder) {
+					this.modelPreviewer.clearAnimations();
+					
+					List<AnimationProvider<?>> allAnimations = weaponBuilder.getComboAnimations().entrySet().stream().reduce(Lists.newArrayList(), (list, entry) -> {
+						list.addAll(entry.getValue());
+						return list;
+					}, (list1, list2) -> {
+						list1.addAll(list2);
+						return list1;
+					});
+					
+					allAnimations.stream().map((provider) -> provider.get()).forEach(this.modelPreviewer::addAnimationToPlay);
+					boolean hasCustomCollider = false;
+					
+					if (tag.contains("collider")) {
+						try {
+							ColliderPreset.deserializeSimpleCollider(tag.getCompound("collider"));
+							hasCustomCollider = true;
+						} catch (IllegalArgumentException e) {
+						}
+					}
+					
+					if (!hasCustomCollider) {
+						this.modelPreviewer.setCollider(weaponBuilder.getCollider());
+					}
+				}
 			}
 		}
 		

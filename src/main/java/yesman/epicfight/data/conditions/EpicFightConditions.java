@@ -10,6 +10,7 @@ import net.minecraftforge.registries.RegistryObject;
 import yesman.epicfight.data.conditions.entity.HealthPoint;
 import yesman.epicfight.data.conditions.entity.OffhandItemCategory;
 import yesman.epicfight.data.conditions.entity.RandomChance;
+import yesman.epicfight.data.conditions.entity.SkillActivated;
 import yesman.epicfight.data.conditions.entity.TargetInDistance;
 import yesman.epicfight.data.conditions.entity.TargetInEyeHeight;
 import yesman.epicfight.data.conditions.entity.TargetInPov;
@@ -33,8 +34,9 @@ public class EpicFightConditions {
 		return (Supplier<T>) REGISTRY.get().getValue(key);
 	}
 	
-	//PlayerPatch conditions
-	public static final RegistryObject<Supplier<Condition<?>>> OFFHAND_ITEM_CATEGORY = CONDITIONS.register(new ResourceLocation(EpicFightMod.MODID, "offhand_category").getPath(), () -> OffhandItemCategory::new);
+	//EntityPatch conditions
+	public static final RegistryObject<Supplier<Condition<?>>> OFFHAND_ITEM_CATEGORY = CONDITIONS.register(new ResourceLocation(EpicFightMod.MODID, "offhand_item_category").getPath(), () -> OffhandItemCategory::new);
+	public static final RegistryObject<Supplier<Condition<?>>> SKILL_ACTIVE = CONDITIONS.register(new ResourceLocation(EpicFightMod.MODID, "skill_active").getPath(), () -> SkillActivated::new);
 	
 	//Mobpatch conditions
 	public static final RegistryObject<Supplier<Condition<?>>> HEALTH_POINT = CONDITIONS.register(new ResourceLocation(EpicFightMod.MODID, "health").getPath(), () -> HealthPoint::new);
