@@ -22,45 +22,32 @@ import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
 public class EpicFightRenderTypes extends RenderType {
+	private static final Map<RenderType, RenderType> TRIANGULATED_RENDER_TYPES = Maps.newHashMap();
 	
-	private static final Map<RenderType, RenderType> renderTypeCache = Maps.newHashMap();
-	
-	public static RenderType triangles(RenderType renderType) {
-		return renderTypeCache.computeIfAbsent(renderType, (key) -> {
-			RenderType trianglesRenderType = null;
+	public static RenderType getTriangulated(RenderType renderType) {
+		return TRIANGULATED_RENDER_TYPES.computeIfAbsent(renderType, (key) -> {
+			RenderType triangulatedRenderType = null;
 			
 			if (renderType instanceof CompositeRenderType compositeRenderType) {
-				trianglesRenderType = new CompositeRenderType(renderType.name, renderType.format, VertexFormat.Mode.TRIANGLES, renderType.bufferSize(), renderType.affectsCrumbling(), renderType.sortOnUpload, compositeRenderType.state);
+				triangulatedRenderType = new CompositeRenderType(renderType.name, renderType.format, VertexFormat.Mode.TRIANGLES, renderType.bufferSize(), renderType.affectsCrumbling(), renderType.sortOnUpload, compositeRenderType.state);
 			}
 			
-			return trianglesRenderType;
+			return triangulatedRenderType;
 		});
 	}
 	
-	private EpicFightRenderTypes(String name, VertexFormat format, VertexFormat.Mode drawingMode, int bufferSize, boolean affectsCrumbling, boolean sortOnUpload, Runnable setup, Runnable clean) {
-		super(name, format, drawingMode, bufferSize, affectsCrumbling, sortOnUpload, setup, clean);
-	}
-	
-	private static VertexConsumer getTriangleBuffer(MultiBufferSource bufferSource, RenderType renderType) {
-		RenderType triangleRenderType = triangles(renderType);
+	private static VertexConsumer getTriangulatedRenderTypeBuffer(MultiBufferSource bufferSource, RenderType renderType) {
+		RenderType triangleRenderType = getTriangulated(renderType);
 		
-		if (bufferSource instanceof MultiBufferSource.BufferSource cast) {
-
-			if (cast.fixedBuffers.containsKey(renderType)) {
-				cast.fixedBuffers.computeIfAbsent(triangleRenderType, (key) -> new BufferBuilder(renderType.bufferSize()));
-				
-				return cast.getBuffer(triangleRenderType);
+		if (bufferSource instanceof MultiBufferSource.BufferSource multiBufferSource) {
+			if (multiBufferSource.fixedBuffers.containsKey(renderType)) {
+				multiBufferSource.fixedBuffers.computeIfAbsent(triangleRenderType, (key) -> new BufferBuilder(renderType.bufferSize()));
 			}
 			
-			return cast.getBuffer(triangleRenderType);
+			return multiBufferSource.getBuffer(triangleRenderType);
 		}
 		
 		return bufferSource.getBuffer(triangleRenderType);
-	}
-	
-	public static VertexConsumer getArmorFoilBufferTriangles(MultiBufferSource bufferSource, RenderType renderType, boolean isEntity, boolean hasEffect) {
-		return hasEffect ? VertexMultiConsumer.create( getTriangleBuffer(bufferSource, isEntity ? RenderType.armorGlint() : RenderType.armorEntityGlint()),
-				getTriangleBuffer(bufferSource, renderType)) : getTriangleBuffer(bufferSource, renderType);
 	}
 	
 	private static final Function<ResourceLocation, RenderType> ENTITY_INDICATOR = Util.memoize((textureLocation) -> {
@@ -96,6 +83,11 @@ public class EpicFightRenderTypes extends RenderType {
 				.createCompositeState(false)
 	);
 	
+	public static VertexConsumer getArmorFoilBufferTriangulated(MultiBufferSource bufferSource, RenderType renderType, boolean isEntity, boolean hasEffect) {
+		return hasEffect ? VertexMultiConsumer.create(getTriangulatedRenderTypeBuffer(bufferSource, isEntity ? RenderType.armorGlint() : RenderType.armorEntityGlint()),
+				getTriangulatedRenderTypeBuffer(bufferSource, renderType)) : getTriangulatedRenderTypeBuffer(bufferSource, renderType);
+	}
+	
 	public static RenderType entityIndicator(ResourceLocation locationIn) {
 		return ENTITY_INDICATOR.apply(locationIn);
 	}
@@ -106,5 +98,10 @@ public class EpicFightRenderTypes extends RenderType {
 	
 	public static RenderType debugQuads() {
 		return DEBUG_QUADS;
+	}
+	
+	//Util class
+	private EpicFightRenderTypes() {
+		super(null, null, null, -1, false, false, null, null);
 	}
 }

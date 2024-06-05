@@ -29,8 +29,8 @@ public class StaminaPillagerSkill extends PassiveSkill {
 	public void onInitiate(SkillContainer container) {
 		super.onInitiate(container);
 		
-		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID, (event) -> {
-			if (!event.getTarget().isAlive()) {
+		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID, (event) -> {
+			if (event.getAttackDamage() > event.getTarget().getHealth()) {
 				float stamina = event.getPlayerPatch().getStamina();
 				float missingStamina = event.getPlayerPatch().getMaxStamina() - stamina;
 				event.getPlayerPatch().setStamina(stamina + missingStamina * this.regenRate * 0.01F);
@@ -42,7 +42,7 @@ public class StaminaPillagerSkill extends PassiveSkill {
 	public void onRemoved(SkillContainer container) {
 		super.onRemoved(container);
 		
-		container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID);
 	}
 	
 	@OnlyIn(Dist.CLIENT)

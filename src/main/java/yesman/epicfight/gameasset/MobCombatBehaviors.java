@@ -1,5 +1,6 @@
 package yesman.epicfight.gameasset;
 
+import yesman.epicfight.data.conditions.entity.HealthPoint;
 import yesman.epicfight.network.server.SPMoveAndPlayAnimation;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
@@ -15,8 +16,6 @@ import yesman.epicfight.world.capabilities.entitypatch.mob.WitchPatch;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors.Behavior;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors.BehaviorSeries;
-import yesman.epicfight.world.entity.ai.goal.CombatBehaviors.Health;
-import yesman.epicfight.world.entity.ai.goal.CombatBehaviors.Health.Comparator;
 
 public class MobCombatBehaviors {
 	public static final CombatBehaviors.Builder<HumanoidMobPatch<?>> HUMANOID_ONEHAND_TOOLS = CombatBehaviors.<HumanoidMobPatch<?>>builder()
@@ -168,13 +167,13 @@ public class MobCombatBehaviors {
 				.nextBehavior(Behavior.<EnderDragonPatch>builder().animationBehavior(Animations.DRAGON_FIREBALL).withinDistance(15.0D, 30.0D).withinAngleHorizontal(0.0F, 10.0F))
 		).newBehaviorSeries(
 			BehaviorSeries.<EnderDragonPatch>builder().weight(1000.0F).cooldown(0).canBeInterrupted(false).looping(false)
-				.nextBehavior(Behavior.<EnderDragonPatch>builder().health(0.3F, Health.Comparator.LESS_RATIO).custom((mobpatch) -> mobpatch.getNearbyCrystals() > 0)
+				.nextBehavior(Behavior.<EnderDragonPatch>builder().health(0.3F, HealthPoint.Comparator.LESS_RATIO).custom((mobpatch) -> mobpatch.getNearbyCrystals() > 0)
 				.behavior((mobpatch) -> {
 					mobpatch.getOriginal().getPhaseManager().setPhase(PatchedPhases.CRYSTAL_LINK);
 				}))
 		).newBehaviorSeries(
 			BehaviorSeries.<EnderDragonPatch>builder().weight(10.0F).cooldown(1600).canBeInterrupted(false).looping(false)
-				.nextBehavior(Behavior.<EnderDragonPatch>builder().health(0.5F, Health.Comparator.LESS_RATIO).custom((mobpatch) -> mobpatch.getNearbyCrystals() > 0)
+				.nextBehavior(Behavior.<EnderDragonPatch>builder().health(0.5F, HealthPoint.Comparator.LESS_RATIO).custom((mobpatch) -> mobpatch.getNearbyCrystals() > 0)
 				.behavior((mobpatch) -> {
 					mobpatch.playAnimationSynchronized(Animations.DRAGON_GROUND_TO_FLY, 0.0F);
 					mobpatch.getOriginal().getPhaseManager().setPhase(PatchedPhases.FLYING);
@@ -259,16 +258,16 @@ public class MobCombatBehaviors {
 	public static final CombatBehaviors.Builder<WitherPatch> WITHER = CombatBehaviors.<WitherPatch>builder()
 		.newBehaviorSeries(
 			BehaviorSeries.<WitherPatch>builder().weight(3000.0F)
-				.nextBehavior(Behavior.<WitherPatch>builder().emptyBehavior().health(150.0F, Comparator.GREATER_ABSOLUTE))
+				.nextBehavior(Behavior.<WitherPatch>builder().emptyBehavior().health(150.0F, HealthPoint.Comparator.GREATER_ABSOLUTE))
 		).newBehaviorSeries(
 			BehaviorSeries.<WitherPatch>builder().weight(100.0F).cooldown(200).looping(false).canBeInterrupted(false)
 				.nextBehavior(Behavior.<WitherPatch>builder().animationBehavior(Animations.WITHER_CHARGE).withinDistance(6.0D, 10.0D).withinAngleHorizontal(0.0D, 30.0D))
 		).newBehaviorSeries(
 			BehaviorSeries.<WitherPatch>builder().weight(500.0F).cooldown(60).looping(false).canBeInterrupted(false)
-				.nextBehavior(Behavior.<WitherPatch>builder().animationBehavior(Animations.WITHER_SWIRL).health(150.0F, Comparator.LESS_ABSOLUTE).withinDistance(0.0D, 2.5D).withinAngle(0.0D, 60.0D))
+				.nextBehavior(Behavior.<WitherPatch>builder().animationBehavior(Animations.WITHER_SWIRL).health(150.0F, HealthPoint.Comparator.LESS_ABSOLUTE).withinDistance(0.0D, 2.5D).withinAngle(0.0D, 60.0D))
 		).newBehaviorSeries(
 			BehaviorSeries.<WitherPatch>builder().weight(500.0F).cooldown(180).looping(false).canBeInterrupted(false)
-				.nextBehavior(Behavior.<WitherPatch>builder().animationBehavior(Animations.WITHER_BACKFLIP).health(150.0F, Comparator.LESS_ABSOLUTE).withinDistance(0.0D, 2.5D).withinAngle(0.0D, 20.0D))
+				.nextBehavior(Behavior.<WitherPatch>builder().animationBehavior(Animations.WITHER_BACKFLIP).health(150.0F, HealthPoint.Comparator.LESS_ABSOLUTE).withinDistance(0.0D, 2.5D).withinAngle(0.0D, 20.0D))
 		).newBehaviorSeries(
 			BehaviorSeries.<WitherPatch>builder().weight(50.0F).cooldown(200).looping(false).canBeInterrupted(false)
 				.nextBehavior(Behavior.<WitherPatch>builder().animationBehavior(Animations.WITHER_BEAM).withinDistance(3.0D, 20.0D).withinAngleHorizontal(0.0D, 20.0D))

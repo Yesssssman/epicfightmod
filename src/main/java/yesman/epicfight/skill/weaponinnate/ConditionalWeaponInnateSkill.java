@@ -7,12 +7,10 @@ import com.google.common.collect.Lists;
 
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import yesman.epicfight.api.animation.AttackAnimationProvider;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
-import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
@@ -23,7 +21,7 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem;
 public class ConditionalWeaponInnateSkill extends WeaponInnateSkill {
 	public static class Builder extends Skill.Builder<ConditionalWeaponInnateSkill> {
 		protected Function<ServerPlayerPatch, Integer> selector;
-		protected ResourceLocation[] animationLocations;
+		protected AttackAnimationProvider[] animations;
 		
 		public Builder setCategory(SkillCategory category) {
 			this.category = category;
@@ -45,28 +43,24 @@ public class ConditionalWeaponInnateSkill extends WeaponInnateSkill {
 			return this;
 		}
 		
-		public Builder setAnimations(ResourceLocation... animationLocations) {
-			this.animationLocations = animationLocations;
+		public Builder setAnimations(AttackAnimationProvider... animations) {
+			this.animations = animations;
 			return this;
 		}
 	}
 	
 	public static ConditionalWeaponInnateSkill.Builder createConditionalWeaponInnateBuilder() {
-		return (new ConditionalWeaponInnateSkill.Builder()).setCategory(SkillCategories.WEAPON_INNATE).setResource(Resource.WEAPON_INNATE_ENERGY);
+		return (new ConditionalWeaponInnateSkill.Builder()).setCategory(SkillCategories.WEAPON_INNATE).setResource(Resource.WEAPON_CHARGE);
 	}
 	
-	protected final StaticAnimation[] attackAnimations;
+	protected final AttackAnimationProvider[] attackAnimations;
 	protected final Function<ServerPlayerPatch, Integer> selector;
 	
 	public ConditionalWeaponInnateSkill(ConditionalWeaponInnateSkill.Builder builder) {
 		super(builder);
 		this.properties = Lists.newArrayList();
-		this.attackAnimations = new StaticAnimation[builder.animationLocations.length];
+		this.attackAnimations = builder.animations;
 		this.selector = builder.selector;
-		
-		for (int i = 0; i < builder.animationLocations.length; i++) {
-			this.attackAnimations[i] = EpicFightMod.getInstance().animationManager.findAnimationByPath(builder.animationLocations[i].toString());
-		}
 	}
 	
 	@Override
@@ -79,12 +73,9 @@ public class ConditionalWeaponInnateSkill extends WeaponInnateSkill {
 	
 	@Override
 	public WeaponInnateSkill registerPropertiesToAnimation() {
-		for (int i = 0; i < this.attackAnimations.length; i++) {
-			this.attackAnimations[i] = EpicFightMod.getInstance().animationManager.refreshAnimation(this.attackAnimations[i]);
-		}
-		
-		for (StaticAnimation animation : this.attackAnimations) {
-			AttackAnimation anim = ((AttackAnimation)animation);
+		for (AttackAnimationProvider animationProvider : this.attackAnimations) {
+			AttackAnimation anim = animationProvider.get();
+			
 			for (Phase phase : anim.phases) {
 				phase.addProperties(this.properties.get(0).entrySet());
 			}
@@ -95,11 +86,15 @@ public class ConditionalWeaponInnateSkill extends WeaponInnateSkill {
 	
 	@Override
 	public void executeOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
-		executer.playAnimationSynchronized(this.attackAnimations[this.getAnimationInCondition(executer)], 0);
+		this.playSkillAnimation(executer);
 		super.executeOnServer(executer, args);
 	}
 	
-	public int getAnimationInCondition(ServerPlayerPatch executer) {
-		return selector.apply(executer);
+	protected int getAnimationInCondition(ServerPlayerPatch executer) {
+		return this.selector.apply(executer);
+	}
+	
+	protected void playSkillAnimation(ServerPlayerPatch executer) {
+		executer.playAnimationSynchronized(this.attackAnimations[this.getAnimationInCondition(executer)].get(), 0);
 	}
 }

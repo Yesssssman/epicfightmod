@@ -1,18 +1,17 @@
 package yesman.epicfight.main;
 
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
+import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.fml.DistExecutor;
@@ -27,23 +26,21 @@ import net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.NewRegistryEvent;
-import net.minecraftforge.registries.RegistryBuilder;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.ServerAnimator;
-import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
+import yesman.epicfight.api.client.animation.property.JointMaskReloadListener;
 import yesman.epicfight.api.client.model.ItemSkins;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.client.ClientEngine;
-import yesman.epicfight.client.gui.screen.IngameConfigurationScreen;
+import yesman.epicfight.client.gui.screen.SkillBookScreen;
+import yesman.epicfight.client.gui.screen.config.IngameConfigurationScreen;
 import yesman.epicfight.client.renderer.patched.item.EpicFightItemProperties;
 import yesman.epicfight.compat.AzureLibArmorCompat;
 import yesman.epicfight.compat.AzureLibCompat;
@@ -53,8 +50,7 @@ import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.data.conditions.EpicFightConditions;
 import yesman.epicfight.data.loot.EpicFightLootTables;
-import yesman.epicfight.gameasset.Armatures;
-import yesman.epicfight.gameasset.EpicFightSkills;
+import yesman.epicfight.gameasset.ColliderPreset;
 import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.network.EpicFightDataSerializers;
 import yesman.epicfight.network.EpicFightNetworkManager;
@@ -80,20 +76,36 @@ import yesman.epicfight.world.effect.EpicFightMobEffects;
 import yesman.epicfight.world.effect.EpicFightPotions;
 import yesman.epicfight.world.entity.EpicFightEntities;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+import yesman.epicfight.world.entity.decoration.EpicFightPaintingVariants;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 import yesman.epicfight.world.item.EpicFightCreativeTabs;
 import yesman.epicfight.world.item.EpicFightItems;
+import yesman.epicfight.world.item.SkillBookItem;
 import yesman.epicfight.world.level.block.EpicFightBlocks;
 import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 
 /**
- *  TODO
+ *  Changes from 20.7.4 -> 20.8.1
  *  
- *  1. Fixed battojutsu crash
+ *  1. Datapack Edit Screen added
  *  
- *  2. Fixed skill command not working in a dedicated server
+ *  2. Skillbook screen revamped
  *  
- *  3. Fixed default weapon types not being reloaded when entering the world
+ *  3. Skill Consume event changed
+ *  
+ *  4. Armor Negation calculation changed
+ *  
+ *  5. Weight base value calculation changed to (entity dimension width * height * {@link LivingEntityPatch#WEIGHT_CORRECTION})
+ *  
+ *  6. Animations now won't be interpolated from between the previous and current pose but from animation clip resulting in increased animation accuracy
+ *  
+ *  7. Skill registration changed
+ *  
+ *  8. Added EpicFightExtensions. Now you can decide a creative tab that you want to display your skills of your mod
+ *  
+ *  TO DO
+ *  
+ *  1. Trail texture bug
  *  
  *  @author yesman
  */
@@ -109,27 +121,29 @@ public class EpicFightMod {
 		return instance;
 	}
 	
-	public final AnimationManager animationManager;
 	private Function<LivingEntityPatch<?>, Animator> animatorProvider;
 	
     public EpicFightMod() {
-    	this.animationManager = new AnimationManager();
     	instance = this;
     	
     	ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ConfigManager.CLIENT_CONFIG);
-    	
 		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 		
-		bus.addListener(this::newRegistry);
 		bus.addListener(this::constructMod);
     	bus.addListener(this::doClientStuff);
     	bus.addListener(this::doCommonStuff);
     	bus.addListener(this::doServerStuff);
-    	bus.addListener(this::registerClientReloadListnerEvent);
+    	bus.addListener(this::registerResourcepackReloadListnerEvent);
+    	bus.addListener(this::buildCreativeTabWithSkillBooks);
     	bus.addListener(EpicFightAttributes::registerNewMobs);
     	bus.addListener(EpicFightAttributes::modifyExistingMobs);
+    	bus.addListener(SkillManager::createSkillRegistry);
+    	bus.addListener(SkillManager::registerSkills);
     	bus.addListener(EpicFightCapabilities::registerCapabilities);
     	bus.addListener(EpicFightEntities::onSpawnPlacementRegister);
+    	
+    	MinecraftForge.EVENT_BUS.addListener(this::command);
+        MinecraftForge.EVENT_BUS.addListener(this::registerDatapackReloadListnerEvent);
     	
     	LivingMotion.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, LivingMotions.class);
     	SkillCategory.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, SkillCategories.class);
@@ -151,44 +165,32 @@ public class EpicFightMod {
 		EpicFightDataSerializers.ENTITY_DATA_SERIALIZER.register(bus);
 		EpicFightConditions.CONDITIONS.register(bus);
 		SkillDataKeys.DATA_KEYS.register(bus);
+		EpicFightPaintingVariants.PAINTING_VARIANTS.register(bus);
 		EpicFightCommandArgumentTypes.COMMAND_ARGUMENT_TYPES.register(bus);
-        EpicFightSkills.registerSkills();
-        
-        MinecraftForge.EVENT_BUS.addListener(this::command);
-        MinecraftForge.EVENT_BUS.addListener(this::reloadListnerEvent);
         
         ConfigManager.loadConfig(ConfigManager.CLIENT_CONFIG, FMLPaths.CONFIGDIR.get().resolve(MODID + "-client.toml").toString());
         ConfigManager.loadConfig(ConfigManager.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve(CONFIG_FILE_PATH).toString());
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory(IngameConfigurationScreen::new));
+        ModLoadingContext.get().registerExtensionPoint(EpicFightExtensions.class, () -> new EpicFightExtensions(EpicFightCreativeTabs.ITEMS.get()));
         
-		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-			if (ModList.get().isLoaded("geckolib")) {
-				ICompatModule.loadCompatModuleClient(GeckolibCompat.class);
-			}
-			
-			if (ModList.get().isLoaded("azurelib")) {
-				ICompatModule.loadCompatModule(AzureLibCompat.class);
-			}
-			
-			if (ModList.get().isLoaded("azurelibarmor")) {
-				ICompatModule.loadCompatModule(AzureLibArmorCompat.class);
-			}
+        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+        	if (ModList.get().isLoaded("geckolib")) {
+    			ICompatModule.loadCompatModule(GeckolibCompat.class);
+    		}
+    		
+    		if (ModList.get().isLoaded("azurelib")) {
+    			ICompatModule.loadCompatModule(AzureLibCompat.class);
+    		}
+    		
+    		if (ModList.get().isLoaded("azurelibarmor")) {
+    			ICompatModule.loadCompatModule(AzureLibArmorCompat.class);
+    		}
 		});
 	}
     
-    private void newRegistry(NewRegistryEvent event) {
-    	RegistryBuilder<StaticAnimation> registryBuilder = RegistryBuilder.of(MODID + "animation");
-    	registryBuilder.addCallback(AnimationManager.getCallBack());
-    	
-    	Supplier<IForgeRegistry<StaticAnimation>> animationRegistry = event.create(registryBuilder);
-    	this.animationManager.onRegistryCreated(animationRegistry);
-    }
-    
-    private void command(final RegisterCommandsEvent event) {
-		PlayerModeCommand.register(event.getDispatcher());
-		PlayerSkillCommand.register(event.getDispatcher(), event.getBuildContext());
-    }
-    
+    /**
+     * FML Lifecycle Events
+     */
     private void constructMod(final FMLConstructModEvent event) {
     	LivingMotion.ENUM_MANAGER.loadEnum();
     	SkillCategory.ENUM_MANAGER.loadEnum();
@@ -203,15 +205,11 @@ public class EpicFightMod {
     	
         this.animatorProvider = ClientAnimator::getAnimator;
 		EntityPatchProvider.registerEntityPatchesClient();
-		ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
-		Armatures.build(resourceManager);
-
 		EpicFightItemProperties.registerItemProperties();
+		SkillBookScreen.registerIconItems();
     }
 	
 	private void doServerStuff(final FMLDedicatedServerSetupEvent event) {
-		Armatures.build(null);
-		this.animationManager.loadAnimationsOnServer();
 		this.animatorProvider = ServerAnimator::getAnimator;
 	}
 	
@@ -226,20 +224,51 @@ public class EpicFightMod {
 		event.enqueueWork(EpicFightMobEffects::addOffhandModifier);
     }
 	
-	private void registerClientReloadListnerEvent(final RegisterClientReloadListenersEvent event) {
+	/**
+	 * Register Etc
+	 */
+	private void command(final RegisterCommandsEvent event) {
+		PlayerModeCommand.register(event.getDispatcher());
+		PlayerSkillCommand.register(event.getDispatcher(), event.getBuildContext());
+    }
+	
+	private void registerResourcepackReloadListnerEvent(final RegisterClientReloadListenersEvent event) {
+		event.registerReloadListener(new JointMaskReloadListener());
 		event.registerReloadListener(Meshes.INSTANCE);
-		event.registerReloadListener(Armatures.INSTANCE);
-		event.registerReloadListener(this.animationManager);
+		event.registerReloadListener(AnimationManager.getInstance());
 		event.registerReloadListener(ItemSkins.INSTANCE);
 	}
 	
-	private void reloadListnerEvent(final AddReloadListenerEvent event) {
+	private void registerDatapackReloadListnerEvent(final AddReloadListenerEvent event) {
+		if (!isPhysicalClient()) {
+			event.addListener(AnimationManager.getInstance());
+		}
+		
+		event.addListener(new ColliderPreset());
 		event.addListener(new SkillManager());
 		event.addListener(new WeaponTypeReloadListener());
 		event.addListener(new ItemCapabilityReloadListener());
 		event.addListener(new MobPatchReloadListener());
 	}
 	
+	private void buildCreativeTabWithSkillBooks(final BuildCreativeModeTabContentsEvent event) {
+		SkillManager.getNamespaces().forEach((modid) -> {
+			ModList.get().getModContainerById(modid).flatMap((mc) -> mc.getCustomExtension(EpicFightExtensions.class)).ifPresent((extension) -> {
+				if (extension.skillBookCreativeTab() == event.getTab()) {
+					
+					SkillManager.getSkillNames((skill) -> skill.getCategory().learnable() && skill.getRegistryName().getNamespace() == modid).forEach((rl) -> {
+						ItemStack stack = new ItemStack(EpicFightItems.SKILLBOOK.get());
+						SkillBookItem.setContainingSkill(rl.toString(), stack);
+						event.accept(stack);
+					});
+				}
+			});
+		});
+	}
+	
+	/**
+	 * Epic Fight utils
+	 */
 	public static Animator getAnimator(LivingEntityPatch<?> entitypatch) {
 		return EpicFightMod.getInstance().animatorProvider.apply(entitypatch);
 	}

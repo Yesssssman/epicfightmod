@@ -9,11 +9,9 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.monster.Vex;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
@@ -54,13 +52,11 @@ public class VexPatch extends MobPatch<Vex> {
         }
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.VEX_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.VEX_DEATH);
-		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.VEX_FLIPPING);
-		clientAnimator.setCurrentMotionsAsDefault();
+	public void initAnimator(Animator animator) {
+		animator.addLivingAnimation(LivingMotions.IDLE, Animations.VEX_IDLE);
+		animator.addLivingAnimation(LivingMotions.DEATH, Animations.VEX_DEATH);
+		animator.addLivingAnimation(LivingMotions.IDLE, Animations.VEX_FLIPPING);
 	}
 	
 	@Override

@@ -21,6 +21,7 @@ import net.minecraft.client.renderer.entity.layers.SpinAttackEffectLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.client.model.ModelPart;
 import yesman.epicfight.api.client.model.VertexIndicator.AnimatedVertexIndicator;
@@ -54,9 +55,11 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 	public void render(LocalPlayer entityIn, LocalPlayerPatch entitypatch, LivingEntityRenderer<LocalPlayer, PlayerModel<LocalPlayer>> renderer, MultiBufferSource buffer, PoseStack matStackIn, int packedLightIn, float partialTicks) {
 		Armature armature = entitypatch.getArmature();
 		armature.initializeTransform();
-		OpenMatrix4f[] poses = armature.getPoseAsTransformMatrix(entitypatch.getClientAnimator().getComposedLayerPose(partialTicks));
+		
+		Pose pose = entitypatch.getAnimator().getPose(partialTicks);
+		OpenMatrix4f[] poses = armature.getPoseAsTransformMatrix(pose);
 		matStackIn.pushPose();
-		OpenMatrix4f mat = entitypatch.getArmature().getBindedTransformFor(entitypatch.getArmature().getPose(partialTicks), Armatures.BIPED.head);
+		OpenMatrix4f mat = entitypatch.getArmature().getBindedTransformFor(pose, Armatures.BIPED.head);
 		mat.translate(0, 0.2F, 0);
 		
 		Vec3f translateVectorOfHead = mat.toTranslationVector();
@@ -74,7 +77,7 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 			mesh.leftSleeve.hidden = false;
 			mesh.rightSleeve.hidden = false;
 			
-			mesh.drawModelWithPose(matStackIn, buffer.getBuffer(EpicFightRenderTypes.triangles(RenderType.entityCutoutNoCull(entityIn.getSkinTextureLocation()))),
+			mesh.drawModelWithPose(matStackIn, buffer.getBuffer(EpicFightRenderTypes.getTriangulated(RenderType.entityCutoutNoCull(entityIn.getSkinTextureLocation()))),
 					packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
 		}
 		

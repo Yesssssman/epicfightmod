@@ -1,8 +1,10 @@
 package yesman.epicfight.api.animation.types;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 
 import com.google.common.collect.Maps;
@@ -12,8 +14,12 @@ import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.AnimationPlayer;
+import yesman.epicfight.api.animation.AnimationProvider;
+import yesman.epicfight.api.animation.JointTransform;
+import yesman.epicfight.api.animation.Keyframe;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.property.AnimationEvent;
@@ -21,13 +27,13 @@ import yesman.epicfight.api.animation.property.AnimationEvent.TimePeriodEvent;
 import yesman.epicfight.api.animation.property.AnimationEvent.TimeStampedEvent;
 import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
+import yesman.epicfight.api.animation.property.AnimationProperty.PlaybackSpeedModifier;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.types.EntityState.StateFactor;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.animation.Layer.LayerType;
 import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
-import yesman.epicfight.api.client.animation.property.JointMask;
-import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
+import yesman.epicfight.api.client.animation.property.JointMaskEntry;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
 import yesman.epicfight.api.client.model.ItemSkin;
 import yesman.epicfight.api.client.model.ItemSkins;
@@ -35,27 +41,29 @@ import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.model.JsonModelLoader;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.config.EpicFightOptions;
+import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
-public class StaticAnimation extends DynamicAnimation {
+public class StaticAnimation extends DynamicAnimation implements AnimationProvider<StaticAnimation> {
 	protected final Map<AnimationProperty<?>, Object> properties = Maps.newHashMap();
-	protected final StateSpectrum.Blueprint stateSpectrumBlueprint = new StateSpectrum.Blueprint();
-	protected final ResourceLocation resourceLocation;
-	protected final ResourceLocation registryName;
-	protected final Armature armature;
-	protected final int namespaceId;
-	protected final int animationId;
 	
-	private final StateSpectrum stateSpectrum = new StateSpectrum();
+	/**
+	 * States will bind into animation on {@link AnimationManager#apply}
+	 */
+	protected final StateSpectrum.Blueprint stateSpectrumBlueprint = new StateSpectrum.Blueprint();
+	protected final Armature armature;
+	protected final int animationId;
+	protected final ResourceLocation registryName;
+	protected final StateSpectrum stateSpectrum = new StateSpectrum();
+	protected ResourceLocation resourceLocation;
 	
 	public StaticAnimation() {
-		super(0.0F, false);
-		this.namespaceId = -1;
-		this.animationId = -1;
+		super(0.0F, true);
 		this.resourceLocation = null;
 		this.registryName = null;
 		this.armature = null;
+		this.animationId = -1;
 	}
 	
 	public StaticAnimation(boolean repeatPlay, String path, Armature armature) {
@@ -65,88 +73,144 @@ public class StaticAnimation extends DynamicAnimation {
 	public StaticAnimation(float convertTime, boolean isRepeat, String path, Armature armature) {
 		super(convertTime, isRepeat);
 		
-		AnimationManager animationManager = EpicFightMod.getInstance().animationManager;
-		this.namespaceId = animationManager.getNamespaceHash();
-		this.animationId = animationManager.getIdCounter();
-		
-		EpicFightMod.LOGGER.info("Assigned animation id " + this.animationId + " to " + path);
-		
 		int colon = path.indexOf(':');
-		String modid = (colon == -1) ? animationManager.getModid() : path.substring(0, colon);
+		String modid = (colon == -1) ? AnimationManager.getInstance().workingModId() : path.substring(0, colon);
 		String folderPath = (colon == -1) ? path : path.substring(colon + 1);
 		
-		animationManager.getIdMap().put(this.animationId, this);
-		this.resourceLocation = new ResourceLocation(modid, "animmodels/animations/" + folderPath);
+		this.resourceLocation = new ResourceLocation(modid, "animmodels/animations/" + folderPath + ".json");
 		this.registryName = new ResourceLocation(modid, folderPath);
-		animationManager.getNameMap().put(new ResourceLocation(animationManager.getModid(), folderPath), this);
 		this.armature = armature;
+		this.animationId = AnimationManager.getInstance().registerAnimation(this);
 	}
 	
-	public StaticAnimation(float convertTime, boolean repeatPlay, String path, Armature armature, boolean notRegisteredInAnimationManager) {
+	public StaticAnimation(float convertTime, boolean repeatPlay, String path, Armature armature, boolean noRegister) {
 		super(convertTime, repeatPlay);
 		
-		AnimationManager animationManager = EpicFightMod.getInstance().animationManager;
-		this.namespaceId = animationManager.getModid().hashCode();
-		this.animationId = -1;
-		
 		int colon = path.indexOf(':');
-		String modid = (colon == -1) ? animationManager.getModid() : path.substring(0, colon);
+		String modid = (colon == -1) ? AnimationManager.getInstance().workingModId() : path.substring(0, colon);
 		String folderPath = (colon == -1) ? path : path.substring(colon + 1);
 		
-		this.resourceLocation = new ResourceLocation(modid, "animmodels/animations/" + folderPath);
+		this.resourceLocation = new ResourceLocation(modid, "animmodels/animations/" + folderPath + ".json");
 		this.registryName = new ResourceLocation(modid, folderPath);
 		this.armature = armature;
+		
+		if (noRegister) {
+			this.animationId = -1;
+		} else {
+			this.animationId = AnimationManager.getInstance().registerAnimation(this);
+		}
 	}
 	
 	/* Multilayer Constructor */
-	public StaticAnimation(ResourceLocation baseAnimPath, float convertTime, boolean repeatPlay, String path, Armature armature, boolean notRegisteredInAnimationManager) {
+	public StaticAnimation(ResourceLocation baseAnimPath, float convertTime, boolean repeatPlay, String registryName, Armature armature, boolean multilayer) {
 		super(convertTime, repeatPlay);
 		
-		this.namespaceId = baseAnimPath.getNamespace().hashCode();
-		this.animationId = -1;
-		this.resourceLocation = new ResourceLocation(baseAnimPath.getNamespace(), "animmodels/animations/" + path);
-		this.registryName = new ResourceLocation(baseAnimPath.getNamespace(), path);
+		this.resourceLocation = baseAnimPath;
+		this.registryName = new ResourceLocation(registryName);
 		this.armature = armature;
+		this.animationId = -1;
 	}
 	
-	public static void load(ResourceManager resourceManager, ResourceLocation rl, StaticAnimation animation) {
-		(new JsonModelLoader(resourceManager, rl)).loadStaticAnimation(animation);
+	public static void loadClip(ResourceManager resourceManager, StaticAnimation animation) throws Exception {
+		JsonModelLoader modelLoader = (new JsonModelLoader(resourceManager, animation.resourceLocation));
+		AnimationManager.getInstance().loadAnimationClip(animation, modelLoader::loadClipForAnimation);
 	}
 	
-	public static void load(ResourceManager resourceManager, StaticAnimation animation) {
-		ResourceLocation path = new ResourceLocation(animation.resourceLocation.getNamespace(), animation.resourceLocation.getPath() + ".json");
-		(new JsonModelLoader(resourceManager, path)).loadStaticAnimation(animation);
-	}
-	
-	public static void loadBothSide(ResourceManager resourceManager, StaticAnimation animation) {
-		ResourceLocation path = new ResourceLocation(animation.resourceLocation.getNamespace(), animation.resourceLocation.getPath() + ".json");
-		(new JsonModelLoader(resourceManager, path)).loadStaticAnimationBothSide(animation);
+	public static void loadAllJointsClip(ResourceManager resourceManager, StaticAnimation animation) throws Exception {
+		JsonModelLoader modelLoader = (new JsonModelLoader(resourceManager, animation.resourceLocation));
+		AnimationManager.getInstance().loadAnimationClip(animation, modelLoader::loadAllJointsClipForAnimation);
 	}
 	
 	public void loadAnimation(ResourceManager resourceManager) {
 		try {
-			int id = Integer.parseInt(this.resourceLocation.getPath().substring(22));
-			StaticAnimation animation = EpicFightMod.getInstance().animationManager.findAnimationById(this.namespaceId, id);
-			ResourceLocation path = new ResourceLocation(animation.resourceLocation.getNamespace(), animation.resourceLocation.getPath() + ".json");
-			load(resourceManager, path, this);
-			
-			this.jointTransforms = animation.jointTransforms;
-		} catch (NumberFormatException numberFormatException) {
-			load(resourceManager, this);
-		} catch (Exception others) {
+			loadClip(resourceManager, this);
+		} catch (Exception e) {
+			AnimationManager.getInstance().onFailed(this);
 			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
-			others.printStackTrace();
+			e.printStackTrace();
 		}
-		
-		this.onLoaded();
 	}
 	
-	protected void onLoaded() {
+	public void postInit() {
 		this.stateSpectrum.readFrom(this.stateSpectrumBlueprint);
+	}
+	
+	public void setLinkAnimation(final DynamicAnimation fromAnimation, Pose startPose, boolean isOnSameLayer, float convertTimeModifier, LivingEntityPatch<?> entitypatch, LinkAnimation dest) {
+		if (!entitypatch.isLogicalClient()) {
+			startPose = Animations.DUMMY_ANIMATION.getPoseByTime(entitypatch, 0.0F, 1.0F);
+		}
+		
+		dest.resetNextStartTime();
+		
+		float playTime = this.getPlaySpeed(entitypatch, dest);
+		PlaybackSpeedModifier playSpeedModifier = this.getRealAnimation().getProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER).orElse(null);
+		
+		if (playSpeedModifier != null) {
+			playTime = playSpeedModifier.modify(dest, entitypatch, playTime, 0.0F, playTime);
+		}
+		
+		playTime = Math.abs(playTime);
+		playTime *= EpicFightOptions.A_TICK;
+		
+		float linkTime = convertTimeModifier > 0.0F ? convertTimeModifier + this.convertTime : this.convertTime;
+		float totalTime = playTime * (int)Math.ceil(linkTime / playTime);
+		float nextStartTime = Math.max(0.0F, -convertTimeModifier);
+		nextStartTime += totalTime - linkTime;
+		
+		dest.setNextStartTime(nextStartTime);
+		dest.getTransfroms().clear();
+		dest.setTotalTime(totalTime);
+		dest.setConnectedAnimations(fromAnimation, this);
+		
+		Map<String, JointTransform> data1 = startPose.getJointTransformData();
+		Map<String, JointTransform> data2 = this.getPoseByTime(entitypatch, nextStartTime, 0.0F).getJointTransformData();
+		Set<String> joint1 = new HashSet<> (isOnSameLayer ? data1.keySet() : Set.of());
+		Set<String> joint2 = new HashSet<> (data2.keySet());
+		
+		if (entitypatch.isLogicalClient()) {
+			JointMaskEntry entry = fromAnimation.getJointMaskEntry(entitypatch, false).orElse(null);
+			JointMaskEntry entry2 = this.getJointMaskEntry(entitypatch, true).orElse(null);
+			
+			if (entry != null) {
+				joint1.removeIf((jointName) -> entry.isMasked(fromAnimation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
+						entitypatch.getClientAnimator().currentMotion() : entitypatch.getClientAnimator().currentCompositeMotion(), jointName));
+			}
+			
+			if (entry2 != null) {
+				joint2.removeIf((jointName) -> entry2.isMasked(this.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
+						entitypatch.getCurrentLivingMotion() : entitypatch.currentCompositeMotion, jointName));
+			}
+		}
+		
+		joint1.addAll(joint2);
+		
+		if (linkTime != totalTime) {
+			Map<String, JointTransform> firstPose = this.getPoseByTime(entitypatch, 0.0F, 0.0F).getJointTransformData();
+			
+			for (String jointName : joint1) {
+				Keyframe[] keyframes = new Keyframe[3];
+				keyframes[0] = new Keyframe(0.0F, data1.get(jointName));
+				keyframes[1] = new Keyframe(linkTime, firstPose.get(jointName));
+				keyframes[2] = new Keyframe(totalTime, data2.get(jointName));
+				TransformSheet sheet = new TransformSheet(keyframes);
+				dest.getAnimationClip().addJointTransform(jointName, sheet);
+			}
+		} else {
+			for (String jointName : joint1) {
+				Keyframe[] keyframes = new Keyframe[2];
+				keyframes[0] = new Keyframe(0.0F, data1.get(jointName));
+				keyframes[1] = new Keyframe(totalTime, data2.get(jointName));
+				TransformSheet sheet = new TransformSheet(keyframes);
+				dest.getAnimationClip().addJointTransform(jointName, sheet);
+			}
+		}
 	}
 	
 	@Override
 	public void begin(LivingEntityPatch<?> entitypatch) {
+		// Load if null
+		this.getAnimationClip();
+		
 		this.getProperty(StaticAnimationProperty.ON_BEGIN_EVENTS).ifPresent((events) -> {
 			for (AnimationEvent event : events) {
 				event.executeIfRightSide(entitypatch, this);
@@ -159,7 +223,6 @@ public class StaticAnimation extends DynamicAnimation {
 				
 				for (TrailInfo trailInfo : trailInfos) {
 					double eid = Double.longBitsToDouble((long)entitypatch.getOriginal().getId());
-					double modid = Double.longBitsToDouble((long)this.namespaceId);
 					double animid = Double.longBitsToDouble((long)this.animationId);
 					double jointId = Double.longBitsToDouble((long)this.armature.searchJointByName(trailInfo.joint).getId());
 					double index = Double.longBitsToDouble((long)idx++);
@@ -173,11 +236,11 @@ public class StaticAnimation extends DynamicAnimation {
 						}
 					}
 					
-					if (trailInfo.particle == null) {
+					if (!trailInfo.playable()) {
 						continue;
 					}
 					
-					entitypatch.getOriginal().level().addParticle(trailInfo.particle, eid, modid, animid, jointId, index, 0);
+					entitypatch.getOriginal().level().addParticle(trailInfo.particle, eid, 0, animid, jointId, index, 0);
 				}
 			});
 		}
@@ -227,52 +290,45 @@ public class StaticAnimation extends DynamicAnimation {
 		});
 	}
 	
-	@Override
-	public EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
+	protected EntityState getState(LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
 		return new EntityState(this.getStatesMap(entitypatch, time));
 	}
 	
-	@Override
-	public TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
+	protected TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
 		return this.stateSpectrum.getStateMap(entitypatch, time);
 	}
 	
-	@Override
-	public <T> T getState(StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
+	protected <T> T getState(StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
 		return this.stateSpectrum.getSingleState(stateFactor, entitypatch, time);
 	}
 	
 	@Override
-	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
-		if (!super.isJointEnabled(entitypatch, layer, joint)) {
-			return false;
-		} else {
-			return this.getProperty(ClientAnimationProperties.JOINT_MASK).map((bindModifier) -> 
-						!bindModifier.isMasked(entitypatch.getCurrentLivingMotion(), joint)).orElse(true);
-		}
+	public final EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
+		return this.getState(entitypatch, this, time);
 	}
 	
 	@Override
-	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
-		return this.getProperty(ClientAnimationProperties.JOINT_MASK).map((jointMaskEntry) -> {
-			List<JointMask> list = jointMaskEntry.getMask(entitypatch.getCurrentLivingMotion());
-			int position = list.indexOf(JointMask.of(joint));
-			
-			if (position >= 0) {
-				return list.get(position).getBindModifier();
-			} else {
-				return null;
-			}
-		}).orElse(null);
+	public final TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
+		return this.getStatesMap(entitypatch, this, time);
+	}
+	
+	@Override
+	public final <T> T getState(StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
+		return this.getState(stateFactor, entitypatch, this, time);
+	}
+	
+	@Override
+	public Optional<JointMaskEntry> getJointMaskEntry(LivingEntityPatch<?> entitypatch, boolean useCurrentMotion) {
+		return this.getProperty(ClientAnimationProperties.JOINT_MASK);
 	}
 	
 	@Override
 	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
-		AnimationProperty.PoseModifier modifier = this.getProperty(StaticAnimationProperty.POSE_MODIFIER).orElse(null);
+		entitypatch.poseTick(animation, pose, time, partialTicks);
 		
-		if (modifier != null) {
-			modifier.modify(animation, pose, entitypatch, time, partialTicks);
-		}
+		this.getProperty(StaticAnimationProperty.POSE_MODIFIER).ifPresent((poseModifier) -> {
+			poseModifier.modify(animation, pose, entitypatch, time, partialTicks);
+		}); 
 	}
 	
 	@Override
@@ -281,8 +337,8 @@ public class StaticAnimation extends DynamicAnimation {
 	}
 	
 	@Override
-	public int getNamespaceId() {
-		return this.namespaceId;
+	public boolean doesHeadRotFollowEntityHead() {
+		return !this.getProperty(StaticAnimationProperty.FIXED_HEAD_ROTATION).orElse(false);
 	}
 	
 	@Override
@@ -293,18 +349,14 @@ public class StaticAnimation extends DynamicAnimation {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof StaticAnimation staticAnimation) {
-			return this.getNamespaceId() == staticAnimation.getNamespaceId() && this.getId() == staticAnimation.getId();
+			return this.getId() == staticAnimation.getId();
 		}
 		
 		return super.equals(obj);
 	}
 	
-	public boolean between(StaticAnimation a1, StaticAnimation a2) {
-		if (a1.getNamespaceId() != a2.getNamespaceId()) {
-			return false;
-		} else {
-			return a1.getId() <= this.getId() && a2.getId() >= this.getId();
-		}
+	public boolean idBetween(StaticAnimation a1, StaticAnimation a2) {
+		return a1.getId() <= this.getId() && a2.getId() >= this.getId();
 	}
 	
 	public boolean in(StaticAnimation[] animations) {
@@ -315,6 +367,27 @@ public class StaticAnimation extends DynamicAnimation {
 		}
 		
 		return false;
+	}
+	
+	@SuppressWarnings("rawtypes")
+	public boolean in(AnimationProvider[] animationProviders) {
+		for (AnimationProvider animationProvider : animationProviders) {
+			if (this.equals(animationProvider.get())) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
+	public StaticAnimation setResourceLocation(String path) {
+		int colon = path.indexOf(':');
+		String modid = (colon == -1) ? AnimationManager.getInstance().workingModId() : path.substring(0, colon);
+		String folderPath = (colon == -1) ? path : path.substring(colon + 1);
+		
+		this.resourceLocation = new ResourceLocation(modid, "animmodels/animations/" + folderPath + ".json");
+		
+		return this;
 	}
 	
 	public ResourceLocation getLocation() {
@@ -331,7 +404,7 @@ public class StaticAnimation extends DynamicAnimation {
 	}
 	
 	@Override
-	public float getPlaySpeed(LivingEntityPatch<?> entitypatch) {
+	public float getPlaySpeed(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
 		return 1.0F;
 	}
 	
@@ -343,8 +416,16 @@ public class StaticAnimation extends DynamicAnimation {
 	@Override
 	public String toString() {
 		String classPath = this.getClass().toString();
-		
 		return classPath.substring(classPath.lastIndexOf(".") + 1) + " " + this.getLocation();
+	}
+	
+	/**
+	 * Internal use only
+	 */
+	@Deprecated
+	public StaticAnimation addPropertyUnsafe(AnimationProperty<?> propertyType, Object value) {
+		this.properties.put(propertyType, value);
+		return this;
 	}
 	
 	public <V> StaticAnimation addProperty(StaticAnimationProperty<V> propertyType, V value) {
@@ -416,5 +497,19 @@ public class StaticAnimation extends DynamicAnimation {
 	public <T> StaticAnimation addStateIfNotExist(StateFactor<T> factor, T val) {
 		this.stateSpectrumBlueprint.addStateIfNotExist(factor, val);
 		return this;
+	}
+
+	@Override
+	public AnimationClip getAnimationClip() {
+		return AnimationManager.getInstance().getStaticAnimationClip(this);
+	}
+	
+	public List<StaticAnimation> getClipHolders() {
+		return List.of(this);
+	}
+	
+	@Override
+	public StaticAnimation get() {
+		return AnimationManager.getInstance().refreshAnimation(this);
 	}
 }

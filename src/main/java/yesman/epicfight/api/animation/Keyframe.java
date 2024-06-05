@@ -28,6 +28,6 @@ public class Keyframe {
 	}
 	
 	public String toString() {
-		return "Keyframe[Time: " + this.timeStamp + ", " + this.transform.toString() + "]";
+		return "Keyframe[Time: " + this.timeStamp + ", " + (this.transform == null ? "null" : this.transform.toString()) + "]";
 	}
 }

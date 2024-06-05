@@ -54,9 +54,9 @@ public class LiechtenauerSkill extends WeaponInnateSkill {
 	
 	@Override
 	public void onInitiate(SkillContainer container) {
-		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID, (event) -> {
+		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID, (event) -> {
 			if (container.isActivated() && !container.isDisabled()) {
-				if (!event.getTarget().isAlive()) {
+				if (event.getAttackDamage() > event.getTarget().getHealth()) {
 					this.setDurationSynchronize(event.getPlayerPatch(), Math.min(this.maxDuration, container.getRemainDuration() + this.returnDuration));
 				}
 			}
@@ -124,7 +124,7 @@ public class LiechtenauerSkill extends WeaponInnateSkill {
 	@Override
 	public void onRemoved(SkillContainer container) {
 		container.getExecuter().getEventListener().removeListener(EventType.HURT_EVENT_PRE, EVENT_UUID, 0);
-		container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID);
 		container.getExecuter().getEventListener().removeListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID);
 	}
 	

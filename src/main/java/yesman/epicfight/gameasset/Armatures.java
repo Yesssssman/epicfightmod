@@ -1,16 +1,15 @@
 package yesman.epicfight.gameasset;
 
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Executor;
+import java.util.Set;
 import java.util.function.Function;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.packs.resources.PreparableReloadListener;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -33,16 +32,15 @@ import yesman.epicfight.model.armature.WitherArmature;
 import yesman.epicfight.world.capabilities.entitypatch.EntityPatch;
 import yesman.epicfight.world.entity.EpicFightEntities;
 
-public class Armatures implements PreparableReloadListener {
-	
+public class Armatures {
 	public static final Armatures INSTANCE = new Armatures();
 	
 	@FunctionalInterface
 	public interface ArmatureContructor<T extends Armature> {
-		T invoke(int jointNumber, Joint joint, Map<String, Joint> jointMap);
+		T invoke(String name, int jointNumber, Joint joint, Map<String, Joint> jointMap);
 	}
 	
-	private static final Map<ResourceLocation, Armature> ARMATURES = Maps.newHashMap();
+	private static final BiMap<ResourceLocation, Armature> ARMATURES = HashBiMap.create();
 	private static final Map<EntityType<?>, Function<EntityPatch<?>, Armature>> ENTITY_TYPE_ARMATURE = Maps.newHashMap();
 	
 	public static HumanoidArmature BIPED;
@@ -122,8 +120,20 @@ public class Armatures implements PreparableReloadListener {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <A extends Armature> A getArmatureFor(EntityPatch<?> patch) {
-		return (A)ENTITY_TYPE_ARMATURE.get(patch.getOriginal().getType()).apply(patch).deepCopy();
+	public static <A extends Armature> A getArmatureFor(EntityPatch<?> entitypatch) {
+		return (A)ENTITY_TYPE_ARMATURE.get(entitypatch.getOriginal().getType()).apply(entitypatch).deepCopy();
+	}
+	
+	public static ResourceLocation getKey(Armature armature) {
+		return ARMATURES.inverse().get(armature);
+	}
+	
+	public static Armature getArmatureOrNull(ResourceLocation rl) {
+		return ARMATURES.get(rl);
+	}
+	
+	public static void addArmature(ResourceLocation rl, Armature armature) {
+		ARMATURES.put(rl, armature);
 	}
 	
 	public static Function<EntityPatch<?>, Armature> getRegistry(EntityType<?> entityType) {
@@ -133,23 +143,16 @@ public class Armatures implements PreparableReloadListener {
 	@SuppressWarnings("unchecked")
 	public static <A extends Armature> A getOrCreateArmature(ResourceManager rm, ResourceLocation rl, ArmatureContructor<A> constructor) {
 		return (A) ARMATURES.computeIfAbsent(rl, (key) -> {
-			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, rl);
+			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, wrapLocation(rl));
 			return jsonModelLoader.loadArmature(constructor);
 		});
 	}
 	
-	public Armature register(ResourceManager rm, ResourceLocation rl) {
-		JsonModelLoader modelLoader = new JsonModelLoader(rm, rl);
-		Armature armature = modelLoader.loadArmature(Armature::new);
-		ARMATURES.put(rl, armature);
-		
-		return armature;
+	public static Set<Map.Entry<ResourceLocation, Armature>> entries() {
+		return ARMATURES.entrySet();
 	}
-
-	@Override
-	public CompletableFuture<Void> reload(PreparableReloadListener.PreparationBarrier stage, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
-		return CompletableFuture.runAsync(() -> {
-			Armatures.build(resourceManager);
-		}, gameExecutor).thenCompose(stage::wait);
+	
+	public static ResourceLocation wrapLocation(ResourceLocation rl) {
+		return rl.getPath().matches("animmodels/.*\\.json") ? rl : new ResourceLocation(rl.getNamespace(), "animmodels/" + rl.getPath() + ".json");
 	}
 }

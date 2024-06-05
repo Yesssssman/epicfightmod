@@ -1,6 +1,5 @@
 package yesman.epicfight.api.animation;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,15 +10,15 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 public class Joint {
 	public static final Joint EMPTY = new Joint("empty", -1, new OpenMatrix4f());
 	
-	private final List<Joint> subJoints = new ArrayList<Joint> ();
+	private final List<Joint> subJoints = Lists.newArrayList();
 	private final int jointId;
 	private final String jointName;
 	private final OpenMatrix4f localTransform;
 	private final OpenMatrix4f toOrigin = new OpenMatrix4f();
 	private final OpenMatrix4f poseTransform = new OpenMatrix4f();
 	
-	public Joint(String name, int jointID, OpenMatrix4f localTransform) {
-		this.jointId = jointID;
+	public Joint(String name, int jointId, OpenMatrix4f localTransform) {
+		this.jointId = jointId;
 		this.jointName = name;
 		this.localTransform = localTransform;
 	}
@@ -79,7 +78,26 @@ public class Joint {
 	public String getName() {
 		return this.jointName;
 	}
-
+	
+	@Override
+	public String toString() {
+		return this.jointName;
+	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof Joint joint) {
+			return this.jointName.equals(joint.jointName) && this.jointId == joint.jointId;
+		} else {
+			return super.equals(o);
+		}
+	}
+	
+	@Override
+	public int hashCode() {
+		return this.jointName.hashCode() + this.jointId;
+	}
+	
 	public int getId() {
 		return this.jointId;
 	}

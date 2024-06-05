@@ -2,10 +2,8 @@ package yesman.epicfight.world.capabilities.entitypatch.mob;
 
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.monster.SpellcasterIllager;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
-import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
 
@@ -19,12 +17,11 @@ public class EvokerPatch<T extends SpellcasterIllager> extends AbstractIllagerPa
 		
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
-		super.initAnimator(clientAnimator);
-		clientAnimator.addLivingAnimation(LivingMotions.SPELLCAST, Animations.EVOKER_CAST_SPELL);
-		clientAnimator.setCurrentMotionsAsDefault();
+	public void initAnimator(Animator animator) {
+		super.initAnimator(animator);
+		
+		animator.addLivingAnimation(LivingMotions.SPELLCAST, Animations.EVOKER_CAST_SPELL);
 	}
 	
 	@Override

@@ -1,6 +1,12 @@
 package yesman.epicfight.world.damagesource;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import org.jetbrains.annotations.Nullable;
+
 import com.google.common.collect.Sets;
+
 import net.minecraft.core.Holder;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
@@ -9,13 +15,10 @@ import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import org.jetbrains.annotations.Nullable;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.math.ValueModifier;
-
-import java.util.HashSet;
-import java.util.Set;
+import yesman.epicfight.gameasset.Animations;
 
 public class EpicFightDamageSource extends DamageSource {
 	private DamageSourceElements damageSourceElements = new DamageSourceElements();
@@ -119,7 +122,7 @@ public class EpicFightDamageSource extends DamageSource {
 	}
 	
 	public StaticAnimation getAnimation() {
-		return animation;
+		return this.animation == null ? Animations.DUMMY_ANIMATION : this.animation;
 	}
 	
 	@Override

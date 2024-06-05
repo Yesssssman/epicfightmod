@@ -8,7 +8,6 @@ import net.minecraft.world.entity.monster.Creeper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.Meshes;
-import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.client.mesh.CreeperMesh;
 import yesman.epicfight.world.capabilities.entitypatch.mob.CreeperPatch;
 
@@ -19,11 +18,6 @@ public class PCreeperRenderer extends PatchedLivingEntityRenderer<Creeper, Creep
 		float f = entity.getSwelling(partialTicks);
 		float overlay = (int) (f * 10.0F) % 2 == 0 ? 0.0F : Mth.clamp(f, 0.5F, 1.0F);
 		return OverlayTexture.pack(OverlayTexture.u(overlay), OverlayTexture.v(entity.hurtTime > 5 || entity.deathTime > 0));
-	}
-	
-	@Override
-	protected void setJointTransforms(CreeperPatch entitypatch, Armature armature, float partialTicks) {
-		this.setJointTransform("Head", armature, entitypatch.getHeadMatrix(partialTicks));
 	}
 	
 	@Override

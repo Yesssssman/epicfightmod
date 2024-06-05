@@ -1,7 +1,23 @@
 package yesman.epicfight.api.utils;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.JsonOps;
 
 import it.unimi.dsi.fastutil.doubles.DoubleArrayList;
 import it.unimi.dsi.fastutil.doubles.DoubleList;
@@ -9,13 +25,12 @@ import it.unimi.dsi.fastutil.floats.FloatArrayList;
 import it.unimi.dsi.fastutil.floats.FloatList;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-
+import net.minecraft.nbt.ByteTag;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.registries.IForgeRegistry;
 import yesman.epicfight.api.utils.math.Vec3f;
 
 public class ParseUtil {
@@ -37,6 +52,36 @@ public class ParseUtil {
 		}
 		
 		return result.toFloatArray();
+	}
+	
+	public static JsonObject arrayToJsonObject(float[] array, int stride) {
+		JsonObject jsonObject = new JsonObject();
+		jsonObject.addProperty("stride", stride);
+		jsonObject.addProperty("count", array.length / stride);
+		JsonArray jsonArray = new JsonArray();
+		
+		for (float element : array) {
+			jsonArray.add(element);
+		}
+		
+		jsonObject.add("array", jsonArray);
+		
+		return jsonObject;
+	}
+	
+	public static JsonObject arrayToJsonObject(int[] array, int stride) {
+		JsonObject jsonObject = new JsonObject();
+		jsonObject.addProperty("stride", stride);
+		jsonObject.addProperty("count", array.length / stride);
+		JsonArray jsonArray = new JsonArray();
+		
+		for (int element : array) {
+			jsonArray.add(element);
+		}
+		
+		jsonObject.add("array", jsonArray);
+		
+		return jsonObject;
 	}
 	
 	public static Vec3f toVector3f(JsonArray array) {
@@ -69,13 +114,32 @@ public class ParseUtil {
 		return new AttributeModifier(UUID.fromString(tag.getString("uuid")), tag.getString("name"), tag.getDouble("amount"), operation);
 	}
 	
-	public static String makeFirstLetterToUpper(String s) {
+	public static <T> String nullOrToString(T obj, Function<T, String> toString) {
+		return obj == null ? "" : toString.apply(obj);
+	}
+	
+	public static <T, V> V nullOrApply(T obj, Function<T, V> apply) {
+		if (obj == null) {
+			return null;
+		}
+		
+		try {
+			return apply.apply(obj);
+		} catch (Exception e) {
+			return null;
+		}
+	}
+	
+	public static String snakeToSpacedCamel(Object obj) {
+		if (obj == null) {
+			return "";
+		}
+		
 		StringBuilder sb = new StringBuilder();
 		boolean upperNext = true;
+		String toStr = obj.toString().toLowerCase(Locale.ROOT);
 		
-		s = s.toLowerCase(Locale.ROOT);
-		
-		for (String sElement : s.split("")) {
+		for (String sElement : toStr.split("")) {
 			if (upperNext) {
 				sElement = sElement.toUpperCase(Locale.ROOT);
 				upperNext = false;
@@ -92,9 +156,109 @@ public class ParseUtil {
 		return sb.toString();
 	}
 	
-	public static String toStringNvl(Object obj) {
+	public static boolean compareNullables(@Nullable Object obj1, @Nullable Object obj2) {
+		if (obj1 == null) {
+			if (obj2 == null) {
+				return true;
+			} else {
+				return false;
+			}
+		} else {
+			return obj1.equals(obj2);
+		}
+	}
+	
+	public static String nullParam(Object obj) {
 		return obj == null ? "" : obj.toString();
 	}
-
-	private ParseUtil() {} // disallow creating new instances of a utility class that has no instance methods
+	
+	public static <T> String getRegistryName(T obj, IForgeRegistry<T> registry) {
+		return obj == null ? "" : registry.getKey(obj).toString();
+	}
+	
+	public static <T extends Tag> T getOrSupply(CompoundTag compTag, String name, Supplier<T> tag) {
+		return getOrDefaultTag(compTag, name, tag.get());
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T extends Tag> T getOrDefaultTag(CompoundTag compTag, String name, T tag) {
+		if (compTag.contains(name)) {
+			return (T)compTag.get(name);
+		}
+		
+		compTag.put(name, tag);
+		
+		return tag;
+	}
+	
+	public static <T> boolean isParsableAllowingMinus(String s, Function<String, T> parser) {
+		if ("-".equals(s)) {
+			return true;
+		}
+		
+		try {
+			parser.apply(s);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+	
+	public static <T> boolean isParsable(String s, Function<String, T> parser) {
+		try {
+			parser.apply(s);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+	
+	public static <T> String valueOfOmittingType(T value) {
+		try {
+			return String.valueOf(value).replaceAll("[df]", "");
+		} catch (NumberFormatException e) {
+			return null;
+		}
+	}
+	
+	public static <T> T parseOrGet(String value, Function<String, T> parseFunction, T defaultValue) {
+		try {
+			return parseFunction.apply(value);
+		} catch (NumberFormatException e) {
+			return defaultValue;
+		}
+	}
+	
+	public static <K, V> Set<Pair<K, V>> mapEntryToPair(Set<Map.Entry<K, V>> entrySet) {
+		return entrySet.stream().map((entry) -> Pair.of(entry.getKey(), entry.getValue())).collect(Collectors.toSet());
+	}
+	
+	public static <T> List<T> remove(Collection<T> collection, T object) {
+		List<T> copied = new ArrayList<> (collection);
+		copied.remove(object);
+		return copied;
+	}
+	
+	public static <T extends Enum<T>> T enumValueOfOrNull(Class<T> enumCls, String enumName) {
+		try {
+			return Enum.valueOf(enumCls, enumName.toUpperCase(Locale.ROOT));
+		} catch (IllegalArgumentException | NullPointerException e) {
+			return null;
+		}
+	}
+	
+	public static JsonObject convertToJsonObject(CompoundTag compoundtag) {
+		JsonObject root = CompoundTag.CODEC.encodeStart(JsonOps.INSTANCE, compoundtag).get().left().get().getAsJsonObject();
+		
+		for (Map.Entry<String, Tag> entry : compoundtag.tags.entrySet()) {
+			if (entry.getValue() instanceof ByteTag byteTag && (byteTag.getAsByte() == 0 || byteTag.getAsByte() == 1)) {
+				root.remove(entry.getKey());
+				root.addProperty(entry.getKey(), byteTag.getAsByte() == 1);
+			}
+		}
+		
+		return root;
+	}
+	
+	private ParseUtil() {}
 }

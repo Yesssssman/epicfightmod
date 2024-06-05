@@ -1,7 +1,6 @@
 package yesman.epicfight.data.loot;
 
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Supplier;
 
 import org.jetbrains.annotations.NotNull;
@@ -12,7 +11,6 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ItemStack;
@@ -39,7 +37,7 @@ public class SkillBookLootModifier extends LootModifier {
 	public SkillBookLootModifier(LootItemCondition[] lootItemConditions) {
 		super(lootItemConditions);
 	}
-
+	
 	/**
 	 * Skill List
 	 * Passive
@@ -65,7 +63,7 @@ public class SkillBookLootModifier extends LootModifier {
 	 * Mover
 	 * epicfight:demolishing_leap
 	 */
-	public static void createSkillLootTable(Set<ResourceLocation> skillNames) {
+	public static void createSkillLootTable() {
 		Map<EntityType<?>, LootTable.Builder> builders = Maps.newHashMap();
 		SkillLootTableRegistryEvent lootTableRegistryEvent = new SkillLootTableRegistryEvent(builders);
 		int modifier = ConfigManager.SKILL_BOOK_MOB_DROP_CHANCE_MODIFIER.get();
@@ -246,6 +244,8 @@ public class SkillBookLootModifier extends LootModifier {
     	));
 		
 		ModLoader.get().postEvent(lootTableRegistryEvent);
+		
+		SKILL_LOOT_TABLE.clear();
 		
 		builders.forEach((k, v) -> {
 			SKILL_LOOT_TABLE.put(k, v.build());

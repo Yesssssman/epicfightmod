@@ -2,17 +2,23 @@ package yesman.epicfight.api.collider;
 
 import java.util.List;
 
+import org.joml.Vector3f;
+
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.renderer.MultiBufferSource;
-import net.minecraft.util.Mth;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.Joint;
+import yesman.epicfight.api.animation.JointTransform;
+import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.types.AttackAnimation;
+import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.model.Armature;
-import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class MultiLineCollider extends MultiCollider<LineCollider> {
@@ -22,13 +28,15 @@ public class MultiLineCollider extends MultiCollider<LineCollider> {
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void draw(PoseStack matrixStackIn, MultiBufferSource buffer, LivingEntityPatch<?> entitypatch, AttackAnimation animation, Joint joint, float prevElapsedTime, float elapsedTime, float partialTicks, float attackSpeed) {
+	public void draw(PoseStack poseStack, MultiBufferSource buffer, LivingEntityPatch<?> entitypatch, AttackAnimation animation, Joint joint, float prevElapsedTime, float elapsedTime, float partialTicks, float attackSpeed) {
 		int numberOf = Math.max(Math.round(this.numberOfColliders * attackSpeed), 1);
 		float partialScale = 1.0F / numberOf;
 		float interpolation = partialScale;
 		Armature armature = entitypatch.getArmature();
 		int pathIndex =  armature.searchPathIndex(joint.getName());
-		boolean red = entitypatch.getEntityState().attacking();
+		EntityState state = animation.getState(entitypatch, elapsedTime);
+		EntityState prevState = animation.getState(entitypatch, prevElapsedTime);
+		boolean attacking = prevState.attacking() || state.attacking() || (prevState.getLevel() < 2 && state.getLevel() > 2);
 		List<LineCollider> colliders = Lists.newArrayList();
 		
 		for (int i = 0; i < numberOf; i++) {
@@ -36,20 +44,38 @@ public class MultiLineCollider extends MultiCollider<LineCollider> {
 		}
 		
 		for (LineCollider lineCollider : colliders) {
-			matrixStackIn.pushPose();
-			OpenMatrix4f mat = null;
+			armature.initializeTransform();
 			
-			float partialTime = Mth.lerp(interpolation, prevElapsedTime, elapsedTime);
+			float pt1 = prevElapsedTime + (elapsedTime - prevElapsedTime) * partialTicks;
+			float pt2 = prevElapsedTime + (elapsedTime - prevElapsedTime) * interpolation;
+			TransformSheet coordTransform = animation.getCoord();
+			Vec3f p1 = coordTransform.getInterpolatedTranslation(pt1);
+			Vec3f p2 = coordTransform.getInterpolatedTranslation(pt2);
+			Vector3f gap = new Vector3f(p2.x - p1.x, p2.y - p1.y, p2.z - p1.z);
+			
+			poseStack.pushPose();
+			poseStack.translate(gap.x(), gap.y(), gap.z());
+			
+			Pose pose;
 			
 			if (pathIndex == -1) {
-				mat = new OpenMatrix4f();
+				pose = new Pose();
+				pose.putJointData("Root", JointTransform.empty());
+				animation.modifyPose(animation, pose, entitypatch, elapsedTime, 1.0F);
 			} else {
-				mat = armature.getBindedTransformByJointIndex(animation.getPoseByTime(entitypatch, partialTime, 0.0F), pathIndex);
+				pose = animation.getPoseByTime(entitypatch, pt2, 1.0F);
 			}
 			
-			lineCollider.drawInternal(matrixStackIn, buffer, mat, red);
+			lineCollider.drawInternal(poseStack, buffer.getBuffer(this.getRenderType()), armature, joint, pose, pose, 1.0F, attacking ? 0xFFFF0000 : -1);
+			poseStack.popPose();
+			
 			interpolation += partialScale;
-			matrixStackIn.popPose();
 		}
+	}
+	
+	@Override
+	@OnlyIn(Dist.CLIENT)
+	public RenderType getRenderType() {
+		return null;
 	}
 }

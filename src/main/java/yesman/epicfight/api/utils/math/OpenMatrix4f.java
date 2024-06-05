@@ -3,11 +3,13 @@ package yesman.epicfight.api.utils.math;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
+import java.util.List;
 import java.util.Map;
 
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 
@@ -190,27 +192,27 @@ public class OpenMatrix4f {
 		return this;
 	}
 
-	public OpenMatrix4f toFloat() {
-		float[] elements = new float[16];
+	public List<Float> toList() {
+		List<Float> elements = Lists.newArrayList();
 		
-		elements[0] = m00;
-		elements[1] = m01;
-		elements[2] = m02;
-		elements[3] = m03;
-		elements[4] = m10;
-		elements[5] = m11;
-		elements[6] = m12;
-		elements[7] = m13;
-		elements[8] = m20;
-		elements[9] = m21;
-		elements[10] = m22;
-		elements[11] = m23;
-		elements[12] = m30;
-		elements[13] = m31;
-		elements[14] = m32;
-		elements[15] = m33;
+		elements.add(0, m00);
+		elements.add(1, m01);
+		elements.add(2, m02);
+		elements.add(3, m03);
+		elements.add(4, m10);
+		elements.add(5, m11);
+		elements.add(6, m12);
+		elements.add(7, m13);
+		elements.add(8, m20);
+		elements.add(9, m21);
+		elements.add(10, m22);
+		elements.add(11, m23);
+		elements.add(12, m30);
+		elements.add(13, m31);
+		elements.add(14, m32);
+		elements.add(15, m33);
 		
-		return this;
+		return elements;
 	}
 	
 	public static OpenMatrix4f add(OpenMatrix4f left, OpenMatrix4f right, OpenMatrix4f dest) {
@@ -688,11 +690,11 @@ public class OpenMatrix4f {
 	
 	@Override
 	public String toString() {
-		String buf = String.valueOf('\n' +
-				m00 + ' ' + m10 + ' ' + m20 + ' ' + m30 + '\n' +
-				m01 + ' ' + m11 + ' ' + m21 + ' ' + m31 + '\n' +
-				m02 + ' ' + m12 + ' ' + m22 + ' ' + m32 + '\n' +
-				m03 + ' ' + m13 + ' ' + m23 + ' ' + m33) + '\n';
+		String buf = String.valueOf("\n" +
+				m00 + " " + m10 + " " + m20 + " " + m30 + "\n" +
+				m01 + " " + m11 + " " + m21 + " " + m31 + "\n" +
+				m02 + " " + m12 + " " + m22 + " " + m32 + "\n" +
+				m03 + " " + m13 + " " + m23 + " " + m33) + "\n";
 		return buf;
 	}
 	

@@ -9,11 +9,9 @@ import net.minecraft.world.entity.PathfinderMob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.LeapAtTargetGoal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
@@ -47,13 +45,11 @@ public class SpiderPatch<T extends PathfinderMob> extends MobPatch<T> {
 		}
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.SPIDER_DEATH);
-		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.SPIDER_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.SPIDER_CRAWL);
-		clientAnimator.setCurrentMotionsAsDefault();
+	public void initAnimator(Animator animator) {
+		animator.addLivingAnimation(LivingMotions.DEATH, Animations.SPIDER_DEATH);
+		animator.addLivingAnimation(LivingMotions.IDLE, Animations.SPIDER_IDLE);
+		animator.addLivingAnimation(LivingMotions.WALK, Animations.SPIDER_CRAWL);
 	}
 
 	@Override

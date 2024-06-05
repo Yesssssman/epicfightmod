@@ -17,8 +17,8 @@ public class SpiderArmature extends Armature {
 	public final Joint RL3;
 	public final Joint RL4;
 		
-	public SpiderArmature(int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
-		super(jointNumber, rootJoint, jointMap);
+	public SpiderArmature(String name, int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
+		super(name, jointNumber, rootJoint, jointMap);
 		
 		this.stomach = this.getOrLogException(jointMap, "Stomach");
 		this.head = this.getOrLogException(jointMap, "Head");

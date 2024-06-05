@@ -26,8 +26,8 @@ public class HumanoidArmature extends Armature {
 	public final Joint toolL;
 	public final Joint elbowL;
 	
-	public HumanoidArmature(int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
-		super(jointNumber, rootJoint, jointMap);
+	public HumanoidArmature(String name, int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
+		super(name, jointNumber, rootJoint, jointMap);
 		
 		this.thighR = this.getOrLogException(jointMap, "Thigh_R");
 		this.legR = this.getOrLogException(jointMap, "Leg_R");

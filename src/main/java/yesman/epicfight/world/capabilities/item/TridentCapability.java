@@ -1,6 +1,5 @@
 package yesman.epicfight.world.capabilities.item;
 
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -8,12 +7,12 @@ import javax.annotation.Nullable;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.ColliderPreset;
-import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.gameasset.EpicFightSkills;
+import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.skill.Skill;
@@ -21,25 +20,14 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class TridentCapability extends RangedWeaponCapability {
-	private static List<StaticAnimation> attackMotion;
-	private static List<StaticAnimation> mountAttackMotion;
+	private List<AnimationProvider<?>> attackMotion;
+	private List<AnimationProvider<?>> mountAttackMotion;
 	
 	public TridentCapability(CapabilityItem.Builder builder) {
 		super(builder);
 		
-		if (attackMotion == null) {
-			attackMotion = new ArrayList<StaticAnimation> ();
-			attackMotion.add(Animations.TRIDENT_AUTO1);
-			attackMotion.add(Animations.TRIDENT_AUTO2);
-			attackMotion.add(Animations.TRIDENT_AUTO3);
-			attackMotion.add(Animations.SPEAR_DASH);
-			attackMotion.add(Animations.SPEAR_ONEHAND_AIR_SLASH);
-		}
-		
-		if (mountAttackMotion == null) {
-			mountAttackMotion = new ArrayList<StaticAnimation> ();
-			mountAttackMotion.add(Animations.SPEAR_MOUNT_ATTACK);
-		}
+		this.attackMotion = List.of(Animations.TRIDENT_AUTO1, Animations.TRIDENT_AUTO2, Animations.TRIDENT_AUTO3, Animations.SPEAR_DASH, Animations.SPEAR_ONEHAND_AIR_SLASH);
+		this.mountAttackMotion = List.of(Animations.SPEAR_MOUNT_ATTACK);
 	}
 	
 	@Override
@@ -63,13 +51,13 @@ public class TridentCapability extends RangedWeaponCapability {
 	}
 	
 	@Override
-	public List<StaticAnimation> getAutoAttckMotion(PlayerPatch<?> playerpatch) {
-		return attackMotion;
+	public List<AnimationProvider<?>> getAutoAttckMotion(PlayerPatch<?> playerpatch) {
+		return this.attackMotion;
 	}
 	
 	@Override
-	public List<StaticAnimation> getMountAttackMotion() {
-		return mountAttackMotion;
+	public List<AnimationProvider<?>> getMountAttackMotion() {
+		return this.mountAttackMotion;
 	}
 	
 	@Nullable

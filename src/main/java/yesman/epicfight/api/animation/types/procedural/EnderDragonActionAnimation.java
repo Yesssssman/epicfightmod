@@ -24,6 +24,7 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.RenderingTool;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.EnderDragonPatch;
 
@@ -38,10 +39,14 @@ public class EnderDragonActionAnimation extends ActionAnimation implements Proce
 	
 	@Override
 	public void loadAnimation(ResourceManager resourceManager) {
-		loadBothSide(resourceManager, this);
-		this.tipPointTransforms = Maps.newHashMap();
-		this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransforms, this.getArmature(), this.getProperty(ActionAnimationProperty.MOVE_VERTICAL).orElse(false), true);
-		this.onLoaded();
+		try {
+			loadAllJointsClip(resourceManager, this);
+			this.tipPointTransforms = Maps.newHashMap();
+			this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransforms, this.getArmature(), this.getProperty(ActionAnimationProperty.MOVE_VERTICAL).orElse(false), true);
+		} catch (Exception e) {
+			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -157,8 +162,8 @@ public class EnderDragonActionAnimation extends ActionAnimation implements Proce
 		       	
 		       	Pose pose = new Pose();
 		       	
-				for (String jointName : this.jointTransforms.keySet()) {
-					pose.putJointData(jointName, this.jointTransforms.get(jointName).getInterpolatedTransform(playTime));
+				for (String jointName : this.getTransfroms().keySet()) {
+					pose.putJointData(jointName, this.getTransfroms().get(jointName).getInterpolatedTransform(playTime));
 				}
 				
 				FABRIK fabrik = new FABRIK(pose, entitypatch.getArmature(), ikInfo.startJoint, ikInfo.endJoint);

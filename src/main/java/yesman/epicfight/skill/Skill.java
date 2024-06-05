@@ -1,21 +1,33 @@
 package yesman.epicfight.skill;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+import java.util.Set;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.registries.ForgeRegistries;
+import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.client.events.engine.ControllEngine;
 import yesman.epicfight.client.gui.BattleModeGui;
+import yesman.epicfight.client.gui.screen.SkillBookScreen;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.network.EpicFightNetworkManager;
@@ -26,10 +38,9 @@ import yesman.epicfight.network.server.SPSkillExecutionFeedback;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
+import yesman.epicfight.world.capabilities.item.WeaponCategory;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 import yesman.epicfight.world.entity.eventlistener.SkillCancelEvent;
-import yesman.epicfight.world.entity.eventlistener.SkillConsumeEvent;
-import yesman.epicfight.world.item.EpicFightCreativeTabs;
 
 public abstract class Skill {
 	public static class Builder<T extends Skill> {
@@ -63,22 +74,6 @@ public abstract class Skill {
 			this.tab = tab;
 			return this;
 		}
-		
-		public CreativeModeTab getCreativeTab() {
-			return this.tab == null ? EpicFightCreativeTabs.ITEMS.get() : this.tab;
-		}
-		
-		public ResourceLocation getRegistryName() {
-			return this.registryName;
-		}
-		
-		public boolean isLearnable() {
-			return this.category.learnable();
-		}
-		
-		public boolean hasCategory(SkillCategory category) {
-			return this.category == category;
-		}
 	}
 	
 	public static Builder<Skill> createBuilder() {
@@ -93,6 +88,7 @@ public abstract class Skill {
 		return (new Skill.Builder<Skill>()).setCategory(SkillCategories.MOVER).setResource(Resource.STAMINA);
 	}
 	
+	private final Map<Attribute, AttributeModifier> attributes = Maps.newHashMap();
 	protected final ResourceLocation registryName;
 	protected final SkillCategory category;
 	protected final ActivateType activateType;
@@ -119,20 +115,35 @@ public abstract class Skill {
 		this.maxDuration = parameters.getInt("max_duration");
 		this.maxStackSize = parameters.contains("max_stacks") ? parameters.getInt("max_stacks") : 1;
 		this.requiredXp = parameters.getInt("xp_requirement");
+		
+		this.attributes.clear();
+		
+		if (parameters.contains("attribute_modifiers")) {
+			ListTag attributeList = parameters.getList("attribute_modifiers", 10);
+			
+			for (Tag tag : attributeList) {
+				CompoundTag comp = (CompoundTag)tag;
+				String attribute = comp.getString("attribute");
+				Attribute attr = ForgeRegistries.ATTRIBUTES.getValue(new ResourceLocation(attribute));
+				AttributeModifier modifier = ParseUtil.toAttributeModifier(comp);
+				
+				this.attributes.put(attr, modifier);
+			}
+		}
 	}
 	
-	public boolean isExecutableState(PlayerPatch<?> executer) {
-		return !executer.getOriginal().isSpectator() && !executer.isUnstable() && executer.getEntityState().canUseSkill();
+	public boolean isExecutableState(PlayerPatch<?> executor) {
+		return !executor.getOriginal().isSpectator() && !executor.isUnstable() && executor.getEntityState().canUseSkill();
 	}
 	
-	public boolean canExecute(PlayerPatch<?> executer) {
-		return this.checkExecuteCondition(executer);
+	public boolean canExecute(PlayerPatch<?> executor) {
+		return this.checkExecuteCondition(executor);
 	}
 	
 	/**
 	 * This makes the skill icon white if it returns false
 	 */
-	public boolean checkExecuteCondition(PlayerPatch<?> executer) {
+	public boolean checkExecuteCondition(PlayerPatch<?> executor) {
 		return true;
 	}
 	
@@ -140,82 +151,80 @@ public abstract class Skill {
 	 * Get a packet to send to the server
 	 */
 	@OnlyIn(Dist.CLIENT)
-	public Object getExecutionPacket(LocalPlayerPatch executer, FriendlyByteBuf args) {
-		return new CPExecuteSkill(executer.getSkill(this).getSlotId(), CPExecuteSkill.WorkType.ACTIVATE, args);
+	public Object getExecutionPacket(LocalPlayerPatch executor, FriendlyByteBuf args) {
+		return new CPExecuteSkill(executor.getSkill(this).getSlotId(), CPExecuteSkill.WorkType.ACTIVATE, args);
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public FriendlyByteBuf gatherArguments(LocalPlayerPatch executer, ControllEngine controllEngine) {
+	public FriendlyByteBuf gatherArguments(LocalPlayerPatch executor, ControllEngine controllEngine) {
 		return null;
 	}
 
-	public void executeOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
-		SPSkillExecutionFeedback feedbackPacket = SPSkillExecutionFeedback.executed(executer.getSkill(this).getSlotId());
-		SkillContainer container = executer.getSkill(this);
+	public void executeOnServer(ServerPlayerPatch executor, FriendlyByteBuf args) {
+		SPSkillExecutionFeedback feedbackPacket = SPSkillExecutionFeedback.executed(executor.getSkill(this).getSlotId());
 		
-		if (executer.isChargingSkill()) {
+		if (executor.isChargingSkill()) {
 			if (this instanceof ChargeableSkill chargingSkill) {
-				feedbackPacket.getBuffer().writeInt(executer.getAccumulatedChargeAmount());
-				chargingSkill.castSkill(executer, container, executer.getAccumulatedChargeAmount(), feedbackPacket, false);
-				executer.resetSkillCharging();
-				
-				EpicFightNetworkManager.sendToPlayer(feedbackPacket, executer.getOriginal());
+				feedbackPacket.getBuffer().writeInt(executor.getAccumulatedChargeAmount());
+				chargingSkill.castSkill(executor, executor.getSkill(this), executor.getAccumulatedChargeAmount(), feedbackPacket, false);
+				executor.resetSkillCharging();
+				EpicFightNetworkManager.sendToPlayer(feedbackPacket, executor.getOriginal());
 			}
 		} else {
-			SkillConsumeEvent event = new SkillConsumeEvent(executer, this, this.resource, true);
-			executer.getEventListener().triggerEvents(EventType.SKILL_CONSUME_EVENT, event);
-			
-			if (!event.isCanceled()) {
-				event.getResourceType().consumer.consume(this, executer, event.getAmount());
-			}
-			
-			container.activate();
-			EpicFightNetworkManager.sendToPlayer(feedbackPacket, executer.getOriginal());
+			executor.getSkill(this).activate();
+			EpicFightNetworkManager.sendToPlayer(feedbackPacket, executor.getOriginal());
 		}
 	}
 	
-	public void cancelOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
-		SkillCancelEvent skillCancelEvent = new SkillCancelEvent(executer, executer.getSkill(this));
-		executer.getEventListener().triggerEvents(EventType.SKILL_CANCEL_EVENT, skillCancelEvent);
-
-		EpicFightNetworkManager.sendToPlayer(SPSkillExecutionFeedback.expired(executer.getSkill(this).getSlotId()), executer.getOriginal());
+	public void cancelOnServer(ServerPlayerPatch executor, FriendlyByteBuf args) {
+		SkillCancelEvent skillCancelEvent = new SkillCancelEvent(executor, executor.getSkill(this));
+		executor.getEventListener().triggerEvents(EventType.SKILL_CANCEL_EVENT, skillCancelEvent);
+		EpicFightNetworkManager.sendToPlayer(SPSkillExecutionFeedback.expired(executor.getSkill(this).getSlotId()), executor.getOriginal());
 	}
-
-	public float getDefaultConsumeptionAmount(PlayerPatch<?> executer) {
-		switch(this.resource) {
+	
+	public final float getDefaultConsumptionAmount(PlayerPatch<?> executer) {
+		switch (this.resource) {
 		case STAMINA:
 			return executer.getModifiedStaminaConsume(this.consumption);
-		case WEAPON_INNATE_ENERGY:
-			return executer.getSkill(this).stack;
+		case WEAPON_CHARGE:
+			return 1;
 		case COOLDOWN:
-			return executer.getSkill(this).stack;
+			return 1;
 		default:
 			return 0.0F;
 		}
 	}
-
+	
 	/**
 	 * Instant feedback when the skill is executed successfully
-	 * @param executer
+	 * @param executor
 	 * @param args
 	 */
 	@OnlyIn(Dist.CLIENT)
-	public void executeOnClient(LocalPlayerPatch executer, FriendlyByteBuf args) {
+	public void executeOnClient(LocalPlayerPatch executor, FriendlyByteBuf args) {
 	}
 	
 	/**
 	 * Called when the duration ends.
-	 * @param executer
+	 * @param executor
 	 * @param args
 	 */
 	@OnlyIn(Dist.CLIENT)
-	public void cancelOnClient(LocalPlayerPatch executer, FriendlyByteBuf args) {
-		SkillCancelEvent skillCancelEvent = new SkillCancelEvent(executer, executer.getSkill(this));
-		executer.getEventListener().triggerEvents(EventType.SKILL_CANCEL_EVENT, skillCancelEvent);
+	public void cancelOnClient(LocalPlayerPatch executor, FriendlyByteBuf args) {
+		SkillCancelEvent skillCancelEvent = new SkillCancelEvent(executor, executor.getSkill(this));
+		executor.getEventListener().triggerEvents(EventType.SKILL_CANCEL_EVENT, skillCancelEvent);
 	}
 	
 	public void onInitiate(SkillContainer container) {
 		container.maxDuration = this.maxDuration;
+		
+		for (Map.Entry<Attribute, AttributeModifier> stat : this.attributes.entrySet()) {
+			AttributeInstance attr = container.getExecuter().getOriginal().getAttribute(stat.getKey());
+			
+			if (!attr.hasModifier(stat.getValue())) {
+				attr.addTransientModifier(stat.getValue());
+			}
+		}
 	}
 	
 	/**
@@ -223,6 +232,13 @@ public abstract class Skill {
 	 * @param container
 	 */
 	public void onRemoved(SkillContainer container) {
+		for (Map.Entry<Attribute, AttributeModifier> stat : this.attributes.entrySet()) {
+			AttributeInstance attr = container.getExecuter().getOriginal().getAttribute(stat.getKey());
+			
+			if (attr.hasModifier(stat.getValue())) {
+				attr.removeModifier(stat.getValue());
+			}
+		}
 	}
 	
 	/**
@@ -329,7 +345,7 @@ public abstract class Skill {
 		SkillContainer skillContainer = executer.getSkill(skill);
 		skillContainer.setResource(amount);
 		
-		EpicFightNetworkManager.sendToPlayer(new SPSetSkillValue(Target.COOLDOWN, skillContainer.getSlotId(), amount, false), executer.getOriginal());
+		EpicFightNetworkManager.sendToPlayer(new SPSetSkillValue(Target.RESOURCE, skillContainer.getSlotId(), amount, false), executer.getOriginal());
 	}
 	
 	public static void setDurationSynchronize(ServerPlayerPatch executer, Skill skill, int amount) {
@@ -392,17 +408,12 @@ public abstract class Skill {
 		return this.requiredXp;
 	}
 	
+	public Set<Entry<Attribute, AttributeModifier>> getModfierEntry() {
+		return this.attributes.entrySet();
+	}
+	
 	public boolean resourcePredicate(PlayerPatch<?> playerpatch) {
-		float consumption = this.getDefaultConsumeptionAmount(playerpatch);
-
-		SkillConsumeEvent event = new SkillConsumeEvent(playerpatch, this, this.resource, consumption, false);
-		playerpatch.getEventListener().triggerEvents(EventType.SKILL_CONSUME_EVENT, event);
-		
-		if (event.isCanceled()) {
-			return false;
-		}
-		
-		return event.getResourceType().predicate.canExecute(this, playerpatch, event.getAmount());
+		return playerpatch.consumeForSkill(this, this.resource);
 	}
 	
 	public boolean shouldDeactivateAutomatically(PlayerPatch<?> executer) {
@@ -460,8 +471,19 @@ public abstract class Skill {
 		return this.getRegistryName().toString();
 	}
 	
+	@OnlyIn(Dist.CLIENT)
 	public Component getDisplayName() {
 		return Component.translatable(String.format("%s.%s.%s", "skill", this.getRegistryName().getNamespace(), this.getRegistryName().getPath()));
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public List<WeaponCategory> getAvailableWeaponCategories() {
+		return null;
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public boolean getCustomConsumptionTooltips(SkillBookScreen.AttributeIconList consumeIconList) {
+		return false;
 	}
 	
 	public enum ActivateType {
@@ -474,36 +496,32 @@ public abstract class Skill {
 			(skill, playerpatch, amount) -> {}
 		),
 		
-		WEAPON_INNATE_ENERGY(
-			(skill, playerpatch, amount) -> amount > 0,
+		WEAPON_CHARGE(
+			(skill, playerpatch, amount) -> playerpatch.getSkill(skill).getStack() >= amount,
 			(skill, playerpatch, amount) -> {
 				skill.setStackSynchronize(playerpatch, playerpatch.getSkill(skill).getStack() - 1);
-				skill.setDurationSynchronize(playerpatch, skill.maxDuration);
 			}
 		),
 		
 		COOLDOWN(
-			(skill, playerpatch, amount) -> amount > 0,
+			(skill, playerpatch, amount) -> playerpatch.getSkill(skill).getStack() >= amount,
 			(skill, playerpatch, amount) -> {
-				skill.setConsumptionSynchronize(playerpatch, 0);
 				skill.setStackSynchronize(playerpatch, playerpatch.getSkill(skill).getStack() - 1);
-				skill.setDurationSynchronize(playerpatch, skill.maxDuration);
 			}
 		),
 		
 		STAMINA(
 			(skill, playerpatch, amount) -> playerpatch.hasStamina(amount),
 			(skill, playerpatch, amount) -> {
-				playerpatch.consumeStamina(amount);
-				skill.setDurationSynchronize(playerpatch, skill.maxDuration);
+				playerpatch.resetActionTick();
+				playerpatch.setStamina(playerpatch.getStamina() - amount);
 			}
 		),
-
+		
 		HEALTH(
 			(skill, playerpatch, amount) -> playerpatch.getOriginal().getHealth() > amount,
 			(skill, playerpatch, amount) -> {
 				playerpatch.getOriginal().setHealth(playerpatch.getOriginal().getHealth() - amount);
-				skill.setDurationSynchronize(playerpatch, skill.maxDuration);
 			}
 		);
 		
@@ -514,12 +532,12 @@ public abstract class Skill {
 			this.predicate = predicate;
 			this.consumer = consumer;
 		}
-
+		
 		@FunctionalInterface
 		public interface ResourcePredicate {
 			boolean canExecute(Skill skill, PlayerPatch<?> playerpatch, float amount);
 		}
-
+		
 		@FunctionalInterface
 		public interface ResourceConsumer {
 			void consume(Skill skill, ServerPlayerPatch playerpatch, float amount);

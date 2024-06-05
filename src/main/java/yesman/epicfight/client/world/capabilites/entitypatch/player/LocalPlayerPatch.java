@@ -22,7 +22,6 @@ import net.minecraftforge.entity.PartEntity;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
-import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.AttackResult;
@@ -72,18 +71,6 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	}
 	
 	@Override
-	public void updateMotion(boolean considerInaction) {
-		super.updateMotion(considerInaction);
-		
-		if (!this.getClientAnimator().isAiming()) {
-			if (this.currentCompositeMotion == LivingMotions.AIM) {
-				this.original.getUseItemRemainingTicks();
-				ClientEngine.getInstance().renderEngine.zoomIn();
-			}
-		}
-	}
-	
-	@Override
 	public void tick(LivingEvent.LivingTickEvent event) {
 		this.prevStamina = this.getStamina();
 
@@ -99,6 +86,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	@Override
 	public void clientTick(LivingEvent.LivingTickEvent event) {
 		this.prevStamina = this.getStamina();
+		
 		super.clientTick(event);
 		
 		HitResult cameraHitResult = this.minecraft.hitResult;
@@ -174,6 +162,35 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 			this.lockOnYRot = this.original.getYRot();
 			this.targetLockedOn = false;
 		}
+		
+		CapabilityItem itemCap = this.getHoldingItemCapability(InteractionHand.MAIN_HAND);
+		
+		switch (itemCap.getZoomInType()) {
+		case ALWAYS:
+			ClientEngine.getInstance().renderEngine.zoomIn();
+			break;
+		case USE_TICK:
+			if (this.original.getUseItemRemainingTicks() > 0) {
+				ClientEngine.getInstance().renderEngine.zoomIn();
+			} else {
+				ClientEngine.getInstance().renderEngine.zoomOut(40);
+			}
+			
+			break;
+		case AIMING:
+			if (this.getClientAnimator().isAiming()) {
+				ClientEngine.getInstance().renderEngine.zoomIn();
+			} else {
+				ClientEngine.getInstance().renderEngine.zoomOut(40);
+			}
+			
+			break;
+		case CUSTOM:
+			//Zoom manually handled
+			break;
+		default:
+			ClientEngine.getInstance().renderEngine.zoomOut(0);
+		}
 	}
 	
 	@Override
@@ -181,20 +198,14 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		return Math.abs(this.original.xxa) > 0.0004F || Math.abs(this.original.zza) > 0.0004F;
 	}
 	
-	@Override
-	protected void playReboundAnimation() {
-		super.playReboundAnimation();
-		ClientEngine.getInstance().renderEngine.zoomOut(40);
-	}
-	
 	public void playAnimationClientPreemptive(StaticAnimation animation, float convertTimeModifier) {
 		this.animator.playAnimation(animation, convertTimeModifier);
-		EpicFightNetworkManager.sendToServer(new CPPlayAnimation(animation.getNamespaceId(), animation.getId(), convertTimeModifier, false, false));
+		EpicFightNetworkManager.sendToServer(new CPPlayAnimation(animation.getId(), convertTimeModifier, false, false));
 	}
 	
 	@Override
 	public void playAnimationSynchronized(StaticAnimation animation, float convertTimeModifier, AnimationPacketProvider packetProvider) {
-		EpicFightNetworkManager.sendToServer(new CPPlayAnimation(animation.getNamespaceId(), animation.getId(), convertTimeModifier, false, true));
+		EpicFightNetworkManager.sendToServer(new CPPlayAnimation(animation.getId(), convertTimeModifier, false, true));
 	}
 	
 	@Override
@@ -275,12 +286,6 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		
 		return actionAnimation.shouldPlayerMove(this);
 	}
-
-	@Override
-	public boolean consumeStamina(float amount) {
-		float currentStamina = this.getStamina();
-		return currentStamina >= amount;
-	}
 	
 	public float getPrevStamina() {
 		return this.prevStamina;
@@ -325,6 +330,20 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		if (sendPacket) {
 			EpicFightNetworkManager.sendToServer(new CPModifyEntityModelYRot(amount));
 		}
+	}
+	
+	public float getModelYRot() {
+		return this.modelYRot;
+	}
+	
+	public void setModelYRotInGui(float rotDeg) {
+		this.useModelYRot = true;
+		this.modelYRot = rotDeg;
+	}
+	
+	public void disableModelYRotInGui(float originalDeg) {
+		this.useModelYRot = false;
+		this.modelYRot = originalDeg;
 	}
 	
 	@Override

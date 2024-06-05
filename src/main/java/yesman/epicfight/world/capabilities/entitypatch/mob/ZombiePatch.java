@@ -4,8 +4,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.gameasset.Animations;
@@ -45,16 +44,14 @@ public class ZombiePatch<T extends PathfinderMob> extends HumanoidMobPatch<T> {
 		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(1.0D);
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.ZOMBIE_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.ZOMBIE_WALK);
-		clientAnimator.addLivingAnimation(LivingMotions.CHASE, Animations.ZOMBIE_CHASE);
-		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
-		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
-		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
-		clientAnimator.setCurrentMotionsAsDefault();
+	public void initAnimator(Animator animator) {
+		animator.addLivingAnimation(LivingMotions.IDLE, Animations.ZOMBIE_IDLE);
+		animator.addLivingAnimation(LivingMotions.WALK, Animations.ZOMBIE_WALK);
+		animator.addLivingAnimation(LivingMotions.CHASE, Animations.ZOMBIE_CHASE);
+		animator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
+		animator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
+		animator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
 	}
 	
 	@Override

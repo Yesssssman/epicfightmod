@@ -1,10 +1,13 @@
 package yesman.epicfight.api.client.model;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
+import java.util.stream.Collectors;
 
-import com.google.common.collect.Maps;
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -41,7 +44,7 @@ public class Meshes implements PreparableReloadListener {
 		M invoke(Map<String, float[]> arrayMap, M parent, RenderProperties properties, Map<String, ModelPart<V>> parts);
 	}
 		
-	private static final Map<ResourceLocation, Mesh<?>> MESHES = Maps.newHashMap();
+	private static final BiMap<ResourceLocation, Mesh<?>> MESHES = HashBiMap.create();
 	
 	public static HumanoidMesh ALEX;
 	public static HumanoidMesh BIPED;
@@ -77,6 +80,7 @@ public class Meshes implements PreparableReloadListener {
 		MESHES.clear();
 		ModelBuildEvent.MeshBuild event = new ModelBuildEvent.MeshBuild(resourceManager, MESHES);
 		
+		//Entities
 		ALEX = event.getAnimated(EpicFightMod.MODID, "entity/biped_slim_arm", HumanoidMesh::new);
 		BIPED = event.getAnimated(EpicFightMod.MODID, "entity/biped", HumanoidMesh::new);
 		BIPED_OLD_TEX = event.getAnimated(EpicFightMod.MODID, "entity/biped_old_texture", HumanoidMesh::new);
@@ -95,10 +99,13 @@ public class Meshes implements PreparableReloadListener {
 		HOGLIN = event.getAnimated(EpicFightMod.MODID, "entity/hoglin", HoglinMesh::new);
 		DRAGON = event.getAnimated(EpicFightMod.MODID, "entity/dragon", DragonMesh::new);
 		WITHER = event.getAnimated(EpicFightMod.MODID, "entity/wither", WitherMesh::new);
+		
+		//Particles
 		AIR_BURST = event.getRaw(EpicFightMod.MODID, "particle/air_burst", RawMesh::new);
 		FORCE_FIELD = event.getRaw(EpicFightMod.MODID, "particle/force_field", RawMesh::new);
 		LASER = event.getRaw(EpicFightMod.MODID, "particle/laser", RawMesh::new);
 		
+		//Armors
 		HELMET = event.getAnimated(EpicFightMod.MODID, "armor/helmet", AnimatedMesh::new);
 		HELMET_PIGLIN = event.getAnimated(EpicFightMod.MODID, "armor/piglin_helmet", AnimatedMesh::new);
 		HELMET_VILLAGER = event.getAnimated(EpicFightMod.MODID, "armor/villager_helmet", AnimatedMesh::new);
@@ -112,7 +119,7 @@ public class Meshes implements PreparableReloadListener {
 	@SuppressWarnings("unchecked")
 	public static <M extends RawMesh> M getOrCreateRawMesh(ResourceManager rm, ResourceLocation rl, MeshContructor<VertexIndicator, M> constructor) {
 		return (M) MESHES.computeIfAbsent(rl, (key) -> {
-			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, rl);
+			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, wrapLocation(rl));
 			return jsonModelLoader.loadMesh(constructor);
 		});
 	}
@@ -120,13 +127,30 @@ public class Meshes implements PreparableReloadListener {
 	@SuppressWarnings("unchecked")
 	public static <M extends AnimatedMesh> M getOrCreateAnimatedMesh(ResourceManager rm, ResourceLocation rl, MeshContructor<AnimatedVertexIndicator, M> constructor) {
 		return (M) MESHES.computeIfAbsent(rl, (key) -> {
-			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, rl);
+			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, wrapLocation(rl));
 			return jsonModelLoader.loadAnimatedMesh(constructor);
 		});
 	}
 	
-	public static void addMesh(ResourceLocation rl, AnimatedMesh animatedMesh) {
-		MESHES.put(rl, animatedMesh);
+	public static ResourceLocation getKey(Mesh<?> mesh) {
+		return MESHES.inverse().get(mesh);
+	}
+	
+	public static Mesh<?> getMeshOrNull(ResourceLocation rl) {
+		return MESHES.get(rl);
+	}
+	
+	public static void addMesh(ResourceLocation rl, Mesh<?> mesh) {
+		MESHES.put(rl, mesh);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public static <T extends Mesh<?>> Set<Map.Entry<ResourceLocation, T>> entries(Class<T> filterInstance) {
+		return MESHES.entrySet().stream().filter((entry) -> filterInstance.isAssignableFrom(entry.getValue().getClass())).map((entry) -> (Map.Entry<ResourceLocation, T>)entry).collect(Collectors.toSet());
+	}
+	
+	public static ResourceLocation wrapLocation(ResourceLocation rl) {
+		return rl.getPath().matches("animmodels/.*\\.json") ? rl : new ResourceLocation(rl.getNamespace(), "animmodels/" + rl.getPath() + ".json");
 	}
 	
 	@Override

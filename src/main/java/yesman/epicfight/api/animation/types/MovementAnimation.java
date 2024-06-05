@@ -13,8 +13,16 @@ public class MovementAnimation extends StaticAnimation {
 		super(convertTime, isRepeat, path, armature);
 	}
 	
+	public MovementAnimation(float convertTime, boolean isRepeat, String path, Armature armature, boolean noRegister) {
+		super(convertTime, isRepeat, path, armature, noRegister);
+	}
+	
 	@Override
-	public float getPlaySpeed(LivingEntityPatch<?> entitypatch) {
+	public float getPlaySpeed(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
+		if (animation.isLinkAnimation()) {
+			return 1.0F;
+		}
+		
 		float movementSpeed = 1.0F;
 		
 		if (Math.abs(entitypatch.getOriginal().walkAnimation.speed() - entitypatch.getOriginal().walkAnimation.speed(1)) < 0.007F) {

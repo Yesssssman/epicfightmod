@@ -11,10 +11,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
 import net.minecraftforge.network.NetworkEvent;
+import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
-import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -69,11 +69,11 @@ public class SPChangeLivingMotion {
 		List<StaticAnimation> animationList = Lists.newArrayList();
 		
 		for (int i = 0; i < msg.count; i++) {
-			motionList.add(LivingMotion.ENUM_MANAGER.get(buf.readInt()));
+			motionList.add(LivingMotion.ENUM_MANAGER.getOrThrow(buf.readInt()));
 		}
 		
 		for (int i = 0; i < msg.count; i++) {
-			animationList.add(EpicFightMod.getInstance().animationManager.findAnimationById(buf.readInt(), buf.readInt()));
+			animationList.add(AnimationManager.getInstance().byId(buf.readInt()));
 		}
 		
 		msg.motionList = motionList;
@@ -92,7 +92,6 @@ public class SPChangeLivingMotion {
 		}
 		
 		for (StaticAnimation anim : msg.animationList) {
-			buf.writeInt(anim.getNamespaceId());
 			buf.writeInt(anim.getId());
 		}
 	}

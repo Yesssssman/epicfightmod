@@ -19,10 +19,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -47,17 +47,18 @@ import yesman.epicfight.world.entity.eventlistener.FallEvent;
 import yesman.epicfight.world.entity.eventlistener.ModifyBaseDamageEvent;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
+import yesman.epicfight.world.entity.eventlistener.SkillConsumeEvent;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T> {
-	private static final UUID ACTION_EVENT_UUID = UUID.fromString("e6beeac4-77d2-11eb-9439-0242ac130002");
+	protected static final UUID PLAYER_EVENT_UUID = UUID.fromString("e6beeac4-77d2-11eb-9439-0242ac130002");
 	public static final EntityDataAccessor<Float> STAMINA = new EntityDataAccessor<Float> (253, EntityDataSerializers.FLOAT);
 	protected PlayerEventListener eventListeners;
 	protected PlayerMode playerMode = PlayerMode.MINING;
 	protected double xo;
 	protected double yo;
 	protected double zo;
-	protected float oModelYRot;
+	protected float modelYRotO;
 	protected float modelYRot;
 	protected boolean useModelYRot;
 	protected int tickSinceLastAction;
@@ -87,7 +88,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		
 		this.tickSinceLastAction = 0;
 		
-		this.eventListeners.addEventListener(EventType.ACTION_EVENT_SERVER, ACTION_EVENT_UUID, (playerEvent) -> {
+		this.eventListeners.addEventListener(EventType.ACTION_EVENT_SERVER, PLAYER_EVENT_UUID, (playerEvent) -> {
 			this.resetActionTick();
 		});
 	}
@@ -102,35 +103,33 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
+	public void initAnimator(Animator animator) {
 		/* Living Animations */
-		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK);
-		clientAnimator.addLivingAnimation(LivingMotions.RUN, Animations.BIPED_RUN);
-		clientAnimator.addLivingAnimation(LivingMotions.SNEAK, Animations.BIPED_SNEAK);
-		clientAnimator.addLivingAnimation(LivingMotions.SWIM, Animations.BIPED_SWIM);
-		clientAnimator.addLivingAnimation(LivingMotions.FLOAT, Animations.BIPED_FLOAT);
-		clientAnimator.addLivingAnimation(LivingMotions.KNEEL, Animations.BIPED_KNEEL);
-		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
-		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
-		clientAnimator.addLivingAnimation(LivingMotions.SIT, Animations.BIPED_SIT);
-		clientAnimator.addLivingAnimation(LivingMotions.FLY, Animations.BIPED_FLYING);
-		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
-		clientAnimator.addLivingAnimation(LivingMotions.JUMP, Animations.BIPED_JUMP);
-		clientAnimator.addLivingAnimation(LivingMotions.CLIMB, Animations.BIPED_CLIMBING);
-		clientAnimator.addLivingAnimation(LivingMotions.SLEEP, Animations.BIPED_SLEEPING);
-		clientAnimator.addLivingAnimation(LivingMotions.CREATIVE_FLY, Animations.BIPED_CREATIVE_FLYING);
-		clientAnimator.addLivingAnimation(LivingMotions.CREATIVE_IDLE, Animations.BIPED_CREATIVE_IDLE);
+		animator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE);
+		animator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK);
+		animator.addLivingAnimation(LivingMotions.RUN, Animations.BIPED_RUN);
+		animator.addLivingAnimation(LivingMotions.SNEAK, Animations.BIPED_SNEAK);
+		animator.addLivingAnimation(LivingMotions.SWIM, Animations.BIPED_SWIM);
+		animator.addLivingAnimation(LivingMotions.FLOAT, Animations.BIPED_FLOAT);
+		animator.addLivingAnimation(LivingMotions.KNEEL, Animations.BIPED_KNEEL);
+		animator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
+		animator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
+		animator.addLivingAnimation(LivingMotions.SIT, Animations.BIPED_SIT);
+		animator.addLivingAnimation(LivingMotions.FLY, Animations.BIPED_FLYING);
+		animator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
+		animator.addLivingAnimation(LivingMotions.JUMP, Animations.BIPED_JUMP);
+		animator.addLivingAnimation(LivingMotions.CLIMB, Animations.BIPED_CLIMBING);
+		animator.addLivingAnimation(LivingMotions.SLEEP, Animations.BIPED_SLEEPING);
+		animator.addLivingAnimation(LivingMotions.CREATIVE_FLY, Animations.BIPED_CREATIVE_FLYING);
+		animator.addLivingAnimation(LivingMotions.CREATIVE_IDLE, Animations.BIPED_CREATIVE_IDLE);
 
 		/* Mix Animations */
-		clientAnimator.addLivingAnimation(LivingMotions.DIGGING, Animations.BIPED_DIG);
-		clientAnimator.addLivingAnimation(LivingMotions.AIM, Animations.BIPED_BOW_AIM);
-		clientAnimator.addLivingAnimation(LivingMotions.SHOT, Animations.BIPED_BOW_SHOT);
-		clientAnimator.addLivingAnimation(LivingMotions.DRINK, Animations.BIPED_DRINK);
-		clientAnimator.addLivingAnimation(LivingMotions.EAT, Animations.BIPED_EAT);
-		clientAnimator.addLivingAnimation(LivingMotions.SPECTATE, Animations.BIPED_SPYGLASS_USE);
-
-		clientAnimator.setCurrentMotionsAsDefault();
+		animator.addLivingAnimation(LivingMotions.DIGGING, Animations.BIPED_DIG);
+		animator.addLivingAnimation(LivingMotions.AIM, Animations.BIPED_BOW_AIM);
+		animator.addLivingAnimation(LivingMotions.SHOT, Animations.BIPED_BOW_SHOT);
+		animator.addLivingAnimation(LivingMotions.DRINK, Animations.BIPED_DRINK);
+		animator.addLivingAnimation(LivingMotions.EAT, Animations.BIPED_EAT);
+		animator.addLivingAnimation(LivingMotions.SPECTATE, Animations.BIPED_SPYGLASS_USE);
 	}
 	
 	public void copySkillsFrom(PlayerPatch<?> old) {
@@ -177,8 +176,8 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 			oYRot = ridingEntity.yBodyRotO;
 			yRot = ridingEntity.yBodyRot;
 		} else {
-			oYRot = this.isLogicalClient() ? this.original.yBodyRotO : this.oModelYRot;
-			yRot = this.isLogicalClient() ? this.original.yBodyRot : this.modelYRot;
+			oYRot = this.modelYRotO;
+			yRot = this.modelYRot;
 		}
 		
 		return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, oYRot, yRot, partialTicks, scale, scale, scale);
@@ -223,7 +222,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		
 		super.tick(event);
 		
-		this.oModelYRot = this.modelYRot;
+		this.modelYRotO = this.modelYRot;
 		
 		if (this.getEntityState().turningLocked()) {
 			if (!this.useModelYRot) {
@@ -235,8 +234,14 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 			}
 		}
 		
+		if (this.getEntityState().inaction()) {
+			this.original.yBodyRot = this.original.getYRot();
+			this.original.yHeadRot = this.original.getYRot();
+		}
+		
 		if (!this.useModelYRot) {
-			this.modelYRot += Mth.clamp(Mth.wrapDegrees(this.original.yBodyRot - this.modelYRot), -45.0F, 45.0F);
+			float originalYRot = this.isLogicalClient() ? this.original.yBodyRot : this.original.getYRot();
+			this.modelYRot += Mth.clamp(Mth.wrapDegrees(originalYRot - this.modelYRot), -45.0F, 45.0F);
 		}
 	}
 	
@@ -384,30 +389,54 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 
 		return ((weight / 40.0F - 1.0F) * attenuation + 1.0F) * amount;
 	}
-
+	
+	public boolean hasStamina(float amount) {
+		return this.getStamina() > amount;
+	}
+	
 	public void setStamina(float value) {
 		float f1 = Math.max(Math.min(value, this.getMaxStamina()), 0.0F);
 		this.original.getEntityData().set(STAMINA, f1);
 	}
 	
+	public boolean consumeForSkill(Skill skill, Skill.Resource consumeResource) {
+		return this.consumeForSkill(skill, consumeResource, skill.getDefaultConsumptionAmount(this));
+	}
+	
+	public boolean consumeForSkill(Skill skill, Skill.Resource consumeResource, float amount) {
+		return this.consumeForSkill(skill, consumeResource, amount, false);
+	}
+	
 	/**
-	 * Client : Compare if the current stamina is bigger than amount
-	 * Server : Consumes the stamina if current stamina is bigger than amount
+	 * Client : Checks if a player has enough resource
+	 * Server : Checks and consumes the resource if it meets the condition
 	 * @param amount
-	 * @return Result of comparison
+	 * @return check result
+	 * Use this 
 	 */
-	public abstract boolean consumeStamina(float amount);
-	
-	public void consumeStaminaAlways(float amount) {
-		float currentStamina = this.getStamina();
-		this.setStamina(currentStamina - amount);
-		this.resetActionTick();
+	public boolean consumeForSkill(Skill skill, Skill.Resource consumeResource, float amount, boolean activateConsumeForce) {
+		SkillConsumeEvent skillConsumeEvent = new SkillConsumeEvent(this, skill, consumeResource, amount);
+		this.getEventListener().triggerEvents(EventType.SKILL_CONSUME_EVENT, skillConsumeEvent);
+		
+		if (skillConsumeEvent.isCanceled()) {
+			return false;
+		}
+		
+		if (skillConsumeEvent.getResourceType().predicate.canExecute(skill, this, amount)) {
+			if (!this.isLogicalClient()) {
+				skillConsumeEvent.getResourceType().consumer.consume(skill, (ServerPlayerPatch)this, amount);
+			}
+			
+			return true;
+		} else if (activateConsumeForce) {
+			if (!this.isLogicalClient()) {
+				skillConsumeEvent.getResourceType().consumer.consume(skill, (ServerPlayerPatch)this, amount);
+			}
+		}
+		
+		return false;
 	}
 	
-	public boolean hasStamina(float amount) {
-		return this.getStamina() > amount;
-	}
-
 	public void resetActionTick() {
 		this.tickSinceLastAction = 0;
 	}
@@ -542,6 +571,25 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	@Override
 	public double getZOld() {
 		return this.zo;
+	}
+	
+	@Override
+	public float getYRot() {
+		return this.modelYRot;
+	}
+	
+	@Override
+	public void setYRot(float yRot) {
+		if (this.useModelYRot) {
+			this.setModelYRot(yRot, true);
+		} else {
+			this.original.setYRot(yRot);
+		}
+	}
+	
+	@Override
+	public float getYRotLimit() {
+		return 180.0F;
 	}
 	
 	@Override

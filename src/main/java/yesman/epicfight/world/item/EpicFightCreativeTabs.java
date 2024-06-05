@@ -13,28 +13,21 @@ import yesman.epicfight.main.EpicFightMod;
 public class EpicFightCreativeTabs {
 	public static final DeferredRegister<CreativeModeTab> TABS = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, EpicFightMod.MODID);
 
-	public static final RegistryObject<CreativeModeTab> ITEMS = TABS.register("items",
-			() -> CreativeModeTab.builder()
+	public static final RegistryObject<CreativeModeTab> ITEMS = TABS.register("items", () -> CreativeModeTab.builder()
 					.title(Component.translatable("itemGroup.epicfight.items"))
 					.icon(() -> new ItemStack(EpicFightItems.SKILLBOOK.get()))
 					.withTabsBefore(CreativeModeTabs.SPAWN_EGGS)
 					.withBackgroundLocation(new ResourceLocation(EpicFightMod.MODID, "textures/gui/container/epicfight_creative_tab.png"))
 					.hideTitle()
 					.displayItems((params, output) -> {
-						EpicFightItems.ITEMS.getEntries().forEach(it -> {
+						EpicFightItems.ITEMS.getEntries().forEach(item -> {
 							// FIXME: bad implement, maybe based protocol better yet.
 							// ignore UCHIGATANA_SHEATH
-							if (it == EpicFightItems.UCHIGATANA_SHEATH) {
+							if (item == EpicFightItems.UCHIGATANA_SHEATH || item == EpicFightItems.SKILLBOOK) {
 								return;
 							}
-							// expend the skill book
-							if (it == EpicFightItems.SKILLBOOK) {
-								if (it.get() instanceof SkillBookItem skillbookItem) {
-									skillbookItem.fillItemCategory(output::accept);
-								}
-								return;
-							}
-							output.accept(it.get());
+							
+							output.accept(item.get());
 						});
 					})
 					.build());

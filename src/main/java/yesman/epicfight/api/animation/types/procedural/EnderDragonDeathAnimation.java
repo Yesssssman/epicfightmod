@@ -5,6 +5,7 @@ import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.LongHitAnimation;
 import yesman.epicfight.api.model.Armature;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class EnderDragonDeathAnimation extends LongHitAnimation {
@@ -14,8 +15,12 @@ public class EnderDragonDeathAnimation extends LongHitAnimation {
 	
 	@Override
 	public void loadAnimation(ResourceManager resourceManager) {
-		loadBothSide(resourceManager, this);
-		this.onLoaded();
+		try {
+			loadAllJointsClip(resourceManager, this);
+		} catch (Exception e) {
+			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
+			e.printStackTrace();
+		}
 	}
 	
 	@Override

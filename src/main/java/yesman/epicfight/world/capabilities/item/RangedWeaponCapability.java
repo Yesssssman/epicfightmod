@@ -5,18 +5,20 @@ import java.util.Map;
 import com.google.common.collect.Maps;
 
 import net.minecraft.world.InteractionHand;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.LivingMotion;
-import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class RangedWeaponCapability extends CapabilityItem {
-	protected Map<LivingMotion, StaticAnimation> rangeAnimationModifiers;
+	protected Map<LivingMotion, AnimationProvider<?>> rangeAnimationModifiers;
+	protected ZoomInType zoomInType;
 	
 	protected RangedWeaponCapability(CapabilityItem.Builder builder) {
 		super(builder);
 		
 		RangedWeaponCapability.Builder rangedBuilder = (RangedWeaponCapability.Builder)builder;
 		this.rangeAnimationModifiers = rangedBuilder.rangeAnimationModifiers;
+		this.zoomInType = rangedBuilder.zoomInType;
 	}
 	
 	@Override
@@ -25,7 +27,7 @@ public class RangedWeaponCapability extends CapabilityItem {
 	}
 	
 	@Override
-	public Map<LivingMotion, StaticAnimation> getLivingMotionModifier(LivingEntityPatch<?> playerdata, InteractionHand hand) {
+	public Map<LivingMotion, AnimationProvider<?>> getLivingMotionModifier(LivingEntityPatch<?> playerdata, InteractionHand hand) {
 		if (hand == InteractionHand.MAIN_HAND) {
 			return this.rangeAnimationModifiers;
 		}
@@ -47,8 +49,14 @@ public class RangedWeaponCapability extends CapabilityItem {
 		return new RangedWeaponCapability.Builder();
 	}
 	
+	@Override
+	public ZoomInType getZoomInType() {
+		return this.zoomInType;
+	}
+	
 	public static class Builder extends CapabilityItem.Builder {
-		Map<LivingMotion, StaticAnimation> rangeAnimationModifiers;
+		private Map<LivingMotion, AnimationProvider<?>> rangeAnimationModifiers;
+		private ZoomInType zoomInType = ZoomInType.USE_TICK;
 		
 		protected Builder() {
 			this.category = WeaponCategories.RANGED;
@@ -56,8 +64,13 @@ public class RangedWeaponCapability extends CapabilityItem {
 			this.rangeAnimationModifiers = Maps.newHashMap();
 		}
 		
-		public Builder addAnimationsModifier(LivingMotion livingMotion, StaticAnimation animations) {
+		public Builder addAnimationsModifier(LivingMotion livingMotion, AnimationProvider<?> animations) {
 			this.rangeAnimationModifiers.put(livingMotion, animations);
+			return this;
+		}
+		
+		public Builder zoomInType(ZoomInType zoomInType) {
+			this.zoomInType = zoomInType;
 			return this;
 		}
 	}

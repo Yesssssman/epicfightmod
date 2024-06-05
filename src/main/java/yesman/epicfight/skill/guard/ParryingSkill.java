@@ -1,6 +1,5 @@
 package yesman.epicfight.skill.guard;
 
-import java.util.Iterator;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -12,8 +11,6 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSkills;
@@ -92,6 +89,9 @@ public class ParryingSkill extends GuardSkill {
 					event.setParried(true);
 					penalty = 0.1F;
 					knockback *= 0.4F;
+					
+					// Solution by Cyber2049(github): Fix continuous parry
+					container.getDataManager().setData(SkillDataKeys.LAST_ACTIVE.get(), 0);
 				} else {
 					penalty += this.getPenalizer(itemCapability);
 					container.getDataManager().setDataSync(SkillDataKeys.PENALTY.get(), penalty, playerentity);
@@ -103,9 +103,9 @@ public class ParryingSkill extends GuardSkill {
 				
 				event.getPlayerPatch().knockBackEntity(damageSource.getDirectEntity().position(), knockback);
 				float consumeAmount = penalty * impact;
-				event.getPlayerPatch().consumeStaminaAlways(consumeAmount);
+				boolean canAfford = event.getPlayerPatch().consumeForSkill(this, Skill.Resource.STAMINA, consumeAmount);
 				
-				BlockType blockType = successParrying ? BlockType.ADVANCED_GUARD : event.getPlayerPatch().hasStamina(0.0F) ? BlockType.GUARD : BlockType.GUARD_BREAK;
+				BlockType blockType = successParrying ? BlockType.ADVANCED_GUARD : (canAfford ? BlockType.GUARD : BlockType.GUARD_BREAK);
 				StaticAnimation animation = this.getGuardMotion(event.getPlayerPatch(), itemCapability, blockType);
 				
 				if (animation != null) {
@@ -164,22 +164,8 @@ public class ParryingSkill extends GuardSkill {
 		return true;
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
-	public List<Object> getTooltipArgsOfScreen(List<Object> list) {
-		list.clear();
-
-		StringBuilder sb = new StringBuilder();
-		Iterator<WeaponCategory> iter = this.advancedGuardMotions.keySet().iterator();
-
-		while (iter.hasNext()) {
-			sb.append(WeaponCategory.ENUM_MANAGER.toTranslated(iter.next()));
-			if (iter.hasNext())
-				sb.append(", ");
-		}
-
-		list.add(sb.toString());
-
-		return list;
+	public List<WeaponCategory> getAvailableWeaponCategories() {
+		return List.copyOf(this.advancedGuardMotions.keySet());
 	}
 }

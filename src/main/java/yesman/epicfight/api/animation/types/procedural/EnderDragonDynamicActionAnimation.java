@@ -22,12 +22,13 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.RenderingTool;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.EnderDragonPatch;
 
 public class EnderDragonDynamicActionAnimation extends ActionAnimation implements ProceduralAnimation {
 	private final IKInfo[] ikInfos;
-	private Map<String, TransformSheet> tipPointTransform;
+	private Map<String, TransformSheet> tipPointTransform = Maps.newHashMap();
 	
 	public EnderDragonDynamicActionAnimation(float convertTime, String path, Armature armature, IKInfo[] ikInfos) {
 		super(convertTime, path, armature);
@@ -36,10 +37,13 @@ public class EnderDragonDynamicActionAnimation extends ActionAnimation implement
 	
 	@Override
 	public void loadAnimation(ResourceManager resourceManager) {
-		loadBothSide(resourceManager, this);
-		this.tipPointTransform = Maps.newHashMap();
-		this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransform, this.getArmature(), true, true);
-		this.onLoaded();
+		try {
+			loadAllJointsClip(resourceManager, this);
+			this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransform, this.getArmature(), true, true);
+		} catch (Exception e) {
+			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -154,8 +158,8 @@ public class EnderDragonDynamicActionAnimation extends ActionAnimation implement
 		       	
 		       	Pose pose = new Pose();
 		       	
-				for (String jointName : this.jointTransforms.keySet()) {
-					pose.putJointData(jointName, this.jointTransforms.get(jointName).getInterpolatedTransform(playTime));
+				for (String jointName : this.getTransfroms().keySet()) {
+					pose.putJointData(jointName, this.getTransfroms().get(jointName).getInterpolatedTransform(playTime));
 				}
 			}
 		}

@@ -12,6 +12,14 @@
 			"type":"none"
 		},
 		{
+			"livingmotion":"WALK",
+			"type":"arms"
+		},
+		{
+			"livingmotion":"RUN",
+			"type":"arms"
+		},
+		{
 			"livingmotion":"KNEEL",
 			"type":"arms"
 		},

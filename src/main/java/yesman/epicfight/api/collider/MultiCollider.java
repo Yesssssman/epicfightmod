@@ -5,8 +5,8 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.phys.AABB;
@@ -25,12 +25,8 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 	protected final List<T> colliders = Lists.newArrayList();
 	protected final int numberOfColliders;
 	
-	public static enum Usage {
-		INTERPOLATION, MULTI_BONES
-	}
-	
-	public MultiCollider(int arrayLength, double posX, double posY, double posZ, AABB outerAABB) {
-		super(new Vec3(posX, posY, posZ), outerAABB);
+	public MultiCollider(int arrayLength, double centerX, double centerY, double centerZ, AABB outerAABB) {
+		super(new Vec3(centerX, centerY, centerZ), outerAABB);
 		this.numberOfColliders = arrayLength;
 	}
 	
@@ -39,7 +35,6 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 		super(null, null);
 
 		Collections.addAll(this.colliders, colliders);
-		
 		this.numberOfColliders = colliders.length;
 	}
 	
@@ -118,7 +113,16 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 	}
 	
 	@Override
-	public void drawInternal(PoseStack matrixStackIn, MultiBufferSource buffer, OpenMatrix4f pose, boolean red) {
+	public void drawInternal(PoseStack poseStack, VertexConsumer vertexConsumer, Armature armature, Joint joint, Pose pose1, Pose pose2, float partialTicks, int color) {
+		int idx = 0;
+		int size = this.colliders.size() - 1;
+		
+		for (T collider : this.colliders) {
+			float interpolation = (float)idx / (float)size;
+			Pose interpolatedPose = Pose.interpolatePose(pose1, pose2, interpolation);
+			collider.drawInternal(poseStack, vertexConsumer, armature, joint, interpolatedPose, interpolatedPose, interpolation, color);
+			idx++;
+		}
 	}
 	
 	@Override
@@ -139,6 +143,6 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 	
 	@Override
 	public String toString() {
-		return super.toString() + " collider count: " + this.numberOfColliders;
+		return super.toString() + " collider count: " + this.numberOfColliders + " " + this.colliders.get(0);
 	}
 }

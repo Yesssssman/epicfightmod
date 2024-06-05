@@ -1,7 +1,6 @@
 package yesman.epicfight.world.item;
 
 import java.util.List;
-import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
@@ -56,16 +55,6 @@ public class SkillBookItem extends Item {
 			ResourceLocation rl = new ResourceLocation(stack.getTag().getString("skill"));
 			tooltip.add(Component.translatable(String.format("skill.%s.%s", rl.getNamespace(), rl.getPath())).withStyle(ChatFormatting.DARK_GRAY));
 		}
-	}
-	
-	public void fillItemCategory(Consumer<ItemStack> items) {
-		SkillManager.getLearnableSkillNames(Skill.Builder::isLearnable)
-			.forEach((rl) -> {
-				ItemStack stack = new ItemStack(this);
-				setContainingSkill(rl.toString(), stack);
-				items.accept(stack);
-			}
-		);
 	}
 	
 	@Override

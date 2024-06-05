@@ -46,12 +46,12 @@ public class PEnderDragonRenderer extends PatchedEntityRenderer<EnderDragon, End
 		if (entityIn.dragonDeathTime > 0) {
 			poseStack.translate(entityIn.getRandom().nextGaussian() * 0.08D, 0.0D, entityIn.getRandom().nextGaussian() * 0.08D);
 			float deathTimeProgression = ((float) entityIn.dragonDeathTime + partialTicks) / 200.0F;
-			VertexConsumer builder = buffer.getBuffer(EpicFightRenderTypes.triangles(RenderType.dragonExplosionAlpha(DRAGON_EXPLODING_LOCATION)));
+			VertexConsumer builder = buffer.getBuffer(EpicFightRenderTypes.getTriangulated(RenderType.dragonExplosionAlpha(DRAGON_EXPLODING_LOCATION)));
 			mesh.drawModelWithPose(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, deathTimeProgression, OverlayTexture.NO_OVERLAY, armature, poses);
-			VertexConsumer builder2 = buffer.getBuffer(EpicFightRenderTypes.triangles(RenderType.entityDecal(DRAGON_LOCATION)));
+			VertexConsumer builder2 = buffer.getBuffer(EpicFightRenderTypes.getTriangulated(RenderType.entityDecal(DRAGON_LOCATION)));
 			mesh.drawModelWithPose(poseStack, builder2, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), armature, poses);
 		} else {
-			VertexConsumer builder = buffer.getBuffer(EpicFightRenderTypes.triangles(RenderType.entityCutoutNoCull(DRAGON_LOCATION)));
+			VertexConsumer builder = buffer.getBuffer(EpicFightRenderTypes.getTriangulated(RenderType.entityCutoutNoCull(DRAGON_LOCATION)));
 			mesh.drawModelWithPose(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), armature, poses);
 		}
 		

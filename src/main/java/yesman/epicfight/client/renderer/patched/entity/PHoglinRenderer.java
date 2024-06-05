@@ -28,8 +28,6 @@ public class PHoglinRenderer<E extends Mob & HoglinBase, T extends MobPatch<E>> 
 		if (entitypatch.getOriginal().isBaby()) {
 			this.setJointTransform("Head", armature, new OpenMatrix4f().scale(new Vec3f(1.25F, 1.25F, 1.25F)));
 		}
-		
-        this.setJointTransform("Head", armature, entitypatch.getHeadMatrix(partialTicks));
 	}
 
 	@Override

@@ -20,7 +20,6 @@ import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
-import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.mesh.WitherMesh;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.patched.layer.PatchedWitherArmorLayer;
@@ -63,11 +62,11 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 					transparency = 1.0F - transparency;
 				}
 				
-				renderType = EpicFightRenderTypes.triangles(RenderType.entityTranslucent(WITHER_LOCATION));
+				renderType = EpicFightRenderTypes.getTriangulated(RenderType.entityTranslucent(WITHER_LOCATION));
 				VertexConsumer builder1 = buffer.getBuffer(renderType);
 				mesh.drawModelWithPose(poseStack, builder1, packedLight, 1.0F, 1.0F, 1.0F, transparency, OverlayTexture.NO_OVERLAY, armature, poseMatrices);
 				
-				renderType = EpicFightRenderTypes.triangles(RenderType.entityTranslucent(WITHER_INVULNERABLE_LOCATION));
+				renderType = EpicFightRenderTypes.getTriangulated(RenderType.entityTranslucent(WITHER_INVULNERABLE_LOCATION));
 				VertexConsumer builder2 = buffer.getBuffer(renderType);
 				mesh.drawModelWithPose(poseStack, builder2, packedLight, 1.0F, 1.0F, 1.0F, Mth.sin(transparency * 3.1415F), OverlayTexture.NO_OVERLAY, armature, poseMatrices);
 			}
@@ -106,20 +105,6 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 		poseStack.scale(f, f, f);
 	}
 	
-	@Override
-	protected void setJointTransforms(WitherPatch entitypatch, Armature armature, float partialTicks) {
-		this.setJointTransform("Head_M", armature, entitypatch.getHeadMatrix(partialTicks));
-		WitherBoss witherBoss = entitypatch.getOriginal();
-		
-		float leftHeadYRot = witherBoss.yRotOHeads[0] + (witherBoss.yRotHeads[0] - witherBoss.yRotOHeads[0]) * partialTicks;
-		float rightHeadYRot = witherBoss.yRotOHeads[1] + (witherBoss.yRotHeads[1] - witherBoss.yRotOHeads[1]) * partialTicks;
-		float leftHeadXRot = witherBoss.xRotOHeads[0] + (witherBoss.xRotHeads[0] - witherBoss.xRotOHeads[0]) * partialTicks;
-		float rightHeadXRot = witherBoss.xRotOHeads[1] + (witherBoss.xRotHeads[1] - witherBoss.xRotOHeads[1]) * partialTicks;
-		
-		this.setJointTransform("Head_R", armature, OpenMatrix4f.createRotatorDeg(witherBoss.yBodyRot - rightHeadYRot, Vec3f.Y_AXIS).rotateDeg(-rightHeadXRot, Vec3f.X_AXIS));
-		this.setJointTransform("Head_L", armature, OpenMatrix4f.createRotatorDeg(witherBoss.yBodyRot - leftHeadYRot, Vec3f.Y_AXIS).rotateDeg(-leftHeadXRot, Vec3f.X_AXIS));
-	}
-
 	@Override
 	public WitherMesh getMesh(WitherPatch entitypatch) {
 		return Meshes.WITHER;

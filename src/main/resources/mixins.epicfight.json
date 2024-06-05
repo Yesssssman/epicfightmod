@@ -1,0 +1,29 @@
+{
+	"required": true,
+	"minVersion": "0.8",
+	"compatibilityLevel": "JAVA_17",
+	"package": "yesman.epicfight.mixin",
+	"client": [
+		"MixinAbstractContainerEventHandler",
+		"MixinEnderDragonRenderer",
+		"MixinThrownTridentRenderer",
+		"MixinBufferBuilder",
+		"MixinLightTexture",
+		"MixinKeyboardHandler",
+		"MixinLocalPlayer",
+		"MixinMinecraft"
+	],
+	"mixins": [
+		"MixinEndCrystal",
+		"MixinWitherBoss",
+		"MixinLivingEntity",
+		"MixinMob",
+		"MixinPlayer",
+		"MixinServerPlayer",
+		"MixinThrownTrident"
+	],
+	"injector": {
+		"defaultRequire": 1
+	},
+	"refmap": "mixins.epicfight.refmap.json"
+}

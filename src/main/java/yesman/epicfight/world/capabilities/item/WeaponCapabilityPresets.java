@@ -20,6 +20,7 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
+import yesman.epicfight.world.capabilities.item.CapabilityItem.ZoomInType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
 @SuppressWarnings("deprecation") // getLevel
@@ -304,6 +305,7 @@ public class WeaponCapabilityPresets {
 			.constructor(GloveCapability::new);
 	
 	public static final Function<Item, CapabilityItem.Builder> BOW =  (item) -> RangedWeaponCapability.builder()
+			.zoomInType(ZoomInType.USE_TICK)
 			.addAnimationsModifier(LivingMotions.IDLE, Animations.BIPED_IDLE)
 			.addAnimationsModifier(LivingMotions.WALK, Animations.BIPED_WALK)
 			.addAnimationsModifier(LivingMotions.AIM, Animations.BIPED_BOW_AIM)
@@ -311,6 +313,7 @@ public class WeaponCapabilityPresets {
 			.constructor(BowCapability::new);
 			
 	public static final Function<Item, CapabilityItem.Builder> CROSSBOW =  (item) -> RangedWeaponCapability.builder()
+			.zoomInType(ZoomInType.AIMING)
 			.addAnimationsModifier(LivingMotions.IDLE, Animations.BIPED_HOLD_CROSSBOW)
 			.addAnimationsModifier(LivingMotions.KNEEL, Animations.BIPED_HOLD_CROSSBOW)
 			.addAnimationsModifier(LivingMotions.WALK, Animations.BIPED_HOLD_CROSSBOW)
@@ -325,6 +328,7 @@ public class WeaponCapabilityPresets {
 			.constructor(CrossbowCapability::new);
 	
 	public static final Function<Item, CapabilityItem.Builder> TRIDENT = (item) -> RangedWeaponCapability.builder()
+			.zoomInType(ZoomInType.USE_TICK)
 			.addAnimationsModifier(LivingMotions.IDLE, Animations.BIPED_IDLE)
 			.addAnimationsModifier(LivingMotions.WALK, Animations.BIPED_WALK)
 			.addAnimationsModifier(LivingMotions.AIM, Animations.BIPED_JAVELIN_AIM)

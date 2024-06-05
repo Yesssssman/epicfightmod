@@ -1,18 +1,23 @@
 package yesman.epicfight.api.collider;
 
+import org.joml.Matrix4f;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
-import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.Joint;
+import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
-
-import org.joml.Matrix4f;
 
 public class LineCollider extends Collider {
 	protected Vec3 modelVec;
@@ -124,21 +129,35 @@ public class LineCollider extends Collider {
 	}
 	
 	@Override
-	public void drawInternal(PoseStack matrixStackIn, MultiBufferSource buffer, OpenMatrix4f pose, boolean red) {
-		VertexConsumer vertexBuilder = buffer.getBuffer(EpicFightRenderTypes.debugCollider());
+	@OnlyIn(Dist.CLIENT)
+	public RenderType getRenderType() {
+		return EpicFightRenderTypes.debugCollider();
+	}
+	
+	@Override
+	public void drawInternal(PoseStack poseStack, VertexConsumer vertexConsumer, Armature armature, Joint joint, Pose pose1, Pose pose2, float partialTicks, int color) {
+		int pathIndex = armature.searchPathIndex(joint.getName());
+		OpenMatrix4f poseMatrix;
+		Pose interpolatedPose = Pose.interpolatePose(pose1, pose2, partialTicks);
+		
+		if (pathIndex == -1) {
+			poseMatrix = interpolatedPose.getOrDefaultTransform("Root").getAnimationBindedMatrix(armature.rootJoint, new OpenMatrix4f()).removeTranslation();
+		} else {
+			poseMatrix = armature.getBindedTransformByJointIndex(interpolatedPose, pathIndex);
+		}
+		
 		OpenMatrix4f transpose = new OpenMatrix4f();
-		OpenMatrix4f.transpose(pose, transpose);
-		MathUtils.translateStack(matrixStackIn, pose);
-        MathUtils.rotateStack(matrixStackIn, transpose);
-        Matrix4f matrix = matrixStackIn.last().pose();
+		OpenMatrix4f.transpose(poseMatrix, transpose);
+		MathUtils.translateStack(poseStack, poseMatrix);
+        MathUtils.rotateStack(poseStack, transpose);
+        Matrix4f matrix = poseStack.last().pose();
         float startX = (float)this.modelCenter.x;
         float startY = (float)this.modelCenter.y;
         float startZ = (float)this.modelCenter.z;
         float endX = (float)(this.modelCenter.x + this.modelVec.x);
         float endY = (float)(this.modelCenter.y + this.modelVec.y);
         float endZ = (float)(this.modelCenter.z + this.modelVec.z);
-        float color = red ? 0.0F : 1.0F;
-        vertexBuilder.vertex(matrix, startX, startY, startZ).color(1.0F, color, color, 1.0F).endVertex();
-        vertexBuilder.vertex(matrix, endX, endY, endZ).color(1.0F, color, color, 1.0F).endVertex();
+        vertexConsumer.vertex(matrix, startX, startY, startZ).color(color).endVertex();
+        vertexConsumer.vertex(matrix, endX, endY, endZ).color(color).endVertex();
 	}
 }

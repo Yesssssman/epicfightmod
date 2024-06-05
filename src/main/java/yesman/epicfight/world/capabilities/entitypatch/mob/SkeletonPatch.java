@@ -6,10 +6,8 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
-import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
@@ -29,10 +27,9 @@ public class SkeletonPatch<T extends PathfinderMob> extends HumanoidMobPatch<T> 
 		super(faction);
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
-		super.commonAggresiveMobAnimatorInit(clientAnimator);
+	public void initAnimator(Animator animator) {
+		super.commonAggresiveMobAnimatorInit(animator);
 	}
 	
 	@Override

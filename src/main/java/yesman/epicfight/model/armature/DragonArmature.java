@@ -44,8 +44,8 @@ public class DragonArmature extends Armature {
 	public final Joint tail11;
 	public final Joint tail12;
 		
-	public DragonArmature(int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
-		super(jointNumber, rootJoint, jointMap);
+	public DragonArmature(String name, int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
+		super(name, jointNumber, rootJoint, jointMap);
 		
 		this.torso = this.getOrLogException(jointMap, "Torso");
 		this.head = this.getOrLogException(jointMap, "Head");

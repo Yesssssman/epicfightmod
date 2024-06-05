@@ -5,9 +5,8 @@ import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
-import yesman.epicfight.api.client.animation.ClientAnimator;
-import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
@@ -33,12 +32,11 @@ public class WitchPatch extends HumanoidMobPatch<Witch> {
 	
 	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
-		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.ILLAGER_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.ILLAGER_WALK);
-		clientAnimator.addLivingAnimation(LivingMotions.DRINK, Animations.WITCH_DRINKING);
-		clientAnimator.setCurrentMotionsAsDefault();
+	public void initAnimator(Animator animator) {
+		animator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
+		animator.addLivingAnimation(LivingMotions.IDLE, Animations.ILLAGER_IDLE);
+		animator.addLivingAnimation(LivingMotions.WALK, Animations.ILLAGER_WALK);
+		animator.addLivingAnimation(LivingMotions.DRINK, Animations.WITCH_DRINKING);
 	}
 	
 	@Override
@@ -47,16 +45,6 @@ public class WitchPatch extends HumanoidMobPatch<Witch> {
 		
 		if (this.original.isDrinkingPotion()) {
 			this.currentCompositeMotion = LivingMotions.DRINK;
-		}
-	}
-	
-	@OnlyIn(Dist.CLIENT)
-	@Override
-	public OpenMatrix4f getHeadMatrix(float partialTicks) {
-		if (this.original.isDrinkingPotion()) {
-			return new OpenMatrix4f();
-		} else {
-			return super.getHeadMatrix(partialTicks);
 		}
 	}
 }

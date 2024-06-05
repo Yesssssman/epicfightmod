@@ -36,7 +36,7 @@ public class CapabilitySkill {
 		int i = 0;
 		
 		for (SkillContainer container : this.skillContainers) {
-			if (SkillSlot.ENUM_MANAGER.get(i).category().learnable()) {
+			if (SkillSlot.ENUM_MANAGER.getOrThrow(i).category().learnable()) {
 				container.setSkill(null);
 			}
 			

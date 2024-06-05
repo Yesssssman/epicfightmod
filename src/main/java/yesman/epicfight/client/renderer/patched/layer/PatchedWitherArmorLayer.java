@@ -56,7 +56,7 @@ public class PatchedWitherArmorLayer extends PatchedLayer<WitherBoss, WitherPatc
 				}
 			}
 			
-			VertexConsumer ivertexbuilder = buffer.getBuffer(EpicFightRenderTypes.triangles(RenderType.energySwirl(WITHER_ARMOR_LOCATION, Mth.cos(progress * 0.02F) * 3.0F % 1.0F, progress * 0.01F % 1.0F)));
+			VertexConsumer ivertexbuilder = buffer.getBuffer(EpicFightRenderTypes.getTriangulated(RenderType.energySwirl(WITHER_ARMOR_LOCATION, Mth.cos(progress * 0.02F) * 3.0F % 1.0F, progress * 0.01F % 1.0F)));
 			this.mesh.drawModelWithPose(matrixStackIn, ivertexbuilder, packedLightIn, transparency * 0.5F, transparency * 0.5F, transparency * 0.5F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
 			matrixStackIn.popPose();
 		}

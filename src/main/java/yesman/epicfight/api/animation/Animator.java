@@ -1,12 +1,12 @@
 package yesman.epicfight.api.animation;
 
 import java.util.Map;
-import java.util.Set;
 
 import javax.annotation.Nullable;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.ibm.icu.impl.locale.XCldrStub.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
 
 import yesman.epicfight.api.animation.types.AttackAnimation;
@@ -16,12 +16,11 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap;
 import yesman.epicfight.api.utils.TypeFlexibleHashMap.TypeKey;
 import yesman.epicfight.gameasset.Animations;
-import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public abstract class Animator {
 	protected final Map<LivingMotion, StaticAnimation> livingAnimations = Maps.newHashMap();
-	protected final TypeFlexibleHashMap<TypeKey<?>> animationVariables = new TypeFlexibleHashMap<TypeKey<?>>(false);
+	protected final TypeFlexibleHashMap<TypeKey<?>> animationVariables = new TypeFlexibleHashMap<> (false);
 	protected LivingEntityPatch<?> entitypatch;
 	
 	public Animator() {
@@ -39,15 +38,18 @@ public abstract class Animator {
 	/** Give a null value as a parameter to get an animation that is highest priority on client **/
 	public abstract AnimationPlayer getPlayerFor(@Nullable DynamicAnimation playingAnimation);
 	public abstract <T> Pair<AnimationPlayer, T> findFor(Class<T> animationType);
-	public abstract void init();
-	public abstract void poseTick();
+	public abstract Pose getPose(float partialTicks);
 	
-	public final void playAnimation(int namespaceId, int id, float convertTimeModifier) {
-		this.playAnimation(EpicFightMod.getInstance().animationManager.findAnimationById(namespaceId, id), convertTimeModifier);
+	public void init() {
+		this.entitypatch.initAnimator(this);
 	}
 	
-	public final void playAnimationInstantly(int namespaceId, int id) {
-		this.playAnimationInstantly(EpicFightMod.getInstance().animationManager.findAnimationById(namespaceId, id));
+	public final void playAnimation(int id, float convertTimeModifier) {
+		this.playAnimation(AnimationManager.getInstance().byId(id), convertTimeModifier);
+	}
+	
+	public final void playAnimationInstantly(int id) {
+		this.playAnimationInstantly(AnimationManager.getInstance().byId(id));
 	}
 	
 	public boolean isReverse() {
@@ -55,7 +57,7 @@ public abstract class Animator {
 	}
 	
 	public void playDeathAnimation() {
-		this.playAnimation(Animations.BIPED_DEATH, 0);
+		this.playAnimation(this.livingAnimations.getOrDefault(LivingMotions.DEATH, Animations.BIPED_DEATH), 0);
 	}
 	
 	public void addLivingAnimation(LivingMotion livingMotion, StaticAnimation animation) {
@@ -66,15 +68,15 @@ public abstract class Animator {
 		return this.livingAnimations.getOrDefault(livingMotion, defaultGetter);
 	}
 	
-	public Set<Map.Entry<LivingMotion, StaticAnimation>> getLivingAnimationEntrySet() {
-		return this.livingAnimations.entrySet();
+	public Map<LivingMotion, StaticAnimation> getLivingAnimations() {
+		return ImmutableMap.copyOf(this.livingAnimations);
 	}
 	
 	public void removeAnimationVariables(TypeKey<?> typeKey) {
 		this.animationVariables.remove(typeKey);
 	}
 	
-	public <T> void putAnimationVariables(TypeKey<T> typeKey, T value) {
+	public <T> void putAnimationVariable(TypeKey<T> typeKey, T value) {
 		if (this.animationVariables.containsKey(typeKey)) {
 			this.animationVariables.replace(typeKey, value);
 		} else {

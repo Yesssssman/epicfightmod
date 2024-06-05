@@ -1,33 +1,35 @@
 package yesman.epicfight.config;
 
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.google.common.collect.Lists;
+
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.utils.math.Vec2i;
-import yesman.epicfight.client.gui.component.ColorWidget;
+import yesman.epicfight.client.gui.widgets.ColorWidget;
+import yesman.epicfight.config.OptionHandler.BooleanOptionHandler;
 import yesman.epicfight.config.OptionHandler.DoubleOptionHandler;
 import yesman.epicfight.config.OptionHandler.IntegerOptionHandler;
-
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public class EpicFightOptions {
 	public static final float A_TICK = 0.05F;
 	public static final float GENERAL_ANIMATION_CONVERT_TIME = 0.15F;
 	
 	public final IntegerOptionHandler longPressCount;
-	public final OptionHandler<Boolean> filterAnimation;
+	public final BooleanOptionHandler filterAnimation;
 	public final OptionHandler<ClientConfig.HealthBarShowOptions> healthBarShowOption;
-	public final OptionHandler<Boolean> showTargetIndicator;
+	public final BooleanOptionHandler showTargetIndicator;
 	public final DoubleOptionHandler aimHelperColor;
-	public final OptionHandler<Boolean> enableAimHelperPointer;
-	public final OptionHandler<Boolean> cameraAutoSwitch;
-	public final OptionHandler<Boolean> autoPreparation;
-	public final OptionHandler<Boolean> bloodEffects;
-	public final OptionHandler<Boolean> noMiningInCombat;
-  public final OptionHandler<Boolean> aimingCorrection;
+	public final BooleanOptionHandler enableAimHelperPointer;
+	public final BooleanOptionHandler cameraAutoSwitch;
+	public final BooleanOptionHandler autoPreparation;
+	public final BooleanOptionHandler bloodEffects;
+	public final BooleanOptionHandler noMiningInCombat;
+  public final BooleanOptionHandler aimingCorrection;
 	public final Set<Item> battleAutoSwitchItems;
 	public final Set<Item> miningAutoSwitchItems;
 	public int aimHelperRealColor;
@@ -56,17 +58,17 @@ public class EpicFightOptions {
 	public EpicFightOptions() {
 		ClientConfig config = ConfigManager.INGAME_CONFIG;
 		this.longPressCount = new IntegerOptionHandler(config.longPressCountConfig.get(), 1, 10);
-		this.filterAnimation = new OptionHandler<Boolean>(config.filterAnimation.get());
+		this.filterAnimation = new BooleanOptionHandler(config.filterAnimation.get());
 		this.healthBarShowOption = new OptionHandler<ClientConfig.HealthBarShowOptions>(config.healthBarShowOption.get());
-		this.showTargetIndicator = new OptionHandler<Boolean>(config.showTargetIndicator.get());
+		this.showTargetIndicator = new BooleanOptionHandler(config.showTargetIndicator.get());
 		this.aimHelperColor = new DoubleOptionHandler(config.aimHelperColor.get(), 0.0D, 1.0D);
-		this.enableAimHelperPointer = new OptionHandler<Boolean>(config.enableAimHelper.get());
+		this.enableAimHelperPointer = new BooleanOptionHandler(config.enableAimHelper.get());
 		this.aimHelperRealColor = ColorWidget.toColorInteger(config.aimHelperColor.get());
-		this.cameraAutoSwitch = new OptionHandler<Boolean>(config.cameraAutoSwitch.get());
-		this.autoPreparation = new OptionHandler<Boolean>(config.autoPreparation.get());
-		this.bloodEffects = new OptionHandler<Boolean>(config.bloodEffects.get());
-		this.noMiningInCombat = new OptionHandler<Boolean>(config.noMiningInCombat.get());
-    this.aimingCorrection = new OptionHandler<Boolean>(config.aimingCorrection.get());
+		this.cameraAutoSwitch = new BooleanOptionHandler(config.cameraAutoSwitch.get());
+		this.autoPreparation = new BooleanOptionHandler(config.autoPreparation.get());
+		this.bloodEffects = new BooleanOptionHandler(config.bloodEffects.get());
+		this.noMiningInCombat = new BooleanOptionHandler(config.noMiningInCombat.get());
+    this.aimingCorrection = new BooleanOptionHandler(config.aimingCorrection.get());
 		this.battleAutoSwitchItems = config.battleAutoSwitchItems.get().stream()
 				.map(itemName -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName)))
 				.filter(Objects::nonNull)

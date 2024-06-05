@@ -23,12 +23,13 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.RenderingTool;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.EnderDragonPatch;
 
 public class EnderDraonWalkAnimation extends StaticAnimation implements ProceduralAnimation {
 	private final IKInfo[] ikInfos;
-	private Map<String, TransformSheet> tipPointTransform;
+	private Map<String, TransformSheet> tipPointTransform = Maps.newHashMap();
 	
 	public EnderDraonWalkAnimation(float convertTime, String path, Armature armature, IKInfo[] ikInfos) {
 		super(convertTime, true, path, armature);
@@ -37,10 +38,13 @@ public class EnderDraonWalkAnimation extends StaticAnimation implements Procedur
 	
 	@Override
 	public void loadAnimation(ResourceManager resourceManager) {
-		loadBothSide(resourceManager, this);
-		this.tipPointTransform = Maps.newHashMap();
-		this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransform, this.getArmature(), false, false);
-		this.onLoaded();
+		try {
+			loadAllJointsClip(resourceManager, this);
+			this.setIKInfo(this.ikInfos, this.getTransfroms(), this.tipPointTransform, this.getArmature(), false, false);
+		} catch (Exception e) {
+			EpicFightMod.LOGGER.warn("Failed to load animation: " + this.resourceLocation);
+			e.printStackTrace();
+		}
 	}
 	
 	@Override
@@ -59,7 +63,7 @@ public class EnderDraonWalkAnimation extends StaticAnimation implements Procedur
 	    	
 	    	for (IKInfo ikInfo : this.ikInfos) {
 	    		for (String jointName : ikInfo.pathToEndJoint) {
-					pose.putJointData(jointName, this.jointTransforms.get(jointName).getKeyframes()[ikInfo.ikPose].transform().copy());
+					pose.putJointData(jointName, this.getTransfroms().get(jointName).getKeyframes()[ikInfo.ikPose].transform().copy());
 				}
 	    		
 	    		TipPointAnimation tipAnim = enderdragonpatch.getTipPointAnimation(ikInfo.endJoint.getName());
@@ -160,12 +164,12 @@ public class EnderDraonWalkAnimation extends StaticAnimation implements Procedur
 		       	
 		       	Pose pose = new Pose();
 		       	
-				for (String jointName : this.jointTransforms.keySet()) {
-					pose.putJointData(jointName, this.jointTransforms.get(jointName).getInterpolatedTransform(playTime));
+				for (String jointName : this.getTransfroms().keySet()) {
+					pose.putJointData(jointName, this.getTransfroms().get(jointName).getInterpolatedTransform(playTime));
 				}
 				
 				for (String jointName : ikInfo.pathToEndJoint) {
-					pose.putJointData(jointName, this.jointTransforms.get(jointName).getKeyframes()[ikInfo.ikPose].transform().copy());
+					pose.putJointData(jointName, this.getTransfroms().get(jointName).getKeyframes()[ikInfo.ikPose].transform().copy());
 				}
 				
 				FABRIK fabrik = new FABRIK(pose, entitypatch.getArmature(), ikInfo.startJoint, ikInfo.endJoint);

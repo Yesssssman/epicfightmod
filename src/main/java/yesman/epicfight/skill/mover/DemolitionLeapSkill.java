@@ -4,13 +4,16 @@ import java.util.UUID;
 
 import net.minecraft.client.KeyMapping;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.util.Mth;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import yesman.epicfight.api.animation.AnimationProvider;
+import yesman.epicfight.api.animation.StaticAnimationProvider;
 import yesman.epicfight.api.utils.LevelUtil;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.events.engine.ControllEngine;
+import yesman.epicfight.client.gui.screen.SkillBookScreen;
 import yesman.epicfight.client.input.EpicFightKeyMappings;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.gameasset.Animations;
@@ -32,8 +35,8 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 	
 	private static final UUID EVENT_UUID = UUID.fromString("3d142bf4-0dcd-11ee-be56-0242ac120002");
-	private AnimationProvider chargingAnimation;
-	private AnimationProvider shootAnimation;
+	private StaticAnimationProvider chargingAnimation;
+	private StaticAnimationProvider shootAnimation;
 	
 	public DemolitionLeapSkill(Builder<? extends Skill> builder) {
 		super(builder);
@@ -171,9 +174,15 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 		int chargingTicks = caster.getSkillChargingTicks();
 		
 		if (chargingTicks % 5 == 0 && caster.getAccumulatedChargeAmount() < this.getMaxChargingTicks()) {
-			if (caster.consumeStamina(this.consumption)) {
+			if (caster.consumeForSkill(this, Skill.Resource.STAMINA, this.consumption)) {
 				caster.setChargingAmount(caster.getChargingAmount() + 5);
 			}
 		}
+	}
+	
+	@Override
+	public boolean getCustomConsumptionTooltips(SkillBookScreen.AttributeIconList consumptionList) {
+		consumptionList.add(Component.translatable("attribute.name.epicfight.stamina.consume.tooltip"), Component.translatable("attribute.name.epicfight.stamina_per_second.consume", ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(this.consumption), "0.25"), SkillBookScreen.STAMINA_TEXTURE_INFO);
+		return true;
 	}
 }

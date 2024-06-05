@@ -9,8 +9,8 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
-import yesman.epicfight.api.animation.AnimationProvider;
-import yesman.epicfight.api.animation.AnimationProvider.AttackAnimationProvider;
+import yesman.epicfight.api.animation.AttackAnimationProvider;
+import yesman.epicfight.api.animation.StaticAnimationProvider;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
 import yesman.epicfight.client.ClientEngine;
@@ -36,7 +36,7 @@ public class SteelWhirlwindSkill extends WeaponInnateSkill implements Chargeable
 		return skillContainer.getDataManager().getDataValue(SkillDataKeys.CHARGING_POWER.get());
 	}
 	
-	private AnimationProvider chargingAnimation;
+	private StaticAnimationProvider chargingAnimation;
 	private AttackAnimationProvider attackAnimation;
 	
 	public SteelWhirlwindSkill(Builder<? extends Skill> builder) {

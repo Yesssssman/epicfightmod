@@ -1,10 +1,13 @@
 package yesman.epicfight.api.animation.types;
 
+import java.util.List;
 import java.util.function.Function;
 
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.AnimationClip;
+import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.property.AnimationEvent;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.client.animation.Layer;
@@ -22,13 +25,18 @@ public class SelectiveAnimation extends StaticAnimation {
 	private final StaticAnimation[] animations;
 	
 	/**
-	 * WARNING: All animations should have same priority and layer type
+	 * All animations should have same priority and layer type
 	 */
-	public SelectiveAnimation(Function<LivingEntityPatch<?>, Integer> selector, StaticAnimation... animations) {
-		super(0.15F, false, "", null);
+	public SelectiveAnimation(Function<LivingEntityPatch<?>, Integer> selector, String path, StaticAnimation... animations) {
+		super(0.15F, false, path, null);
 		
 		this.selector = selector;
 		this.animations = animations;
+	}
+	
+	@Override
+	public AnimationClip getAnimationClip() {
+		return AnimationManager.getInstance().getStaticAnimationClip(this.animations[0]);
 	}
 	
 	@Override
@@ -38,7 +46,7 @@ public class SelectiveAnimation extends StaticAnimation {
 		int result = this.selector.apply(entitypatch);
 		
 		entitypatch.getAnimator().playAnimation(this.animations[result], 0.0F);
-		entitypatch.getAnimator().putAnimationVariables(PREVIOUS_STATE, result);
+		entitypatch.getAnimator().putAnimationVariable(PREVIOUS_STATE, result);
 	}
 	
 	@Override
@@ -65,11 +73,16 @@ public class SelectiveAnimation extends StaticAnimation {
 				
 				if (entitypatch.getAnimator().getAnimationVariables(PREVIOUS_STATE) != result) {
 					entitypatch.getAnimator().playAnimation(this.animations[result], 0.0F);
-					entitypatch.getAnimator().putAnimationVariables(PREVIOUS_STATE, result);
+					entitypatch.getAnimator().putAnimationVariable(PREVIOUS_STATE, result);
 				}
 				
 			}, AnimationEvent.Side.BOTH));
 		}
+	}
+	
+	@Override
+	public List<StaticAnimation> getClipHolders() {
+		return List.of(this.animations);
 	}
 	
 	@OnlyIn(Dist.CLIENT)

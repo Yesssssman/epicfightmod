@@ -105,8 +105,8 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		float f = Mth.rotLerp(partialTicks, entityIn.yBodyRotO, entityIn.yBodyRot);
 		float f1 = Mth.rotLerp(partialTicks, entityIn.yHeadRotO, entityIn.yHeadRot);
 		float f2 = f1 - f;
-		if (shouldSit && entityIn.getVehicle() instanceof LivingEntity) {
-			LivingEntity livingentity = (LivingEntity) entityIn.getVehicle();
+		
+		if (shouldSit && entityIn.getVehicle() instanceof LivingEntity livingentity) {
 			f = Mth.rotLerp(partialTicks, livingentity.yBodyRotO, livingentity.yBodyRot);
 			f2 = f1 - f;
 			float f3 = Mth.wrapDegrees(f2);
@@ -136,6 +136,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		float f7 = this.getVanillaRendererBob(entityIn, renderer, partialTicks);
 		float f8 = 0.0F;
 		float f5 = 0.0F;
+		
 		if (!shouldSit && entityIn.isAlive()) {
 			f8 = entityIn.walkAnimation.speed(partialTicks);
 			f5 = entityIn.walkAnimation.position() - entityIn.walkAnimation.speed() * (1.0F - partialTicks);
@@ -181,8 +182,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 			});
 		}
 		
-		int rootJointId = this.getRootJointIndex();
-		OpenMatrix4f modelMatrix = new OpenMatrix4f().mulFront(poses[rootJointId]);
+		OpenMatrix4f modelMatrix = new OpenMatrix4f().mulFront(poses[entitypatch.getArmature().getRootJoint().getId()]);
 		OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);
 		
 		poseStack.pushPose();
@@ -203,7 +203,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 			RenderType renderType = (RenderType)getRenderType.invoke(renderer, entityIn, isVisible, isVisibleToPlayer, isGlowing);
 			
 			if (renderType != null) {
-				renderType = EpicFightRenderTypes.triangles(renderType);
+				renderType = EpicFightRenderTypes.getTriangulated(renderType);
 			}
 			
 			return renderType;
@@ -240,10 +240,6 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 	
 	public void addPatchedLayer(Class<?> originalLayerClass, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>, AM> patchedLayer) {
 		this.patchedLayers.put(originalLayerClass, patchedLayer);
-	}
-	
-	protected int getRootJointIndex() {
-		return 0;
 	}
 	
 	protected double getLayerCorrection() {

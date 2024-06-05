@@ -1,0 +1,195 @@
+package yesman.epicfight.client.gui.datapack.widgets;
+
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.components.AbstractWidget;
+import net.minecraft.client.gui.components.Tooltip;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.network.chat.Component;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+
+@OnlyIn(Dist.CLIENT)
+public class Static extends AbstractWidget implements ResizableComponent {
+	private Font font;
+	private Component tooltip;
+	private int fontColor = 0xFFFFFFFF;
+	
+	public Static(Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, String translateKey) {
+		this(font, x1, x2, y1, y2, horizontal, vertical, Component.translatable(translateKey), Component.translatable(translateKey + ".tooltip"));
+	}
+	
+	public Static(Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component message) {
+		this(font, x1, x2, y1, y2, horizontal, vertical, message, null);
+	}
+	
+	public Static(Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component message, Component tooltip) {
+		super(x1, y1, x2, y2, message);
+		
+		this.font = font;
+		this.x1 = x1;
+		this.x2 = x2;
+		this.y1 = y1;
+		this.y2 = y2;
+		this.horizontalSizingOption = horizontal;
+		this.verticalSizingOption = vertical;
+		this.tooltip = tooltip;
+	}
+	
+	@Override
+	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		String correctedString = this._getMessage() == null ? "" : this.font.plainSubstrByWidth(this._getMessage().getString(), this._getWidth());
+		//16777215
+		guiGraphics.drawString(this.font, correctedString, this._getX(), this._getY() + this.height / 2 - this.font.lineHeight / 2, this.fontColor, false);
+		
+		if (this.tooltip != null) {
+			this.setTooltip(this.isMouseOver(mouseX, mouseY) ? Tooltip.create(this.tooltip) : null);
+		}
+	}
+	
+	@Override
+	protected void updateWidgetNarration(NarrationElementOutput p_259858_) {
+	}
+	
+	@Override
+	public boolean isMouseOver(double mouseX, double mouseY) {
+		return mouseX >= (double) this.getX() && mouseY >= (double) this.getY() && mouseX < (double) (this.getX() + this.font.width(this._getMessage())) && mouseY < (double) (this.getY() + this.height);
+	}
+	
+	@Override
+	public boolean mouseClicked(double mouseX, double mouseY, int action) {
+		return false;
+	}
+	
+	@Override
+	public boolean mouseReleased(double mouseX, double mouseY, int action) {
+		return false;
+	}
+	
+	public boolean mouseDragged(double mouseX, double mouseY, int action, double p_93648_, double p_93649_) {
+		return false;
+	}
+	
+	public void setColor(int r, int g, int b) {
+		this.fontColor = 0xFF000000 | r << 24 | g << 16 | b << 8;
+	}
+	
+	/*******************************************************************
+	 * @ResizableComponent variables                                   *
+	 *******************************************************************/
+	private int x1;
+	private int x2;
+	private int y1;
+	private int y2;
+	private final HorizontalSizing horizontalSizingOption;
+	private final VerticalSizing verticalSizingOption;
+	
+	@Override
+	public void setX1(int x1) {
+		this.x1 = x1;
+	}
+
+	@Override
+	public void setX2(int x2) {
+		this.x2 = x2;
+	}
+
+	@Override
+	public void setY1(int y1) {
+		this.y1 = y1;
+	}
+
+	@Override
+	public void setY2(int y2) {
+		this.y2 = y2;
+	}
+	
+	@Override
+	public int getX1() {
+		return this.x1;
+	}
+
+	@Override
+	public int getX2() {
+		return this.x2;
+	}
+
+	@Override
+	public int getY1() {
+		return this.y1;
+	}
+
+	@Override
+	public int getY2() {
+		return this.y2;
+	}
+
+	@Override
+	public HorizontalSizing getHorizontalSizingOption() {
+		return this.horizontalSizingOption;
+	}
+
+	@Override
+	public VerticalSizing getVerticalSizingOption() {
+		return this.verticalSizingOption;
+	}
+	
+	@Override
+	public void _setActive(boolean active) {
+		this.active = active;
+	}
+	
+	@Override
+	public void _tick() {
+	}
+	
+	@Override
+	public int _getX() {
+		return this.getX();
+	}
+
+	@Override
+	public int _getY() {
+		return this.getY();
+	}
+
+	@Override
+	public int _getWidth() {
+		return this.getWidth();
+	}
+
+	@Override
+	public int _getHeight() {
+		return this.getHeight();
+	}
+
+	@Override
+	public void _setX(int x) {
+		this.setX(x);
+	}
+
+	@Override
+	public void _setY(int y) {
+		this.setY(y);
+	}
+
+	@Override
+	public void _setWidth(int width) {
+		this.setWidth(width);
+	}
+
+	@Override
+	public void _setHeight(int height) {
+		this.setHeight(height);
+	}
+
+	@Override
+	public Component _getMessage() {
+		return this.getMessage();
+	}
+
+	@Override
+	public void _renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		this.render(guiGraphics, mouseX, mouseY, partialTicks);
+	}
+}

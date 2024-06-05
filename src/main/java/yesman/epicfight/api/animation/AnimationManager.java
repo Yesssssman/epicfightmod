@@ -1,184 +1,274 @@
 package yesman.epicfight.api.animation;
 
 import java.util.Map;
-import java.util.function.Supplier;
+import java.util.NoSuchElementException;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.ibm.icu.impl.locale.XCldrStub.ImmutableMap;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.minecraft.core.IdMapper;
+import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
-import net.minecraft.server.packs.resources.SimplePreparableReloadListener;
+import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraftforge.fml.ModLoader;
-import net.minecraftforge.registries.IForgeRegistry;
-import net.minecraftforge.registries.IForgeRegistryInternal;
-import net.minecraftforge.registries.RegistryManager;
+import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.AnimationDataReader;
+import yesman.epicfight.api.animation.types.datapack.ClipHoldingAnimation;
+import yesman.epicfight.api.client.animation.ClientAnimationDataReader;
 import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
+import yesman.epicfight.api.utils.ClearableIdMapper;
+import yesman.epicfight.api.utils.InstantiateInvoker;
+import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.main.EpicFightMod;
 
-public class AnimationManager extends SimplePreparableReloadListener<Int2ObjectMap<Int2ObjectMap<StaticAnimation>>> {
-	private final Int2ObjectMap<Int2ObjectMap<StaticAnimation>> animationById = new Int2ObjectOpenHashMap<>();
-	private final Map<ResourceLocation, StaticAnimation> animationByName = Maps.newHashMap();
-	/*
-	 * Note: The above registries will be replaced to below Forge registries
-	 */
-	private IForgeRegistry<StaticAnimation> animationRegistry;
-	private IdMapper<StaticAnimation> animationIdMap;
-	private String modid;
-	private int namespaceHash;
-	private int counter = 0;
+public class AnimationManager extends SimpleJsonResourceReloadListener {
+	private static final AnimationManager INSTANCE = new AnimationManager();
+	private static ResourceManager resourceManager = null;
 	
-	public StaticAnimation findAnimationById(int namespaceId, int animationId) {
-		if (this.animationById.containsKey(namespaceId)) {
-			Int2ObjectMap<StaticAnimation> map = this.animationById.get(namespaceId);
-			
-			if (map.containsKey(animationId)) {
-				return map.get(animationId);
+	public static AnimationManager getInstance() {
+		return INSTANCE;
+	}
+	
+	private final Map<ResourceLocation, AnimationClip> animationClips = Maps.newHashMap();
+	private final Map<ResourceLocation, StaticAnimation> animationRegistry = Maps.newHashMap();
+	private final ClearableIdMapper<StaticAnimation> animationIdMap = new ClearableIdMapper<> ();
+	private String currentWorkingModid;
+	
+	public AnimationManager() {
+		super((new GsonBuilder()).create(), "animmodels/animations");
+	}
+	
+	public StaticAnimation byId(int animationId) {
+		if (!this.animationIdMap.contains(animationId)) {
+			throw new NoSuchElementException("No animation id " + animationId);
+		}
+		
+		return this.animationIdMap.byId(animationId);
+	}
+	
+	public StaticAnimation byKeyOrThrow(String resourceLocation) {
+		return this.byKeyOrThrow(new ResourceLocation(resourceLocation));
+	}
+	
+	public StaticAnimation byKeyOrThrow(ResourceLocation rl) {
+		if (!this.animationRegistry.containsKey(rl)) {
+			throw new NoSuchElementException("No animation with registry name " + rl);
+		}
+		
+		return this.byKey(rl);
+	}
+	
+	public StaticAnimation byKey(ResourceLocation rl) {
+		return this.animationRegistry.get(rl);
+	}
+	
+	public AnimationClip getStaticAnimationClip(StaticAnimation animation) {
+		if (!this.animationClips.containsKey(animation.getLocation())) {
+			animation.loadAnimation(resourceManager);
+		}
+		
+		return this.animationClips.get(animation.getLocation());
+	}
+	
+	public Map<ResourceLocation, StaticAnimation> getAnimations() {
+		return ImmutableMap.copyOf(this.animationRegistry);
+	}
+	
+	public Map<ResourceLocation, StaticAnimation> getAnimations(Predicate<StaticAnimation> filter) {
+		Map<ResourceLocation, StaticAnimation> filteredItems = this.animationRegistry.entrySet().stream().filter((entry) -> filter.test(entry.getValue())).reduce(Maps.newHashMap(), (map, entry) -> {
+			map.put(entry.getKey(), entry.getValue());
+			return map;
+		}, (map1, map2) -> {
+			map1.putAll(map2);
+			return map1;
+		});
+		
+		return ImmutableMap.copyOf(filteredItems);
+	}
+	
+	public int registerAnimation(StaticAnimation staticAnimation) {
+		if (this.currentWorkingModid != null) {
+			if (this.animationRegistry.containsKey(staticAnimation.getRegistryName())) {
+				EpicFightMod.LOGGER.error("Animation registration failed.");
+				new IllegalStateException("[EpicFightMod] Animation with registry name " + staticAnimation.getRegistryName() + " already exists!").printStackTrace();
+				return -1;
 			}
+			
+			this.animationRegistry.put(staticAnimation.getRegistryName(), staticAnimation);
+			int id = this.animationRegistry.size();
+			this.animationIdMap.addMapping(staticAnimation, id);
+			
+			return id;
 		}
 		
-		throw new IllegalArgumentException("Can't find animation. id: " + animationId + ", namespcae hash: " + namespaceId);
+		return -1;
 	}
 	
-	public StaticAnimation findAnimationByPath(String resourceLocation) {
-		ResourceLocation rl = new ResourceLocation(resourceLocation);
-		
-		if (this.animationByName.containsKey(rl)) {
-			return this.animationByName.get(rl);
+	/**
+	 * Registers animations created by datapack edit screen
+	 */
+	public void registerUserAnimation(ClipHoldingAnimation animation) {
+		this.animationRegistry.put(animation.getCreator().getRegistryName(), animation.cast());
+	}
+	
+	/**
+	 * Remove user animations created by datapack edit screen
+	 */
+	public void removeUserAnimation(ClipHoldingAnimation animation) {
+		this.animationRegistry.remove(animation.getCreator().getRegistryName());
+	}
+	
+	public StaticAnimation refreshAnimation(StaticAnimation staticAnimation) {
+		if (!this.animationRegistry.containsKey(staticAnimation.getRegistryName())) {
+			throw new IllegalStateException("Animation refresh exception: No animation named " + staticAnimation.getRegistryName());
 		}
 		
-		throw new IllegalArgumentException("Can't find animation named: " + rl);
+		return this.animationRegistry.get(staticAnimation.getRegistryName());
 	}
 	
-	public void registerAnimations() {
-		this.animationById.clear();
-		this.animationByName.clear();
+	public void loadAnimationClip(StaticAnimation animation, Function<StaticAnimation, AnimationClip> clipProvider) {
+		if (!this.animationClips.containsKey(animation.getLocation())) {
+			AnimationClip animationClip = clipProvider.apply(animation);
+			this.animationClips.put(animation.getLocation(), animationClip);
+		}
+	}
+	
+	public void onFailed(StaticAnimation animation) {
+		if (!this.animationClips.containsKey(animation.getLocation())) {
+			this.animationClips.put(animation.getLocation(), AnimationClip.EMPTY_CLIP);
+		}
+	}
+	
+	public String workingModId() {
+		return this.currentWorkingModid;
+	}
+	
+	public static void readAnimationProperties(StaticAnimation animation) {
+		ResourceLocation dataLocation = getAnimationDataFileLocation(animation.getLocation());
 		
-		Map<String, Runnable> registryMap = Maps.newHashMap();
+		resourceManager.getResource(dataLocation).ifPresent((rs) -> {
+			ClientAnimationDataReader.readAndApply(animation, rs);
+		});
+	}
+	
+	@Override
+	protected Map<ResourceLocation, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profilerIn) {
+		reloadResourceManager(resourceManager);
+		Armatures.build(resourceManager);
+		
+		this.animationClips.clear();
+		this.animationIdMap.clear();
+		this.animationRegistry.clear();
+		
+		Map<String, Runnable> registryMap = Maps.newLinkedHashMap();
 		ModLoader.get().postEvent(new AnimationRegistryEvent(registryMap));
 		
 		registryMap.entrySet().forEach((entry) -> {
-			EpicFightMod.LOGGER.info("Start animation registration of " + entry.getKey());
-			this.modid = entry.getKey();
-			this.namespaceHash = this.modid.hashCode();
-			this.animationById.put(this.namespaceHash, new Int2ObjectOpenHashMap<>());
-			this.counter = 0;
+			EpicFightMod.LOGGER.info("Register animations from " + entry.getKey());
+			this.currentWorkingModid = entry.getKey();
 			entry.getValue().run();
-		});
-	}
-	
-	public void loadAnimationsOnServer() {
-		this.registerAnimations();
-		
-		this.animationById.values().forEach((map) -> {
-			map.values().forEach((animation) -> {
-				animation.loadAnimation(null);
-				this.setAnimationProperties(null, animation);
-			});
-		});
-	}
-	
-	@Override
-	protected Int2ObjectMap<Int2ObjectMap<StaticAnimation>> prepare(ResourceManager resourceManager, ProfilerFiller profilerIn) {
-		if (EpicFightMod.isPhysicalClient()) {
-			this.registerAnimations();
 			
-			this.animationById.values().forEach((map) -> {
-				map.values().forEach((animation) -> {
-					this.setAnimationProperties(resourceManager, animation);
-				});
-			});
-		}
+			this.currentWorkingModid = null;
+		});
 		
-		return this.animationById;
+		return super.prepare(resourceManager, profilerIn);
 	}
 	
 	@Override
-	protected void apply(Int2ObjectMap<Int2ObjectMap<StaticAnimation>> objectIn, ResourceManager resourceManager, ProfilerFiller profilerIn) {
-		objectIn.values().forEach((map) -> {
-			map.values().forEach((animation) -> {
-				animation.loadAnimation(resourceManager);
-			});
-		});
+	protected void apply(Map<ResourceLocation, JsonElement> objectIn, ResourceManager resourceManager, ProfilerFiller profilerIn) {
+		final Map<ResourceLocation, StaticAnimation> registeredAnimation = Maps.newHashMap();
+		this.animationRegistry.values().forEach(a1 -> a1.getClipHolders().forEach((a2) -> registeredAnimation.put(a2.getRegistryName(), a2)));
+		
+		/**
+		 * Load animations that are not registered from {@link AnimationRegistryEvent}
+		 * Reads from Resource Pack in physical client, Datapack in physical server.
+		 */
+		objectIn.entrySet().stream().filter((entry) -> !registeredAnimation.containsKey(entry.getKey()) && !entry.getKey().getPath().contains("/data/"))
+									.sorted((e1, e2) -> e1.getKey().toString().compareTo(e2.getKey().toString()))
+									.forEach((entry) -> {
+										if (!entry.getKey().getNamespace().equals(this.currentWorkingModid)) {
+											this.currentWorkingModid = entry.getKey().getNamespace();
+										}
+										
+										try {
+											readAnimationFromJson(entry.getKey(), entry.getValue().getAsJsonObject());
+										} catch (Exception e) {
+											EpicFightMod.LOGGER.error("Failed to load User animation " + entry.getKey() + " because of " + e + ". Skipped.");
+											e.printStackTrace();
+										}
+									});
 		
 		SkillManager.reloadAllSkillsAnimations();
-	}
-	
-	private void setAnimationProperties(ResourceManager resourceManager, StaticAnimation animation) {
-		if (resourceManager == null) {
-			return;
-		}
 		
-		ResourceLocation location = animation.getLocation();
-		String path = location.getPath();
-		int last = location.getPath().lastIndexOf('/');
-		
-		if (last > 0) {
-			ResourceLocation dataLocation = new ResourceLocation(location.getNamespace(), String.format("%s/data%s.json", path.substring(0, last), path.substring(last)));
+		this.animationRegistry.values().stream().reduce(Lists.<StaticAnimation>newArrayList(), (list, anim) -> {
+			list.addAll(anim.getClipHolders());
+			return list;
+		}, (list1, list2) -> {
+			list1.addAll(list2);
+			return list1;
+		}).forEach((animation) -> {
+			animation.postInit();
 			
-			if (resourceManager.getResource(dataLocation).isPresent()) {
-				AnimationDataReader.readAndApply(animation, resourceManager, resourceManager.getResource(dataLocation).get());
+			if (EpicFightMod.isPhysicalClient()) {
+				AnimationManager.readAnimationProperties(animation);
 			}
+		});
+	}
+	
+	public static ResourceLocation getAnimationDataFileLocation(ResourceLocation location) {
+		int splitIdx = location.getPath().lastIndexOf('/');
+		
+		if (splitIdx < 0) {
+			splitIdx = 0;
+		}
+		
+		return new ResourceLocation(location.getNamespace(), String.format("%s/data%s", location.getPath().substring(0, splitIdx), location.getPath().substring(splitIdx)));
+	}
+	
+	private static void reloadResourceManager(ResourceManager pResourceManager) {
+		if (resourceManager != pResourceManager) {
+			resourceManager = pResourceManager;
 		}
 	}
 	
-	public StaticAnimation refreshAnimation(StaticAnimation oldAnimation) {
-		return this.animationByName.get(oldAnimation.getRegistryName());
+	public static ResourceManager getAnimationResourceManager() {
+		return EpicFightMod.isPhysicalClient() ? Minecraft.getInstance().getResourceManager() : resourceManager;
 	}
 	
-	public String getModid() {
-		return this.modid;
-	}
-	
-	public int getNamespaceHash() {
-		return this.namespaceHash;
-	}
-	
-	public int getIdCounter() {
-		return this.counter++;
-	}
-	
-	public Int2ObjectMap<StaticAnimation> getIdMap() {
-		return this.animationById.get(this.namespaceHash);
-	}
-	
-	public Map<ResourceLocation, StaticAnimation> getNameMap() {
-		return this.animationByName;
-	}
-	
-	public static AnimationRegistryCallbacks getCallBack() {
-		return AnimationRegistryCallbacks.INSTANCE;
-	}
-	
-	private static class AnimationRegistryCallbacks implements IForgeRegistry.BakeCallback<StaticAnimation>, IForgeRegistry.CreateCallback<StaticAnimation> {
-		private static final AnimationRegistryCallbacks INSTANCE = new AnimationRegistryCallbacks();
-		private static final ResourceLocation ANIMATION_ID_MAP = new ResourceLocation(EpicFightMod.MODID, "animationidmap");
+	/**************************************************
+	 * User-animation loader
+	 **************************************************/
+	@SuppressWarnings({ "deprecation" })
+	private static StaticAnimation readAnimationFromJson(ResourceLocation rl, JsonObject json) throws Exception {
+		JsonElement constructorElement = json.get("constructor");
 		
-		@Override
-		@SuppressWarnings("unchecked")
-        public void onBake(IForgeRegistryInternal<StaticAnimation> owner, RegistryManager stage) {
-            IdMapper<StaticAnimation> animationIdMap = owner.getSlaveMap(ANIMATION_ID_MAP, IdMapper.class);
-            
-			for (StaticAnimation animation : owner) {
-				animationIdMap.add(animation);
-			}
-        }
-		
-		@Override
-		public void onCreate(IForgeRegistryInternal<StaticAnimation> owner, RegistryManager stage) {
-			IdMapper<StaticAnimation> animationIdMap = new IdMapper<StaticAnimation> (owner.getKeys().size());
-			owner.setSlaveMap(ANIMATION_ID_MAP, animationIdMap);
-			EpicFightMod.getInstance().animationManager.animationIdMap = animationIdMap;
+		if (constructorElement == null) {
+			throw new IllegalStateException("No constructor information has provided in User animation " + rl);
 		}
-	}
-	
-	public void onRegistryCreated(Supplier<IForgeRegistry<StaticAnimation>> animationRegistry) {
-		this.animationRegistry = animationRegistry.get();
+		
+		JsonObject constructorObject = constructorElement.getAsJsonObject();
+		String invocationCommand = constructorObject.get("invocation_command").getAsString();
+		StaticAnimation animation = InstantiateInvoker.invoke(invocationCommand, StaticAnimation.class).getResult();
+		JsonElement propertiesElement = json.getAsJsonObject().get("properties");
+		
+		if (propertiesElement != null) {
+			JsonObject propertiesObject = propertiesElement.getAsJsonObject();
+			
+			for (Map.Entry<String, JsonElement> entry : propertiesObject.entrySet()) {
+				AnimationProperty<?> propertyKey = AnimationProperty.getSerializableProperty(entry.getKey());
+				Object value = propertyKey.parseFrom(entry.getValue());
+				animation.addPropertyUnsafe(propertyKey, value);
+			}
+		}
+		
+		return animation;
 	}
 }

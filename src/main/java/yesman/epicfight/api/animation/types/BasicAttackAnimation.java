@@ -1,7 +1,7 @@
 package yesman.epicfight.api.animation.types;
 
-import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
@@ -13,8 +13,6 @@ import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimation
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.animation.types.EntityState.StateFactor;
 import yesman.epicfight.api.client.animation.Layer;
-import yesman.epicfight.api.client.animation.property.JointMask;
-import yesman.epicfight.api.client.animation.property.JointMask.BindModifier;
 import yesman.epicfight.api.client.animation.property.JointMaskEntry;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Armature;
@@ -55,14 +53,10 @@ public class BasicAttackAnimation extends AttackAnimation {
 	protected void bindPhaseState(Phase phase) {
 		float preDelay = phase.preDelay;
 		
-		if (preDelay == 0.0F) {
-			preDelay += 0.01F;
-		}
-		
 		this.stateSpectrumBlueprint
 			.newTimePair(phase.start, preDelay)
 			.addState(EntityState.PHASE_LEVEL, 1)
-			.newTimePair(phase.start, phase.contact + 0.01F)
+			.newTimePair(phase.start, phase.contact)
 			.addState(EntityState.CAN_SKILL_EXECUTION, false)
 			.newTimePair(phase.start, phase.recovery)
 			.addState(EntityState.MOVEMENT_LOCKED, true)
@@ -70,20 +64,20 @@ public class BasicAttackAnimation extends AttackAnimation {
 			.addState(EntityState.CAN_BASIC_ATTACK, false)
 			.newTimePair(phase.start, phase.end)
 			.addState(EntityState.INACTION, true)
-			.newTimePair(preDelay, phase.contact + 0.01F)
+			.newTimePair(preDelay, phase.contact)
 			.addState(EntityState.ATTACKING, true)
 			.addState(EntityState.PHASE_LEVEL, 2)
-			.newTimePair(phase.contact + 0.01F, phase.end)
+			.newTimePair(phase.contact, phase.end)
 			.addState(EntityState.PHASE_LEVEL, 3)
 			.addState(EntityState.TURNING_LOCKED, true);
 	}
 	
 	@Override
-	protected void onLoaded() {
-		super.onLoaded();
+	public void postInit() {
+		super.postInit();
 		
 		if (!this.properties.containsKey(AttackAnimationProperty.BASIS_ATTACK_SPEED)) {
-			float basisSpeed = Float.parseFloat(String.format(Locale.US, "%.2f", (1.0F / this.totalTime)));
+			float basisSpeed = Float.parseFloat(String.format(Locale.US, "%.2f", (1.0F / this.getTotalTime())));
 			this.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, basisSpeed);
 		}
 	}
@@ -95,14 +89,14 @@ public class BasicAttackAnimation extends AttackAnimation {
 		boolean stiffAttack = entitypatch.getOriginal().level().getGameRules().getRule(EpicFightGamerules.STIFF_COMBO_ATTACKS).get();
 		
 		if (!isEnd && !nextAnimation.isMainFrameAnimation() && entitypatch.isLogicalClient() && !stiffAttack) {
-			float playbackSpeed = EpicFightOptions.A_TICK * this.getPlaySpeed(entitypatch);
+			float playbackSpeed = EpicFightOptions.A_TICK * this.getPlaySpeed(entitypatch, this);
 			entitypatch.getClientAnimator().baseLayer.copyLayerTo(entitypatch.getClientAnimator().baseLayer.getLayer(Layer.Priority.HIGHEST), playbackSpeed);
 		}
 	}
 	
 	@Override
-	public TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
-		TypeFlexibleHashMap<StateFactor<?>> stateMap = super.getStatesMap(entitypatch, time);
+	protected TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
+		TypeFlexibleHashMap<StateFactor<?>> stateMap = super.getStatesMap(entitypatch, animation, time);
 		
 		if (!entitypatch.getOriginal().level().getGameRules().getRule(EpicFightGamerules.STIFF_COMBO_ATTACKS).get()) {
 			stateMap.put(EntityState.MOVEMENT_LOCKED, (Object)false);
@@ -124,28 +118,14 @@ public class BasicAttackAnimation extends AttackAnimation {
 	}
 	
 	@Override
-	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
-		if (layer == Layer.Priority.HIGHEST) {
-			return !JointMaskEntry.BASIC_ATTACK_MASK.isMasked(entitypatch.getCurrentLivingMotion(), joint);
-		} else {
-			return super.isJointEnabled(entitypatch, layer, joint);
-		}
-	}
-	
-	@Override
-	public BindModifier getBindModifier(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
-		if (layer == Layer.Priority.HIGHEST) {
-			List<JointMask> list = JointMaskEntry.BIPED_UPPER_JOINTS_WITH_ROOT;
-			int position = list.indexOf(JointMask.of(joint));
-			
-			if (position >= 0) {
-				return list.get(position).getBindModifier();
-			} else {
-				return null;
+	public Optional<JointMaskEntry> getJointMaskEntry(LivingEntityPatch<?> entitypatch, boolean useCurrentMotion) {
+		if (entitypatch.isLogicalClient()) {
+			if (entitypatch.getClientAnimator().getPriorityFor(this) == Layer.Priority.HIGHEST) {
+				return Optional.of(JointMaskEntry.BASIC_ATTACK_MASK);
 			}
-		} else {
-			return super.getBindModifier(entitypatch, layer, joint);
 		}
+		
+		return super.getJointMaskEntry(entitypatch, useCurrentMotion);
 	}
 	
 	@Override

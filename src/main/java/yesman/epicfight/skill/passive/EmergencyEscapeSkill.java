@@ -87,7 +87,7 @@ public class EmergencyEscapeSkill extends PassiveSkill {
 		listener.addEventListener(EventType.SKILL_CONSUME_EVENT, EVENT_UUID, (event) -> {
 			if (event.getSkill().getCategory() == SkillCategories.DODGE) {
 				if (!container.getExecuter().getOriginal().isCreative() && event.getSkill().getConsumption() > container.getExecuter().getStamina() && container.getStack() > 0) {
-					if (event.shouldConsume()) {
+					if (!container.getExecuter().isLogicalClient()) {
 						this.setStackSynchronize((ServerPlayerPatch)container.getExecuter(), container.getStack() - 1);
 					}
 					
@@ -113,14 +113,11 @@ public class EmergencyEscapeSkill extends PassiveSkill {
 	@Override
 	public List<Object> getTooltipArgsOfScreen(List<Object> list) {
 		list.add(String.format("%.1f", this.consumption));
-		String availableWeapons = "";
-		
-		for (WeaponCategory category : this.availableWeapons) {
-			availableWeapons += WeaponCategory.ENUM_MANAGER.toTranslated(category) + ", ";
-		}
-		
-		list.add(availableWeapons);
-		
 		return list;
+	}
+	
+	@Override
+	public List<WeaponCategory> getAvailableWeaponCategories() {
+		return List.copyOf(this.availableWeapons);
 	}
 }

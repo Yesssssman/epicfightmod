@@ -7,7 +7,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ItemStack;
-import yesman.epicfight.api.animation.AnimationProvider.AttackAnimationProvider;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.skill.Skill;
@@ -19,8 +19,8 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 
 public class EviscerateSkill extends WeaponInnateSkill {
 	private static final UUID EVENT_UUID = UUID.fromString("f082557a-b2f9-11eb-8529-0242ac130003");
-	private AttackAnimationProvider first;
-	private AttackAnimationProvider second;
+	private AnimationProvider<AttackAnimation> first;
+	private AnimationProvider<AttackAnimation> second;
 	
 	public EviscerateSkill(Builder<? extends Skill> builder) {
 		super(builder);
@@ -39,7 +39,6 @@ public class EviscerateSkill extends WeaponInnateSkill {
 					event.getPlayerPatch().reserveAnimation(this.second.get());
 					event.getPlayerPatch().getServerAnimator().getPlayerFor(null).reset();
 					event.getPlayerPatch().getCurrenltyHurtEntities().clear();
-					this.second.get().tick(event.getPlayerPatch());
 				}
 			}
 		});

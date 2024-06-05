@@ -24,10 +24,11 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.ProjectileWeaponItem;
 import net.minecraft.world.item.SwordItem;
 import net.minecraft.world.item.TridentItem;
+import yesman.epicfight.api.animation.AnimationProvider;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
 import yesman.epicfight.model.armature.HumanoidArmature;
@@ -132,23 +133,21 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 		}
 	}
 	
-	protected final void commonMobAnimatorInit(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK);
-		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
-		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
-		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
-		clientAnimator.setCurrentMotionsAsDefault();
+	protected final void commonMobAnimatorInit(Animator animator) {
+		animator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE);
+		animator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK);
+		animator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
+		animator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
+		animator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
 	}
 	
-	protected final void commonAggresiveMobAnimatorInit(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK);
-		clientAnimator.addLivingAnimation(LivingMotions.CHASE, Animations.BIPED_WALK);
-		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
-		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
-		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
-		clientAnimator.setCurrentMotionsAsDefault();
+	protected final void commonAggresiveMobAnimatorInit(Animator animator) {
+		animator.addLivingAnimation(LivingMotions.IDLE, Animations.BIPED_IDLE);
+		animator.addLivingAnimation(LivingMotions.WALK, Animations.BIPED_WALK);
+		animator.addLivingAnimation(LivingMotions.CHASE, Animations.BIPED_WALK);
+		animator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
+		animator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
+		animator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);
 	}
 	
 	@Override
@@ -185,11 +184,12 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 		
 		CapabilityItem mainhandCap = this.getHoldingItemCapability(InteractionHand.MAIN_HAND);
 		CapabilityItem offhandCap = this.getAdvancedHoldingItemCapability(InteractionHand.OFF_HAND);
-		Map<LivingMotion, StaticAnimation> motionModifier = new HashMap<>(mainhandCap.getLivingMotionModifier(this, InteractionHand.MAIN_HAND));
+		
+		Map<LivingMotion, AnimationProvider<?>> motionModifier = new HashMap<>(mainhandCap.getLivingMotionModifier(this, InteractionHand.MAIN_HAND));
 		motionModifier.putAll(offhandCap.getLivingMotionModifier(this, InteractionHand.OFF_HAND));
 		
-		for (Map.Entry<LivingMotion, StaticAnimation> entry : motionModifier.entrySet()) {
-			this.getAnimator().addLivingAnimation(entry.getKey(), entry.getValue());
+		for (Map.Entry<LivingMotion, AnimationProvider<?>> entry : motionModifier.entrySet()) {
+			this.getAnimator().addLivingAnimation(entry.getKey(), entry.getValue().get());
 		}
 		
 		if (this.weaponLivingMotions != null && this.weaponLivingMotions.containsKey(mainhandCap.getWeaponCategory())) {
@@ -206,7 +206,7 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 		}
 		
 		SPChangeLivingMotion msg = new SPChangeLivingMotion(this.original.getId());
-		msg.putEntries(this.getAnimator().getLivingAnimationEntrySet());
+		msg.putEntries(this.getAnimator().getLivingAnimations().entrySet());
 		EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(msg, this.original);
 	}
 	

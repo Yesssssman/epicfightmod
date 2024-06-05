@@ -1,62 +1,58 @@
 package yesman.epicfight.api.forgeevent;
 
-import java.util.Map;
+import java.util.List;
+import java.util.Set;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
-import com.mojang.datafixers.util.Pair;
+import com.google.common.collect.Lists;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.eventbus.api.Event;
-import yesman.epicfight.main.EpicFightMod;
+import net.minecraftforge.fml.event.IModBusEvent;
 import yesman.epicfight.skill.Skill;
 
-public class SkillBuildEvent extends Event {
-	protected final Map<ResourceLocation, Pair<? extends Skill.Builder<?>, Function<? extends Skill.Builder<?>, ? extends Skill>>> builders;
-	protected final Map<ResourceLocation, Skill> skills;
-	protected final Map<ResourceLocation, Skill> learnableSkills;
+public class SkillBuildEvent extends Event implements IModBusEvent {
+	private final List<ModRegistryWorker> modRegisterWorkers = Lists.newArrayList();
 	
-	public SkillBuildEvent(Map<ResourceLocation, Pair<? extends Skill.Builder<?>, Function<? extends Skill.Builder<?>, ? extends Skill>>> builders,
-			Map<ResourceLocation, Skill> skills, Map<ResourceLocation, Skill> learnableSkills) {
-		this.builders = builders;
-		this.skills = skills;
-		this.learnableSkills = learnableSkills;
+	public ModRegistryWorker createRegistryWorker(String modid) {
+		ModRegistryWorker modRegisterWorker = new ModRegistryWorker(modid);
+		this.modRegisterWorkers.add(modRegisterWorker);
+		
+		return modRegisterWorker;
 	}
 	
-	@SuppressWarnings("unchecked")
-	public <T extends Skill, B extends Skill.Builder<T>> T build(String modid, String name) {
-		try {
-			ResourceLocation registryName = new ResourceLocation(modid, name);
-			Pair<B, Function<B, T>> pair = (Pair<B, Function<B, T>>) (Object)this.builders.get(registryName);
+	public Set<String> getNamespaces() {
+		return this.modRegisterWorkers.stream().map((worker) -> worker.modid).collect(Collectors.toSet());
+	}
+	
+	public List<Skill> getAllSkills() {
+		List<Skill> skills = Lists.newArrayList();
+		
+		this.modRegisterWorkers.forEach((registryWorker) -> {
+			skills.addAll(registryWorker.modSkills);
+		});
+		
+		return skills;
+	}
+	
+	public static class ModRegistryWorker {
+		private final String modid;
+		private final List<Skill> modSkills = Lists.newArrayList();
+		
+		private ModRegistryWorker(String modid) {
+			this.modid = modid;
+		}
+		
+		public <S extends Skill, B extends Skill.Builder<S>> S build(String name, Function<B, S> constructor, B builder) {
+			final ResourceLocation registryName = new ResourceLocation(this.modid, name);
+			builder.setRegistryName(registryName);
 			
-			if (pair == null) {
-				if (this.builders.containsKey(registryName)) {
-					EpicFightMod.LOGGER.warn("Invalid builder registered for skill " + registryName);
-				} else {
-					EpicFightMod.LOGGER.warn("Can't find the skill " + registryName + " in the registry. Here's all registered skills.");
-					
-					for (Map.Entry<ResourceLocation, Pair<? extends Skill.Builder<?>, Function<? extends Skill.Builder<?>, ? extends Skill>>> rl : this.builders.entrySet()) {
-						EpicFightMod.LOGGER.warn(rl);
-					}
-				}
-				
-				throw new IllegalStateException("Illegal skill registry: " + registryName);
-			}
+			final S skill = constructor.apply(builder);
 			
-			T skill = pair.getSecond().apply(pair.getFirst());
-			
-			if (skill != null) {
-				this.skills.put(registryName, skill);
-				
-				if (skill.getCategory().learnable()) {
-					this.learnableSkills.put(registryName, skill);
-				}
-			}
+			this.modSkills.add(skill);
 			
 			return skill;
-			
-		} catch (Exception e) {
-			e.printStackTrace();
-			return null;
 		}
 	}
 }

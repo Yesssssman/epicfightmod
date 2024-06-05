@@ -9,7 +9,7 @@ import net.minecraft.world.entity.projectile.ThrownTrident;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.AnimationProvider;
+import yesman.epicfight.api.animation.StaticAnimationProvider;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.skill.Skill;
@@ -30,7 +30,7 @@ public class EverlastingAllegiance extends WeaponInnateSkill {
 		return skillContainer.getDataManager().getDataValue(SkillDataKeys.THROWN_TRIDENT_ENTITY_ID.get());
 	}
 	
-	private AnimationProvider callingAnimation;
+	private StaticAnimationProvider callingAnimation;
 	
 	public EverlastingAllegiance(Builder<? extends Skill> builder) {
 		super(builder);

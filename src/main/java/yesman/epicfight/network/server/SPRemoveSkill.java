@@ -27,7 +27,7 @@ public class SPRemoveSkill {
 	}
 	
 	public static SPRemoveSkill fromBytes(FriendlyByteBuf buf) {
-		SPRemoveSkill msg = new SPRemoveSkill(buf.readUtf(), SkillSlot.ENUM_MANAGER.get(buf.readInt()));
+		SPRemoveSkill msg = new SPRemoveSkill(buf.readUtf(), SkillSlot.ENUM_MANAGER.getOrThrow(buf.readInt()));
 		return msg;
 	}
 	

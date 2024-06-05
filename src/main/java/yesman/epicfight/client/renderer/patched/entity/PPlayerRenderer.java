@@ -23,6 +23,7 @@ import yesman.epicfight.client.world.capabilites.entitypatch.player.AbstractClie
 public class PPlayerRenderer extends PHumanoidRenderer<AbstractClientPlayer, AbstractClientPlayerPatch<AbstractClientPlayer>, PlayerModel<AbstractClientPlayer>, PlayerRenderer, HumanoidMesh> {
 	public PPlayerRenderer() {
 		super(Meshes.BIPED);
+		
 		this.addPatchedLayer(ArrowLayer.class, new EmptyLayer<>());
 		this.addPatchedLayer(BeeStingerLayer.class, new EmptyLayer<>());
 		this.addPatchedLayer(CapeLayer.class, new PatchedCapeLayer());
@@ -34,7 +35,6 @@ public class PPlayerRenderer extends PHumanoidRenderer<AbstractClientPlayer, Abs
 		super.prepareModel(mesh, entity, entitypatch, renderer);
 		
 		renderer.setModelProperties(entity);
-		
 		PlayerModel<AbstractClientPlayer> model = renderer.getModel();
 		
 		mesh.head.hidden = !model.head.visible;

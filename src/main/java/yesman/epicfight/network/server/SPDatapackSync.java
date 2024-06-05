@@ -8,6 +8,7 @@ import net.minecraftforge.network.NetworkEvent;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 import yesman.epicfight.api.data.reloader.SkillManager;
+import yesman.epicfight.api.exception.DatapackException;
 import yesman.epicfight.world.capabilities.item.WeaponTypeReloadListener;
 
 public class SPDatapackSync {
@@ -47,6 +48,18 @@ public class SPDatapackSync {
 			msg.tags[i] = buf.readNbt();
 		}
 		
+		try {
+			switch (msg.getType()) {
+			case MOB -> MobPatchReloadListener.processServerPacket(msg);
+			case SKILL_PARAMS -> SkillManager.processServerPacket((SPDatapackSyncSkill)msg);
+			case WEAPON -> ItemCapabilityReloadListener.processServerPacket(msg);
+			case ARMOR -> ItemCapabilityReloadListener.processServerPacket(msg);
+			case WEAPON_TYPE -> WeaponTypeReloadListener.processServerPacket(msg);
+			}
+		} catch (Exception e) {
+			throw new DatapackException(e.getMessage());
+		}
+		
 		return msg;
 	}
 	
@@ -61,17 +74,6 @@ public class SPDatapackSync {
 	
 	public static void handle(SPDatapackSync msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
-			if (msg.getType() == Type.MOB) {
-				MobPatchReloadListener.processServerPacket(msg);
-			} else if (msg.getType() == Type.SKILL_PARAMS) {
-				SkillManager.processServerPacket((SPDatapackSyncSkill)msg);
-			} else if (msg.getType() == Type.WEAPON) {
-				ItemCapabilityReloadListener.processServerPacket(msg);
-			} else if (msg.getType() == Type.ARMOR) {
-				ItemCapabilityReloadListener.processServerPacket(msg);
-			} else if (msg.getType() == Type.WEAPON_TYPE) {
-				WeaponTypeReloadListener.processServerPacket(msg);
-			}
 		});
 		
 		ctx.get().setPacketHandled(true);

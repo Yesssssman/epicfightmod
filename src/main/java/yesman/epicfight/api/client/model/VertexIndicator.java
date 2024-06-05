@@ -26,13 +26,13 @@ public class VertexIndicator {
 		return vertexIndicators;
 	}
 	
-	public static List<AnimatedVertexIndicator> createAnimated(int[] drawingIndices, int[] vCounts, int[] animationIndices) {
+	public static List<AnimatedVertexIndicator> createAnimated(int[] drawingIndices, int[] affectingJointCount, int[] animationIndices) {
 		List<AnimatedVertexIndicator> vertexIndicators = Lists.newArrayList();
-		IntList[] listedAnimationData = new IntList[vCounts.length];
+		IntList[] listedAnimationData = new IntList[affectingJointCount.length];
 		int indexPointer = 0;
 		
-		for (int i = 0; i < vCounts.length; i++) {
-			int count = vCounts[i];
+		for (int i = 0; i < affectingJointCount.length; i++) {
+			int count = affectingJointCount[i];
 			IntList list = new IntArrayList();
 			
 			for (int j = 0; j < count; j++) {

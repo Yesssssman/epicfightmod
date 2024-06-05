@@ -15,9 +15,12 @@ import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.FormattedCharSequence;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.SkillContainer;
 
+@OnlyIn(Dist.CLIENT)
 public class SlotSelectScreen extends Screen {
 	private static final ResourceLocation BACKGROUND = new ResourceLocation(EpicFightMod.MODID, "textures/gui/screen/slot_select.png");
 	private final SkillBookScreen parent;
@@ -74,9 +77,9 @@ public class SlotSelectScreen extends Screen {
 		int posY = (this.height - 150) / 2;
 		
 		this.parent.render(guiGraphics, mouseX, mouseY, partialTicks, true);
-
+		
 		// move z level, to prevent the button text displayed above the screen.
-		guiGraphics.pose().translate(0, 0, 50);
+		guiGraphics.pose().translate(0, 0, 5000);
 		
 		RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
 		guiGraphics.blit(BACKGROUND, posX, posY, 0, 0, 191, 154);
@@ -93,6 +96,7 @@ public class SlotSelectScreen extends Screen {
 		super.render(guiGraphics, mouseX, mouseY, partialTicks);
 	}
 	
+	@OnlyIn(Dist.CLIENT)
 	class SlotButton extends Button {
 		public SlotButton(int x, int y, int width, int height, Component title, OnPress pressedAction) {
 			super(x, y, width, height, title, pressedAction, Button.DEFAULT_NARRATION);

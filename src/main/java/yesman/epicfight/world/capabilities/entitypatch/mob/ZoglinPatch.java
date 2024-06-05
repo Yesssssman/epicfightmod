@@ -10,11 +10,9 @@ import net.minecraft.world.entity.ai.behavior.OneShot;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.Zoglin;
 import net.minecraft.world.entity.schedule.Activity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
-import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSounds;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
@@ -34,13 +32,11 @@ public class ZoglinPatch extends MobPatch<Zoglin> {
 		BrainRecomposer.removeBehavior(this.original.getBrain(), Activity.FIGHT, 12, OneShot.class);
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.HOGLIN_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.HOGLIN_WALK);
-		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.HOGLIN_DEATH);
-		clientAnimator.setCurrentMotionsAsDefault();
+	public void initAnimator(Animator animator) {
+		animator.addLivingAnimation(LivingMotions.IDLE, Animations.HOGLIN_IDLE);
+		animator.addLivingAnimation(LivingMotions.WALK, Animations.HOGLIN_WALK);
+		animator.addLivingAnimation(LivingMotions.DEATH, Animations.HOGLIN_DEATH);
 	}
 	
 	@Override

@@ -9,6 +9,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.PlayerRideableJumping;
 import net.minecraft.world.entity.player.Player;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -66,7 +67,7 @@ public class BasicAttack extends Skill {
 	
 	@Override
 	public void executeOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
-		SkillConsumeEvent event = new SkillConsumeEvent(executer, this, this.resource, true);
+		SkillConsumeEvent event = new SkillConsumeEvent(executer, this, this.resource);
 		executer.getEventListener().triggerEvents(EventType.SKILL_CONSUME_EVENT, event);
 		
 		if (!event.isCanceled()) {
@@ -89,11 +90,11 @@ public class BasicAttack extends Skill {
 			
 			if ((entity instanceof PlayerRideableJumping ridable && ridable.canJump()) && cap.availableOnHorse() && cap.getMountAttackMotion() != null) {
 				comboCounter %= cap.getMountAttackMotion().size();
-				attackMotion = cap.getMountAttackMotion().get(comboCounter);
+				attackMotion = cap.getMountAttackMotion().get(comboCounter).get();
 				comboCounter++;
 			}
 		} else {
-			List<StaticAnimation> combo = cap.getAutoAttckMotion(executer);
+			List<AnimationProvider<?>> combo = cap.getAutoAttckMotion(executer);
 			int comboSize = combo.size();
 			boolean dashAttack = player.isSprinting();
 			
@@ -103,7 +104,7 @@ public class BasicAttack extends Skill {
 				comboCounter %= comboSize - 2;
 			}
 			
-			attackMotion = combo.get(comboCounter);
+			attackMotion = combo.get(comboCounter).get();
 			comboCounter = dashAttack ? 0 : comboCounter + 1;
 		}
 		

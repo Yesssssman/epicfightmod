@@ -5,6 +5,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -18,16 +20,16 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.main.EpicFightMod;
 
 public class Armature {
+	private final String name;
 	private final Int2ObjectMap<Joint> jointById;
 	private final Map<String, Joint> jointByName;
 	private final Object2IntMap<String> pathIndexMap;
 	private final int jointNumber;
 	public final Joint rootJoint;
 	private final TransformSheet actionAnimationCoord = new TransformSheet();
-	private Pose prevPose = new Pose();
-	private Pose currentPose = new Pose();
 	
-	public Armature(int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
+	public Armature(String name, int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
+		this.name = name;
 		this.jointNumber = jointNumber;
 		this.rootJoint = rootJoint;
 		this.jointByName = jointMap;
@@ -48,29 +50,8 @@ public class Armature {
 		return jointMap.get(name);
 	}
 	
-	public Pose getPose(float partialTicks) {
-		return Pose.interpolatePose(this.prevPose, this.currentPose, partialTicks);
-	}
-	
-	public Pose getPrevPose() {
-		return this.prevPose;
-	}
-	
-	public Pose getCurrentPose() {
-		return this.currentPose;
-	}
-	
-	public void setPose(Pose pose) {
-		this.prevPose = this.currentPose;
-		this.currentPose = pose;
-	}
-	
 	public void initializeTransform() {
 		this.rootJoint.resetPoseTransforms();
-	}
-	
-	public OpenMatrix4f[] getAllPoseTransform(float partialTicks) {
-		return this.getPoseAsTransformMatrix(this.getPose(partialTicks));
 	}
 	
 	public OpenMatrix4f[] getPoseAsTransformMatrix(Pose pose) {
@@ -86,10 +67,6 @@ public class Armature {
 		for (Joint joints : joint.getSubJoints()) {
 			this.getPoseTransform(joints, result, pose, jointMatrices);
 		}
-	}
-	
-	public OpenMatrix4f getBindedTransformForCurrentPose(Joint joint) {
-		return this.getBindedTransformByJointIndex(this.getCurrentPose(), this.searchPathIndex(joint.getName()));
 	}
 	
 	public OpenMatrix4f getBindedTransformFor(Pose pose, Joint joint) {
@@ -147,20 +124,25 @@ public class Armature {
 		return this.rootJoint;
 	}
 	
+	@Override
+	public String toString() {
+		return this.name;
+	}
+	
 	public Armature deepCopy() {
 		Map<String, Joint> oldToNewJoint = Maps.newHashMap();
 		oldToNewJoint.put("empty", Joint.EMPTY);
 		
 		Joint newRoot = this.copyHierarchy(this.rootJoint, oldToNewJoint);
 		newRoot.initOriginTransform(new OpenMatrix4f());
-		
 		Armature newArmature = null;
 		
+		//Uses reflection to keep the type of copied armature
 		try {
-			Constructor<? extends Armature> constructor = this.getClass().getConstructor(int.class, Joint.class, Map.class);
-			newArmature = constructor.newInstance(this.jointNumber, newRoot, oldToNewJoint);
+			Constructor<? extends Armature> constructor = this.getClass().getConstructor(String.class, int.class, Joint.class, Map.class);
+			newArmature = constructor.newInstance(this.name, this.jointNumber, newRoot, oldToNewJoint);
 		} catch (NoSuchMethodException | SecurityException | InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			e.printStackTrace();
+			throw new IllegalStateException("Armature copy failed! " + e);
 		}
 		
 		return newArmature;
@@ -179,5 +161,46 @@ public class Armature {
 		}
 		
 		return newJoint;
+	}
+	
+	public JsonObject toJsonObject() {
+		JsonObject root = new JsonObject();
+		JsonObject armature = new JsonObject();
+		
+		JsonArray jointNamesArray = new JsonArray();
+		JsonArray jointHierarchy = new JsonArray();
+		
+		this.jointById.int2ObjectEntrySet().stream().sorted((entry1, entry2) -> Integer.compare(entry1.getIntKey(), entry2.getIntKey())).forEach((entry) -> jointNamesArray.add(entry.getValue().getName()));
+		armature.add("joints", jointNamesArray);
+		armature.add("hierarchy", jointHierarchy);
+		
+		exportJoint(jointHierarchy, this.rootJoint, true);
+		
+		root.add("armature", armature);
+		
+		return root;
+	}
+	
+	private static void exportJoint(JsonArray parent, Joint joint, boolean root) {
+		JsonObject jointJson = new JsonObject();
+		jointJson.addProperty("name", joint.getName());
+		
+		JsonArray transformMatrix = new JsonArray();
+		OpenMatrix4f localMatrixInBlender = new OpenMatrix4f(joint.getLocalTrasnform());
+		
+		if (root) {
+			localMatrixInBlender.mulFront(OpenMatrix4f.invert(JsonModelLoader.BLENDER_TO_MINECRAFT_COORD, null));
+		}
+		
+		localMatrixInBlender.transpose();
+		localMatrixInBlender.toList().forEach(transformMatrix::add);
+		jointJson.add("transform", transformMatrix);
+		parent.add(jointJson);
+		
+		if (!joint.getSubJoints().isEmpty()) {
+			JsonArray children = new JsonArray();
+			jointJson.add("children", children);
+			joint.getSubJoints().forEach((joint$2) -> exportJoint(children, joint$2, false));
+		}
 	}
 }

@@ -36,6 +36,7 @@ public abstract class HurtableEntityPatch<T extends LivingEntity> extends Entity
 		
 		if (this.stunReductionDecreases) {
 			float stunArmor = this.getStunArmor();
+			
 			this.stunTimeReduction -= 0.1F * (1.1F - this.stunTimeReduction * this.stunTimeReduction) * (1.0F - stunArmor / (7.5F + stunArmor));
 			
 			if (this.stunTimeReduction < 0.0F) {
@@ -111,7 +112,7 @@ public abstract class HurtableEntityPatch<T extends LivingEntity> extends Entity
 	
 	public float getStunArmor() {
 		AttributeInstance stunArmor = this.original.getAttribute(EpicFightAttributes.STUN_ARMOR.get());
-		return (float)(stunArmor == null ? 0 : stunArmor.getValue());
+		return (float)(stunArmor == null ? 0.0F : stunArmor.getValue());
 	}
 	
 	public EntityState getEntityState() {

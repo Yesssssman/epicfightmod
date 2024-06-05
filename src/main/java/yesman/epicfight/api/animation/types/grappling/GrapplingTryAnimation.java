@@ -8,28 +8,28 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import yesman.epicfight.api.animation.AnimationPlayer;
+import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.property.AnimationProperty.ActionAnimationProperty;
 import yesman.epicfight.api.animation.property.AnimationProperty.AttackAnimationProperty;
 import yesman.epicfight.api.animation.property.MoveCoordFunctions;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.DynamicAnimation;
-import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class GrapplingTryAnimation extends AttackAnimation {
-	private final StaticAnimation grapplingAttackAnimation;
-	private final StaticAnimation failAnimation;
-	private final StaticAnimation grapplingHitAnimation;
+	private final AnimationProvider<?> grapplingAttackAnimation;
+	private final AnimationProvider<?> failAnimation;
+	private final AnimationProvider<?> grapplingHitAnimation;
 	
-	public GrapplingTryAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, Collider collider, Joint colliderJoint, String path, StaticAnimation grapplingHitAnimation, StaticAnimation interactAnimation, StaticAnimation failAnimation, Armature armature) {
+	public GrapplingTryAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, Collider collider, Joint colliderJoint, String path, AnimationProvider<?> grapplingHitAnimation, AnimationProvider<?> interactAnimation, AnimationProvider<?> failAnimation, Armature armature) {
 		this(convertTime, antic, preDelay, contact, recovery, InteractionHand.MAIN_HAND, collider, colliderJoint, path, grapplingHitAnimation, interactAnimation, failAnimation, armature);
 	}
 	
-	public GrapplingTryAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, InteractionHand hand, Collider collider, Joint colliderJoint, String path, StaticAnimation grapplingHitAnimation, StaticAnimation interactAnimation, StaticAnimation failAnimation, Armature armature) {
+	public GrapplingTryAnimation(float convertTime, float antic, float preDelay, float contact, float recovery, InteractionHand hand, Collider collider, Joint colliderJoint, String path, AnimationProvider<?> grapplingHitAnimation, AnimationProvider<?> interactAnimation, AnimationProvider<?> failAnimation, Armature armature) {
 		super(convertTime, antic, preDelay, contact, recovery, hand, collider, colliderJoint, path, armature);
 		this.grapplingAttackAnimation = interactAnimation;
 		this.failAnimation = failAnimation;
@@ -51,6 +51,7 @@ public class GrapplingTryAnimation extends AttackAnimation {
 			
 			if (hitEntity != null) {
 				LivingEntityPatch<?> hitEntityPatch = EpicFightCapabilities.getEntityPatch(hitEntity, LivingEntityPatch.class);
+				
 				if (hitEntityPatch != null) {
 					hitEntityPatch.notifyGrapplingWarning();
 				}
@@ -70,19 +71,19 @@ public class GrapplingTryAnimation extends AttackAnimation {
 				AnimationPlayer player = entitypatch.getAnimator().getPlayerFor(this);
 				float prevPoseTime = player.getPrevElapsedTime();
 				float poseTime = player.getElapsedTime();
-				List<Entity> list = phase.getCollidingEntities(entitypatch, this, prevPoseTime, poseTime, this.getPlaySpeed(entitypatch));
+				List<Entity> list = phase.getCollidingEntities(entitypatch, this, prevPoseTime, poseTime, this.getPlaySpeed(entitypatch, this));
 				
 				if (list.contains(hitEntity)) {
-					DamageSource dmgSource = (DamageSource)this.getEpicFightDamageSource(entitypatch, hitEntity, phase);
+					DamageSource dmgSource = this.getEpicFightDamageSource(entitypatch, hitEntity, phase);
 					
 					if (entitypatch.tryHurt(dmgSource, 0.0F).resultType.dealtDamage()) {
-						entitypatch.reserveAnimation(this.grapplingAttackAnimation);
+						entitypatch.reserveAnimation(this.grapplingAttackAnimation.get());
 						entitypatch.setGrapplingTarget(hitEntity);
 						LivingEntityPatch<?> hitEntityPatch = EpicFightCapabilities.getEntityPatch(hitEntity, LivingEntityPatch.class);
 						
 						if (hitEntityPatch != null) {
 							hitEntity.lookAt(EntityAnchorArgument.Anchor.FEET, entitypatch.getOriginal().position());
-							hitEntityPatch.playAnimationSynchronized(this.grapplingHitAnimation, 0.0F);
+							hitEntityPatch.playAnimationSynchronized(this.grapplingHitAnimation.get(), 0.0F);
 						}
 						
 						return;
@@ -90,11 +91,11 @@ public class GrapplingTryAnimation extends AttackAnimation {
 				}
 			}
 			
-			entitypatch.reserveAnimation(this.failAnimation);
+			entitypatch.reserveAnimation(this.failAnimation.get());
 		}
 	}
 	
 	@Override
-	protected void attackTick(LivingEntityPatch<?> entitypatch) {
+	protected void attackTick(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
 	}
 }

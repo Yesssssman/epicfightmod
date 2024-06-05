@@ -28,7 +28,7 @@ public class SPChangeSkill {
 	}
 	
 	public static SPChangeSkill fromBytes(FriendlyByteBuf buf) {
-		SPChangeSkill msg = new SPChangeSkill(SkillSlot.ENUM_MANAGER.get(buf.readInt()), buf.readUtf(), SPChangeSkill.State.values()[buf.readInt()]);
+		SPChangeSkill msg = new SPChangeSkill(SkillSlot.ENUM_MANAGER.getOrThrow(buf.readInt()), buf.readUtf(), SPChangeSkill.State.values()[buf.readInt()]);
 		return msg;
 	}
 	

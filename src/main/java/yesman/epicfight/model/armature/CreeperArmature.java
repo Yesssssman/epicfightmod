@@ -13,8 +13,8 @@ public class CreeperArmature extends Armature {
 	public final Joint legRB;
 	public final Joint legLB;
 		
-	public CreeperArmature(int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
-		super(jointNumber, rootJoint, jointMap);
+	public CreeperArmature(String name, int jointNumber, Joint rootJoint, Map<String, Joint> jointMap) {
+		super(name, jointNumber, rootJoint, jointMap);
 		
 		this.torso = this.getOrLogException(jointMap, "Torso");
 		this.head = this.getOrLogException(jointMap, "Head");

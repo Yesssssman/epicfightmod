@@ -1,6 +1,10 @@
 package yesman.epicfight.world.capabilities.entitypatch;
 
+import java.util.Optional;
+import java.util.Set;
+
 import com.google.common.collect.Sets;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -29,9 +33,6 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 
-import java.util.Optional;
-import java.util.Set;
-
 public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	protected final Faction mobFaction;
 	
@@ -44,10 +45,10 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	}
 	
 	@Override
-	public void onJoinWorld(T entityIn, EntityJoinLevelEvent event) {
-		super.onJoinWorld(entityIn, event);
+	public void onJoinWorld(T entity, EntityJoinLevelEvent event) {
+		super.onJoinWorld(entity, event);
 		
-		if (!entityIn.level().isClientSide() && !this.original.isNoAi()) {
+		if (!entity.level().isClientSide() && !this.original.isNoAi()) {
 			this.initAI();
 		}
 	}
@@ -146,17 +147,17 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	}
 	
 	@Override
-	public boolean isTeammate(Entity entityIn) {
-		EntityPatch<?> cap = EpicFightCapabilities.getEntityPatch(entityIn, EntityPatch.class);
+	public boolean isTeammate(Entity entity) {
+		EntityPatch<?> cap = EpicFightCapabilities.getEntityPatch(entity, EntityPatch.class);
 		
-		if (cap != null && cap instanceof MobPatch) {
-			if (((MobPatch<?>) cap).mobFaction.equals(this.mobFaction)) {
+		if (cap != null && cap instanceof MobPatch mobpatch) {
+			if (mobpatch.mobFaction.equals(this.mobFaction)) {
 				Optional<LivingEntity> opt = Optional.ofNullable(this.getTarget());
-				return opt.map((attackTarget) -> !attackTarget.is(entityIn)).orElse(true);
+				return opt.map((attackTarget) -> !attackTarget.is(entity)).orElse(true);
 			}
 		}
 		
-		return super.isTeammate(entityIn);
+		return super.isTeammate(entity);
 	}
 	
 	@Override

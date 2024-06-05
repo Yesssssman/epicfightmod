@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.UUID;
 
 public class ArmorCapability extends CapabilityItem {
-	protected static final UUID[] ARMOR_MODIFIERS = new UUID[] {UUID.fromString("845DB27C-C624-495F-8C9F-6020A9A58B6B"), UUID.fromString("D8499B04-0E66-4726-AB29-64469D734E0D"), UUID.fromString("9F3D476D-C118-4544-8365-64846904B48E"), UUID.fromString("2AD3F246-FEE1-4E67-B886-69FD380BB150")};
+	protected static final UUID[] ARMOR_MODIFIERS_BY_SLOTS = new UUID[] {UUID.fromString("845DB27C-C624-495F-8C9F-6020A9A58B6B"), UUID.fromString("D8499B04-0E66-4726-AB29-64469D734E0D"), UUID.fromString("9F3D476D-C118-4544-8365-64846904B48E"), UUID.fromString("2AD3F246-FEE1-4E67-B886-69FD380BB150")};
 	protected final double weight;
 	protected final double stunArmor;
 	private final EquipmentSlot equipmentSlot;
@@ -43,8 +43,8 @@ public class ArmorCapability extends CapabilityItem {
 		Multimap<Attribute, AttributeModifier> map = HashMultimap.create();
 		
 		if (equipmentSlot == this.equipmentSlot) {
-			map.put(EpicFightAttributes.WEIGHT.get(), new AttributeModifier(ARMOR_MODIFIERS[equipmentSlot.getIndex()], "Armor modifier", this.weight, Operation.ADDITION));
-			map.put(EpicFightAttributes.STUN_ARMOR.get(), new AttributeModifier(ARMOR_MODIFIERS[equipmentSlot.getIndex()], "Armor modifier", this.stunArmor, Operation.ADDITION));
+			map.put(EpicFightAttributes.WEIGHT.get(), new AttributeModifier(ARMOR_MODIFIERS_BY_SLOTS[equipmentSlot.getIndex()], "Armor modifier", this.weight, Operation.ADDITION));
+			map.put(EpicFightAttributes.STUN_ARMOR.get(), new AttributeModifier(ARMOR_MODIFIERS_BY_SLOTS[equipmentSlot.getIndex()], "Armor modifier", this.stunArmor, Operation.ADDITION));
 		}
 		
         return map;
@@ -69,7 +69,6 @@ public class ArmorCapability extends CapabilityItem {
 			if (item instanceof ArmorItem armorItem) {
 				ArmorMaterial armorMaterial = armorItem.getMaterial();
 				ArmorItem.Type armorType = armorItem.getType();
-				
 				this.equipmentSlot = armorItem.getEquipmentSlot();
 				
 				if (this.weight < 0.0D) {

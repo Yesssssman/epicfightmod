@@ -1,33 +1,32 @@
 package yesman.epicfight.data.conditions.itemstack;
 
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.commons.compress.utils.Lists;
-
-import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 
 import io.netty.util.internal.StringUtil;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.utils.ParseUtil;
+import yesman.epicfight.client.gui.datapack.widgets.ResizableEditBox;
+import yesman.epicfight.data.conditions.Condition.ItemStackCondition;
 
 public class TagValueCondition extends ItemStackCondition {
 	private String key;
 	private String value;
 	
-	public TagValueCondition(CompoundTag tag) {
-		super(tag);
-	}
-	
 	@Override
-	public void read(CompoundTag tag) {
+	public TagValueCondition read(CompoundTag tag) {
 		this.key = tag.getString("key");
 		this.value = tag.get("value").getAsString();
 		
@@ -38,6 +37,8 @@ public class TagValueCondition extends ItemStackCondition {
 		if (this.value == null) {
 			throw new IllegalArgumentException("No value provided!");
 		}
+		
+		return this;
 	}
 	
 	@Override
@@ -70,8 +71,13 @@ public class TagValueCondition extends ItemStackCondition {
 	
 	@Override
 	@OnlyIn(Dist.CLIENT)
-	public Set<Map.Entry<String, Object>> getAcceptingParameters() {
-		return ImmutableMap.of("key", (Object)"", "value", (Object)"").entrySet();
+	public List<ParameterEditor> getAcceptingParameters(Screen screen) {
+		ResizableEditBox keyEditBox = new ResizableEditBox(screen.getMinecraft().font, 0, 0, 0, 0, Component.literal("key"), null, null);
+		ResizableEditBox valueEditBox = new ResizableEditBox(screen.getMinecraft().font, 0, 0, 0, 0, Component.literal("value"), null, null);
+		Function<Object, Tag> stringParser = (value) -> StringTag.valueOf(value.toString());
+		Function<Tag, Object> stringGetter = (tag) -> ParseUtil.nullOrToString(tag, Tag::getAsString);
+		
+		return List.of(ParameterEditor.of(stringParser, stringGetter, keyEditBox), ParameterEditor.of(stringParser, stringGetter, valueEditBox));
 	}
 	
 	private static List<Tag> visitTags(String key, List<Tag> compoundTag) {

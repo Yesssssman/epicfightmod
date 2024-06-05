@@ -1,18 +1,18 @@
 package yesman.epicfight.api.animation;
 
-import yesman.epicfight.api.animation.types.AttackAnimation;
+import net.minecraft.resources.ResourceLocation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 
 /**
- * Use this for the animations that should be reloaded after reloading resource
- * e.g. () -> Animations.DUMMY_ANIMATION
+ * Use this for the animations that should be automatically refreshed after reloading resource
+ * e.g. AnimationProvider.of(Animations.DUMMY_ANIMATION)
  */
 @FunctionalInterface
-public interface AnimationProvider {
-	public StaticAnimation get();
+public interface AnimationProvider<T extends StaticAnimation> {
+	public T get();
 	
-	@FunctionalInterface
-	public interface AttackAnimationProvider {
-		public AttackAnimation get();
+	@SuppressWarnings("unchecked")
+	public static <T extends StaticAnimation> AnimationProvider<T> of(ResourceLocation rl) {
+		return () -> (T)AnimationManager.getInstance().byKeyOrThrow(rl);
 	}
 }

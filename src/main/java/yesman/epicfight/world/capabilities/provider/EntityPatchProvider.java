@@ -1,9 +1,12 @@
 package yesman.epicfight.world.capabilities.provider;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
+
+import org.apache.commons.compress.utils.Lists;
 
 import com.google.common.collect.Maps;
 
@@ -15,6 +18,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.monster.Husk;
 import net.minecraft.world.entity.monster.Skeleton;
@@ -148,6 +152,14 @@ public class EntityPatchProvider implements ICapabilityProvider, NonNullSupplier
 		EntityType<?> entityType = ForgeRegistries.ENTITY_TYPES.getValue(rl);
 		
 		return CAPABILITIES.get(entityType);
+	}
+	
+	public static List<EntityType<?>> getPatchedEntities() {
+		List<EntityType<?>> list = Lists.newArrayList();
+		list.add(null);
+		CAPABILITIES.keySet().stream().filter((type) -> type.getCategory() != MobCategory.MISC).sorted((type$1, type$2) -> EntityType.getKey(type$1).compareTo(EntityType.getKey(type$2))).forEach(list::add);
+		
+		return list;
 	}
 	
 	private EntityPatch<?> capability;

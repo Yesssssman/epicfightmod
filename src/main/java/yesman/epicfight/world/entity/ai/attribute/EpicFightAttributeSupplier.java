@@ -12,8 +12,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 
 public class EpicFightAttributeSupplier extends AttributeSupplier {
 	private static Map<Attribute, AttributeInstance> putEpicFightAttributes(Map<Attribute, AttributeInstance> originalMap) {
-		Map<Attribute, AttributeInstance> newMap = new HashMap<>(originalMap);
-		
 		AttributeSupplier supplier = AttributeSupplier.builder()
 				.add(Attributes.ATTACK_DAMAGE)
 				.add(EpicFightAttributes.WEIGHT.get())
@@ -28,7 +26,8 @@ public class EpicFightAttributeSupplier extends AttributeSupplier {
 				.add(EpicFightAttributes.OFFHAND_ATTACK_SPEED.get())
 			.build();
 		
-		newMap.putAll(supplier.instances);
+		Map<Attribute, AttributeInstance> newMap = new HashMap<>(supplier.instances);
+		newMap.putAll(originalMap);
 		
 		return ImmutableMap.copyOf(newMap);
 	}

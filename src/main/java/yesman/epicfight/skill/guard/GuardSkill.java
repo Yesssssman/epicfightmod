@@ -1,6 +1,5 @@
 package yesman.epicfight.skill.guard;
 
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -15,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.InteractionHand;
@@ -25,12 +25,11 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.gui.BattleModeGui;
+import yesman.epicfight.client.gui.screen.SkillBookScreen;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.gameasset.EpicFightSounds;
@@ -160,7 +159,7 @@ public class GuardSkill extends Skill {
 			container.getDataManager().setDataSync(SkillDataKeys.PENALTY_RESTORE_COUNTER.get(), serverplayer.tickCount, serverplayer);
 		});
 		
-		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID, (event) -> {
+		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID, (event) -> {
 			container.getDataManager().setDataSync(SkillDataKeys.PENALTY.get(), 0.0F, event.getPlayerPatch().getOriginal());
 		});
 		
@@ -226,10 +225,12 @@ public class GuardSkill extends Skill {
 			
 			float penalty = container.getDataManager().getDataValue(SkillDataKeys.PENALTY.get()) + this.getPenalizer(itemCapability);
 			float consumeAmount = penalty * impact;
+			boolean canAfford = event.getPlayerPatch().consumeForSkill(this, Skill.Resource.STAMINA, consumeAmount);
+			
 			event.getPlayerPatch().knockBackEntity(damageSource.getDirectEntity().position(), knockback);
-			event.getPlayerPatch().consumeStaminaAlways(consumeAmount);
 			container.getDataManager().setDataSync(SkillDataKeys.PENALTY.get(), penalty, event.getPlayerPatch().getOriginal());
-			BlockType blockType = event.getPlayerPatch().hasStamina(0.0F) ? BlockType.GUARD : BlockType.GUARD_BREAK;
+			
+			BlockType blockType = canAfford ? BlockType.GUARD : BlockType.GUARD_BREAK;
 			StaticAnimation animation = this.getGuardMotion(event.getPlayerPatch(), itemCapability, blockType);
 			
 			if (animation != null) {
@@ -341,7 +342,7 @@ public class GuardSkill extends Skill {
 		container.getExecuter().getEventListener().removeListener(EventType.CLIENT_ITEM_USE_EVENT, EVENT_UUID);
 		container.getExecuter().getEventListener().removeListener(EventType.SERVER_ITEM_USE_EVENT, EVENT_UUID);
 		container.getExecuter().getEventListener().removeListener(EventType.SERVER_ITEM_STOP_EVENT, EVENT_UUID);
-		container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID);
 	}
 	
 	@Override
@@ -359,30 +360,11 @@ public class GuardSkill extends Skill {
 				&& !damageSource.is(DamageTypeTags.IS_FIRE);
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
-	public List<Object> getTooltipArgsOfScreen(List<Object> list) {
-		list.clear();
-
-		StringBuilder sb = new StringBuilder();
-
-		Iterator<WeaponCategory> iter = this.guardMotions.keySet().iterator();
-		while (iter.hasNext()) {
-			sb.append(WeaponCategory.ENUM_MANAGER.toTranslated(iter.next()));
-			if (iter.hasNext())
-				sb.append(", ");
-		}
-
-		list.add(sb.toString());
-		return list;
-	}
-	
-	@OnlyIn(Dist.CLIENT)
 	public boolean shouldDraw(SkillContainer container) {
 		return container.getDataManager().getDataValue(SkillDataKeys.PENALTY.get()) > 0.0F;
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void drawOnGui(BattleModeGui gui, SkillContainer container, GuiGraphics guiGraphics, float x, float y) {
 		PoseStack poseStack = guiGraphics.pose();
@@ -391,6 +373,17 @@ public class GuardSkill extends Skill {
 		guiGraphics.blit(EpicFightSkills.GUARD.getSkillTexture(), (int)x, (int)y, 24, 24, 0, 0, 1, 1, 1, 1);
 		guiGraphics.drawString(gui.font, String.format("x%.1f", container.getDataManager().getDataValue(SkillDataKeys.PENALTY.get())), x, y + 6, 16777215, true);
 		poseStack.popPose();
+	}
+	
+	@Override
+	public List<WeaponCategory> getAvailableWeaponCategories() {
+		return List.copyOf(this.guardMotions.keySet());
+	}
+	
+	@Override
+	public boolean getCustomConsumptionTooltips(SkillBookScreen.AttributeIconList consumptionList) {
+		consumptionList.add(Component.translatable("attribute.name.epicfight.stamina.consume.tooltip"), Component.translatable("skill.epicfight.guard.consume.tooltip"), SkillBookScreen.STAMINA_TEXTURE_INFO);
+		return true;
 	}
 	
 	protected boolean isAdvancedGuard() {

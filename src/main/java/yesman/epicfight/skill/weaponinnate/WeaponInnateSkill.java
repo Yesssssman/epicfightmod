@@ -29,7 +29,7 @@ import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
 public abstract class WeaponInnateSkill extends Skill {
 	public static Skill.Builder<WeaponInnateSkill> createWeaponInnateBuilder() {
-		return (new Skill.Builder<WeaponInnateSkill>()).setCategory(SkillCategories.WEAPON_INNATE).setResource(Resource.WEAPON_INNATE_ENERGY);
+		return (new Skill.Builder<WeaponInnateSkill>()).setCategory(SkillCategories.WEAPON_INNATE).setResource(Resource.WEAPON_CHARGE);
 	}
 	
 	protected List<Map<AttackPhaseProperty<?>, Object>> properties;

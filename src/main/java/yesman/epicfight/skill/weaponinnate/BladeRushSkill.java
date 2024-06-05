@@ -16,7 +16,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.AnimationProvider;
+import yesman.epicfight.api.animation.StaticAnimationProvider;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.client.events.engine.ControllEngine;
@@ -37,7 +37,7 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 
 public class BladeRushSkill extends WeaponInnateSkill {
 	public static Builder createBladeRushBuilder() {
-		return new Builder().setCategory(SkillCategories.WEAPON_INNATE).setResource(Resource.WEAPON_INNATE_ENERGY)
+		return new Builder().setCategory(SkillCategories.WEAPON_INNATE).setResource(Resource.WEAPON_CHARGE)
 				.putTryAnimation(EntityType.ZOMBIE, Animations.BLADE_RUSH_TRY)
 				.putTryAnimation(EntityType.HUSK, Animations.BLADE_RUSH_TRY)
 				.putTryAnimation(EntityType.DROWNED, Animations.BLADE_RUSH_TRY)
@@ -77,7 +77,7 @@ public class BladeRushSkill extends WeaponInnateSkill {
 		}
 	}
 	
-	private final AnimationProvider[] comboAnimations = new AnimationProvider[3];
+	private final StaticAnimationProvider[] comboAnimations = new StaticAnimationProvider[3];
 	private final Map<EntityType<?>, StaticAnimation> tryAnimations;
 	
 	public BladeRushSkill(Builder builder) {
@@ -101,8 +101,8 @@ public class BladeRushSkill extends WeaponInnateSkill {
 	public void onInitiate(SkillContainer container) {
 		super.onInitiate(container);
 		
-		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID, (event) -> {
-			if (event.getDamageSource().getAnimation().between(Animations.BLADE_RUSH_COMBO1, Animations.BLADE_RUSH_COMBO3) && event.getTarget().isAlive() && this.tryAnimations.containsKey(event.getTarget().getType())) {
+		container.getExecuter().getEventListener().addEventListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID, (event) -> {
+			if (event.getDamageSource().getAnimation().idBetween(Animations.BLADE_RUSH_COMBO1, Animations.BLADE_RUSH_COMBO3) && this.tryAnimations.containsKey(event.getTarget().getType())) {
 				MobEffectInstance effectInstance = event.getTarget().getEffect(EpicFightMobEffects.INSTABILITY.get());
 				int amp = effectInstance == null ? 0 : effectInstance.getAmplifier() + 1;
 				event.getTarget().addEffect(new MobEffectInstance(EpicFightMobEffects.INSTABILITY.get(), 100, amp));
@@ -112,7 +112,7 @@ public class BladeRushSkill extends WeaponInnateSkill {
 	
 	@Override
 	public void onRemoved(SkillContainer container) {
-		container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_POST, EVENT_UUID);
+		container.getExecuter().getEventListener().removeListener(EventType.DEALT_DAMAGE_EVENT_DAMAGE, EVENT_UUID);
 	}
 	
 	@Override

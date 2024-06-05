@@ -1,6 +1,11 @@
 package yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+
 import com.google.common.collect.Maps;
+
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.minecraft.sounds.SoundEvent;
@@ -19,11 +24,10 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.TransformSheet;
@@ -31,7 +35,6 @@ import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.animation.types.procedural.IKInfo;
 import yesman.epicfight.api.animation.types.procedural.TipPointAnimation;
-import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -44,10 +47,6 @@ import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.item.EpicFightItems;
 import yesman.epicfight.world.item.SkillBookItem;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
 
 public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	public static final TargetingConditions DRAGON_TARGETING = TargetingConditions.forCombat().ignoreLineOfSight();
@@ -100,13 +99,11 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 		this.original.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(10.0F);
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
+	public void initAnimator(Animator animator) {
 		for (Map.Entry<LivingMotions, StaticAnimation> livingmotionEntry : this.livingMotions.entrySet()) {
-			clientAnimator.addLivingAnimation(livingmotionEntry.getKey(), livingmotionEntry.getValue());
+			animator.addLivingAnimation(livingmotionEntry.getKey(), livingmotionEntry.getValue());
 		}
-		clientAnimator.setCurrentMotionsAsDefault();
 	}
 	
 	@Override
@@ -286,10 +283,6 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 		return this.original.getDragonFight() != null ? this.original.getDragonFight().getCrystalsAlive() : 0;
 	}
 	
-	public void resetTipAnimations() {
-		this.tipPointAnimations.clear();
-	}
-	
 	public void setFlyingPhase() {
 		this.groundPhase = false;
 		this.original.horizontalCollision = false;
@@ -340,6 +333,10 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 		double cos = (a.x * b.x + a.y * b.y + a.z * b.z);
 		
 		return Math.toDegrees(Math.acos(cos));
+	}
+	
+	public void resetTipAnimations() {
+		this.tipPointAnimations.clear();
 	}
 	
 	public TipPointAnimation getTipPointAnimation(String jointName) {

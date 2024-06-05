@@ -13,8 +13,8 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.animation.AnimationProvider;
 import yesman.epicfight.api.animation.LivingMotions;
+import yesman.epicfight.api.animation.StaticAnimationProvider;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.gameasset.Animations;
@@ -27,7 +27,7 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 
 public class PhantomAscentSkill extends Skill {
 	private static final UUID EVENT_UUID = UUID.fromString("051a9bb2-7541-11ee-b962-0242ac120002");
-	private final AnimationProvider[] animations = new AnimationProvider[2];
+	private final StaticAnimationProvider[] animations = new StaticAnimationProvider[2];
 	private int extraJumps;
 	
 	public PhantomAscentSkill(Builder<? extends Skill> builder) {

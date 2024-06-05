@@ -1,11 +1,20 @@
 package yesman.epicfight.api.animation.types;
 
+import java.util.Optional;
+
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.AnimationClip;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.types.EntityState.StateFactor;
 import yesman.epicfight.api.client.animation.Layer;
+import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
+import yesman.epicfight.api.client.animation.property.JointMaskEntry;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
+@OnlyIn(Dist.CLIENT)
 public class ConcurrentLinkAnimation extends DynamicAnimation {
+	private final AnimationClip animationClip = new AnimationClip();
 	protected DynamicAnimation nextAnimation;
 	protected DynamicAnimation currentAnimation;
 	protected float startsAt;
@@ -54,7 +63,15 @@ public class ConcurrentLinkAnimation extends DynamicAnimation {
 		Pose nextAnimPose = this.nextAnimation.getPoseByTime(entitypatch, nextElapsed, 1.0F);
 		float interpolate = time / this.getTotalTime();
 		
-		return Pose.interpolatePose(currentAnimPose, nextAnimPose, interpolate);
+		Pose interpolatedPose = Pose.interpolatePose(currentAnimPose, nextAnimPose, interpolate);
+		JointMaskEntry maskEntry = this.nextAnimation.getJointMaskEntry(entitypatch, true).orElse(null);
+		
+		if (maskEntry != null && entitypatch.isLogicalClient()) {
+			interpolatedPose.getJointTransformData().entrySet().removeIf((entry) -> maskEntry.isMasked(this.nextAnimation.getProperty(ClientAnimationProperties.LAYER_TYPE).orElse(Layer.LayerType.BASE_LAYER) == Layer.LayerType.BASE_LAYER ?
+					entitypatch.getClientAnimator().currentMotion() : entitypatch.getClientAnimator().currentCompositeMotion(), entry.getKey()));
+		}
+		
+		return interpolatedPose;
 	}
 	
 	@Override
@@ -63,17 +80,18 @@ public class ConcurrentLinkAnimation extends DynamicAnimation {
 	}
 	
 	@Override
-	public float getPlaySpeed(LivingEntityPatch<?> entitypatch) {
-		return this.nextAnimation.getPlaySpeed(entitypatch);
+	public float getPlaySpeed(LivingEntityPatch<?> entitypatch, DynamicAnimation animation) {
+		return this.nextAnimation.getPlaySpeed(entitypatch, animation);
 	}
 	
 	public void setNextAnimation(DynamicAnimation animation) {
 		this.nextAnimation = animation;
 	}
 	
+	@OnlyIn(Dist.CLIENT)
 	@Override
-	public boolean isJointEnabled(LivingEntityPatch<?> entitypatch, Layer.Priority layer, String joint) {
-		return this.nextAnimation.isJointEnabled(entitypatch, layer, joint);
+	public Optional<JointMaskEntry> getJointMaskEntry(LivingEntityPatch<?> entitypatch, boolean useCurrentMotion) {
+		return this.nextAnimation.getJointMaskEntry(entitypatch, useCurrentMotion);
 	}
 	
 	@Override
@@ -94,5 +112,20 @@ public class ConcurrentLinkAnimation extends DynamicAnimation {
 	@Override
 	public String toString() {
 		return "ConcurrentLinkAnimation: Mix " + this.currentAnimation + " and " + this.nextAnimation;
+	}
+	
+	@Override
+	public AnimationClip getAnimationClip() {
+		return this.animationClip;
+	}
+	
+	@Override
+	public boolean hasTransformFor(String joint) {
+		return this.nextAnimation.hasTransformFor(joint);
+	}
+	
+	@Override
+	public boolean isLinkAnimation() {
+		return true;
 	}
 }

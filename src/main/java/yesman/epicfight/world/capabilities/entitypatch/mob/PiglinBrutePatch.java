@@ -8,10 +8,8 @@ import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraft.world.entity.schedule.Activity;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
-import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
@@ -34,16 +32,14 @@ public class PiglinBrutePatch extends HumanoidMobPatch<PiglinBrute> {
 		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(3.0F);
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
-	public void initAnimator(ClientAnimator clientAnimator) {
-		clientAnimator.addLivingAnimation(LivingMotions.IDLE, Animations.PIGLIN_IDLE);
-		clientAnimator.addLivingAnimation(LivingMotions.WALK, Animations.PIGLIN_WALK);
-		clientAnimator.addLivingAnimation(LivingMotions.CHASE, Animations.PIGLIN_WALK);
-		clientAnimator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
-		clientAnimator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
-		clientAnimator.addLivingAnimation(LivingMotions.DEATH, Animations.PIGLIN_DEATH);
-		clientAnimator.setCurrentMotionsAsDefault();
+	public void initAnimator(Animator animator) {
+		animator.addLivingAnimation(LivingMotions.IDLE, Animations.PIGLIN_IDLE);
+		animator.addLivingAnimation(LivingMotions.WALK, Animations.PIGLIN_WALK);
+		animator.addLivingAnimation(LivingMotions.CHASE, Animations.PIGLIN_WALK);
+		animator.addLivingAnimation(LivingMotions.FALL, Animations.BIPED_FALL);
+		animator.addLivingAnimation(LivingMotions.MOUNT, Animations.BIPED_MOUNT);
+		animator.addLivingAnimation(LivingMotions.DEATH, Animations.PIGLIN_DEATH);
 	}
 	
 	@Override

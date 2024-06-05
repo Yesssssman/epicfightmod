@@ -33,7 +33,7 @@ public class StateSpectrum {
 			}
 		}
 		
-		return null;
+		return stateFactor.defaultValue();
 	}
 	
 	public TypeFlexibleHashMap<StateFactor<?>> getStateMap(LivingEntityPatch<?> entitypatch, float time) {
@@ -94,6 +94,11 @@ public class StateSpectrum {
 		public void removeState(StateFactor<?> state) {
 			this.states.remove(state);
 		}
+		
+		@Override
+		public String toString() {
+			return String.format("Time: %.2f ~ %.2f, States: %s", this.start, this.end, this.states);
+		}
 	}
 	
 	static class ConditionalStatesInTime extends StatesInTime {
@@ -143,6 +148,26 @@ public class StateSpectrum {
 				states.remove(state);
 			}
 		}
+		
+		@SuppressWarnings("deprecation")
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			
+			sb.append(String.format("Time: %.2f ~ %.2f, ", this.start, this.end));
+			int entryCnt = 0;
+			
+			for (Map.Entry<Integer, Map<StateFactor<?>, Object>> entry : this.conditionalStates.entrySet()) {
+				sb.append(String.format("States %d: %s", entry.getKey(), entry.getValue()));
+				entryCnt++;
+				
+				if (entryCnt < this.conditionalStates.size()) {
+					sb.append(", ");
+				}
+			}
+			
+			return sb.toString();
+		}
 	}
 	
 	static class VariableStatesInTime extends StatesInTime {
@@ -178,6 +203,11 @@ public class StateSpectrum {
 		@Override
 		public void removeState(StateFactor<?> state) {
 			this.states.remove(state);
+		}
+		
+		@Override
+		public String toString() {
+			return String.format("States: %s", this.states);
 		}
 	}
 	
@@ -250,6 +280,17 @@ public class StateSpectrum {
 			this.currentState = null;
 			this.timePairs.clear();
 			return this;
+		}
+		
+		@Override
+		public String toString() {
+			StringBuilder sb = new StringBuilder();
+			
+			for (StatesInTime state : this.timePairs) {
+				sb.append(state + "\n");
+			}
+			
+			return sb.toString();
 		}
 	}
 }

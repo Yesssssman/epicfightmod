@@ -16,6 +16,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryInternal;
 import net.minecraftforge.registries.RegistryManager;
+import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.api.utils.ClearableIdMapper;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.main.EpicFightMod;
@@ -31,32 +32,23 @@ public class SkillDataKey<T> {
 		@Override
 		@SuppressWarnings("unchecked")
         public void onBake(IForgeRegistryInternal<SkillDataKey<?>> owner, RegistryManager stage) {
-			ClearableIdMapper<SkillDataKey<?>> skillDataKeyMap = owner.getSlaveMap(DATA_KEY_TO_ID, ClearableIdMapper.class);
-            
-			for (SkillDataKey<?> block : owner) {
-				skillDataKeyMap.add(block);
-			}
-            
-			Map<Class<?>, Set<SkillDataKey<?>>> skillDataKeys = owner.getSlaveMap(CLASS_TO_DATA_KEYS, Map.class);
+			final ClearableIdMapper<SkillDataKey<?>> skillDataKeyMap = owner.getSlaveMap(DATA_KEY_TO_ID, ClearableIdMapper.class);
+			owner.forEach(skillDataKeyMap::add);
+			final Map<Class<?>, Set<SkillDataKey<?>>> skillDataKeys = owner.getSlaveMap(CLASS_TO_DATA_KEYS, Map.class);
 			
-			for (Class<?> key : SKILL_DATA_KEYS.keySet()) {
+			SkillManager.getSkillRegistry().forEach((skill) -> {
+				Class<?> skillClass = skill.getClass();
 				Set<SkillDataKey<?>> dataKeySet = Sets.newHashSet();
-				dataKeySet.addAll(SKILL_DATA_KEYS.get(key));
-				skillDataKeys.put(key, dataKeySet);
+				skillDataKeys.put(skillClass, dataKeySet);
 				
-				Class<?> superKey = key.getSuperclass();
-				
-				while (superKey != null) {
-					if (SKILL_DATA_KEYS.containsKey(superKey)) {
-						Set<SkillDataKey<?>> dataKeySet$2 = skillDataKeys.get(key);
-						dataKeySet$2.addAll(SKILL_DATA_KEYS.get(superKey));
+				do {
+					if (SKILL_DATA_KEYS.containsKey(skillClass)) {
+						dataKeySet.addAll(SKILL_DATA_KEYS.get(skillClass));
 					}
 					
-					superKey = superKey.getSuperclass();
-				}
-			}
-			
-			SKILL_DATA_KEYS.clear();
+					skillClass = skillClass.getSuperclass();
+				} while (Skill.class.isAssignableFrom(skillClass));
+			});
         }
 		
 		@Override
@@ -67,11 +59,12 @@ public class SkillDataKey<T> {
 		
 		@Override
         public void onClear(IForgeRegistryInternal<SkillDataKey<?>> owner, RegistryManager stage) {
+			owner.getSlaveMap(CLASS_TO_DATA_KEYS, Map.class).clear();
             owner.getSlaveMap(DATA_KEY_TO_ID, ClearableIdMapper.class).clear();
         }
 	}
 	
-	public static SkillDataKeyCallbacks getCallBack() {
+	public static SkillDataKeyCallbacks getRegistryCallback() {
 		return SkillDataKeyCallbacks.INSTANCE;
 	}
 	

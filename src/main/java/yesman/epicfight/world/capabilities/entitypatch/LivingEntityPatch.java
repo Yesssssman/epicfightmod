@@ -5,6 +5,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import org.joml.Quaternionf;
+
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.Minecraft;
@@ -36,11 +38,14 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.animation.Animator;
+import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
+import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.ServerAnimator;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation;
+import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
@@ -50,6 +55,7 @@ import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.AttackResult.ResultType;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.main.EpicFightMod;
@@ -70,6 +76,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	public static final EntityDataAccessor<Float> MAX_STUN_SHIELD = new EntityDataAccessor<Float> (252, EntityDataSerializers.FLOAT);
 	public static final EntityDataAccessor<Integer> EXECUTION_RESISTANCE = new EntityDataAccessor<Integer> (254, EntityDataSerializers.INT);
 	public static final EntityDataAccessor<Boolean> AIRBORNE = new EntityDataAccessor<Boolean> (250, EntityDataSerializers.BOOLEAN);
+	protected static final double WEIGHT_CORRECTION = 37.037D;
 	
 	private ItemStack tempOffhandHolder = ItemStack.EMPTY;
 	private ResultType lastResultType;
@@ -82,7 +89,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	protected Vec3 lastAttackPosition;
 	protected EpicFightDamageSource epicFightDamageSource;
 	protected boolean isLastAttackSuccess;
-	
+
 	public LivingMotion currentLivingMotion = LivingMotions.IDLE;
 	public LivingMotion currentCompositeMotion = LivingMotions.IDLE;
 	
@@ -105,8 +112,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		this.initAttributes();
 	}
 	
-	@OnlyIn(Dist.CLIENT)
-	public abstract void initAnimator(ClientAnimator clientAnimator);
+	public abstract void initAnimator(Animator clientAnimator);
 	public abstract void updateMotion(boolean considerInaction);
 	
 	public Armature getArmature() {
@@ -114,7 +120,8 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	protected void initAttributes() {
-		this.original.getAttribute(EpicFightAttributes.WEIGHT.get()).setBaseValue(this.original.getAttribute(Attributes.MAX_HEALTH).getBaseValue() * 2.0D);
+		EntityDimensions dimension = this.original.getDimensions(net.minecraft.world.entity.Pose.STANDING);
+		this.original.getAttribute(EpicFightAttributes.WEIGHT.get()).setBaseValue(dimension.width * dimension.height * WEIGHT_CORRECTION);
 		this.original.getAttribute(EpicFightAttributes.MAX_STRIKES.get()).setBaseValue(1.0D);
 		this.original.getAttribute(EpicFightAttributes.ARMOR_NEGATION.get()).setBaseValue(0.0D);
 		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(0.5D);
@@ -122,6 +129,16 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	
 	@Override
 	public void tick(LivingEvent.LivingTickEvent event) {
+		if (this.original.getHealth() <= 0.0F) {
+			this.original.setXRot(0);
+			
+			AnimationPlayer animPlayer = this.getAnimator().getPlayerFor(null);
+			
+			if (this.original.deathTime >= 19 && !animPlayer.isEmpty() && !animPlayer.isEnd()) {
+				this.original.deathTime--;
+			}
+		}
+		
 		this.animator.tick();
 		super.tick(event);
 		
@@ -131,6 +148,18 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		
 		if (!this.getEntityState().inaction() && this.original.onGround && this.isAirborneState()) {
 			this.setAirborneState(false);
+		}
+	}
+	
+	public void poseTick(DynamicAnimation animation, Pose pose, float elapsedTime, float partialTicks) {
+		if (pose.getJointTransformData().containsKey("Head")) {
+			if (animation.doesHeadRotFollowEntityHead()) {
+				float headRotO = this.original.yBodyRotO - this.original.yHeadRotO;
+				float headRot = this.original.yBodyRot - this.original.yHeadRot;
+				float partialHeadRot = MathUtils.lerpBetween(headRotO, headRot, partialTicks);
+				Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(-this.original.getXRot(), Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(partialHeadRot, Vec3f.Y_AXIS)).toQuaternion();
+				pose.getOrDefaultTransform("Head").frontResult(JointTransform.getRotation(headRotation), OpenMatrix4f::mul);
+			}
 		}
 	}
 	
@@ -295,8 +324,6 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		return false;
 	}
 	
-	public void gatherDamageDealt(EpicFightDamageSource source, float amount) {}
-	
 	@Override
 	public float getStunShield() {
 		return this.original.getEntityData().get(STUN_SHIELD).floatValue();
@@ -377,45 +404,21 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		return Mth.wrapDegrees(this.original.getYRot());
 	}
 	
-	@OnlyIn(Dist.CLIENT)
-	public OpenMatrix4f getHeadMatrix(float partialTicks) {
-        float f2;
-        
-		if (this.state.inaction()) {
-			f2 = 0;
-		} else {
-			float f = MathUtils.lerpBetween(this.original.yBodyRotO, this.original.yBodyRot, partialTicks);
-			float f1 = MathUtils.lerpBetween(this.original.yHeadRotO, this.original.yHeadRot, partialTicks);
-			f2 = f1 - f;
-			
-			if (this.original.getVehicle() != null) {
-				if (f2 > 45.0F) {
-					f2 = 45.0F;
-				} else if (f2 < -45.0F) {
-					f2 = -45.0F;
-				}
-			}
-		}
-		
-		
-		return MathUtils.getModelMatrixIntegral(0, 0, 0, 0, 0, 0, this.original.xRotO, this.original.getXRot(), f2, f2, partialTicks, 1, 1, 1);
-	}
-	
 	@Override
 	public OpenMatrix4f getModelMatrix(float partialTicks) {
-		float prevYRot;
+		float yRotO;
 		float yRot;
 		float scale = this.original.isBaby() ? 0.5F : 1.0F;
 		
 		if (this.original.getVehicle() instanceof LivingEntity ridingEntity) {
-			prevYRot = ridingEntity.yBodyRotO;
+			yRotO = ridingEntity.yBodyRotO;
 			yRot = ridingEntity.yBodyRot;
 		} else {
-			prevYRot = this.isLogicalClient() ? this.original.yBodyRotO : this.original.getYRot();
+			yRotO = this.isLogicalClient() ? this.original.yBodyRotO : this.original.getYRot();
 			yRot = this.isLogicalClient() ? this.original.yBodyRot : this.original.getYRot();
 		}
 		
-		return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, prevYRot, yRot, partialTicks, scale, scale, scale);
+		return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yRotO, yRot, partialTicks, scale, scale, scale);
 	}
 	
 	public void reserveAnimation(StaticAnimation animation) {
@@ -496,11 +499,9 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	public void notifyGrapplingWarning() {
-		
 	}
 	
 	public void onDodgeSuccess(DamageSource damageSource) {
-		
 	}
 	
 	@Override
@@ -675,6 +676,10 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		return false;
 	}
 	
+	/**
+	 * Returns a value that the entity can trace a target in rotation by a tick
+	 * @return
+	 */
 	public float getYRotLimit() {
 		return 20.0F;
 	}
@@ -689,6 +694,14 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	
 	public double getZOld() {
 		return this.original.zOld;
+	}
+	
+	public float getYRot() {
+		return this.original.getYRot();
+	}
+	
+	public void setYRot(float yRot) {
+		this.original.setYRot(yRot);
 	}
 	
 	@Override
