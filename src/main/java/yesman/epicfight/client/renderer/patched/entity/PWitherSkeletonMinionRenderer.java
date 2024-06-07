@@ -5,6 +5,7 @@ import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
 import net.minecraft.world.entity.PathfinderMob;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.model.Armature;
@@ -20,15 +21,9 @@ public class PWitherSkeletonMinionRenderer extends PHumanoidRenderer<PathfinderM
 	}
 
 	@Override
-	protected void setJointTransforms(HumanoidMobPatch<PathfinderMob> entitypatch, Armature armature, float partialTicks) {
-		Pose pose = entitypatch.getAnimator().getPose(partialTicks);
+	protected void setJointTransforms(HumanoidMobPatch<PathfinderMob> entitypatch, Armature armature, Pose pose, float partialTicks) {
 		Vec3f rootScale = pose.getOrDefaultTransform("Root").scale();
-		Vec3f headScale = pose.getOrDefaultTransform("Head").scale();
-		Vec3f shoulderLScale = pose.getOrDefaultTransform("Shoulder_L").scale();
-		Vec3f shoulderRScale = pose.getOrDefaultTransform("Shoulder_R").scale();
-		this.setJointTransform("Head", armature, OpenMatrix4f.createScale(headScale.x / rootScale.x, headScale.y / rootScale.y, headScale.z / rootScale.z));
-		this.setJointTransform("Shoulder_R", armature, OpenMatrix4f.createScale(shoulderRScale.x / rootScale.x, shoulderRScale.y / rootScale.y, shoulderRScale.z / rootScale.z));
-		this.setJointTransform("Shoulder_L", armature, OpenMatrix4f.createScale(shoulderLScale.x / rootScale.x, shoulderLScale.y / rootScale.y, shoulderLScale.z / rootScale.z));
+		pose.getOrDefaultTransform("Head").jointLocal(JointTransform.getScale(new Vec3f(1.0F / rootScale.x, 1.0F / rootScale.y, 1.0F / rootScale.z)), OpenMatrix4f::mul);
 	}
 	
 	@Override

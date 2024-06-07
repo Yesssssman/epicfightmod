@@ -5,8 +5,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import org.joml.Quaternionf;
-
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.Minecraft;
@@ -81,6 +79,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	private ItemStack tempOffhandHolder = ItemStack.EMPTY;
 	private ResultType lastResultType;
 	private float lastDealDamage;
+	
 	protected Entity lastTryHurtEntity;
 	protected LivingEntity grapplingTarget;
 	protected Armature armature;
@@ -157,8 +156,14 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 				float headRotO = this.original.yBodyRotO - this.original.yHeadRotO;
 				float headRot = this.original.yBodyRot - this.original.yHeadRot;
 				float partialHeadRot = MathUtils.lerpBetween(headRotO, headRot, partialTicks);
-				Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(-this.original.getXRot(), Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(partialHeadRot, Vec3f.Y_AXIS)).toQuaternion();
-				pose.getOrDefaultTransform("Head").frontResult(JointTransform.getRotation(headRotation), OpenMatrix4f::mul);
+				
+				OpenMatrix4f toOrigin = new OpenMatrix4f(this.armature.getBindedTransformFor(pose, this.armature.searchJointByName("Head"))).extractTranslation().invert();
+				OpenMatrix4f headRotation = OpenMatrix4f.createRotatorDeg(-this.original.getXRot(), Vec3f.X_AXIS)
+														.mulFront(OpenMatrix4f.createRotatorDeg(partialHeadRot, Vec3f.Y_AXIS))
+														.mulFront(OpenMatrix4f.invert(toOrigin, null))
+														.mulBack(toOrigin);
+				
+				pose.getOrDefaultTransform("Head").parent(JointTransform.fromMatrix(headRotation), OpenMatrix4f::mul);
 			}
 		}
 	}

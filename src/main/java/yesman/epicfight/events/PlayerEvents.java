@@ -105,6 +105,7 @@ public class PlayerEvents {
 	public static void changeDimensionEvent(PlayerEvent.PlayerChangedDimensionEvent event) {
 		Player player = event.getEntity();
 		ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(player, ServerPlayerPatch.class);
+		playerpatch.getAnimator().resetLivingAnimations();
 		playerpatch.modifyLivingMotionByCurrentItem();
 		
 		EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.WEIGHT_PENALTY, player.level().getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY)), (ServerPlayer)player);

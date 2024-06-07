@@ -2,8 +2,6 @@ package yesman.epicfight.client.world.capabilites.entitypatch.player;
 
 import javax.annotation.Nonnull;
 
-import org.joml.Quaternionf;
-
 import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -231,8 +229,14 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 				float headRotO = this.modelYRotO - this.original.yHeadRotO;
 				float headRot = this.modelYRot - this.original.yHeadRot;
 				float partialHeadRot = MathUtils.lerpBetween(headRotO, headRot, partialTicks);
-				Quaternionf headRotation = OpenMatrix4f.createRotatorDeg(-this.original.getXRot(), Vec3f.X_AXIS).mulFront(OpenMatrix4f.createRotatorDeg(partialHeadRot, Vec3f.Y_AXIS)).toQuaternion();
-				pose.getOrDefaultTransform("Head").frontResult(JointTransform.getRotation(headRotation), OpenMatrix4f::mul);
+				
+				OpenMatrix4f toOrigin = new OpenMatrix4f(this.armature.getBindedTransformFor(pose, this.armature.searchJointByName("Head"))).extractTranslation().invert();
+				OpenMatrix4f headRotation = OpenMatrix4f.createRotatorDeg(-0, Vec3f.X_AXIS)
+														.mulFront(OpenMatrix4f.createRotatorDeg(partialHeadRot, Vec3f.Y_AXIS))
+														.mulFront(OpenMatrix4f.invert(toOrigin, null))
+														.mulBack(toOrigin);
+				
+				pose.getOrDefaultTransform("Head").parent(JointTransform.fromMatrix(headRotation), OpenMatrix4f::mul);
 			}
 		}
 	}

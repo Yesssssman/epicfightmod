@@ -310,8 +310,6 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 		this.modelRenderTarget.bindWrite(true);
 		
 		if (this.animator != null) {
-			this.getArmature().initializeTransform();
-			
 			Pose pose = this.animator.getPose(partialTicks);
 			OpenMatrix4f[] poseMatrices = this.getArmature().getPoseAsTransformMatrix(pose);
 			guiGraphics.pose().pushPose();

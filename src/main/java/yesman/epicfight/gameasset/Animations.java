@@ -580,7 +580,7 @@ public class Animations {
 							float yawOffset = entitypatch.getOriginal().getVehicle() != null ? entitypatch.getOriginal().getYHeadRot() : entitypatch.getOriginal().yBodyRot;
 							rawPose.getJointTransformData().get("Chest").frontResult(
 								  JointTransform.getRotation(QuaternionUtils.YP.rotationDegrees(Mth.wrapDegrees(entitypatch.getOriginal().getYHeadRot() - yawOffset) * ratio))
-								, OpenMatrix4f::mulAsOriginFront
+								, OpenMatrix4f::mulAsOriginInverse
 							);
 						}
 
@@ -740,7 +740,7 @@ public class Animations {
 					float yRot = Mth.clamp(Mth.wrapDegrees(entitypatch.getCameraYRot() - entitypatch.getOriginal().getYRot()), -60.0F, 60.0F);
 					
 					JointTransform chest = pose.getOrDefaultTransform("Chest");
-					chest.frontResult(JointTransform.getRotation(QuaternionUtils.YP.rotationDegrees(yRot)), OpenMatrix4f::mulAsOriginFront);
+					chest.frontResult(JointTransform.getRotation(QuaternionUtils.YP.rotationDegrees(yRot)), OpenMatrix4f::mulAsOriginInverse);
 
 					JointTransform head = pose.getOrDefaultTransform("Head");
 					MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(xRot), head.rotation(), head.rotation());
@@ -2002,7 +2002,7 @@ public class Animations {
 			float pitch = entitypatch.getAttackDirectionPitch();
 			
 			JointTransform chest = pose.getOrDefaultTransform("Chest");
-			chest.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginFront);
+			chest.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginInverse);
 			
 			if (entitypatch instanceof PlayerPatch) {
 				JointTransform head = pose.getOrDefaultTransform("Head");
@@ -2014,7 +2014,7 @@ public class Animations {
 		public static final AnimationProperty.PoseModifier ROOT_X_MODIFIER = (self, pose, entitypatch, time, partialTicks) -> {
 			float pitch = -entitypatch.getOriginal().getXRot();
 			JointTransform chest = pose.getOrDefaultTransform("Root");
-			chest.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginFront);
+			chest.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginInverse);
 		};
 		
 		public static final AnimationProperty.PoseModifier FLYING_CORRECTION = (self, pose, entitypatch, elapsedTime, partialTicks) -> {
@@ -2030,7 +2030,7 @@ public class Animations {
                 double d3 = vec3d1.x * vec3d.z - vec3d1.z * vec3d.x;
                 float zRot = Mth.clamp((float)(Math.signum(d3) * Math.acos(d2)), -1.0F, 1.0F);
 
-                root.frontResult(JointTransform.getRotation(QuaternionUtils.ZP.rotation(zRot)), OpenMatrix4f::mulAsOriginFront);
+                root.frontResult(JointTransform.getRotation(QuaternionUtils.ZP.rotation(zRot)), OpenMatrix4f::mulAsOriginInverse);
 
                 float xRot = (float) MathUtils.getXRotOfVector(vec3d1) * 2.0F;
 
@@ -2065,8 +2065,8 @@ public class Animations {
 			
 			shoulderL.jointLocal(JointTransform.getTranslation(new Vec3f(0.0F, trans, -trans)), OpenMatrix4f::mul);
 			shoulderR.jointLocal(JointTransform.getTranslation(new Vec3f(0.0F, trans, -trans)), OpenMatrix4f::mul);
-			shoulderL.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(xRot)), OpenMatrix4f::mulAsOriginFront);
-			shoulderR.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(xRot)), OpenMatrix4f::mulAsOriginFront);
+			shoulderL.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(xRot)), OpenMatrix4f::mulAsOriginInverse);
+			shoulderR.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(xRot)), OpenMatrix4f::mulAsOriginInverse);
 		};
 		
 		public static final AnimationProperty.PlaybackSpeedModifier CONSTANT_ONE = (self, entitypatch, speed, prevElapsedTime, elapsedTime) -> 1.0F;

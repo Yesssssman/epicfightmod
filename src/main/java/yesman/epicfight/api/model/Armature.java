@@ -50,10 +50,6 @@ public class Armature {
 		return jointMap.get(name);
 	}
 	
-	public void initializeTransform() {
-		this.rootJoint.resetPoseTransforms();
-	}
-	
 	public OpenMatrix4f[] getPoseAsTransformMatrix(Pose pose) {
 		OpenMatrix4f[] jointMatrices = new OpenMatrix4f[this.jointNumber];
 		this.getPoseTransform(this.rootJoint, new OpenMatrix4f(), pose, jointMatrices);
@@ -75,7 +71,6 @@ public class Armature {
 	
 	/** Get binded position of joint **/
 	public OpenMatrix4f getBindedTransformByJointIndex(Pose pose, int pathIndex) {
-		this.initializeTransform();
 		return getBindedJointTransformByIndexInternal(pose, this.rootJoint, new OpenMatrix4f(), pathIndex);
 	}
 	

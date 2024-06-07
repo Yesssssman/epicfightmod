@@ -18,7 +18,7 @@ import yesman.epicfight.api.animation.JointTransform;
 
 public class OpenMatrix4f {
 	public static class AnimationTransformEntry {
-		private static final String[] BINDING_PRIORITY = {JointTransform.PARENT, JointTransform.JOINT_LOCAL_TRANSFORM, JointTransform.ANIMATION_TRANSFROM, JointTransform.RESULT1, JointTransform.RESULT2};
+		private static final String[] BINDING_PRIORITY = {JointTransform.PARENT, JointTransform.JOINT_LOCAL_TRANSFORM, JointTransform.ANIMATION_TRANSFORM, JointTransform.RESULT1, JointTransform.RESULT2};
 		private final Map<String, Pair<OpenMatrix4f, MatrixOperation>> matrices = Maps.newHashMap();
 		
 		public void put(String entryPosition, OpenMatrix4f matrix) {
@@ -27,8 +27,8 @@ public class OpenMatrix4f {
 		
 		public void put(String entryPosition, OpenMatrix4f matrix, MatrixOperation operation) {
 			if (this.matrices.containsKey(entryPosition)) {
-				Pair<OpenMatrix4f, MatrixOperation> entryValue = this.matrices.get(entryPosition);
-				OpenMatrix4f result = entryValue.getSecond().mul(entryValue.getFirst(), matrix, null);
+				Pair<OpenMatrix4f, MatrixOperation> appliedTransform = this.matrices.get(entryPosition);
+				OpenMatrix4f result = appliedTransform.getSecond().mul(appliedTransform.getFirst(), matrix, null);
 				this.matrices.put(entryPosition, Pair.of(result, operation));
 			} else {
 				this.matrices.put(entryPosition, Pair.of(new OpenMatrix4f(matrix), operation));
@@ -65,6 +65,10 @@ public class OpenMatrix4f {
 	
 	public OpenMatrix4f(final OpenMatrix4f src) {
 		load(src);
+	}
+	
+	public OpenMatrix4f(final JointTransform jointTransform) {
+		load(OpenMatrix4f.fromQuaternion(jointTransform.rotation()).translate(jointTransform.translation()).scale(jointTransform.scale()));
 	}
 	
 	public OpenMatrix4f setIdentity() {
@@ -298,29 +302,8 @@ public class OpenMatrix4f {
 		return result;
 	}
 	
-	public static OpenMatrix4f mulAsOriginFront(OpenMatrix4f left, OpenMatrix4f right, OpenMatrix4f dest) {
+	public static OpenMatrix4f mulAsOriginInverse(OpenMatrix4f left, OpenMatrix4f right, OpenMatrix4f dest) {
 		return mulAsOrigin(right, left, dest);
-	}
-	
-	public static OpenMatrix4f overwriteRotation(OpenMatrix4f left, OpenMatrix4f right, OpenMatrix4f dest) {
-		if (dest == null) {
-			dest = new OpenMatrix4f();
-		}
-		
-		dest.m00 = right.m00;
-		dest.m10 = right.m10;
-		dest.m20 = right.m20;
-		dest.m01 = right.m01;
-		dest.m11 = right.m11;
-		dest.m21 = right.m21;
-		dest.m02 = right.m02;
-		dest.m12 = right.m12;
-		dest.m22 = right.m22;
-		dest.m30 = left.m30;
-		dest.m31 = left.m31;
-		dest.m32 = left.m32;
-		
-		return dest;
 	}
 	
 	public static Vec4f transform(OpenMatrix4f matrix, Vec4f src, Vec4f dest) {
@@ -673,6 +656,14 @@ public class OpenMatrix4f {
 	
 	public Vec3f toScaleVector() {
 		return new Vec3f(new Vec3f(this.m00, this.m01, this.m02).length(), new Vec3f(this.m10, this.m11, this.m12).length(), new Vec3f(this.m20, this.m21, this.m22).length());
+	}
+	
+	public OpenMatrix4f extractTranslation() {
+		OpenMatrix4f translationMatrix = new OpenMatrix4f();
+		translationMatrix.m30 = this.m30;
+		translationMatrix.m31 = this.m31;
+		translationMatrix.m32 = this.m32;
+		return translationMatrix;
 	}
 	
 	public OpenMatrix4f removeTranslation() {

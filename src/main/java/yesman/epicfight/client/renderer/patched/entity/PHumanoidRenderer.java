@@ -9,6 +9,8 @@ import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.JointTransform;
+import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -33,9 +35,9 @@ public class PHumanoidRenderer<E extends LivingEntity, T extends LivingEntityPat
 	}
 	
 	@Override
-	protected void setJointTransforms(T entitypatch, Armature armature, float partialTicks) {
+	protected void setJointTransforms(T entitypatch, Armature armature, Pose pose, float partialTicks) {
 		if (entitypatch.getOriginal().isBaby()) {
-			this.setJointTransform("Head", armature, new OpenMatrix4f().scale(new Vec3f(1.25F, 1.25F, 1.25F)));
+			pose.getOrDefaultTransform("Head").frontResult(JointTransform.getScale(new Vec3f(1.25F, 1.25F, 1.25F)), OpenMatrix4f::mul);
 		}
 	}
 	

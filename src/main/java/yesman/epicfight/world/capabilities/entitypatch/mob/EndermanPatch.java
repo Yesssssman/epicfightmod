@@ -11,7 +11,6 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -22,11 +21,15 @@ import net.minecraft.world.level.Level;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import yesman.epicfight.api.animation.Animator;
+import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.LivingMotions;
+import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.types.AttackAnimation;
+import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimator;
 import yesman.epicfight.api.utils.AttackResult;
+import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.gameasset.MobCombatBehaviors;
@@ -151,6 +154,15 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 	}
 	
 	@Override
+	public void poseTick(DynamicAnimation animation, Pose pose, float elapsedTime, float partialTicks) {
+		super.poseTick(animation, pose, elapsedTime, partialTicks);
+		
+		if (this.isRaging() && pose.getJointTransformData().containsKey("Head_Top")) {
+			pose.getOrDefaultTransform("Head_Top").frontResult(JointTransform.getTranslation(new Vec3f(0.0F, 0.25F, 0.0F)), OpenMatrix4f::mul);
+		}
+	}
+	
+	@Override
 	public AttackResult tryHurt(DamageSource damageSource, float amount) {
 		if (!this.original.level().isClientSide()) {
 			if (damageSource.getEntity() != null && !this.isRaging()) {
@@ -241,7 +253,7 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 				Vec3f vec = new Vec3f(rand.nextInt(), rand.nextInt(), rand.nextInt());
 				vec.normalise().scale(0.5F);
 				Minecraft minecraft = Minecraft.getInstance();
-				minecraft.particleEngine.createParticle(EpicFightParticles.ENDERMAN_DEATH_EMIT.get(), this.original.getX(), this.original.getY() + this.original.getDimensions(Pose.STANDING).height / 2, this.original.getZ(), vec.x, vec.y, vec.z);
+				minecraft.particleEngine.createParticle(EpicFightParticles.ENDERMAN_DEATH_EMIT.get(), this.original.getX(), this.original.getY() + this.original.getDimensions(net.minecraft.world.entity.Pose.STANDING).height / 2, this.original.getZ(), vec.x, vec.y, vec.z);
 			}
 		}
 		

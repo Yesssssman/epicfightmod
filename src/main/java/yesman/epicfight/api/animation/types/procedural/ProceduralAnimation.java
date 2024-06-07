@@ -110,7 +110,7 @@ public interface ProceduralAnimation {
 		Quaternionf quat = QuaternionUtils.ZP.rotationDegrees(zRoot);
 		quat.mul(QuaternionUtils.XP.rotationDegrees(-xRoot));
 
-		rootTransform.frontResult(JointTransform.getRotation(quat), OpenMatrix4f::mulAsOriginFront);
+		rootTransform.frontResult(JointTransform.getRotation(quat), OpenMatrix4f::mulAsOriginInverse);
 	}
 	
 	default void applyFabrikToJoint(Vec3f recalculatedPosition, Pose pose, Armature armature, Joint startJoint, Joint endJoint, Quaternionf tipRotation) {

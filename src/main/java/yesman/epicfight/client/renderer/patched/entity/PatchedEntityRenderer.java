@@ -17,7 +17,7 @@ import net.minecraftforge.client.event.RenderNameTagEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
-import yesman.epicfight.api.animation.Joint;
+import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
@@ -48,14 +48,6 @@ public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends Li
 		}
 	}
 	
-	protected void setJointTransform(String jointName, Armature modelArmature, OpenMatrix4f mat) {
-		Joint joint = modelArmature.searchJointByName(jointName);
-		
-		if (joint != null) {
-			joint.getPoseTransform().mulFront(mat);
-		}
-	}
-	
 	public void mulPoseStack(PoseStack poseStack, Armature armature, E entityIn, T entitypatch, float partialTicks) {
 		OpenMatrix4f modelMatrix = entitypatch.getModelMatrix(partialTicks);
         OpenMatrix4f transpose = modelMatrix.transpose(null);
@@ -71,14 +63,15 @@ public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends Li
 	}
 	
 	public OpenMatrix4f[] getPoseMatrices(T entitypatch, Armature armature, float partialTicks) {
-		armature.initializeTransform();
-        this.setJointTransforms(entitypatch, armature, partialTicks);
-		OpenMatrix4f[] poseMatrices = armature.getPoseAsTransformMatrix(entitypatch.getAnimator().getPose(partialTicks));
+		Pose pose = entitypatch.getAnimator().getPose(partialTicks);
+        this.setJointTransforms(entitypatch, armature, pose, partialTicks);
+		OpenMatrix4f[] poseMatrices = armature.getPoseAsTransformMatrix(pose);
 		
 		return poseMatrices;
 	}
 	
 	public abstract AM getMesh(T entitypatch);
 	
-	protected void setJointTransforms(T entitypatch, Armature armature, float partialTicks) {}
+	protected void setJointTransforms(T entitypatch, Armature armature, Pose pose, float partialTicks) {
+	}
 }

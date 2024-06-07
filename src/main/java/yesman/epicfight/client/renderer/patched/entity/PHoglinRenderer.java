@@ -6,6 +6,8 @@ import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.hoglin.HoglinBase;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.JointTransform;
+import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -15,21 +17,13 @@ import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class PHoglinRenderer<E extends Mob & HoglinBase, T extends MobPatch<E>> extends PatchedLivingEntityRenderer<E, T, HoglinModel<E>, MobRenderer<E, HoglinModel<E>>, HoglinMesh> {
-	private static final OpenMatrix4f CORRECTION = OpenMatrix4f.createRotatorDeg(-30.0F, Vec3f.X_AXIS);
-	private static final OpenMatrix4f REVERSE = OpenMatrix4f.createRotatorDeg(30.0F, Vec3f.X_AXIS);
-	
 	@Override
-	protected void setJointTransform(String jointName, Armature modelArmature, OpenMatrix4f mat) {
-		modelArmature.searchJointByName(jointName).getPoseTransform().mulBack(CORRECTION).mulBack(mat).mulBack(REVERSE);
-	}
-	
-	@Override
-	protected void setJointTransforms(T entitypatch, Armature armature, float partialTicks) {
+	protected void setJointTransforms(T entitypatch, Armature armature, Pose pose, float partialTicks) {
 		if (entitypatch.getOriginal().isBaby()) {
-			this.setJointTransform("Head", armature, new OpenMatrix4f().scale(new Vec3f(1.25F, 1.25F, 1.25F)));
+			pose.getOrDefaultTransform("Head").frontResult(JointTransform.getScale(new Vec3f(1.25F, 1.25F, 1.25F)), OpenMatrix4f::mul);
 		}
 	}
-
+	
 	@Override
 	public HoglinMesh getMesh(T entitypatch) {
 		return Meshes.HOGLIN;

@@ -54,8 +54,6 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 	@Override
 	public void render(LocalPlayer entityIn, LocalPlayerPatch entitypatch, LivingEntityRenderer<LocalPlayer, PlayerModel<LocalPlayer>> renderer, MultiBufferSource buffer, PoseStack matStackIn, int packedLightIn, float partialTicks) {
 		Armature armature = entitypatch.getArmature();
-		armature.initializeTransform();
-		
 		Pose pose = entitypatch.getAnimator().getPose(partialTicks);
 		OpenMatrix4f[] poses = armature.getPoseAsTransformMatrix(pose);
 		matStackIn.pushPose();

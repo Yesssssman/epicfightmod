@@ -54,7 +54,6 @@ import yesman.epicfight.main.EpicFightMod;
 
 public class JsonModelLoader {
 	public static final OpenMatrix4f BLENDER_TO_MINECRAFT_COORD = OpenMatrix4f.createRotatorDeg(-90.0F, Vec3f.X_AXIS);
-	
 	private JsonObject rootJson;
 	private ResourceManager resourceManager;
 	private ResourceLocation resourceLocation;

@@ -88,7 +88,7 @@ public class AimAnimation extends StaticAnimation {
 			float yRotHead = entitypatch.getOriginal().yHeadRotO;
 			float yRot = entitypatch.getOriginal().getVehicle() != null ? yRotHead : entitypatch.getYRot();
 			MathUtils.mulQuaternion(QuaternionUtils.YP.rotationDegrees(Mth.wrapDegrees(yRot - yRotHead) * ratio), head.rotation(), head.rotation());
-			chest.frontResult(JointTransform.getRotation(QuaternionUtils.YP.rotationDegrees(Mth.wrapDegrees(yRotHead - yRot) * ratio)), OpenMatrix4f::mulAsOriginFront);
+			chest.frontResult(JointTransform.getRotation(QuaternionUtils.YP.rotationDegrees(Mth.wrapDegrees(yRotHead - yRot) * ratio)), OpenMatrix4f::mulAsOriginInverse);
 		}
 	}
 	

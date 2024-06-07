@@ -15,7 +15,6 @@ public class Joint {
 	private final String jointName;
 	private final OpenMatrix4f localTransform;
 	private final OpenMatrix4f toOrigin = new OpenMatrix4f();
-	private final OpenMatrix4f poseTransform = new OpenMatrix4f();
 	
 	public Joint(String name, int jointId, OpenMatrix4f localTransform) {
 		this.jointId = jointId;
@@ -25,14 +24,6 @@ public class Joint {
 
 	public void addSubJoint(Joint... joints) {
         Collections.addAll(this.subJoints, joints);
-	}
-
-	public void resetPoseTransforms() {
-		this.poseTransform.setIdentity();
-		
-		for (Joint joint : this.subJoints) {
-			joint.resetPoseTransforms();
-		}
 	}
 	
 	public List<Joint> getAllJoints() {
@@ -62,11 +53,7 @@ public class Joint {
 	public OpenMatrix4f getLocalTrasnform() {
 		return this.localTransform;
 	}
-
-	public OpenMatrix4f getPoseTransform() {
-		return this.poseTransform;
-	}
-
+	
 	public OpenMatrix4f getToOrigin() {
 		return this.toOrigin;
 	}

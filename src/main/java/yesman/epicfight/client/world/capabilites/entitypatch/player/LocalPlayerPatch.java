@@ -54,6 +54,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	@Override
 	public void onConstructed(LocalPlayer entity) {
 		super.onConstructed(entity);
+		
 		this.minecraft = Minecraft.getInstance();
 		ClientEngine.getInstance().controllEngine.setPlayerPatch(this);
 	}
@@ -61,6 +62,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	@Override
 	public void onJoinWorld(LocalPlayer entityIn, EntityJoinLevelEvent event) {
 		super.onJoinWorld(entityIn, event);
+		
 		this.eventListeners.addEventListener(EventType.ACTION_EVENT_CLIENT, ACTION_EVENT_UUID, (playerEvent) -> {
 			ClientEngine.getInstance().controllEngine.unlockHotkeys();
 		});

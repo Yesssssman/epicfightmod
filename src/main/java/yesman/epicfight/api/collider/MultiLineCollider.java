@@ -44,8 +44,6 @@ public class MultiLineCollider extends MultiCollider<LineCollider> {
 		}
 		
 		for (LineCollider lineCollider : colliders) {
-			armature.initializeTransform();
-			
 			float pt1 = prevElapsedTime + (elapsedTime - prevElapsedTime) * partialTicks;
 			float pt2 = prevElapsedTime + (elapsedTime - prevElapsedTime) * interpolation;
 			TransformSheet coordTransform = animation.getCoord();

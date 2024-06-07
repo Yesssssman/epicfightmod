@@ -11,7 +11,7 @@ import yesman.epicfight.api.utils.math.Vec3f;
 import java.util.Map;
 
 public class JointTransform {
-	public static final String ANIMATION_TRANSFROM = "animation_transform";
+	public static final String ANIMATION_TRANSFORM = "animation_transform";
 	public static final String JOINT_LOCAL_TRANSFORM = "joint_local_transform";
 	public static final String PARENT = "parent";
 	public static final String RESULT1 = "front_result";
@@ -90,11 +90,10 @@ public class JointTransform {
 			animationTransformEntry.put(entry.getKey(), entry.getValue().transform.toMatrix(), entry.getValue().multiplyFunction);
 		}
 		
-		animationTransformEntry.put(ANIMATION_TRANSFROM, this.toMatrix(), OpenMatrix4f::mul);
+		animationTransformEntry.put(ANIMATION_TRANSFORM, this.toMatrix(), OpenMatrix4f::mul);
 		animationTransformEntry.put(JOINT_LOCAL_TRANSFORM, joint.getLocalTrasnform());
 		animationTransformEntry.put(PARENT, parentTransform);
-		animationTransformEntry.put(ANIMATION_TRANSFROM, joint.getPoseTransform());
-				
+		
 		return animationTransformEntry.getResult();
 	}
 	
@@ -149,7 +148,7 @@ public class JointTransform {
 	}
 	
 	public static JointTransform getScale(Vec3f vec) {
-		return new JointTransform(new Vec3f(1.0F, 1.0F, 1.0F), new Quaternionf(0.0F, 0.0F, 0.0F, 1.0F), vec);
+		return new JointTransform(new Vec3f(0.0F, 0.0F, 0.0F), new Quaternionf(0.0F, 0.0F, 0.0F, 1.0F), vec);
 	}
 	
 	public static JointTransform fromMatrix(OpenMatrix4f matrix) {

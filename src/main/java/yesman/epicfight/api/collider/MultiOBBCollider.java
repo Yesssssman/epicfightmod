@@ -63,8 +63,6 @@ public class MultiOBBCollider extends MultiCollider<OBBCollider> {
 		}
 		
 		for (OBBCollider obbCollider : colliders) {
-			armature.initializeTransform();
-			
 			float pt1 = prevElapsedTime + (elapsedTime - prevElapsedTime) * partialTicks;
 			float pt2 = prevElapsedTime + (elapsedTime - prevElapsedTime) * interpolation;
 			TransformSheet coordTransform = animation.getCoord();

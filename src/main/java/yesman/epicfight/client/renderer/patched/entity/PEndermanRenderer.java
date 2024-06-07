@@ -8,8 +8,6 @@ import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.Meshes;
-import yesman.epicfight.api.model.Armature;
-import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.mesh.EndermanMesh;
 import yesman.epicfight.client.renderer.patched.layer.PatchedEyeLayer;
 import yesman.epicfight.world.capabilities.entitypatch.mob.EndermanPatch;
@@ -20,14 +18,6 @@ public class PEndermanRenderer extends PatchedLivingEntityRenderer<EnderMan, End
 	
 	public PEndermanRenderer() {
 		this.addPatchedLayer(EnderEyesLayer.class, new PatchedEyeLayer<>(ENDERMAN_EYE_TEXTURE, Meshes.ENDERMAN));
-	}
-	
-	@Override
-	protected void setJointTransforms(EndermanPatch entitypatch, Armature armature, float partialTicks) {
-		if (entitypatch.isRaging()) {
-			OpenMatrix4f head = new OpenMatrix4f().translate(0.0F, 0.25F, 0.0F);
-			this.setJointTransform("Head_Top", armature, head);
-		}
 	}
 	
 	@Override
