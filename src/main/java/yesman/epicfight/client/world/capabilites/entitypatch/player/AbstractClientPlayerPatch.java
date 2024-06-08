@@ -230,13 +230,12 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 				float headRot = this.modelYRot - this.original.yHeadRot;
 				float partialHeadRot = MathUtils.lerpBetween(headRotO, headRot, partialTicks);
 				
-				OpenMatrix4f toOrigin = new OpenMatrix4f(this.armature.getBindedTransformFor(pose, this.armature.searchJointByName("Head"))).extractTranslation().invert();
-				OpenMatrix4f headRotation = OpenMatrix4f.createRotatorDeg(-0, Vec3f.X_AXIS)
-														.mulFront(OpenMatrix4f.createRotatorDeg(partialHeadRot, Vec3f.Y_AXIS))
-														.mulFront(OpenMatrix4f.invert(toOrigin, null))
-														.mulBack(toOrigin);
+				OpenMatrix4f toOriginalRotation = new OpenMatrix4f(this.armature.getBindedTransformFor(pose, this.armature.searchJointByName("Head"))).removeTranslation().invert();
+				Vec3f xAxis = OpenMatrix4f.transform3v(toOriginalRotation, Vec3f.X_AXIS, null);
+				Vec3f yAxis = OpenMatrix4f.transform3v(toOriginalRotation, Vec3f.Y_AXIS, null);
+				OpenMatrix4f headRotation = OpenMatrix4f.createRotatorDeg(-this.original.getXRot(), xAxis).mulFront(OpenMatrix4f.createRotatorDeg(partialHeadRot, yAxis));
 				
-				pose.getOrDefaultTransform("Head").parent(JointTransform.fromMatrix(headRotation), OpenMatrix4f::mul);
+				pose.getOrDefaultTransform("Head").frontResult(JointTransform.fromMatrix(headRotation), OpenMatrix4f::mul);
 			}
 		}
 	}

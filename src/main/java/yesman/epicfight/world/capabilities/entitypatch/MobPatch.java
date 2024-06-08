@@ -1,5 +1,6 @@
 package yesman.epicfight.world.capabilities.entitypatch;
 
+import java.util.Collection;
 import java.util.Optional;
 import java.util.Set;
 
@@ -12,6 +13,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
@@ -162,12 +165,13 @@ public abstract class MobPatch<T extends Mob> extends LivingEntityPatch<T> {
 	
 	@Override
 	public AttackResult attack(EpicFightDamageSource damageSource, Entity target, InteractionHand hand) {
-		boolean shouldSwap = hand == InteractionHand.OFF_HAND;
+		Collection<AttributeModifier> mainHandAttributes = this.original.getMainHandItem().getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE);
+		Collection<AttributeModifier> offHandAttributes = this.isOffhandItemValid() ? this.getOriginal().getOffhandItem().getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE) : Set.of();
 		
 		this.epicFightDamageSource = damageSource;
-		this.setOffhandDamage(shouldSwap);
+		this.setOffhandDamage(hand, mainHandAttributes, offHandAttributes);
 		this.original.doHurtTarget(target);
-		this.recoverMainhandDamage(shouldSwap);
+		this.recoverMainhandDamage(hand, mainHandAttributes, offHandAttributes);
 		this.epicFightDamageSource = null;
 		
 		return super.attack(damageSource, target, hand);

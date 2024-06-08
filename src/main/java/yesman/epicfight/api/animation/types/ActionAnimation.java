@@ -138,8 +138,6 @@ public class ActionAnimation extends MainFrameAnimation {
 	
 	@Override
 	public void modifyPose(DynamicAnimation animation, Pose pose, LivingEntityPatch<?> entitypatch, float time, float partialTicks) {
-		super.modifyPose(animation, pose, entitypatch, time, partialTicks);
-		
 		JointTransform jt = pose.getOrDefaultTransform("Root");
 		Vec3f jointPosition = jt.translation();
 		OpenMatrix4f toRootTransformApplied = entitypatch.getArmature().searchJointByName("Root").getLocalTrasnform().removeTranslation();
@@ -152,6 +150,8 @@ public class ActionAnimation extends MainFrameAnimation {
 		jointPosition.x = worldPosition.x;
 		jointPosition.y = worldPosition.y;
 		jointPosition.z = worldPosition.z;
+		
+		super.modifyPose(animation, pose, entitypatch, time, partialTicks);
 	}
 	
 	@Override

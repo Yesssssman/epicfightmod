@@ -1,14 +1,16 @@
 package yesman.epicfight.api.animation;
 
-import com.google.common.collect.Maps;
-import net.minecraft.util.Mth;
+import java.util.Map;
+
 import org.joml.Quaternionf;
+
+import com.google.common.collect.Maps;
+
+import net.minecraft.util.Mth;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.MatrixOperation;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
-
-import java.util.Map;
 
 public class JointTransform {
 	public static final String ANIMATION_TRANSFORM = "animation_transform";
@@ -68,19 +70,32 @@ public class JointTransform {
 	}
 	
 	public void jointLocal(JointTransform transform, MatrixOperation multiplyFunction) {
-		this.entries.put(JOINT_LOCAL_TRANSFORM, new TransformEntry(multiplyFunction, transform));
+		this.entries.put(JOINT_LOCAL_TRANSFORM, new TransformEntry(multiplyFunction, this.mergeIfExist(JOINT_LOCAL_TRANSFORM, transform)));
 	}
 	
 	public void parent(JointTransform transform, MatrixOperation multiplyFunction) {
-		this.entries.put(PARENT, new TransformEntry(multiplyFunction, transform));
+		this.entries.put(PARENT, new TransformEntry(multiplyFunction, this.mergeIfExist(PARENT, transform)));
+	}
+	
+	public void animationTransform(JointTransform transform, MatrixOperation multiplyFunction) {
+		this.entries.put(ANIMATION_TRANSFORM, new TransformEntry(multiplyFunction, this.mergeIfExist(ANIMATION_TRANSFORM, transform)));
 	}
 	
 	public void frontResult(JointTransform transform, MatrixOperation multiplyFunction) {
-		this.entries.put(RESULT1, new TransformEntry(multiplyFunction, transform));
+		this.entries.put(RESULT1, new TransformEntry(multiplyFunction, this.mergeIfExist(RESULT1, transform)));
 	}
 	
 	public void overwriteRotation(JointTransform transform) {
-		this.entries.put(RESULT2, new TransformEntry(OpenMatrix4f::mul, transform));
+		this.entries.put(RESULT2, new TransformEntry(OpenMatrix4f::mul, this.mergeIfExist(RESULT2, transform)));
+	}
+	
+	public JointTransform mergeIfExist(String entryName, JointTransform transform) {
+		if (this.entries.containsKey(entryName)) {
+			TransformEntry transformEntry = this.entries.get(entryName);
+			return JointTransform.mul(transform, transformEntry.transform, transformEntry.multiplyFunction);
+		}
+		
+		return transform;
 	}
 	
 	public OpenMatrix4f getAnimationBindedMatrix(Joint joint, OpenMatrix4f parentTransform) {
@@ -157,6 +172,10 @@ public class JointTransform {
 	
 	public static JointTransform translationRotation(Vec3f vec, Quaternionf quat) {
 		return new JointTransform(vec, quat, new Vec3f(1.0F, 1.0F, 1.0F));
+	}
+	
+	public static JointTransform mul(JointTransform left, JointTransform right, MatrixOperation operation) {
+		return JointTransform.fromMatrix(operation.mul(left.toMatrix(), right.toMatrix(), null));
 	}
 	
 	public static JointTransform empty() {

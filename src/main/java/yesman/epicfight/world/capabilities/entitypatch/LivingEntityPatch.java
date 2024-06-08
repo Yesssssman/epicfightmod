@@ -75,8 +75,6 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	public static final EntityDataAccessor<Integer> EXECUTION_RESISTANCE = new EntityDataAccessor<Integer> (254, EntityDataSerializers.INT);
 	public static final EntityDataAccessor<Boolean> AIRBORNE = new EntityDataAccessor<Boolean> (250, EntityDataSerializers.BOOLEAN);
 	protected static final double WEIGHT_CORRECTION = 37.037D;
-	
-	private ItemStack tempOffhandHolder = ItemStack.EMPTY;
 	private ResultType lastResultType;
 	private float lastDealDamage;
 	
@@ -156,14 +154,12 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 				float headRotO = this.original.yBodyRotO - this.original.yHeadRotO;
 				float headRot = this.original.yBodyRot - this.original.yHeadRot;
 				float partialHeadRot = MathUtils.lerpBetween(headRotO, headRot, partialTicks);
+				OpenMatrix4f toOriginalRotation = new OpenMatrix4f(this.armature.getBindedTransformFor(pose, this.armature.searchJointByName("Head"))).removeTranslation().invert();
+				Vec3f xAxis = OpenMatrix4f.transform3v(toOriginalRotation, Vec3f.X_AXIS, null);
+				Vec3f yAxis = OpenMatrix4f.transform3v(toOriginalRotation, Vec3f.Y_AXIS, null);
+				OpenMatrix4f headRotation = OpenMatrix4f.createRotatorDeg(-this.original.getXRot(), xAxis).mulFront(OpenMatrix4f.createRotatorDeg(partialHeadRot, yAxis));
 				
-				OpenMatrix4f toOrigin = new OpenMatrix4f(this.armature.getBindedTransformFor(pose, this.armature.searchJointByName("Head"))).extractTranslation().invert();
-				OpenMatrix4f headRotation = OpenMatrix4f.createRotatorDeg(-this.original.getXRot(), Vec3f.X_AXIS)
-														.mulFront(OpenMatrix4f.createRotatorDeg(partialHeadRot, Vec3f.Y_AXIS))
-														.mulFront(OpenMatrix4f.invert(toOrigin, null))
-														.mulBack(toOrigin);
-				
-				pose.getOrDefaultTransform("Head").parent(JointTransform.fromMatrix(headRotation), OpenMatrix4f::mul);
+				pose.getOrDefaultTransform("Head").frontResult(JointTransform.fromMatrix(headRotation), OpenMatrix4f::mul);
 			}
 		}
 	}
@@ -236,67 +232,48 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	/**
-	 * Set offhand item's attribute modifiers when in mainhand
-	 * You must call {@link LivingEntityPatch#recoverMainhandDamage(boolean)} method again after finishing the damaging process.
+	 * Swap item and attributes of mainhand for offhand item and attributes
+	 * You must call {@link LivingEntityPatch#recoverMainhandDamage} method again after finishing the damaging process.
 	 */
-	protected void setOffhandDamage(boolean execute) {
-		if (!execute) {
+	protected void setOffhandDamage(InteractionHand hand, Collection<AttributeModifier> mainhandAttributes, Collection<AttributeModifier> offhandAttributes) {
+		if (hand == InteractionHand.MAIN_HAND) {
+			return;
+		}
+		
+		/**
+		 * Swap hand items
+		 */
+		ItemStack mainHandItem = this.getOriginal().getMainHandItem();
+		ItemStack offHandItem = this.getOriginal().getOffhandItem();
+		this.getOriginal().setItemInHand(InteractionHand.MAIN_HAND, offHandItem);
+		this.getOriginal().setItemInHand(InteractionHand.OFF_HAND, mainHandItem);
+		
+		/**
+		 * Swap item's attributes before {@link LivingEntity#setItemInHand} called
+		 */
+		AttributeInstance damageAttributeInstance = this.original.getAttribute(Attributes.ATTACK_DAMAGE);
+		mainhandAttributes.forEach(damageAttributeInstance::removeModifier);
+		offhandAttributes.forEach(damageAttributeInstance::addTransientModifier);
+	}
+	
+	/**
+	 * Set mainhand item's attribute modifiers
+	 */
+	protected void recoverMainhandDamage(InteractionHand hand, Collection<AttributeModifier> mainhandAttributes, Collection<AttributeModifier> offhandAttributes) {
+		if (hand == InteractionHand.MAIN_HAND) {
 			return;
 		}
 		
 		ItemStack mainHandItem = this.getOriginal().getMainHandItem();
-		ItemStack offHandItem = this.isOffhandItemValid() ? this.getOriginal().getOffhandItem() : ItemStack.EMPTY;
-		
-		if (!this.isOffhandItemValid()) {
-			this.tempOffhandHolder = this.getOriginal().getOffhandItem();
-		}
-		
-		/**
-		 * Swap hand items to decrease durability
-		 */
-		this.getOriginal().setItemInHand(InteractionHand.MAIN_HAND, offHandItem);
-		this.getOriginal().setItemInHand(InteractionHand.OFF_HAND, mainHandItem);
-		
-		/**
-		 * Swap hand item attributes  forcely because they don't relected as soon as LivingEntity#setItemInHand is called
-		 */
-		AttributeInstance damageAttributeInstance = this.original.getAttribute(Attributes.ATTACK_DAMAGE);
-		Collection<AttributeModifier> modifiers = this.isOffhandItemValid() ? offHandItem.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE) : null;
-		mainHandItem.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE).forEach(damageAttributeInstance::removeModifier);
-		
-		if (modifiers != null) {
-			modifiers.forEach(damageAttributeInstance::addTransientModifier);
-		}
-	}
-
-	/**
-	 * Set mainhand item's attribute modifiers
-	 */
-	protected void recoverMainhandDamage(boolean execute) {
-		if (!execute) {
-			return;
-		}
-		
-		ItemStack mainHandItem = this.tempOffhandHolder.isEmpty() ? this.getOriginal().getMainHandItem() : this.tempOffhandHolder;
 		ItemStack offHandItem = this.getOriginal().getOffhandItem();
-		
 		this.getOriginal().setItemInHand(InteractionHand.MAIN_HAND, offHandItem);
 		this.getOriginal().setItemInHand(InteractionHand.OFF_HAND, mainHandItem);
 		
-		if (!this.tempOffhandHolder.isEmpty()) {
-			this.tempOffhandHolder = ItemStack.EMPTY;
-		}
-		
 		AttributeInstance damageAttributeInstance = this.original.getAttribute(Attributes.ATTACK_DAMAGE);
-		Collection<AttributeModifier> modifiers = mainHandItem.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE);
-		
-		if (modifiers != null) {
-			modifiers.forEach(damageAttributeInstance::removeModifier);
-		}
-		
-		offHandItem.getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE).forEach(damageAttributeInstance::addTransientModifier);
+		offhandAttributes.forEach(damageAttributeInstance::removeModifier);
+		mainhandAttributes.forEach(damageAttributeInstance::addTransientModifier);
 	}
-
+	
 	public void setLastAttackResult(AttackResult attackResult) {
 		this.lastResultType = attackResult.resultType;
 		this.lastDealDamage = attackResult.damage;

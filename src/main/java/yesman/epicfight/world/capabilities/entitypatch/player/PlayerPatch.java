@@ -1,6 +1,7 @@
 package yesman.epicfight.world.capabilities.entitypatch.player;
 
 import java.util.Collection;
+import java.util.Set;
 import java.util.UUID;
 
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -340,16 +341,17 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	public AttackResult attack(EpicFightDamageSource damageSource, Entity target, InteractionHand hand) {
 		float fallDist = this.original.fallDistance;
 		boolean onGround = this.original.onGround;
-		boolean shouldSwap = hand == InteractionHand.OFF_HAND;
+		Collection<AttributeModifier> mainHandAttributes = this.original.getMainHandItem().getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE);
+		Collection<AttributeModifier> offHandAttributes = this.isOffhandItemValid() ? this.getOriginal().getOffhandItem().getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE) : Set.of();
 		
 		// Prevents crit and sweeping edge effect
 		this.epicFightDamageSource = damageSource;
 		this.original.attackStrengthTicker = Integer.MAX_VALUE;
 		this.original.fallDistance = 0.0F;
 		this.original.onGround = false;
-		this.setOffhandDamage(shouldSwap);
+		this.setOffhandDamage(hand, mainHandAttributes, offHandAttributes);
 		this.original.attack(target);
-		this.recoverMainhandDamage(shouldSwap);
+		this.recoverMainhandDamage(hand, mainHandAttributes, offHandAttributes);
 		this.epicFightDamageSource = null;
 		this.original.fallDistance = fallDist;
 		this.original.onGround = onGround;

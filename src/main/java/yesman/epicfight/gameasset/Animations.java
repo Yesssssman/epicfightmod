@@ -2000,14 +2000,16 @@ public class Animations {
 			}
 			
 			float pitch = entitypatch.getAttackDirectionPitch();
-			
 			JointTransform chest = pose.getOrDefaultTransform("Chest");
 			chest.frontResult(JointTransform.getRotation(QuaternionUtils.XP.rotationDegrees(-pitch)), OpenMatrix4f::mulAsOriginInverse);
 			
 			if (entitypatch instanceof PlayerPatch) {
-				JointTransform head = pose.getOrDefaultTransform("Head");
 				float xRot = MathUtils.lerpBetween(entitypatch.getOriginal().xRotO, entitypatch.getOriginal().getXRot(), partialTicks);
-				MathUtils.mulQuaternion(QuaternionUtils.XP.rotationDegrees(pitch + xRot), head.rotation(), head.rotation());
+				OpenMatrix4f toOriginalRotation = new OpenMatrix4f(entitypatch.getArmature().getBindedTransformFor(pose, entitypatch.getArmature().searchJointByName("Head"))).removeTranslation().invert();
+				Vec3f xAxis = OpenMatrix4f.transform3v(toOriginalRotation, Vec3f.X_AXIS, null);
+				OpenMatrix4f headRotation = OpenMatrix4f.createRotatorDeg(-(pitch + xRot), xAxis);
+				
+				pose.getOrDefaultTransform("Head").frontResult(JointTransform.fromMatrix(headRotation), OpenMatrix4f::mul);
 			}
 		};
 		
