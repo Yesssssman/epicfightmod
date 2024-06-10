@@ -75,9 +75,8 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	public static final EntityDataAccessor<Integer> EXECUTION_RESISTANCE = new EntityDataAccessor<Integer> (254, EntityDataSerializers.INT);
 	public static final EntityDataAccessor<Boolean> AIRBORNE = new EntityDataAccessor<Boolean> (250, EntityDataSerializers.BOOLEAN);
 	protected static final double WEIGHT_CORRECTION = 37.037D;
-	private ResultType lastResultType;
-	private float lastDealDamage;
-	
+	protected ResultType lastResultType;
+	protected float lastDealDamage;
 	protected Entity lastTryHurtEntity;
 	protected LivingEntity grapplingTarget;
 	protected Armature armature;
@@ -86,7 +85,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	protected Vec3 lastAttackPosition;
 	protected EpicFightDamageSource epicFightDamageSource;
 	protected boolean isLastAttackSuccess;
-
+	
 	public LivingMotion currentLivingMotion = LivingMotions.IDLE;
 	public LivingMotion currentCompositeMotion = LivingMotions.IDLE;
 	
@@ -99,7 +98,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		this.animator.init();
 		this.original.getEntityData().define(STUN_SHIELD, Float.valueOf(0.0F));
 		this.original.getEntityData().define(MAX_STUN_SHIELD, Float.valueOf(0.0F));
-		this.original.getEntityData().define(EXECUTION_RESISTANCE, Integer.valueOf(1));
+		this.original.getEntityData().define(EXECUTION_RESISTANCE, Integer.valueOf(0));
 		this.original.getEntityData().define(AIRBORNE, Boolean.valueOf(false));
 	}
 	

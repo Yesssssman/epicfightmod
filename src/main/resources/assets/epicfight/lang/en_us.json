@@ -38,6 +38,8 @@
 	"death.attack.shockwave": "%1$s was teared up by Shockwave",
 	"debug.armor_model_debugging.on": "Armor model debugging: On",
 	"debug.armor_model_debugging.off": "Armor model debugging: Off",
+	"debug.show_epicfight_tooltip.on": "Show Epic Fight Tooltip: On",
+	"debug.show_epicfight_tooltip.off": "Show Epic Fight Tooltip: Off",
 	
 	"damage_source.epicfight.damage": "%s damage",
 	"damage_source.epicfight.target_lost_health": " + %s of the target lost health",
@@ -136,9 +138,10 @@
 	"gui.epicfight.blood_effects.off": "Blood Effects: OFF",
 	"gui.epicfight.no_mining_in_combat.on": "No Mining In Combat: ON",
 	"gui.epicfight.no_mining_in_combat.off": "No Mining In Combat: OFF",
-	
 	"gui.epicfight.aiming_correction.on": "Aiming Correction: ON",
 	"gui.epicfight.aiming_correction.off": "Aiming Correction: OFF",
+	"gui.epicfight.show_attributes.on": "Show Attributes: ON",
+	"gui.epicfight.show_attributes.off": "Show Attributes: OFF",
 	
 	"gui.epicfight.auto_switching_items": "Auto Switching Items",
 	"gui.epicfight.export_custom_armor": "Export Armor Models",
@@ -152,6 +155,7 @@
 	"gui.epicfight.blood_effects.tooltip": "Turn on/off blood effects",
 	"gui.epicfight.no_mining_in_combat.tooltip": "Enables/Disables the mining ability in combat mode",
 	"gui.epicfight.aiming_correction.tooltip": "Enables/Disables the camera correction when aiming ranged weapons",
+	"gui.epicfight.show_attributes.tooltip": "Enables/Disables epic fight attributes in item tooltips",
 	"gui.epicfight.auto_switching_items.tooltip": "Edit the list of items that will automatically switch between Battle/Mining mode",
 	"gui.epicfight.export_custom_armor.tooltip": "Export the all custom armor models as an resource pack",
 	"gui.epicfight.replace": "Following skill will be removed: %s",
@@ -168,7 +172,7 @@
 	
 	"gui.epicfight.button.graphics": "Graphics",
 	"gui.epicfight.button.controls": "Controls",
-	"gui.epicfight.button.datapack_edit": "Datapack Edit",
+	"gui.epicfight.button.datapack_edit": "Datapack Editor",
 	
 	"gui.epicfight.tab.datapack.weapon_type": "Weapon Type",
 	"gui.epicfight.tab.datapack.item_capability": "Item Capability",
@@ -214,6 +218,8 @@
 	
 	"item.epicfight.uchigatana.tooltip": "Sheathe Uchigatana after 5 seconds of inactivity and your next attack will be empowered.",
 	"itemGroup.epicfight.items": "EpicFight Items",
+	
+	"inventory.epicfight.guide_innate_tooltip": "[%s] to see Innate skill",
 	
 	"key.epicfight.gui": "Epic Fight GUI",
 	"key.epicfight.combat": "Epic Fight Combat",
@@ -304,6 +310,9 @@
 	"skill.epicfight.guard.category": "Guard",
 	"skill.epicfight.identity.category": "Identity",
 	"skill.epicfight.mover.category": "Mobility",
+	
+	"painting.epicfight.epicfight_logo.title": "The martial Herobrine",
+	"painting.epicfight.epicfight_logo.author": "Gui Brabo",
 	
 	"epicfight.tip.weight": "Weight shortens stun, raises skill stamina use, and slows attack speed, especially on fast items.",
 	"epicfight.tip.stun_armor": "Stun Armor extends the time between stuns, boosting overall resilience and defense.",

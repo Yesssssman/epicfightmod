@@ -103,6 +103,8 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  
  *  8. Added EpicFightExtensions. Now you can decide a creative tab that you want to display your skills of your mod
  *  
+ *  9. Fixed crash when item broken in player's offhand by attacking any entities
+ *  
  *  TO DO
  *  
  *  1. Trail texture bug

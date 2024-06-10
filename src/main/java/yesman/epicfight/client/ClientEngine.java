@@ -2,8 +2,6 @@ package yesman.epicfight.client;
 
 import javax.annotation.Nullable;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -23,8 +21,7 @@ public class ClientEngine {
 	public Minecraft minecraft;
 	public RenderEngine renderEngine;
 	public ControllEngine controllEngine;
-	private boolean armorModelDebuggingMode;
-	private boolean triangleDrawingMode;
+	private boolean armorModelDebuggingMode = false;
 	
 	public ClientEngine() {
 		instance = this;
@@ -55,19 +52,5 @@ public class ClientEngine {
 		}
 		
 		return localPlayerPatch.isBattleMode();
-	}
-	
-	public void turnOnTriangleDrawingMode(PoseStack stack) {
-		this.triangleDrawingMode = true;
-		stack.pushPose();
-	}
-	
-	public void turnOffTriangleDrawingMode(PoseStack stack) {
-		this.triangleDrawingMode = false;
-		stack.popPose();
-	}
-	
-	public boolean isTriangleDrawingMode() {
-		return this.triangleDrawingMode;
 	}
 }

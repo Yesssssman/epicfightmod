@@ -32,7 +32,7 @@ import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
 @OnlyIn(Dist.CLIENT)
 public class SkillEditScreen extends Screen {
 	private static final ResourceLocation SKILL_EDIT_UI = new ResourceLocation(EpicFightMod.MODID, "textures/gui/screen/skill_edit.png");
-	private static final MutableComponent NO_SKILLS = Component.literal("gui.epicfight.no_skills");
+	private static final MutableComponent NO_SKILLS = Component.translatable("gui.epicfight.no_skills");
 	private static final int MAX_SHOWING_BUTTONS = 6;
 	
 	private final Player player;
@@ -129,8 +129,8 @@ public class SkillEditScreen extends Screen {
 		if (this.slotButtons.isEmpty()) {
 			int lineHeight = 0;
 			
-			for (FormattedCharSequence s : this.font.split(NO_SKILLS, 110)) {
-				guiGraphics.drawString(this.font, s, this.width / 2 - 50, this.height / 2 - 72 + lineHeight, 3158064, false);
+			for (FormattedCharSequence s : this.font.split(NO_SKILLS, 140)) {
+				guiGraphics.drawString(this.font, s, this.width / 2 - 65, this.height / 2 - 72 + lineHeight, 3158064, false);
 				
 				lineHeight += 10;
 			}

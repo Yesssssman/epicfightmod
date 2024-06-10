@@ -20,6 +20,7 @@ import yesman.epicfight.skill.Skill.ActivateType;
 import yesman.epicfight.skill.Skill.Resource;
 import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.dodge.DodgeSkill;
+import yesman.epicfight.skill.dodge.KnockdownWakeupSkill;
 import yesman.epicfight.skill.guard.GuardSkill;
 import yesman.epicfight.skill.guard.ImpactGuardSkill;
 import yesman.epicfight.skill.guard.ParryingSkill;
@@ -111,7 +112,7 @@ public class EpicFightSkills {
 		AIR_ATTACK = modRegistry.build("air_attack", AirAttack::new, AirAttack.createAirAttackBuilder());
 		ROLL = modRegistry.build("roll", DodgeSkill::new, DodgeSkill.createDodgeBuilder().setAnimations(() -> Animations.BIPED_ROLL_FORWARD, () -> Animations.BIPED_ROLL_BACKWARD));
 		STEP = modRegistry.build("step", DodgeSkill::new, DodgeSkill.createDodgeBuilder().setAnimations(() -> Animations.BIPED_STEP_FORWARD, () -> Animations.BIPED_STEP_BACKWARD, () -> Animations.BIPED_STEP_LEFT, () -> Animations.BIPED_STEP_RIGHT));
-		KNOCKDOWN_WAKEUP = modRegistry.build("knockdown_wakeup", DodgeSkill::new, DodgeSkill.createDodgeBuilder().setAnimations(() -> Animations.BIPED_KNOCKDOWN_WAKEUP_LEFT, () -> Animations.BIPED_KNOCKDOWN_WAKEUP_RIGHT).setCategory(SkillCategories.KNOCKDOWN_WAKEUP));
+		KNOCKDOWN_WAKEUP = modRegistry.build("knockdown_wakeup", KnockdownWakeupSkill::new, DodgeSkill.createDodgeBuilder().setAnimations(() -> Animations.BIPED_KNOCKDOWN_WAKEUP_LEFT, () -> Animations.BIPED_KNOCKDOWN_WAKEUP_RIGHT).setCategory(SkillCategories.KNOCKDOWN_WAKEUP));
 		
 		GUARD = modRegistry.build("guard", GuardSkill::new, GuardSkill.createGuardBuilder());
 		PARRYING = modRegistry.build("parrying", ParryingSkill::new, ParryingSkill.createActiveGuardBuilder());

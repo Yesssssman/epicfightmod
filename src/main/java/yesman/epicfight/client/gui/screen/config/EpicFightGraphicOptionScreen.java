@@ -42,6 +42,7 @@ public class EpicFightGraphicOptionScreen extends EpicFightOptionSubScreen {
 		OptionHandler<Double> aimHelperColor = this.config.aimHelperColor;
 		BooleanOptionHandler bloodEffects = this.config.bloodEffects;
 		BooleanOptionHandler aimingCorrection = this.config.aimingCorrection;
+		BooleanOptionHandler showEpicFightAttributes = this.config.showEpicFightAttributes;
 		
 		int buttonHeight = -32;
 		
@@ -103,6 +104,13 @@ public class EpicFightGraphicOptionScreen extends EpicFightOptionSubScreen {
 		}).pos(this.width / 2 + 5, this.height / 4 + buttonHeight).size(160, 20).tooltip(Tooltip.create(Component.translatable("gui."+EpicFightMod.MODID+".ui_setup.tooltip"))).build();
 		
 		this.optionsList.addSmall(aimingCorrectionButton, uiSetupButton);
+		
+		Button showEpicfightAttributesButton = Button.builder(Component.translatable("gui."+EpicFightMod.MODID+".show_attributes." + (showEpicFightAttributes.getValue() ? "on" : "off")), (button) -> {
+			showEpicFightAttributes.setValue(!showEpicFightAttributes.getValue());
+			button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".show_attributes." + (showEpicFightAttributes.getValue() ? "on" : "off")));
+		}).pos(this.width / 2 - 165, this.height / 4 + buttonHeight).size(160, 20).tooltip(Tooltip.create(Component.translatable("gui."+EpicFightMod.MODID+".show_attributes.tooltip"))).build();
+		
+		this.optionsList.addSmall(showEpicfightAttributesButton, null);
 		
 		buttonHeight += 30;
 		

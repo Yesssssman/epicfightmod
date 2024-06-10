@@ -29,7 +29,8 @@ public class EpicFightOptions {
 	public final BooleanOptionHandler autoPreparation;
 	public final BooleanOptionHandler bloodEffects;
 	public final BooleanOptionHandler noMiningInCombat;
-  public final BooleanOptionHandler aimingCorrection;
+	public final BooleanOptionHandler aimingCorrection;
+	public final BooleanOptionHandler showEpicFightAttributes;
 	public final Set<Item> battleAutoSwitchItems;
 	public final Set<Item> miningAutoSwitchItems;
 	public int aimHelperRealColor;
@@ -38,23 +39,23 @@ public class EpicFightOptions {
 	public final OptionHandler<Integer> staminaBarY;
 	public final OptionHandler<ClientConfig.HorizontalBasis> staminaBarXBase;
 	public final OptionHandler<ClientConfig.VerticalBasis> staminaBarYBase;
-
+	
 	public final OptionHandler<Integer> weaponInnateX;
 	public final OptionHandler<Integer> weaponInnateY;
 	public final OptionHandler<ClientConfig.HorizontalBasis> weaponInnateXBase;
 	public final OptionHandler<ClientConfig.VerticalBasis> weaponInnateYBase;
-
+	
 	public final OptionHandler<Integer> passivesX;
 	public final OptionHandler<Integer> passivesY;
 	public final OptionHandler<ClientConfig.HorizontalBasis> passivesXBase;
 	public final OptionHandler<ClientConfig.VerticalBasis> passivesYBase;
 	public final OptionHandler<ClientConfig.AlignDirection> passivesAlignDirection;
-
+	
 	public final OptionHandler<Integer> chargingBarX;
 	public final OptionHandler<Integer> chargingBarY;
 	public final OptionHandler<ClientConfig.HorizontalBasis> chargingBarXBase;
 	public final OptionHandler<ClientConfig.VerticalBasis> chargingBarYBase;
-
+	
 	public EpicFightOptions() {
 		ClientConfig config = ConfigManager.INGAME_CONFIG;
 		this.longPressCount = new IntegerOptionHandler(config.longPressCountConfig.get(), 1, 10);
@@ -68,7 +69,8 @@ public class EpicFightOptions {
 		this.autoPreparation = new BooleanOptionHandler(config.autoPreparation.get());
 		this.bloodEffects = new BooleanOptionHandler(config.bloodEffects.get());
 		this.noMiningInCombat = new BooleanOptionHandler(config.noMiningInCombat.get());
-    this.aimingCorrection = new BooleanOptionHandler(config.aimingCorrection.get());
+		this.aimingCorrection = new BooleanOptionHandler(config.aimingCorrection.get());
+		this.showEpicFightAttributes = new BooleanOptionHandler(config.showEpicFightAttributes.get());
 		this.battleAutoSwitchItems = config.battleAutoSwitchItems.get().stream()
 				.map(itemName -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName)))
 				.filter(Objects::nonNull)
@@ -112,6 +114,7 @@ public class EpicFightOptions {
 		this.bloodEffects.setDefaultValue();
 		this.noMiningInCombat.setDefaultValue();
 		this.aimingCorrection.setDefaultValue();
+		this.showEpicFightAttributes.setDefaultValue();
 		this.aimHelperRealColor = ColorWidget.toColorInteger(this.aimHelperColor.getValue());
 		this.staminaBarX.setDefaultValue();
 		this.staminaBarY.setDefaultValue();
@@ -145,6 +148,7 @@ public class EpicFightOptions {
 		config.bloodEffects.set(this.bloodEffects.getValue());
 		config.noMiningInCombat.set(this.noMiningInCombat.getValue());
 		config.aimingCorrection.set(this.aimingCorrection.getValue());
+		config.showEpicFightAttributes.set(this.showEpicFightAttributes.getValue());
 		this.aimHelperRealColor = ColorWidget.toColorInteger(this.aimHelperColor.getValue());
 		config.battleAutoSwitchItems.set(Lists.newArrayList(this.battleAutoSwitchItems.stream().map((item) -> ForgeRegistries.ITEMS.getKey(item).toString()).iterator()));
 		config.miningAutoSwitchItems.set(Lists.newArrayList(this.miningAutoSwitchItems.stream().map((item) -> ForgeRegistries.ITEMS.getKey(item).toString()).iterator()));

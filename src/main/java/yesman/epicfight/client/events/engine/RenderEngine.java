@@ -469,54 +469,61 @@ public class RenderEngine {
 		@SubscribeEvent
 		public static void itemTooltip(ItemTooltipEvent event) {
 			if (event.getEntity() != null && event.getEntity().level().isClientSide) {
-				CapabilityItem cap = EpicFightCapabilities.getItemStackCapabilityOr(event.getItemStack(), null);
-				LocalPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), LocalPlayerPatch.class);
-				
-				if (cap != null && playerpatch != null) {
-					if (ClientEngine.getInstance().controllEngine.isKeyDown(EpicFightKeyMappings.WEAPON_INNATE_SKILL_TOOLTIP)) {
-						Skill weaponInnateSkill = cap.getInnateSkill(playerpatch, event.getItemStack());
+				if (EpicFightMod.CLIENT_CONFIGS.showEpicFightAttributes.getValue()) {
+					CapabilityItem cap = EpicFightCapabilities.getItemStackCapabilityOr(event.getItemStack(), null);
+					LocalPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), LocalPlayerPatch.class);
+					
+					if (cap != null && playerpatch != null) {
+						if (ClientEngine.getInstance().controllEngine.isKeyDown(EpicFightKeyMappings.WEAPON_INNATE_SKILL_TOOLTIP)) {
+							Skill weaponInnateSkill = cap.getInnateSkill(playerpatch, event.getItemStack());
 
-						if (weaponInnateSkill != null) {
-							event.getToolTip().clear();
-							List<Component> skilltooltip = weaponInnateSkill.getTooltipOnItem(event.getItemStack(), cap, playerpatch);
+							if (weaponInnateSkill != null) {
+								event.getToolTip().clear();
+								List<Component> skilltooltip = weaponInnateSkill.getTooltipOnItem(event.getItemStack(), cap, playerpatch);
 
-							for (Component s : skilltooltip) {
-								event.getToolTip().add(s);
+								for (Component s : skilltooltip) {
+									event.getToolTip().add(s);
+								}
 							}
-						}
-					} else {
-						List<Component> tooltip = event.getToolTip();
-						cap.modifyItemTooltip(event.getItemStack(), event.getToolTip(), playerpatch);
-						
-						for (int i = 0; i < tooltip.size(); i++) {
-							Component textComp = tooltip.get(i);
+						} else {
+							List<Component> tooltip = event.getToolTip();
+							cap.modifyItemTooltip(event.getItemStack(), event.getToolTip(), playerpatch);
 							
-							if (!textComp.getSiblings().isEmpty()) {
-								Component sibling = textComp.getSiblings().get(0);
+							for (int i = 0; i < tooltip.size(); i++) {
+								Component textComp = tooltip.get(i);
 								
-								if (sibling instanceof MutableComponent mutableComponent && mutableComponent.getContents() instanceof TranslatableContents translatableContent) {
-									if (translatableContent.getArgs().length > 1 && translatableContent.getArgs()[1] instanceof MutableComponent mutableComponent$2) {
-										if (mutableComponent$2.getContents() instanceof TranslatableContents translatableContent$2) {
-											if (translatableContent$2.getKey().equals(Attributes.ATTACK_SPEED.getDescriptionId())) {
-												float weaponSpeed = (float)playerpatch.getWeaponAttribute(Attributes.ATTACK_SPEED, event.getItemStack());
-												tooltip.remove(i);
-												tooltip.add(i, Component.literal(String.format(" %.2f ", playerpatch.getModifiedAttackSpeed(cap, weaponSpeed)))
-														.append(Component.translatable(Attributes.ATTACK_SPEED.getDescriptionId())));
-												
-											} else if (translatableContent$2.getKey().equals(Attributes.ATTACK_DAMAGE.getDescriptionId())) {
-												
-												float weaponDamage = (float)playerpatch.getWeaponAttribute(Attributes.ATTACK_DAMAGE, event.getItemStack());
-												float damageBonus = EnchantmentHelper.getDamageBonus(event.getItemStack(), MobType.UNDEFINED);
-												String damageFormat = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(playerpatch.getModifiedBaseDamage(weaponDamage) + damageBonus);
-												
-												tooltip.remove(i);
-												tooltip.add(i, Component.literal(String.format(" %s ", damageFormat))
-																		.append(Component.translatable(Attributes.ATTACK_DAMAGE.getDescriptionId()))
-																		.withStyle(ChatFormatting.DARK_GREEN));
+								if (!textComp.getSiblings().isEmpty()) {
+									Component sibling = textComp.getSiblings().get(0);
+									
+									if (sibling instanceof MutableComponent mutableComponent && mutableComponent.getContents() instanceof TranslatableContents translatableContent) {
+										if (translatableContent.getArgs().length > 1 && translatableContent.getArgs()[1] instanceof MutableComponent mutableComponent$2) {
+											if (mutableComponent$2.getContents() instanceof TranslatableContents translatableContent$2) {
+												if (translatableContent$2.getKey().equals(Attributes.ATTACK_SPEED.getDescriptionId())) {
+													float weaponSpeed = (float)playerpatch.getWeaponAttribute(Attributes.ATTACK_SPEED, event.getItemStack());
+													tooltip.remove(i);
+													tooltip.add(i, Component.literal(String.format(" %.2f ", playerpatch.getModifiedAttackSpeed(cap, weaponSpeed)))
+															.append(Component.translatable(Attributes.ATTACK_SPEED.getDescriptionId())));
+													
+												} else if (translatableContent$2.getKey().equals(Attributes.ATTACK_DAMAGE.getDescriptionId())) {
+													float weaponDamage = (float)playerpatch.getWeaponAttribute(Attributes.ATTACK_DAMAGE, event.getItemStack());
+													float damageBonus = EnchantmentHelper.getDamageBonus(event.getItemStack(), MobType.UNDEFINED);
+													String damageFormat = ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(playerpatch.getModifiedBaseDamage(weaponDamage) + damageBonus);
+													
+													tooltip.remove(i);
+													tooltip.add(i, Component.literal(String.format(" %s ", damageFormat))
+																			.append(Component.translatable(Attributes.ATTACK_DAMAGE.getDescriptionId()))
+																			.withStyle(ChatFormatting.DARK_GREEN));
+												}
 											}
 										}
 									}
 								}
+							}
+							
+							Skill weaponInnateSkill = cap.getInnateSkill(playerpatch, event.getItemStack());
+							
+							if (weaponInnateSkill != null) {
+								event.getToolTip().add(Component.translatable("inventory.epicfight.guide_innate_tooltip", EpicFightKeyMappings.WEAPON_INNATE_SKILL_TOOLTIP.getKey().getDisplayName()).withStyle(ChatFormatting.DARK_GRAY));
 							}
 						}
 					}

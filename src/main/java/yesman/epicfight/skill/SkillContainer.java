@@ -246,7 +246,9 @@ public class SkillContainer {
 			if (executor.isChargingSkill(this.containingSkill) && this.containingSkill instanceof ChargeableSkill chargingSkill) {
 				if (executor.isLogicalClient()) {
 					return true;
-				} else return executor.getSkillChargingTicks() >= chargingSkill.getMinChargingTicks();
+				} else {
+					return executor.getSkillChargingTicks() >= chargingSkill.getMinChargingTicks();
+				}
 			}
 			
 			event.setResourcePredicate(this.containingSkill.resourcePredicate(executor) || (this.isActivated() && this.containingSkill.activateType == ActivateType.DURATION));
