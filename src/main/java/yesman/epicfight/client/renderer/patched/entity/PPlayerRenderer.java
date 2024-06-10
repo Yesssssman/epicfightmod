@@ -1,10 +1,7 @@
 package yesman.epicfight.client.renderer.patched.entity;
 
-import com.mojang.blaze3d.vertex.PoseStack;
-
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.layers.ArrowLayer;
 import net.minecraft.client.renderer.entity.layers.BeeStingerLayer;
 import net.minecraft.client.renderer.entity.layers.CapeLayer;
@@ -49,11 +46,6 @@ public class PPlayerRenderer extends PHumanoidRenderer<AbstractClientPlayer, Abs
 		mesh.rightLeg.hidden = !model.rightLeg.visible;
 		mesh.rightPants.hidden = !model.rightPants.visible;
 		mesh.rightSleeve.hidden = !model.rightSleeve.visible;
-	}
-	
-	@Override
-	public void render(AbstractClientPlayer entity, AbstractClientPlayerPatch<AbstractClientPlayer> entitypatch, PlayerRenderer renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
-		super.render(entity, entitypatch, renderer, buffer, poseStack, packedLight, partialTicks);
 	}
 	
 	@Override

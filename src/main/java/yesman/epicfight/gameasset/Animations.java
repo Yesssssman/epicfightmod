@@ -2005,7 +2005,7 @@ public class Animations {
 			
 			if (entitypatch instanceof PlayerPatch) {
 				float xRot = MathUtils.lerpBetween(entitypatch.getOriginal().xRotO, entitypatch.getOriginal().getXRot(), partialTicks);
-				OpenMatrix4f toOriginalRotation = new OpenMatrix4f(entitypatch.getArmature().getBindedTransformFor(pose, entitypatch.getArmature().searchJointByName("Head"))).removeTranslation().invert();
+				OpenMatrix4f toOriginalRotation = entitypatch.getArmature().getBindedTransformFor(pose, entitypatch.getArmature().searchJointByName("Head")).removeScale().removeTranslation().invert();
 				Vec3f xAxis = OpenMatrix4f.transform3v(toOriginalRotation, Vec3f.X_AXIS, null);
 				OpenMatrix4f headRotation = OpenMatrix4f.createRotatorDeg(-(pitch + xRot), xAxis);
 				
