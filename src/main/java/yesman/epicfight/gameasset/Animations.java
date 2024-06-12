@@ -1065,7 +1065,7 @@ public class Animations {
 		BIPED_HIT_LONG = new LongHitAnimation(0.08F, "biped/combat/hit_long", biped);
 		BIPED_HIT_ON_MOUNT = new LongHitAnimation(0.08F, "biped/combat/hit_on_mount", biped);
 		BIPED_LANDING = new LongHitAnimation(0.03F, "biped/living/landing", biped);
-		BIPED_KNOCKDOWN = new KnockdownAnimation(0.08F, 2.1F, "biped/combat/knockdown", biped);
+		BIPED_KNOCKDOWN = new KnockdownAnimation(0.08F, "biped/combat/knockdown", biped);
 		BIPED_DEATH = new LongHitAnimation(0.16F, "biped/living/death", biped);
 		
 		CREEPER_HIT_SHORT = new HitAnimation(0.05F, "creeper/hit_short", creeper);

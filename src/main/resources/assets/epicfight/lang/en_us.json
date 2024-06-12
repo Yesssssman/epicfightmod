@@ -355,6 +355,8 @@
 	"datapack_edit.import_animation.recovery.tooltip": "Defines recovery time.\n\ncontact ~ recovery: an entity can't rotate and can't move\n\nrecovery ~ EoA: an entity can move canceling this animation",
 	"datapack_edit.import_animation.hand": "Hand",
 	"datapack_edit.import_animation.hand.tooltip": "Defines a hand to get an item in a current phase",
+	"datapack_edit.import_animation.collider": "Collider",
+	"datapack_edit.import_animation.collider.tooltip": "Defines a collider of an animation. If you define no collider here, it will get collider from item capability.\n(optional)",
 	"datapack_edit.import_animation.joint": "Collider Joint",
 	"datapack_edit.import_animation.joint.tooltip": "Defines a parent joint of collider",
 	"datapack_edit.import_animation.preview": "Preview",
@@ -418,7 +420,9 @@
 	"datapack_edit.weapon_type.styles.default": "Default",
 	"datapack_edit.weapon_type.styles.default.tooltip": "A default style (mandatory)",
 	"datapack_edit.weapon_type.styles.condition": "Condition",
+	"datapack_edit.weapon_type.styles.condition.tooltip": "Defines conditions that determine when a player have this style",
 	"datapack_edit.weapon_type.styles.parameters": "Parameters",
+	"datapack_edit.weapon_type.styles.parameters.tooltip": "Defines parameters of a condition",
 	
 	"datapack_edit.weapon_type.combos.combo_attacks": "Combo Attacks",
 	"datapack_edit.weapon_type.combos.combo_attacks.tooltip": "Defines combo attacks of a weapon\n(mandatory)",

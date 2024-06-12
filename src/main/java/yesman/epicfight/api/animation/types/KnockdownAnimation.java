@@ -8,9 +8,13 @@ import yesman.epicfight.world.damagesource.EpicFightDamageSource;
 import yesman.epicfight.world.damagesource.EpicFightDamageType;
 
 public class KnockdownAnimation extends LongHitAnimation {
-	public KnockdownAnimation(float convertTime, float delayTime, String path, Armature armature) {
-		super(convertTime, path, armature);
-
+	public KnockdownAnimation(float convertTime, String path, Armature armature) {
+		this(convertTime, path, armature, false);
+	}
+	
+	public KnockdownAnimation(float convertTime, String path, Armature armature, boolean noRegister) {
+		super(convertTime, path, armature, noRegister);
+		
 		this.stateSpectrumBlueprint
 			.addState(EntityState.KNOCKDOWN, true)
 			.addState(EntityState.ATTACK_RESULT, (damagesource) -> {

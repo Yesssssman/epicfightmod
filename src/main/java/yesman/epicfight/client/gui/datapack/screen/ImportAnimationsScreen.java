@@ -322,7 +322,7 @@ public class ImportAnimationsScreen extends Screen {
 			}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 		}
 		break;
-		case SHORT_HIT, LONG_HIT:
+		case SHORT_HIT, LONG_HIT, KNOCK_DOWN:
 		{
 			final ResizableEditBox convertTime = new ResizableEditBox(this.font, 0, 35, 0, 15, Component.translatable("datapack_edit.import_animation.convert_time"), HorizontalSizing.LEFT_WIDTH, null);
 			
@@ -336,12 +336,6 @@ public class ImportAnimationsScreen extends Screen {
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.convert_time"));
 			this.inputComponentsList.addComponentCurrentRow(convertTime.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
-			
-			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data"));
-			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
-				return new StaticAnimationPropertyScreen(this, this.fakeAnimations.get(this.animationGrid.getRowposition()));
-			}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 		}
 		break;
 		case ATTACK, BASIC_ATTACK:
@@ -709,7 +703,7 @@ public class ImportAnimationsScreen extends Screen {
 			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.hand"));
 			this.inputComponentsList.addComponentCurrentRow(interactionHand.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.collider"));
 			this.inputComponentsList.addComponentCurrentRow(colliderPopup.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			
 			this.inputComponentsList.newRow();

@@ -105,6 +105,6 @@ public class DodgeSkill extends Skill {
 	@Override
 	public boolean isExecutableState(PlayerPatch<?> executer) {
 		EntityState playerState = executer.getEntityState();
-		return !(executer.isUnstable() || !playerState.canUseSkill()) && !executer.getOriginal().isInWater() && !executer.getOriginal().onClimbable() && executer.getOriginal().getVehicle() == null;
+		return !(executer.footsOnGround() || !playerState.canUseSkill()) && !executer.getOriginal().isInWater() && !executer.getOriginal().onClimbable() && executer.getOriginal().getVehicle() == null;
 	}
 }

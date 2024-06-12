@@ -20,6 +20,7 @@ import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.BasicAttackAnimation;
 import yesman.epicfight.api.animation.types.HitAnimation;
+import yesman.epicfight.api.animation.types.KnockdownAnimation;
 import yesman.epicfight.api.animation.types.LongHitAnimation;
 import yesman.epicfight.api.animation.types.MovementAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -119,7 +120,7 @@ public class FakeAnimation extends StaticAnimation {
 		switch (this.animationType) {
 		case STATIC, MOVEMENT:
 			return String.format("(%s#F,%b#Z,%s#java.lang.String,%s#" + Armature.class.getTypeName() + ")#%s", this.constructorParams.get("convertTime"), this.constructorParams.get("isRepeat"), this.constructorParams.get("path"), this.constructorParams.get("armature"), this.animationType.animCls.getTypeName());
-		case SHORT_HIT, LONG_HIT:
+		case SHORT_HIT, LONG_HIT, KNOCK_DOWN:
 			return String.format("(%s#F,%s#java.lang.String,%s#" + Armature.class.getTypeName() + ")#%s", this.constructorParams.get("convertTime"), this.constructorParams.get("path"), this.constructorParams.get("armature"), this.animationType.animCls.getTypeName());
 		case ATTACK, BASIC_ATTACK:
 			ListTag phasesTag = this.getParameter("phases");
@@ -258,6 +259,7 @@ public class FakeAnimation extends StaticAnimation {
 		PARAMETERS.put(AnimationType.BASIC_ATTACK, attackAnimationParameters);
 		PARAMETERS.put(AnimationType.SHORT_HIT, hitAnimationParameters);
 		PARAMETERS.put(AnimationType.LONG_HIT, hitAnimationParameters);
+		PARAMETERS.put(AnimationType.KNOCK_DOWN, hitAnimationParameters);
 		
 		FAKE_ANIMATIONS.put(AnimationType.STATIC, FakeStaticAnimation.class);
 		FAKE_ANIMATIONS.put(AnimationType.MOVEMENT, FakeMovementAnimation.class);
@@ -265,6 +267,7 @@ public class FakeAnimation extends StaticAnimation {
 		FAKE_ANIMATIONS.put(AnimationType.BASIC_ATTACK, FakeBasicAttackAnimation.class);
 		FAKE_ANIMATIONS.put(AnimationType.SHORT_HIT, FakeHitAnimation.class);
 		FAKE_ANIMATIONS.put(AnimationType.LONG_HIT, FakeLongHitAnimation.class);
+		FAKE_ANIMATIONS.put(AnimationType.KNOCK_DOWN, FakeKnockdownAnimation.class);
 	}
 	
 	public static Class<? extends ClipHoldingAnimation> switchType(AnimationType cls) {
@@ -283,7 +286,7 @@ public class FakeAnimation extends StaticAnimation {
 	
 	@OnlyIn(Dist.CLIENT)
 	public static enum AnimationType {
-		STATIC(StaticAnimation.class), MOVEMENT(MovementAnimation.class), ATTACK(AttackAnimation.class), BASIC_ATTACK(BasicAttackAnimation.class), SHORT_HIT(HitAnimation.class), LONG_HIT(LongHitAnimation.class);
+		STATIC(StaticAnimation.class), MOVEMENT(MovementAnimation.class), ATTACK(AttackAnimation.class), BASIC_ATTACK(BasicAttackAnimation.class), SHORT_HIT(HitAnimation.class), LONG_HIT(LongHitAnimation.class), KNOCK_DOWN(KnockdownAnimation.class);
 		
 		final Class<? extends StaticAnimation> animCls;
 		

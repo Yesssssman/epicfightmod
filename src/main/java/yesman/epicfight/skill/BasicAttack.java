@@ -62,7 +62,7 @@ public class BasicAttack extends Skill {
 		EntityState playerState = executer.getEntityState();
 		Player player = executer.getOriginal();
 		
-		return !(player.isSpectator() || executer.isUnstable() || !playerState.canBasicAttack());
+		return !(player.isSpectator() || executer.footsOnGround() || !playerState.canBasicAttack());
 	}
 	
 	@Override
