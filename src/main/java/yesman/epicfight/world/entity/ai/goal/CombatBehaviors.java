@@ -41,9 +41,8 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 		for (int i = 0; i < this.behaviorSeriesList.size(); i++) {
 			if (this.currentBehaviorPointer != i) {
 				BehaviorSeries<T> move = this.behaviorSeriesList.get(i);
-				boolean result = move.test(this.mobpatch);
 				
-				if (result) {
+				if (move.canBeSelected(this.mobpatch)) {
 					weightSum += move.weight;
 					candidates.add(i);
 				}
@@ -70,6 +69,11 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 		return -1;
 	}
 	
+	/**
+	 * Force activating an attack move
+	 * 
+	 * @param seriesPointer
+	 */
 	public void execute(int seriesPointer) {
 		this.currentBehaviorPointer = seriesPointer;
 		BehaviorSeries<T> behaviorSeries = this.behaviorSeriesList.get(seriesPointer);
@@ -170,7 +174,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 		private final boolean canBeInterrupted;
 		private final float weight;
 		private final int maxCooldown;
-		private final IntList cooldownSharingPointer;
+		private final IntList cooldownShares;
 		private int cooldown;
 		private int nextBehaviorPointer;
 		private boolean loopFinished;
@@ -180,11 +184,11 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 			this.looping = builder.looping;
 			this.canBeInterrupted = builder.canBeInterrupted;
 			this.weight = builder.weight;
-			this.cooldownSharingPointer = builder.cooldownSharingPointers;
+			this.cooldownShares = builder.cooldownSharingPointers;
 			this.maxCooldown = builder.cooldown;
 		}
 		
-		public boolean test(T mobpatch) {
+		public boolean canBeSelected(T mobpatch) {
 			if (this.cooldown > 0) {
 				return false;
 			}
@@ -211,7 +215,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 			this.cooldown = this.maxCooldown;
 			
 			if (resetSharingCooldown) {
-				for (int i : this.cooldownSharingPointer) {
+				for (int i : this.cooldownShares) {
 					BehaviorSeries<T> behaviorSeries = mobBehavior.behaviorSeriesList.get(i);
 					behaviorSeries.cooldown = behaviorSeries.maxCooldown;
 				}

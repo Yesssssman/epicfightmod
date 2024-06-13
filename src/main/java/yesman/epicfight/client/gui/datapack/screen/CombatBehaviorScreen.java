@@ -214,6 +214,7 @@ public class CombatBehaviorScreen extends Screen {
 				
 				this.setDataBindingComponenets(new Object[] {
 					tag.contains("weight") ? ParseUtil.valueOfOmittingType(tag.getDouble("weight")) : "",
+					tag.contains("cooldown") ? ParseUtil.valueOfOmittingType(tag.getDouble("cooldown")) : "",
 					tag.getBoolean("canBeInterrupted"),
 					tag.getBoolean("looping"),
 					null,
@@ -237,6 +238,18 @@ public class CombatBehaviorScreen extends Screen {
 		});
 		
 		weightEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
+		
+		final ResizableEditBox cooldownEditBox = new ResizableEditBox(this.font, 0, 50, 0, 15, Component.translatable("datapack_edit.mob_patch.combat_behavior.weight"), HorizontalSizing.LEFT_WIDTH, null);
+		
+		cooldownEditBox.setResponder((value) -> {
+			if (StringUtil.isNullOrEmpty(value)) {
+				this.movesetList.get(this.movesetGrid.getRowposition()).remove("cooldown");
+			} else {
+				this.movesetList.get(this.movesetGrid.getRowposition()).putInt("cooldown", Integer.parseInt(value));
+			}
+		});
+		
+		cooldownEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Integer::parseInt));
 		
 		this.conditionGrid = Grid.builder(this, caller.getMinecraft())
 									.xy1(63, 0)
@@ -355,6 +368,10 @@ public class CombatBehaviorScreen extends Screen {
 		this.inputComponentsList.addComponentCurrentRow(weightEditBox.relocateX(caller.getRectangle(), this.inputComponentsList.nextStart(5)));
 		
 		this.inputComponentsList.newRow();
+		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior.cooldown"));
+		this.inputComponentsList.addComponentCurrentRow(cooldownEditBox.relocateX(caller.getRectangle(), this.inputComponentsList.nextStart(5)));
+		
+		this.inputComponentsList.newRow();
 		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior.interceptable"));
 		this.inputComponentsList.addComponentCurrentRow(new CheckBox(this.font, this.inputComponentsList.nextStart(5), 60, 0, 10, HorizontalSizing.LEFT_WIDTH, null, null, Component.literal(""), (value) -> {
 			this.movesetList.get(this.movesetGrid.getRowposition()).putBoolean("canBeInterrupted", value);
@@ -462,8 +479,12 @@ public class CombatBehaviorScreen extends Screen {
 	
 	@Override
 	public void onClose() {
-		this.modelPreviewer.onDestroy();
 		this.minecraft.setScreen(this.caller);
+	}
+	
+	@Override
+	public void removed() {
+		this.modelPreviewer.onDestroy();
 	}
 	
 	@Override
@@ -519,6 +540,10 @@ public class CombatBehaviorScreen extends Screen {
 	private void validateTagSave(CompoundTag tag) throws IllegalStateException {
 		if (!tag.contains("weight")) {
 			throw new IllegalStateException("Define a weight value");
+		}
+		
+		if (tag.getInt("cooldown") < 0) {
+			throw new IllegalStateException("Cooldown can't be a negative value");
 		}
 		
 		if (!tag.contains("canBeInterrupted")) {

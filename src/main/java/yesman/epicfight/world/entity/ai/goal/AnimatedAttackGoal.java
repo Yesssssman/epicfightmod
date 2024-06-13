@@ -46,7 +46,7 @@ public class AnimatedAttackGoal<T extends MobPatch<?>> extends Goal {
 		}
 	}
 	
-	private boolean checkTargetValid() {
+	protected boolean checkTargetValid() {
 		LivingEntity livingentity = this.mobpatch.getTarget();
 		
 		if (livingentity == null) {

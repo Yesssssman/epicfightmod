@@ -55,7 +55,7 @@ import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.DroppedNetherStar;
 import yesman.epicfight.world.entity.WitherGhostClone;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
-import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
+import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 
 public class WitherPatch extends MobPatch<WitherBoss> {
 	private static final EntityDataAccessor<Boolean> DATA_ARMOR_ACTIVED = SynchedEntityData.defineId(WitherBoss.class, EntityDataSerializers.BOOLEAN);
@@ -97,7 +97,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 		super.initAI();
 		this.original.goalSelector.addGoal(1, new WitherChasingGoal());
 		this.original.goalSelector.addGoal(0, new WitherGhostAttackGoal());
-		this.original.goalSelector.addGoal(0, new CombatBehaviorGoal<>(this, MobCombatBehaviors.WITHER.build(this)));
+		this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, MobCombatBehaviors.WITHER.build(this)));
 	}
 	
 	@Override

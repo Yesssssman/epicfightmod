@@ -68,11 +68,19 @@ public class SelectModelScreen extends Screen {
 		this.addRenderableWidget(this.modelList);
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_OK, (button) -> {
-			if (this.modelList.getSelected() != null) {
-				this.selectCallback.accept(this.modelList.getSelected().registryName, this.modelList.getSelected().mesh);
+			if (this.modelList.getSelected() == null) {
+				this.minecraft.setScreen(new MessageScreen<>("", "Select an item from the list", this, (button$2) -> {
+					this.minecraft.setScreen(this);
+				}, 180, 60));
+			} else {
+				try {
+					this.selectCallback.accept(this.modelList.getSelected().registryName, this.modelList.getSelected().mesh);
+					this.onClose();
+				} catch (Exception e) {
+					this.minecraft.setScreen(new MessageScreen<>("", e.getMessage(), this.parentScreen, (button$2) -> this.minecraft.setScreen(this.parentScreen), 180, 70).autoCalculateHeight());
+				}
 			}
 			
-			this.onClose();
 		}).pos(this.width / 2 - 162, this.height - 28).size(160, 21).build());
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, (button) -> {
 			this.onClose();
@@ -90,10 +98,14 @@ public class SelectModelScreen extends Screen {
 	
 	@Override
 	public void onClose() {
-		this.modelPreviewer.onDestroy();
 		this.minecraft.setScreen(this.parentScreen);
 	}
 	
+	@Override
+	public void removed() {
+		this.modelPreviewer.onDestroy();
+	}
+
 	@Override
 	public void tick() {
 		this.modelPreviewer._tick();
@@ -160,8 +172,13 @@ public class SelectModelScreen extends Screen {
 			public boolean mouseClicked(double mouseX, double mouseY, int button) {
 				if (button == 0) {
 					if (ModelList.this.getSelected() == this) {
-						SelectModelScreen.this.selectCallback.accept(this.registryName, this.mesh);
-						SelectModelScreen.this.minecraft.setScreen(SelectModelScreen.this.parentScreen);
+						try {
+							SelectModelScreen.this.selectCallback.accept(this.registryName, this.mesh);
+							SelectModelScreen.this.onClose();
+						} catch (Exception e) {
+							SelectModelScreen.this.minecraft.setScreen(new MessageScreen<>("", e.getMessage(), SelectModelScreen.this.parentScreen, (button$2) -> SelectModelScreen.this.minecraft.setScreen(SelectModelScreen.this.parentScreen), 180, 70).autoCalculateHeight());
+						}
+						
 						return true;
 					}
 					

@@ -29,11 +29,25 @@ import yesman.epicfight.main.EpicFightMod;
 public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 	public static final ModelPart<AnimatedVertexIndicator> EMPTY = new ModelPart<>(null, null);
 	final float[] weights;
+	final int maxJointId;
 	
 	public AnimatedMesh(Map<String, float[]> arrayMap, AnimatedMesh parent, RenderProperties properties, Map<String, ModelPart<AnimatedVertexIndicator>> parts) {
 		super(arrayMap, parent, properties, parts);
 		
 		this.weights = (parent == null) ? arrayMap.get("weights") : parent.weights;
+		int maxJointId = 0;
+		
+		for (Map.Entry<String, ModelPart<AnimatedVertexIndicator>> entry : parts.entrySet()) {
+			for (AnimatedVertexIndicator vi : entry.getValue().getVertices()) {
+				for (int ji : vi.joint) {
+					if (ji > maxJointId) {
+						maxJointId = ji;
+					}
+				}
+			}
+		}
+		
+		this.maxJointId = maxJointId;
 	}
 	
 	@Override
@@ -46,7 +60,7 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 		return parts.get(name);
 	}
 	
-	public void draw(PoseStack poseStack, VertexConsumer builder, DrawingFunction drawingFunction, int packedLightIn, float r, float g, float b, float a, int overlay, Armature armature, OpenMatrix4f[] poses) {
+	public void draw(PoseStack poseStack, VertexConsumer builder, DrawingFunction drawingFunction, int packedLight, float r, float g, float b, float a, int overlay, Armature armature, OpenMatrix4f[] poses) {
 		Matrix4f matrix4f = poseStack.last().pose();
 		Matrix3f matrix3f = poseStack.last().normal();
 		OpenMatrix4f[] posesNoTranslation = new OpenMatrix4f[poses.length];
@@ -90,18 +104,18 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 					posVec.mul(matrix4f);
 					normVec.mul(matrix3f);
 					
-					drawingFunction.draw(builder, posVec, normVec, packedLightIn, r, g, b, a, this.uvs[uv], this.uvs[uv + 1], overlay);
+					drawingFunction.draw(builder, posVec, normVec, packedLight, r, g, b, a, this.uvs[uv], this.uvs[uv + 1], overlay);
 				}
 			}
 		}
 	}
 	
-	public void drawModelWithPose(PoseStack poseStack, VertexConsumer builder, int packedLightIn, float r, float g, float b, float a, int overlayCoord, Armature armature, OpenMatrix4f[] poses) {
-		this.draw(poseStack, builder, DrawingFunction.ENTITY_TRANSLUCENT, packedLightIn, r, g, b, a, overlayCoord, armature, poses);
+	public void drawModelWithPose(PoseStack poseStack, VertexConsumer builder, int packedLight, float r, float g, float b, float a, int overlayCoord, Armature armature, OpenMatrix4f[] poses) {
+		this.draw(poseStack, builder, DrawingFunction.ENTITY_TRANSLUCENT, packedLight, r, g, b, a, overlayCoord, armature, poses);
 	}
 	
-	public void drawWithPoseNoTexture(PoseStack poseStack, VertexConsumer builder, int packedLightIn, float r, float g, float b, float a, int overlayCoord, OpenMatrix4f[] poses) {
-		this.draw(poseStack, builder, DrawingFunction.ENTITY_PARTICLE, packedLightIn, r, g, b, a, overlayCoord, null, poses);
+	public void drawWithPoseNoTexture(PoseStack poseStack, VertexConsumer builder, int packedLight, float r, float g, float b, float a, int overlayCoord, OpenMatrix4f[] poses) {
+		this.draw(poseStack, builder, DrawingFunction.ENTITY_PARTICLE, packedLight, r, g, b, a, overlayCoord, null, poses);
 	}
 	
 	public JsonObject toJsonObject() {
@@ -193,5 +207,9 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 		}
 		
 		return root;
+	}
+	
+	public int getMaxJointId() {
+		return this.maxJointId;
 	}
 }

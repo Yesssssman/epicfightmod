@@ -420,7 +420,10 @@ public class DatapackEditScreen extends Screen {
 		}
 		
 		this.minecraft.setScreen(this.parentScreen);
-		
+	}
+	
+	@Override
+	public void removed() {
 		this.weaponTab.modelPreviewer.onDestroy();
 		this.itemCapabilityTab.modelPreviewer.onDestroy();
 	}
@@ -1950,6 +1953,9 @@ public class DatapackEditScreen extends Screen {
 		
 		private final Map<String, ParameterEditor> attributeEditors = Maps.newLinkedHashMap();
 		
+		private PopupBox<AnimatedMesh> meshPopupBox;
+		private PopupBox<Armature> armaturePopupBox;
+		
 		public MobPatchTab() {
 			super(Component.translatable("gui." + EpicFightMod.MODID + ".tab.datapack.mob_patch"), MobPatchReloadListener.DIRECTORY, ForgeRegistries.ENTITY_TYPES, (entityType) -> entityType.getCategory() != MobCategory.MISC);
 			
@@ -1984,6 +1990,22 @@ public class DatapackEditScreen extends Screen {
 			
 			this.modelPreviewer = new ModelPreviewer(9, 15, 0, 140, HorizontalSizing.LEFT_RIGHT, null, Armatures.BIPED, Meshes.BIPED);
 			this.modelPreviewer.setColliderJoint(Armatures.BIPED.searchJointByName("Tool_R"));
+			
+			this.meshPopupBox = new PopupBox.MeshPopupBox(DatapackEditScreen.this, font, 0, 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.model"), (pair) -> {
+				if (this.armaturePopupBox._getValue() != null && pair.getSecond().getMaxJointId() > this.armaturePopupBox._getValue().getJointNumber()) {
+					throw new IllegalArgumentException("The model is incompatible with an armature!");
+				}
+				
+				this.packList.get(this.packListGrid.getRowposition()).getValue().putString("model", pair.getFirst());
+			});
+			
+			this.armaturePopupBox = new PopupBox.ArmaturePopupBox(DatapackEditScreen.this, font, 0, 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.armature"), (pair) -> {
+				if (this.meshPopupBox._getValue() != null && this.meshPopupBox._getValue().getMaxJointId() > pair.getSecond().getJointNumber()) {
+					throw new IllegalArgumentException("The armature is incompatible with a model!");
+				}
+				
+				this.packList.get(this.packListGrid.getRowposition()).getValue().putString("armature", pair.getFirst());
+			});
 			
 			final ResizableEditBox impactEditBox = new ResizableEditBox(DatapackEditScreen.this.getMinecraft().font, 0, 0, 0, 0, Component.literal("impact"), null, null);
 			final ResizableEditBox armorNegationEditBox = new ResizableEditBox(DatapackEditScreen.this.getMinecraft().font, 0, 0, 0, 0, Component.literal("armor_negation"), null, null);
@@ -2024,7 +2046,7 @@ public class DatapackEditScreen extends Screen {
 			} else if (usePreset) {
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.preset"));
-				this.inputComponentsList.addComponentCurrentRow(this.presetCombo.relocateX(screen, this.inputComponentsList.nextStart(4)));
+				this.inputComponentsList.addComponentCurrentRow(this.presetCombo.relocateX(screen, this.inputComponentsList.nextStart(5)));
 				this.presetCombo._setResponder(this.presetResponder);
 			} else {
 				this.disableCheckBox._setResponder(null);
@@ -2037,26 +2059,16 @@ public class DatapackEditScreen extends Screen {
 				
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.preset"));
-				this.inputComponentsList.addComponentCurrentRow(this.presetCombo.relocateX(screen, this.inputComponentsList.nextStart(4)));
+				this.inputComponentsList.addComponentCurrentRow(this.presetCombo.relocateX(screen, this.inputComponentsList.nextStart(5)));
 				this.presetCombo._setResponder(this.presetResponder);
-				
-				final PopupBox<AnimatedMesh> meshPopupBox = new PopupBox.MeshPopupBox(parentScreen, font, 0, 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
-					Component.translatable("datapack_edit.weapon_type.model"), (pair) -> {
-						this.packList.get(this.packListGrid.getRowposition()).getValue().putString("model", pair.getFirst());
-					});
 				
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.model"));
-				this.inputComponentsList.addComponentCurrentRow(meshPopupBox.relocateX(screen, this.inputComponentsList.nextStart(5)));
-				
-				final PopupBox<Armature> armaturePopupBox = new PopupBox.ArmaturePopupBox(parentScreen, font, 0, 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
-						Component.translatable("datapack_edit.weapon_type.armature"), (pair) -> {
-							this.packList.get(this.packListGrid.getRowposition()).getValue().putString("armature", pair.getFirst());
-						});
+				this.inputComponentsList.addComponentCurrentRow(this.meshPopupBox.relocateX(screen, this.inputComponentsList.nextStart(5)));
 				
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.armature"));
-				this.inputComponentsList.addComponentCurrentRow(armaturePopupBox.relocateX(screen, this.inputComponentsList.nextStart(5)));
+				this.inputComponentsList.addComponentCurrentRow(this.armaturePopupBox.relocateX(screen, this.inputComponentsList.nextStart(5)));
 				
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.renderer"));
@@ -2174,7 +2186,7 @@ public class DatapackEditScreen extends Screen {
 																						livingMotionTag.putString(ParseUtil.nullOrToString(event.postValue, (livingmotion) -> livingmotion.name().toLowerCase(Locale.ROOT)), "");
 																					}).editable(true).width(100))
 																	.addColumn(Grid.popup("animation", PopupBox.AnimationPopupBox::new).filter((animation) -> !(animation instanceof MainFrameAnimation) || animation instanceof LongHitAnimation)
-																					.editWidgetCreated((popupBox) -> popupBox.setModel(() -> armaturePopupBox._getValue(), () -> meshPopupBox._getValue()))
+																					.editWidgetCreated((popupBox) -> popupBox.setModel(() -> this.armaturePopupBox._getValue(), () -> this.meshPopupBox._getValue()))
 																					.valueChanged((event) -> {
 																						CompoundTag livingMotionTag = ParseUtil.getOrSupply(this.packList.get(this.packListGrid.getRowposition()).getValue(), "default_livingmotions", CompoundTag::new);
 																						livingMotionTag.putString(ParseUtil.nullOrToString((LivingMotions)event.grid.getValue(event.rowposition, "living_motion"), (livingmotion) -> livingmotion.name().toLowerCase(Locale.ROOT)),
@@ -2219,7 +2231,7 @@ public class DatapackEditScreen extends Screen {
 																					}).editable(true).width(100))
 																	.addColumn(Grid.popup("animation", PopupBox.AnimationPopupBox::new)
 																					.filter((animation) -> animation instanceof HitAnimation || animation instanceof LongHitAnimation)
-																					.editWidgetCreated((popupBox) -> popupBox.setModel(() -> armaturePopupBox._getValue(), () -> meshPopupBox._getValue()))
+																					.editWidgetCreated((popupBox) -> popupBox.setModel(() -> this.armaturePopupBox._getValue(), () -> this.meshPopupBox._getValue()))
 																					.valueChanged((event) -> {
 																						CompoundTag stunTypeTag = ParseUtil.getOrSupply(this.packList.get(this.packListGrid.getRowposition()).getValue(), "stun_animations", CompoundTag::new);
 																						stunTypeTag.putString(ParseUtil.nullOrToString((StunType)event.grid.getValue(event.rowposition, "stun_type"), (stunType) -> stunType.name().toLowerCase(Locale.ROOT)),
@@ -2248,10 +2260,10 @@ public class DatapackEditScreen extends Screen {
 					this.inputComponentsList.newRow();
 					this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 140, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.humanoid_weapon_motions"));
 					this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
-						if (armaturePopupBox._getValue() == null || meshPopupBox._getValue() == null) {
+						if (this.armaturePopupBox._getValue() == null || this.meshPopupBox._getValue() == null) {
 							return new MessageScreen<>("", "Define model and armature first.", DatapackEditScreen.this, (button2) -> DatapackEditScreen.this.getMinecraft().setScreen(DatapackEditScreen.this), 180, 60);
 						} else {
-							return new HumanoidWeaponMotionScreen(DatapackEditScreen.this, this.packList.get(this.packListGrid.getRowposition()).getValue(), armaturePopupBox._getValue(), meshPopupBox._getValue());
+							return new HumanoidWeaponMotionScreen(DatapackEditScreen.this, this.packList.get(this.packListGrid.getRowposition()).getValue(), this.armaturePopupBox._getValue(), this.meshPopupBox._getValue());
 						}
 					}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 				}
@@ -2259,12 +2271,12 @@ public class DatapackEditScreen extends Screen {
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 140, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior"));
 				this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
-					if (armaturePopupBox._getValue() == null || meshPopupBox._getValue() == null) {
+					if (this.armaturePopupBox._getValue() == null || this.meshPopupBox._getValue() == null) {
 						return new MessageScreen<>("", "Define model and armature first.", DatapackEditScreen.this, (button2) -> DatapackEditScreen.this.getMinecraft().setScreen(DatapackEditScreen.this), 180, 60);
 					} else if (isHumanoid) {
-						return new HumanoidCombatBehaviorScreen(DatapackEditScreen.this, this.packList.get(this.packListGrid.getRowposition()).getValue(), armaturePopupBox._getValue(), meshPopupBox._getValue());
+						return new HumanoidCombatBehaviorScreen(DatapackEditScreen.this, this.packList.get(this.packListGrid.getRowposition()).getValue(), this.armaturePopupBox._getValue(), this.meshPopupBox._getValue());
 					} else {
-						return new CombatBehaviorScreen(DatapackEditScreen.this, this.packList.get(this.packListGrid.getRowposition()).getValue(), armaturePopupBox._getValue(), meshPopupBox._getValue(), false);
+						return new CombatBehaviorScreen(DatapackEditScreen.this, this.packList.get(this.packListGrid.getRowposition()).getValue(), this.armaturePopupBox._getValue(), this.meshPopupBox._getValue(), false);
 					}
 				}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			}
@@ -2291,7 +2303,7 @@ public class DatapackEditScreen extends Screen {
 			
 			for (Map.Entry<String, Tag> livingmotionTag : tag.getCompound("default_livingmotions").tags.entrySet()) {
 				try {
-					LivingMotion livingMotion = LivingMotion.ENUM_MANAGER.getOrThrow(livingmotionTag.getKey().toUpperCase(Locale.ROOT));
+					LivingMotion livingMotion = LivingMotion.ENUM_MANAGER.get(livingmotionTag.getKey().toUpperCase(Locale.ROOT));
 					livingmotionPackImporter.newRow();
 					livingmotionPackImporter.newValue("living_motion", livingMotion);
 					livingmotionPackImporter.newValue("animation", DatapackEditScreen.animationByKey(livingmotionTag.getValue().getAsString()));
@@ -2300,7 +2312,7 @@ public class DatapackEditScreen extends Screen {
 			
 			for (Map.Entry<String, Tag> stunTag : tag.getCompound("stun_animations").tags.entrySet()) {
 				try {
-					StunType stunType = StunType.valueOf(stunTag.getKey().toUpperCase(Locale.ROOT));
+					StunType stunType = ParseUtil.enumValueOfOrNull(StunType.class, stunTag.getKey().toUpperCase(Locale.ROOT));
 					stunPackImporter.newRow();
 					stunPackImporter.newValue("stun_type", stunType);
 					stunPackImporter.newValue("animation", DatapackEditScreen.animationByKey(stunTag.getValue().getAsString()));

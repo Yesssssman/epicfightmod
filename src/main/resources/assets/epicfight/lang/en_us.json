@@ -495,6 +495,8 @@
 	
 	"datapack_edit.mob_patch.combat_behavior.weight": "Weight",
 	"datapack_edit.mob_patch.combat_behavior.weight.tooltip": "Defines a chance to select this behavior",
+	"datapack_edit.mob_patch.combat_behavior.cooldown": "Cooldown",
+	"datapack_edit.mob_patch.combat_behavior.cooldown.tooltip": "Defines cooldown ticks of a moveset",
 	"datapack_edit.mob_patch.combat_behavior.interceptable": "Interceptable",
 	"datapack_edit.mob_patch.combat_behavior.interceptable.tooltip": "Defines if this moveset can be canceled by another moveset",
 	"datapack_edit.mob_patch.combat_behavior.loop": "Loop",

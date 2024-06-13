@@ -77,14 +77,18 @@ public class SelectFromRegistryScreen<T> extends Screen {
 		this.addRenderableWidget(this.registryList);
 		this.addRenderableWidget(editBox);
 		
-		this.addRenderableWidget(Button.builder(CommonComponents.GUI_OK, (button) -> {
+		this.addRenderableWidget(Button.builder(CommonComponents.GUI_OK, (button$1) -> {
 			if (this.registryList.getSelected() == null) {
-				this.minecraft.setScreen(new MessageScreen<>("", "Select an item from the list", this, (button2) -> {
+				this.minecraft.setScreen(new MessageScreen<>("", "Select an item from the list", this, (button$2) -> {
 					this.minecraft.setScreen(this);
 				}, 180, 60));
 			} else {
-				this.onAccept.accept(this.registryList.getSelected().name, this.registryList.getSelected().item);
-				this.minecraft.setScreen(this.parentScreen);
+				try {
+					this.onAccept.accept(this.registryList.getSelected().name, this.registryList.getSelected().item);
+					this.minecraft.setScreen(this.parentScreen);
+				} catch (Exception e) {
+					this.minecraft.setScreen(new MessageScreen<>("", e.getMessage(), this.parentScreen, (button$2) -> this.minecraft.setScreen(this.parentScreen), 180, 70).autoCalculateHeight());
+				}
 			}
 		}).pos(this.width / 2 - 162, this.height - 28).size(160, 21).build());
 		
@@ -165,8 +169,13 @@ public class SelectFromRegistryScreen<T> extends Screen {
 			public boolean mouseClicked(double mouseX, double mouseY, int button) {
 				if (button == 0) {
 					if (RegistryList.this.getSelected() == this) {
-						SelectFromRegistryScreen.this.onAccept.accept(this.name, this.item);
-						SelectFromRegistryScreen.this.minecraft.setScreen(SelectFromRegistryScreen.this.parentScreen);
+						try {
+							SelectFromRegistryScreen.this.onAccept.accept(this.name, this.item);
+							SelectFromRegistryScreen.this.minecraft.setScreen(SelectFromRegistryScreen.this.parentScreen);
+						} catch (Exception e) {
+							SelectFromRegistryScreen.this.minecraft.setScreen(new MessageScreen<>("", e.getMessage(), SelectFromRegistryScreen.this.parentScreen, (button$2) -> SelectFromRegistryScreen.this.minecraft.setScreen(SelectFromRegistryScreen.this.parentScreen), 180, 70).autoCalculateHeight());
+						}
+						
 						return true;
 					}
 					

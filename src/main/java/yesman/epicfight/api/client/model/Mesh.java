@@ -64,7 +64,6 @@ public abstract class Mesh<T extends VertexIndicator> {
 	final float[] positions;
 	final float[] uvs;
 	final float[] normals;
-	
 	final int totalVertices;
 	final Map<String, ModelPart<T>> parts;
 	final RenderProperties renderProperties;

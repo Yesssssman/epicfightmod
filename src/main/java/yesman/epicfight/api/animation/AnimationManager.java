@@ -39,6 +39,7 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	
 	private final Map<ResourceLocation, AnimationClip> animationClips = Maps.newHashMap();
 	private final Map<ResourceLocation, StaticAnimation> animationRegistry = Maps.newHashMap();
+	private final Map<ResourceLocation, StaticAnimation> userAnimations = Maps.newHashMap();
 	private final ClearableIdMapper<StaticAnimation> animationIdMap = new ClearableIdMapper<> ();
 	private String currentWorkingModid;
 	
@@ -78,12 +79,8 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		return this.animationClips.get(animation.getLocation());
 	}
 	
-	public Map<ResourceLocation, StaticAnimation> getAnimations() {
-		return ImmutableMap.copyOf(this.animationRegistry);
-	}
-	
 	public Map<ResourceLocation, StaticAnimation> getAnimations(Predicate<StaticAnimation> filter) {
-		Map<ResourceLocation, StaticAnimation> filteredItems = this.animationRegistry.entrySet().stream().filter((entry) -> filter.test(entry.getValue())).reduce(Maps.newHashMap(), (map, entry) -> {
+		Map<ResourceLocation, StaticAnimation> filteredItems = this.animationRegistry.entrySet().stream().filter((entry) -> !this.userAnimations.containsKey(entry.getKey()) && filter.test(entry.getValue())).reduce(Maps.newHashMap(), (map, entry) -> {
 			map.put(entry.getKey(), entry.getValue());
 			return map;
 		}, (map1, map2) -> {
@@ -199,7 +196,7 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 										}
 										
 										try {
-											readAnimationFromJson(entry.getKey(), entry.getValue().getAsJsonObject());
+											this.readAnimationFromJson(entry.getKey(), entry.getValue().getAsJsonObject());
 										} catch (Exception e) {
 											EpicFightMod.LOGGER.error("Failed to load User animation " + entry.getKey() + " because of " + e + ". Skipped.");
 											e.printStackTrace();
@@ -247,7 +244,7 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	 * User-animation loader
 	 **************************************************/
 	@SuppressWarnings({ "deprecation" })
-	private static StaticAnimation readAnimationFromJson(ResourceLocation rl, JsonObject json) throws Exception {
+	private void readAnimationFromJson(ResourceLocation rl, JsonObject json) throws Exception {
 		JsonElement constructorElement = json.get("constructor");
 		
 		if (constructorElement == null) {
@@ -257,6 +254,8 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		JsonObject constructorObject = constructorElement.getAsJsonObject();
 		String invocationCommand = constructorObject.get("invocation_command").getAsString();
 		StaticAnimation animation = InstantiateInvoker.invoke(invocationCommand, StaticAnimation.class).getResult();
+		this.userAnimations.put(animation.getRegistryName(), animation);
+		
 		JsonElement propertiesElement = json.getAsJsonObject().get("properties");
 		
 		if (propertiesElement != null) {
@@ -268,7 +267,5 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 				animation.addPropertyUnsafe(propertyKey, value);
 			}
 		}
-		
-		return animation;
 	}
 }

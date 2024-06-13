@@ -11,6 +11,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -44,7 +45,6 @@ import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.effect.EpicFightMobEffects;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
-import yesman.epicfight.world.entity.ai.goal.CombatBehaviorGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
@@ -278,7 +278,7 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 		}
 	}
 	
-	static class EndermanTeleportMove extends CombatBehaviorGoal<EndermanPatch> {
+	static class EndermanTeleportMove extends AnimatedAttackGoal<EndermanPatch> {
 		private int waitingCounter;
 		private int delayCounter;
 		private CombatBehaviors.Behavior<EndermanPatch> move;
@@ -308,12 +308,12 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 				this.waitingCounter = 500;
 			}
 			
-	    	return this.isValidTarget(this.mob.getTarget()) && !this.mobpatch.getEntityState().hurt() && !this.mobpatch.getEntityState().inaction() && waitExpired;
+	    	return this.checkTargetValid() && !this.mobpatch.getEntityState().hurt() && !this.mobpatch.getEntityState().inaction() && waitExpired;
 	    }
 		
 		@Override
 		public void start() {
-			this.delayCounter = 20 + this.mob.getRandom().nextInt(5);
+			this.delayCounter = 20 + this.mobpatch.getOriginal().getRandom().nextInt(5);
 			this.waitingCounter = 0;
 		}
 		
@@ -324,19 +324,20 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 		
 		@Override
 		public void tick() {
-			LivingEntity target = this.mob.getTarget();
-	        this.mob.getLookControl().setLookAt(target, 30.0F, 30.0F);
+			Mob mob = this.mobpatch.getOriginal();
+			LivingEntity target = mob.getTarget();
+	        mob.getLookControl().setLookAt(target, 30.0F, 30.0F);
 	        
 			if (this.delayCounter-- < 0 && !this.mobpatch.getEntityState().inaction()) {
-				Vec3f vec = new Vec3f((float)(this.mob.getX() - target.getX()), 0, (float)(this.mob.getZ() - target.getZ()));
+				Vec3f vec = new Vec3f((float)(mob.getX() - target.getX()), 0, (float)(mob.getZ() - target.getZ()));
 	        	vec.normalise().scale(1.414F);
-	        	boolean flag = this.mob.randomTeleport(target.getX() + vec.x, target.getY(), target.getZ() + vec.z, true);
+	        	boolean flag = mob.randomTeleport(target.getX() + vec.x, target.getY(), target.getZ() + vec.z, true);
 	        	
 				if (flag) {
 					this.mobpatch.rotateTo(target, 360.0F, true);
 					this.move.execute(this.mobpatch);
-		        	this.mob.level().playSound(null, this.mob.xo, this.mob.yo, this.mob.zo, SoundEvents.ENDERMAN_TELEPORT, this.mob.getSoundSource(), 1.0F, 1.0F);
-		        	this.mob.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0F, 1.0F);
+		        	mob.level().playSound(null, mob.xo, mob.yo, mob.zo, SoundEvents.ENDERMAN_TELEPORT, mob.getSoundSource(), 1.0F, 1.0F);
+		        	mob.playSound(SoundEvents.ENDERMAN_TELEPORT, 1.0F, 1.0F);
 		        	this.waitingCounter = 0;
 				} else {
 	            	this.waitingCounter++;
