@@ -426,12 +426,12 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 	
 	@Override
 	public void _setValue(@Nullable T item) {
+		this.item = item;
+		this.itemDisplayName = this.toDisplayString.apply(item);
+		
 		if (this.responder != null) {
 			this.responder.accept(Pair.of(this.itemDisplayName, item));
 		}
-		
-		this.item = item;
-		this.itemDisplayName = this.toDisplayString.apply(item);
 		
 		if (!StringUtil.isNullOrEmpty(this.itemDisplayName) && !this.itemDisplayName.equals(this.font.plainSubstrByWidth(this.itemDisplayName, this.width - 16))) {
 			this.setTooltip(Tooltip.create(Component.literal(this.itemDisplayName)));
