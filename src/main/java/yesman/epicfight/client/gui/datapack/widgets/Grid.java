@@ -485,8 +485,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 	@Override
 	public boolean isMouseOver(double x, double y) {
 		double y0 = this.rowEditButtons.size() > 0 ? this.y0 - 12 : this.y0;
-		
-		return y >= y0 && y <= (double)this.y1 && x >= (double)this.x0 && x <= (double)this.x1;
+		return (this.editingWidget != null && this.editingWidget.isMouseOver(x, y)) || y >= y0 && y <= (double)this.y1 && x >= (double)this.x0 && x <= (double)this.x1;
 	}
 	
 	@Override
@@ -519,15 +518,15 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 	}
 	
 	@Override
-	public boolean mouseScrolled(double x, double y, double button) {
+	public boolean mouseScrolled(double x, double y, double amount) {
 		if (this.editingWidget != null) {
-			if (this.editingWidget.isMouseOver(x, y) && this.editingWidget.mouseScrolled(x, y, button)) {
+			if (this.editingWidget.isMouseOver(x, y) && this.editingWidget.mouseScrolled(x, y, amount)) {
 				return true;
 			}
 		}
 		
 		if (this.isFocused() && this.getMaxScroll() > 0) {
-			this.setScrollAmount(this.getScrollAmount() - button * (double) this.itemHeight / 2.0D);
+			this.setScrollAmount(this.getScrollAmount() - amount * (double) this.itemHeight / 2.0D);
 			return true;
 		}
 		

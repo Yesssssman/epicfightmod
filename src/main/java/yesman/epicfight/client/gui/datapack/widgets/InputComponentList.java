@@ -238,7 +238,7 @@ public abstract class InputComponentList<T> extends ContainerObjectSelectionList
 		
 		@Override
 		public Optional<GuiEventListener> getChildAt(double x, double y) {
-			for (GuiEventListener guieventlistener : this.children()) {
+			for (GuiEventListener guieventlistener : this.children) {
 				if (guieventlistener.isMouseOver(x, y)) {
 					return Optional.of(guieventlistener);
 				}

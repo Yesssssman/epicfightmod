@@ -500,7 +500,7 @@
 	"datapack_edit.mob_patch.combat_behavior.interceptable": "Interceptable",
 	"datapack_edit.mob_patch.combat_behavior.interceptable.tooltip": "Defines if this moveset can be canceled by another moveset",
 	"datapack_edit.mob_patch.combat_behavior.loop": "Loop",
-	"datapack_edit.mob_patch.combat_behavior.loop.tooltip": "Defines if a moveset is looping. Looping moveset won't reset a combo counter when it doesn't meet conditions",
+	"datapack_edit.mob_patch.combat_behavior.loop.tooltip": "Defines if a moveset is looping. The combo counter will not be reset if looping is true",
 	"datapack_edit.mob_patch.combat_behavior.conditions": "Conditions",
 	"datapack_edit.mob_patch.combat_behavior.conditions.tooltip": "Defines conditions to execute an attack movement",
 	"datapack_edit.mob_patch.combat_behavior.parameters": "Parameters",
