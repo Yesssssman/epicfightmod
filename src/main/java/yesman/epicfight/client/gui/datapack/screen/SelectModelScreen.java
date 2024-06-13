@@ -99,13 +99,9 @@ public class SelectModelScreen extends Screen {
 	@Override
 	public void onClose() {
 		this.minecraft.setScreen(this.parentScreen);
-	}
-	
-	@Override
-	public void removed() {
 		this.modelPreviewer.onDestroy();
 	}
-
+	
 	@Override
 	public void tick() {
 		this.modelPreviewer._tick();

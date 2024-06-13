@@ -419,13 +419,9 @@ public class DatapackEditScreen extends Screen {
 			workingPackScreen = null;
 		}
 		
-		this.minecraft.setScreen(this.parentScreen);
-	}
-	
-	@Override
-	public void removed() {
 		this.weaponTab.modelPreviewer.onDestroy();
 		this.itemCapabilityTab.modelPreviewer.onDestroy();
+		this.minecraft.setScreen(this.parentScreen);
 	}
 	
 	@Override

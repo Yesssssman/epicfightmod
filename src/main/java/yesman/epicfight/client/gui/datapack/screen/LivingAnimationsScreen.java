@@ -235,10 +235,6 @@ public class LivingAnimationsScreen extends Screen {
 	@Override
 	public void onClose() {
 		this.minecraft.setScreen(this.parentScreen);
-	}
-	
-	@Override
-	public void removed() {
 		this.modelPreviewer.onDestroy();
 	}
 	

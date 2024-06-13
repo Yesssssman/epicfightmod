@@ -161,10 +161,6 @@ public class ImportModelScreen extends Screen {
 	public void onClose() {
 		this.caller.refreshModelList();
 		this.minecraft.setScreen(this.caller);
-	}
-	
-	@Override
-	public void removed() {
 		this.modelPreviewer.onDestroy();
 	}
 	

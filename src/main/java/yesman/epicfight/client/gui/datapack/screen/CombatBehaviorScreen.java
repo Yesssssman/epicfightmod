@@ -480,10 +480,6 @@ public class CombatBehaviorScreen extends Screen {
 	@Override
 	public void onClose() {
 		this.minecraft.setScreen(this.caller);
-	}
-	
-	@Override
-	public void removed() {
 		this.modelPreviewer.onDestroy();
 	}
 	

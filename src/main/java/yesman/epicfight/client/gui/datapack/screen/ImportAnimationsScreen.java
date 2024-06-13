@@ -805,10 +805,6 @@ public class ImportAnimationsScreen extends Screen {
 	public void onClose() {
 		this.caller.refreshAnimationList();
 		this.minecraft.setScreen(this.caller);
-	}
-	
-	@Override
-	public void removed() {
 		this.modelPreviewer.onDestroy();
 	}
 	
