@@ -1545,9 +1545,9 @@ public class DatapackEditScreen extends Screen {
 					ListTag list = ParseUtil.getOrDefaultTag(trailTag, "begin_pos", new ListTag());
 					
 					if (list.isEmpty()) {
-						list.add(IntTag.valueOf(0));
-						list.add(IntTag.valueOf(0));
-						list.add(IntTag.valueOf(0));
+						list.add(DoubleTag.valueOf(0));
+						list.add(DoubleTag.valueOf(0));
+						list.add(DoubleTag.valueOf(0));
 					}
 					
 					double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
@@ -1561,9 +1561,9 @@ public class DatapackEditScreen extends Screen {
 					ListTag list = ParseUtil.getOrDefaultTag(trailTag, "begin_pos", new ListTag());
 					
 					if (list.isEmpty()) {
-						list.add(IntTag.valueOf(0));
-						list.add(IntTag.valueOf(0));
-						list.add(IntTag.valueOf(0));
+						list.add(DoubleTag.valueOf(0));
+						list.add(DoubleTag.valueOf(0));
+						list.add(DoubleTag.valueOf(0));
 					}
 					
 					double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
@@ -1577,9 +1577,9 @@ public class DatapackEditScreen extends Screen {
 					ListTag list = ParseUtil.getOrDefaultTag(trailTag, "begin_pos", new ListTag());
 					
 					if (list.isEmpty()) {
-						list.add(IntTag.valueOf(0));
-						list.add(IntTag.valueOf(0));
-						list.add(IntTag.valueOf(0));
+						list.add(DoubleTag.valueOf(0));
+						list.add(DoubleTag.valueOf(0));
+						list.add(DoubleTag.valueOf(0));
 					}
 					
 					double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
@@ -1611,9 +1611,9 @@ public class DatapackEditScreen extends Screen {
 					ListTag list = ParseUtil.getOrDefaultTag(trailTag, "end_pos", new ListTag());
 					
 					if (list.isEmpty()) {
-						list.add(IntTag.valueOf(0));
-						list.add(IntTag.valueOf(0));
-						list.add(IntTag.valueOf(0));
+						list.add(DoubleTag.valueOf(0));
+						list.add(DoubleTag.valueOf(0));
+						list.add(DoubleTag.valueOf(0));
 					}
 					
 					double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
@@ -1628,9 +1628,9 @@ public class DatapackEditScreen extends Screen {
 					ListTag list = ParseUtil.getOrDefaultTag(trailTag, "end_pos", new ListTag());
 					
 					if (list.isEmpty()) {
-						list.add(IntTag.valueOf(0));
-						list.add(IntTag.valueOf(0));
-						list.add(IntTag.valueOf(0));
+						list.add(DoubleTag.valueOf(0));
+						list.add(DoubleTag.valueOf(0));
+						list.add(DoubleTag.valueOf(0));
 					}
 					
 					double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
@@ -1645,9 +1645,9 @@ public class DatapackEditScreen extends Screen {
 					ListTag list = ParseUtil.getOrDefaultTag(trailTag, "end_pos", new ListTag());
 					
 					if (list.isEmpty()) {
-						list.add(IntTag.valueOf(0));
-						list.add(IntTag.valueOf(0));
-						list.add(IntTag.valueOf(0));
+						list.add(DoubleTag.valueOf(0));
+						list.add(DoubleTag.valueOf(0));
+						list.add(DoubleTag.valueOf(0));
 					}
 					
 					double d = StringUtil.isNullOrEmpty(input) ? 0 : ParseUtil.parseOrGet(input, Double::valueOf, 0.0D);
