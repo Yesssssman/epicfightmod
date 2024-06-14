@@ -219,6 +219,7 @@ public class ActionAnimation extends MainFrameAnimation {
 				keyframes[0] = new Keyframe(0.0F, data1.getOrDefault(jointName, JointTransform.empty()));
 				keyframes[1] = new Keyframe(linkTime, poseData.get(jointName));
 				keyframes[2] = new Keyframe(totalTime, data2.get(jointName));
+				
 				TransformSheet sheet = new TransformSheet(keyframes);
 				dest.getAnimationClip().addJointTransform(jointName, sheet);
 			}
@@ -227,6 +228,7 @@ public class ActionAnimation extends MainFrameAnimation {
 				Keyframe[] keyframes = new Keyframe[2];
 				keyframes[0] = new Keyframe(0.0F, data1.getOrDefault(jointName, JointTransform.empty()));
 				keyframes[1] = new Keyframe(totalTime, data2.get(jointName));
+				
 				TransformSheet sheet = new TransformSheet(keyframes);
 				dest.getAnimationClip().addJointTransform(jointName, sheet);
 			}

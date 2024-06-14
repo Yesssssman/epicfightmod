@@ -86,7 +86,7 @@ public class LinkAnimation extends DynamicAnimation {
 			OpenMatrix4f toOrigin = OpenMatrix4f.invert(toRootTransformApplied, null);
 			Vec3f worldPosition = OpenMatrix4f.transform3v(toRootTransformApplied, jointPosition, null);
 			worldPosition.x = 0.0F;
-			worldPosition.y = (this.getProperty(ActionAnimationProperty.MOVE_VERTICAL).orElse(false) && worldPosition.y > 0.0F) ? 0.0F : worldPosition.y;
+			worldPosition.y = (this.toAnimation.getProperty(ActionAnimationProperty.MOVE_VERTICAL).orElse(false) && worldPosition.y > 0.0F) ? 0.0F : worldPosition.y;
 			worldPosition.z = 0.0F;
 			OpenMatrix4f.transform3v(toOrigin, worldPosition, worldPosition);
 			jointPosition.x = worldPosition.x;
