@@ -862,6 +862,7 @@ public class ImportAnimationsScreen extends Screen {
 	}
 	
 	private String createRealAnimations(List<FakeAnimation> fakeAnimations) {
+		this.userAnimations.forEach((name, animation) -> AnimationManager.getInstance().removeUserAnimation(animation.getValue()));
 		this.userAnimations.clear();
 		
 		StringBuilder sb = new StringBuilder();

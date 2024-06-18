@@ -147,7 +147,7 @@ public class WeaponComboScreen extends Screen {
 									grid.removeRow((removedRow) -> this.styles.remove(removedRow));
 									
 									if (grid.children().size() == 0) {
-										this.comboGrid._setActive(false);
+										this.inputComponentsList.setComponentsActive(false);
 									}
 								})
 								.build();

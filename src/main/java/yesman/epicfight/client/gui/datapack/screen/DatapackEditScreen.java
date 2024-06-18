@@ -358,6 +358,7 @@ public class DatapackEditScreen extends Screen {
 					this.addRenderableWidget(titleEditBox);
 					this.addRenderableWidget(Button.builder(CommonComponents.GUI_OK, (button$2) -> {
 						if (DatapackEditScreen.this.exportDataPack(titleEditBox.getValue())) {
+							DatapackEditScreen.this.clearUserData();
 							DatapackEditScreen.this.minecraft.setScreen(DatapackEditScreen.this);
 						}
 					}).bounds(this.width / 2 - 56, this.height / 2 + height - 20, 55, 16).build());
@@ -421,6 +422,8 @@ public class DatapackEditScreen extends Screen {
 		
 		this.weaponTab.modelPreviewer.onDestroy();
 		this.itemCapabilityTab.modelPreviewer.onDestroy();
+		this.clearUserData();
+		
 		this.minecraft.setScreen(this.parentScreen);
 	}
 	
@@ -606,7 +609,9 @@ public class DatapackEditScreen extends Screen {
 			out.write(gson.toJson(root).getBytes());
 			out.closeEntry();
 		}
-		
+	}
+	
+	public void clearUserData() {
 		this.userAnimations.values().forEach((packEntry) -> AnimationManager.getInstance().removeUserAnimation(packEntry.getValue()));
 		Meshes.build(Minecraft.getInstance().getResourceManager());
 		Armatures.build(Minecraft.getInstance().getResourceManager());

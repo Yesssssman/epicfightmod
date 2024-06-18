@@ -73,14 +73,14 @@ public class StaticAnimationPropertyScreen extends Screen {
 				Object[] data;
 				
 				if (layerOption == LayerOptions.BASE_LAYER) {
-					Layer.Priority priority = Layer.Priority.valueOf(GsonHelper.getAsString(tag, "priority"));
+					StaticAnimationPropertyScreen.this.baseLayerPriority = Layer.Priority.valueOf(GsonHelper.getAsString(tag, "priority"));
 					
 					data = new Object[] {
 						layerOption,
-						priority
+						StaticAnimationPropertyScreen.this.baseLayerPriority
 					};
 				} else if (layerOption == LayerOptions.COMPOSITE_LAYER) {
-					Layer.Priority priority = Layer.Priority.valueOf(GsonHelper.getAsString(tag, "priority"));
+					StaticAnimationPropertyScreen.this.compositeLayerPriority = Layer.Priority.valueOf(GsonHelper.getAsString(tag, "priority"));
 					Grid.PackImporter packImporter = new Grid.PackImporter();
 					
 					for (JsonElement maskTag : tag.getAsJsonArray("masks")) {
@@ -97,7 +97,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 					
 					data = new Object[] {
 						layerOption,
-						priority,
+						StaticAnimationPropertyScreen.this.compositeLayerPriority,
 						packImporter
 					};
 					
@@ -105,7 +105,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 					JsonObject base = tag.getAsJsonObject("multilayer").getAsJsonObject("base");
 					JsonObject composite = tag.getAsJsonObject("multilayer").getAsJsonObject("composite");
 					
-					Layer.Priority basePriority = Layer.Priority.valueOf(GsonHelper.getAsString(base, "priority"));
+					StaticAnimationPropertyScreen.this.baseLayerPriority = Layer.Priority.valueOf(GsonHelper.getAsString(base, "priority"));
 					Grid.PackImporter basePackImporter = new Grid.PackImporter();
 					
 					for (JsonElement maskTag : base.getAsJsonArray("masks")) {
@@ -120,7 +120,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 						StaticAnimationPropertyScreen.this.baseLayerMasks.add(PackEntry.ofValue(livingMotion, jointMask));
 					}
 					
-					Layer.Priority compositePriority = Layer.Priority.valueOf(GsonHelper.getAsString(composite, "priority"));
+					StaticAnimationPropertyScreen.this.compositeLayerPriority = Layer.Priority.valueOf(GsonHelper.getAsString(composite, "priority"));
 					Grid.PackImporter compositePackImporter = new Grid.PackImporter();
 					
 					for (JsonElement maskTag : composite.getAsJsonArray("masks")) {
@@ -137,9 +137,9 @@ public class StaticAnimationPropertyScreen extends Screen {
 					
 					data = new Object[] {
 						layerOption,
-						basePriority,
+						StaticAnimationPropertyScreen.this.baseLayerPriority,
 						basePackImporter,
-						compositePriority,
+						StaticAnimationPropertyScreen.this.compositeLayerPriority,
 						compositePackImporter
 					};
 				} else {
@@ -399,6 +399,14 @@ public class StaticAnimationPropertyScreen extends Screen {
 			multilayer.add("composite", composite);
 			this.animation.getPropertiesJson().add("multilayer", multilayer);
 		} else {
+			if (layerOption == LayerOptions.BASE_LAYER && this.baseLayerPriority == null) {
+				throw new IllegalStateException("Base layer priority is not defined!");
+			}
+			
+			if (layerOption == LayerOptions.COMPOSITE_LAYER && this.compositeLayerPriority == null) {
+				throw new IllegalStateException("Composite layer priority is not defined!");
+			}
+			
 			this.animation.getPropertiesJson().addProperty("layer", layerOption.toString());
 			this.animation.getPropertiesJson().addProperty("priority", layerOption == LayerOptions.BASE_LAYER ? this.baseLayerPriority.toString() : this.compositeLayerPriority.toString());
 			

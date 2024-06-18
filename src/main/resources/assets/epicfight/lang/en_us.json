@@ -334,6 +334,7 @@
 	"datapack_edit.model_player.collider": "Collider",
 	"datapack_edit.model_player.item": "Item",
 	"datapack_edit.model_player.trail": "Trail",
+	"datapack_edit.model_player.trail.tooltip": "Defines a trail effect information of an animation.",
 	
 	"datapack_edit.import_animation": "Import Animation",
 	"datapack_edit.import_animation.place_tooltip": "Drag & drop the animation files you want to import here.",
