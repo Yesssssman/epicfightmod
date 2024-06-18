@@ -533,7 +533,7 @@ public class MobPatchReloadListener extends SimpleJsonResourceReloadListener {
 	
 	public static Stream<CompoundTag> getDataStream() {
 		Stream<CompoundTag> tagStream = TAGMAP.entrySet().stream().map((entry) -> {
-			entry.getValue().putString("id", ForgeRegistries.ENTITY_TYPES.getKey((EntityType<?>) entry).toString());
+			entry.getValue().putString("id", ForgeRegistries.ENTITY_TYPES.getKey(entry.getKey()).toString()); //Changed to get Entity Type via getKey to fix error on join
 			return entry.getValue();
 		});
 		
