@@ -163,13 +163,7 @@ public class Layer {
 	}
 	
 	public LivingMotion getLivingMotion(LivingEntityPatch<?> entitypatch, boolean current) {
-		ClientAnimator animator = entitypatch.getClientAnimator();
-		
-		if (this.isBaseLayer()) {
-			return current ? entitypatch.currentLivingMotion : animator.currentMotion();
-		} else {
-			return current ? entitypatch.currentCompositeMotion : animator.currentCompositeMotion();
-		}
+		return current ? entitypatch.currentLivingMotion : entitypatch.getClientAnimator().currentMotion();
 	}
 	
 	public Pose getEnabledPose(LivingEntityPatch<?> entitypatch, boolean useCurrentMotion, float partialTick) {

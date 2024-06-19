@@ -185,6 +185,13 @@ public class TransformSheet {
 	}
 	
 	private InterpolationInfo getInterpolationInfo(float currentTime) {
+		float totalTime = this.keyframes[this.keyframes.length - 1].time();
+		currentTime %= totalTime;
+		
+		if (currentTime < 0.0F) {
+			currentTime = totalTime + currentTime;
+		}
+		
 		int prev = 0, next = 1;
 		
 		for (int i = 1; i < this.keyframes.length; i++) {
@@ -195,9 +202,6 @@ public class TransformSheet {
 			if (this.keyframes.length > next + 1) {
 				prev++;
 				next++;
-			} else {
-				//EpicFightMod.LOGGER.error("time exceeded keyframe length. current : " + currentTime + " max : " + this.keyframes[this.keyframes.length - 1].time());
-				//(new IllegalArgumentException()).printStackTrace();
 			}
 		}
 		

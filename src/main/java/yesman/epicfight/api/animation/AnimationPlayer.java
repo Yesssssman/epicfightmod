@@ -43,7 +43,7 @@ public class AnimationPlayer {
 		
 		if (this.elapsedTime > this.play.getTotalTime()) {
 			if (this.play.isRepeat()) {
-				this.prevElapsedTime = 0;
+				this.prevElapsedTime = this.prevElapsedTime - this.play.getTotalTime();
 				this.elapsedTime %= this.play.getTotalTime();
 			} else {
 				this.elapsedTime = this.play.getTotalTime();
@@ -51,7 +51,7 @@ public class AnimationPlayer {
 			}
 		} else if (this.elapsedTime < 0) {
 			if (this.play.isRepeat()) {
-				this.prevElapsedTime = this.play.getTotalTime();
+				this.prevElapsedTime = this.play.getTotalTime() - this.elapsedTime;
 				this.elapsedTime = this.play.getTotalTime() + this.elapsedTime;
 			} else {
 				this.elapsedTime = 0.0F;

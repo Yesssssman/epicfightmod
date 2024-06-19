@@ -596,9 +596,9 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 									if (info.hand != InteractionHand.MAIN_HAND) {
 										continue;
 									}
-
+									
 									TrailInfo combinedTrailInfo = trailInfo.overwrite(info);
-
+									
 									if (combinedTrailInfo.playable()) {
 										CustomTrailParticle trail = new CustomTrailParticle(ModelPreviewer.this.getArmature().searchJointByName(combinedTrailInfo.joint), toPlay, combinedTrailInfo);
 										ModelPreviewer.this.trailParticles.add(trail);

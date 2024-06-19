@@ -57,7 +57,6 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.DoubleTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.nbt.TagParser;
 import net.minecraft.network.chat.CommonComponents;
@@ -414,7 +413,7 @@ public class DatapackEditScreen extends Screen {
 	
 	@Override
 	public void onClose() {
-		if (this.weaponTab.packList.size() > 0 || this.itemCapabilityTab.packList.size() > 0 || this.mobPatchTab.packList.size() > 0) {
+		if (this.weaponTab.packList.size() > 0 || this.itemCapabilityTab.packList.size() > 0 || this.mobPatchTab.packList.size() > 0 || !this.userMeshes.isEmpty() || !this.userArmatures.isEmpty() || !this.userAnimations.isEmpty()) {
 			workingPackScreen = this;
 		} else {
 			workingPackScreen = null;
@@ -1117,9 +1116,9 @@ public class DatapackEditScreen extends Screen {
 	
 	@OnlyIn(Dist.CLIENT)
 	class ItemCapabilityTab extends DatapackTab<Item> {
-		private final ModelPreviewer modelPreviewer;
-		private final ComboBox<ItemType> itemTypeCombo;
-		private final Consumer<ItemType> responder;
+		private ModelPreviewer modelPreviewer;
+		private ComboBox<ItemType> itemTypeCombo;
+		private Consumer<ItemType> responder;
 		
 		enum ItemType {
 			ARMOR("armors"), WEAPON("weapons");
@@ -1142,6 +1141,50 @@ public class DatapackEditScreen extends Screen {
 				tag.tags.clear();
 				tag.putString("item_type", ParseUtil.nullParam(itemType));
 				this.rearrangeElements(itemType, tag);
+				
+				if (itemType == ItemType.WEAPON) {
+					CompoundTag trailTag = ParseUtil.getOrSupply(tag, "trail", CompoundTag::new);
+					CompoundTag colliderTag = ParseUtil.getOrSupply(tag, "collider", CompoundTag::new);
+					
+					boolean centerInit = colliderTag.contains("center");
+					boolean sizeInit = colliderTag.contains("size");
+					boolean colorInit = trailTag.contains("color");
+					boolean beginInit = trailTag.contains("begin_pos");
+					boolean endInit = trailTag.contains("end_pos");
+					
+					this.itemTypeCombo._setResponder(null);
+					
+					this.inputComponentsList.setDataBindingComponenets(new Object[] {
+						itemType,
+						WeaponTypeReloadListener.get(tag.getString("type")),
+						null,
+						ParseUtil.nullParam(colliderTag.get("number")),
+						centerInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
+						centerInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
+						centerInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(colliderTag.getList("center", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
+						sizeInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
+						sizeInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
+						sizeInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(colliderTag.getList("size", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
+						colorInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("color", Tag.TAG_INT).get(0), Tag::getAsString)) : "",
+						colorInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("color", Tag.TAG_INT).get(1), Tag::getAsString)) : "",
+						colorInit ? ParseUtil.nullParam(ParseUtil.nullOrToString(trailTag.getList("color", Tag.TAG_INT).get(2), Tag::getAsString)) : "",
+						beginInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
+						beginInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
+						beginInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(trailTag.getList("begin_pos", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
+						endInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(0), Tag::getAsString)) : "",
+						endInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(1), Tag::getAsString)) : "",
+						endInit ? ParseUtil.valueOfOmittingType(ParseUtil.nullOrToString(trailTag.getList("end_pos", Tag.TAG_DOUBLE).get(2), Tag::getAsString)) : "",
+						ParseUtil.nullParam(trailTag.get("lifetime")),
+						ParseUtil.nullParam(trailTag.get("interpolations")),
+						ParseUtil.nullParam(trailTag.getString("texture_path")),
+						ForgeRegistries.PARTICLE_TYPES.getValue(new ResourceLocation(trailTag.getString("particle_type")))
+					});
+					this.itemTypeCombo._setResponder(this.responder);
+				} else {
+					this.itemTypeCombo._setResponder(null);
+					this.inputComponentsList.setDataBindingComponenets(new Object[] {itemType});
+					this.itemTypeCombo._setResponder(this.responder);
+				}
 			};
 			
 			this.itemTypeCombo = new ComboBox<> (parentScreen, parentScreen.getMinecraft().font, 0, 124, 100, 15, HorizontalSizing.LEFT_WIDTH, null, 8, Component.translatable("datapack_edit.item_capability.item_type"),
@@ -1709,22 +1752,28 @@ public class DatapackEditScreen extends Screen {
 				this.inputComponentsList.addComponentCurrentRow(interpolation.relocateX(rect, this.inputComponentsList.nextStart(8)));
 				
 				final ResizableEditBox texturePath = new ResizableEditBox(font, 0, 15, 0, 15, Component.translatable("datapack_edit.item_capability.trail.end_pos.z"), HorizontalSizing.LEFT_RIGHT, null);
-				texturePath.setResponder((input) -> this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail").put("texture_path", StringTag.valueOf(new ResourceLocation(input).toString())));
+				texturePath.setResponder((input) -> {
+					CompoundTag trailTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "trail", new CompoundTag()); 
+					trailTag.putString("texture_path", new ResourceLocation(input).toString());
+					
+					TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
+					this.modelPreviewer.setTrailInfo(trailInfo);
+				});
 				texturePath.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ResourceLocation.isValidResourceLocation(context));
 				texturePath.setMaxLength(100);
+				texturePath.setValue("epicfight:textures/particle/swing_trail.png");
+				texturePath.moveCursorToStart();
 				
 				final PopupBox<ParticleType<?>> particlePopup = new PopupBox.RegistryPopupBox<>(DatapackEditScreen.this, font, 0, 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 																								Component.translatable("datapack_edit.weapon_type.hit_particle"), ForgeRegistries.PARTICLE_TYPES,
 																								(pair) -> {
-																									CompoundTag trailTag = this.packList.get(this.packListGrid.getRowposition()).getValue().getCompound("trail");
+																									CompoundTag trailTag = ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "trail", new CompoundTag());
 																									trailTag.putString("particle_type", ParseUtil.getRegistryName(pair.getSecond(), ForgeRegistries.PARTICLE_TYPES));
 																									
 																									TrailInfo trailInfo = TrailInfo.deserialize(trailTag);
 																									this.modelPreviewer.setTrailInfo(trailInfo);
 																								});
 				
-				texturePath.setValue("epicfight:textures/particle/swing_trail.png");
-				texturePath.moveCursorToStart();
 				particlePopup._setValue(EpicFightParticles.SWING_TRAIL.get());
 				
 				this.inputComponentsList.newRow();
