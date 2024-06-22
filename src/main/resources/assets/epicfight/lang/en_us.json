@@ -314,6 +314,8 @@
 	"painting.epicfight.epicfight_logo.title": "The martial Herobrine",
 	"painting.epicfight.epicfight_logo.author": "Gui Brabo",
 	
+	"pack.epicfight_legacy.title": "Epic Fight Legacy",
+	
 	"epicfight.tip.weight": "Weight shortens stun, raises skill stamina use, and slows attack speed, especially on fast items.",
 	"epicfight.tip.stun_armor": "Stun Armor extends the time between stuns, boosting overall resilience and defense.",
 	"epicfight.tip.knockback": "The Knockback enchantment functions to amplify the stun duration upon impact.",
@@ -330,9 +332,6 @@
 	"epicfight.tip.combat_mode": "Switch between mining and combat modes by pressing it's default key, 'R'.",
 	"epicfight.tip.weapon_charge": "Your weapon will be charged up when you strike entities. You can use weapon innate skill when weapon charge is full",
 	"epicfight.tip.weapon_innate": "Each weapon has its innate skill. You can execute a skill with a weapon innate keybind",
-	
-	"pack.epicfight_legacy.title": "Epic Fight Legacy Resources",
-	"pack.epicfight_legacy.description": "Old resources of Epic Fight",
 	
 	"datapack_edit.model_player.collider": "Collider",
 	"datapack_edit.model_player.item": "Item",

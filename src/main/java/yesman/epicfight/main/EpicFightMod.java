@@ -112,6 +112,8 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  
  *  9. Fixed crash when item broken in player's offhand by attacking any entities
  *  
+ *  10. Added a selectable built-in resource pack with legacy weapon textures
+ *  
  *  TO DO
  *  
  *  1. Trail texture bug
@@ -245,13 +247,13 @@ public class EpicFightMod {
 	public void addPackFindersEvent(AddPackFindersEvent event) {
 		if (event.getPackType() == PackType.CLIENT_RESOURCES) {
             Path resourcePath = ModList.get().getModFileById(EpicFightMod.MODID).getFile().findResource("packs/epicfight_legacy");
-            PathPackResources pack = new PathPackResources(ModList.get().getModFileById(EpicFightMod.MODID).getFile().getFileName() + ":" + resourcePath, resourcePath, true);
+            PathPackResources pack = new PathPackResources(ModList.get().getModFileById(EpicFightMod.MODID).getFile().getFileName() + ":" + resourcePath, resourcePath, false);
             Pack.ResourcesSupplier resourcesSupplier = (string) -> pack;
-            Pack.Info info = Pack.readPackInfo("builtin/epicfight_legacy", resourcesSupplier);
+            Pack.Info info = Pack.readPackInfo("epicfight_legacy", resourcesSupplier);
             
             if (info != null) {
                 event.addRepositorySource((source) ->
-    			source.accept(Pack.create("builtin/epicfight_legacy", Component.translatable("pack.epicfight_legacy.title"), false, resourcesSupplier, info, PackType.CLIENT_RESOURCES, Pack.Position.TOP, false, PackSource.BUILT_IN)));
+    			source.accept(Pack.create("epicfight_legacy", Component.translatable("pack.epicfight_legacy.title"), false, resourcesSupplier, info, PackType.CLIENT_RESOURCES, Pack.Position.TOP, false, PackSource.BUILT_IN)));
             }
         }
     }
