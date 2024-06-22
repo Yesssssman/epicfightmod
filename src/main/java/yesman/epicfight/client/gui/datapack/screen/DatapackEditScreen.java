@@ -357,7 +357,6 @@ public class DatapackEditScreen extends Screen {
 					this.addRenderableWidget(titleEditBox);
 					this.addRenderableWidget(Button.builder(CommonComponents.GUI_OK, (button$2) -> {
 						if (DatapackEditScreen.this.exportDataPack(titleEditBox.getValue())) {
-							DatapackEditScreen.this.clearUserData();
 							DatapackEditScreen.this.minecraft.setScreen(DatapackEditScreen.this);
 						}
 					}).bounds(this.width / 2 - 56, this.height / 2 + height - 20, 55, 16).build());

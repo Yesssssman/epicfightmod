@@ -1,15 +1,22 @@
 package yesman.epicfight.main;
 
+import java.nio.file.Path;
 import java.util.function.Function;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.PathPackResources;
+import net.minecraft.server.packs.repository.Pack;
+import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.ConfigScreenHandler;
 import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -135,6 +142,7 @@ public class EpicFightMod {
     	bus.addListener(this::doClientStuff);
     	bus.addListener(this::doCommonStuff);
     	bus.addListener(this::doServerStuff);
+    	bus.addListener(this::addPackFindersEvent);
     	bus.addListener(this::registerResourcepackReloadListnerEvent);
     	bus.addListener(this::buildCreativeTabWithSkillBooks);
     	bus.addListener(EpicFightAttributes::registerNewMobs);
@@ -232,6 +240,20 @@ public class EpicFightMod {
 	private void command(final RegisterCommandsEvent event) {
 		PlayerModeCommand.register(event.getDispatcher());
 		PlayerSkillCommand.register(event.getDispatcher(), event.getBuildContext());
+    }
+	
+	public void addPackFindersEvent(AddPackFindersEvent event) {
+		if (event.getPackType() == PackType.CLIENT_RESOURCES) {
+            Path resourcePath = ModList.get().getModFileById(EpicFightMod.MODID).getFile().findResource("packs/epicfight_legacy");
+            PathPackResources pack = new PathPackResources(ModList.get().getModFileById(EpicFightMod.MODID).getFile().getFileName() + ":" + resourcePath, resourcePath, true);
+            Pack.ResourcesSupplier resourcesSupplier = (string) -> pack;
+            Pack.Info info = Pack.readPackInfo("builtin/epicfight_legacy", resourcesSupplier);
+            
+            if (info != null) {
+                event.addRepositorySource((source) ->
+    			source.accept(Pack.create("builtin/epicfight_legacy", Component.translatable("pack.epicfight_legacy.title"), false, resourcesSupplier, info, PackType.CLIENT_RESOURCES, Pack.Position.TOP, false, PackSource.BUILT_IN)));
+            }
+        }
     }
 	
 	private void registerResourcepackReloadListnerEvent(final RegisterClientReloadListenersEvent event) {

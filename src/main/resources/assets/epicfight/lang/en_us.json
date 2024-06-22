@@ -331,6 +331,9 @@
 	"epicfight.tip.weapon_charge": "Your weapon will be charged up when you strike entities. You can use weapon innate skill when weapon charge is full",
 	"epicfight.tip.weapon_innate": "Each weapon has its innate skill. You can execute a skill with a weapon innate keybind",
 	
+	"pack.epicfight_legacy.title": "Epic Fight Legacy Resources",
+	"pack.epicfight_legacy.description": "Old resources of Epic Fight",
+	
 	"datapack_edit.model_player.collider": "Collider",
 	"datapack_edit.model_player.item": "Item",
 	"datapack_edit.model_player.trail": "Trail",

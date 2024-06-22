@@ -185,11 +185,8 @@ public class TransformSheet {
 	}
 	
 	private InterpolationInfo getInterpolationInfo(float currentTime) {
-		float totalTime = this.keyframes[this.keyframes.length - 1].time();
-		currentTime %= totalTime;
-		
 		if (currentTime < 0.0F) {
-			currentTime = totalTime + currentTime;
+			currentTime = this.keyframes[this.keyframes.length - 1].time() + currentTime;
 		}
 		
 		int prev = 0, next = 1;
