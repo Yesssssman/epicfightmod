@@ -38,6 +38,8 @@ public class EpicFightGamerules {
 			EpicFightNetworkManager.sendToAll(new SPChangeGamerule(SynchronizedGameRules.STIFF_COMBO_ATTACKS, value.get()));
 		}));
 		
-		NO_MOBS_IN_BOSSFIGHT = GameRules.register("noMobsInBossfight", GameRules.Category.SPAWNING, GameRules.BooleanValue.create(ConfigManager.NO_MOBS_IN_BOSSFIGHT.get()));
+		NO_MOBS_IN_BOSSFIGHT = GameRules.register("noMobsInBossfight", GameRules.Category.SPAWNING, GameRules.BooleanValue.create(ConfigManager.NO_MOBS_IN_BOSSFIGHT.get(), (server, value) -> {
+			EpicFightNetworkManager.sendToAll(new SPChangeGamerule(SynchronizedGameRules.NO_MOBS_IN_BOSSFIGHT, value.get()));
+		}));
 	}
 }

@@ -74,7 +74,6 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	@Override
 	public void onConstructed(T entityIn) {
 		super.onConstructed(entityIn);
-		
 		entityIn.getEntityData().define(STAMINA, Float.valueOf(0.0F));
 	}
 	

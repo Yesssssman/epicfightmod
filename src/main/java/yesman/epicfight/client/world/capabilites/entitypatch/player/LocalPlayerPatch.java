@@ -54,9 +54,7 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	@Override
 	public void onConstructed(LocalPlayer entity) {
 		super.onConstructed(entity);
-		
 		this.minecraft = Minecraft.getInstance();
-		ClientEngine.getInstance().controllEngine.setPlayerPatch(this);
 	}
 	
 	@Override
@@ -96,10 +94,9 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		if (cameraHitResult != null && cameraHitResult.getType() == HitResult.Type.ENTITY) {
 			Entity hit = ((EntityHitResult)cameraHitResult).getEntity();
 			
-			if (hit != this.rayTarget) {
+			if (hit != this.rayTarget && hit != this.original) {
 				if (hit instanceof LivingEntity livingentity) {
 					if (!(hit instanceof ArmorStand) && !this.targetLockedOn) {
-						this.rayTarget = livingentity;
 						this.rayTarget = livingentity;
 					}
 				} else if (hit instanceof PartEntity<?> partEntity) {

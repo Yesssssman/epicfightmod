@@ -18,6 +18,7 @@ import yesman.epicfight.data.loot.SkillBookLootModifier;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.network.server.SPChangeGamerule;
+import yesman.epicfight.network.server.SPChangeGamerule.SynchronizedGameRules;
 import yesman.epicfight.network.server.SPDatapackSync;
 import yesman.epicfight.network.server.SPDatapackSyncSkill;
 import yesman.epicfight.skill.SkillCategory;
@@ -26,7 +27,6 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.player.ServerPlayerPatch;
 import yesman.epicfight.world.capabilities.item.WeaponTypeReloadListener;
 import yesman.epicfight.world.capabilities.skill.CapabilitySkill;
-import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 @Mod.EventBusSubscriber(modid = EpicFightMod.MODID)
 public class WorldEvents {
@@ -39,10 +39,9 @@ public class WorldEvents {
 	@SubscribeEvent
 	public static void onDatapackSync(final OnDatapackSyncEvent event) {
 		if (event.getPlayer() != null) {
-			EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.WEIGHT_PENALTY, event.getPlayer().level().getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY)), event.getPlayer());
-			EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.DIABLE_ENTITY_UI, event.getPlayer().level().getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI)), event.getPlayer());
-			EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.STIFF_COMBO_ATTACKS, event.getPlayer().level().getGameRules().getBoolean(EpicFightGamerules.STIFF_COMBO_ATTACKS)), event.getPlayer());
-			EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.CAN_SWITCH_COMBAT, event.getPlayer().level().getGameRules().getBoolean(EpicFightGamerules.CAN_SWITCH_COMBAT)), event.getPlayer());
+			for (SynchronizedGameRules syncRule : SPChangeGamerule.SynchronizedGameRules.values()) {
+				EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(syncRule, syncRule.getRule.apply(event.getPlayer().level())), event.getPlayer());
+			}
 			
 			if (!event.getPlayer().getServer().isSingleplayerOwner(event.getPlayer().getGameProfile())) {
 				synchronizeWorldData(event.getPlayer());

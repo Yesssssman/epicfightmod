@@ -118,14 +118,29 @@ public class ClientEvents {
 	}
 	
 	@SubscribeEvent
+	public static void clientLoggingInEvent(ClientPlayerNetworkEvent.LoggingIn event) {
+		LocalPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(event.getPlayer(), LocalPlayerPatch.class);
+		
+		if (playerpatch != null) {
+			ClientEngine.getInstance().controllEngine.setPlayerPatch(playerpatch);
+		}
+		
+		ClientEngine.getInstance().renderEngine.battleModeUI.reset();
+	}
+	
+	@SubscribeEvent
 	public static void clientRespawnEvent(ClientPlayerNetworkEvent.Clone event) {
 		LocalPlayerPatch oldCap = EpicFightCapabilities.getEntityPatch(event.getOldPlayer(), LocalPlayerPatch.class);
 		
 		if (oldCap != null) {
 			LocalPlayerPatch newCap = EpicFightCapabilities.getEntityPatch(event.getNewPlayer(), LocalPlayerPatch.class);
-			newCap.onRespawnLocalPlayer(event);
-			newCap.copySkillsFrom(oldCap);
-			newCap.toMode(oldCap.getPlayerMode(), false);
+			
+			if (newCap != null) {
+				newCap.onRespawnLocalPlayer(event);
+				newCap.copySkillsFrom(oldCap);
+				newCap.toMode(oldCap.getPlayerMode(), false);
+				ClientEngine.getInstance().controllEngine.setPlayerPatch(newCap);
+			}
 		}
 		
 		ClientEngine.getInstance().renderEngine.battleModeUI.reset();

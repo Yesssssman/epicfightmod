@@ -109,6 +109,7 @@
 	"gamerule.globalStun": "Enable Global Hitstun",
 	"gamerule.canSwitchCombat": "Enable switching between Battle/Mining mode",
 	"gamerule.noMobsInBossfight": "Disable mob spawn during Bossfight",
+	"gamerule.stiffComboAttacks": "Disable player movement while attacking",
 	
 	"gui.epicfight.configurations": "Epic Fight Configurations",
 	"gui.epicfight.graphic_options": "Epic Fight Graphics",

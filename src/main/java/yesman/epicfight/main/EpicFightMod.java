@@ -108,7 +108,7 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  
  *  7. Skill registration changed
  *  
- *  8. Added EpicFightExtensions. Now you can decide a creative tab that you want to display your skills of your mod
+ *  8. Added {@link EpicFightExtensions}. Now you can decide a creative tab that you want to display your skills of your mod. (see the usage below)
  *  
  *  9. Fixed crash when item broken in player's offhand by attacking any entities
  *  
@@ -117,6 +117,10 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  TO DO
  *  
  *  1. Trail texture bug
+ *  
+ *  2. Crash because {@link PlayerPatch#STAMINA} is unregistered at SynchedEntityData (Most likely a mod compatibility issue)
+ *  
+ *  3. Freecam mod disables Epic Fight battle mode.
  *  
  *  @author yesman
  */
@@ -183,6 +187,8 @@ public class EpicFightMod {
         ConfigManager.loadConfig(ConfigManager.CLIENT_CONFIG, FMLPaths.CONFIGDIR.get().resolve(MODID + "-client.toml").toString());
         ConfigManager.loadConfig(ConfigManager.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve(CONFIG_FILE_PATH).toString());
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory(IngameConfigurationScreen::new));
+        
+        //
         ModLoadingContext.get().registerExtensionPoint(EpicFightExtensions.class, () -> new EpicFightExtensions(EpicFightCreativeTabs.ITEMS.get()));
         
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
@@ -278,10 +284,21 @@ public class EpicFightMod {
 	}
 	
 	private void buildCreativeTabWithSkillBooks(final BuildCreativeModeTabContentsEvent event) {
+		/**
+		 * Accept learnable skills for each mod by {@link EpicFightExtensions#skillBookCreativeTab}.
+		 * If the extension doesn't exist, add them to {@link EpicFightCreativeTabs.ITEMS} tab.
+		 */
 		SkillManager.getNamespaces().forEach((modid) -> {
-			ModList.get().getModContainerById(modid).flatMap((mc) -> mc.getCustomExtension(EpicFightExtensions.class)).ifPresent((extension) -> {
+			ModList.get().getModContainerById(modid).flatMap((mc) -> mc.getCustomExtension(EpicFightExtensions.class)).ifPresentOrElse((extension) -> {
 				if (extension.skillBookCreativeTab() == event.getTab()) {
-					
+					SkillManager.getSkillNames((skill) -> skill.getCategory().learnable() && skill.getRegistryName().getNamespace() == modid).forEach((rl) -> {
+						ItemStack stack = new ItemStack(EpicFightItems.SKILLBOOK.get());
+						SkillBookItem.setContainingSkill(rl.toString(), stack);
+						event.accept(stack);
+					});
+				}
+			}, () -> {
+				if (event.getTab() == EpicFightCreativeTabs.ITEMS.get()) {
 					SkillManager.getSkillNames((skill) -> skill.getCategory().learnable() && skill.getRegistryName().getNamespace() == modid).forEach((rl) -> {
 						ItemStack stack = new ItemStack(EpicFightItems.SKILLBOOK.get());
 						SkillBookItem.setContainingSkill(rl.toString(), stack);
