@@ -55,7 +55,7 @@ public class ColliderPreset implements PreparableReloadListener {
 	public static final Collider DRAGON_LEG = registerCollider(new ResourceLocation(EpicFightMod.MODID, "dragon_leg"), new MultiOBBCollider(3, 0.8D, 1.6D, 0.8D, 0.0D, -0.6D, 0.7D));
 	public static final Collider DUAL_SWORD = registerCollider(new ResourceLocation(EpicFightMod.MODID, "dual_sword"), new OBBCollider(0.8D, 0.5D, 1.0D, 0.0D, 0.5D, -1.0D));
 	public static final Collider DUAL_SWORD_DASH = registerCollider(new ResourceLocation(EpicFightMod.MODID, "dual_sword_dash"), new OBBCollider(0.8D, 0.5D, 1.0D, 0D, 1.0D, -1.0D));
-	public static final Collider BATTOJUTSU = registerCollider(new ResourceLocation(EpicFightMod.MODID, "battojutsu"), new OBBCollider(2.5D, 0.25D, 1.5D, 0D, 1.0D, -1.0D));
+	public static final Collider BATTOJUTSU = registerCollider(new ResourceLocation(EpicFightMod.MODID, "battojutsu"), new OBBCollider(3.0D, 0.4D, 1.5D, 0.0D, 1.2D, -1.0D));
 	public static final Collider BATTOJUTSU_DASH = registerCollider(new ResourceLocation(EpicFightMod.MODID, "battojutsu_dash"), new MultiOBBCollider(
 			new OBBCollider(0.7D, 0.7D, 1.0D, 0.0D, 1.0D, -1.0D),
 			new OBBCollider(0.7D, 0.7D, 1.0D, 0.0D, 1.0D, -1.0D),
@@ -77,7 +77,7 @@ public class ColliderPreset implements PreparableReloadListener {
 	public static final Collider ENDERMAN_LIMB = registerCollider(new ResourceLocation(EpicFightMod.MODID, "enderman_limb"), new OBBCollider(0.4D, 0.8D, 0.4D, 0D, 0D, 0D));
 	public static final Collider GOLEM_SMASHDOWN = registerCollider(new ResourceLocation(EpicFightMod.MODID, "golem_smashdown"), new MultiOBBCollider(3, 0.75D, 0.5D, 0.5D, 0.6D, 0.5D, 0D));
 	public static final Collider GOLEM_SWING_ARM = registerCollider(new ResourceLocation(EpicFightMod.MODID, "golem_swing_arm"), new MultiOBBCollider(2, 0.6D, 0.9D, 0.6D, 0D, 0D, 0D));
-	public static final Collider FIST_FIXED = registerCollider(new ResourceLocation(EpicFightMod.MODID, "fist_fixed"), new OBBCollider(0.4D, 0.4D, 0.5D, 0D, 1.0D, -0.85D));
+	public static final Collider FIST_FIXED = registerCollider(new ResourceLocation(EpicFightMod.MODID, "fist_fixed"), new OBBCollider(0.4D, 0.4D, 0.5D, 0D, 1.25D, -0.85D));
 	public static final Collider DUAL_SWORD_AIR_SLASH = registerCollider(new ResourceLocation(EpicFightMod.MODID, "dual_sword_air_slash"), new OBBCollider(0.8D, 0.4D, 1.0D, 0D, 0.5D, -0.5D));
 	public static final Collider DUAL_DAGGER_AIR_SLASH = registerCollider(new ResourceLocation(EpicFightMod.MODID, "dual_dagger_air_slash"), new OBBCollider(0.8D, 0.4D, 0.75D, 0D, 0.5D, -0.5D));
 	public static final Collider WITHER_CHARGE = registerCollider(new ResourceLocation(EpicFightMod.MODID, "wither_charge"), new MultiOBBCollider(5, 0.7D, 0.9D, 0.7D, 0D, 1.0D, -0.35D));
@@ -123,7 +123,7 @@ public class ColliderPreset implements PreparableReloadListener {
 	@Override
 	public CompletableFuture<Void> reload(PreparationBarrier stage, ResourceManager resourceManager, ProfilerFiller preparationsProfiler, ProfilerFiller reloadProfiler, Executor backgroundExecutor, Executor gameExecutor) {
 		return CompletableFuture.runAsync(() -> {
-			//Collider newCOllider = new OBBCollider(0.7D, 0.7D, 3.5D, 0D, 1.0D, -3.5D);
+			//Collider newCOllider = new OBBCollider(0.4D, 0.4D, 0.5D, 0D, 1.25D, -0.85D)
 			//((AttackAnimation)Animations.FATAL_DRAW_DASH).changeCollider(newCOllider, 0);
 		}, gameExecutor).thenCompose(stage::wait);
 	}

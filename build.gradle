@@ -111,6 +111,10 @@ dependencies {
     compileOnly fg.deobf("curse.maven:azurelib-817423:4812417")
     compileOnly fg.deobf("curse.maven:azurelibarmor-912767:4866792")
     
+    //compileOnly fg.deobf("curse.maven:patchouli-306770:4966125")
+    //compileOnly fg.deobf("curse.maven:curios-309927:5367944")
+    //compileOnly fg.deobf("curse.maven:ars-nouveau-401955:5436131")
+    
     // compile against the JEI API but do not include it at runtime
   	compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"))
  	compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}"))

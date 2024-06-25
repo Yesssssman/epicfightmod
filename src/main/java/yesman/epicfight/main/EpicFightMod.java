@@ -114,13 +114,13 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  
  *  10. Added a selectable built-in resource pack with legacy weapon textures
  *  
+ *  11. Fixed Freecam mod disables Epic Fight battle mode.
+ *  
  *  TO DO
  *  
  *  1. Trail texture bug
  *  
  *  2. Crash because {@link PlayerPatch#STAMINA} is unregistered at SynchedEntityData (Most likely a mod compatibility issue)
- *  
- *  3. Freecam mod disables Epic Fight battle mode.
  *  
  *  @author yesman
  */
