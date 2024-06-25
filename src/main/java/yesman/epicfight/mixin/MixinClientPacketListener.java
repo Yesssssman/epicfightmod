@@ -11,7 +11,7 @@ import yesman.epicfight.client.events.ClientEvents;
 
 @Mixin(value = ClientPacketListener.class)
 public abstract class MixinClientPacketListener {
-	@Inject(at = @At(value = "INVOKE", target = ""), method = "handleRespawn(Lnet/minecraft/network/protocol/game/ClientboundRespawnPacket;)V", cancellable = false)
+	@Inject(at = @At(value = "HEAD"), method = "handleRespawn(Lnet/minecraft/network/protocol/game/ClientboundRespawnPacket;)V", cancellable = false)
 	private void epicfight_handleRespawn(ClientboundRespawnPacket clientboundRespawnPacket, CallbackInfo info) {
 		ClientEvents.packet = clientboundRespawnPacket;
 	}
