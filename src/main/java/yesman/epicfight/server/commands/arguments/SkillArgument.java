@@ -26,7 +26,7 @@ import yesman.epicfight.skill.SkillSlot;
 public class SkillArgument implements ArgumentType<Skill> {
 	private static final Collection<String> EXAMPLES = Arrays.asList("epicfight:dodge");
 	private static final DynamicCommandExceptionType ERROR_UNKNOWN_SKILL = new DynamicCommandExceptionType((obj) -> {
-		return Component.literal("epicfight.skillNotFound");
+		return Component.translatable("epicfight.skillNotFound", obj);
 	});
 	
 	public static SkillArgument skill() {

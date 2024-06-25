@@ -115,16 +115,24 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  10. Added a selectable built-in resource pack with legacy weapon textures
  *  
  *  11. Fixed Freecam mod disables Epic Fight battle mode
- *  
+ *  --- 20.8.1.1
  *  12. Fixed Ender dragon breath hits a player in creative mode
  *  
  *  13. Fixed Player head go through the body when using demolition leap
+ *  
+ *  14. Fixed Demolition leap unable to jump forward when you cast it with a wall behind
+ *  
+ *  15. Fixed the skills are not removed even tho keepSkills gamerule is set to false
+ *  
+ *  16. Added translations for sound subtitles.
  *  
  *  TO DO
  *  
  *  1. Trail texture bug
  *  
  *  2. Crash because {@link PlayerPatch#STAMINA} is unregistered at SynchedEntityData (Most likely a mod compatibility issue)
+ *  
+ *  3. Add reach property to attack animation. (idea)
  *  
  *  @author yesman
  */

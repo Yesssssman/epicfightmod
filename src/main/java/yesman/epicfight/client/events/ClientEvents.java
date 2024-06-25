@@ -4,6 +4,7 @@ import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.inventory.AbstractContainerScreen;
+import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
@@ -128,6 +129,12 @@ public class ClientEvents {
 		ClientEngine.getInstance().renderEngine.battleModeUI.reset();
 	}
 	
+	/**
+	 * Bad code: should be fixed after Forge allows to access any data that can figure out a respawn occurs from dimension changes
+	 */
+	@Deprecated
+	public static ClientboundRespawnPacket packet;
+	
 	@SubscribeEvent
 	public static void clientRespawnEvent(ClientPlayerNetworkEvent.Clone event) {
 		LocalPlayerPatch oldCap = EpicFightCapabilities.getEntityPatch(event.getOldPlayer(), LocalPlayerPatch.class);
@@ -136,8 +143,13 @@ public class ClientEvents {
 			LocalPlayerPatch newCap = EpicFightCapabilities.getEntityPatch(event.getNewPlayer(), LocalPlayerPatch.class);
 			
 			if (newCap != null) {
+				if (packet != null && packet.shouldKeep((byte)3)) {
+					newCap.copySkillsFrom(oldCap);
+				}
+				
+				packet = null;
+				
 				newCap.onRespawnLocalPlayer(event);
-				newCap.copySkillsFrom(oldCap);
 				newCap.toMode(oldCap.getPlayerMode(), false);
 				ClientEngine.getInstance().controllEngine.setPlayerPatch(newCap);
 			}

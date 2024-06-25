@@ -326,6 +326,8 @@ public class ControllEngine {
 			for (int i = 0; i < 9; ++i) {
 				while (this.options.keyHotbarSlots[i].consumeClick());
 			}
+			
+			while (this.options.keyDrop.consumeClick());
 		}
 	}
 	

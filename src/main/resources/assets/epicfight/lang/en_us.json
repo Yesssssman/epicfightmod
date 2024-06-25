@@ -53,7 +53,7 @@
 	
 	"effect.epicfight.stun_immunity": "Stun Immunity",
 	"effect.epicfight.blooming": "Blooming",
-	"effect.epicfight.stun_instability": "Instability",
+	"effect.epicfight.instability": "Instability",
 	
 	"entity.epicfight.wither_skeleton_minion": "Wither's Minion",
 	
@@ -97,6 +97,35 @@
 	"epicfight.skill_slot.guard": "Guard",
 	"epicfight.skill_slot.identity": "Identity",
 	"epicfight.skill_slot.mover": "Mobility",
+	
+	"entity.weapon.whoosh": "Whoosh",
+	"entity.weapon.whoosh_small": "Small whoosh",
+	"entity.weapon.whoosh_hard": "Big whoosh",
+	"entity.weapon.whoosh_sharp": "Swinging blade",
+	"entity.weapon.whoosh_rod": "Whoosh",
+	"entity.weapon.sword_in": "Sword in",
+	"entity.hit.blunt": "Smash",
+	"entity.hit.blunt_hard": "Smash hard",
+	"entity.hit.blade": "Slash",
+	"entity.hit.clash": "Metal clashing",
+	"entity.hit.blade_rush_last": "Piercing flesh",
+	"entity.hit.eviscerate": "Penetrate organs",
+	"entity.enderdragon.dragon_breath": "Dragon breathing",
+	"entity.enderdragon.dragon_breath_finale": "Dragon breathing",
+	"entity.enderdragon.dragon_crystal_link": "Force transferring",
+	"sfx.nether_star_glitter": "Nether start glowing",
+	"sfx.ground_slam_small": "Slam",
+	"sfx.ground_slam": "Slam",
+	"sfx.entity_move": "Whoosh",
+	"sfx.big_entity_move": "Big whoosh",
+	"sfx.no_sound": "",
+	"sfx.buzz": "Warning sound",
+	"sfx.laser_blast": "Beam firing",
+	"sfx.neutralize_mobs": "Entity suppressed",
+	"sfx.neutralize_bosses": "Boss suppressed",
+	"skill.rocket_jump": "Slam",
+	"skill.roll": "Rolling",
+	"skill.forbidden_strength": "Forbidden magic casting",
 	
 	"gameMode.epicfight.mining": "Mining",
 	"gameMode.epicfight.battle": "Battle",
@@ -177,7 +206,7 @@
 	
 	"gui.epicfight.tab.datapack.weapon_type": "Weapon Type",
 	"gui.epicfight.tab.datapack.item_capability": "Item Capability",
-	"gui.epicfight.tab.datapack.mob_patch": "Mob Patch",
+	"gui.epicfight.tab.datapack.mob_patch": "Mob Capability",
 	
 	"gui.epicfight.select": "%s List",
 	"gui.epicfight.available_weapon_types": "Available Weapon Types",

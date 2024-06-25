@@ -33,7 +33,6 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener;
 import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
-	
 	private static final UUID EVENT_UUID = UUID.fromString("3d142bf4-0dcd-11ee-be56-0242ac120002");
 	private StaticAnimationProvider chargingAnimation;
 	private StaticAnimationProvider shootAnimation;
@@ -71,28 +70,28 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 			}
 		});
 	}
-
+	
 	@Override
 	public void onRemoved(SkillContainer container) {
 		super.onRemoved(container);
-
+		
 		container.getExecuter().getEventListener().removeListener(EventType.MOVEMENT_INPUT_EVENT, EVENT_UUID);
 		container.getExecuter().getEventListener().removeListener(EventType.HURT_EVENT_PRE, EVENT_UUID, 1);
 		container.getExecuter().getEventListener().removeListener(EventType.FALL_EVENT, EVENT_UUID);
 	}
-
+	
 	@Override
 	public boolean isExecutableState(PlayerPatch<?> executer) {
 		return super.isExecutableState(executer) && executer.getOriginal().onGround();
 	}
-
+	
 	@Override
 	public void cancelOnClient(LocalPlayerPatch executer, FriendlyByteBuf args) {
 		super.cancelOnClient(executer, args);
 		executer.resetSkillCharging();
 		executer.playAnimationSynchronized(Animations.BIPED_IDLE, 0.0F);
 	}
-
+	
 	@Override
 	public void executeOnClient(LocalPlayerPatch executer, FriendlyByteBuf args) {
 		args.readInt(); // discard raw charging ticks
@@ -104,7 +103,6 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 		jumpDirection.add(0.0F, (xRot / 70.0F) * 0.05F, 0.0F);
 		jumpDirection.rotate(xRot, Vec3f.X_AXIS);
 		jumpDirection.rotate(-executer.getCameraYRot(), Vec3f.Y_AXIS);
-
 		executer.getOriginal().setDeltaMovement(jumpDirection.toDoubleVector());
 		executer.resetSkillCharging();
 	}
@@ -119,7 +117,7 @@ public class DemolitionLeapSkill extends Skill implements ChargeableSkill {
 	@Override
 	public void startCharging(PlayerPatch<?> caster) {
 		caster.getAnimator().playAnimation(this.chargingAnimation.get(), 0.0F);
-
+		
 		if (!caster.isLogicalClient()) {
 			EpicFightNetworkManager.sendToAllPlayerTrackingThisEntity(new SPPlayAnimation(this.chargingAnimation.get(), 0.0F, caster), caster.getOriginal());
 		}
