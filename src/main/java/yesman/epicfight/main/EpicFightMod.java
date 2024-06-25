@@ -114,7 +114,11 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  
  *  10. Added a selectable built-in resource pack with legacy weapon textures
  *  
- *  11. Fixed Freecam mod disables Epic Fight battle mode.
+ *  11. Fixed Freecam mod disables Epic Fight battle mode
+ *  
+ *  12. Fixed Ender dragon breath hits a player in creative mode
+ *  
+ *  13. Fixed Player head go through the body when using demolition leap
  *  
  *  TO DO
  *  

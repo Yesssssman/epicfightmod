@@ -67,6 +67,17 @@ public class AreaEffectBreath extends AreaEffectCloud {
 			
 			if (!list1.isEmpty()) {
 				for (LivingEntity livingentity : list1) {
+					if (livingentity.is(this.getOwner())) {
+						continue;
+					}
+					
+					EpicFightDamageSources damageSources = EpicFightDamageSources.of(livingentity.level());
+					EpicFightDamageSource damageSource = damageSources.enderDragonBreath(this.getOwner(), this).setAnimation(Animations.DUMMY_ANIMATION).setStunType(StunType.SHORT);
+					
+					if (livingentity.isInvulnerableTo(damageSource)) {
+						continue;
+					}
+					
 					if (!this.victims.containsKey(livingentity) && livingentity.isAffectedByPotions()) {
 						double d8 = livingentity.getX() - this.getX();
 						double d1 = livingentity.getZ() - this.getZ();
@@ -75,8 +86,7 @@ public class AreaEffectBreath extends AreaEffectCloud {
 						if (d3 <= (double) (f * f)) {
 							this.victims.put(livingentity, this.tickCount + 3);
 							livingentity.invulnerableTime = 0;
-							EpicFightDamageSources damageSources = EpicFightDamageSources.of(livingentity.level());
-							EpicFightDamageSource damageSource = damageSources.indirectMagic(this.getOwner(), this).setAnimation(Animations.DUMMY_ANIMATION).setStunType(StunType.SHORT);
+							
 							damageSource.setInitialPosition(this.initialFirePosition);
 							damageSource.setImpact(2.0F);
 							livingentity.hurt(damageSource, 3.0F);

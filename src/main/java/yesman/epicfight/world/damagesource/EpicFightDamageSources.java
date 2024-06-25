@@ -3,7 +3,6 @@ package yesman.epicfight.world.damagesource;
 import net.minecraft.core.Holder;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.DamageSources;
 import net.minecraft.world.damagesource.DamageType;
@@ -35,24 +34,23 @@ public interface EpicFightDamageSources {
 	}
 
 	default EpicFightDamageSource trident(Entity owner, Entity causingEntity) {
-		return copy(getDamageSources().trident(owner, causingEntity));
+		return copy(this.getDamageSources().trident(owner, causingEntity));
 	}
 
 	default EpicFightDamageSource mobAttack(LivingEntity owner) {
-		return copy(getDamageSources().mobAttack(owner));
+		return copy(this.getDamageSources().mobAttack(owner));
 	}
 
 	default EpicFightDamageSource playerAttack(Player owner) {
-		return copy(getDamageSources().playerAttack(owner));
+		return copy(this.getDamageSources().playerAttack(owner));
 	}
 
-	default EpicFightDamageSource indirectMagic(LivingEntity owner, Entity causingEntity) {
-		EpicFightDamageSource damageSource = copy(getDamageSources().indirectMagic(owner, causingEntity));
-		damageSource.addRuntimeTag(DamageTypeTags.BYPASSES_INVULNERABILITY);
+	default EpicFightDamageSource enderDragonBreath(LivingEntity owner, Entity causingEntity) {
+		EpicFightDamageSource damageSource = copy(this.getDamageSources().indirectMagic(owner, causingEntity));
 		damageSource.addRuntimeTag(DamageTypes.MAGIC);
 		return damageSource;
 	}
-
+	
 	default DamageSources getDamageSources() {
 		return getLevel().damageSources();
 	}
