@@ -1,6 +1,6 @@
-# Blender v2.79 (sub 0) OBJ File: 'katana_sheath.blend'
+# Blender v2.79 (sub 0) OBJ File: 'uchigatana_sheath.blend'
 # www.blender.org
-mtllib katana_sheath.mtl
+mtllib uchigatana.mtl
 o katana_Cube.075
 v -0.022091 -0.060052 -0.000002
 v -0.022091 0.059979 -0.000002
