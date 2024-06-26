@@ -113,20 +113,26 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  9. Fixed crash when item broken in player's offhand by attacking any entities
  *  
  *  10. Added a selectable built-in resource pack with legacy weapon textures
+ *
+ *  11. Fixed Player head go through the body when using demolition leap
+ *
+ *  --- 20.8.1.2 ---
+ *
+ *  1. Fixed Freecam mod disabling Epic Fight battle mode
  *  
- *  11. Fixed Freecam mod disables Epic Fight battle mode
- *  --- 20.8.1.1
- *  12. Fixed Ender dragon breath hits a player in creative mode
+ *  2. Fixed Ender dragon breath hitting a player in creative mode
  *  
- *  13. Fixed Player head go through the body when using demolition leap
+ *  --- 20.8.1.2 ---
  *  
- *  14. Fixed Demolition leap unable to jump forward when you cast it with a wall behind
+ *  1. Fixed Demolition leap unable to jump forward when you cast it with a wall behind
  *  
- *  15. Fixed the skills are not removed even tho keepSkills gamerule is set to false
+ *  2. Fixed the skills are not removed even tho keepSkills gamerule is set to false
  *  
- *  16. Added translations for sound subtitles.
+ *  3. Added translations for sound subtitles.
  *  
- *  TO DO
+ *  4. Fixed players dealing a weapon's damage when they drop a weapon and attack at the same time.
+ *  
+ *  - TO DO -
  *  
  *  1. Trail texture bug
  *  

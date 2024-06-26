@@ -32,6 +32,7 @@ import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.Skill.ActivateType;
 import yesman.epicfight.skill.SkillContainer;
+import yesman.epicfight.skill.SkillSlot;
 import yesman.epicfight.skill.SkillSlots;
 
 @OnlyIn(Dist.CLIENT)
@@ -132,7 +133,7 @@ public class BattleModeGui extends ModIngameGui {
 			poseStack.popPose();
 		}
 		
-		for (int i = 0; i < SkillSlots.ENUM_MANAGER.universalValues().size(); i++) {
+		for (int i = 0; i < SkillSlot.ENUM_MANAGER.universalValues().size(); i++) {
 			SkillContainer container = playerpatch.getSkill(i);
 			
 			if (!container.isEmpty()) {
