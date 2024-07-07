@@ -32,6 +32,11 @@ public class ThrownTridentPatch extends ProjectilePatch<ThrownTrident> {
 	private float independentXRotO;
 	private float independentXRot;
 	
+	public float renderXRot;
+	public float renderXRotO;
+	public float renderYRot;
+	public float renderYRotO;
+	
 	@Override
 	public void onStartTracking(ServerPlayer trackingPlayer) {
 		if (this.innateActivated) {
