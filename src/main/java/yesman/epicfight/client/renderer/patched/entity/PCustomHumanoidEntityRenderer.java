@@ -23,10 +23,10 @@ import yesman.epicfight.client.renderer.patched.layer.WearableItemLayer;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PHumanoidRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends HumanoidModel<E>, R extends LivingEntityRenderer<E, M>, AM extends HumanoidMesh> extends PatchedLivingEntityRenderer<E, T, M, R, AM> {
+public class PCustomHumanoidEntityRenderer<AM extends HumanoidMesh> extends PatchedLivingEntityRenderer<LivingEntity, LivingEntityPatch<LivingEntity>, HumanoidModel<LivingEntity>, LivingEntityRenderer<LivingEntity, HumanoidModel<LivingEntity>>, AM> {
 	private final AM mesh;
 	
-	public PHumanoidRenderer(AM mesh, EntityRendererProvider.Context context) {
+	public PCustomHumanoidEntityRenderer(AM mesh, EntityRendererProvider.Context context) {
 		super(context);
 		
 		this.mesh = mesh;
@@ -37,7 +37,7 @@ public class PHumanoidRenderer<E extends LivingEntity, T extends LivingEntityPat
 	}
 	
 	@Override
-	protected void setJointTransforms(T entitypatch, Armature armature, Pose pose, float partialTicks) {
+	protected void setJointTransforms(LivingEntityPatch<LivingEntity> entitypatch, Armature armature, Pose pose, float partialTicks) {
 		if (entitypatch.getOriginal().isBaby()) {
 			pose.getOrDefaultTransform("Head").frontResult(JointTransform.getScale(new Vec3f(1.25F, 1.25F, 1.25F)), OpenMatrix4f::mul);
 		}
@@ -47,9 +47,9 @@ public class PHumanoidRenderer<E extends LivingEntity, T extends LivingEntityPat
 	protected double getLayerCorrection() {
 		return 0.75F;
 	}
-
+	
 	@Override
-	public AM getMesh(T entitypatch) {
+	public AM getMesh(LivingEntityPatch<LivingEntity> entitypatch) {
 		return this.mesh;
 	}
 }

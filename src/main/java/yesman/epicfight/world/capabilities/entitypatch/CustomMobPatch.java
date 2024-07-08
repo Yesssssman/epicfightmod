@@ -4,9 +4,7 @@ import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.Pose;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotion;
@@ -38,10 +36,7 @@ public class CustomMobPatch<T extends PathfinderMob> extends MobPatch<T> {
 		this.original.goalSelector.addGoal(1, new TargetChasingGoal(this, this.getOriginal(), this.provider.getChasingSpeed(), true));
 	}
 	
-	@Override
-	protected void initAttributes() {
-		EntityDimensions dimension = this.original.getDimensions(Pose.STANDING);
-		this.original.getAttribute(EpicFightAttributes.WEIGHT.get()).setBaseValue(dimension.width * dimension.height * WEIGHT_CORRECTION);
+	public void initAttributes() {
 		this.original.getAttribute(EpicFightAttributes.MAX_STRIKES.get()).setBaseValue(this.provider.getAttributeValues().getDouble(EpicFightAttributes.MAX_STRIKES.get()));
 		this.original.getAttribute(EpicFightAttributes.ARMOR_NEGATION.get()).setBaseValue(this.provider.getAttributeValues().getDouble(EpicFightAttributes.ARMOR_NEGATION.get()));
 		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(this.provider.getAttributeValues().getDouble(EpicFightAttributes.IMPACT.get()));

@@ -4,12 +4,14 @@ import java.util.Optional;
 
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.behavior.OneShot;
 import net.minecraft.world.entity.ai.memory.MemoryModuleType;
 import net.minecraft.world.entity.monster.hoglin.Hoglin;
 import net.minecraft.world.entity.schedule.Activity;
+import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -39,11 +41,9 @@ public class HoglinPatch extends MobPatch<Hoglin> {
 		animator.addLivingAnimation(LivingMotions.DEATH, Animations.HOGLIN_DEATH);
 	}
 	
-	@Override
-	protected void initAttributes() {
-		super.initAttributes();
-		this.original.getAttribute(EpicFightAttributes.MAX_STRIKES.get()).setBaseValue(4.0F);
-		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(5.0F);
+	public static void initAttributes(EntityAttributeModificationEvent event) {
+		event.add(EntityType.HOGLIN, EpicFightAttributes.MAX_STRIKES.get(), 4.0D);
+		event.add(EntityType.HOGLIN, EpicFightAttributes.IMPACT.get(), 5.0D);
 	}
 	
 	@Override

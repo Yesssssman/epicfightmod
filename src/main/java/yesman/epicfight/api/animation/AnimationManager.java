@@ -5,12 +5,12 @@ import java.util.NoSuchElementException;
 import java.util.function.Function;
 import java.util.function.Predicate;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.ibm.icu.impl.locale.XCldrStub.ImmutableMap;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;

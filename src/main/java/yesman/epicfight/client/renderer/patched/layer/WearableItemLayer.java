@@ -1,7 +1,6 @@
 package yesman.epicfight.client.renderer.patched.layer;
 
 import java.util.Map;
-import java.util.function.Function;
 
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -15,7 +14,9 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.client.renderer.texture.TextureAtlas;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.client.resources.model.ModelManager;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -47,36 +48,39 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 	private static final Map<ResourceLocation, AnimatedMesh> ARMOR_MODELS = Maps.newHashMap();
 	private static final Map<String, ResourceLocation> EPICFIGHT_OVERRIDING_TEXTURES = Maps.newHashMap();
 	
-	public static void clear() {
+	public static void clearModels() {
 		ARMOR_MODELS.clear();
 		EPICFIGHT_OVERRIDING_TEXTURES.clear();
 	}
 	
 	private final boolean firstPersonModel;
-	private final Function<ResourceLocation, TextureAtlasSprite> armorTrimAtlas = Minecraft.getInstance().getTextureAtlas(Sheets.ARMOR_TRIMS_SHEET);
+	private final TextureAtlas armorTrimAtlas;
 
-	public WearableItemLayer(AM mesh, boolean firstPersonModel) {
+	public WearableItemLayer(AM mesh, boolean firstPersonModel, ModelManager modelManager) {
 		super(mesh);
 		
 		this.firstPersonModel = firstPersonModel;
+		this.armorTrimAtlas = modelManager.getAtlas(Sheets.ARMOR_TRIMS_SHEET);
 	}
 	
-	private void renderArmor(PoseStack matStack, MultiBufferSource multiBufferSource, int packedLightIn, boolean hasEffect, AnimatedMesh model, Armature armature, float r, float g, float b, ResourceLocation armorTexture, OpenMatrix4f[] poses) {
-		VertexConsumer vertexConsumer = EpicFightRenderTypes.getArmorFoilBufferTriangulated(multiBufferSource, RenderType.armorCutoutNoCull(armorTexture), false, hasEffect);
-		model.drawModelWithPose(matStack, vertexConsumer, packedLightIn, r, g, b, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
+	private void renderArmor(PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight, AnimatedMesh model, Armature armature, float r, float g, float b, ResourceLocation armorTexture, OpenMatrix4f[] poses) {
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(EpicFightRenderTypes.getTriangulated(RenderType.armorCutoutNoCull(armorTexture)));
+		model.drawModelWithPose(poseStack, vertexConsumer, packedLight, r, g, b, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
 	}
-
-	private void renderTrim(PoseStack matStack, MultiBufferSource multiBufferSource, int packedLightIn, boolean hasEffect, AnimatedMesh model, Armature armature, ArmorMaterial armorMaterial, ArmorTrim armorTrim, OpenMatrix4f[] poses) {
-		ResourceLocation armorTexture = armorTrim.outerTexture(armorMaterial);
-		TextureAtlasSprite textureatlassprite = this.armorTrimAtlas.apply(armorTexture);
-		VertexConsumer vertexConsumer = textureatlassprite.wrap(EpicFightRenderTypes.getArmorFoilBufferTriangulated(multiBufferSource, Sheets.armorTrimsSheet(), false, hasEffect));
-
-		model.drawModelWithPose(matStack, vertexConsumer, packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
+	
+	private void renderGlint(PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight, AnimatedMesh model, Armature armature, OpenMatrix4f[] poses) {
+		VertexConsumer vertexConsumer = multiBufferSource.getBuffer(EpicFightRenderTypes.getTriangulated(RenderType.armorEntityGlint()));
+		model.drawModelWithPose(poseStack, vertexConsumer, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
 	}
-
+	
+	private void renderTrim(PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight, AnimatedMesh model, Armature armature, ArmorMaterial armorMaterial, ArmorTrim armorTrim, EquipmentSlot slot, OpenMatrix4f[] poses) {
+		TextureAtlasSprite textureatlassprite = this.armorTrimAtlas.getSprite(innerModel(slot) ? armorTrim.innerTexture(armorMaterial) : armorTrim.outerTexture(armorMaterial));
+		VertexConsumer vertexConsumer = textureatlassprite.wrap(multiBufferSource.getBuffer(EpicFightRenderTypes.getTriangulated(Sheets.armorTrimsSheet())));
+		model.drawModelWithPose(poseStack, vertexConsumer, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
+	}
+	
 	@Override
-	public void renderLayer(T entitypatch, E entityliving, HumanoidArmorLayer<E, M, M> vanillaLayer, PoseStack poseStack, MultiBufferSource buf, int packedLightIn,
-								OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
+	public void renderLayer(T entitypatch, E entityliving, HumanoidArmorLayer<E, M, M> vanillaLayer, PoseStack poseStack, MultiBufferSource buf, int packedLight, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
 			if (slot.getType() != EquipmentSlot.Type.ARMOR) {
 				continue;
@@ -96,8 +100,8 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				continue;
 			}
 			
-			ItemStack stack = entityliving.getItemBySlot(slot);
-			Item item = stack.getItem();
+			ItemStack itemstack = entityliving.getItemBySlot(slot);
+			Item item = itemstack.getItem();
 			
 			if (item instanceof ArmorItem armorItem) {
 				if (slot != armorItem.getEquipmentSlot()) {
@@ -117,12 +121,12 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 					poseStack.pushPose();
 					poseStack.scale(-1.0F, -1.0F, 1.0F);
 					poseStack.translate(1.0D, -1.501D, 0.0D);
-					vanillaLayer.render(poseStack, buf, packedLightIn, entityliving, partialTicks, head, packedLightIn, bob, yRot, xRot);
+					vanillaLayer.render(poseStack, buf, packedLight, entityliving, partialTicks, head, packedLight, bob, yRot, xRot);
 					poseStack.popPose();
 				}
 				
 				M defaultModel = vanillaLayer.getArmorModel(slot);
-				AnimatedMesh armorMesh = this.getArmorModel(vanillaLayer, defaultModel, entityliving, armorItem, stack, slot, debuggingMode);
+				AnimatedMesh armorMesh = this.getArmorModel(vanillaLayer, defaultModel, entityliving, armorItem, itemstack, slot, debuggingMode);
 				
 				if (armorMesh == null) {
 					poseStack.popPose();
@@ -137,24 +141,26 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 					}
 				}
 				
-				boolean hasEffect = stack.hasFoil();
-				
 				if (armorItem instanceof DyeableLeatherItem dyeableItem) {
-					int i = dyeableItem.getColor(stack);
+					int i = dyeableItem.getColor(itemstack);
 					float r = (float) (i >> 16 & 255) / 255.0F;
 					float g = (float) (i >> 8 & 255) / 255.0F;
 					float b = (float) (i & 255) / 255.0F;
 					
-					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, armorMesh, entitypatch.getArmature(), r, g, b, this.getArmorTexture(stack, entityliving, armorMesh, slot, null, defaultModel), poses);
-					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, armorMesh, entitypatch.getArmature(), 1.0F, 1.0F, 1.0F, this.getArmorTexture(stack, entityliving, armorMesh, slot, "overlay", defaultModel), poses);
+					this.renderArmor(poseStack, buf, packedLight, armorMesh, entitypatch.getArmature(), r, g, b, this.getArmorTexture(itemstack, entityliving, armorMesh, slot, null, defaultModel), poses);
+					this.renderArmor(poseStack, buf, packedLight, armorMesh, entitypatch.getArmature(), 1.0F, 1.0F, 1.0F, this.getArmorTexture(itemstack, entityliving, armorMesh, slot, "overlay", defaultModel), poses);
 				} else {
-					this.renderArmor(poseStack, buf, packedLightIn, hasEffect, armorMesh, entitypatch.getArmature(), 1.0F, 1.0F, 1.0F, this.getArmorTexture(stack, entityliving, armorMesh, slot, null, defaultModel), poses);
+					this.renderArmor(poseStack, buf, packedLight, armorMesh, entitypatch.getArmature(), 1.0F, 1.0F, 1.0F, this.getArmorTexture(itemstack, entityliving, armorMesh, slot, null, defaultModel), poses);
 				}
 
-				ArmorTrim.getTrim(entityliving.level().registryAccess(), stack).ifPresent((armorTrim) -> {
-					this.renderTrim(poseStack, buf, packedLightIn, hasEffect, armorMesh, entitypatch.getArmature(), armorItem.getMaterial(), armorTrim, poses);
+				ArmorTrim.getTrim(entityliving.level().registryAccess(), itemstack).ifPresent((armorTrim) -> {
+					this.renderTrim(poseStack, buf, packedLight, armorMesh, entitypatch.getArmature(), armorItem.getMaterial(), armorTrim, slot, poses);
 				});
-
+				
+				if (itemstack.hasFoil()) {
+					this.renderGlint(poseStack, buf, packedLight, armorMesh, entitypatch.getArmature(), poses);
+				}
+				
 				poseStack.popPose();
 			}
 		}
@@ -200,7 +206,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 			texture = texture.substring(idx + 1);
 		}
 		
-		String s1 = String.format("%s:textures/models/armor/%s_layer_%d%s.png", domain, texture, (slot == EquipmentSlot.LEGS ? 2 : 1), type == null ? "" : String.format("_%s", type));
+		String s1 = String.format("%s:textures/models/armor/%s_layer_%d%s.png", domain, texture, (innerModel(slot) ? 2 : 1), type == null ? "" : String.format("_%s", type));
 		s1 = ForgeHooksClient.getArmorTexture(entity, itemstack, s1, slot, type);
 		int idx2 = s1.lastIndexOf('/');
 		String s2 = String.format("%s/epicfight/%s", s1.substring(0, idx2), s1.substring(idx2 + 1));
@@ -240,5 +246,9 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		}
 		
 		return resourcelocation;
+	}
+	
+	private static boolean innerModel(EquipmentSlot slot) {
+		return slot == EquipmentSlot.LEGS;
 	}
 }

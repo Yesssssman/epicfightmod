@@ -1,6 +1,7 @@
 package yesman.epicfight.client.renderer.patched.entity;
 
 import net.minecraft.client.model.VexModel;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.VexRenderer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.world.entity.monster.Vex;
@@ -13,7 +14,8 @@ import yesman.epicfight.world.capabilities.entitypatch.mob.VexPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class PVexRenderer extends PatchedLivingEntityRenderer<Vex, VexPatch, VexModel, VexRenderer, VexMesh> {
-	public PVexRenderer() {
+	public PVexRenderer(EntityRendererProvider.Context context) {
+		super(context);
 		this.addPatchedLayer(ItemInHandLayer.class, new PatchedItemInHandLayer<>());
 	}
 	

@@ -527,8 +527,6 @@ public class CombatBehaviorScreen extends Screen {
 			CompoundTag behaviorCompound = (CompoundTag)behaviorTag;
 			StaticAnimation animation = DatapackEditScreen.animationByKey(behaviorCompound.getString("animation"));
 			
-			System.out.println(behaviorCompound.getString("animation"));
-			
 			if (animation != null) {
 				this.modelPreviewer.addAnimationToPlay(animation);
 			}

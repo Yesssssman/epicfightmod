@@ -110,6 +110,15 @@ public class TrailParticle extends TextureSheetParticle {
 		this.rCol = Math.max(this.trailInfo.rCol, 0.0F);
 		this.gCol = Math.max(this.trailInfo.gCol, 0.0F);
 		this.bCol = Math.max(this.trailInfo.bCol, 0.0F);
+		
+		if (this.trailInfo.texturePath != null) {
+			TextureManager texturemanager = Minecraft.getInstance().getTextureManager();
+			AbstractTexture abstracttexture = texturemanager.getTexture(this.trailInfo.texturePath);
+		    
+			RenderSystem.bindTexture(abstracttexture.getId());
+			RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+		    RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+		}
 	}
 	
 	@Deprecated /** This constructor is only for {@link ModelPreviewer} **/
@@ -149,6 +158,15 @@ public class TrailParticle extends TextureSheetParticle {
 		this.rCol = Math.max(this.trailInfo.rCol, 0.0F);
 		this.gCol = Math.max(this.trailInfo.gCol, 0.0F);
 		this.bCol = Math.max(this.trailInfo.bCol, 0.0F);
+		
+		if (this.trailInfo.texturePath != null) {
+			TextureManager texturemanager = Minecraft.getInstance().getTextureManager();
+			AbstractTexture abstracttexture = texturemanager.getTexture(this.trailInfo.texturePath);
+		    
+			RenderSystem.bindTexture(abstracttexture.getId());
+			RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
+		    RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
+		}
 	}
 	
 	@Override
@@ -273,14 +291,6 @@ public class TrailParticle extends TextureSheetParticle {
 			return;
 		}
 		
-		TextureManager texturemanager = Minecraft.getInstance().getTextureManager();
-        AbstractTexture abstracttexture = texturemanager.getTexture(this.trailInfo.texturePath);
-        
-        RenderSystem.bindTexture(abstracttexture.getId());
-        RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_S, GL12.GL_CLAMP_TO_EDGE);
-	    RenderSystem.texParameter(GL11.GL_TEXTURE_2D, GL11.GL_TEXTURE_WRAP_T, GL12.GL_CLAMP_TO_EDGE);
-	    RenderSystem.setShaderTexture(0, abstracttexture.getId());
-		
 		PoseStack poseStack = new PoseStack();
 		int light = this.getLightColor(partialTick);
 		this.setupPoseStack(poseStack, camera, partialTick);
@@ -338,7 +348,7 @@ public class TrailParticle extends TextureSheetParticle {
 	
 	@Override
 	public ParticleRenderType getRenderType() {
-		return EpicFightParticleRenderTypes.TRAIL;
+		return EpicFightParticleRenderTypes.TRAIL_PROVIDER.apply(this.trailInfo.texturePath);
 	}
 	
 	protected void setupPoseStack(PoseStack poseStack, Camera camera, float partialTicks) {

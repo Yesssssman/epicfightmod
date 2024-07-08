@@ -53,6 +53,8 @@ import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T> {
 	protected static final UUID PLAYER_EVENT_UUID = UUID.fromString("e6beeac4-77d2-11eb-9439-0242ac130002");
+	protected static final float PLAYER_SCALE = 0.9375F;
+	
 	public static final EntityDataAccessor<Float> STAMINA = new EntityDataAccessor<Float> (253, EntityDataSerializers.FLOAT);
 	protected PlayerEventListener eventListeners;
 	protected PlayerMode playerMode = PlayerMode.MINING;
@@ -74,6 +76,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	@Override
 	public void onConstructed(T entityIn) {
 		super.onConstructed(entityIn);
+		
 		entityIn.getEntityData().define(STAMINA, Float.valueOf(0.0F));
 	}
 	
@@ -91,15 +94,6 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		this.eventListeners.addEventListener(EventType.ACTION_EVENT_SERVER, PLAYER_EVENT_UUID, (playerEvent) -> {
 			this.resetActionTick();
 		});
-	}
-
-	@Override
-	protected void initAttributes() {
-		super.initAttributes();
-		
-		this.original.getAttribute(EpicFightAttributes.MAX_STAMINA.get()).setBaseValue(15.0D);
-		this.original.getAttribute(EpicFightAttributes.STAMINA_REGEN.get()).setBaseValue(1.0D);
-		this.original.getAttribute(EpicFightAttributes.OFFHAND_IMPACT.get()).setBaseValue(0.5D);
 	}
 	
 	@Override
@@ -141,7 +135,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 			container.setExecuter(this);
 			Skill oldone = oldSkill.skillContainers[i].getSkill();
 			
-			if (oldone != null && oldone.getCategory().shouldSynchronize()) {
+			if (oldone != null && oldone.getCategory().learnable()) {
 				container.setSkill(oldSkill.skillContainers[i].getSkill());
 			}
 			
@@ -170,7 +164,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	public OpenMatrix4f getModelMatrix(float partialTicks) {
 		float oYRot;
 		float yRot;
-		float scale = (this.original.isBaby() ? 0.5F : 1.0F) * 0.9375F;
+		float scale = (this.original.isBaby() ? 0.5F : 1.0F) * PLAYER_SCALE;
 		
 		if (this.original.getVehicle() instanceof LivingEntity ridingEntity) {
 			oYRot = ridingEntity.yBodyRotO;

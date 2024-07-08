@@ -33,11 +33,12 @@ public class AzureLibCompat implements ICompatModule {
 	@Override
 	public void onForgeEventBusClient(IEventBus eventBus) {
 		eventBus.addListener(AzureGeoArmor::getGeoArmorTexturePath);
-		eventBus.addListener(this::geoEntityRenderEvent);
+		eventBus.addListener(this::geoEntityRenderPreEvent);
+		eventBus.addListener(this::geoEntityRenderPostEvent);
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public void geoEntityRenderEvent(GeoRenderEvent.Entity.Pre event) {
+	public void geoEntityRenderPreEvent(GeoRenderEvent.Entity.Pre event) {
 		Entity entity = event.getEntity();
 		
 		if (entity.level() == null) {
@@ -62,12 +63,33 @@ public class AzureLibCompat implements ICompatModule {
 				if (entitypatch != null && entitypatch.overrideRender()) {
 					event.setCanceled(true);
 					renderEngine.renderEntityArmatureModel(livingentity, entitypatch, event.getRenderer(), event.getBufferSource(), event.getPoseStack(), event.getPackedLight(), event.getPartialTick());
+					
+					if (ClientEngine.getInstance().getPlayerPatch() != null && !renderEngine.minecraft.options.hideGui && !livingentity.level().getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI)) {
+						for (EntityIndicator entityIndicator : EntityIndicator.ENTITY_INDICATOR_RENDERERS) {
+							if (entityIndicator.shouldDraw(livingentity, entitypatch, ClientEngine.getInstance().getPlayerPatch())) {
+								entityIndicator.drawIndicator(livingentity, entitypatch, ClientEngine.getInstance().getPlayerPatch(), event.getPoseStack(), event.getBufferSource(), event.getPartialTick());
+							}
+						}
+					}
 				}
 				
 				if (playerpatch != null) {
 					playerpatch.disableModelYRotInGui(originalYRot);
 				}
 			}
+		}
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public void geoEntityRenderPostEvent(GeoRenderEvent.Entity.Post event) {
+		Entity entity = event.getEntity();
+		
+		if (entity.level() == null) {
+			return;
+		}
+		
+		if (entity instanceof LivingEntity livingentity) {
+			RenderEngine renderEngine = ClientEngine.getInstance().renderEngine;
 			
 			if (ClientEngine.getInstance().getPlayerPatch() != null && !renderEngine.minecraft.options.hideGui && !livingentity.level().getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI)) {
 				LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(livingentity, LivingEntityPatch.class);

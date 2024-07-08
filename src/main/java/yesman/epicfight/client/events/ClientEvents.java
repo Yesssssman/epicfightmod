@@ -169,7 +169,7 @@ public class ClientEvents {
 			ClientEngine.getInstance().renderEngine.zoomOut(0);
 			ClientEngine.getInstance().renderEngine.battleModeUI.reset();
 			// Reset renderers
-			ClientEngine.getInstance().renderEngine.registerRenderer();
+			ClientEngine.getInstance().renderEngine.resetRenderers();
 		}
 		
 		FractureBlockState.reset();

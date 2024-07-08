@@ -6,6 +6,7 @@ import io.netty.buffer.ByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.behavior.MeleeAttack;
 import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.behavior.OneShot;
@@ -15,6 +16,7 @@ import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.piglin.Piglin;
 import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.CrossbowItem;
+import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
@@ -36,10 +38,8 @@ public class PiglinPatch extends HumanoidMobPatch<Piglin> {
 		super(Faction.PIGLINS);
 	}
 	
-	@Override
-	protected void initAttributes() {
-		super.initAttributes();
-		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(1.0F);
+	public static void initAttributes(EntityAttributeModificationEvent event) {
+		event.add(EntityType.PIGLIN, EpicFightAttributes.IMPACT.get(), 1.0D);
 	}
 	
 	@Override

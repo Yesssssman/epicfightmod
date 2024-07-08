@@ -74,7 +74,8 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	public static final EntityDataAccessor<Float> MAX_STUN_SHIELD = new EntityDataAccessor<Float> (252, EntityDataSerializers.FLOAT);
 	public static final EntityDataAccessor<Integer> EXECUTION_RESISTANCE = new EntityDataAccessor<Integer> (254, EntityDataSerializers.INT);
 	public static final EntityDataAccessor<Boolean> AIRBORNE = new EntityDataAccessor<Boolean> (250, EntityDataSerializers.BOOLEAN);
-	protected static final double WEIGHT_CORRECTION = 37.037D;
+	public static final double WEIGHT_CORRECTION = 37.037D;
+	
 	protected ResultType lastResultType;
 	protected float lastDealDamage;
 	protected Entity lastTryHurtEntity;
@@ -103,9 +104,15 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	@Override
-	public void onJoinWorld(T entityIn, EntityJoinLevelEvent event) {
-		super.onJoinWorld(entityIn, event);
-		this.initAttributes();
+	public void onJoinWorld(T entity, EntityJoinLevelEvent event) {
+		super.onJoinWorld(entity, event);
+		
+		if (entity.getAttributeBaseValue(EpicFightAttributes.WEIGHT.get()) == 0.0D) {
+			EntityDimensions entityDimensions = entity.getDimensions(net.minecraft.world.entity.Pose.STANDING);
+			double weight = entityDimensions.width * entityDimensions.height * WEIGHT_CORRECTION;
+			
+			entity.getAttribute(EpicFightAttributes.WEIGHT.get()).setBaseValue(weight);
+		}
 	}
 	
 	public abstract void initAnimator(Animator clientAnimator);
@@ -113,14 +120,6 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	
 	public Armature getArmature() {
 		return this.armature;
-	}
-	
-	protected void initAttributes() {
-		EntityDimensions dimension = this.original.getDimensions(net.minecraft.world.entity.Pose.STANDING);
-		this.original.getAttribute(EpicFightAttributes.WEIGHT.get()).setBaseValue(dimension.width * dimension.height * WEIGHT_CORRECTION);
-		this.original.getAttribute(EpicFightAttributes.MAX_STRIKES.get()).setBaseValue(1.0D);
-		this.original.getAttribute(EpicFightAttributes.ARMOR_NEGATION.get()).setBaseValue(0.0D);
-		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(0.5D);
 	}
 	
 	@Override
@@ -330,7 +329,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 	}
 	
 	public void setExecutionResistance(int value) {
-		int maxExecutionResistance = (int)this.original.getAttributeValue(EpicFightAttributes.MAX_EXECUTION_RESISTANCE.get());
+		int maxExecutionResistance = (int)this.original.getAttributeValue(EpicFightAttributes.EXECUTION_RESISTANCE.get());
 		value = Math.min(maxExecutionResistance, value);
 		this.original.getEntityData().set(EXECUTION_RESISTANCE, value);
 	}

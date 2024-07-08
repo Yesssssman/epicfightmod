@@ -7,6 +7,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
@@ -26,7 +27,9 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 public class PCustomEntityRenderer extends PatchedEntityRenderer<LivingEntity, LivingEntityPatch<LivingEntity>, EntityRenderer<LivingEntity>, AnimatedMesh> {
 	private final AnimatedMesh mesh;
 	
-	public PCustomEntityRenderer(AnimatedMesh mesh) {
+	public PCustomEntityRenderer(AnimatedMesh mesh, EntityRendererProvider.Context context) {
+		super(context);
+		
 		this.mesh = mesh;
 	}
 	

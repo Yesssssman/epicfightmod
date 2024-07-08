@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraftforge.api.distmarker.Dist;
@@ -23,6 +24,10 @@ import yesman.epicfight.world.entity.WitherGhostClone;
 
 @OnlyIn(Dist.CLIENT)
 public class WitherGhostCloneRenderer extends PatchedEntityRenderer<WitherGhostClone, WitherGhostPatch, NoopLivingEntityRenderer<WitherGhostClone>, WitherMesh> {
+	public WitherGhostCloneRenderer(EntityRendererProvider.Context context) {
+		super(context);
+	}
+	
 	@Override
 	public void render(WitherGhostClone entityIn, WitherGhostPatch entitypatch, NoopLivingEntityRenderer<WitherGhostClone> renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
 		RenderType renderType = EpicFightRenderTypes.getTriangulated(RenderType.entityTranslucent(PWitherRenderer.WITHER_INVULNERABLE_LOCATION));

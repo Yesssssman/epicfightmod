@@ -3,11 +3,11 @@ package yesman.epicfight.client.gui.datapack.screen;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import org.apache.commons.compress.utils.Lists;
-
+import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
 
 import io.netty.util.internal.StringUtil;
@@ -195,7 +195,7 @@ public class StylesScreen extends Screen {
 									.xy2(15, 52)
 									.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
 									.verticalSizing(VerticalSizing.TOP_BOTTOM)
-									.rowHeight(26)
+									.rowHeight(21)
 									.rowEditable(RowEditButton.NONE)
 									.transparentBackground(false)
 									.addColumn(Grid.<ParameterEditor, ResizableEditBox>wildcard("parameter_key")
@@ -235,6 +235,19 @@ public class StylesScreen extends Screen {
 				
 				if (caseComp.contains("conditions")) {
 					caseComp$2.put("conditions", caseComp.get("conditions"));
+				}
+				/** Convert an old condition format to new one **/
+				else if (caseComp.contains("condition")) {
+					ListTag conditionsList = new ListTag();
+					CompoundTag conditionTag = new CompoundTag();
+					conditionTag.putString("predicate", EpicFightConditions.convertOldNames(caseComp.getString("condition")));
+					
+					for (Map.Entry<String, Tag> tag : caseComp.getCompound("predicate").tags.entrySet()) {
+						conditionTag.put(tag.getKey(), tag.getValue());
+					}
+					
+					conditionsList.add(conditionTag);
+					caseComp$2.put("conditions", conditionsList);
 				}
 				
 				packImporter.newRow();

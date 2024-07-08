@@ -16,6 +16,20 @@ import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.world.capabilities.entitypatch.boss.WitherGhostPatch;
+import yesman.epicfight.world.capabilities.entitypatch.boss.WitherPatch;
+import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.EnderDragonPatch;
+import yesman.epicfight.world.capabilities.entitypatch.mob.CreeperPatch;
+import yesman.epicfight.world.capabilities.entitypatch.mob.EndermanPatch;
+import yesman.epicfight.world.capabilities.entitypatch.mob.HoglinPatch;
+import yesman.epicfight.world.capabilities.entitypatch.mob.IronGolemPatch;
+import yesman.epicfight.world.capabilities.entitypatch.mob.PiglinBrutePatch;
+import yesman.epicfight.world.capabilities.entitypatch.mob.PiglinPatch;
+import yesman.epicfight.world.capabilities.entitypatch.mob.RavagerPatch;
+import yesman.epicfight.world.capabilities.entitypatch.mob.VindicatorPatch;
+import yesman.epicfight.world.capabilities.entitypatch.mob.WitherSkeletonPatch;
+import yesman.epicfight.world.capabilities.entitypatch.mob.ZoglinPatch;
+import yesman.epicfight.world.capabilities.entitypatch.mob.ZombiePatch;
 import yesman.epicfight.world.entity.EpicFightEntities;
 import yesman.epicfight.world.entity.WitherGhostClone;
 
@@ -26,46 +40,48 @@ public class EpicFightAttributes {
 	
 	public static final DeferredRegister<Attribute> ATTRIBUTES = DeferredRegister.create(ForgeRegistries.ATTRIBUTES, EpicFightMod.MODID);
 	
-    public static final RegistryObject<Attribute> MAX_STAMINA = ATTRIBUTES.register("staminar", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".staminar", 0.0D, 0.0D, 1024.0D).setSyncable(true));
-    public static final RegistryObject<Attribute> STAMINA_REGEN = ATTRIBUTES.register("stamina_regen", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".stamina_regen", 0.0D, 0.0D, 1024.0D).setSyncable(true));
+    public static final RegistryObject<Attribute> MAX_STAMINA = ATTRIBUTES.register("staminar", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".staminar", 15.0D, 0.0D, 1024.0D).setSyncable(true));
+    public static final RegistryObject<Attribute> STAMINA_REGEN = ATTRIBUTES.register("stamina_regen", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".stamina_regen", 1.0D, 0.0D, 1024.0D).setSyncable(true));
     public static final RegistryObject<Attribute> STUN_ARMOR = ATTRIBUTES.register("stun_armor", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".stun_armor", 0.0D, 0.0D, 1024.0D).setSyncable(true));
     public static final RegistryObject<Attribute> WEIGHT = ATTRIBUTES.register("weight", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".weight", 0.0D, 0.0D, 1024.0).setSyncable(true));
     public static final RegistryObject<Attribute> MAX_STRIKES = ATTRIBUTES.register("max_strikes", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".max_strikes", 1.0D, 1.0D, 1024.0).setSyncable(true));
 	public static final RegistryObject<Attribute> ARMOR_NEGATION = ATTRIBUTES.register("armor_negation", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".armor_negation", 0.0D, 0.0D, 100.0D).setSyncable(true));
-	public static final RegistryObject<Attribute> IMPACT = ATTRIBUTES.register("impact", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".impact", 0.0D, 0.0D, 1024.0).setSyncable(true));
-	public static final RegistryObject<Attribute> OFFHAND_ATTACK_SPEED = ATTRIBUTES.register("offhand_attack_speed", () -> new RangedAttribute("offhand attack speed", 4.0D, 0.0D, 1024.0D).setSyncable(true));
+	public static final RegistryObject<Attribute> IMPACT = ATTRIBUTES.register("impact", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".impact", 0.5D, 0.0D, 1024.0).setSyncable(true));
+	public static final RegistryObject<Attribute> EXECUTION_RESISTANCE = ATTRIBUTES.register("execution_resistance", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".execution_resistance", 0.0D, 0.0D, 10.0D).setSyncable(true));
+	
+	public static final RegistryObject<Attribute> OFFHAND_ATTACK_SPEED = ATTRIBUTES.register("offhand_attack_speed", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".offhand_attack_speed", 4.0D, 0.0D, 1024.0D).setSyncable(true));
 	public static final RegistryObject<Attribute> OFFHAND_MAX_STRIKES = ATTRIBUTES.register("offhand_max_strikes", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".offhand_max_strikes", 1.0D, 1.0D, 1024.0).setSyncable(true));
 	public static final RegistryObject<Attribute> OFFHAND_ARMOR_NEGATION = ATTRIBUTES.register("offhand_armor_negation", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".offhand_armor_negation", 0.0D, 0.0D, 100.0D).setSyncable(true));
-	public static final RegistryObject<Attribute> OFFHAND_IMPACT = ATTRIBUTES.register("offhand_impact", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".offhand_impact", 0.0D, 0.0D, 1024.0).setSyncable(true));
-	public static final RegistryObject<Attribute> MAX_EXECUTION_RESISTANCE = ATTRIBUTES.register("execution_resistance", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".execution_resistance", 0.0D, 0.0D, 10.0D).setSyncable(true));
+	public static final RegistryObject<Attribute> OFFHAND_IMPACT = ATTRIBUTES.register("offhand_impact", () -> new RangedAttribute("attribute.name." + EpicFightMod.MODID + ".offhand_impact", 0.5D, 0.0D, 1024.0).setSyncable(true));
+	
 	public static final UUID ARMOR_NEGATION_MODIFIER = UUID.fromString("b0a7436e-5734-11eb-ae93-0242ac130002");
 	public static final UUID MAX_STRIKE_MODIFIER = UUID.fromString("b0a745b2-5734-11eb-ae93-0242ac130002");
 	public static final UUID IMPACT_MODIFIER = UUID.fromString("b0a746ac-5734-11eb-ae93-0242ac130002");
 	public static final UUID ATTACK_DAMAGE_MODIFIER = UUID.fromString("1c224694-19f3-11ec-9621-0242ac130002");
 	public static final UUID ATTACK_SPEED_MODIFIER = UUID.fromString("1c2249f0-19f3-11ec-9621-0242ac130002");
-    
-	public static void registerNewMobs(EntityAttributeCreationEvent event) {
+	
+	public static void entityAttributeCreationEvent(EntityAttributeCreationEvent event) {
 		event.put(EpicFightEntities.WITHER_SKELETON_MINION.get(), AbstractSkeleton.createAttributes().build());
 		event.put(EpicFightEntities.WITHER_GHOST_CLONE.get(), WitherGhostClone.createAttributes().build());
 		event.put(EpicFightEntities.DODGE_LEFT.get(), LivingEntity.createLivingAttributes().build());
 	}
 	
-	public static void modifyExistingMobs(EntityAttributeModificationEvent event) {
-		commonCreature(EntityType.CAVE_SPIDER, event);
-		commonCreature(EntityType.EVOKER, event);
-		commonCreature(EntityType.IRON_GOLEM, event);
+	public static void entityAttributeModificationEvent(EntityAttributeModificationEvent event) {
+		common(EntityType.CAVE_SPIDER, event);
+		common(EntityType.EVOKER, event);
+		common(EntityType.IRON_GOLEM, event);
 		humanoid(EntityType.PILLAGER, event);
-		commonCreature(EntityType.RAVAGER, event);
-		commonCreature(EntityType.SPIDER, event);
-		commonCreature(EntityType.VEX, event);
+		common(EntityType.RAVAGER, event);
+		common(EntityType.SPIDER, event);
+		common(EntityType.VEX, event);
 		humanoid(EntityType.VINDICATOR, event);
 		humanoid(EntityType.WITCH, event);
-		commonCreature(EntityType.HOGLIN, event);
-		commonCreature(EntityType.ZOGLIN, event);
-		commonCreature(EntityType.ENDER_DRAGON, event);
-		commonCreature(EntityType.CREEPER, event);
+		common(EntityType.HOGLIN, event);
+		common(EntityType.ZOGLIN, event);
+		common(EntityType.ENDER_DRAGON, event);
+		common(EntityType.CREEPER, event);
 		humanoid(EntityType.DROWNED, event);
-		commonCreature(EntityType.ENDERMAN, event);
+		common(EntityType.ENDERMAN, event);
 		humanoid(EntityType.HUSK, event);
 		humanoid(EntityType.PIGLIN, event);
 		humanoid(EntityType.PIGLIN_BRUTE, event);
@@ -75,13 +91,28 @@ public class EpicFightAttributes {
 		humanoid(EntityType.ZOMBIE, event);
 		humanoid(EntityType.ZOMBIE_VILLAGER, event);
 		humanoid(EntityType.ZOMBIFIED_PIGLIN, event);
-		commonCreature(EpicFightEntities.WITHER_SKELETON_MINION.get(), event);
+		common(EpicFightEntities.WITHER_SKELETON_MINION.get(), event);
 		player(EntityType.PLAYER, event);
 		dragon(EntityType.ENDER_DRAGON, event);
-		commonCreature(EntityType.WITHER, event);
+		common(EntityType.WITHER, event);
+		
+		CreeperPatch.initAttributes(event);
+		EnderDragonPatch.initAttributes(event);
+		EndermanPatch.initAttributes(event);
+		HoglinPatch.initAttributes(event);
+		IronGolemPatch.initAttributes(event);
+		PiglinBrutePatch.initAttributes(event);
+		PiglinPatch.initAttributes(event);
+		RavagerPatch.initAttributes(event);
+		VindicatorPatch.initAttributes(event);
+		WitherPatch.initAttributes(event);
+		WitherGhostPatch.initAttributes(event);
+		WitherSkeletonPatch.initAttributes(event);
+		ZoglinPatch.initAttributes(event);
+		ZombiePatch.initAttributes(event);
 	}
     
-    private static void commonCreature(EntityType<? extends LivingEntity> entityType, EntityAttributeModificationEvent event) {
+    private static void common(EntityType<? extends LivingEntity> entityType, EntityAttributeModificationEvent event) {
 		event.add(entityType, EpicFightAttributes.WEIGHT.get());
 		event.add(entityType, EpicFightAttributes.ARMOR_NEGATION.get());
 		event.add(entityType, EpicFightAttributes.IMPACT.get());
@@ -90,7 +121,7 @@ public class EpicFightAttributes {
 	}
     
     private static void humanoid(EntityType<? extends LivingEntity> entityType, EntityAttributeModificationEvent event) {
-    	commonCreature(entityType, event);
+    	common(entityType, event);
 		event.add(entityType, EpicFightAttributes.OFFHAND_ATTACK_SPEED.get());
 		event.add(entityType, EpicFightAttributes.OFFHAND_MAX_STRIKES.get());
 		event.add(entityType, EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get());
@@ -104,7 +135,7 @@ public class EpicFightAttributes {
 	}
     
     private static void dragon(EntityType<? extends EnderDragon> entityType, EntityAttributeModificationEvent event) {
-    	commonCreature(entityType, event);
+    	common(entityType, event);
 		event.add(entityType, Attributes.ATTACK_DAMAGE);
 	}
     

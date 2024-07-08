@@ -238,6 +238,11 @@ public abstract class AnimationProperty<T> {
 		 * This property adds interpolated colliders when detecting colliding entities by using @MultiCollider.
 		 */
 		public static final AttackAnimationProperty<Integer> EXTRA_COLLIDERS = new AttackAnimationProperty<Integer> ("extra_colliders", Codec.INT);
+		
+		/**
+		 * This property determines a minimal distance between attacker and target.
+		 */
+		public static final AttackAnimationProperty<Double> REACH = new AttackAnimationProperty<Double> ("reach", Codec.DOUBLE);
 	}
 	
 	public static class AttackPhaseProperty<T> extends AnimationProperty<T> {

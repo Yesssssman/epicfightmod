@@ -33,16 +33,16 @@ public abstract class EntityIndicator extends ModIngameGui {
 		new HealthBarIndicator();
 	}
 	
-	public void drawTexturedModalRect2DPlane(Matrix4f matrix, VertexConsumer vertexBuilder, float minX, float minY, float maxX, float maxY, float minTexU, float minTexV, float maxTexU, float maxTexV) {
-		this.drawTexturedModalRect3DPlane(matrix, vertexBuilder, minX, minY, this.getBlitOffset(), maxX, maxY, this.getBlitOffset(), minTexU, minTexV, maxTexU, maxTexV);
+	public void drawTexturedModalRect2DPlane(Matrix4f matrix, VertexConsumer vertexConsumer, float minX, float minY, float maxX, float maxY, float minTexU, float minTexV, float maxTexU, float maxTexV) {
+		this.drawTexturedModalRect3DPlane(matrix, vertexConsumer, minX, minY, this.getBlitOffset(), maxX, maxY, this.getBlitOffset(), minTexU, minTexV, maxTexU, maxTexV);
 	}
 	
-	public void drawTexturedModalRect3DPlane(Matrix4f matrix, VertexConsumer vertexBuilder, float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float minTexU, float minTexV, float maxTexU, float maxTexV) {
+	public void drawTexturedModalRect3DPlane(Matrix4f matrix, VertexConsumer vertexConsumer, float minX, float minY, float minZ, float maxX, float maxY, float maxZ, float minTexU, float minTexV, float maxTexU, float maxTexV) {
 		float cor = 0.00390625F;
-		vertexBuilder.vertex(matrix, minX, minY, maxZ).uv((minTexU * cor), (maxTexV) * cor).endVertex();
-        vertexBuilder.vertex(matrix, maxX, minY, maxZ).uv((maxTexU * cor), (maxTexV) * cor).endVertex();
-        vertexBuilder.vertex(matrix, maxX, maxY, minZ).uv((maxTexU * cor), (minTexV) * cor).endVertex();
-        vertexBuilder.vertex(matrix, minX, maxY, minZ).uv((minTexU * cor), (minTexV) * cor).endVertex();
+		vertexConsumer.vertex(matrix, minX, minY, maxZ).uv((minTexU * cor), (maxTexV) * cor).endVertex();
+        vertexConsumer.vertex(matrix, maxX, minY, maxZ).uv((maxTexU * cor), (maxTexV) * cor).endVertex();
+        vertexConsumer.vertex(matrix, maxX, maxY, minZ).uv((maxTexU * cor), (minTexV) * cor).endVertex();
+        vertexConsumer.vertex(matrix, minX, maxY, minZ).uv((minTexU * cor), (minTexV) * cor).endVertex();
 	}
 	
 	public EntityIndicator() {
@@ -53,6 +53,7 @@ public abstract class EntityIndicator extends ModIngameGui {
 		float posX = (float)Mth.lerp(partialTicks, entity.xOld, entity.getX());
 		float posY = (float)Mth.lerp(partialTicks, entity.yOld, entity.getY());
 		float posZ = (float)Mth.lerp(partialTicks, entity.zOld, entity.getZ());
+		
 		poseStack.pushPose();
 		poseStack.translate(-posX, -posY, -posZ);
 		poseStack.mulPose(QuaternionUtils.YP.rotationDegrees(180.0F));
@@ -83,6 +84,6 @@ public abstract class EntityIndicator extends ModIngameGui {
 		return OpenMatrix4f.exportToMojangMatrix(finalMatrix);
 	}
 	
-	public abstract void drawIndicator(LivingEntity entityIn, @Nullable LivingEntityPatch<?> entitypatch, LocalPlayerPatch playerpatch, PoseStack matStackIn, MultiBufferSource VertexConsumer, float partialTicks);
-	public abstract boolean shouldDraw(LivingEntity entityIn, @Nullable LivingEntityPatch<?> entitypatch, LocalPlayerPatch playerpatch);
+	public abstract void drawIndicator(LivingEntity entity, @Nullable LivingEntityPatch<?> entitypatch, LocalPlayerPatch playerpatch, PoseStack poseStack, MultiBufferSource multiBufferSource, float partialTicks);
+	public abstract boolean shouldDraw(LivingEntity entity, @Nullable LivingEntityPatch<?> entitypatch, LocalPlayerPatch playerpatch);
 }

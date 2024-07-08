@@ -115,30 +115,76 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  10. Added a selectable built-in resource pack with legacy weapon textures
  *
  *  11. Fixed Player head go through the body when using demolition leap
- *
- *  --- 20.8.1.2 ---
- *
- *  1. Fixed Freecam mod disabling Epic Fight battle mode
- *  
- *  2. Fixed Ender dragon breath hitting a player in creative mode
  *  
  *  --- 20.8.1.2 ---
+ *
+ *  1. Fixed Freecam mod disabling Epic Fight battle mode (Release fix)
  *  
- *  1. Fixed Demolition leap unable to jump forward when you cast it with a wall behind
+ *  2. Fixed Ender dragon breath hitting a player in creative mode (Release fix)
  *  
- *  2. Fixed the skills are not removed even tho keepSkills gamerule is set to false
+ *  --- 20.8.1.2 ---
  *  
- *  3. Added translations for sound subtitles.
+ *  1. Fixed Demolition leap unable to jump forward when you cast it with a wall behind (Release fix)
  *  
- *  4. Fixed players dealing a weapon's damage when they drop a weapon and attack at the same time.
+ *  2. Fixed the skills are not removed even tho keepSkills gamerule is set to false (Release fix)
  *  
- *  - TO DO -
+ *  3. Added translations for sound subtitles. (Release fix)
  *  
- *  1. Trail texture bug
+ *  4. Fixed players dealing a weapon's damage when they drop a weapon and attack at the same time (Release fix)
  *  
- *  2. Crash because {@link PlayerPatch#STAMINA} is unregistered at SynchedEntityData (Most likely a mod compatibility issue)
+ *  --- 20.8.1.3 ---
  *  
- *  3. Add reach property to attack animation. (idea)
+ *  1. Fixed epic fight legacy resource pack not loaded properly
+ *  
+ *  2. Fixed trail textures broken when trails that have different textures from each other are on the screen (Release fix)
+ *  
+ *  3. Added missing translations for attributes (GitHub issues #1678) (Release fix)
+ *  
+ *  4. Fixed Armor negation dealing more damage when it exceeds 100
+ *  
+ *  5. Deactivated Bloom effect
+ *  
+ *  6. Now players can select any skills in the skill edit screen(Default Keybind: K) when they're in creative mode.
+ *  
+ *  7. Fixed epic fight attributes not being applied to entities via commands (Release fix)
+ *  
+ *  8. Fixed epic fight attributes being reset when joining the world (GitHub issues #1354) (Release fix)
+ *  
+ *  9. Fixed Gecko & Azurelib based entities' texture broken when the health bar is activated (Release fix)
+ *  
+ *  10. Fixed server loading crash (GitHub issues #1680) (Release fix)
+ *  
+ *  11. Fixed a crash when spawning Witches in a dedicated server
+ *  
+ *  --- 20.8.1.4 ---
+ *  
+ *  1. Fixed a crash when loading weapon types from datapack
+ *  
+ *  2. Datapack editor screen automatically updates the old condition format
+ *  
+ *  --- 20.8.1.5 ---
+ *  
+ *  1. Fixed Weapon innate skills remaining after the player respawns
+ *  
+ *  2. Fixed custom animations not shown on the animation select screen
+ *  
+ *  3. Now Epic Fight is compatible with the latest Azurelib (release fix)
+ *  
+ *  4. Now Armor trims work normally in the animated models (release fix) (GitHub issues #1689)
+ *  
+ *  --- TO DO ---
+ *  
+ *  1. Crash because {@link PlayerPatch#STAMINA} is unregistered at SynchedEntityData (Most likely a mod compatibility issue)
+ *  
+ *  2. Add an reach property to attack animation (idea)
+ *  
+ *  3. Add an alert function when an entity targeting the player tries grappling or execution attack
+ *  
+ *  4. Add UI for execution resistance
+ *  
+ *  5. Add functionality to blooming effect (resists wither effect)
+ *  
+ *  6. First person animation system by adding /data/ folder in the path, and few samples
  *  
  *  @author yesman
  */
@@ -169,8 +215,8 @@ public class EpicFightMod {
     	bus.addListener(this::addPackFindersEvent);
     	bus.addListener(this::registerResourcepackReloadListnerEvent);
     	bus.addListener(this::buildCreativeTabWithSkillBooks);
-    	bus.addListener(EpicFightAttributes::registerNewMobs);
-    	bus.addListener(EpicFightAttributes::modifyExistingMobs);
+    	bus.addListener(EpicFightAttributes::entityAttributeCreationEvent);
+    	bus.addListener(EpicFightAttributes::entityAttributeModificationEvent);
     	bus.addListener(SkillManager::createSkillRegistry);
     	bus.addListener(SkillManager::registerSkills);
     	bus.addListener(EpicFightCapabilities::registerCapabilities);

@@ -6,7 +6,9 @@ import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.gameasset.Animations;
@@ -29,10 +31,8 @@ public class VindicatorPatch<T extends PathfinderMob> extends AbstractIllagerPat
 		clientAnimator.addLivingAnimation(LivingMotions.CHASE, Animations.VINDICATOR_CHASE);
 	}
 	
-	@Override
-	protected void initAttributes() {
-		super.initAttributes();
-		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(1.0F);
+	public static void initAttributes(EntityAttributeModificationEvent event) {
+		event.add(EntityType.VINDICATOR, EpicFightAttributes.IMPACT.get(), 1.0D);
 	}
 	
 	@Override

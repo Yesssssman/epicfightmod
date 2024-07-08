@@ -5,7 +5,9 @@ import java.util.Set;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
 
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -21,10 +23,8 @@ public class WitherSkeletonPatch<T extends PathfinderMob> extends SkeletonPatch<
 		super(Faction.WITHER);
 	}
 	
-	@Override
-	protected void initAttributes() {
-		super.initAttributes();
-		this.original.getAttribute(EpicFightAttributes.STUN_ARMOR.get()).setBaseValue(6.0F);
+	public static void initAttributes(EntityAttributeModificationEvent event) {
+		event.add(EntityType.WITHER_SKELETON, EpicFightAttributes.STUN_ARMOR.get(), 6.0D);
 	}
 	
 	@Override

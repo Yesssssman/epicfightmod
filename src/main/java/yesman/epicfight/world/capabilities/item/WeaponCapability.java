@@ -4,9 +4,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.ibm.icu.impl.locale.XCldrStub.ImmutableMap;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.sounds.SoundEvent;
@@ -47,6 +47,7 @@ public class WeaponCapability extends CapabilityItem {
 		super(builder);
 		
 		WeaponCapability.Builder weaponBuilder = (WeaponCapability.Builder)builder;
+		
 		this.autoAttackMotions = weaponBuilder.autoAttackMotionMap;
 		this.innateSkill = weaponBuilder.innateSkillByStyle;
 		this.livingMotionModifiers = weaponBuilder.livingMotionModifiers;

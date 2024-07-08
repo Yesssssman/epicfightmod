@@ -48,4 +48,13 @@ public class EpicFightConditions {
 	
 	//Itemstack conditions
 	public static final RegistryObject<Supplier<Condition<?>>> TAG_VALUE = CONDITIONS.register(new ResourceLocation(EpicFightMod.MODID, "tag_value").getPath(), () -> TagValueCondition::new);
+	
+	@Deprecated
+	public static String convertOldNames(String string) {
+		if ("epicfight:offhand_category".equals(string)) {
+			return OFFHAND_ITEM_CATEGORY.getId().toString();
+		}
+		
+		return string;
+	}
 }

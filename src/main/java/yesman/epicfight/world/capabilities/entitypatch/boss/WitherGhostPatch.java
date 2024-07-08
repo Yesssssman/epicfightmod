@@ -1,6 +1,7 @@
 package yesman.epicfight.world.capabilities.entitypatch.boss;
 
 import net.minecraft.sounds.SoundEvents;
+import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
@@ -8,6 +9,7 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 import yesman.epicfight.world.damagesource.StunType;
+import yesman.epicfight.world.entity.EpicFightEntities;
 import yesman.epicfight.world.entity.WitherGhostClone;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
@@ -31,10 +33,8 @@ public class WitherGhostPatch extends MobPatch<WitherGhostClone> {
 		animator.addLivingAnimation(LivingMotions.DEATH, Animations.WITHER_IDLE);
 	}
 	
-	@Override
-	protected void initAttributes() {
-		super.initAttributes();
-		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(3.0F);
+	public static void initAttributes(EntityAttributeModificationEvent event) {
+		event.add(EpicFightEntities.WITHER_GHOST_CLONE.get(), EpicFightAttributes.IMPACT.get(), 3.0D);
 	}
 	
 	@Override

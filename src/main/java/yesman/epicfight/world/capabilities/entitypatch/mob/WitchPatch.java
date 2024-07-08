@@ -30,7 +30,6 @@ public class WitchPatch extends HumanoidMobPatch<Witch> {
 	public void updateHeldItem(CapabilityItem fromCap, CapabilityItem toCap, ItemStack from, ItemStack to, InteractionHand hand) {
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void initAnimator(Animator animator) {
 		animator.addLivingAnimation(LivingMotions.DEATH, Animations.BIPED_DEATH);

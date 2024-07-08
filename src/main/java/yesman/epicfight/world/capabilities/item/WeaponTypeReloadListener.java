@@ -8,8 +8,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import org.apache.commons.compress.utils.Lists;
-
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -96,7 +95,7 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 			}
 			
 			try {
-				WeaponCapability.Builder builder = deserializeWeaponCapabilityBuilder(nbt);
+				WeaponCapability.Builder builder = deserializeWeaponCapabilityBuilder(entry.getKey(), nbt);
 				
 				PRESETS.put(entry.getKey(), (itemstack) -> builder);
 				TAGMAP.put(entry.getKey(), nbt);
@@ -126,7 +125,7 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 		PRESETS.put(rl, (item) -> builder);
 	}
 	
-	public static WeaponCapability.Builder deserializeWeaponCapabilityBuilder(CompoundTag tag) {
+	public static WeaponCapability.Builder deserializeWeaponCapabilityBuilder(ResourceLocation rl, CompoundTag tag) {
 		WeaponCapability.Builder builder = WeaponCapability.builder();
 		
 		if (!tag.contains("category") || StringUtil.isNullOrEmpty(tag.getString("category"))) {
@@ -141,9 +140,9 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 			ParticleType<?> particleType = ForgeRegistries.PARTICLE_TYPES.getValue(new ResourceLocation(tag.getString("hit_particle")));
 			
 			if (particleType == null) {
-				EpicFightMod.LOGGER.warn("Can't find a particle type " + tag.getString("hit_particle"));
+				EpicFightMod.LOGGER.warn("Can't find a particle type " + tag.getString("hit_particle") + " in " + rl);
 			} else if (!(particleType instanceof HitParticleType)) {
-				EpicFightMod.LOGGER.warn(tag.getString("hit_particle") + " is not a hit particle type");
+				EpicFightMod.LOGGER.warn(tag.getString("hit_particle") + " is not a hit particle type in " + rl);
 			} else {
 				builder.hitParticle((HitParticleType)particleType);
 			}
@@ -153,7 +152,7 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 			SoundEvent sound = ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation(tag.getString("swing_sound")));
 			
 			if (sound == null) {
-				EpicFightMod.LOGGER.warn("Can't find a swing sound " + tag.getString("swing_sound"));
+				EpicFightMod.LOGGER.warn("Can't find a swing sound " + tag.getString("swing_sound") + " in " + rl);
 			} else {
 				builder.swingSound(sound);
 			}
@@ -163,7 +162,7 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 			SoundEvent sound = ForgeRegistries.SOUND_EVENTS.getValue(new ResourceLocation(tag.getString("hit_sound")));
 			
 			if (sound == null) {
-				EpicFightMod.LOGGER.warn("Can't find a hit sound " + tag.getString("hit_sound"));
+				EpicFightMod.LOGGER.warn("Can't find a hit sound " + tag.getString("hit_sound") + " in " + rl);
 			} else {
 				builder.hitSound(sound);
 			}
@@ -296,7 +295,9 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 			registerDefaultWeaponTypes();
 			
 			for (CompoundTag tag : packet.getTags()) {
-				PRESETS.put(new ResourceLocation(tag.getString("registry_name")), (itemstack) -> deserializeWeaponCapabilityBuilder(tag));
+				ResourceLocation rl = new ResourceLocation(tag.getString("registry_name"));
+				
+				PRESETS.put(rl, (itemstack) -> deserializeWeaponCapabilityBuilder(rl, tag));
 			}
 			
 			ItemCapabilityReloadListener.weaponTypeProcessedCheck();

@@ -6,8 +6,7 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import org.apache.commons.compress.utils.Lists;
-
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 
 import net.minecraft.client.player.LocalPlayer;

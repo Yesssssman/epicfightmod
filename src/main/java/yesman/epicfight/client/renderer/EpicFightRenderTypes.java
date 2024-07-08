@@ -1,18 +1,12 @@
 package yesman.epicfight.client.renderer;
 
-import java.util.Map;
 import java.util.OptionalDouble;
 import java.util.function.Function;
 
-import com.google.common.collect.Maps;
-import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.blaze3d.vertex.VertexFormat;
-import com.mojang.blaze3d.vertex.VertexMultiConsumer;
 
 import net.minecraft.Util;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.resources.ResourceLocation;
@@ -22,32 +16,16 @@ import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
 public class EpicFightRenderTypes extends RenderType {
-	private static final Map<RenderType, RenderType> TRIANGULATED_RENDER_TYPES = Maps.newHashMap();
+	private static final Function<RenderType, RenderType> TRIANGULATED_RENDER_TYPES = Util.memoize((renderType$1) -> {
+		if (renderType$1 instanceof CompositeRenderType compositeRenderType) {
+			return new CompositeRenderType(renderType$1.name, renderType$1.format, VertexFormat.Mode.TRIANGLES, renderType$1.bufferSize(), renderType$1.affectsCrumbling(), renderType$1.sortOnUpload, compositeRenderType.state);
+		} else {
+			return renderType$1;
+		}
+	});
 	
 	public static RenderType getTriangulated(RenderType renderType) {
-		return TRIANGULATED_RENDER_TYPES.computeIfAbsent(renderType, (key) -> {
-			RenderType triangulatedRenderType = null;
-			
-			if (renderType instanceof CompositeRenderType compositeRenderType) {
-				triangulatedRenderType = new CompositeRenderType(renderType.name, renderType.format, VertexFormat.Mode.TRIANGLES, renderType.bufferSize(), renderType.affectsCrumbling(), renderType.sortOnUpload, compositeRenderType.state);
-			}
-			
-			return triangulatedRenderType;
-		});
-	}
-	
-	private static VertexConsumer getTriangulatedRenderTypeBuffer(MultiBufferSource bufferSource, RenderType renderType) {
-		RenderType triangleRenderType = getTriangulated(renderType);
-		
-		if (bufferSource instanceof MultiBufferSource.BufferSource multiBufferSource) {
-			if (multiBufferSource.fixedBuffers.containsKey(renderType)) {
-				multiBufferSource.fixedBuffers.computeIfAbsent(triangleRenderType, (key) -> new BufferBuilder(renderType.bufferSize()));
-			}
-			
-			return multiBufferSource.getBuffer(triangleRenderType);
-		}
-		
-		return bufferSource.getBuffer(triangleRenderType);
+		return TRIANGULATED_RENDER_TYPES.apply(renderType);
 	}
 	
 	private static final Function<ResourceLocation, RenderType> ENTITY_INDICATOR = Util.memoize((textureLocation) -> {
@@ -82,11 +60,6 @@ public class EpicFightRenderTypes extends RenderType {
 				.setCullState(NO_CULL)
 				.createCompositeState(false)
 	);
-	
-	public static VertexConsumer getArmorFoilBufferTriangulated(MultiBufferSource bufferSource, RenderType renderType, boolean isEntity, boolean hasEffect) {
-		return hasEffect ? VertexMultiConsumer.create(getTriangulatedRenderTypeBuffer(bufferSource, isEntity ? RenderType.armorGlint() : RenderType.armorEntityGlint()),
-				getTriangulatedRenderTypeBuffer(bufferSource, renderType)) : getTriangulatedRenderTypeBuffer(bufferSource, renderType);
-	}
 	
 	public static RenderType entityIndicator(ResourceLocation locationIn) {
 		return ENTITY_INDICATOR.apply(locationIn);

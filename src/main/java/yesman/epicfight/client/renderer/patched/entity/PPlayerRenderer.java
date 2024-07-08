@@ -2,6 +2,7 @@ package yesman.epicfight.client.renderer.patched.entity;
 
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.layers.ArrowLayer;
 import net.minecraft.client.renderer.entity.layers.BeeStingerLayer;
 import net.minecraft.client.renderer.entity.layers.CapeLayer;
@@ -18,8 +19,8 @@ import yesman.epicfight.client.world.capabilites.entitypatch.player.AbstractClie
 
 @OnlyIn(Dist.CLIENT)
 public class PPlayerRenderer extends PHumanoidRenderer<AbstractClientPlayer, AbstractClientPlayerPatch<AbstractClientPlayer>, PlayerModel<AbstractClientPlayer>, PlayerRenderer, HumanoidMesh> {
-	public PPlayerRenderer() {
-		super(Meshes.BIPED);
+	public PPlayerRenderer(EntityRendererProvider.Context context) {
+		super(Meshes.BIPED, context);
 		
 		this.addPatchedLayer(ArrowLayer.class, new EmptyLayer<>());
 		this.addPatchedLayer(BeeStingerLayer.class, new EmptyLayer<>());

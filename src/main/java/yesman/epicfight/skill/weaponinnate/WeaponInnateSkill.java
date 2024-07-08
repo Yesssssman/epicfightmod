@@ -102,8 +102,9 @@ public abstract class WeaponInnateSkill extends Skill {
 		list.add(Component.literal(title).withStyle(ChatFormatting.UNDERLINE).withStyle(ChatFormatting.GRAY));
 		
 		MutableComponent damageComponent = Component.translatable("damage_source.epicfight.damage",
-					Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(damage)).withStyle(ChatFormatting.RED)
-				).withStyle(ChatFormatting.DARK_GRAY);
+																	Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(damage))
+																				.withStyle(ChatFormatting.RED)
+																	).withStyle(ChatFormatting.DARK_GRAY);
 		
 		this.getProperty(AttackPhaseProperty.EXTRA_DAMAGE, propertyMap).ifPresent((extraDamageSet) -> {
 			extraDamageSet.forEach((extraDamage) -> {
@@ -114,21 +115,23 @@ public abstract class WeaponInnateSkill extends Skill {
 		list.add(damageComponent);
 		
 		if (armorNegation != 0.0D) {
-			list.add(Component.translatable( EpicFightAttributes.ARMOR_NEGATION.get().getDescriptionId()
-											  , Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(armorNegation) + "%"
-											  ).withStyle(ChatFormatting.GOLD)).withStyle(ChatFormatting.DARK_GRAY));
+			list.add(Component.translatable(EpicFightAttributes.ARMOR_NEGATION.get().getDescriptionId() + ".value",
+											Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(armorNegation) + "%")
+														.withStyle(ChatFormatting.GOLD))
+											.withStyle(ChatFormatting.DARK_GRAY));
 		}
 		
 		if (impact != 0.0D) {
-			list.add(Component.translatable( EpicFightAttributes.IMPACT.get().getDescriptionId()
-					                          , Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(impact)
-					                          ).withStyle(ChatFormatting.AQUA)
-			                                  ).withStyle(ChatFormatting.DARK_GRAY));
+			list.add(Component.translatable(EpicFightAttributes.IMPACT.get().getDescriptionId() + ".value",
+											Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(impact))
+														.withStyle(ChatFormatting.AQUA))
+											.withStyle(ChatFormatting.DARK_GRAY));
 		}
 		
-		list.add(Component.translatable(EpicFightAttributes.MAX_STRIKES.get().getDescriptionId(),
-				Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(maxStrikes)).withStyle(ChatFormatting.WHITE)
-		).withStyle(ChatFormatting.DARK_GRAY));
+		list.add(Component.translatable(EpicFightAttributes.MAX_STRIKES.get().getDescriptionId() + ".value",
+											Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(maxStrikes))
+														.withStyle(ChatFormatting.WHITE))
+											.withStyle(ChatFormatting.DARK_GRAY));
 		
 		Optional<StunType> stunOption = this.getProperty(AttackPhaseProperty.STUN_TYPE, propertyMap);
 		

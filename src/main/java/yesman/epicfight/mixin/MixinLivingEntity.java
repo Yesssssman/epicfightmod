@@ -7,17 +7,24 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.CombatRules;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.level.Level;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
+import yesman.epicfight.world.capabilities.entitypatch.CustomHumanoidMobPatch;
+import yesman.epicfight.world.capabilities.entitypatch.CustomMobPatch;
+import yesman.epicfight.world.capabilities.entitypatch.HurtableEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.projectile.ProjectilePatch;
 import yesman.epicfight.world.damagesource.EpicFightDamageSource;
+import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributeSupplier;
 
 @Mixin(value = LivingEntity.class)
 public abstract class MixinLivingEntity {
@@ -80,12 +87,37 @@ public abstract class MixinLivingEntity {
 		
 		if (epicFightDamageSource != null && !source.is(DamageTypeTags.BYPASSES_ARMOR)) {
 			this.hurtArmor(source, amount);
-			float armorNegationAmount = amount * epicFightDamageSource.getArmorNegation() * 0.01F;
+			float armorNegationAmount = amount * Math.min(epicFightDamageSource.getArmorNegation() * 0.01F , 1.0F);
 			float amountElse = amount - armorNegationAmount;
 			LivingEntity self = (LivingEntity)((Object)this);
 			amountElse = CombatRules.getDamageAfterAbsorb(amountElse, (float)self.getArmorValue(), (float)self.getAttributeValue(Attributes.ARMOR_TOUGHNESS));
 			info.setReturnValue(armorNegationAmount + amountElse);
 			info.cancel();
+		}
+	}
+	
+	@Inject(at = @At(value = "HEAD"), method = "readAdditionalSaveData(Lnet/minecraft/nbt/CompoundTag;)V", cancellable = true)
+	private void epicfight_readAdditionalSaveData(CompoundTag compTag, CallbackInfo info) {
+		LivingEntity self = (LivingEntity)((Object)this);
+		CustomMobPatch<?> customMobPatch = EpicFightCapabilities.getEntityPatch(self, CustomMobPatch.class);
+		
+		if (customMobPatch != null) {
+			customMobPatch.initAttributes();
+		} else {
+			CustomHumanoidMobPatch<?> customHumanoidMobPatch = EpicFightCapabilities.getEntityPatch(self, CustomHumanoidMobPatch.class);
+			
+			if (customHumanoidMobPatch != null) {
+				customHumanoidMobPatch.initAttributes();
+			}
+		}
+	}
+	
+	@Inject(at = @At(value = "TAIL"), method = "<init>(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/level/Level;)V", cancellable = true)
+	private void epicfight_constructor(EntityType<?> entityType, Level level, CallbackInfo info) {
+		LivingEntity self = (LivingEntity)((Object)this);
+		
+		if (EpicFightCapabilities.getEntityPatch(self, HurtableEntityPatch.class) != null) {
+			self.getAttributes().supplier = new EpicFightAttributeSupplier(self.getAttributes().supplier);
 		}
 	}
 }

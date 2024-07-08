@@ -148,6 +148,9 @@ public class SelectAnimationScreen extends Screen {
 			
 			AnimationManager.getInstance().getAnimations(SelectAnimationScreen.this.filter).values().stream().filter((animation) -> StringUtil.isNullOrEmpty(keyward) ? true : animation.getRegistryName().toString().contains(keyward))
 																							.map(AnimationEntry::new).sorted((a1, a2) -> Integer.compare(a1.animation.getId(), a2.animation.getId())).forEach(this::addEntry);
+			
+			DatapackEditScreen.getCurrentScreen().getUserAniamtions().values().stream().map((packEntry) -> packEntry.getValue().cast()).filter(SelectAnimationScreen.this.filter).map(AnimationEntry::new)
+																		.sorted((a1, a2) -> a1.animation.getRegistryName().compareTo(a2.animation.getRegistryName())).forEach(this::addEntry);
 		}
 		
 		@OnlyIn(Dist.CLIENT)

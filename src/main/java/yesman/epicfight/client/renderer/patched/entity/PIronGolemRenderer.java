@@ -1,6 +1,7 @@
 package yesman.epicfight.client.renderer.patched.entity;
 
 import net.minecraft.client.model.IronGolemModel;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.IronGolemRenderer;
 import net.minecraft.client.renderer.entity.layers.IronGolemCrackinessLayer;
 import net.minecraft.world.entity.animal.IronGolem;
@@ -13,7 +14,8 @@ import yesman.epicfight.world.capabilities.entitypatch.mob.IronGolemPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class PIronGolemRenderer extends PatchedLivingEntityRenderer<IronGolem, IronGolemPatch, IronGolemModel<IronGolem>, IronGolemRenderer, IronGolemMesh> {
-	public PIronGolemRenderer() {
+	public PIronGolemRenderer(EntityRendererProvider.Context context) {
+		super(context);
 		this.addPatchedLayer(IronGolemCrackinessLayer.class, new PatchedGolemCrackLayer(Meshes.IRON_GOLEM));
 	}
 	

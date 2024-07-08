@@ -14,6 +14,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
@@ -24,6 +25,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
+import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
@@ -91,12 +93,10 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 		}
 	}
 	
-	@Override
-	protected void initAttributes() {
-		super.initAttributes();
-		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(8.0F);
-		this.original.getAttribute(EpicFightAttributes.MAX_STRIKES.get()).setBaseValue(Double.MAX_VALUE);
-		this.original.getAttribute(Attributes.ATTACK_DAMAGE).setBaseValue(10.0F);
+	public static void initAttributes(EntityAttributeModificationEvent event) {
+		event.add(EntityType.ENDER_DRAGON, EpicFightAttributes.IMPACT.get(), 8.0D);
+		event.add(EntityType.ENDER_DRAGON, EpicFightAttributes.MAX_STRIKES.get(), Double.MAX_VALUE);
+		event.add(EntityType.ENDER_DRAGON, Attributes.ATTACK_DAMAGE, 10.0D);
 	}
 	
 	@Override

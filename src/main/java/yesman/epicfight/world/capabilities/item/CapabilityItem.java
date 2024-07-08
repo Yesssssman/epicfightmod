@@ -85,7 +85,7 @@ public class CapabilityItem {
 			Component textComp = itemTooltip.get(i);
 			index = i;
 			
-			if (findComponentArgument(textComp, Attributes.ATTACK_SPEED.getDescriptionId()) != null) {
+			if (this.findComponentArgument(textComp, Attributes.ATTACK_SPEED.getDescriptionId()) != null) {
 				modifyIn = true;
 				break;
 			}
@@ -109,7 +109,7 @@ public class CapabilityItem {
 				double value = attribute.get(armorNegation).getAmount() + entitypatch.getOriginal().getAttribute(armorNegation).getBaseValue();
 
 				if (value > 0.0D) {
-					itemTooltip.add(index, Component.literal(" ").append(Component.translatable(armorNegation.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
+					itemTooltip.add(index, Component.literal(" ").append(Component.translatable(armorNegation.getDescriptionId() + ".value", ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
 				}
 			}
 			
@@ -119,7 +119,7 @@ public class CapabilityItem {
 				if (value > 0.0D) {
 					int i = itemstack.getEnchantmentLevel(Enchantments.KNOCKBACK);
 					value *= (1.0F + i * 0.12F);
-					itemTooltip.add(index++, Component.literal(" ").append(Component.translatable(impact.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
+					itemTooltip.add(index++, Component.literal(" ").append(Component.translatable(impact.getDescriptionId() + ".value", ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
 				}
 			}
 			
@@ -127,10 +127,10 @@ public class CapabilityItem {
 				double value = attribute.get(maxStrikes).getAmount() + entitypatch.getOriginal().getAttribute(maxStrikes).getBaseValue();
 
 				if (value > 0.0D) {
-					itemTooltip.add(index++, Component.literal(" ").append(Component.translatable(maxStrikes.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
+					itemTooltip.add(index++, Component.literal(" ").append(Component.translatable(maxStrikes.getDescriptionId() + ".value", ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(value))));
 				}
 			} else {
-				itemTooltip.add(index++, Component.literal(" ").append(Component.translatable(maxStrikes.getDescriptionId(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(maxStrikes.getDefaultValue()))));
+				itemTooltip.add(index++, Component.literal(" ").append(Component.translatable(maxStrikes.getDescriptionId() + ".value", ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(maxStrikes.getDefaultValue()))));
 			}
 		}
 	}
@@ -145,7 +145,7 @@ public class CapabilityItem {
 			// check all arguments.
 			for (Object arg : contents.getArgs()) {
 				if (arg instanceof Component argComponent) {
-					Object ret = findComponentArgument(argComponent, key);
+					Object ret = this.findComponentArgument(argComponent, key);
 					if (ret != null) {
 						return ret;
 					}
@@ -154,7 +154,7 @@ public class CapabilityItem {
 		}
 		// check all sibling.
 		for (Component siblingComponent : component.getSiblings()) {
-			Object ret = findComponentArgument(siblingComponent, key);
+			Object ret = this.findComponentArgument(siblingComponent, key);
 			if (ret != null) {
 				return ret;
 			}

@@ -57,6 +57,7 @@ public abstract class MixinBufferBuilder {
 			this.putSortedTriangleIndices(vertexformat$indextype);
 		}
 	}
+	
 	private void putSortedTriangleIndices(VertexFormat.IndexType indexType) {
 		int[] aint = this.sorting.sort(this.sortingPoints);
 		IntConsumer intconsumer = this.intConsumer(this.nextElementByte,indexType);

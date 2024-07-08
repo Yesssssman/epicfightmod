@@ -8,6 +8,7 @@ import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.ArrowLayer;
 import net.minecraft.client.renderer.entity.layers.BeeStingerLayer;
@@ -39,11 +40,11 @@ import yesman.epicfight.gameasset.Armatures;
 
 @OnlyIn(Dist.CLIENT)
 public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer, LocalPlayerPatch, PlayerModel<LocalPlayer>, LivingEntityRenderer<LocalPlayer, PlayerModel<LocalPlayer>>, HumanoidMesh> {
-	public FirstPersonRenderer() {
-		super();
+	public FirstPersonRenderer(EntityRendererProvider.Context context) {
+		super(context);
 		this.addPatchedLayer(ElytraLayer.class, new EmptyLayer<>());
 		this.addPatchedLayer(PlayerItemInHandLayer.class, new PatchedItemInHandLayer<>());
-		this.addPatchedLayer(HumanoidArmorLayer.class, new WearableItemLayer<>(Meshes.BIPED, true));
+		this.addPatchedLayer(HumanoidArmorLayer.class, new WearableItemLayer<>(Meshes.BIPED, true, context.getModelManager()));
 		this.addPatchedLayer(CustomHeadLayer.class, new EmptyLayer<>());
 		this.addPatchedLayer(ArrowLayer.class, new EmptyLayer<>());
 		this.addPatchedLayer(BeeStingerLayer.class, new EmptyLayer<>());

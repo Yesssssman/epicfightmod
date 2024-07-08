@@ -301,4 +301,6 @@ public class EpicFightSkills {
 					.addProperty(AttackPhaseProperty.STUN_TYPE, StunType.HOLD);
 		EVERLASTING_ALLEGIANCE = everlastAllegiance;
 	}
+	
+	private EpicFightSkills() {}
 }

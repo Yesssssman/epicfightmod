@@ -108,18 +108,17 @@ dependencies {
     
     //implementation fg.deobf("local:epcfight:20.x.x")
     compileOnly fg.deobf("curse.maven:geckolib-388172:4822252")
-    compileOnly fg.deobf("curse.maven:azurelib-817423:4812417")
-    compileOnly fg.deobf("curse.maven:azurelibarmor-912767:4866792")
-    
-    //compileOnly fg.deobf("curse.maven:patchouli-306770:4966125")
-    //compileOnly fg.deobf("curse.maven:curios-309927:5367944")
-    //compileOnly fg.deobf("curse.maven:ars-nouveau-401955:5436131")
+    compileOnly fg.deobf("curse.maven:azurelib-817423:5500355")
+    compileOnly fg.deobf("curse.maven:azurelib-armor-912767:5500370")
     
     // compile against the JEI API but do not include it at runtime
   	compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-common-api:${jei_version}"))
  	compileOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge-api:${jei_version}"))
   	// at runtime, use the full JEI jar for Forge
   	runtimeOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}"))
+    
+    implementation fg.deobf("curse.maven:curios-309927:5367944")
+    implementation fg.deobf("curse.maven:epic-samurais-848381:5493853")
     
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }

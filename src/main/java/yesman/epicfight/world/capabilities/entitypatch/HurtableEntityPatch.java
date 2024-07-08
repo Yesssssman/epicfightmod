@@ -10,12 +10,10 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.world.damagesource.StunType;
-import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributeSupplier;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
 public abstract class HurtableEntityPatch<T extends LivingEntity> extends EntityPatch<T> {
@@ -23,12 +21,6 @@ public abstract class HurtableEntityPatch<T extends LivingEntity> extends Entity
 	protected float stunTimeReductionDefault;
 	protected float stunTimeReduction;
 	protected boolean cancelKnockback;
-	
-	@Override
-	public void onJoinWorld(T entityIn, EntityJoinLevelEvent event) {
-		super.onJoinWorld(entityIn, event);
-		this.original.getAttributes().supplier = new EpicFightAttributeSupplier(this.original.getAttributes().supplier);
-	}
 	
 	@Override
 	protected void serverTick(LivingEvent.LivingTickEvent event) {

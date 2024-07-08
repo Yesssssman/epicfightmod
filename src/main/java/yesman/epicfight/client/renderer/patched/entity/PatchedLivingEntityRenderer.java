@@ -15,6 +15,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -47,7 +48,11 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 	}
 	
 	protected Map<Class<?>, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>, AM>> patchedLayers = Maps.newHashMap();
-
+	
+	public PatchedLivingEntityRenderer(EntityRendererProvider.Context context) {
+		super(context);
+	}
+	
 	@Override
 	public void render(E entityIn, T entitypatch, R renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
 		super.render(entityIn, entitypatch, renderer, buffer, poseStack, packedLight, partialTicks);

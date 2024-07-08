@@ -4,6 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.model.IllagerModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.world.entity.monster.AbstractIllager;
@@ -15,7 +16,9 @@ import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class PVindicatorRenderer extends PIllagerRenderer<AbstractIllager, MobPatch<AbstractIllager>> {
-	public PVindicatorRenderer() {
+	public PVindicatorRenderer(EntityRendererProvider.Context context) {
+		super(context);
+		
 		this.addPatchedLayer(ItemInHandLayer.class, new PatchedItemInHandLayer<>() {
 			@Override
 			public void renderLayer(MobPatch<AbstractIllager> entitypatch, AbstractIllager entityliving, RenderLayer<AbstractIllager, IllagerModel<AbstractIllager>> originalRenderer, PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {

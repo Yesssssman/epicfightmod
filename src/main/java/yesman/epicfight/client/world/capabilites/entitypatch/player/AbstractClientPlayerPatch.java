@@ -243,7 +243,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 		Direction direction;
 		
 		if (this.original.isAutoSpinAttack()) {
-			OpenMatrix4f mat = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0, partialTick, 0.9375F, 0.9375F, 0.9375F);
+			OpenMatrix4f mat = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0, partialTick, PLAYER_SCALE, PLAYER_SCALE, PLAYER_SCALE);
 			float yRot = MathUtils.lerpBetween(this.original.yRotO, this.original.getYRot(), partialTick);
 			float xRot = MathUtils.lerpBetween(this.original.xRotO, this.original.getXRot(), partialTick);
 			
@@ -254,7 +254,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 			
 			return mat;
 		} else if (this.original.isFallFlying()) {
-			OpenMatrix4f mat = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0, partialTick, 0.9375F, 0.9375F, 0.9375F);
+			OpenMatrix4f mat = MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0, 0, 0, 0, partialTick, PLAYER_SCALE, PLAYER_SCALE, PLAYER_SCALE);
             float f1 = (float)this.original.getFallFlyingTicks() + partialTick;
             float f2 = Mth.clamp(f1 * f1 / 100.0F, 0.0F, 1.0F);
             
@@ -294,7 +294,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
             	}
 			}
 			
-			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yRot, yRot, 0, 0.9375F, 0.9375F, 0.9375F);
+			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yRot, yRot, 0, PLAYER_SCALE, PLAYER_SCALE, PLAYER_SCALE);
 		} else if ((direction = this.getLadderDirection(this.original.getFeetBlockState(), this.original.level(), this.original.blockPosition(), this.original)) != Direction.UP) {
 			float yRot = 0.0F;
 			
@@ -312,7 +312,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 				break;
 			}
 			
-			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yRot, yRot, 0.0F, 0.9375F, 0.9375F, 0.9375F);
+			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, yRot, yRot, 0.0F, PLAYER_SCALE, PLAYER_SCALE, PLAYER_SCALE);
 		} else {
 			float yRotO;
 			float yRot;
@@ -335,7 +335,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 		        xRot = f4;
 			}
 			
-			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, xRotO, xRot, yRotO, yRot, partialTick, 0.9375F, 0.9375F, 0.9375F);
+			return MathUtils.getModelMatrixIntegral(0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, xRotO, xRot, yRotO, yRot, partialTick, PLAYER_SCALE, PLAYER_SCALE, PLAYER_SCALE);
 		}
 	}
 	

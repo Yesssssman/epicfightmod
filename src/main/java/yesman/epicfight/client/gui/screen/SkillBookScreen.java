@@ -518,7 +518,7 @@ public class SkillBookScreen extends Screen {
 		private final TextureInfo textureInfo;
 		
 		public AttributeIcon(int x, int y, int width, int height, Attribute attribute, TextureInfo textureInfo) {
-			super(x, y, width, height, Component.translatable(attribute.getDescriptionId() + ".tooltip"));
+			super(x, y, width, height, Component.translatable(attribute.getDescriptionId() + ".skillbook_tooltip"));
 			this.textureInfo = textureInfo;
 		}
 		

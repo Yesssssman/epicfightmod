@@ -10,6 +10,7 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -30,7 +31,9 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 public class PCutsomGeoEntityRenderer<E extends LivingEntity & GeoAnimatable> extends PatchedEntityRenderer<E, LivingEntityPatch<E>, GeoEntityRenderer<E>, AnimatedMesh> {
 	private final AnimatedMesh mesh;
 	
-	public PCutsomGeoEntityRenderer(AnimatedMesh mesh) {
+	public PCutsomGeoEntityRenderer(AnimatedMesh mesh, EntityRendererProvider.Context context) {
+		super(context);
+		
 		this.mesh = mesh;
 	}
 	

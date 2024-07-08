@@ -7,6 +7,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.Entity;
@@ -33,6 +34,9 @@ public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends Li
 	static {
 		shouldShowName = ObfuscationReflectionHelper.findMethod(EntityRenderer.class, "m_6512_", Entity.class);
 		renderNameTag = ObfuscationReflectionHelper.findMethod(EntityRenderer.class, "m_7649_", Entity.class, Component.class, PoseStack.class, MultiBufferSource.class, int.class);
+	}
+	
+	public PatchedEntityRenderer(EntityRendererProvider.Context context) {
 	}
 	
 	public void render(E entityIn, T entitypatch, R renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {

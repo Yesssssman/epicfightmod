@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -32,7 +33,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 import io.netty.util.internal.StringUtil;
 import net.minecraft.SharedConstants;
@@ -160,9 +160,9 @@ public class DatapackEditScreen extends Screen {
 	}
 	
 	public static Set<Map.Entry<ResourceLocation, Function<Item, CapabilityItem.Builder>>> getSerializableWeaponTypes() {
-		return workingPackScreen.weaponTab.packList.stream().reduce(Sets.<Map.Entry<ResourceLocation, Function<Item, CapabilityItem.Builder>>>newHashSet(), (set, entry) -> {
+		return workingPackScreen.weaponTypeTab.packList.stream().reduce(Sets.<Map.Entry<ResourceLocation, Function<Item, CapabilityItem.Builder>>>newHashSet(), (set, entry) -> {
 			try {
-				WeaponCapability.Builder builder = WeaponTypeReloadListener.deserializeWeaponCapabilityBuilder(entry.getValue());
+				WeaponCapability.Builder builder = WeaponTypeReloadListener.deserializeWeaponCapabilityBuilder(entry.getKey(), entry.getValue());
 				set.add(PackEntry.ofValue(entry.getKey(), (itemstack) -> builder));
 			} catch (Exception e) {
 				e.printStackTrace();
@@ -179,9 +179,9 @@ public class DatapackEditScreen extends Screen {
 	private GridLayout bottomButtons;
 	private TabNavigationBar tabNavigationBar;
 	private final Screen parentScreen;
-	private final DatapackEditScreen.WeaponTypeTab weaponTab;
+	private final DatapackEditScreen.WeaponTypeTab weaponTypeTab;
 	private final DatapackEditScreen.ItemCapabilityTab itemCapabilityTab;
-	private final DatapackEditScreen.MobPatchTab mobPatchTab;
+	private final DatapackEditScreen.MobCapabilityTab mobCapabilityTab;
 	
 	private final Map<ResourceLocation, PackEntry<FakeAnimation, ClipHoldingAnimation>> userAnimations = Maps.newLinkedHashMap();
 	private final BiMap<ResourceLocation, AnimatedMesh> userMeshes = HashBiMap.create();
@@ -213,9 +213,9 @@ public class DatapackEditScreen extends Screen {
 		this.minecraft = parentScreen.getMinecraft();
 		this.font = parentScreen.getMinecraft().font;
 		
-		this.weaponTab = new DatapackEditScreen.WeaponTypeTab();
+		this.weaponTypeTab = new DatapackEditScreen.WeaponTypeTab();
 		this.itemCapabilityTab = new DatapackEditScreen.ItemCapabilityTab();
-		this.mobPatchTab = new DatapackEditScreen.MobPatchTab();
+		this.mobCapabilityTab = new DatapackEditScreen.MobCapabilityTab();
 		
 		if (workingPackScreen == null) {
 			workingPackScreen = this;
@@ -231,9 +231,9 @@ public class DatapackEditScreen extends Screen {
 			PackResources packResources = pack.open();
 			
 			this.importUserData(packResources);
-			this.weaponTab.importEntries(packResources);
+			this.weaponTypeTab.importEntries(packResources);
 			this.itemCapabilityTab.importEntries(packResources);
-			this.mobPatchTab.importEntries(packResources);
+			this.mobCapabilityTab.importEntries(packResources);
 			
 			packResources.close();
 			
@@ -261,9 +261,9 @@ public class DatapackEditScreen extends Screen {
 			
 			out = new ZipOutputStream(new FileOutputStream(zipFile));
 			
-			this.weaponTab.exportEntries(out);
+			this.weaponTypeTab.exportEntries(out);
 			this.itemCapabilityTab.exportEntries(out);
-			this.mobPatchTab.exportEntries(out);
+			this.mobCapabilityTab.exportEntries(out);
 			this.exportUserData(out);
 			
 			ZipEntry zipEntry = new ZipEntry("pack.mcmeta");
@@ -306,20 +306,66 @@ public class DatapackEditScreen extends Screen {
 	
 	@Override
 	public void onFilesDrop(List<Path> filePath) {
-		if (filePath.size() > 1) {
-			this.minecraft.setScreen(new MessageScreen<>("", "Please select only one file", this, (button) -> this.minecraft.setScreen(this), 160, 50));
+		boolean isJsonFiles = true;
+		
+		for (Path path : filePath) {
+			isJsonFiles &= path.getFileName().toString().indexOf(".json") > -1;
 		}
 		
-		if (this.weaponTab.packList.size() > 0 || this.itemCapabilityTab.packList.size() > 0 || this.mobPatchTab.packList.size() > 0) {
-			this.minecraft.setScreen(new MessageScreen<>("", "The current entries will be removed if you import the new data pack. Do you want to proceed?", this,
-														(button) -> {
-															if (this.importDataPack(filePath.get(0))) {
-																this.minecraft.setScreen(this);
-															}
-														}, (button) -> this.minecraft.setScreen(this), 200, 90));
+		if (isJsonFiles) {
+			this.minecraft.setScreen(new MessageScreen<>("", "Enter the mod id", this,
+					(modid) -> {
+						StringBuilder sb = new StringBuilder();
+						boolean hasException = false;
+						
+						for (Path path : filePath) {
+							try {
+								InputStream stream = Files.newInputStream(path);
+								ResourceLocation registryName = new ResourceLocation(modid, path.getFileName().toString().replaceAll(".json", ""));
+								
+								if (this.tabManager.getCurrentTab() == this.weaponTypeTab) {
+									this.weaponTypeTab.importJson(registryName, stream);
+								} else if (this.tabManager.getCurrentTab() == this.itemCapabilityTab) {
+									this.itemCapabilityTab.importJson(registryName, null, stream);
+								} else if (this.tabManager.getCurrentTab() == this.mobCapabilityTab) {
+									this.mobCapabilityTab.importJson(registryName, stream);
+								}
+							} catch (Exception e) {
+								hasException = true;
+								sb.append(String.format("%s : %s\n", path.getFileName().toString(), e.getMessage()));
+								e.printStackTrace();
+							}
+						}
+						
+						if (hasException) {
+							this.minecraft.setScreen(new MessageScreen<>("Failed to import these items", sb.toString(), this, (button2) -> this.minecraft.setScreen(this), 300, 70).autoCalculateHeight());
+						} else {
+							this.minecraft.setScreen(this);
+						}
+					},
+					(button) -> this.minecraft.setScreen(this),
+					new ResizableEditBox(this.minecraft.font, 0, 0, 0, 16, Component.literal("datapack_edit.input"), null, null), 120, 80));
 		} else {
-			workingPackScreen = this;
-			this.importDataPack(filePath.get(0));
+			if (filePath.size() > 1) {
+				this.minecraft.setScreen(new MessageScreen<>("", "Please drop only one file", this, (button) -> this.minecraft.setScreen(this), 160, 50));
+			}
+			
+			Path path = filePath.get(0);
+			
+			if (this.weaponTypeTab.packList.size() > 0 || this.itemCapabilityTab.packList.size() > 0 || this.mobCapabilityTab.packList.size() > 0) {
+				this.minecraft.setScreen(new MessageScreen<>("", "The current entries will be removed if you import the new data pack. Do you want to proceed?", this,
+															(button) -> {
+																DatapackEditScreen newScreen = new DatapackEditScreen(this.parentScreen);
+																workingPackScreen = newScreen;
+																
+																if (newScreen.importDataPack(path)) {
+																	this.minecraft.setScreen(newScreen);
+																}
+															}, (button) -> this.minecraft.setScreen(this), 200, 90));
+			} else {
+				workingPackScreen = this;
+				this.importDataPack(path);
+			}
 		}
 	}
 	
@@ -328,7 +374,7 @@ public class DatapackEditScreen extends Screen {
 		// Enable stencil buffer to render a grid inside the area
 		Minecraft.getInstance().getMainRenderTarget().enableStencil();
 		
-		this.tabNavigationBar = TabNavigationBar.builder(this.tabManager, this.width).addTabs(this.weaponTab, this.itemCapabilityTab, this.mobPatchTab).build();
+		this.tabNavigationBar = TabNavigationBar.builder(this.tabManager, this.width).addTabs(this.weaponTypeTab, this.itemCapabilityTab, this.mobCapabilityTab).build();
 		this.tabNavigationBar.selectTab(0, false);
 		
 	    this.addRenderableWidget(this.tabNavigationBar);
@@ -337,9 +383,9 @@ public class DatapackEditScreen extends Screen {
 		GridLayout.RowHelper gridlayout$rowhelper = this.bottomButtons.createRowHelper(2);
 		gridlayout$rowhelper.addChild(Button.builder(GUI_EXPORT, (button) -> {
 			try {
-				this.weaponTab.validateBeforeExport();
+				this.weaponTypeTab.validateBeforeExport();
 				this.itemCapabilityTab.validateBeforeExport();
-				this.mobPatchTab.validateBeforeExport();
+				this.mobCapabilityTab.validateBeforeExport();
 			} catch (Exception e) {
 				e.printStackTrace();
 				this.minecraft.setScreen(new MessageScreen<>("", e.getMessage(), this, (button2) -> this.minecraft.setScreen(this), 400, 110).autoCalculateHeight());
@@ -412,13 +458,13 @@ public class DatapackEditScreen extends Screen {
 	
 	@Override
 	public void onClose() {
-		if (this.weaponTab.packList.size() > 0 || this.itemCapabilityTab.packList.size() > 0 || this.mobPatchTab.packList.size() > 0 || !this.userMeshes.isEmpty() || !this.userArmatures.isEmpty() || !this.userAnimations.isEmpty()) {
+		if (this.weaponTypeTab.packList.size() > 0 || this.itemCapabilityTab.packList.size() > 0 || this.mobCapabilityTab.packList.size() > 0 || !this.userMeshes.isEmpty() || !this.userArmatures.isEmpty() || !this.userAnimations.isEmpty()) {
 			workingPackScreen = this;
 		} else {
 			workingPackScreen = null;
 		}
 		
-		this.weaponTab.modelPreviewer.onDestroy();
+		this.weaponTypeTab.modelPreviewer.onDestroy();
 		this.itemCapabilityTab.modelPreviewer.onDestroy();
 		this.clearUserData();
 		
@@ -613,6 +659,7 @@ public class DatapackEditScreen extends Screen {
 		this.userAnimations.values().forEach((packEntry) -> AnimationManager.getInstance().removeUserAnimation(packEntry.getValue()));
 		Meshes.build(Minecraft.getInstance().getResourceManager());
 		Armatures.build(Minecraft.getInstance().getResourceManager());
+		WeaponTypeReloadListener.clear();
 	}
 	
 	public Map<ResourceLocation, AnimatedMesh> getUserMeshes() {
@@ -1060,7 +1107,7 @@ public class DatapackEditScreen extends Screen {
 		public void validateBeforeExport() {
 			for (PackEntry<ResourceLocation, CompoundTag> packEntry : this.packList) {
 				try {
-					WeaponTypeReloadListener.deserializeWeaponCapabilityBuilder(packEntry.getValue());
+					WeaponTypeReloadListener.deserializeWeaponCapabilityBuilder(packEntry.getKey(), packEntry.getValue());
 				} catch (Exception e) {
 					e.printStackTrace();
 					throw new IllegalStateException("Failed to export weapon type " + packEntry.getKey() + " :\n" + e.getMessage());
@@ -1071,29 +1118,41 @@ public class DatapackEditScreen extends Screen {
 		@Override
 		public void importEntries(PackResources packResources) {
 			packResources.getNamespaces(PackType.SERVER_DATA).stream().distinct().forEach((namespace) -> {
-				packResources.listResources(PackType.SERVER_DATA, namespace, this.directory, (resourceLocation, stream) -> {
+				packResources.listResources(PackType.SERVER_DATA, namespace, this.directory, (resourceLocation, streamSupplier) -> {
 					try {
-						JsonReader jsonReader = new JsonReader(new InputStreamReader(stream.get(), StandardCharsets.UTF_8));
-						jsonReader.setLenient(true);
-						JsonObject jsonObject = Streams.parse(jsonReader).getAsJsonObject();
-						CompoundTag compTag = TagParser.parseTag(jsonObject.toString());
 						ResourceLocation rl = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll(this.directory + "/", "").replaceAll(".json", ""));
-						
-						try {
-							WeaponCapability.Builder builder = WeaponTypeReloadListener.deserializeWeaponCapabilityBuilder(compTag);
-							WeaponTypeReloadListener.register(rl, builder);
-							
-							this.packList.add(PackEntry.of(rl, () -> compTag));
-							this.packListGrid.addRowWithDefaultValues("pack_item", rl.toString());
-						} catch (Exception e) {
-							EpicFightMod.LOGGER.info("Failed to import " + rl + " because of " + e.getMessage());
-							e.printStackTrace();
-						}
-					} catch (IOException | CommandSyntaxException e) {
+						this.importJson(rl, streamSupplier.get());
+					} catch (Exception e) {
+						EpicFightMod.LOGGER.info("Failed to import " + resourceLocation + ": " + e.getMessage());
 						e.printStackTrace();
 					}
 				});
 			});
+		}
+		
+		public void importJson(ResourceLocation registryName, InputStream inputStream) throws Exception {
+			JsonReader jsonReader = new JsonReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+			
+			try {
+				jsonReader.setLenient(true);
+				JsonObject jsonObject = Streams.parse(jsonReader).getAsJsonObject();
+				CompoundTag compTag = TagParser.parseTag(jsonObject.toString());
+				
+				WeaponCapability.Builder builder = WeaponTypeReloadListener.deserializeWeaponCapabilityBuilder(registryName, compTag);
+				WeaponTypeReloadListener.register(registryName, builder);
+				
+				this.packList.add(PackEntry.ofValue(registryName, compTag));
+				this.packListGrid.addRowWithDefaultValues("pack_item", registryName.toString());
+			} catch (Exception e) {
+				EpicFightMod.LOGGER.info("Failed to import " + registryName + ": " + e.getMessage());
+				throw e;
+			} finally {
+				try {
+					jsonReader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		
 		@Override
@@ -1866,45 +1925,70 @@ public class DatapackEditScreen extends Screen {
 		@Override
 		public void importEntries(PackResources packResources) {
 			packResources.getNamespaces(PackType.SERVER_DATA).stream().distinct().forEach((namespace) -> {
-				packResources.listResources(PackType.SERVER_DATA, namespace, this.directory, (resourceLocation, stream) -> {
+				packResources.listResources(PackType.SERVER_DATA, namespace, this.directory, (resourceLocation, streamSupplier) -> {
 					if (resourceLocation.toString().contains("/types/")) {
 						return;
 					}
 					
 					try {
-						JsonReader jsonReader = new JsonReader(new InputStreamReader(stream.get(), StandardCharsets.UTF_8));
-						jsonReader.setLenient(true);
-						JsonObject jsonObject = Streams.parse(jsonReader).getAsJsonObject();
-						CompoundTag compTag = TagParser.parseTag(jsonObject.toString());
+						ResourceLocation registryName = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll(String.format("%s/%s/", this.directory, ItemType.WEAPON.directoryName), "")
+																													.replaceAll(String.format("%s/%s/", this.directory, ItemType.ARMOR.directoryName), "").replaceAll(".json", ""));
 						
 						ItemType itemType = resourceLocation.getPath().contains(ItemType.WEAPON.directoryName) ? ItemType.WEAPON : ItemType.ARMOR;
-						compTag.putString("item_type", itemType.toString());
+						this.importJson(registryName, itemType, streamSupplier.get());
 						
-						ResourceLocation rl = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll(String.format("%s/%s/", this.directory, ItemType.WEAPON.directoryName), "")
-																		.replaceAll(String.format("%s/%s/", this.directory, ItemType.ARMOR.directoryName), "").replaceAll(".json", ""));
+						ResourceLocation itemSkin = new ResourceLocation(registryName.getNamespace(), "item_skins/" + registryName.getPath() + ".json");
+						IoSupplier<InputStream> itemSkinStreamSupplier = packResources.getResource(PackType.CLIENT_RESOURCES, itemSkin);
 						
-						ResourceLocation itemSkin = new ResourceLocation(rl.getNamespace(), "item_skins/" + rl.getPath() + ".json");
-						IoSupplier<InputStream> supplier = packResources.getResource(PackType.CLIENT_RESOURCES, itemSkin);
-						
-						if (supplier != null) {
-							InputStream inputstream = supplier.get();
+						if (itemSkinStreamSupplier != null) {
+							InputStream itemSkinInputStream = itemSkinStreamSupplier.get();
 							
-							if (inputstream != null) {
-								jsonReader = new JsonReader(new InputStreamReader(inputstream, StandardCharsets.UTF_8));
+							if (itemSkinInputStream != null) {
+								JsonReader jsonReader = new JsonReader(new InputStreamReader(itemSkinInputStream, StandardCharsets.UTF_8));
 								jsonReader.setLenient(true);
+								CompoundTag comp = null;
 								
-								CompoundTag comp = TagParser.parseTag(Streams.parse(jsonReader).getAsJsonObject().toString());
-								compTag.put("trail", comp.get("trail"));
+								try {
+									comp = TagParser.parseTag(Streams.parse(jsonReader).getAsJsonObject().toString());
+								} finally {
+									jsonReader.close();
+								}
+								
+								this.packList.get(this.packList.size() - 1).getValue().put("trail", comp.get("trail"));
 							}
 						}
-						
-						this.packList.add(PackEntry.of(rl, () -> compTag));
-						this.packListGrid.addRowWithDefaultValues("pack_item", rl.toString());
-					} catch (IOException | CommandSyntaxException e) {
+					} catch (Exception e) {
+						EpicFightMod.LOGGER.info("Failed to import " + resourceLocation + ": " + e.getMessage());
 						e.printStackTrace();
 					}
 				});
 			});
+		}
+		
+		public void importJson(ResourceLocation registryName, ItemType itemType, InputStream inputStream) throws Exception {
+			JsonReader jsonReader = new JsonReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+			
+			try {
+				jsonReader.setLenient(true);
+				JsonObject jsonObject = Streams.parse(jsonReader).getAsJsonObject();
+				CompoundTag compTag = TagParser.parseTag(jsonObject.toString());
+				
+				if (itemType != null) {
+					compTag.putString("item_type", itemType.toString());
+				}
+				
+				this.packList.add(PackEntry.ofValue(registryName, compTag));
+				this.packListGrid.addRowWithDefaultValues("pack_item", registryName.toString());
+			} catch (Exception e) {
+				EpicFightMod.LOGGER.info("Failed to import " + registryName + ": " + e.getMessage());
+				throw e;
+			} finally {
+				try {
+					jsonReader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		
 		@Override
@@ -1955,7 +2039,7 @@ public class DatapackEditScreen extends Screen {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	class MobPatchTab extends DatapackTab<EntityType<?>> {
+	class MobCapabilityTab extends DatapackTab<EntityType<?>> {
 		private final ModelPreviewer modelPreviewer;
 		private final ComboBox<EntityType<?>> presetCombo = new ComboBox<>(DatapackEditScreen.this, DatapackEditScreen.this.font, 0, 124, 100, 15, HorizontalSizing.LEFT_WIDTH, null, 8,
 				Component.translatable("datapack_edit.mob_patch.preset"), EntityPatchProvider.getPatchedEntities(), (entityType) -> entityType == null ? "none" : EntityType.getKey(entityType).toString(), null);
@@ -2005,7 +2089,7 @@ public class DatapackEditScreen extends Screen {
 		private PopupBox<AnimatedMesh> meshPopupBox;
 		private PopupBox<Armature> armaturePopupBox;
 		
-		public MobPatchTab() {
+		public MobCapabilityTab() {
 			super(Component.translatable("gui." + EpicFightMod.MODID + ".tab.datapack.mob_patch"), MobPatchReloadListener.DIRECTORY, ForgeRegistries.ENTITY_TYPES, (entityType) -> entityType.getCategory() != MobCategory.MISC);
 			
 			this.inputComponentsList = new InputComponentList<>(DatapackEditScreen.this, 0, 0, 0, 0, 30) {
@@ -2020,19 +2104,19 @@ public class DatapackEditScreen extends Screen {
 					
 					boolean isHumanoid = tag.getBoolean("isHumanoid");
 					
-					MobPatchTab.this.rearrangeComponents(disabled, preset, isHumanoid);
+					MobCapabilityTab.this.rearrangeComponents(disabled, preset, isHumanoid);
 					this.setComponentsActive(true);
 					
 					if (preset) {
-						MobPatchTab.this.presetCombo._setResponder(null);
+						MobCapabilityTab.this.presetCombo._setResponder(null);
 						
 						this.setDataBindingComponenets(new Object[] {
 							EntityType.byString(tag.getString("preset")).orElse(null)
 						});
 						
-						MobPatchTab.this.presetCombo._setResponder(MobPatchTab.this.presetResponder);
+						MobCapabilityTab.this.presetCombo._setResponder(MobCapabilityTab.this.presetResponder);
 					} else if (!disabled) {
-						MobPatchTab.this.bindTag(tag);
+						MobCapabilityTab.this.bindTag(tag);
 					}
 				}
 			};
@@ -2089,7 +2173,7 @@ public class DatapackEditScreen extends Screen {
 			if (disable) {
 				this.disableCheckBox._setResponder(null);
 				this.disableCheckBox._setValue(true);
-				this.disableCheckBox._setResponder(MobPatchTab.this.disableResponder);
+				this.disableCheckBox._setResponder(MobCapabilityTab.this.disableResponder);
 				
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.disabled"));
@@ -2102,7 +2186,7 @@ public class DatapackEditScreen extends Screen {
 			} else {
 				this.disableCheckBox._setResponder(null);
 				this.disableCheckBox._setValue(false);
-				this.disableCheckBox._setResponder(MobPatchTab.this.disableResponder);
+				this.disableCheckBox._setResponder(MobCapabilityTab.this.disableResponder);
 				
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.disabled"));
@@ -2336,9 +2420,9 @@ public class DatapackEditScreen extends Screen {
 		}
 		
 		private void bindTag(CompoundTag tag) {
-			MobPatchTab.this.presetCombo._setResponder(null);
-			MobPatchTab.this.disableCheckBox._setResponder(null);
-			MobPatchTab.this.isHumanoidCheckbox._setResponder(null);
+			MobCapabilityTab.this.presetCombo._setResponder(null);
+			MobCapabilityTab.this.disableCheckBox._setResponder(null);
+			MobCapabilityTab.this.isHumanoidCheckbox._setResponder(null);
 			
 			Grid.PackImporter attributePackImporter = new Grid.PackImporter();
 			Grid.PackImporter livingmotionPackImporter = new Grid.PackImporter();
@@ -2386,9 +2470,9 @@ public class DatapackEditScreen extends Screen {
 				stunPackImporter
 			});
 			
-			MobPatchTab.this.presetCombo._setResponder(MobPatchTab.this.presetResponder);
-			MobPatchTab.this.disableCheckBox._setResponder(MobPatchTab.this.disableResponder);
-			MobPatchTab.this.isHumanoidCheckbox._setResponder(MobPatchTab.this.isHumanoidResponder);
+			MobCapabilityTab.this.presetCombo._setResponder(MobCapabilityTab.this.presetResponder);
+			MobCapabilityTab.this.disableCheckBox._setResponder(MobCapabilityTab.this.disableResponder);
+			MobCapabilityTab.this.isHumanoidCheckbox._setResponder(MobCapabilityTab.this.isHumanoidResponder);
 		}
 		
 		@Override
@@ -2417,21 +2501,39 @@ public class DatapackEditScreen extends Screen {
 		@Override
 		public void importEntries(PackResources packResources) {
 			packResources.getNamespaces(PackType.SERVER_DATA).stream().distinct().forEach((namespace) -> {
-				packResources.listResources(PackType.SERVER_DATA, namespace, this.directory, (resourceLocation, stream) -> {
+				packResources.listResources(PackType.SERVER_DATA, namespace, this.directory, (resourceLocation, streamSupplier) -> {
+					ResourceLocation rl = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll(String.format("%s/", this.directory), "").replaceAll(".json", ""));
+					
 					try {
-						JsonReader jsonReader = new JsonReader(new InputStreamReader(stream.get(), StandardCharsets.UTF_8));
-						jsonReader.setLenient(true);
-						JsonObject jsonObject = Streams.parse(jsonReader).getAsJsonObject();
-						CompoundTag compTag = TagParser.parseTag(jsonObject.toString());
-						ResourceLocation rl = new ResourceLocation(resourceLocation.getNamespace(), resourceLocation.getPath().replaceAll(String.format("%s/", this.directory), "").replaceAll(".json", ""));
-						
-						this.packList.add(PackEntry.of(rl, () -> compTag));
-						this.packListGrid.addRowWithDefaultValues("pack_item", rl.toString());
-					} catch (IOException | CommandSyntaxException e) {
+						this.importJson(rl, streamSupplier.get());
+					} catch (Exception e) {
+						EpicFightMod.LOGGER.info("Failed to import " + resourceLocation + ": " + e.getMessage());
 						e.printStackTrace();
 					}
 				});
 			});
+		}
+		
+		public void importJson(ResourceLocation registryName, InputStream inputStream) throws Exception {
+			JsonReader jsonReader = new JsonReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+			
+			try {
+				jsonReader.setLenient(true);
+				JsonObject jsonObject = Streams.parse(jsonReader).getAsJsonObject();
+				CompoundTag compTag = TagParser.parseTag(jsonObject.toString());
+				
+				this.packList.add(PackEntry.of(registryName, () -> compTag));
+				this.packListGrid.addRowWithDefaultValues("pack_item", registryName.toString());
+			} catch (Exception e) {
+				EpicFightMod.LOGGER.info("Failed to import " + registryName + ": " + e.getMessage());
+				throw e;
+			} finally {
+				try {
+					jsonReader.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		
 		@Override

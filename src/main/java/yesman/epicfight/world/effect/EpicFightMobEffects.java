@@ -17,8 +17,8 @@ public class EpicFightMobEffects {
 	public static final RegistryObject<MobEffect> STUN_IMMUNITY = EFFECTS.register("stun_immunity", () -> 
 		new VisibleMobEffect(MobEffectCategory.BENEFICIAL, 16758016, new ResourceLocation(EpicFightMod.MODID, "textures/mob_effect/stun_immunity.png")));
 	
-	public static final RegistryObject<MobEffect> BLOOMING = EFFECTS.register("blooming", () -> 
-		new VisibleMobEffect(MobEffectCategory.BENEFICIAL, 16735744, new ResourceLocation(EpicFightMod.MODID, "textures/mob_effect/blooming.png")));
+	//public static final RegistryObject<MobEffect> BLOOMING = EFFECTS.register("blooming", () -> 
+	//	new VisibleMobEffect(MobEffectCategory.BENEFICIAL, 16735744, new ResourceLocation(EpicFightMod.MODID, "textures/mob_effect/blooming.png")));
 	
 	public static final RegistryObject<MobEffect> INSTABILITY = EFFECTS.register("instability", () -> 
 		new VisibleMobEffect(MobEffectCategory.HARMFUL, 0, (effectInstance) -> Math.min(effectInstance.getAmplifier(), 2)

@@ -89,8 +89,8 @@ public class ClientModBusEvent {
 	
 	@SubscribeEvent
 	public static void addLayersEvent(EntityRenderersEvent.AddLayers event) {
-		ClientEngine.getInstance().renderEngine.registerRenderer();
-		WearableItemLayer.clear();
+		ClientEngine.getInstance().renderEngine.bootstrap(event.getContext());
+		WearableItemLayer.clearModels();
 	}
 	
 	@SubscribeEvent

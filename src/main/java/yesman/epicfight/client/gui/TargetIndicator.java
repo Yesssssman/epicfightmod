@@ -20,19 +20,18 @@ import org.joml.Matrix4f;
 @OnlyIn(Dist.CLIENT)
 public class TargetIndicator extends EntityIndicator {
 	@Override
-	public boolean shouldDraw(LivingEntity entityIn, @Nullable LivingEntityPatch<?> entitypatch, LocalPlayerPatch playerpatch) {
+	public boolean shouldDraw(LivingEntity entity, @Nullable LivingEntityPatch<?> entitypatch, LocalPlayerPatch playerpatch) {
 		if (!EpicFightMod.CLIENT_CONFIGS.showTargetIndicator.getValue()) {
 			return false;
 		} else {
-			if (playerpatch != null && entityIn != playerpatch.getTarget()) {
+			if (playerpatch != null && entity != playerpatch.getTarget()) {
 				return false;
-			} else if (entityIn.isInvisible() || !entityIn.isAlive() || entityIn == playerpatch.getOriginal()) {
+			} else if (entity.isInvisible() || !entity.isAlive() || entity == playerpatch.getOriginal()) {
 				return false;
-			} else if (entityIn.distanceToSqr(Minecraft.getInstance().getCameraEntity()) >= 400) {
+			} else if (entity.distanceToSqr(Minecraft.getInstance().getCameraEntity()) >= 400) {
 				return false;
-			} else if (entityIn instanceof Player playerIn) {
-
-				return !playerIn.isSpectator();
+			} else if (entity instanceof Player player) {
+				return !player.isSpectator();
 			}
 		}
 		
@@ -40,16 +39,16 @@ public class TargetIndicator extends EntityIndicator {
 	}
 	
 	@Override
-	public void drawIndicator(LivingEntity entityIn, @Nullable LivingEntityPatch<?> entitypatch, LocalPlayerPatch playerpatch, PoseStack matStackIn, MultiBufferSource bufferIn, float partialTicks) {
-		Matrix4f mvMatrix = super.getMVMatrix(matStackIn, entityIn, 0.0F, entityIn.getBbHeight() + 0.45F, 0.0F, true, partialTicks);
+	public void drawIndicator(LivingEntity entity, @Nullable LivingEntityPatch<?> entitypatch, LocalPlayerPatch playerpatch, PoseStack poseStack, MultiBufferSource multiBufferSource, float partialTicks) {
+		Matrix4f mvMatrix = super.getMVMatrix(poseStack, entity, 0.0F, entity.getBbHeight() + 0.45F, 0.0F, true, partialTicks);
 		
 		if (entitypatch == null) {
-			this.drawTexturedModalRect2DPlane(mvMatrix, bufferIn.getBuffer(EpicFightRenderTypes.entityIndicator(BATTLE_ICON)), -0.1F, -0.1F, 0.1F, 0.1F, 97, 2, 128, 33);
+			this.drawTexturedModalRect2DPlane(mvMatrix, multiBufferSource.getBuffer(EpicFightRenderTypes.entityIndicator(BATTLE_ICON)), -0.1F, -0.1F, 0.1F, 0.1F, 97, 2, 128, 33);
 		} else {
-			if (entityIn.tickCount % 2 == 0 && !entitypatch.flashTargetIndicator(playerpatch)) {
-				this.drawTexturedModalRect2DPlane(mvMatrix, bufferIn.getBuffer(EpicFightRenderTypes.entityIndicator(BATTLE_ICON)), -0.1F, -0.1F, 0.1F, 0.1F, 132, 0, 167, 36);
+			if (entity.tickCount % 2 == 0 && !entitypatch.flashTargetIndicator(playerpatch)) {
+				this.drawTexturedModalRect2DPlane(mvMatrix, multiBufferSource.getBuffer(EpicFightRenderTypes.entityIndicator(BATTLE_ICON)), -0.1F, -0.1F, 0.1F, 0.1F, 132, 0, 167, 36);
 			} else {
-				this.drawTexturedModalRect2DPlane(mvMatrix, bufferIn.getBuffer(EpicFightRenderTypes.entityIndicator(BATTLE_ICON)), -0.1F, -0.1F, 0.1F, 0.1F, 97, 2, 128, 33);
+				this.drawTexturedModalRect2DPlane(mvMatrix, multiBufferSource.getBuffer(EpicFightRenderTypes.entityIndicator(BATTLE_ICON)), -0.1F, -0.1F, 0.1F, 0.1F, 97, 2, 128, 33);
 			}
 		}
 	}

@@ -21,7 +21,9 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.BossHealthOverlay;
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
 import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -73,10 +75,12 @@ import yesman.epicfight.client.gui.EntityIndicator;
 import yesman.epicfight.client.gui.screen.config.UISetupScreen;
 import yesman.epicfight.client.gui.screen.overlay.OverlayManager;
 import yesman.epicfight.client.input.EpicFightKeyMappings;
+import yesman.epicfight.client.mesh.HumanoidMesh;
 import yesman.epicfight.client.renderer.AimHelperRenderer;
 import yesman.epicfight.client.renderer.FirstPersonRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PCreeperRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PCustomEntityRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PCustomHumanoidEntityRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PDrownedRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PEnderDragonRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PEndermanRenderer;
@@ -125,17 +129,19 @@ import yesman.epicfight.world.item.EpicFightItems;
 public class RenderEngine {
 	private static final Vec3f AIMING_CORRECTION = new Vec3f(-1.5F, 0.0F, 1.25F);
 	
-	public AimHelperRenderer aimHelper;
 	public final BattleModeGui battleModeUI = new BattleModeGui(Minecraft.getInstance());
 	public final BetaWarningMessage betaWarningMessage = new BetaWarningMessage(Minecraft.getInstance());
 	public final Minecraft minecraft;
+	
 	private final BiMap<EntityType<?>, Supplier<PatchedEntityRenderer>> entityRendererProvider;
 	private final Map<EntityType<?>, PatchedEntityRenderer> entityRendererCache;
 	private final Map<Item, RenderItemBase> itemRendererMapByInstance;
 	private final Map<Class<?>, RenderItemBase> itemRendererMapByClass;
+	private final OverlayManager overlayManager;
+	
+	private AimHelperRenderer aimHelper;
 	private FirstPersonRenderer firstPersonRenderer;
 	private PHumanoidRenderer<?, ?, ?, ?, ?> basicHumanoidRenderer;
-	private final OverlayManager overlayManager;
 	private boolean zoomingIn;
 	private int zoomOutStandbyTicks = 0;
 	private int zoomCount = 0;
@@ -153,43 +159,40 @@ public class RenderEngine {
 		this.overlayManager = new OverlayManager();
 	}
 	
-	public void registerRenderer() {
+	public void bootstrap(EntityRendererProvider.Context context) {
 		this.entityRendererProvider.clear();
-		this.entityRendererCache.clear();
-		this.itemRendererMapByInstance.clear();
-		this.itemRendererMapByClass.clear();
+		this.entityRendererProvider.put(EntityType.CREEPER, () -> new PCreeperRenderer(context));
+		this.entityRendererProvider.put(EntityType.ENDERMAN, () -> new PEndermanRenderer(context));
+		this.entityRendererProvider.put(EntityType.ZOMBIE, () -> new PHumanoidRenderer<>(Meshes.BIPED_OLD_TEX, context));
+		this.entityRendererProvider.put(EntityType.ZOMBIE_VILLAGER, () -> new PZombieVillagerRenderer(context));
+		this.entityRendererProvider.put(EntityType.ZOMBIFIED_PIGLIN, () -> new PHumanoidRenderer<>(Meshes.PIGLIN, context));
+		this.entityRendererProvider.put(EntityType.HUSK, () -> new PHumanoidRenderer<>(Meshes.BIPED_OLD_TEX, context));
+		this.entityRendererProvider.put(EntityType.SKELETON, () -> new PHumanoidRenderer<>(Meshes.SKELETON, context));
+		this.entityRendererProvider.put(EntityType.WITHER_SKELETON, () -> new PHumanoidRenderer<>(Meshes.SKELETON, context));
+		this.entityRendererProvider.put(EntityType.STRAY, () -> new PStrayRenderer(context));
+		this.entityRendererProvider.put(EntityType.PLAYER, () -> new PPlayerRenderer(context));
+		this.entityRendererProvider.put(EntityType.SPIDER, () -> new PSpiderRenderer(context));
+		this.entityRendererProvider.put(EntityType.CAVE_SPIDER, () -> new PSpiderRenderer(context));
+		this.entityRendererProvider.put(EntityType.IRON_GOLEM, () -> new PIronGolemRenderer(context));
+		this.entityRendererProvider.put(EntityType.VINDICATOR, () -> new PVindicatorRenderer(context));
+		this.entityRendererProvider.put(EntityType.EVOKER, () -> new PIllagerRenderer(context));
+		this.entityRendererProvider.put(EntityType.WITCH, () -> new PWitchRenderer(context));
+		this.entityRendererProvider.put(EntityType.DROWNED, () -> new PDrownedRenderer(context));
+		this.entityRendererProvider.put(EntityType.PILLAGER, () -> new PIllagerRenderer(context));
+		this.entityRendererProvider.put(EntityType.RAVAGER, () -> new PRavagerRenderer(context));
+		this.entityRendererProvider.put(EntityType.VEX, () -> new PVexRenderer(context));
+		this.entityRendererProvider.put(EntityType.PIGLIN, () -> new PHumanoidRenderer<>(Meshes.PIGLIN, context));
+		this.entityRendererProvider.put(EntityType.PIGLIN_BRUTE, () -> new PHumanoidRenderer<>(Meshes.PIGLIN, context));
+		this.entityRendererProvider.put(EntityType.HOGLIN, () -> new PHoglinRenderer(context));
+		this.entityRendererProvider.put(EntityType.ZOGLIN, () -> new PHoglinRenderer(context));
+		this.entityRendererProvider.put(EntityType.ENDER_DRAGON, () -> new PEnderDragonRenderer(context));
+		this.entityRendererProvider.put(EntityType.WITHER, () -> new PWitherRenderer(context));
+		this.entityRendererProvider.put(EpicFightEntities.WITHER_SKELETON_MINION.get(), () -> new PWitherSkeletonMinionRenderer(context));
+		this.entityRendererProvider.put(EpicFightEntities.WITHER_GHOST_CLONE.get(), () -> new WitherGhostCloneRenderer(context));
 		
-		this.firstPersonRenderer = new FirstPersonRenderer();
-		this.basicHumanoidRenderer = new PHumanoidRenderer<>(Meshes.BIPED);
-		
-		this.entityRendererProvider.put(EntityType.CREEPER, PCreeperRenderer::new);
-		this.entityRendererProvider.put(EntityType.ENDERMAN, PEndermanRenderer::new);
-		this.entityRendererProvider.put(EntityType.ZOMBIE, () -> new PHumanoidRenderer<>(Meshes.BIPED_OLD_TEX));
-		this.entityRendererProvider.put(EntityType.ZOMBIE_VILLAGER, PZombieVillagerRenderer::new);
-		this.entityRendererProvider.put(EntityType.ZOMBIFIED_PIGLIN, () -> new PHumanoidRenderer<>(Meshes.PIGLIN));
-		this.entityRendererProvider.put(EntityType.HUSK, () -> new PHumanoidRenderer<>(Meshes.BIPED_OLD_TEX));
-		this.entityRendererProvider.put(EntityType.SKELETON, () -> new PHumanoidRenderer<>(Meshes.SKELETON));
-		this.entityRendererProvider.put(EntityType.WITHER_SKELETON, () -> new PHumanoidRenderer<>(Meshes.SKELETON));
-		this.entityRendererProvider.put(EntityType.STRAY, PStrayRenderer::new);
-		this.entityRendererProvider.put(EntityType.PLAYER, PPlayerRenderer::new);
-		this.entityRendererProvider.put(EntityType.SPIDER, PSpiderRenderer::new);
-		this.entityRendererProvider.put(EntityType.CAVE_SPIDER, PSpiderRenderer::new);
-		this.entityRendererProvider.put(EntityType.IRON_GOLEM, PIronGolemRenderer::new);
-		this.entityRendererProvider.put(EntityType.VINDICATOR, PVindicatorRenderer::new);
-		this.entityRendererProvider.put(EntityType.EVOKER, PIllagerRenderer::new);
-		this.entityRendererProvider.put(EntityType.WITCH, PWitchRenderer::new);
-		this.entityRendererProvider.put(EntityType.DROWNED, PDrownedRenderer::new);
-		this.entityRendererProvider.put(EntityType.PILLAGER, PIllagerRenderer::new);
-		this.entityRendererProvider.put(EntityType.RAVAGER, PRavagerRenderer::new);
-		this.entityRendererProvider.put(EntityType.VEX, PVexRenderer::new);
-		this.entityRendererProvider.put(EntityType.PIGLIN, () -> new PHumanoidRenderer<>(Meshes.PIGLIN));
-		this.entityRendererProvider.put(EntityType.PIGLIN_BRUTE, () -> new PHumanoidRenderer<>(Meshes.PIGLIN));
-		this.entityRendererProvider.put(EntityType.HOGLIN, PHoglinRenderer::new);
-		this.entityRendererProvider.put(EntityType.ZOGLIN, PHoglinRenderer::new);
-		this.entityRendererProvider.put(EntityType.ENDER_DRAGON, PEnderDragonRenderer::new);
-		this.entityRendererProvider.put(EntityType.WITHER, PWitherRenderer::new);
-		this.entityRendererProvider.put(EpicFightEntities.WITHER_SKELETON_MINION.get(), PWitherSkeletonMinionRenderer::new);
-		this.entityRendererProvider.put(EpicFightEntities.WITHER_GHOST_CLONE.get(), WitherGhostCloneRenderer::new);
+		this.firstPersonRenderer = new FirstPersonRenderer(context);
+		this.basicHumanoidRenderer = new PHumanoidRenderer<>(Meshes.BIPED, context);
+		this.aimHelper = new AimHelperRenderer();
 		
 		RenderItemBase baseRenderer = new RenderItemBase();
 		RenderBow bowRenderer = new RenderBow();
@@ -197,6 +200,10 @@ public class RenderEngine {
 		RenderTrident tridentRenderer = new RenderTrident();
 		RenderMap mapRenderer = new RenderMap();
 		RenderShield shieldRenderer = new RenderShield();
+		
+		//Clear item renderers
+		this.itemRendererMapByInstance.clear();
+		this.itemRendererMapByClass.clear();
 		
 		this.itemRendererMapByInstance.put(Items.AIR, baseRenderer);
 		this.itemRendererMapByInstance.put(Items.BOW, bowRenderer);
@@ -219,9 +226,13 @@ public class RenderEngine {
 		this.itemRendererMapByClass.put(MapCapability.class, mapRenderer);
 		this.itemRendererMapByClass.put(ShieldCapability.class, shieldRenderer);
 		
-		this.aimHelper = new AimHelperRenderer();
+		ModLoader.get().postEvent(new PatchedRenderersEvent.Add(this.entityRendererProvider, this.itemRendererMapByInstance, context));
 		
-		ModLoader.get().postEvent(new PatchedRenderersEvent.Add(this.entityRendererProvider, this.itemRendererMapByInstance));
+		this.resetRenderers();
+	}
+	
+	public void resetRenderers() {
+		this.entityRendererCache.clear();
 		
 		for (Map.Entry<EntityType<?>, Supplier<PatchedEntityRenderer>> entry : this.entityRendererProvider.entrySet()) {
 			this.entityRendererCache.put(entry.getKey(), entry.getValue().get());
@@ -238,8 +249,17 @@ public class RenderEngine {
 		if ("player".equals(renderer)) {
 			this.entityRendererCache.put(entityType, this.basicHumanoidRenderer);
 		} else if ("epicfight:custom".equals(renderer)) {
-			AnimatedMesh mesh = Meshes.getOrCreateAnimatedMesh(Minecraft.getInstance().getResourceManager(), new ResourceLocation(compound.getString("model")), AnimatedMesh::new);
-			this.entityRendererCache.put(entityType, new PCustomEntityRenderer(mesh));
+			EntityRenderDispatcher erd = this.minecraft.getEntityRenderDispatcher();
+			EntityRendererProvider.Context context = new EntityRendererProvider.Context(erd, this.minecraft.getItemRenderer(), this.minecraft.getBlockRenderer(), erd.getItemInHandRenderer(),
+																						this.minecraft.getResourceManager(), this.minecraft.getEntityModels(), this.minecraft.font);
+			
+			if (compound.getBoolean("humanoid")) {
+				HumanoidMesh mesh = Meshes.getOrCreateAnimatedMesh(this.minecraft.getResourceManager(), new ResourceLocation(compound.getString("model")), HumanoidMesh::new);
+				this.entityRendererCache.put(entityType, new PCustomHumanoidEntityRenderer<> (mesh, context));
+			} else {
+				AnimatedMesh mesh = Meshes.getOrCreateAnimatedMesh(this.minecraft.getResourceManager(), new ResourceLocation(compound.getString("model")), AnimatedMesh::new);
+				this.entityRendererCache.put(entityType, new PCustomEntityRenderer(mesh, context));
+			}
 		} else {
 			EntityType<?> presetEntityType = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(renderer));
 			

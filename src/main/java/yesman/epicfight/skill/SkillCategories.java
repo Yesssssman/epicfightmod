@@ -17,9 +17,9 @@ public enum SkillCategories implements SkillCategory {
 	boolean modifiable;
 	int id;
 	
-	SkillCategories(boolean shouldSave, boolean shouldSyncronize, boolean modifiable) {
+	SkillCategories(boolean shouldSave, boolean shouldSyncronizedAllPlayers, boolean modifiable) {
 		this.shouldSave = shouldSave;
-		this.shouldSyncronize = shouldSyncronize;
+		this.shouldSyncronize = shouldSyncronizedAllPlayers;
 		this.modifiable = modifiable;
 		this.id = SkillCategory.ENUM_MANAGER.assign(this);
 	}

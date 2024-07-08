@@ -1,6 +1,7 @@
 package yesman.epicfight.client.gui.datapack.screen;
 
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import com.google.common.collect.Lists;
@@ -26,8 +27,8 @@ import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.Horizonta
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.VerticalSizing;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableEditBox;
 import yesman.epicfight.data.conditions.Condition;
-import yesman.epicfight.data.conditions.Condition.ParameterEditor;
 import yesman.epicfight.data.conditions.Condition.EntityPatchCondition;
+import yesman.epicfight.data.conditions.Condition.ParameterEditor;
 import yesman.epicfight.data.conditions.EpicFightConditions;
 
 @OnlyIn(Dist.CLIENT)
@@ -121,7 +122,7 @@ public class OffhandValidatorScreen extends Screen {
 									.xy2(12, 45)
 									.horizontalSizing(HorizontalSizing.LEFT_RIGHT)
 									.verticalSizing(VerticalSizing.TOP_BOTTOM)
-									.rowHeight(26)
+									.rowHeight(21)
 									.rowEditable(RowEditButton.NONE)
 									.transparentBackground(false)
 									.addColumn(Grid.<ParameterEditor, ResizableEditBox>wildcard("parameter_key")
@@ -159,6 +160,26 @@ public class OffhandValidatorScreen extends Screen {
 				packImporter.newRow();
 				packImporter.newValue("condition", EpicFightConditions.getConditionOrNull(new ResourceLocation(compTag.getString("predicate"))));
 			}
+			
+			this.conditionGrid._setValue(packImporter);
+		}
+		/** Convert an old condition format to new one **/
+		else if (rootTag.contains("offhand_item_compatible_predicate", Tag.TAG_COMPOUND)) {
+			CompoundTag conditionTag = rootTag.getCompound("offhand_item_compatible_predicate");
+			CompoundTag compTag = new CompoundTag();
+			
+			compTag.putString("predicate", EpicFightConditions.convertOldNames(conditionTag.getString("condition")));
+			
+			for (Map.Entry<String, Tag> tag : conditionTag.getCompound("predicate").tags.entrySet()) {
+				compTag.put(tag.getKey(), tag.getValue());
+			}
+			
+			this.conditionList.add(compTag);
+			
+			Grid.PackImporter packImporter = new Grid.PackImporter();
+			
+			packImporter.newRow();
+			packImporter.newValue("condition", EpicFightConditions.getConditionOrNull(new ResourceLocation(compTag.getString("predicate"))));
 			
 			this.conditionGrid._setValue(packImporter);
 		}

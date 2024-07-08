@@ -57,7 +57,7 @@ public class SkillEditScreen extends Screen {
 		this.learnedSkillButtons.clear();
 		
 		for (SkillSlot skillSlot : SkillSlot.ENUM_MANAGER.universalValues()) {
-			if (this.skills.hasCategory(skillSlot.category()) && skillSlot.category().learnable()) {
+			if ((this.player.isCreative() || this.skills.hasCategory(skillSlot.category())) && skillSlot.category().learnable()) {
 				SlotButton slotButton = new SlotButton(i, j, 18, 18, skillSlot, this.skills.skillContainers[skillSlot.universalOrdinal()].getSkill(), (button) -> {
 					this.start = 0;
 					

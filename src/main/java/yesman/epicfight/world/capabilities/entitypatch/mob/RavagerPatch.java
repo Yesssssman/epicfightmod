@@ -3,7 +3,9 @@ package yesman.epicfight.world.capabilities.entitypatch.mob;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Ravager;
+import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -23,11 +25,9 @@ public class RavagerPatch extends MobPatch<Ravager> {
 		super(Faction.ILLAGER);
 	}
 	
-	@Override
-	protected void initAttributes() {
-		super.initAttributes();
-		this.original.getAttribute(EpicFightAttributes.MAX_STRIKES.get()).setBaseValue(8.0D);
-		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(6.0D);
+	public static void initAttributes(EntityAttributeModificationEvent event) {
+		event.add(EntityType.RAVAGER, EpicFightAttributes.MAX_STRIKES.get(), 8.0D);
+		event.add(EntityType.RAVAGER, EpicFightAttributes.IMPACT.get(), 6.0D);
 	}
 	
 	@Override

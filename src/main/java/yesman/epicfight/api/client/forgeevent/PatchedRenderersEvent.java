@@ -3,6 +3,7 @@ package yesman.epicfight.api.client.forgeevent;
 import java.util.Map;
 import java.util.function.Supplier;
 
+import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
@@ -18,10 +19,12 @@ public abstract class PatchedRenderersEvent extends Event implements IModBusEven
 	public static class Add extends PatchedRenderersEvent {
 		private final Map<EntityType<?>, Supplier<PatchedEntityRenderer>> entityRendererProvider;
 		private final Map<Item, RenderItemBase> itemRenerers;
+		private final EntityRendererProvider.Context context;
 		
-		public Add(Map<EntityType<?>, Supplier<PatchedEntityRenderer>> entityRendererProvider, Map<Item, RenderItemBase> itemRenerers) {
+		public Add(Map<EntityType<?>, Supplier<PatchedEntityRenderer>> entityRendererProvider, Map<Item, RenderItemBase> itemRenerers, EntityRendererProvider.Context context) {
 			this.entityRendererProvider = entityRendererProvider;
 			this.itemRenerers = itemRenerers;
+			this.context = context;
 		}
 		
 		public void addPatchedEntityRenderer(EntityType<?> entityType, Supplier<PatchedEntityRenderer> provider) {
@@ -30,6 +33,10 @@ public abstract class PatchedRenderersEvent extends Event implements IModBusEven
 		
 		public void addItemRenderer(Item item, RenderItemBase renderer) {
 			this.itemRenerers.put(item, renderer);
+		}
+		
+		public EntityRendererProvider.Context getContext() {
+			return this.context;
 		}
 	}
 	

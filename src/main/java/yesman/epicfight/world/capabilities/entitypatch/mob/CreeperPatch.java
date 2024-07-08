@@ -3,10 +3,12 @@ package yesman.epicfight.world.capabilities.entitypatch.mob;
 import java.util.Set;
 
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.SwellGoal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.monster.Creeper;
+import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
@@ -25,10 +27,8 @@ public class CreeperPatch extends MobPatch<Creeper> {
 		super(Faction.NEUTRAL);
 	}
 	
-	@Override
-	protected void initAttributes() {
-		super.initAttributes();
-		this.original.getAttribute(EpicFightAttributes.STUN_ARMOR.get()).setBaseValue(1.0D);
+	public static void initAttributes(EntityAttributeModificationEvent event) {
+		event.add(EntityType.CREEPER, EpicFightAttributes.STUN_ARMOR.get(), 1.0D);
 	}
 	
 	@Override

@@ -19,7 +19,7 @@ public class EpicFightAttributeSupplier extends AttributeSupplier {
 				.add(EpicFightAttributes.ARMOR_NEGATION.get())
 				.add(EpicFightAttributes.MAX_STRIKES.get())
 				.add(EpicFightAttributes.STUN_ARMOR.get())
-				.add(EpicFightAttributes.MAX_EXECUTION_RESISTANCE.get())
+				.add(EpicFightAttributes.EXECUTION_RESISTANCE.get())
 				.add(EpicFightAttributes.OFFHAND_ARMOR_NEGATION.get())
 				.add(EpicFightAttributes.OFFHAND_IMPACT.get())
 				.add(EpicFightAttributes.OFFHAND_MAX_STRIKES.get())

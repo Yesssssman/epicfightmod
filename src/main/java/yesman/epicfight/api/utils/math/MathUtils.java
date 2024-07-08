@@ -11,10 +11,10 @@ import net.minecraft.world.phys.Vec3;
 public class MathUtils {
 	public static OpenMatrix4f getModelMatrixIntegral(float xPosO, float xPos, float yPosO, float yPos, float zPosO, float zPos, float xRotO, float pitch, float yRotO, float yRot, float partialTick, float scaleX, float scaleY, float scaleZ) {
 		OpenMatrix4f modelMatrix = new OpenMatrix4f();
-		Vec3f entityPosition = new Vec3f(-(xPosO + (xPos - xPosO) * partialTick), ((yPosO + (yPos - yPosO) * partialTick)), -(zPosO + (zPos - zPosO) * partialTick));
+		Vec3f translation = new Vec3f(-(xPosO + (xPos - xPosO) * partialTick), ((yPosO + (yPos - yPosO) * partialTick)), -(zPosO + (zPos - zPosO) * partialTick));
 		float partialXRot = lerpBetween(xRotO, pitch, partialTick);
 		float partialYRot = lerpBetween(yRotO, yRot, partialTick);
-		modelMatrix.translate(entityPosition).rotateDeg(-partialYRot, Vec3f.Y_AXIS).rotateDeg(-partialXRot, Vec3f.X_AXIS).scale(scaleX, scaleY, scaleZ);
+		modelMatrix.translate(translation).rotateDeg(-partialYRot, Vec3f.Y_AXIS).rotateDeg(-partialXRot, Vec3f.X_AXIS).scale(scaleX, scaleY, scaleZ);
 		
 		return modelMatrix;
 	}
@@ -97,18 +97,18 @@ public class MathUtils {
 		return (float)d;
 	}
 
-	public static void translateStack(PoseStack mStack, OpenMatrix4f mat) {
+	public static void translateStack(PoseStack poseStack, OpenMatrix4f mat) {
 		Vector3f vector = new Vector3f(mat.m30, mat.m31, mat.m32);
-		mStack.translate(vector.x(), vector.y(), vector.z());
+		poseStack.translate(vector.x(), vector.y(), vector.z());
 	}
 	
-	public static void rotateStack(PoseStack mStack, OpenMatrix4f mat) {
-		mStack.mulPose(getQuaternionFromMatrix(mat));
+	public static void rotateStack(PoseStack poseStack, OpenMatrix4f mat) {
+		poseStack.mulPose(getQuaternionFromMatrix(mat));
 	}
 	
-	public static void scaleStack(PoseStack mStack, OpenMatrix4f mat) {
+	public static void scaleStack(PoseStack poseStack, OpenMatrix4f mat) {
 		Vector3f vector = getScaleVectorFromMatrix(mat);
-		mStack.scale(vector.x(), vector.y(), vector.z());
+		poseStack.scale(vector.x(), vector.y(), vector.z());
 	}
 	
 	public static double getAngleBetween(Vec3f a, Vec3f b) {
@@ -132,37 +132,8 @@ public class MathUtils {
 	}
 	
 	private static Quaternionf getQuaternionFromMatrix(OpenMatrix4f mat) {
-		float w, x, y, z;
-		float diagonal = mat.m00 + mat.m11 + mat.m22;
-
-		if (diagonal > 0) {
-			float w4 = (float) (Math.sqrt(diagonal + 1.0F) * 2.0F);
-			w = w4 * 0.25F;
-			x = (mat.m21 - mat.m12) / w4;
-			y = (mat.m02 - mat.m20) / w4;
-			z = (mat.m10 - mat.m01) / w4;
-		} else if ((mat.m00 > mat.m11) && (mat.m00 > mat.m22)) {
-			float x4 = (float) (Math.sqrt(1.0F + mat.m00 - mat.m11 - mat.m22) * 2F);
-			w = (mat.m21 - mat.m12) / x4;
-			x = x4 * 0.25F;
-			y = (mat.m01 + mat.m10) / x4;
-			z = (mat.m02 + mat.m20) / x4;
-		} else if (mat.m11 > mat.m22) {
-			float y4 = (float) (Math.sqrt(1.0F + mat.m11 - mat.m00 - mat.m22) * 2F);
-			w = (mat.m02 - mat.m20) / y4;
-			x = (mat.m01 + mat.m10) / y4;
-			y = y4 * 0.25F;
-			z = (mat.m12 + mat.m21) / y4;
-		} else {
-			float z4 = (float) (Math.sqrt(1.0F + mat.m22 - mat.m00 - mat.m11) * 2F);
-			w = (mat.m10 - mat.m01) / z4;
-			x = (mat.m02 + mat.m20) / z4;
-			y = (mat.m12 + mat.m21) / z4;
-			z = z4 * 0.25F;
-		}
-		
-		Quaternionf quat = new Quaternionf(x, y, z, w);
-		quat.normalize();
+		Quaternionf quat = new Quaternionf(0, 0, 0, 1);
+		quat.setFromUnnormalized(OpenMatrix4f.exportToMojangMatrix(mat.transpose(null)));
 		return quat;
 	}
 	

@@ -3,7 +3,9 @@ package yesman.epicfight.world.capabilities.entitypatch.mob;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.PathfinderMob;
+import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.client.animation.ClientAnimator;
@@ -38,10 +40,8 @@ public class ZombiePatch<T extends PathfinderMob> extends HumanoidMobPatch<T> {
 		animator.setCurrentMotionsAsDefault();
 	}
 	
-	@Override
-	protected void initAttributes() {
-		super.initAttributes();
-		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(1.0D);
+	public static void initAttributes(EntityAttributeModificationEvent event) {
+		event.add(EntityType.ZOMBIE, EpicFightAttributes.IMPACT.get(), 1.0D);
 	}
 	
 	@Override

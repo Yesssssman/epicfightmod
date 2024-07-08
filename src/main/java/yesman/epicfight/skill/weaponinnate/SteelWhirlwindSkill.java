@@ -33,6 +33,10 @@ public class SteelWhirlwindSkill extends WeaponInnateSkill implements Chargeable
 	private static final UUID EVENT_UUID = UUID.fromString("d2d057cc-f30f-11ed-a05b-0242ac120003");
 	
 	public static int getChargingPower(SkillContainer skillContainer) {
+		if (skillContainer == null) {
+			return 0;
+		}
+		
 		return skillContainer.getDataManager().getDataValue(SkillDataKeys.CHARGING_POWER.get());
 	}
 	

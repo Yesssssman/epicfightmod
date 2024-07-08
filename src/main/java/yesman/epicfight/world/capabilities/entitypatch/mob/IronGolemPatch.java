@@ -4,10 +4,12 @@ import java.util.Set;
 
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.MoveTowardsTargetGoal;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
 import net.minecraft.world.entity.animal.IronGolem;
+import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -46,12 +48,9 @@ public class IronGolemPatch extends MobPatch<IronGolem> {
 		}
 	}
 	
-	@Override
-	protected void initAttributes() {
-		super.initAttributes();
-		
-		this.original.getAttribute(EpicFightAttributes.MAX_STRIKES.get()).setBaseValue(4.0D);
-		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(6.0D);
+	public static void initAttributes(EntityAttributeModificationEvent event) {
+		event.add(EntityType.IRON_GOLEM, EpicFightAttributes.MAX_STRIKES.get(), 4.0D);
+		event.add(EntityType.IRON_GOLEM, EpicFightAttributes.IMPACT.get(), 6.0D);
 	}
 	
 	@Override

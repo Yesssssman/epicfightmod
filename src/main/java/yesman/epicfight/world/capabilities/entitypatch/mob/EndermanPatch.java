@@ -10,6 +10,7 @@ import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
@@ -19,6 +20,7 @@ import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
+import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import yesman.epicfight.api.animation.Animator;
@@ -91,11 +93,9 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 		animator.setCurrentMotionsAsDefault();
 	}
 	
-	@Override
-	protected void initAttributes() {
-		super.initAttributes();
-		this.original.getAttribute(EpicFightAttributes.STUN_ARMOR.get()).setBaseValue(8.0F);
-		this.original.getAttribute(EpicFightAttributes.IMPACT.get()).setBaseValue(1.8F);
+	public static void initAttributes(EntityAttributeModificationEvent event) {
+		event.add(EntityType.ENDERMAN, EpicFightAttributes.STUN_ARMOR.get(), 8.0D);
+		event.add(EntityType.ENDERMAN, EpicFightAttributes.IMPACT.get(), 1.8D);
 	}
 	
 	@Override
