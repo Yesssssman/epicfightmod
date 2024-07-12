@@ -6,8 +6,8 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.eventbus.api.IEventBus;
-import yesman.epicfight.api.client.model.armor.AzureGeoArmor;
-import yesman.epicfight.api.client.model.armor.CustomModelBakery;
+import yesman.epicfight.api.client.model.transformer.AzureModelTransformer;
+import yesman.epicfight.api.client.model.transformer.CustomModelBakery;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.events.engine.RenderEngine;
 import yesman.epicfight.client.gui.EntityIndicator;
@@ -27,12 +27,12 @@ public class AzureLibCompat implements ICompatModule {
 	
 	@Override
 	public void onModEventBusClient(IEventBus eventBus) {
-		CustomModelBakery.registerNewTransformer(new AzureGeoArmor());
+		CustomModelBakery.registerNewTransformer(new AzureModelTransformer());
 	}
 	
 	@Override
 	public void onForgeEventBusClient(IEventBus eventBus) {
-		eventBus.addListener(AzureGeoArmor::getGeoArmorTexturePath);
+		eventBus.addListener(AzureModelTransformer::getGeoArmorTexturePath);
 		eventBus.addListener(this::geoEntityRenderPreEvent);
 		eventBus.addListener(this::geoEntityRenderPostEvent);
 	}

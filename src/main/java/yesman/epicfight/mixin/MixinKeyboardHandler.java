@@ -23,8 +23,8 @@ public abstract class MixinKeyboardHandler {
 		if (!(this.debugCrashKeyTime > 0L && this.debugCrashKeyTime < Util.getMillis() - 100L)) {
 			switch (key) {
 			case InputConstants.KEY_Y -> {
-				boolean flag = ClientEngine.getInstance().switchArmorModelDebuggingMode();
-				this.debugFeedbackTranslated(flag ? "debug.armor_model_debugging.on" : "debug.armor_model_debugging.off");
+				boolean flag = ClientEngine.getInstance().switchVanillaModelDebuggingMode();
+				this.debugFeedbackTranslated(flag ? "debug.vanilla_model_debugging.on" : "debug.vanilla_model_debugging.off");
 				info.cancel();
 				info.setReturnValue(true);
 			}

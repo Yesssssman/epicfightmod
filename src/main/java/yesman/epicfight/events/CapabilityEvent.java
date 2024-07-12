@@ -14,7 +14,7 @@ import yesman.epicfight.world.capabilities.provider.EntityPatchProvider;
 import yesman.epicfight.world.capabilities.provider.ItemCapabilityProvider;
 import yesman.epicfight.world.capabilities.provider.SkillCapabilityProvider;
 
-@Mod.EventBusSubscriber(modid=EpicFightMod.MODID)
+@Mod.EventBusSubscriber(modid = EpicFightMod.MODID)
 public class CapabilityEvent {
 	@SubscribeEvent
 	public static void attachItemCapability(AttachCapabilitiesEvent<ItemStack> event) {

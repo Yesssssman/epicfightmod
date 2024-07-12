@@ -6,8 +6,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.eventbus.api.IEventBus;
 import software.bernie.geckolib.event.GeoRenderEvent;
-import yesman.epicfight.api.client.model.armor.CustomModelBakery;
-import yesman.epicfight.api.client.model.armor.GeoArmor;
+import yesman.epicfight.api.client.model.transformer.CustomModelBakery;
+import yesman.epicfight.api.client.model.transformer.GeoModelTransformer;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.events.engine.RenderEngine;
 import yesman.epicfight.client.gui.EntityIndicator;
@@ -19,12 +19,12 @@ import yesman.epicfight.world.gamerule.EpicFightGamerules;
 public class GeckolibCompat implements ICompatModule {
 	@Override
 	public void onModEventBusClient(IEventBus eventBus) {
-		CustomModelBakery.registerNewTransformer(new GeoArmor());
+		CustomModelBakery.registerNewTransformer(new GeoModelTransformer());
 	}
 	
 	@Override
 	public void onForgeEventBusClient(IEventBus eventBus) {
-		eventBus.addListener(GeoArmor::getGeoArmorTexturePath);
+		eventBus.addListener(GeoModelTransformer::getGeoArmorTexturePath);
 		eventBus.addListener(this::geoEntityRenderPreEvent);
 		eventBus.addListener(this::geoEntityRenderPostEvent);
 	}

@@ -58,6 +58,7 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.fml.common.Mod;
@@ -466,8 +467,13 @@ public class RenderEngine {
 				}
 				
 				if (entitypatch != null && entitypatch.overrideRender()) {
-					event.setCanceled(true);
 					renderEngine.renderEntityArmatureModel(livingentity, entitypatch, event.getRenderer(), event.getMultiBufferSource(), event.getPoseStack(), event.getPackedLight(), event.getPartialTick());
+					
+					if (ClientEngine.getInstance().isVanillaModelDebuggingMode()) {
+						event.getPoseStack().translate(1.0F, 0.0F, 0.0F);
+					} else {
+						event.setCanceled(true);
+					}
 				}
 				
 				if (playerpatch != null) {
@@ -614,7 +620,7 @@ public class RenderEngine {
 		}
 		
 		@SuppressWarnings("unchecked")
-		@SubscribeEvent
+		@SubscribeEvent(priority = EventPriority.HIGHEST)
 		public static void renderHand(RenderHandEvent event) {
 			LocalPlayerPatch playerpatch = ClientEngine.getInstance().getPlayerPatch();
 			

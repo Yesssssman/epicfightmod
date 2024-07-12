@@ -34,7 +34,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.client.forgeevent.AnimatedArmorTextureEvent;
 import yesman.epicfight.api.client.model.AnimatedMesh;
-import yesman.epicfight.api.client.model.armor.CustomModelBakery;
+import yesman.epicfight.api.client.model.transformer.CustomModelBakery;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.model.JsonModelLoader;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -115,18 +115,8 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 					poseStack.translate(0.0D, head * 0.055D, 0.0D);
 				}
 				
-				boolean debuggingMode = ClientEngine.getInstance().isArmorModelDebuggingMode();
-				
-				if (debuggingMode) {
-					poseStack.pushPose();
-					poseStack.scale(-1.0F, -1.0F, 1.0F);
-					poseStack.translate(1.0D, -1.501D, 0.0D);
-					vanillaLayer.render(poseStack, buf, packedLight, entityliving, partialTicks, head, packedLight, bob, yRot, xRot);
-					poseStack.popPose();
-				}
-				
 				M defaultModel = vanillaLayer.getArmorModel(slot);
-				AnimatedMesh armorMesh = this.getArmorModel(vanillaLayer, defaultModel, entityliving, armorItem, itemstack, slot, debuggingMode);
+				AnimatedMesh armorMesh = this.getArmorModel(vanillaLayer, defaultModel, entityliving, armorItem, itemstack, slot, ClientEngine.getInstance().isVanillaModelDebuggingMode());
 				
 				if (armorMesh == null) {
 					poseStack.popPose();
@@ -185,7 +175,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				if (customModel == originalModel || !(customModel instanceof HumanoidModel<?> humanoidModel)) {
 					model = this.mesh.getHumanoidArmorModel(slot);
 				} else {
-					model = CustomModelBakery.bake(humanoidModel, armorItem, slot, armorDebugging);
+					model = CustomModelBakery.bakeArmor(humanoidModel, armorItem, slot);
 				}
 			}
 			

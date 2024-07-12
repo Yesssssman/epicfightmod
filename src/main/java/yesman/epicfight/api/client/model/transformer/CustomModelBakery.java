@@ -1,4 +1,4 @@
-package yesman.epicfight.api.client.model.armor;
+package yesman.epicfight.api.client.model.transformer;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -31,11 +31,11 @@ import yesman.epicfight.main.EpicFightMod;
 @OnlyIn(Dist.CLIENT)
 public class CustomModelBakery {
 	static final Map<ResourceLocation, AnimatedMesh> BAKED_MODELS = Maps.newHashMap();
-	static final List<ArmorModelTransformer> MODEL_TRANSFORMERS = Lists.newArrayList();
-	static final ArmorModelTransformer VANILLA_TRANSFORMER = new VanillaArmor();
+	static final List<HumanoidModelTransformer> MODEL_TRANSFORMERS = Lists.newArrayList();
+	static final HumanoidModelTransformer VANILLA_TRANSFORMER = new VanillaModelTransformer();
 	static final Set<ArmorItem> EXCEPTIONAL_MODELS = Sets.newHashSet();
 	
-	public static void registerNewTransformer(ArmorModelTransformer transformer) {
+	public static void registerNewTransformer(HumanoidModelTransformer transformer) {
 		MODEL_TRANSFORMERS.add(transformer);
 	}
 	
@@ -65,13 +65,15 @@ public class CustomModelBakery {
 		out.close();
 	}
 	
-	public static AnimatedMesh bake(HumanoidModel<?> armorModel, ArmorItem armorItem, EquipmentSlot slot, boolean debuggingMode) {
+	public static AnimatedMesh bakeArmor(HumanoidModel<?> armorModel, ArmorItem armorItem, EquipmentSlot slot) {
 		AnimatedMesh animatedArmorModel = null;
 		
 		if (!EXCEPTIONAL_MODELS.contains(armorItem)) {
-			for (ArmorModelTransformer modelTransformer : MODEL_TRANSFORMERS) {
+			ResourceLocation modelName = new ResourceLocation(ForgeRegistries.ITEMS.getKey(armorItem).getNamespace(), "armor/" + ForgeRegistries.ITEMS.getKey(armorItem).getPath());
+			
+			for (HumanoidModelTransformer modelTransformer : MODEL_TRANSFORMERS) {
 				try {
-					animatedArmorModel = modelTransformer.transformModel(armorModel, armorItem, slot, debuggingMode);
+					animatedArmorModel = modelTransformer.transformArmorModel(armorModel, modelName, slot);
 				} catch (Exception e) {
 					EpicFightMod.LOGGER.warn("Can't transform the model of " + ForgeRegistries.ITEMS.getKey(armorItem) + " because of :");
 					e.printStackTrace();
@@ -84,7 +86,7 @@ public class CustomModelBakery {
 			}
 			
 			if (animatedArmorModel == null) {
-				animatedArmorModel = VANILLA_TRANSFORMER.transformModel(armorModel, armorItem, slot, debuggingMode);
+				animatedArmorModel = VANILLA_TRANSFORMER.transformArmorModel(armorModel, modelName, slot);
 			}
 		}
 		

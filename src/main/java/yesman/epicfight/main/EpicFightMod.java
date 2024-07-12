@@ -51,8 +51,10 @@ import yesman.epicfight.client.gui.screen.config.IngameConfigurationScreen;
 import yesman.epicfight.client.renderer.patched.item.EpicFightItemProperties;
 import yesman.epicfight.compat.AzureLibArmorCompat;
 import yesman.epicfight.compat.AzureLibCompat;
+import yesman.epicfight.compat.FirstPersonCompat;
 import yesman.epicfight.compat.GeckolibCompat;
 import yesman.epicfight.compat.ICompatModule;
+import yesman.epicfight.compat.SkinLayer3DCompat;
 import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.data.conditions.EpicFightConditions;
@@ -72,6 +74,7 @@ import yesman.epicfight.skill.SkillSlot;
 import yesman.epicfight.skill.SkillSlots;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.Style;
@@ -266,6 +269,14 @@ public class EpicFightMod {
     		
     		if (ModList.get().isLoaded("azurelibarmor")) {
     			ICompatModule.loadCompatModule(AzureLibArmorCompat.class);
+    		}
+    		
+    		if (ModList.get().isLoaded("firstperson")) {
+    			ICompatModule.loadCompatModule(FirstPersonCompat.class);
+    		}
+    		
+    		if (ModList.get().isLoaded("skinlayers3d")) {
+    			ICompatModule.loadCompatModule(SkinLayer3DCompat.class);
     		}
 		});
 	}

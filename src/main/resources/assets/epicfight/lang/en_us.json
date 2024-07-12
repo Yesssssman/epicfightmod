@@ -44,8 +44,8 @@
 	
 	"death.attack.wither_beam": "%1$s was vaporized by wither beam",
 	"death.attack.shockwave": "%1$s was teared up by Shockwave",
-	"debug.armor_model_debugging.on": "Armor model debugging: On",
-	"debug.armor_model_debugging.off": "Armor model debugging: Off",
+	"debug.vanilla_model_debugging.on": "Vanilla model debugging: On",
+	"debug.vanilla_model_debugging.off": "Vanilla model debugging: Off",
 	"debug.show_epicfight_tooltip.on": "Show Epic Fight Tooltip: On",
 	"debug.show_epicfight_tooltip.off": "Show Epic Fight Tooltip: Off",
 	
