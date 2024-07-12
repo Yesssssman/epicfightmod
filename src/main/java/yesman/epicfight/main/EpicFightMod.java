@@ -172,6 +172,12 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  
  *  4. Now Armor trims work normally in the animated models (release fix) (GitHub issues #1689)
  *  
+ *  --- 20.8.1.6 ---
+ *  
+ *  1. Fixed Item capability attribute values are exported in string format
+ *  
+ *  2. Added BLOCK type animation in the living animations screen in weapon type datapack editor.
+ *  
  *  --- TO DO ---
  *  
  *  1. Crash because {@link PlayerPatch#STAMINA} is unregistered at SynchedEntityData (Most likely a mod compatibility issue)
