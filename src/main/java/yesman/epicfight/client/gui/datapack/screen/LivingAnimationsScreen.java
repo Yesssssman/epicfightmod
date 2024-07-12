@@ -102,7 +102,7 @@ public class LivingAnimationsScreen extends Screen {
 									.rowEditable(RowEditButton.ADD_REMOVE)
 									.transparentBackground(false)
 									.addColumn(Grid.combo("living_motion", List.of(LivingMotions.IDLE, LivingMotions.WALK, LivingMotions.RUN, LivingMotions.SNEAK, LivingMotions.SWIM, LivingMotions.FLOAT, LivingMotions.KNEEL, LivingMotions.FALL,
-											LivingMotions.SIT, LivingMotions.FLY, LivingMotions.CREATIVE_FLY, LivingMotions.CREATIVE_IDLE, LivingMotions.RELOAD, LivingMotions.AIM, LivingMotions.SHOT))
+											LivingMotions.SIT, LivingMotions.FLY, LivingMotions.CREATIVE_FLY, LivingMotions.CREATIVE_IDLE, LivingMotions.BLOCK, LivingMotions.RELOAD, LivingMotions.AIM, LivingMotions.SHOT))
 													.valueChanged((event) -> {
 														CompoundTag tag = this.styles.get(this.stylesGrid.getRowposition()).getValue();
 														String oldMotion = ParseUtil.nullParam(event.prevValue).toLowerCase(Locale.ROOT);

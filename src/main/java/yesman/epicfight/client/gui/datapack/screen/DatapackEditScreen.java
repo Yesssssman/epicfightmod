@@ -1977,6 +1977,57 @@ public class DatapackEditScreen extends Screen {
 					compTag.putString("item_type", itemType.toString());
 				}
 				
+				//Removal expected after 20.8.1.6
+				if (itemType == ItemType.WEAPON) {
+					if (compTag.contains("attributes", Tag.TAG_COMPOUND)) {
+						final Map<String, ParameterEditor> weaponAttributeEditors = Maps.newLinkedHashMap();
+						weaponAttributeEditors.put("armor_negation", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), null));
+						weaponAttributeEditors.put("impact", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), null));
+						weaponAttributeEditors.put("max_strikes", ParameterEditor.of((value) -> IntTag.valueOf(Integer.parseInt(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), null));
+						weaponAttributeEditors.put("damage_bonus", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), null));
+						weaponAttributeEditors.put("speed_bonus", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), null));
+						
+						CompoundTag attrComp = compTag.getCompound("attributes");
+						
+						for (Map.Entry<String, Tag> e : attrComp.tags.entrySet()) {
+							CompoundTag comp = (CompoundTag)e.getValue();
+							
+							for (Map.Entry<String, Tag> attrEntry : comp.tags.entrySet()) {
+								if (attrEntry.getValue().getId() == Tag.TAG_STRING) {
+									ParameterEditor paramEditor = weaponAttributeEditors.get(attrEntry.getKey());
+									
+									if (ParseUtil.isParsable(attrEntry.getValue().getAsString(), Double::parseDouble)) {
+										comp.put(attrEntry.getKey(), paramEditor.toTag.apply(attrEntry.getValue().getAsString()));
+									} else {
+										comp.remove(attrEntry.getKey());
+									}
+								}
+							}
+						}
+					}
+				} else if (itemType == ItemType.ARMOR) {
+					if (compTag.contains("attributes", Tag.TAG_COMPOUND)) {
+						final Map<String, ParameterEditor> armorAttributeEditors = Maps.newLinkedHashMap();
+						armorAttributeEditors.put("stun_armor", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), null));
+						armorAttributeEditors.put("weight", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), null));
+						
+						CompoundTag comp = compTag.getCompound("attributes");
+						
+						for (Map.Entry<String, Tag> attrEntry : comp.tags.entrySet()) {
+							if (attrEntry.getValue().getId() == Tag.TAG_STRING) {
+								ParameterEditor paramEditor = armorAttributeEditors.get(attrEntry.getKey());
+								
+								if (ParseUtil.isParsable(attrEntry.getValue().getAsString(), Double::parseDouble)) {
+									comp.put(attrEntry.getKey(), paramEditor.toTag.apply(attrEntry.getValue().getAsString()));
+								} else {
+									comp.remove(attrEntry.getKey());
+								}
+							}
+						}
+					}
+				}
+				//Removal expected after 20.8.1.6
+				
 				this.packList.add(PackEntry.ofValue(registryName, compTag));
 				this.packListGrid.addRowWithDefaultValues("pack_item", registryName.toString());
 			} catch (Exception e) {

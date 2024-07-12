@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Set;
 
 import com.google.common.collect.Lists;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
 
 import io.netty.util.internal.StringUtil;
@@ -14,6 +15,8 @@ import net.minecraft.client.gui.components.Button;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.CommonComponents;
@@ -26,14 +29,16 @@ import yesman.epicfight.client.gui.datapack.widgets.Grid;
 import yesman.epicfight.client.gui.datapack.widgets.Grid.GridBuilder.RowEditButton;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.HorizontalSizing;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.VerticalSizing;
+import yesman.epicfight.client.gui.datapack.widgets.ResizableEditBox;
 import yesman.epicfight.client.gui.datapack.widgets.Static;
+import yesman.epicfight.data.conditions.Condition.ParameterEditor;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.Style;
 
 @OnlyIn(Dist.CLIENT)
 public class WeaponAttributeScreen extends Screen {
-	private static final List<String> WEAPON_ATTRIBUTES = List.of("armor_negation", "impact", "max_strikes", "damage_bonus", "speed_bonus");
-	private static final List<String> ARMOR_ATTRIBUTES = List.of("stun_armor", "weight");
+	private final Map<String, ParameterEditor> weaponAttributeEditors = Maps.newLinkedHashMap();
+	private final Map<String, ParameterEditor> armorAttributeEditors = Maps.newLinkedHashMap();
 	
 	private final Screen parentScreen;
 	private final ItemType itemType;
@@ -50,6 +55,30 @@ public class WeaponAttributeScreen extends Screen {
 		this.rootTag = rootTag;
 		this.font = parentScreen.getMinecraft().font;
 		
+		final ResizableEditBox impactEditBox = new ResizableEditBox(this.font, 0, 0, 0, 0, Component.literal("impact"), null, null);
+		final ResizableEditBox armorNegationEditBox = new ResizableEditBox(this.font, 0, 0, 0, 0, Component.literal("armor_negation"), null, null);
+		final ResizableEditBox maxStrikesEditBox = new ResizableEditBox(this.font, 0, 0, 0, 0, Component.literal("max_strikes"), null, null);
+		final ResizableEditBox damageBonusEditBox = new ResizableEditBox(this.font, 0, 0, 0, 0, Component.literal("damage_bonus"), null, null);
+		final ResizableEditBox speedBonusEditBox = new ResizableEditBox(this.font, 0, 0, 0, 0, Component.literal("speed_bonus"), null, null);
+		final ResizableEditBox stunArmorEditBox = new ResizableEditBox(this.font, 0, 0, 0, 0, Component.literal("stun_armor"), null, null);
+		final ResizableEditBox weightEditBox = new ResizableEditBox(this.font, 0, 0, 0, 0, Component.literal("weight"), null, null);
+		
+		impactEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
+		armorNegationEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
+		maxStrikesEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Integer::parseInt));
+		damageBonusEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
+		speedBonusEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
+		stunArmorEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
+		weightEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
+		
+		this.weaponAttributeEditors.put("armor_negation", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), armorNegationEditBox));
+		this.weaponAttributeEditors.put("impact", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), impactEditBox));
+		this.weaponAttributeEditors.put("max_strikes", ParameterEditor.of((value) -> IntTag.valueOf(Integer.parseInt(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), maxStrikesEditBox));
+		this.weaponAttributeEditors.put("damage_bonus", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), damageBonusEditBox));
+		this.weaponAttributeEditors.put("speed_bonus", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), speedBonusEditBox));
+		this.armorAttributeEditors.put("stun_armor", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), stunArmorEditBox));
+		this.armorAttributeEditors.put("weight", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), weightEditBox));
+		
 		if (itemType == ItemType.WEAPON) {
 			this.stylesGrid = Grid.builder(this, parentScreen.getMinecraft())
 									.xy1(20, 60)
@@ -63,7 +92,8 @@ public class WeaponAttributeScreen extends Screen {
 										Grid.PackImporter packImporter = new Grid.PackImporter();
 										
 										for (Map.Entry<String, Tag> entry : this.styles.get(rowposition).getValue().tags.entrySet()) {
-											packImporter.newRow().newValue("attribute", entry.getKey()).newValue("amount", entry.getValue().getAsString());
+											ParameterEditor paramEditor = this.weaponAttributeEditors.get(entry.getKey());
+											packImporter.newRow().newValue("attribute", this.weaponAttributeEditors.get(entry.getKey())).newValue("amount", paramEditor.fromTag.apply(entry.getValue()));
 										}
 										
 										this.attributesGrid._setActive(true);
@@ -94,21 +124,34 @@ public class WeaponAttributeScreen extends Screen {
 										.rowHeight(21)
 										.rowEditable(RowEditButton.ADD_REMOVE)
 										.transparentBackground(false)
-										.addColumn(Grid.combo("attribute", WEAPON_ATTRIBUTES)
-														.toDisplayText(ParseUtil::snakeToSpacedCamel)
+										.addColumn(Grid.combo("attribute", List.copyOf(this.weaponAttributeEditors.values()))
+														.toDisplayText((editor) -> ParseUtil.nullOrToString(editor, (editor$1) -> ParseUtil.snakeToSpacedCamel(editor.editWidget.getMessage().getString())))
 														.valueChanged((event) -> {
 															CompoundTag attributesCompound = this.styles.get(this.stylesGrid.getRowposition()).getValue();
-															Tag tag = attributesCompound.get(ParseUtil.nullParam(event.prevValue));
 															
-															attributesCompound.remove(ParseUtil.nullParam(event.prevValue));
-															attributesCompound.put(ParseUtil.nullParam(event.postValue), tag == null ? StringTag.valueOf("") : tag);
+															if (event.prevValue != null) {
+																attributesCompound.remove(event.prevValue.editWidget.getMessage().getString());
+															} else {
+																attributesCompound.remove("");
+															}
+															
+															attributesCompound.putString(ParseUtil.nullParam(event.postValue.editWidget.getMessage().getString()), "");
 														})
 														.width(100))
-										.addColumn(Grid.editbox("amount")
-														.editWidgetCreated((editbox) -> editbox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble)))
+										.addColumn(Grid.wildcard("amount")
+														.editWidgetProvider((row) -> {
+															ParameterEditor editor = row.getValue("attribute");
+															return editor == null ? null : editor.editWidget;
+														})
 														.valueChanged((event) -> {
-															CompoundTag attributesCompound = this.styles.get(this.stylesGrid.getRowposition()).getValue();
-															attributesCompound.put(event.grid.getValue(event.rowposition, "attribute"), StringTag.valueOf(ParseUtil.nullParam(event.postValue)));
+															CompoundTag attributesTag = this.styles.get(this.stylesGrid.getRowposition()).getValue();
+															ParameterEditor editor = event.grid.getValue(event.rowposition, "attribute");
+															
+															if (!StringUtil.isNullOrEmpty(ParseUtil.nullParam(event.postValue))) {
+																attributesTag.put(editor.editWidget.getMessage().getString(), editor.toTag.apply(event.postValue));
+															} else {
+																attributesTag.remove(editor.editWidget.getMessage().getString());
+															}
 														})
 														.width(150))
 										.pressAdd((grid, button) -> {
@@ -144,21 +187,35 @@ public class WeaponAttributeScreen extends Screen {
 										.rowHeight(21)
 										.rowEditable(RowEditButton.ADD_REMOVE)
 										.transparentBackground(false)
-										.addColumn(Grid.combo("attribute", ARMOR_ATTRIBUTES)
-														.toDisplayText(ParseUtil::snakeToSpacedCamel)
+										
+										.addColumn(Grid.combo("attribute", List.copyOf(this.armorAttributeEditors.values()))
+														.toDisplayText((editor) -> ParseUtil.nullOrToString(editor, (editor$1) -> ParseUtil.snakeToSpacedCamel(editor.editWidget.getMessage().getString())))
 														.valueChanged((event) -> {
 															CompoundTag attributesCompound = this.styles.get(0).getValue();
-															Tag tag = attributesCompound.get(ParseUtil.nullParam(event.prevValue));
 															
-															attributesCompound.remove(ParseUtil.nullParam(event.prevValue));
-															attributesCompound.put(ParseUtil.nullParam(event.postValue), tag == null ? StringTag.valueOf("") : tag);
+															if (event.prevValue != null) {
+																attributesCompound.remove(event.prevValue.editWidget.getMessage().getString());
+															} else {
+																attributesCompound.remove("");
+															}
+															
+															attributesCompound.putString(ParseUtil.nullParam(event.postValue.editWidget.getMessage().getString()), "");
 														})
 														.width(100))
-										.addColumn(Grid.editbox("amount")
-														.editWidgetCreated((editbox) -> editbox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble)))
+										.addColumn(Grid.wildcard("amount")
+														.editWidgetProvider((row) -> {
+															ParameterEditor editor = row.getValue("attribute");
+															return editor == null ? null : editor.editWidget;
+														})
 														.valueChanged((event) -> {
-															CompoundTag attributesCompound = this.styles.get(0).getValue();
-															attributesCompound.put(event.grid.getValue(event.rowposition, "attribute"), StringTag.valueOf(ParseUtil.nullParam(event.postValue)));
+															CompoundTag attributesTag = this.styles.get(0).getValue();
+															ParameterEditor editor = event.grid.getValue(event.rowposition, "attribute");
+															
+															if (!StringUtil.isNullOrEmpty(ParseUtil.nullParam(event.postValue))) {
+																attributesTag.put(editor.editWidget.getMessage().getString(), editor.toTag.apply(event.postValue));
+															} else {
+																attributesTag.remove(editor.editWidget.getMessage().getString());
+															}
 														})
 														.width(150))
 										.pressAdd((grid, button) -> {
@@ -177,9 +234,11 @@ public class WeaponAttributeScreen extends Screen {
 			Grid.PackImporter packImporter = new Grid.PackImporter();
 			
 			for (Map.Entry<String, Tag> entry : rootTag.tags.entrySet()) {
+				ParameterEditor paramEditor = this.armorAttributeEditors.get(entry.getKey());
+				
 				packImporter.newRow();
-				packImporter.newValue("attribute", entry.getKey());
-				packImporter.newValue("amount", entry.getValue().getAsString());
+				packImporter.newValue("attribute", this.armorAttributeEditors.get(entry.getKey()));
+				packImporter.newValue("amount", paramEditor.fromTag.apply(entry.getValue()));
 			}
 			
 			this.attributesGrid._setValue(packImporter);
