@@ -44,7 +44,7 @@ import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends HumanoidModel<E>, AM extends HumanoidMesh> extends PatchedLayer<E, T, M, HumanoidArmorLayer<E, M, M>, AM> {
+public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends HumanoidModel<E>, AM extends HumanoidMesh> extends ModelRenderLayer<E, T, M, HumanoidArmorLayer<E, M, M>, AM> {
 	private static final Map<ResourceLocation, AnimatedMesh> ARMOR_MODELS = Maps.newHashMap();
 	private static final Map<String, ResourceLocation> EPICFIGHT_OVERRIDING_TEXTURES = Maps.newHashMap();
 	

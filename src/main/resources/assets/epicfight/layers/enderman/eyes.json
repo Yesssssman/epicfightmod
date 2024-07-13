@@ -1,0 +1,6 @@
+{
+	"layer_type": "epicfight:eyes",
+	"target_layer": "EnderEyesLayer",
+	"model": "epicfight:entity/enderman",
+	"texture": "textures/entity/enderman/enderman_eyes.png"
+}

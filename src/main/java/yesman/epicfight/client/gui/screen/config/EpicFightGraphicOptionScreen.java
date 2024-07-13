@@ -19,6 +19,7 @@ import yesman.epicfight.config.ClientConfig;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.config.OptionHandler;
 import yesman.epicfight.config.OptionHandler.BooleanOptionHandler;
+import yesman.epicfight.config.OptionHandler.IntegerOptionHandler;
 import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
@@ -43,6 +44,7 @@ public class EpicFightGraphicOptionScreen extends EpicFightOptionSubScreen {
 		BooleanOptionHandler bloodEffects = this.config.bloodEffects;
 		BooleanOptionHandler aimingCorrection = this.config.aimingCorrection;
 		BooleanOptionHandler showEpicFightAttributes = this.config.showEpicFightAttributes;
+		IntegerOptionHandler maxHitProjectiles = this.config.maxStuckProjectiles;
 		
 		int buttonHeight = -32;
 		
@@ -110,7 +112,12 @@ public class EpicFightGraphicOptionScreen extends EpicFightOptionSubScreen {
 			button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".show_attributes." + (showEpicFightAttributes.getValue() ? "on" : "off")));
 		}).pos(this.width / 2 - 165, this.height / 4 + buttonHeight).size(160, 20).tooltip(Tooltip.create(Component.translatable("gui."+EpicFightMod.MODID+".show_attributes.tooltip"))).build();
 		
-		this.optionsList.addSmall(showEpicfightAttributesButton, null);
+		Button maxHitProjectilesButton = Button.builder(Component.translatable("gui."+EpicFightMod.MODID+".max_stuck_projectiles", String.valueOf(maxHitProjectiles.getValue())), (button) -> {
+			maxHitProjectiles.setValue((maxHitProjectiles.getValue() + 1) % 30);
+			button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".max_stuck_projectiles", String.valueOf(maxHitProjectiles.getValue())));
+		}).pos(this.width / 2 + 5, this.height / 4 + buttonHeight).size(160, 20).tooltip(Tooltip.create(Component.translatable("gui."+EpicFightMod.MODID+".max_stuck_projectiles.tooltip"))).build();
+		
+		this.optionsList.addSmall(showEpicfightAttributesButton, maxHitProjectilesButton);
 		
 		buttonHeight += 30;
 		

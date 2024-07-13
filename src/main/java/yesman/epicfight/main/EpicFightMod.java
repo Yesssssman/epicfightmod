@@ -51,6 +51,7 @@ import yesman.epicfight.client.gui.screen.config.IngameConfigurationScreen;
 import yesman.epicfight.client.renderer.patched.item.EpicFightItemProperties;
 import yesman.epicfight.compat.AzureLibArmorCompat;
 import yesman.epicfight.compat.AzureLibCompat;
+import yesman.epicfight.compat.CuriosCompat;
 import yesman.epicfight.compat.FirstPersonCompat;
 import yesman.epicfight.compat.GeckolibCompat;
 import yesman.epicfight.compat.ICompatModule;
@@ -181,6 +182,12 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  
  *  2. Added BLOCK type animation in the living animations screen in weapon type datapack editor.
  *  
+ *  --- 20.8.1.101 ---
+ *  
+ *  1. Added arrow and bee stinger stuck effect for player
+ *  
+ *  2. Added config value to modulate the maximum number of arrows & bee stingers stuck in player's body
+ *  
  *  --- TO DO ---
  *  
  *  1. Crash because {@link PlayerPatch#STAMINA} is unregistered at SynchedEntityData (Most likely a mod compatibility issue)
@@ -275,6 +282,10 @@ public class EpicFightMod {
     		
     		if (ModList.get().isLoaded("azurelibarmor")) {
     			ICompatModule.loadCompatModule(AzureLibArmorCompat.class);
+    		}
+    		
+    		if (ModList.get().isLoaded("curios")) {
+    			ICompatModule.loadCompatModule(CuriosCompat.class);
     		}
     		
     		if (ModList.get().isLoaded("firstperson")) {

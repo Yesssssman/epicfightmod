@@ -1,0 +1,9 @@
+{
+	"model": "original",
+	"root_joint": [
+		{
+			"slot": ""
+			"joint": "Tool_R"
+		}
+	]
+}

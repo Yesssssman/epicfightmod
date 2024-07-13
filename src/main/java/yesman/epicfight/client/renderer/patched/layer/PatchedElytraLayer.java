@@ -16,7 +16,7 @@ import yesman.epicfight.client.mesh.HumanoidMesh;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PatchedElytraLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, AM extends HumanoidMesh> extends PatchedLayer<E, T, M, ElytraLayer<E, M>, AM> {
+public class PatchedElytraLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, AM extends HumanoidMesh> extends ModelRenderLayer<E, T, M, ElytraLayer<E, M>, AM> {
 	public PatchedElytraLayer() {
 		super(null);
 	}

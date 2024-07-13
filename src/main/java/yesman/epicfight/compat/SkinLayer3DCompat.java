@@ -54,7 +54,7 @@ import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.mesh.HumanoidMesh;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.patched.entity.PPlayerRenderer;
-import yesman.epicfight.client.renderer.patched.layer.PatchedLayer;
+import yesman.epicfight.client.renderer.patched.layer.ModelRenderLayer;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.AbstractClientPlayerPatch;
 import yesman.epicfight.main.EpicFightMod;
 
@@ -107,7 +107,7 @@ public class SkinLayer3DCompat implements ICompatModule {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public class EpicFight3DSkinLayerRenderer extends PatchedLayer<AbstractClientPlayer, AbstractClientPlayerPatch<AbstractClientPlayer>, PlayerModel<AbstractClientPlayer>, CustomLayerFeatureRenderer, HumanoidMesh> {
+	public static class EpicFight3DSkinLayerRenderer extends ModelRenderLayer<AbstractClientPlayer, AbstractClientPlayerPatch<AbstractClientPlayer>, PlayerModel<AbstractClientPlayer>, CustomLayerFeatureRenderer, HumanoidMesh> {
 		private static Method skinUtil$getSkinTexture;
 		
 		static {

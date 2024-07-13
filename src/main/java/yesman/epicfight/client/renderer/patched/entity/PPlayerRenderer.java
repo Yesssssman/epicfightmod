@@ -12,7 +12,8 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.client.mesh.HumanoidMesh;
-import yesman.epicfight.client.renderer.patched.layer.EmptyLayer;
+import yesman.epicfight.client.renderer.patched.layer.PatchedArrowLayer;
+import yesman.epicfight.client.renderer.patched.layer.PatchedBeeStingerLayer;
 import yesman.epicfight.client.renderer.patched.layer.PatchedCapeLayer;
 import yesman.epicfight.client.renderer.patched.layer.PatchedItemInHandLayer;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.AbstractClientPlayerPatch;
@@ -22,8 +23,8 @@ public class PPlayerRenderer extends PHumanoidRenderer<AbstractClientPlayer, Abs
 	public PPlayerRenderer(EntityRendererProvider.Context context) {
 		super(Meshes.BIPED, context);
 		
-		this.addPatchedLayer(ArrowLayer.class, new EmptyLayer<>());
-		this.addPatchedLayer(BeeStingerLayer.class, new EmptyLayer<>());
+		this.addPatchedLayer(ArrowLayer.class, new PatchedArrowLayer<> (context));
+		this.addPatchedLayer(BeeStingerLayer.class, new PatchedBeeStingerLayer<> ());
 		this.addPatchedLayer(CapeLayer.class, new PatchedCapeLayer());
 		this.addPatchedLayer(PlayerItemInHandLayer.class, new PatchedItemInHandLayer<>());
 	}

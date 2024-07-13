@@ -19,13 +19,13 @@ import yesman.epicfight.client.mesh.HumanoidMesh;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.AbstractClientPlayerPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PatchedCapeLayer extends PatchedLayer<AbstractClientPlayer, AbstractClientPlayerPatch<AbstractClientPlayer>, PlayerModel<AbstractClientPlayer>, CapeLayer, HumanoidMesh>  {
+public class PatchedCapeLayer extends ModelRenderLayer<AbstractClientPlayer, AbstractClientPlayerPatch<AbstractClientPlayer>, PlayerModel<AbstractClientPlayer>, CapeLayer, HumanoidMesh>  {
 	public PatchedCapeLayer() {
 		super(null);
 	}
 	
 	@Override
-	protected void renderLayer(AbstractClientPlayerPatch<AbstractClientPlayer> entitypatch, AbstractClientPlayer entityliving, CapeLayer vanillaLayer, PoseStack poseStack, MultiBufferSource buffer, int packedLightIn,
+	protected void renderLayer(AbstractClientPlayerPatch<AbstractClientPlayer> entitypatch, AbstractClientPlayer entityliving, CapeLayer vanillaLayer, PoseStack poseStack, MultiBufferSource buffer, int packedLight,
 			OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 		if (entityliving.isCapeLoaded() && !entityliving.isInvisible() && entityliving.isModelPartShown(PlayerModelPart.CAPE) && entityliving.getCloakTextureLocation() != null) {
 			ItemStack itemstack = entityliving.getItemBySlot(EquipmentSlot.CHEST);
@@ -39,7 +39,7 @@ public class PatchedCapeLayer extends PatchedLayer<AbstractClientPlayer, Abstrac
 				MathUtils.translateStack(poseStack, modelMatrix);
 				MathUtils.rotateStack(poseStack, transpose);
 				poseStack.translate(0.0D, -0.4D, -0.025D);
-				vanillaLayer.render(poseStack, buffer, packedLightIn, entityliving, entityliving.walkAnimation.position(), entityliving.walkAnimation.speed(), partialTicks, entityliving.tickCount, yRot, xRot);
+				vanillaLayer.render(poseStack, buffer, packedLight, entityliving, entityliving.walkAnimation.position(), entityliving.walkAnimation.speed(), partialTicks, entityliving.tickCount, yRot, xRot);
 				poseStack.popPose();
 			}
 		}

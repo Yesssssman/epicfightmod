@@ -31,6 +31,7 @@ public class EpicFightOptions {
 	public final BooleanOptionHandler noMiningInCombat;
 	public final BooleanOptionHandler aimingCorrection;
 	public final BooleanOptionHandler showEpicFightAttributes;
+	public final IntegerOptionHandler maxStuckProjectiles;
 	public final Set<Item> battleAutoSwitchItems;
 	public final Set<Item> miningAutoSwitchItems;
 	public int aimHelperRealColor;
@@ -71,6 +72,7 @@ public class EpicFightOptions {
 		this.noMiningInCombat = new BooleanOptionHandler(config.noMiningInCombat.get());
 		this.aimingCorrection = new BooleanOptionHandler(config.aimingCorrection.get());
 		this.showEpicFightAttributes = new BooleanOptionHandler(config.showEpicFightAttributes.get());
+		this.maxStuckProjectiles = new IntegerOptionHandler(config.maxStuckProjectiles.get(), 1, 30);
 		this.battleAutoSwitchItems = config.battleAutoSwitchItems.get().stream()
 				.map(itemName -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName)))
 				.filter(Objects::nonNull)
@@ -104,6 +106,7 @@ public class EpicFightOptions {
 	
 	public void resetSettings() {
 		this.longPressCount.setDefaultValue();
+		this.maxStuckProjectiles.setDefaultValue();
 		this.filterAnimation.setDefaultValue();
 		this.healthBarShowOption.setDefaultValue();
 		this.showTargetIndicator.setDefaultValue();
@@ -138,6 +141,7 @@ public class EpicFightOptions {
 	public void save() {
 		ClientConfig config = ConfigManager.INGAME_CONFIG;
 		config.longPressCountConfig.set(this.longPressCount.getValue());
+		config.maxStuckProjectiles.set(this.maxStuckProjectiles.getValue());
 		config.filterAnimation.set(this.filterAnimation.getValue());
 		config.healthBarShowOption.set(this.healthBarShowOption.getValue());
 		config.showTargetIndicator.set(this.showTargetIndicator.getValue());

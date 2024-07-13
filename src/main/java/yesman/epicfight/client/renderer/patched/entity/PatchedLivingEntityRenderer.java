@@ -47,7 +47,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		getRenderType = ObfuscationReflectionHelper.findMethod(LivingEntityRenderer.class, "m_7225_", LivingEntity.class, boolean.class, boolean.class, boolean.class);
 	}
 	
-	protected Map<Class<?>, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>, AM>> patchedLayers = Maps.newHashMap();
+	protected Map<Class<?>, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>>> patchedLayers = Maps.newHashMap();
 	
 	public PatchedLivingEntityRenderer(EntityRendererProvider.Context context) {
 		super(context);
@@ -243,7 +243,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		}
 	}
 	
-	public void addPatchedLayer(Class<?> originalLayerClass, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>, AM> patchedLayer) {
+	public void addPatchedLayer(Class<?> originalLayerClass, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>> patchedLayer) {
 		this.patchedLayers.put(originalLayerClass, patchedLayer);
 	}
 	
