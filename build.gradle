@@ -117,12 +117,7 @@ dependencies {
   	// at runtime, use the full JEI jar for Forge
   	runtimeOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}"))
     
-    implementation fg.deobf("curse.maven:curios-309927:5367944")
-    implementation fg.deobf("curse.maven:octo-lib-916747:5115332")
-    implementation fg.deobf("curse.maven:relics-mod-445274:5435202")
-    
-    compileOnly fg.deobf("local:firstperson:2.4.2")
-    compileOnly fg.deobf("local:skinlayers3d:1.6.6")
+    compileOnly fg.deobf("curse.maven:curios-309927:5367944")
     
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }

@@ -1,13 +1,19 @@
 package yesman.epicfight.client.renderer.patched.entity;
 
+import java.io.IOException;
+import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import com.google.common.collect.Maps;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
@@ -19,7 +25,12 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.client.renderer.entity.layers.RenderLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.resources.FileToIdConverter;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.util.GsonHelper;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -33,6 +44,7 @@ import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
+import yesman.epicfight.client.renderer.patched.layer.LayerUtil;
 import yesman.epicfight.client.renderer.patched.layer.PatchedLayer;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
@@ -49,8 +61,34 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 	
 	protected Map<Class<?>, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>>> patchedLayers = Maps.newHashMap();
 	
-	public PatchedLivingEntityRenderer(EntityRendererProvider.Context context) {
+	public PatchedLivingEntityRenderer(EntityRendererProvider.Context context, EntityType<?> entityType) {
 		super(context);
+		
+		ResourceLocation type = EntityType.getKey(entityType);
+		FileToIdConverter filetoidconverter = FileToIdConverter.json("animated_layers/" + type.getPath());
+		
+		for (Map.Entry<ResourceLocation, Resource> entry : filetoidconverter.listMatchingResources(context.getResourceManager()).entrySet()) {
+			Reader reader = null;
+			
+			try {
+				reader = entry.getValue().openAsReader();
+				JsonElement jsonelement = GsonHelper.fromJson(new GsonBuilder().create(), reader, JsonElement.class);
+				LayerUtil.addLayer(this, jsonelement);
+			} catch (IllegalArgumentException | IOException | JsonParseException jsonparseexception) {
+				EpicFightMod.LOGGER.error("Failed to parse layer file {} for {}", entry.getKey(), type);
+				jsonparseexception.printStackTrace();
+			} catch (NoSuchElementException | ClassNotFoundException e) {
+				EpicFightMod.LOGGER.error("Couldn't read layer file {} for {}", entry.getKey(), type);
+				e.printStackTrace();
+			} finally {
+				try {
+					if (reader != null) {
+						reader.close();
+					}
+				} catch (IOException e) {
+				}
+			}
+		}
 	}
 	
 	@Override
@@ -174,17 +212,16 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		
 		while (iter.hasNext()) {
 			RenderLayer<E, M> layer = iter.next();
-			Class<?> rendererClass = layer.getClass();
+			Class<?> layerClass = layer.getClass();
 			
-			if (rendererClass.isAnonymousClass()) {
-				rendererClass = rendererClass.getSuperclass();
+			if (layerClass.isAnonymousClass()) {
+				layerClass = layerClass.getSuperclass();
 			}
 			
-			this.patchedLayers.computeIfPresent(rendererClass, (key, val) -> {
-				val.renderLayer(0, entitypatch, entityIn, layer, poseStack, buffer, packedLightIn, poses, bob, f2, f7, partialTicks);
+			if (this.patchedLayers.containsKey(layerClass)) {
+				this.patchedLayers.get(layerClass).renderLayer(0, entitypatch, entityIn, layer, poseStack, buffer, packedLightIn, poses, bob, f2, f7, partialTicks);
 				iter.remove();
-				return val;
-			});
+			}
 		}
 		
 		OpenMatrix4f modelMatrix = new OpenMatrix4f().mulFront(poses[entitypatch.getArmature().getRootJoint().getId()]);
@@ -244,7 +281,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 	}
 	
 	public void addPatchedLayer(Class<?> originalLayerClass, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>> patchedLayer) {
-		this.patchedLayers.put(originalLayerClass, patchedLayer);
+		this.patchedLayers.putIfAbsent(originalLayerClass, patchedLayer);
 	}
 	
 	protected double getLayerCorrection() {

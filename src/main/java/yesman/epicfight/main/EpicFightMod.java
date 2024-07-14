@@ -188,6 +188,8 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  
  *  2. Added config value to modulate the maximum number of arrows & bee stingers stuck in player's body
  *  
+ *  3. Fixed entity scaling issue
+ *  
  *  --- TO DO ---
  *  
  *  1. Crash because {@link PlayerPatch#STAMINA} is unregistered at SynchedEntityData (Most likely a mod compatibility issue)
@@ -315,8 +317,8 @@ public class EpicFightMod {
     	
         this.animatorProvider = ClientAnimator::getAnimator;
 		EntityPatchProvider.registerEntityPatchesClient();
-		EpicFightItemProperties.registerItemProperties();
 		SkillBookScreen.registerIconItems();
+		EpicFightItemProperties.registerItemProperties();
     }
 	
 	private void doServerStuff(final FMLDedicatedServerSetupEvent event) {

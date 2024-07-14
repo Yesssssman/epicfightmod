@@ -55,7 +55,6 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 	private static final UUID SPEED_MODIFIER_RAGE_UUID = UUID.fromString("dc362d1a-8424-11ec-a8a3-0242ac120002");
 	private static final AttributeModifier SPEED_MODIFIER_RAGE = new AttributeModifier(SPEED_MODIFIER_RAGE_UUID, "Rage speed bonus", 0.1D, AttributeModifier.Operation.ADDITION);
 	
-	private int deathTimerExt = 0;
 	private boolean onRage;
 	private Goal normalAttacks;
 	private Goal teleportAttacks;
@@ -143,11 +142,6 @@ public class EndermanPatch extends MobPatch<EnderMan> {
 	public void tick(LivingEvent.LivingTickEvent event) {
 		if (this.original.getHealth() <= 0.0F) {
 			this.original.setXRot(0);
-			
-			if (this.original.deathTime > 1 && this.deathTimerExt < 20) {
-				this.deathTimerExt++;
-				this.original.deathTime--;
-			}
 		}
 		
 		super.tick(event);

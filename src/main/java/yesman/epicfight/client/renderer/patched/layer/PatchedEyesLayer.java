@@ -18,10 +18,10 @@ import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PatchedEyeLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, AM extends AnimatedMesh> extends ModelRenderLayer<E, T, M, EyesLayer<E, M>, AM> {
+public class PatchedEyesLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, AM extends AnimatedMesh> extends ModelRenderLayer<E, T, M, EyesLayer<E, M>, AM> {
 	private final RenderType renderType;
 	
-	public PatchedEyeLayer(ResourceLocation eyeTexture, AM mesh) {
+	public PatchedEyesLayer(ResourceLocation eyeTexture, AM mesh) {
 		super(mesh);
 		
 		this.renderType = EpicFightRenderTypes.getTriangulated(RenderType.eyes(eyeTexture));

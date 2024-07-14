@@ -36,7 +36,7 @@ public class CuriosCompat implements ICompatModule {
 	public void onModEventBusClient(IEventBus eventBus) {
 		eventBus.<PatchedRenderersEvent.Modify>addListener((event) -> {
 			if (event.get(EntityType.PLAYER) instanceof PatchedLivingEntityRenderer patchedlivingrenderer) {
-				patchedlivingrenderer.addPatchedLayer(CuriosLayer.class, new CuriosLayerRenderer());
+				//patchedlivingrenderer.addPatchedLayer(CuriosLayer.class, new CuriosLayerRenderer());
 			}
 		});
 	}

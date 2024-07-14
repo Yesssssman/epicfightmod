@@ -3,6 +3,7 @@ package yesman.epicfight.client.renderer.patched.entity;
 import net.minecraft.client.model.HoglinModel;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.MobRenderer;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.monster.hoglin.HoglinBase;
 import net.minecraftforge.api.distmarker.Dist;
@@ -18,8 +19,8 @@ import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class PHoglinRenderer<E extends Mob & HoglinBase, T extends MobPatch<E>> extends PatchedLivingEntityRenderer<E, T, HoglinModel<E>, MobRenderer<E, HoglinModel<E>>, HoglinMesh> {
-	public PHoglinRenderer(EntityRendererProvider.Context context) {
-		super(context);
+	public PHoglinRenderer(EntityRendererProvider.Context context, EntityType<?> entityType) {
+		super(context, entityType);
 	}
 	
 	@Override
