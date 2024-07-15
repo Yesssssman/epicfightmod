@@ -19,7 +19,7 @@ import yesman.epicfight.client.mesh.HumanoidMesh;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PatchedHeadLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E> & HeadedModel, AM extends HumanoidMesh> extends PatchedLayer<E, T, M, CustomHeadLayer<E, M>, AM> {
+public class PatchedHeadLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E> & HeadedModel, AM extends HumanoidMesh> extends ModelRenderLayer<E, T, M, CustomHeadLayer<E, M>, AM> {
 	
 	public PatchedHeadLayer() {
 		super(null);

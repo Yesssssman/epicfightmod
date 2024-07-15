@@ -1,10 +1,11 @@
-package yesman.epicfight.api.client.model.armor;
+package yesman.epicfight.api.client.model.transformer;
 
+import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 
-import it.unimi.dsi.fastutil.ints.IntList;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -12,256 +13,198 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions;
-import net.minecraftforge.registries.ForgeRegistries;
-import software.bernie.geckolib.animatable.GeoItem;
-import software.bernie.geckolib.cache.object.GeoBone;
-import software.bernie.geckolib.cache.object.GeoCube;
-import software.bernie.geckolib.cache.object.GeoQuad;
-import software.bernie.geckolib.cache.object.GeoVertex;
-import software.bernie.geckolib.core.animatable.GeoAnimatable;
-import software.bernie.geckolib.renderer.GeoArmorRenderer;
-import software.bernie.geckolib.util.RenderUtils;
-import yesman.epicfight.api.client.forgeevent.AnimatedArmorTextureEvent;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.client.model.SingleVertex;
+import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec3f;
 
 @OnlyIn(Dist.CLIENT)
-public class GeoArmor extends ArmorModelTransformer {
-	static final PartTransformer<GeoCube> HEAD = new SimpleTransformer(9);
-	static final PartTransformer<GeoCube> LEFT_FEET = new SimpleTransformer(5);
-	static final PartTransformer<GeoCube> RIGHT_FEET = new SimpleTransformer(2);
-	static final PartTransformer<GeoCube> LEFT_ARM = new LimbPartTransformer(16, 17, 19, 1.125F, false, AABB.ofSize(new Vec3(-0.375D, 1.125D, 0), 0.5D, 0.85D, 0.5D));
-	static final PartTransformer<GeoCube> RIGHT_ARM = new LimbPartTransformer(11, 12, 14, 1.125F, false, AABB.ofSize(new Vec3(0.375D, 1.125D, 0), 0.5D, 0.85D, 0.5D));
-	static final PartTransformer<GeoCube> LEFT_LEG = new LimbPartTransformer(4, 5, 6, 0.375F, true, AABB.ofSize(new Vec3(-0.15D, 0.375D, 0), 0.5D, 0.85D, 0.5D));
-	static final PartTransformer<GeoCube> RIGHT_LEG = new LimbPartTransformer(1, 2, 3, 0.375F, true, AABB.ofSize(new Vec3(0.15D, 0.375D, 0), 0.5D, 0.85D, 0.5D));
-	static final PartTransformer<GeoCube> CHEST = new ChestPartTransformer(8, 7, 1.125F, AABB.ofSize(new Vec3(0, 1.125D, 0), 0.9D, 0.85D, 0.45D));
+public class VanillaModelTransformer extends HumanoidModelTransformer {
+	public static final PartTransformer<ModelPart.Cube> HEAD = new SimpleTransformer(9);
+	public static final PartTransformer<ModelPart.Cube> LEFT_FEET = new SimpleTransformer(5);
+	public static final PartTransformer<ModelPart.Cube> RIGHT_FEET = new SimpleTransformer(2);
+	public static final PartTransformer<ModelPart.Cube> LEFT_ARM = new LimbPartTransformer(16, 17, 19, 19.0F, false, AABB.ofSize(new Vec3(-6.0D, 18.0D, 0), 8.0D, 14.0D, 8.0D));
+	public static final PartTransformer<ModelPart.Cube> RIGHT_ARM = new LimbPartTransformer(11, 12, 14, 19.0F, false, AABB.ofSize(new Vec3(6.0D, 18.0D, 0), 8.0D, 14.0D, 8.0D));
+	public static final PartTransformer<ModelPart.Cube> LEFT_LEG = new LimbPartTransformer(4, 5, 6, 6.0F, true, AABB.ofSize(new Vec3(-2.0D, 6.0D, 0), 8.0D, 14.0D, 8.0D));
+	public static final PartTransformer<ModelPart.Cube> RIGHT_LEG = new LimbPartTransformer(1, 2, 3, 6.0F, true, AABB.ofSize(new Vec3(2.0D, 6.0D, 0), 8.0D, 14.0D, 8.0D));
+	public static final PartTransformer<ModelPart.Cube> CHEST = new ChestPartTransformer(8, 7, 18.0F, AABB.ofSize(new Vec3(0, 18.0D, 0), 12.0D, 14.0D, 6.0D));
 	
-	static int indexCount = 0;
-	
-	static class GeoModelPartition {
-		final PartTransformer<GeoCube> partTransformer;
-		final GeoBone geoBone;
+	static class VanillaModelPartition {
+		final PartTransformer<ModelPart.Cube> partTransformer;
+		final ModelPart modelPart;
+		final String partName;
 		
-		private GeoModelPartition(PartTransformer<GeoCube> partTransformer, GeoBone geoBone) {
+		private VanillaModelPartition(PartTransformer<ModelPart.Cube> partTransformer, ModelPart modelPart, String partName) {
 			this.partTransformer = partTransformer;
-			this.geoBone = geoBone;
+			this.modelPart = modelPart;
+			this.partName = partName;
 		}
 	}
 	
-	@SuppressWarnings("unchecked")
-	public static void getGeoArmorTexturePath(AnimatedArmorTextureEvent event) {
-		IClientItemExtensions customRenderProperties = IClientItemExtensions.of(event.getItemstack());
+	@Override
+	public AnimatedMesh transformArmorModel(HumanoidModel<?> model, ResourceLocation modelName, EquipmentSlot slot) {
+		List<VanillaModelPartition> boxes = Lists.newArrayList();
+		//List<ModelPart> modelParts = getAllParts(model);
 		
-		if (customRenderProperties != null) {
-			HumanoidModel<?> extensionRenderer = customRenderProperties.getHumanoidArmorModel(event.getLivingEntity(), event.getItemstack(), event.getEquipmentSlot(), event.getOriginalModel());
-			
-			if (extensionRenderer instanceof GeoArmorRenderer geoArmorRenderer && event.getItemstack().getItem() instanceof GeoAnimatable geoAnimatable) {
-				event.setResultLocation(geoArmorRenderer.getTextureLocation(geoAnimatable));
-			}
-		}
-	}
-	
-	@SuppressWarnings("rawtypes")
-	public AnimatedMesh transformModel(HumanoidModel<?> model, ArmorItem armorItem, EquipmentSlot slot, boolean debuggingMode) {
-		if (!(armorItem instanceof GeoItem) || !(model instanceof GeoArmorRenderer<?>)) {
-			return null;
-		}
+		model.head.setRotation(0.0F, 0.0F, 0.0F);
+		model.hat.setRotation(0.0F, 0.0F, 0.0F);
+		model.body.setRotation(0.0F, 0.0F, 0.0F);
+	    model.rightArm.setRotation(0.0F, 0.0F, 0.0F);
+	    model.leftArm.setRotation(0.0F, 0.0F, 0.0F);
+	    model.rightLeg.setRotation(0.0F, 0.0F, 0.0F);
+	    model.leftLeg.setRotation(0.0F, 0.0F, 0.0F);
 		
-		GeoArmorRenderer geoModel = (GeoArmorRenderer)model;
-		List<GeoModelPartition> boxes = Lists.newArrayList();
-		
-		GeoBone headBone = geoModel.getHeadBone();
-		GeoBone bodyBone = geoModel.getBodyBone();
-		GeoBone rightArmBone = geoModel.getRightArmBone();
-		GeoBone leftArmBone = geoModel.getLeftArmBone();
-		GeoBone rightLegBone = geoModel.getRightLegBone();
-		GeoBone leftLegBone = geoModel.getLeftLegBone();
-		GeoBone rightBootBone = geoModel.getRightBootBone();
-		GeoBone leftBootBone = geoModel.getLeftBootBone();
-		
-		if (headBone != null) {
-			headBone.setRotX(0);
-			headBone.setRotY(0);
-			headBone.setRotZ(0);
-		}
-		
-		if (bodyBone != null) {
-			bodyBone.setRotX(0);
-			bodyBone.setRotY(0);
-			bodyBone.setRotZ(0);
-		}
-		
-		if (rightArmBone != null) {
-			rightArmBone.setRotX(0);
-			rightArmBone.setRotY(0);
-			rightArmBone.setRotZ(0);
-		}
-		
-		if (leftArmBone != null) {
-			leftArmBone.setRotX(0);
-			leftArmBone.setRotY(0);
-			leftArmBone.setRotZ(0);
-		}
-		
-		if (rightLegBone != null) {
-			rightLegBone.setRotX(0);
-			rightLegBone.setRotY(0);
-			rightLegBone.setRotZ(0);
-		}
-		
-		if (leftLegBone != null) {
-			leftLegBone.setRotX(0);
-			leftLegBone.setRotY(0);
-			leftLegBone.setRotZ(0);
-		}
-		
-		if (rightBootBone != null) {
-			rightBootBone.setRotX(0);
-			rightBootBone.setRotY(0);
-			rightBootBone.setRotZ(0);
-		}
-		
-		if (leftBootBone != null) {
-			leftBootBone.setRotX(0);
-			leftBootBone.setRotY(0);
-			leftBootBone.setRotZ(0);
-		}
-		
-		switch (slot) {
+	    switch (slot) {
 		case HEAD:
-			boxes.add(new GeoModelPartition(HEAD, headBone));
+			boxes.add(new VanillaModelPartition(HEAD, model.head, "head"));
+			boxes.add(new VanillaModelPartition(HEAD, model.hat, "hat"));
 			break;
 		case CHEST:
-			boxes.add(new GeoModelPartition(CHEST, bodyBone));
-			boxes.add(new GeoModelPartition(RIGHT_ARM, rightArmBone));
-			boxes.add(new GeoModelPartition(LEFT_ARM, leftArmBone));
+			boxes.add(new VanillaModelPartition(CHEST, model.body, "body"));
+			boxes.add(new VanillaModelPartition(RIGHT_ARM, model.rightArm, "rightArm"));
+			boxes.add(new VanillaModelPartition(LEFT_ARM, model.leftArm, "leftArm"));
 			break;
 		case LEGS:
-			boxes.add(new GeoModelPartition(CHEST, bodyBone));
-			boxes.add(new GeoModelPartition(LEFT_LEG, leftLegBone));
-			boxes.add(new GeoModelPartition(RIGHT_LEG, rightLegBone));
+			boxes.add(new VanillaModelPartition(CHEST, model.body, "body"));
+			boxes.add(new VanillaModelPartition(LEFT_LEG, model.leftLeg, "leftLeg"));
+			boxes.add(new VanillaModelPartition(RIGHT_LEG, model.rightLeg, "rightLeg"));
 			break;
 		case FEET:
-			boxes.add(new GeoModelPartition(LEFT_FEET, leftBootBone));
-			boxes.add(new GeoModelPartition(RIGHT_FEET, rightBootBone));
+			boxes.add(new VanillaModelPartition(LEFT_FEET, model.leftLeg, "leftLeg"));
+			boxes.add(new VanillaModelPartition(RIGHT_FEET, model.rightLeg, "rightLeg"));
 			break;
 		default:
 			return null;
 		}
 		
-		ResourceLocation rl = new ResourceLocation(ForgeRegistries.ITEMS.getKey(armorItem).getNamespace(), "armor/" + ForgeRegistries.ITEMS.getKey(armorItem).getPath());
-		AnimatedMesh armorModelMesh = bakeMeshFromCubes(boxes, debuggingMode);
-		Meshes.addMesh(rl, armorModelMesh);
+		AnimatedMesh mesh = bakeMeshFromCubes(boxes);
+		Meshes.addMesh(modelName, mesh);
 		
-		return armorModelMesh;
+		return mesh;
 	}
 	
-	private static AnimatedMesh bakeMeshFromCubes(List<GeoModelPartition> partitions, boolean debuggingMode) {
+	public static List<ModelPart> getAllParts(Model model) {
+		Class<?> cls = model.getClass();
+		List<Class<?>> superClasses = Lists.newArrayList();
+		
+		while (Model.class.isAssignableFrom(cls)) {
+			superClasses.add(cls);
+			cls = cls.getSuperclass();
+		}
+		
+		List<ModelPart> modelParts = Lists.newArrayList();
+		
+		for (Class<?> modelClss : superClasses) {
+			Field[] modelFields = modelClss.getDeclaredFields();
+			
+			for (Field field : modelFields) {
+				if (field.getType().isAssignableFrom(ModelPart.class)) {
+					field.setAccessible(true);
+					try {
+						ModelPart modelPart = (ModelPart)field.get(model);
+						
+						if (modelPart.visible) {
+							modelParts.add(modelPart);
+						}
+					} catch(Exception e) {}
+				}
+			}
+		}
+		
+		return modelParts;
+	}
+	
+	private static AnimatedMesh bakeMeshFromCubes(List<VanillaModelPartition> partitions) {
 		List<SingleVertex> vertices = Lists.newArrayList();
 		Map<String, IntList> indices = Maps.newHashMap();
 		PoseStack poseStack = new PoseStack();
-		indexCount = 0;
+		PartTransformer.IndexCounter indexCounter = new PartTransformer.IndexCounter();
 		
-		for (GeoModelPartition modelpartition : partitions) {
-			bake(poseStack, modelpartition, modelpartition.geoBone, vertices, indices, debuggingMode);
+		poseStack.mulPose(QuaternionUtils.YP.rotationDegrees(180.0F));
+		poseStack.mulPose(QuaternionUtils.XP.rotationDegrees(180.0F));
+		poseStack.translate(0, -24, 0);
+		
+		for (VanillaModelPartition modelpartition : partitions) {
+			bake(poseStack, modelpartition.partName, modelpartition, modelpartition.modelPart, vertices, indices, indexCounter);
 		}
 		
 		return SingleVertex.loadVertexInformation(vertices, indices);
 	}
 	
-	private static void bake(PoseStack poseStack, GeoModelPartition modelpartition, GeoBone geoBone, List<SingleVertex> vertices, Map<String, IntList> indices, boolean debuggingMode) {
-		if (geoBone == null) {
-			return;
-		}
+	private static void bake(PoseStack poseStack, String partName, VanillaModelPartition modelpartition, ModelPart part, List<SingleVertex> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+		part.loadPose(part.getInitialPose());
 		
 		poseStack.pushPose();
+		poseStack.translate(part.x, part.y, part.z);
 		
-		if (!geoBone.isHidden()) {
-			RenderUtils.prepMatrixForBone(poseStack, geoBone);
-			
-			for (GeoCube cube : geoBone.getCubes()) {
-				poseStack.pushPose();
-				
-				RenderUtils.translateToPivotPoint(poseStack, cube);
-				RenderUtils.rotateMatrixAroundCube(poseStack, cube);
-				RenderUtils.translateAwayFromPivotPoint(poseStack, cube);
-				
-				modelpartition.partTransformer.bakeCube(poseStack, geoBone.getName(), cube, vertices, indices);
-				poseStack.popPose();
-			}
+		if (part.xRot != 0.0F || part.yRot != 0.0F || part.zRot != 0.0F) {
+			poseStack.mulPose((new Quaternionf()).rotationZYX(part.zRot, part.yRot, part.xRot));
 		}
 		
-		if (!geoBone.isHidingChildren()) {
-			for (GeoBone childBone : geoBone.getChildBones()) {
-				bake(poseStack, modelpartition, childBone, vertices, indices, debuggingMode);
-			}
+		if (part.xScale != 1.0F || part.yScale != 1.0F || part.zScale != 1.0F) {
+			poseStack.scale(part.xScale, part.yScale, part.zScale);
+		}
+		
+		for (ModelPart.Cube cube : part.cubes) {
+			modelpartition.partTransformer.bakeCube(poseStack, partName, cube, vertices, indices, indexCounter);
+		}
+		
+		for (Map.Entry<String, ModelPart> child : part.children.entrySet()) {
+			bake(poseStack, child.getKey(), modelpartition, child.getValue(), vertices, indices, indexCounter);
 		}
 		
 		poseStack.popPose();
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class SimpleTransformer extends PartTransformer<GeoCube> {
+	static class SimpleTransformer extends PartTransformer<ModelPart.Cube> {
 		final int jointId;
 		
 		public SimpleTransformer(int jointId) {
 			this.jointId = jointId;
 		}
 		
-		public void bakeCube(PoseStack poseStack, String partName, GeoCube cube, List<SingleVertex> vertices, Map<String, IntList> indices) {
-			for (GeoQuad quad : cube.quads()) {
-				if (quad == null) {
-					continue;
-				}
-				
-				Vector3f norm = new Vector3f(quad.normal());
+		public void bakeCube(PoseStack poseStack, String partName, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+			for (ModelPart.Polygon quad : cube.polygons) {
+				Vector3f norm = new Vector3f(quad.normal);
 				norm.mul(poseStack.last().normal());
 				
-				for (GeoVertex vertex : quad.vertices()) {
-					Vector4f pos = new Vector4f(vertex.position(), 1.0F);
+				for (ModelPart.Vertex vertex : quad.vertices) {
+					Vector4f pos = new Vector4f(vertex.pos, 1.0F);
 					pos.mul(poseStack.last().pose());
-					
 					vertices.add(new SingleVertex()
-						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z())/*.scale(0.0625F)*/)
+						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
-						.setTextureCoordinate(new Vec2f(vertex.texU(), vertex.texV()))
+						.setTextureCoordinate(new Vec2f(vertex.u, vertex.v))
 						.setEffectiveJointIDs(new Vec3f(this.jointId, 0, 0))
 						.setEffectiveJointWeights(new Vec3f(1.0F, 0.0F, 0.0F))
 						.setEffectiveJointNumber(1)
 					);
 				}
 				
-				putIndexCount(indices, partName, indexCount);
-				putIndexCount(indices, partName, indexCount + 1);
-				putIndexCount(indices, partName, indexCount + 3);
-				putIndexCount(indices, partName, indexCount + 3);
-				putIndexCount(indices, partName, indexCount + 1);
-				putIndexCount(indices, partName, indexCount + 2);
-				indexCount+=4;
+				triangluatePolygon(indices, partName, indexCounter);
 			}
 		}
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class ChestPartTransformer extends PartTransformer<GeoCube> {
+	static class ChestPartTransformer extends PartTransformer<ModelPart.Cube> {
 		static final float X_PLANE = 0.0F;
 		static final VertexWeight[] WEIGHT_ALONG_Y = { new VertexWeight(13.6666F, 0.230F, 0.770F), new VertexWeight(15.8333F, 0.254F, 0.746F), new VertexWeight(18.0F, 0.5F, 0.5F), new VertexWeight(20.1666F, 0.744F, 0.256F), new VertexWeight(22.3333F, 0.770F, 0.230F)};
-		
 		final SimpleTransformer upperAttachmentTransformer;
 		final SimpleTransformer lowerAttachmentTransformer;
 		final AABB noneAttachmentArea;
@@ -275,30 +218,32 @@ public class GeoArmor extends ArmorModelTransformer {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName, GeoCube cube, List<SingleVertex> vertices, Map<String, IntList> indices) {
+		public void bakeCube(PoseStack poseStack, String partName, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 			Vec3 centerOfCube = getCenterOfCube(poseStack, cube);
 			
 			if (!this.noneAttachmentArea.contains(centerOfCube)) {
 				if (centerOfCube.y < this.yClipCoord) {
-					this.lowerAttachmentTransformer.bakeCube(poseStack, partName, cube, vertices, indices);
+					this.lowerAttachmentTransformer.bakeCube(poseStack, partName, cube, vertices, indices, indexCounter);
 				} else {
-					this.upperAttachmentTransformer.bakeCube(poseStack, partName, cube, vertices, indices);
+					this.upperAttachmentTransformer.bakeCube(poseStack, partName, cube, vertices, indices, indexCounter);
 				}
 				
 				return;
 			}
 			
-			List<AnimatedPolygon> xClipPolygons = Lists.newArrayList();
-			List<AnimatedPolygon> xyClipPolygons = Lists.newArrayList();
 			
-			for (GeoQuad polygon : cube.quads()) {
+			List<AnimatedPolygon> xClipPolygons = Lists.<AnimatedPolygon>newArrayList();
+			List<AnimatedPolygon> xyClipPolygons = Lists.<AnimatedPolygon>newArrayList();
+			
+			for (ModelPart.Polygon polygon : cube.polygons) {
 				Matrix4f matrix = poseStack.last().pose();
 				
-				ModelPart.Vertex pos0 = getTranslatedVertex(polygon.vertices()[0], matrix);
-				ModelPart.Vertex pos1 = getTranslatedVertex(polygon.vertices()[1], matrix);
-				ModelPart.Vertex pos2 = getTranslatedVertex(polygon.vertices()[2], matrix);
-				ModelPart.Vertex pos3 = getTranslatedVertex(polygon.vertices()[3], matrix);
-				Direction direction = getDirectionFromVector(polygon.normal());
+				ModelPart.Vertex pos0 = getTranslatedVertex(polygon.vertices[0], matrix);
+				ModelPart.Vertex pos1 = getTranslatedVertex(polygon.vertices[1], matrix);
+				ModelPart.Vertex pos2 = getTranslatedVertex(polygon.vertices[2], matrix);
+				ModelPart.Vertex pos3 = getTranslatedVertex(polygon.vertices[3], matrix);
+				Direction direction = getDirectionFromVector(polygon.normal);
+				
 				VertexWeight pos0Weight = getYClipWeight(pos0.pos.y());
 				VertexWeight pos1Weight = getYClipWeight(pos1.pos.y());
 				VertexWeight pos2Weight = getYClipWeight(pos2.pos.y());
@@ -340,7 +285,7 @@ public class GeoArmor extends ArmorModelTransformer {
 				AnimatedVertex pos3 = upsideDown ? polygon.animatedVertexPositions[1] : polygon.animatedVertexPositions[3];
 				Direction direction = getDirectionFromVector(polygon.normal);
 				List<VertexWeight> vertexWeights = getMiddleYClipWeights(pos1.pos.y(), pos2.pos.y());
-				List<AnimatedVertex> animatedVertices = Lists.newArrayList();
+				List<AnimatedVertex> animatedVertices = Lists.<AnimatedVertex>newArrayList();
 				animatedVertices.add(pos0);
 				animatedVertices.add(pos1);
 				
@@ -393,7 +338,7 @@ public class GeoArmor extends ArmorModelTransformer {
 					}
 					
 					vertices.add(new SingleVertex()
-						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()))
+						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
 						.setTextureCoordinate(new Vec2f(vertex.u, vertex.v))
 						.setEffectiveJointIDs(new Vec3f(joint1, joint2, 0))
@@ -402,13 +347,7 @@ public class GeoArmor extends ArmorModelTransformer {
 					);
 				}
 				
-				putIndexCount(indices, partName, indexCount);
-				putIndexCount(indices, partName, indexCount + 1);
-				putIndexCount(indices, partName, indexCount + 3);
-				putIndexCount(indices, partName, indexCount + 3);
-				putIndexCount(indices, partName, indexCount + 1);
-				putIndexCount(indices, partName, indexCount + 2);
-				indexCount+=4;
+				triangluatePolygon(indices, partName, indexCounter);
 			}
 		}
 		
@@ -430,16 +369,6 @@ public class GeoArmor extends ArmorModelTransformer {
 			return new VertexWeight(y, 1.0F, 0.0F);
 		}
 		
-		static List<VertexWeight> getMiddleYClipWeights(float minY, float maxY) {
-			List<VertexWeight> cutYs = Lists.newArrayList();
-			for (VertexWeight vertexWeight : WEIGHT_ALONG_Y) {
-				if (vertexWeight.yClipCoord > minY && maxY >= vertexWeight.yClipCoord) {
-					cutYs.add(vertexWeight);
-				}
-			}
-			return cutYs;
-		}
-		
 		static class VertexWeight {
 			final float yClipCoord;
 			final float chestWeight;
@@ -451,10 +380,20 @@ public class GeoArmor extends ArmorModelTransformer {
 				this.torsoWeight = torsoWeight;
 			}
 		}
+		
+		static List<VertexWeight> getMiddleYClipWeights(float minY, float maxY) {
+			List<VertexWeight> cutYs = Lists.<VertexWeight>newArrayList();
+			for (VertexWeight vertexWeight : WEIGHT_ALONG_Y) {
+				if (vertexWeight.yClipCoord > minY && maxY >= vertexWeight.yClipCoord) {
+					cutYs.add(vertexWeight);
+				}
+			}
+			return cutYs;
+		}
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class LimbPartTransformer extends PartTransformer<GeoCube> {
+	static class LimbPartTransformer extends PartTransformer<ModelPart.Cube> {
 		final int upperJoint;
 		final int lowerJoint;
 		final int middleJoint;
@@ -476,28 +415,16 @@ public class GeoArmor extends ArmorModelTransformer {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName, GeoCube cube, List<SingleVertex> vertices, Map<String, IntList> indices) {
-			Vec3 centerOfCube = getCenterOfCube(poseStack, cube);
+		public void bakeCube(PoseStack poseStack, String partName,  ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+			List<AnimatedPolygon> polygons = Lists.<AnimatedPolygon>newArrayList();
 			
-			if (!this.noneAttachmentArea.contains(centerOfCube)) {
-				if (centerOfCube.y < this.yClipCoord) {
-					this.lowerAttachmentTransformer.bakeCube(poseStack, partName, cube, vertices, indices);
-				} else {
-					this.upperAttachmentTransformer.bakeCube(poseStack, partName, cube, vertices, indices);
-				}
-				
-				return;
-			}
-			
-			List<AnimatedPolygon> polygons = Lists.newArrayList();
-			
-			for (GeoQuad quad : cube.quads()) {
+			for (ModelPart.Polygon quad : cube.polygons) {
 				Matrix4f matrix = poseStack.last().pose();
-				ModelPart.Vertex pos0 = getTranslatedVertex(quad.vertices()[0], matrix);
-				ModelPart.Vertex pos1 = getTranslatedVertex(quad.vertices()[1], matrix);
-				ModelPart.Vertex pos2 = getTranslatedVertex(quad.vertices()[2], matrix);
-				ModelPart.Vertex pos3 = getTranslatedVertex(quad.vertices()[3], matrix);
-				Direction direction = getDirectionFromVector(quad.normal());
+				ModelPart.Vertex pos0 = getTranslatedVertex(quad.vertices[0], matrix);
+				ModelPart.Vertex pos1 = getTranslatedVertex(quad.vertices[1], matrix);
+				ModelPart.Vertex pos2 = getTranslatedVertex(quad.vertices[2], matrix);
+				ModelPart.Vertex pos3 = getTranslatedVertex(quad.vertices[3], matrix);
+				Direction direction = getDirectionFromVector(quad.normal);
 				
 				if (pos1.pos.y() > this.yClipCoord != pos2.pos.y() > this.yClipCoord) {
 					float distance = pos2.pos.y() - pos1.pos.y();
@@ -570,9 +497,8 @@ public class GeoArmor extends ArmorModelTransformer {
 				
 				for (AnimatedVertex vertex : quad.animatedVertexPositions) {
 					Vector4f pos = new Vector4f(vertex.pos, 1.0F);
-					
 					vertices.add(new SingleVertex()
-						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()))
+						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
 						.setTextureCoordinate(new Vec2f(vertex.u, vertex.v))
 						.setEffectiveJointIDs(new Vec3f(vertex.jointId.getX(), 0, 0))
@@ -581,13 +507,7 @@ public class GeoArmor extends ArmorModelTransformer {
 					);
 				}
 				
-				putIndexCount(indices, partName, indexCount);
-				putIndexCount(indices, partName, indexCount + 1);
-				putIndexCount(indices, partName, indexCount + 3);
-				putIndexCount(indices, partName, indexCount + 3);
-				putIndexCount(indices, partName, indexCount + 1);
-				putIndexCount(indices, partName, indexCount + 2);
-				indexCount+=4;
+				triangluatePolygon(indices, partName, indexCounter);
 			}
 		}
 	}
@@ -603,7 +523,7 @@ public class GeoArmor extends ArmorModelTransformer {
 		return null;
 	}
 	
-	static Vec3 getCenterOfCube(PoseStack poseStack, GeoCube cube) {
+	static Vec3 getCenterOfCube(PoseStack poseStack, ModelPart.Cube cube) {
 		double minX = Double.MAX_VALUE;
 		double minY = Double.MAX_VALUE;
 		double minZ = Double.MAX_VALUE;
@@ -613,9 +533,9 @@ public class GeoArmor extends ArmorModelTransformer {
 		
 		Matrix4f matrix = poseStack.last().pose();
 		
-		for (GeoQuad quad : cube.quads()) {
-			for (GeoVertex v : quad.vertices()) {
-				Vector4f translatedPosition = new Vector4f(v.position(), 1.0F);
+		for (ModelPart.Polygon quad : cube.polygons) {
+			for (ModelPart.Vertex v : quad.vertices) {
+				Vector4f translatedPosition = new Vector4f(v.pos, 1.0F);
 				translatedPosition.mul(matrix);
 				
 				if (minX > translatedPosition.x()) {
@@ -658,11 +578,11 @@ public class GeoArmor extends ArmorModelTransformer {
 		return clipPoint;
 	}
 	
-	static ModelPart.Vertex getTranslatedVertex(GeoVertex original, Matrix4f matrix) {
-		Vector4f translatedPosition = new Vector4f(original.position(), 1.0F);
+	static ModelPart.Vertex getTranslatedVertex(ModelPart.Vertex original, Matrix4f matrix) {
+		Vector4f translatedPosition = new Vector4f(original.pos, 1.0F);
 		translatedPosition.mul(matrix);
 		
-		return new ModelPart.Vertex(translatedPosition.x(), translatedPosition.y(), translatedPosition.z(), original.texU(), original.texV());
+		return new ModelPart.Vertex(translatedPosition.x(), translatedPosition.y(), translatedPosition.z(), original.u, original.v);
 	}
 	
 	@OnlyIn(Dist.CLIENT)

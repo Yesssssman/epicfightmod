@@ -1,7 +1,7 @@
 package yesman.epicfight.api.client.forgeevent;
 
 import java.util.Map;
-import java.util.function.Supplier;
+import java.util.function.Function;
 
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.world.entity.EntityType;
@@ -17,17 +17,17 @@ import yesman.epicfight.client.renderer.patched.item.RenderItemBase;
 @SuppressWarnings("rawtypes")
 public abstract class PatchedRenderersEvent extends Event implements IModBusEvent {
 	public static class Add extends PatchedRenderersEvent {
-		private final Map<EntityType<?>, Supplier<PatchedEntityRenderer>> entityRendererProvider;
+		private final Map<EntityType<?>, Function<EntityType<?>, PatchedEntityRenderer>> entityRendererProvider;
 		private final Map<Item, RenderItemBase> itemRenerers;
 		private final EntityRendererProvider.Context context;
 		
-		public Add(Map<EntityType<?>, Supplier<PatchedEntityRenderer>> entityRendererProvider, Map<Item, RenderItemBase> itemRenerers, EntityRendererProvider.Context context) {
+		public Add(Map<EntityType<?>, Function<EntityType<?>, PatchedEntityRenderer>> entityRendererProvider, Map<Item, RenderItemBase> itemRenerers, EntityRendererProvider.Context context) {
 			this.entityRendererProvider = entityRendererProvider;
 			this.itemRenerers = itemRenerers;
 			this.context = context;
 		}
 		
-		public void addPatchedEntityRenderer(EntityType<?> entityType, Supplier<PatchedEntityRenderer> provider) {
+		public void addPatchedEntityRenderer(EntityType<?> entityType, Function<EntityType<?>, PatchedEntityRenderer> provider) {
 			this.entityRendererProvider.put(entityType, provider);
 		}
 		

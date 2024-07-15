@@ -1,0 +1,7 @@
+{
+	"layer_type": "epicfight:model_original",
+	"target_layer": "dev.tr7zw.waveycapes.renderlayers.CustomCapeRenderLayer",
+	"joint": "Chest",
+	"translation": [0.0, 0.4, 0.0],
+	"rotation": [0.0, 0.0, 0.0]
+}

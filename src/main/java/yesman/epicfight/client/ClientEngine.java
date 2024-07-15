@@ -21,7 +21,7 @@ public class ClientEngine {
 	public Minecraft minecraft;
 	public RenderEngine renderEngine;
 	public ControllEngine controllEngine;
-	private boolean armorModelDebuggingMode = false;
+	private boolean vanillaModelDebuggingMode = false;
 	
 	public ClientEngine() {
 		instance = this;
@@ -30,13 +30,13 @@ public class ClientEngine {
 		this.controllEngine = new ControllEngine();
 	}
 	
-	public boolean switchArmorModelDebuggingMode() {
-		this.armorModelDebuggingMode = !this.armorModelDebuggingMode;
-		return this.armorModelDebuggingMode;
+	public boolean switchVanillaModelDebuggingMode() {
+		this.vanillaModelDebuggingMode = !this.vanillaModelDebuggingMode;
+		return this.vanillaModelDebuggingMode;
 	}
 	
-	public boolean isArmorModelDebuggingMode() {
-		return this.armorModelDebuggingMode;
+	public boolean isVanillaModelDebuggingMode() {
+		return this.vanillaModelDebuggingMode;
 	}
 	
 	@Nullable

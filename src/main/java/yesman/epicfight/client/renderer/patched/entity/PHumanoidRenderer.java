@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.ElytraLayer;
 import net.minecraft.client.renderer.entity.layers.HumanoidArmorLayer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -26,8 +27,8 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 public class PHumanoidRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends HumanoidModel<E>, R extends LivingEntityRenderer<E, M>, AM extends HumanoidMesh> extends PatchedLivingEntityRenderer<E, T, M, R, AM> {
 	private final AM mesh;
 	
-	public PHumanoidRenderer(AM mesh, EntityRendererProvider.Context context) {
-		super(context);
+	public PHumanoidRenderer(AM mesh, EntityRendererProvider.Context context, EntityType<?> entityType) {
+		super(context, entityType);
 		
 		this.mesh = mesh;
 		this.addPatchedLayer(ElytraLayer.class, new PatchedElytraLayer<>());

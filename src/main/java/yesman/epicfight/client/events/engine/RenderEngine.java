@@ -3,7 +3,7 @@ package yesman.epicfight.client.events.engine;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Supplier;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.google.common.collect.BiMap;
@@ -58,6 +58,7 @@ import net.minecraftforge.client.event.RenderLevelStageEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.ViewportEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModLoader;
 import net.minecraftforge.fml.common.Mod;
@@ -133,7 +134,7 @@ public class RenderEngine {
 	public final BetaWarningMessage betaWarningMessage = new BetaWarningMessage(Minecraft.getInstance());
 	public final Minecraft minecraft;
 	
-	private final BiMap<EntityType<?>, Supplier<PatchedEntityRenderer>> entityRendererProvider;
+	private final BiMap<EntityType<?>, Function<EntityType<?>, PatchedEntityRenderer>> entityRendererProvider;
 	private final Map<EntityType<?>, PatchedEntityRenderer> entityRendererCache;
 	private final Map<Item, RenderItemBase> itemRendererMapByInstance;
 	private final Map<Class<?>, RenderItemBase> itemRendererMapByClass;
@@ -151,6 +152,7 @@ public class RenderEngine {
 		Events.renderEngine = this;
 		RenderItemBase.renderEngine = this;
 		EntityIndicator.init();
+		
 		this.minecraft = Minecraft.getInstance();
 		this.entityRendererProvider = HashBiMap.create();
 		this.entityRendererCache = Maps.newHashMap();
@@ -161,37 +163,37 @@ public class RenderEngine {
 	
 	public void bootstrap(EntityRendererProvider.Context context) {
 		this.entityRendererProvider.clear();
-		this.entityRendererProvider.put(EntityType.CREEPER, () -> new PCreeperRenderer(context));
-		this.entityRendererProvider.put(EntityType.ENDERMAN, () -> new PEndermanRenderer(context));
-		this.entityRendererProvider.put(EntityType.ZOMBIE, () -> new PHumanoidRenderer<>(Meshes.BIPED_OLD_TEX, context));
-		this.entityRendererProvider.put(EntityType.ZOMBIE_VILLAGER, () -> new PZombieVillagerRenderer(context));
-		this.entityRendererProvider.put(EntityType.ZOMBIFIED_PIGLIN, () -> new PHumanoidRenderer<>(Meshes.PIGLIN, context));
-		this.entityRendererProvider.put(EntityType.HUSK, () -> new PHumanoidRenderer<>(Meshes.BIPED_OLD_TEX, context));
-		this.entityRendererProvider.put(EntityType.SKELETON, () -> new PHumanoidRenderer<>(Meshes.SKELETON, context));
-		this.entityRendererProvider.put(EntityType.WITHER_SKELETON, () -> new PHumanoidRenderer<>(Meshes.SKELETON, context));
-		this.entityRendererProvider.put(EntityType.STRAY, () -> new PStrayRenderer(context));
-		this.entityRendererProvider.put(EntityType.PLAYER, () -> new PPlayerRenderer(context));
-		this.entityRendererProvider.put(EntityType.SPIDER, () -> new PSpiderRenderer(context));
-		this.entityRendererProvider.put(EntityType.CAVE_SPIDER, () -> new PSpiderRenderer(context));
-		this.entityRendererProvider.put(EntityType.IRON_GOLEM, () -> new PIronGolemRenderer(context));
-		this.entityRendererProvider.put(EntityType.VINDICATOR, () -> new PVindicatorRenderer(context));
-		this.entityRendererProvider.put(EntityType.EVOKER, () -> new PIllagerRenderer(context));
-		this.entityRendererProvider.put(EntityType.WITCH, () -> new PWitchRenderer(context));
-		this.entityRendererProvider.put(EntityType.DROWNED, () -> new PDrownedRenderer(context));
-		this.entityRendererProvider.put(EntityType.PILLAGER, () -> new PIllagerRenderer(context));
-		this.entityRendererProvider.put(EntityType.RAVAGER, () -> new PRavagerRenderer(context));
-		this.entityRendererProvider.put(EntityType.VEX, () -> new PVexRenderer(context));
-		this.entityRendererProvider.put(EntityType.PIGLIN, () -> new PHumanoidRenderer<>(Meshes.PIGLIN, context));
-		this.entityRendererProvider.put(EntityType.PIGLIN_BRUTE, () -> new PHumanoidRenderer<>(Meshes.PIGLIN, context));
-		this.entityRendererProvider.put(EntityType.HOGLIN, () -> new PHoglinRenderer(context));
-		this.entityRendererProvider.put(EntityType.ZOGLIN, () -> new PHoglinRenderer(context));
-		this.entityRendererProvider.put(EntityType.ENDER_DRAGON, () -> new PEnderDragonRenderer(context));
-		this.entityRendererProvider.put(EntityType.WITHER, () -> new PWitherRenderer(context));
-		this.entityRendererProvider.put(EpicFightEntities.WITHER_SKELETON_MINION.get(), () -> new PWitherSkeletonMinionRenderer(context));
-		this.entityRendererProvider.put(EpicFightEntities.WITHER_GHOST_CLONE.get(), () -> new WitherGhostCloneRenderer(context));
+		this.entityRendererProvider.put(EntityType.CREEPER, (entityType) -> new PCreeperRenderer(context, entityType));
+		this.entityRendererProvider.put(EntityType.ENDERMAN, (entityType) -> new PEndermanRenderer(context, entityType));
+		this.entityRendererProvider.put(EntityType.ZOMBIE, (entityType) -> new PHumanoidRenderer<>(Meshes.BIPED_OLD_TEX, context, entityType));
+		this.entityRendererProvider.put(EntityType.ZOMBIE_VILLAGER, (entityType) -> new PZombieVillagerRenderer(context, entityType));
+		this.entityRendererProvider.put(EntityType.ZOMBIFIED_PIGLIN, (entityType) -> new PHumanoidRenderer<>(Meshes.PIGLIN, context, entityType));
+		this.entityRendererProvider.put(EntityType.HUSK, (entityType) -> new PHumanoidRenderer<>(Meshes.BIPED_OLD_TEX, context, entityType));
+		this.entityRendererProvider.put(EntityType.SKELETON, (entityType) -> new PHumanoidRenderer<>(Meshes.SKELETON, context, entityType));
+		this.entityRendererProvider.put(EntityType.WITHER_SKELETON, (entityType) -> new PHumanoidRenderer<>(Meshes.SKELETON, context, entityType));
+		this.entityRendererProvider.put(EntityType.STRAY, (entityType) -> new PStrayRenderer(context, entityType));
+		this.entityRendererProvider.put(EntityType.PLAYER, (entityType) -> new PPlayerRenderer(context, entityType));
+		this.entityRendererProvider.put(EntityType.SPIDER, (entityType) -> new PSpiderRenderer(context, entityType));
+		this.entityRendererProvider.put(EntityType.CAVE_SPIDER, (entityType) -> new PSpiderRenderer(context, entityType));
+		this.entityRendererProvider.put(EntityType.IRON_GOLEM, (entityType) -> new PIronGolemRenderer(context, entityType));
+		this.entityRendererProvider.put(EntityType.VINDICATOR, (entityType) -> new PVindicatorRenderer(context, entityType));
+		this.entityRendererProvider.put(EntityType.EVOKER, (entityType) -> new PIllagerRenderer<> (context, entityType));
+		this.entityRendererProvider.put(EntityType.WITCH, (entityType) -> new PWitchRenderer(context, entityType));
+		this.entityRendererProvider.put(EntityType.DROWNED, (entityType) -> new PDrownedRenderer(context, entityType));
+		this.entityRendererProvider.put(EntityType.PILLAGER, (entityType) -> new PIllagerRenderer<> (context, entityType));
+		this.entityRendererProvider.put(EntityType.RAVAGER, (entityType) -> new PRavagerRenderer(context, entityType));
+		this.entityRendererProvider.put(EntityType.VEX, (entityType) -> new PVexRenderer(context, entityType));
+		this.entityRendererProvider.put(EntityType.PIGLIN, (entityType) -> new PHumanoidRenderer<>(Meshes.PIGLIN, context, entityType));
+		this.entityRendererProvider.put(EntityType.PIGLIN_BRUTE, (entityType) -> new PHumanoidRenderer<>(Meshes.PIGLIN, context, entityType));
+		this.entityRendererProvider.put(EntityType.HOGLIN, (entityType) -> new PHoglinRenderer<> (context, entityType));
+		this.entityRendererProvider.put(EntityType.ZOGLIN, (entityType) -> new PHoglinRenderer<> (context, entityType));
+		this.entityRendererProvider.put(EntityType.ENDER_DRAGON, (entityType) -> new PEnderDragonRenderer(context));
+		this.entityRendererProvider.put(EntityType.WITHER, (entityType) -> new PWitherRenderer(context, entityType));
+		this.entityRendererProvider.put(EpicFightEntities.WITHER_SKELETON_MINION.get(), (entityType) -> new PWitherSkeletonMinionRenderer(context, entityType));
+		this.entityRendererProvider.put(EpicFightEntities.WITHER_GHOST_CLONE.get(), (entityType) -> new WitherGhostCloneRenderer(context));
 		
-		this.firstPersonRenderer = new FirstPersonRenderer(context);
-		this.basicHumanoidRenderer = new PHumanoidRenderer<>(Meshes.BIPED, context);
+		this.firstPersonRenderer = new FirstPersonRenderer(context, EntityType.PLAYER);
+		this.basicHumanoidRenderer = new PHumanoidRenderer<>(Meshes.BIPED, context, EntityType.PLAYER);
 		this.aimHelper = new AimHelperRenderer();
 		
 		RenderItemBase baseRenderer = new RenderItemBase();
@@ -234,8 +236,8 @@ public class RenderEngine {
 	public void resetRenderers() {
 		this.entityRendererCache.clear();
 		
-		for (Map.Entry<EntityType<?>, Supplier<PatchedEntityRenderer>> entry : this.entityRendererProvider.entrySet()) {
-			this.entityRendererCache.put(entry.getKey(), entry.getValue().get());
+		for (Map.Entry<EntityType<?>, Function<EntityType<?>, PatchedEntityRenderer>> entry : this.entityRendererProvider.entrySet()) {
+			this.entityRendererCache.put(entry.getKey(), entry.getValue().apply(entry.getKey()));
 		}
 		
 		ModLoader.get().postEvent(new PatchedRenderersEvent.Modify(this.entityRendererCache));
@@ -255,16 +257,16 @@ public class RenderEngine {
 			
 			if (compound.getBoolean("humanoid")) {
 				HumanoidMesh mesh = Meshes.getOrCreateAnimatedMesh(this.minecraft.getResourceManager(), new ResourceLocation(compound.getString("model")), HumanoidMesh::new);
-				this.entityRendererCache.put(entityType, new PCustomHumanoidEntityRenderer<> (mesh, context));
+				this.entityRendererCache.put(entityType, new PCustomHumanoidEntityRenderer<> (mesh, context, entityType));
 			} else {
 				AnimatedMesh mesh = Meshes.getOrCreateAnimatedMesh(this.minecraft.getResourceManager(), new ResourceLocation(compound.getString("model")), AnimatedMesh::new);
-				this.entityRendererCache.put(entityType, new PCustomEntityRenderer(mesh, context));
+				this.entityRendererCache.put(entityType, new PCustomEntityRenderer(mesh, context, entityType));
 			}
 		} else {
 			EntityType<?> presetEntityType = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(renderer));
 			
 			if (this.entityRendererProvider.containsKey(presetEntityType)) {
-				this.entityRendererCache.put(entityType, this.entityRendererProvider.get(presetEntityType).get());
+				this.entityRendererCache.put(entityType, this.entityRendererProvider.get(presetEntityType).apply(entityType));
 			} else {
 				throw new IllegalArgumentException("Datapack Mob Patch Crash: Invalid Renderer type " + renderer);
 			}
@@ -308,11 +310,15 @@ public class RenderEngine {
 	}
 	
 	public PatchedEntityRenderer getEntityRenderer(Entity entity) {
-		return this.entityRendererCache.get(entity.getType());
+		return this.getEntityRenderer(entity.getType());
+	}
+	
+	public PatchedEntityRenderer getEntityRenderer(EntityType entityType) {
+		return this.entityRendererCache.get(entityType);
 	}
 	
 	public boolean hasRendererFor(Entity entity) {
-		return this.entityRendererCache.computeIfAbsent(entity.getType(), (key) -> this.entityRendererProvider.containsKey(key) ? this.entityRendererProvider.get(entity.getType()).get() : null) != null;
+		return this.entityRendererCache.computeIfAbsent(entity.getType(), (key) -> this.entityRendererProvider.containsKey(key) ? this.entityRendererProvider.get(entity.getType()).apply(entity.getType()) : null) != null;
 	}
 	
 	public Set<ResourceLocation> getRendererEntries() {
@@ -466,8 +472,13 @@ public class RenderEngine {
 				}
 				
 				if (entitypatch != null && entitypatch.overrideRender()) {
-					event.setCanceled(true);
 					renderEngine.renderEntityArmatureModel(livingentity, entitypatch, event.getRenderer(), event.getMultiBufferSource(), event.getPoseStack(), event.getPackedLight(), event.getPartialTick());
+					
+					if (ClientEngine.getInstance().isVanillaModelDebuggingMode()) {
+						event.getPoseStack().translate(1.0F, 0.0F, 0.0F);
+					} else {
+						event.setCanceled(true);
+					}
 				}
 				
 				if (playerpatch != null) {
@@ -614,7 +625,7 @@ public class RenderEngine {
 		}
 		
 		@SuppressWarnings("unchecked")
-		@SubscribeEvent
+		@SubscribeEvent(priority = EventPriority.HIGHEST)
 		public static void renderHand(RenderHandEvent event) {
 			LocalPlayerPatch playerpatch = ClientEngine.getInstance().getPlayerPatch();
 			

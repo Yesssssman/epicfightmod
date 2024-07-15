@@ -18,17 +18,17 @@ import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PatchedEyeLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, AM extends AnimatedMesh> extends PatchedLayer<E, T, M, EyesLayer<E, M>, AM> {
+public class PatchedEyesLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, AM extends AnimatedMesh> extends ModelRenderLayer<E, T, M, EyesLayer<E, M>, AM> {
 	private final RenderType renderType;
 	
-	public PatchedEyeLayer(ResourceLocation eyeTexture, AM mesh) {
+	public PatchedEyesLayer(ResourceLocation eyeTexture, AM mesh) {
 		super(mesh);
+		
 		this.renderType = EpicFightRenderTypes.getTriangulated(RenderType.eyes(eyeTexture));
 	}
 	
 	@Override
-	protected void renderLayer(T entitypatch, E entityliving, EyesLayer<E, M> vanillaLayer, PoseStack postStack, MultiBufferSource buffer, int packedLightIn,
-			OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
+	protected void renderLayer(T entitypatch, E entityliving, EyesLayer<E, M> vanillaLayer, PoseStack postStack, MultiBufferSource buffer, int packedLightIn, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 		VertexConsumer ivertexbuilder = buffer.getBuffer(this.renderType);
 		this.mesh.drawModelWithPose(postStack, ivertexbuilder, 15728640, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
 	}

@@ -5,6 +5,7 @@ import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.IllagerRenderer;
 import net.minecraft.client.renderer.entity.layers.CustomHeadLayer;
 import net.minecraft.client.renderer.entity.layers.ItemInHandLayer;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.AbstractIllager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -16,8 +17,8 @@ import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class PIllagerRenderer<E extends AbstractIllager, T extends MobPatch<E>> extends PatchedLivingEntityRenderer<E, T, IllagerModel<E>, IllagerRenderer<E>, HumanoidMesh> {
-	public PIllagerRenderer(EntityRendererProvider.Context context) {
-		super(context);
+	public PIllagerRenderer(EntityRendererProvider.Context context, EntityType<?> entityType) {
+		super(context, entityType);
 		this.addPatchedLayer(ItemInHandLayer.class, new PatchedItemInHandLayer<>());
 		this.addPatchedLayer(CustomHeadLayer.class, new PatchedHeadLayer<>());
 	}

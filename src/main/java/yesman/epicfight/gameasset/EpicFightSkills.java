@@ -79,6 +79,10 @@ public class EpicFightSkills {
 	public static Skill STAMINA_PILLAGER;
 	public static Skill SWORD_MASTER;
 	public static Skill TECHNICIAN;
+		/** Unimplemented passives **/
+		public static Skill CATHARSIS;
+		public static Skill AVENGERS_PATIENCE;
+		public static Skill ADAPTIVE_SKIN;
 	/** Weapon innate skills**/
 	public static Skill GUILLOTINE_AXE;
 	public static Skill SWEEPING_EDGE;

@@ -117,8 +117,7 @@ dependencies {
   	// at runtime, use the full JEI jar for Forge
   	runtimeOnly(fg.deobf("mezz.jei:jei-${minecraft_version}-forge:${jei_version}"))
     
-    implementation fg.deobf("curse.maven:curios-309927:5367944")
-    implementation fg.deobf("curse.maven:epic-samurais-848381:5493853")
+    compileOnly fg.deobf("curse.maven:curios-309927:5367944")
     
     annotationProcessor 'org.spongepowered:mixin:0.8.5:processor'
 }

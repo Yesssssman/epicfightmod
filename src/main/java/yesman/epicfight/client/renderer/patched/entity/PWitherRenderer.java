@@ -13,6 +13,7 @@ import net.minecraft.client.renderer.entity.layers.WitherArmorLayer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
@@ -31,8 +32,8 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 	public static final ResourceLocation WITHER_INVULNERABLE_LOCATION = new ResourceLocation("textures/entity/wither/wither_invulnerable.png");
 	private static final ResourceLocation WITHER_LOCATION = new ResourceLocation("textures/entity/wither/wither.png");
 	
-	public PWitherRenderer(EntityRendererProvider.Context context) {
-		super(context);
+	public PWitherRenderer(EntityRendererProvider.Context context, EntityType<?> entityType) {
+		super(context, entityType);
 		this.addPatchedLayer(WitherArmorLayer.class, new PatchedWitherArmorLayer());
 	}
 	

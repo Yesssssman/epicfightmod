@@ -1,0 +1,7 @@
+{
+	"layer_type": "epicfight:model_original",
+	"target_layer": "com.tiviacz.travelersbackpack.client.renderer.TravelersBackpackLayer",
+	"joint": "Chest",
+	"translation": [0.0, 0.5, 0.0],
+	"rotation": [0.0, 0.0, 0.0]
+}

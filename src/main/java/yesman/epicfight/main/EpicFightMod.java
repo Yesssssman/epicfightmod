@@ -51,8 +51,11 @@ import yesman.epicfight.client.gui.screen.config.IngameConfigurationScreen;
 import yesman.epicfight.client.renderer.patched.item.EpicFightItemProperties;
 import yesman.epicfight.compat.AzureLibArmorCompat;
 import yesman.epicfight.compat.AzureLibCompat;
+import yesman.epicfight.compat.CuriosCompat;
+import yesman.epicfight.compat.FirstPersonCompat;
 import yesman.epicfight.compat.GeckolibCompat;
 import yesman.epicfight.compat.ICompatModule;
+import yesman.epicfight.compat.SkinLayer3DCompat;
 import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.data.conditions.EpicFightConditions;
@@ -72,6 +75,7 @@ import yesman.epicfight.skill.SkillSlot;
 import yesman.epicfight.skill.SkillSlots;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.Style;
@@ -178,6 +182,14 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  
  *  2. Added BLOCK type animation in the living animations screen in weapon type datapack editor.
  *  
+ *  --- 20.8.1.101 ---
+ *  
+ *  1. Added arrow and bee stinger stuck effect for player
+ *  
+ *  2. Added config value to modulate the maximum number of arrows & bee stingers stuck in player's body
+ *  
+ *  3. Fixed entity scaling issue
+ *  
  *  --- TO DO ---
  *  
  *  1. Crash because {@link PlayerPatch#STAMINA} is unregistered at SynchedEntityData (Most likely a mod compatibility issue)
@@ -273,6 +285,18 @@ public class EpicFightMod {
     		if (ModList.get().isLoaded("azurelibarmor")) {
     			ICompatModule.loadCompatModule(AzureLibArmorCompat.class);
     		}
+    		
+    		if (ModList.get().isLoaded("curios")) {
+    			ICompatModule.loadCompatModule(CuriosCompat.class);
+    		}
+    		
+    		if (ModList.get().isLoaded("firstperson")) {
+    			ICompatModule.loadCompatModule(FirstPersonCompat.class);
+    		}
+    		
+    		if (ModList.get().isLoaded("skinlayers3d")) {
+    			ICompatModule.loadCompatModule(SkinLayer3DCompat.class);
+    		}
 		});
 	}
     
@@ -293,8 +317,8 @@ public class EpicFightMod {
     	
         this.animatorProvider = ClientAnimator::getAnimator;
 		EntityPatchProvider.registerEntityPatchesClient();
-		EpicFightItemProperties.registerItemProperties();
 		SkillBookScreen.registerIconItems();
+		EpicFightItemProperties.registerItemProperties();
     }
 	
 	private void doServerStuff(final FMLDedicatedServerSetupEvent event) {

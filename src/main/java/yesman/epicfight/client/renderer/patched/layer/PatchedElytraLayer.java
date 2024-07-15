@@ -16,15 +16,13 @@ import yesman.epicfight.client.mesh.HumanoidMesh;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PatchedElytraLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, AM extends HumanoidMesh> extends PatchedLayer<E, T, M, ElytraLayer<E, M>, AM> {
-	
+public class PatchedElytraLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, AM extends HumanoidMesh> extends ModelRenderLayer<E, T, M, ElytraLayer<E, M>, AM> {
 	public PatchedElytraLayer() {
 		super(null);
 	}
 	
 	@Override
-	protected void renderLayer(T entitypatch, E livingentity, ElytraLayer<E, M> vanillaLayer, PoseStack poseStack, MultiBufferSource buffer, int packedLightIn,
-			OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
+	protected void renderLayer(T entitypatch, E livingentity, ElytraLayer<E, M> vanillaLayer, PoseStack poseStack, MultiBufferSource buffer, int packedLight, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 		if (vanillaLayer.shouldRender(livingentity.getItemBySlot(EquipmentSlot.CHEST), livingentity)) {
 			vanillaLayer.getParentModel().copyPropertiesTo(vanillaLayer.elytraModel);
 			OpenMatrix4f modelMatrix = new OpenMatrix4f();
@@ -33,7 +31,7 @@ public class PatchedElytraLayer<E extends LivingEntity, T extends LivingEntityPa
 			poseStack.pushPose();
 			MathUtils.translateStack(poseStack, modelMatrix);
 			MathUtils.rotateStack(poseStack, transpose);
-			vanillaLayer.render(poseStack, buffer, packedLightIn, livingentity, livingentity.walkAnimation.position(), livingentity.walkAnimation.speed(), partialTicks, bob, yRot, xRot);
+			vanillaLayer.render(poseStack, buffer, packedLight, livingentity, livingentity.walkAnimation.position(), livingentity.walkAnimation.speed(), partialTicks, bob, yRot, xRot);
 			poseStack.popPose();
 		}
 	}

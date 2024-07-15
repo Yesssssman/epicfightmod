@@ -1,11 +1,12 @@
-package yesman.epicfight.api.client.model.armor;
+package yesman.epicfight.api.client.model.transformer;
 
 import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Consumer;
 
-import it.unimi.dsi.fastutil.ints.IntList;
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -13,182 +14,245 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.PoseStack;
 
-import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.Model;
+import dev.tr7zw.skinlayers.SkinLayersModBase;
+import dev.tr7zw.skinlayers.api.LayerFeatureTransformerAPI;
+import dev.tr7zw.skinlayers.api.MeshTransformer;
+import dev.tr7zw.skinlayers.api.SkinLayersAPI;
+import dev.tr7zw.skinlayers.versionless.render.CustomModelPart;
+import dev.tr7zw.skinlayers.versionless.render.CustomizableCube;
+import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.ModelPart.Cube;
+import net.minecraft.client.player.AbstractClientPlayer;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.phys.AABB;
-import net.minecraft.world.phys.Vec3;
+import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.client.model.AnimatedMesh;
-import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.client.model.SingleVertex;
+import yesman.epicfight.api.client.model.transformer.HumanoidModelTransformer.PartTransformer;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec3f;
 
 @OnlyIn(Dist.CLIENT)
-public class VanillaArmor extends ArmorModelTransformer {
-	static final PartTransformer<ModelPart.Cube> HEAD = new SimpleTransformer(9);
-	static final PartTransformer<ModelPart.Cube> LEFT_FEET = new SimpleTransformer(5);
-	static final PartTransformer<ModelPart.Cube> RIGHT_FEET = new SimpleTransformer(2);
-	static final PartTransformer<ModelPart.Cube> LEFT_ARM = new LimbPartTransformer(16, 17, 19, 19.0F, false, AABB.ofSize(new Vec3(-6.0D, 18.0D, 0), 8.0D, 14.0D, 8.0D));
-	static final PartTransformer<ModelPart.Cube> RIGHT_ARM = new LimbPartTransformer(11, 12, 14, 19.0F, false, AABB.ofSize(new Vec3(6.0D, 18.0D, 0), 8.0D, 14.0D, 8.0D));
-	static final PartTransformer<ModelPart.Cube> LEFT_LEG = new LimbPartTransformer(4, 5, 6, 6.0F, true, AABB.ofSize(new Vec3(-2.0D, 6.0D, 0), 8.0D, 14.0D, 8.0D));
-	static final PartTransformer<ModelPart.Cube> RIGHT_LEG = new LimbPartTransformer(1, 2, 3, 6.0F, true, AABB.ofSize(new Vec3(2.0D, 6.0D, 0), 8.0D, 14.0D, 8.0D));
-	static final PartTransformer<ModelPart.Cube> CHEST = new ChestPartTransformer(8, 7, 18.0F, AABB.ofSize(new Vec3(0, 18.0D, 0), 12.0D, 14.0D, 6.0D));
+public class SkinLayer3DTransformer extends CustomizableCube {
+	private SkinLayer3DTransformer() {
+		super(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, false, 0, 0, new dev.tr7zw.skinlayers.versionless.util.Direction[] {}, new dev.tr7zw.skinlayers.versionless.util.Direction[][] {{}});
+	}
 	
-	static int indexCount = 0;
+	static final PartTransformer<CustomizableCube> HEAD = new SimpleTransformer(9);
+	static final PartTransformer<CustomizableCube> LEFT_FEET = new SimpleTransformer(5);
+	static final PartTransformer<CustomizableCube> RIGHT_FEET = new SimpleTransformer(2);
+	static final PartTransformer<CustomizableCube> LEFT_ARM = new LimbPartTransformer(16, 17, 19, 19.0F, false);
+	static final PartTransformer<CustomizableCube> RIGHT_ARM = new LimbPartTransformer(11, 12, 14, 19.0F, false);
+	static final PartTransformer<CustomizableCube> LEFT_LEG = new LimbPartTransformer(4, 5, 6, 6.0F, true);
+	static final PartTransformer<CustomizableCube> RIGHT_LEG = new LimbPartTransformer(1, 2, 3, 6.0F, true);
+	static final PartTransformer<CustomizableCube> CHEST = new ChestPartTransformer(18.0F);
 	
-	static class VanillaModelPartition {
-		final PartTransformer<ModelPart.Cube> partTransformer;
-		final ModelPart modelPart;
-		final String partName;
+	private static Field customModelPart$x;
+	private static Field customModelPart$y;
+	private static Field customModelPart$z;
+	private static Field customModelPart$xRot;
+	private static Field customModelPart$yRot;
+	private static Field customModelPart$zRot;
+	private static Field customizableCube$polygons;
+	
+	static {
+		try {
+			customModelPart$x = CustomModelPart.class.getDeclaredField("x");
+			customModelPart$y = CustomModelPart.class.getDeclaredField("y");
+			customModelPart$z = CustomModelPart.class.getDeclaredField("z");
+			customModelPart$xRot = CustomModelPart.class.getDeclaredField("xRot");
+			customModelPart$yRot = CustomModelPart.class.getDeclaredField("yRot");
+			customModelPart$zRot = CustomModelPart.class.getDeclaredField("zRot");
+			customizableCube$polygons = CustomizableCube.class.getDeclaredField("polygons");
+		} catch (NoSuchFieldException | SecurityException e) {
+			e.printStackTrace();
+		}
 		
-		private VanillaModelPartition(PartTransformer<ModelPart.Cube> partTransformer, ModelPart modelPart, String partName) {
+		customModelPart$x.setAccessible(true);
+		customModelPart$y.setAccessible(true);
+		customModelPart$z.setAccessible(true);
+		customModelPart$xRot.setAccessible(true);
+		customModelPart$yRot.setAccessible(true);
+		customModelPart$zRot.setAccessible(true);
+		customizableCube$polygons.setAccessible(true);
+	}
+	
+	static class ModelPartition {
+		final PartTransformer<ModelPart.Cube> vanillaPartTransformer;
+		final PartTransformer<CustomizableCube> partTransformer;
+		final String partName;
+		final CustomModelPart skinlayerModelPart;
+		final ModelPart vanillaModelPart;
+		
+		final List<Cube> vanillaCubes;
+		final List<CustomizableCube> customizableCubes;
+		final Consumer<PoseStack> transformFunction;
+		
+		private ModelPartition(PartTransformer<ModelPart.Cube> vanillaPartTransformer, PartTransformer<CustomizableCube> partTransformer, String partName, CustomModelPart skinlayerModelPart, ModelPart vanillaModelPart, List<Cube> vanillaCubes, List<CustomizableCube> customCubes, Consumer<PoseStack> transformFunction) {
+			this.vanillaPartTransformer = vanillaPartTransformer;
 			this.partTransformer = partTransformer;
-			this.modelPart = modelPart;
 			this.partName = partName;
+			this.skinlayerModelPart = skinlayerModelPart;
+			this.vanillaModelPart = vanillaModelPart;
+			
+			this.vanillaCubes = vanillaCubes;
+			this.customizableCubes = customCubes;
+			this.transformFunction = transformFunction;
 		}
 	}
 	
-	public AnimatedMesh transformModel(HumanoidModel<?> model, ArmorItem armorItem, EquipmentSlot slot, boolean debuggingMode) {
-		List<VanillaModelPartition> boxes = Lists.newArrayList();
-		//List<ModelPart> modelParts = getAllParts(model);
+	public static AnimatedMesh transformMesh(AbstractClientPlayer abstractClientPlayer, CustomModelPart skinlayerModelPart, ModelPart vanillaModelPart, PlayerModelPart modelPart, List<Cube> vanillaCubes, List<CustomizableCube> cubes) {
+		List<ModelPartition> partitions = Lists.newArrayList();
 		
-		model.head.setRotation(0.0F, 0.0F, 0.0F);
-		model.hat.setRotation(0.0F, 0.0F, 0.0F);
-		model.body.setRotation(0.0F, 0.0F, 0.0F);
-	    model.rightArm.setRotation(0.0F, 0.0F, 0.0F);
-	    model.leftArm.setRotation(0.0F, 0.0F, 0.0F);
-	    model.rightLeg.setRotation(0.0F, 0.0F, 0.0F);
-	    model.leftLeg.setRotation(0.0F, 0.0F, 0.0F);
+		float widthScale = SkinLayersModBase.config.baseVoxelSize;
+		float heightScale = 1.035F;
 		
-	    switch (slot) {
-		case HEAD:
-			boxes.add(new VanillaModelPartition(HEAD, model.head, "head"));
-			boxes.add(new VanillaModelPartition(HEAD, model.hat, "hat"));
+		switch (modelPart) {
+		case JACKET:
+			partitions.add(new ModelPartition(VanillaModelTransformer.CHEST, CHEST, "jacket", skinlayerModelPart, vanillaModelPart, vanillaCubes, cubes, (poseStack) -> {
+				poseStack.scale(SkinLayersModBase.config.bodyVoxelWidthSize, heightScale, widthScale);
+			}));
 			break;
-		case CHEST:
-			boxes.add(new VanillaModelPartition(CHEST, model.body, "body"));
-			boxes.add(new VanillaModelPartition(RIGHT_ARM, model.rightArm, "rightArm"));
-			boxes.add(new VanillaModelPartition(LEFT_ARM, model.leftArm, "leftArm"));
+		case LEFT_SLEEVE:
+			partitions.add(new ModelPartition(VanillaModelTransformer.LEFT_ARM, LEFT_ARM, "leftSleeve", skinlayerModelPart, vanillaModelPart, vanillaCubes, cubes, (poseStack) -> {
+				poseStack.scale(widthScale, heightScale, widthScale);
+			}));
 			break;
-		case LEGS:
-			boxes.add(new VanillaModelPartition(CHEST, model.body, "body"));
-			boxes.add(new VanillaModelPartition(LEFT_LEG, model.leftLeg, "leftLeg"));
-			boxes.add(new VanillaModelPartition(RIGHT_LEG, model.rightLeg, "rightLeg"));
+		case RIGHT_SLEEVE:
+			partitions.add(new ModelPartition(VanillaModelTransformer.RIGHT_ARM, RIGHT_ARM, "rightSleeve", skinlayerModelPart, vanillaModelPart, vanillaCubes, cubes, (poseStack) -> {
+				poseStack.scale(widthScale, heightScale, widthScale);
+			}));
 			break;
-		case FEET:
-			boxes.add(new VanillaModelPartition(LEFT_FEET, model.leftLeg, "leftLeg"));
-			boxes.add(new VanillaModelPartition(RIGHT_FEET, model.rightLeg, "rightLeg"));
+		case LEFT_PANTS_LEG:
+			partitions.add(new ModelPartition(VanillaModelTransformer.LEFT_LEG, LEFT_LEG, "leftPantsLeg", skinlayerModelPart, vanillaModelPart, vanillaCubes, cubes, (poseStack) -> {
+				poseStack.scale(widthScale, heightScale, widthScale);
+			}));
+			break;
+		case RIGHT_PANTS_LEG:
+			partitions.add(new ModelPartition(VanillaModelTransformer.RIGHT_LEG, RIGHT_LEG, "rightPantsLeg", skinlayerModelPart, vanillaModelPart, vanillaCubes, cubes, (poseStack) -> {
+				poseStack.scale(widthScale, heightScale, widthScale);
+			}));
+			break;
+		case HAT:
+			partitions.add(new ModelPartition(VanillaModelTransformer.HEAD, HEAD, "hat", skinlayerModelPart, vanillaModelPart, vanillaCubes, cubes, (poseStack) -> {
+				float headsize = SkinLayersModBase.config.headVoxelSize;
+				poseStack.translate(0.0D, -0.25D * 24.0D, 0.0D);
+				poseStack.scale(headsize, headsize, headsize);
+                poseStack.translate(0.0D, 0.25D * 24.0D, 0.0D);
+                poseStack.translate(0.0D, -0.04D * 24.0D, 0.0D);
+			}));
 			break;
 		default:
 			return null;
 		}
 		
-		ResourceLocation rl = new ResourceLocation(ForgeRegistries.ITEMS.getKey(armorItem).getNamespace(), "armor/" + ForgeRegistries.ITEMS.getKey(armorItem).getPath());
-		AnimatedMesh armorModelMesh = bakeMeshFromCubes(boxes, debuggingMode);
-		Meshes.addMesh(rl, armorModelMesh);
-		
-		return armorModelMesh;
+		return bakeMeshFromCubes(abstractClientPlayer, partitions);
 	}
 	
-	public static List<ModelPart> getAllParts(Model model) {
-		Class<?> cls = model.getClass();
-		List<Class<?>> superClasses = Lists.newArrayList();
-		
-		while (Model.class.isAssignableFrom(cls)) {
-			superClasses.add(cls);
-			cls = cls.getSuperclass();
-		}
-		
-		List<ModelPart> modelParts = Lists.newArrayList();
-		
-		for (Class<?> modelClss : superClasses) {
-			Field[] modelFields = modelClss.getDeclaredFields();
-			
-			for (Field field : modelFields) {
-				if (field.getType().isAssignableFrom(ModelPart.class)) {
-					field.setAccessible(true);
-					try {
-						ModelPart modelPart = (ModelPart)field.get(model);
-						
-						if (modelPart.visible) {
-							modelParts.add(modelPart);
-						}
-					} catch(Exception e) {}
-				}
-			}
-		}
-		
-		return modelParts;
-	}
-	
-	private static AnimatedMesh bakeMeshFromCubes(List<VanillaModelPartition> partitions, boolean debuggingMode) {
+	private static AnimatedMesh bakeMeshFromCubes(AbstractClientPlayer abstractClientPlayer, List<ModelPartition> partitions) {
 		List<SingleVertex> vertices = Lists.newArrayList();
 		Map<String, IntList> indices = Maps.newHashMap();
 		PoseStack poseStack = new PoseStack();
-		indexCount = 0;
+		PartTransformer.IndexCounter indexCounter = new PartTransformer.IndexCounter();
+		
 		poseStack.mulPose(QuaternionUtils.YP.rotationDegrees(180.0F));
 		poseStack.mulPose(QuaternionUtils.XP.rotationDegrees(180.0F));
-		poseStack.translate(0, -24, 0);
+		poseStack.translate(0, -24F, 0);
 		
-		for (VanillaModelPartition modelpartition : partitions) {
-			bake(poseStack, modelpartition.partName, modelpartition, modelpartition.modelPart, vertices, indices, debuggingMode);
+		for (ModelPartition modelpartition : partitions) {
+			bake(abstractClientPlayer, poseStack, modelpartition, vertices, indices, indexCounter);
 		}
 		
 		return SingleVertex.loadVertexInformation(vertices, indices);
 	}
 	
-	private static void bake(PoseStack poseStack, String partName, VanillaModelPartition modelpartition, ModelPart part, List<SingleVertex> vertices, Map<String, IntList> indices, boolean debuggingMode) {
+	private static void bake(AbstractClientPlayer abstractClientPlayer, PoseStack poseStack, ModelPartition modelpartition, List<SingleVertex> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+		modelpartition.vanillaModelPart.loadPose(modelpartition.vanillaModelPart.getInitialPose());
+		ModelPart part = modelpartition.vanillaModelPart;
+		
 		poseStack.pushPose();
 		poseStack.translate(part.x, part.y, part.z);
 		
-		if (part.zRot != 0.0F) {
-			poseStack.mulPose(QuaternionUtils.ZP.rotation(part.zRot));
+		if (part.xRot != 0.0F || part.yRot != 0.0F || part.zRot != 0.0F) {
+			poseStack.mulPose(new Quaternionf().rotationZYX(part.zRot, part.yRot, part.xRot));
 		}
 		
-		if (part.yRot != 0.0F) {
-			poseStack.mulPose(QuaternionUtils.YP.rotation(part.yRot));
+		if (part.xScale != 1.0F || part.yScale != 1.0F || part.zScale != 1.0F) {
+			poseStack.scale(part.xScale, part.yScale, part.zScale);
 		}
 		
-		if (part.xRot != 0.0F) {
-			poseStack.mulPose(QuaternionUtils.XP.rotation(part.xRot));
+		MeshTransformer transformer = SkinLayersAPI.getMeshTransformerProvider().prepareTransformer(modelpartition.vanillaModelPart);
+		LayerFeatureTransformerAPI.getTransformer().transform(abstractClientPlayer, poseStack, modelpartition.vanillaModelPart);
+		modelpartition.transformFunction.accept(poseStack);
+		
+		float posX = 0;
+		float posY = 0;
+		float posZ = 0;
+		float xRot = 0;
+		float yRot = 0;
+		float zRot = 0;
+		
+		try {
+			posX = (float)customModelPart$x.get(modelpartition.skinlayerModelPart);
+			posY = (float)customModelPart$y.get(modelpartition.skinlayerModelPart);
+			posZ = (float)customModelPart$z.get(modelpartition.skinlayerModelPart);
+			xRot = (float)customModelPart$xRot.get(modelpartition.skinlayerModelPart);
+			yRot = (float)customModelPart$yRot.get(modelpartition.skinlayerModelPart);
+			zRot = (float)customModelPart$zRot.get(modelpartition.skinlayerModelPart);
+		} catch (IllegalArgumentException | IllegalAccessException e) {
 		}
 		
-		for (ModelPart.Cube cube : part.cubes) {
-			modelpartition.partTransformer.bakeCube(poseStack, partName, cube, vertices, indices);
+		poseStack.translate(posX, posY, posZ);
+		
+        if (xRot != 0.0F || yRot != 0.0F || zRot != 0.0F) {
+            poseStack.mulPose((new Quaternionf()).rotationZYX(zRot, yRot, xRot));
+        }
+		
+		for (ModelPart.Cube cube : modelpartition.vanillaCubes) {
+			transformer.transform(cube);
+			modelpartition.vanillaPartTransformer.bakeCube(poseStack, modelpartition.partName, cube, vertices, indices, indexCounter);
 		}
 		
-		for (Map.Entry<String, ModelPart> child : part.children.entrySet()) {
-			bake(poseStack, child.getKey(), modelpartition, child.getValue(), vertices, indices, debuggingMode);
+		for (CustomizableCube cube : modelpartition.customizableCubes) {
+			modelpartition.partTransformer.bakeCube(poseStack, modelpartition.partName, cube, vertices, indices, indexCounter);
 		}
 		
 		poseStack.popPose();
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class SimpleTransformer extends PartTransformer<ModelPart.Cube> {
+	static class SimpleTransformer extends PartTransformer<CustomizableCube> {
 		final int jointId;
 		
 		public SimpleTransformer(int jointId) {
 			this.jointId = jointId;
 		}
 		
-		public void bakeCube(PoseStack poseStack, String partName, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, IntList> indices) {
-			for (ModelPart.Polygon quad : cube.polygons) {
-				Vector3f norm = new Vector3f(quad.normal);
+		@Override
+		public void bakeCube(PoseStack poseStack, String partName, CustomizableCube cube, List<SingleVertex> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+			CustomizableCube.Polygon[] polygons = null;
+			
+			try {
+				polygons = (CustomizableCube.Polygon[])customizableCube$polygons.get(cube);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				e.printStackTrace();
+				return;
+			}
+			
+			for (CustomizableCube.Polygon polygon : polygons) {
+				if (polygon == null) {
+					continue;
+				}
+				
+				Vector3f norm = new Vector3f(polygon.normal.x, polygon.normal.y, polygon.normal.z);
 				norm.mul(poseStack.last().normal());
 				
-				for (ModelPart.Vertex vertex : quad.vertices) {
-					Vector4f pos = new Vector4f(vertex.pos, 1.0F);
+				for (CustomizableCube.Vertex vertex : polygon.vertices) {
+					Vector4f pos = new Vector4f(vertex.pos.x, vertex.pos.y, vertex.pos.z, 1.0F);
 					pos.mul(poseStack.last().pose());
 					vertices.add(new SingleVertex()
 						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
@@ -200,59 +264,46 @@ public class VanillaArmor extends ArmorModelTransformer {
 					);
 				}
 				
-				putIndexCount(indices, partName, indexCount);
-				putIndexCount(indices, partName, indexCount + 1);
-				putIndexCount(indices, partName, indexCount + 3);
-				putIndexCount(indices, partName, indexCount + 3);
-				putIndexCount(indices, partName, indexCount + 1);
-				putIndexCount(indices, partName, indexCount + 2);
-				indexCount+=4;
+				triangluatePolygon(indices, partName, indexCounter);
 			}
 		}
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class ChestPartTransformer extends PartTransformer<ModelPart.Cube> {
+	static class ChestPartTransformer extends PartTransformer<CustomizableCube> {
 		static final float X_PLANE = 0.0F;
 		static final VertexWeight[] WEIGHT_ALONG_Y = { new VertexWeight(13.6666F, 0.230F, 0.770F), new VertexWeight(15.8333F, 0.254F, 0.746F), new VertexWeight(18.0F, 0.5F, 0.5F), new VertexWeight(20.1666F, 0.744F, 0.256F), new VertexWeight(22.3333F, 0.770F, 0.230F)};
-		final SimpleTransformer upperAttachmentTransformer;
-		final SimpleTransformer lowerAttachmentTransformer;
-		final AABB noneAttachmentArea;
 		final float yClipCoord;
 		
-		public ChestPartTransformer(int upperJoint, int lowerJoint, float yBasis, AABB noneAttachmentArea) {
-			this.noneAttachmentArea = noneAttachmentArea;
-			this.upperAttachmentTransformer = new SimpleTransformer(upperJoint);
-			this.lowerAttachmentTransformer = new SimpleTransformer(lowerJoint);
+		public ChestPartTransformer(float yBasis) {
 			this.yClipCoord = yBasis;
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName, ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, IntList> indices) {
-			Vec3 centerOfCube = getCenterOfCube(poseStack, cube);
-			
-			if (!this.noneAttachmentArea.contains(centerOfCube)) {
-				if (centerOfCube.y < this.yClipCoord) {
-					this.lowerAttachmentTransformer.bakeCube(poseStack, partName, cube, vertices, indices);
-				} else {
-					this.upperAttachmentTransformer.bakeCube(poseStack, partName, cube, vertices, indices);
-				}
-				
-				return;
-			}
-			
-			
+		public void bakeCube(PoseStack poseStack, String partName, CustomizableCube cube, List<SingleVertex> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 			List<AnimatedPolygon> xClipPolygons = Lists.<AnimatedPolygon>newArrayList();
 			List<AnimatedPolygon> xyClipPolygons = Lists.<AnimatedPolygon>newArrayList();
 			
-			for (ModelPart.Polygon polygon : cube.polygons) {
-				Matrix4f matrix = poseStack.last().pose();
+			CustomizableCube.Polygon[] polygons = null;
+			
+			try {
+				polygons = (CustomizableCube.Polygon[])customizableCube$polygons.get(cube);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				e.printStackTrace();
+				return;
+			}
+			
+			for (CustomizableCube.Polygon polygon : polygons) {
+				if (polygon == null) {
+					continue;
+				}
 				
+				Matrix4f matrix = poseStack.last().pose();
 				ModelPart.Vertex pos0 = getTranslatedVertex(polygon.vertices[0], matrix);
 				ModelPart.Vertex pos1 = getTranslatedVertex(polygon.vertices[1], matrix);
 				ModelPart.Vertex pos2 = getTranslatedVertex(polygon.vertices[2], matrix);
 				ModelPart.Vertex pos3 = getTranslatedVertex(polygon.vertices[3], matrix);
-				Direction direction = getDirectionFromVector(polygon.normal);
+				Direction direction = getDirectionFromVector(polygon.normal.x, polygon.normal.y, polygon.normal.z);
 				
 				VertexWeight pos0Weight = getYClipWeight(pos0.pos.y());
 				VertexWeight pos1Weight = getYClipWeight(pos1.pos.y());
@@ -293,7 +344,7 @@ public class VanillaArmor extends ArmorModelTransformer {
 				AnimatedVertex pos1 = upsideDown ? polygon.animatedVertexPositions[3] : polygon.animatedVertexPositions[1];
 				AnimatedVertex pos2 = upsideDown ? polygon.animatedVertexPositions[0] : polygon.animatedVertexPositions[2];
 				AnimatedVertex pos3 = upsideDown ? polygon.animatedVertexPositions[1] : polygon.animatedVertexPositions[3];
-				Direction direction = getDirectionFromVector(polygon.normal);
+				Direction direction = getDirectionFromVector(polygon.normal.x, polygon.normal.y, polygon.normal.z);
 				List<VertexWeight> vertexWeights = getMiddleYClipWeights(pos1.pos.y(), pos2.pos.y());
 				List<AnimatedVertex> animatedVertices = Lists.<AnimatedVertex>newArrayList();
 				animatedVertices.add(pos0);
@@ -357,13 +408,7 @@ public class VanillaArmor extends ArmorModelTransformer {
 					);
 				}
 				
-				putIndexCount(indices, partName, indexCount);
-				putIndexCount(indices, partName, indexCount + 1);
-				putIndexCount(indices, partName, indexCount + 3);
-				putIndexCount(indices, partName, indexCount + 3);
-				putIndexCount(indices, partName, indexCount + 1);
-				putIndexCount(indices, partName, indexCount + 2);
-				indexCount+=4;
+				triangluatePolygon(indices, partName, indexCounter);
 			}
 		}
 		
@@ -409,39 +454,45 @@ public class VanillaArmor extends ArmorModelTransformer {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	static class LimbPartTransformer extends PartTransformer<ModelPart.Cube> {
+	static class LimbPartTransformer extends PartTransformer<CustomizableCube> {
 		final int upperJoint;
 		final int lowerJoint;
 		final int middleJoint;
 		final boolean bendInFront;
-		final SimpleTransformer upperAttachmentTransformer;
-		final SimpleTransformer lowerAttachmentTransformer;
-		final AABB noneAttachmentArea;
 		final float yClipCoord;
 		
-		public LimbPartTransformer(int upperJoint, int lowerJoint, int middleJoint, float yClipCoord, boolean bendInFront, AABB noneAttachmentArea) {
+		public LimbPartTransformer(int upperJoint, int lowerJoint, int middleJoint, float yClipCoord, boolean bendInFront) {
 			this.upperJoint = upperJoint;
 			this.lowerJoint = lowerJoint;
 			this.middleJoint = middleJoint;
 			this.bendInFront = bendInFront;
-			this.upperAttachmentTransformer = new SimpleTransformer(upperJoint);
-			this.lowerAttachmentTransformer = new SimpleTransformer(lowerJoint);
-			this.noneAttachmentArea = noneAttachmentArea;
 			this.yClipCoord = yClipCoord;
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName,  ModelPart.Cube cube, List<SingleVertex> vertices, Map<String, IntList> indices) {
-			List<AnimatedPolygon> polygons = Lists.<AnimatedPolygon>newArrayList();
+		public void bakeCube(PoseStack poseStack, String partName, CustomizableCube cube, List<SingleVertex> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+			List<AnimatedPolygon> animatedPolygons = Lists.<AnimatedPolygon>newArrayList();
+			CustomizableCube.Polygon[] polygons = null;
 			
-			for (ModelPart.Polygon quad : cube.polygons) {
-				Matrix4f matrix = poseStack.last().pose();
-				ModelPart.Vertex pos0 = getTranslatedVertex(quad.vertices[0], matrix);
-				ModelPart.Vertex pos1 = getTranslatedVertex(quad.vertices[1], matrix);
-				ModelPart.Vertex pos2 = getTranslatedVertex(quad.vertices[2], matrix);
-				ModelPart.Vertex pos3 = getTranslatedVertex(quad.vertices[3], matrix);
-				Direction direction = getDirectionFromVector(quad.normal);
+			try {
+				polygons = (CustomizableCube.Polygon[])customizableCube$polygons.get(cube);
+			} catch (IllegalArgumentException | IllegalAccessException e) {
+				e.printStackTrace();
+				return;
+			}
+			
+			for (CustomizableCube.Polygon polygon : polygons) {
+				if (polygon == null) {
+					continue;
+				}
 				
+				Matrix4f matrix = poseStack.last().pose();
+				ModelPart.Vertex pos0 = getTranslatedVertex(polygon.vertices[0], matrix);
+				ModelPart.Vertex pos1 = getTranslatedVertex(polygon.vertices[1], matrix);
+				ModelPart.Vertex pos2 = getTranslatedVertex(polygon.vertices[2], matrix);
+				ModelPart.Vertex pos3 = getTranslatedVertex(polygon.vertices[3], matrix);
+				Direction direction = getDirectionFromVector(polygon.normal.x, polygon.normal.y, polygon.normal.z);
+				//System.out.println(partName + " " + polygon.vertices[0].pos +" "+ polygon.vertices[1].pos +" "+ polygon.vertices[2].pos +" "+ polygon.vertices[3].pos);
 				if (pos1.pos.y() > this.yClipCoord != pos2.pos.y() > this.yClipCoord) {
 					float distance = pos2.pos.y() - pos1.pos.y();
 					float textureV = pos1.v + (pos2.v - pos1.v) * ((this.yClipCoord - pos1.pos.y()) / distance);
@@ -449,8 +500,8 @@ public class VanillaArmor extends ArmorModelTransformer {
 					Vector3f clipPos2 = getClipPoint(pos0.pos, pos3.pos, this.yClipCoord);
 					ModelPart.Vertex pos4 = new ModelPart.Vertex(clipPos2, pos0.u, textureV);
 					ModelPart.Vertex pos5 = new ModelPart.Vertex(clipPos1, pos1.u, textureV);
-					
 					int upperId, lowerId;
+					
 					if (distance > 0) {
 						upperId = this.lowerJoint;
 						lowerId = this.upperJoint;
@@ -459,11 +510,11 @@ public class VanillaArmor extends ArmorModelTransformer {
 						lowerId = this.lowerJoint;
 					}
 					
-					polygons.add(new AnimatedPolygon(new AnimatedVertex[] {
+					animatedPolygons.add(new AnimatedPolygon(new AnimatedVertex[] {
 						new AnimatedVertex(pos0, upperId), new AnimatedVertex(pos1, upperId),
 						new AnimatedVertex(pos5, upperId), new AnimatedVertex(pos4, upperId)
 					}, direction));
-					polygons.add(new AnimatedPolygon(new AnimatedVertex[] {
+					animatedPolygons.add(new AnimatedPolygon(new AnimatedVertex[] {
 						new AnimatedVertex(pos4, lowerId), new AnimatedVertex(pos5, lowerId),
 						new AnimatedVertex(pos2, lowerId), new AnimatedVertex(pos3, lowerId)
 					}, direction));
@@ -472,11 +523,11 @@ public class VanillaArmor extends ArmorModelTransformer {
 					boolean isFront = hasSameZ && (pos4.pos.z() < 0.0F == this.bendInFront);
 					
 					if (isFront) {
-						polygons.add(new AnimatedPolygon(new AnimatedVertex[] {
+						animatedPolygons.add(new AnimatedPolygon(new AnimatedVertex[] {
 							new AnimatedVertex(pos4, this.middleJoint), new AnimatedVertex(pos5, this.middleJoint),
 							new AnimatedVertex(pos5, this.upperJoint), new AnimatedVertex(pos4, this.upperJoint)
 						}, 0.001F, direction));
-						polygons.add(new AnimatedPolygon(new AnimatedVertex[] {
+						animatedPolygons.add(new AnimatedPolygon(new AnimatedVertex[] {
 							new AnimatedVertex(pos4, this.lowerJoint), new AnimatedVertex(pos5, this.lowerJoint),
 							new AnimatedVertex(pos5, this.middleJoint), new AnimatedVertex(pos4, this.middleJoint)
 						}, 0.001F, direction));
@@ -489,25 +540,25 @@ public class VanillaArmor extends ArmorModelTransformer {
 						int fifthJoint = this.upperJoint;
 						int sixthJoint = this.upperJoint;
 						
-						polygons.add(new AnimatedPolygon(new AnimatedVertex[] {
+						animatedPolygons.add(new AnimatedPolygon(new AnimatedVertex[] {
 							new AnimatedVertex(pos4, firstJoint), new AnimatedVertex(pos5, secondJoint),
 							new AnimatedVertex(pos5, thirdJoint), new AnimatedVertex(pos4, fourthJoint)
 						}, 0.001F, direction));
-						polygons.add(new AnimatedPolygon(new AnimatedVertex[] {
+						animatedPolygons.add(new AnimatedPolygon(new AnimatedVertex[] {
 							new AnimatedVertex(pos4, fourthJoint), new AnimatedVertex(pos5, thirdJoint),
 							new AnimatedVertex(pos5, fifthJoint), new AnimatedVertex(pos4, sixthJoint)
 						}, 0.001F, direction));
 					}
 				} else {
 					int jointId = pos0.pos.y() > this.yClipCoord ? this.upperJoint : this.lowerJoint;
-					polygons.add(new AnimatedPolygon(new AnimatedVertex[] {
+					animatedPolygons.add(new AnimatedPolygon(new AnimatedVertex[] {
 						new AnimatedVertex(pos0, jointId), new AnimatedVertex(pos1, jointId),
 						new AnimatedVertex(pos2, jointId), new AnimatedVertex(pos3, jointId)
 					}, direction));
 				}
 			}
 			
-			for (AnimatedPolygon quad : polygons) {
+			for (AnimatedPolygon quad : animatedPolygons) {
 				Vector3f norm = new Vector3f(quad.normal);
 				norm.mul(poseStack.last().normal());
 				
@@ -523,70 +574,21 @@ public class VanillaArmor extends ArmorModelTransformer {
 					);
 				}
 				
-				putIndexCount(indices, partName, indexCount);
-				putIndexCount(indices, partName, indexCount + 1);
-				putIndexCount(indices, partName, indexCount + 3);
-				putIndexCount(indices, partName, indexCount + 3);
-				putIndexCount(indices, partName, indexCount + 1);
-				putIndexCount(indices, partName, indexCount + 2);
-				indexCount+=4;
+				triangluatePolygon(indices, partName, indexCounter);
 			}
 		}
 	}
 	
-	static Direction getDirectionFromVector(Vector3f directionVec) {
+	static Direction getDirectionFromVector(float x, float y, float z) {
 		for (Direction direction : Direction.values()) {
-			Vector3f direcVec = new Vector3f(Float.compare(directionVec.x(), -0.0F) == 0 ? 0.0F : directionVec.x(), directionVec.y(), directionVec.z());
+			Vector3f direcVec = new Vector3f(Float.compare(x, -0.0F) == 0 ? 0.0F : x, y, z);
+			
 			if (direcVec.equals(direction.step())) {
 				return direction;
 			}
 		}
 		
 		return null;
-	}
-	
-	static Vec3 getCenterOfCube(PoseStack poseStack, ModelPart.Cube cube) {
-		double minX = Double.MAX_VALUE;
-		double minY = Double.MAX_VALUE;
-		double minZ = Double.MAX_VALUE;
-		double maxX = Double.MIN_VALUE;
-		double maxY = Double.MIN_VALUE;
-		double maxZ = Double.MIN_VALUE;
-		
-		Matrix4f matrix = poseStack.last().pose();
-		
-		for (ModelPart.Polygon quad : cube.polygons) {
-			for (ModelPart.Vertex v : quad.vertices) {
-				Vector4f translatedPosition = new Vector4f(v.pos, 1.0F);
-				translatedPosition.mul(matrix);
-				
-				if (minX > translatedPosition.x()) {
-					minX = translatedPosition.x();
-				}
-				
-				if (minY > translatedPosition.y()) {
-					minY = translatedPosition.y();
-				}
-				
-				if (minZ > translatedPosition.z()) {
-					minZ = translatedPosition.z();
-				}
-				
-				if (maxX < translatedPosition.x()) {
-					maxX = translatedPosition.x();
-				}
-				
-				if (maxY < translatedPosition.y()) {
-					maxY = translatedPosition.y();
-				}
-				
-				if (maxZ < translatedPosition.z()) {
-					maxZ = translatedPosition.z();
-				}
-			}
-		}
-		
-		return new Vec3(minX + (maxX - minX) * 0.5D, minY + (maxY - minY) * 0.5D, minZ + (maxZ - minZ) * 0.5D);
 	}
 	
 	static Vector3f getClipPoint(Vector3f pos1, Vector3f pos2, float yClip) {
@@ -600,8 +602,8 @@ public class VanillaArmor extends ArmorModelTransformer {
 		return clipPoint;
 	}
 	
-	static ModelPart.Vertex getTranslatedVertex(ModelPart.Vertex original, Matrix4f matrix) {
-		Vector4f translatedPosition = new Vector4f(original.pos, 1.0F);
+	static ModelPart.Vertex getTranslatedVertex(CustomizableCube.Vertex original, Matrix4f matrix) {
+		Vector4f translatedPosition = new Vector4f(original.pos.x, original.pos.y, original.pos.z, 1.0F);
 		translatedPosition.mul(matrix);
 		
 		return new ModelPart.Vertex(translatedPosition.x(), translatedPosition.y(), translatedPosition.z(), original.u, original.v);

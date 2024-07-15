@@ -17,6 +17,7 @@ import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.entity.EntityJoinLevelEvent;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
@@ -24,6 +25,7 @@ import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.api.forgeevent.ChangePlayerModeEvent;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -542,11 +544,19 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	public void toMiningMode(boolean synchronize) {
-		this.playerMode = PlayerMode.MINING;
+		ChangePlayerModeEvent prepareModelEvent = new ChangePlayerModeEvent(this, PlayerMode.MINING);
+		
+		if (!MinecraftForge.EVENT_BUS.post(prepareModelEvent)) {
+			this.playerMode = prepareModelEvent.getPlayerMode();
+		}
 	}
 	
 	public void toBattleMode(boolean synchronize) {
-		this.playerMode = PlayerMode.BATTLE;
+		ChangePlayerModeEvent prepareModelEvent = new ChangePlayerModeEvent(this, PlayerMode.BATTLE);
+		
+		if (!MinecraftForge.EVENT_BUS.post(prepareModelEvent)) {
+			this.playerMode = prepareModelEvent.getPlayerMode();
+		}
 	}
 	
 	public boolean isBattleMode() {

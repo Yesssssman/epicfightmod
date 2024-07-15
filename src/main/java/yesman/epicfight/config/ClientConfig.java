@@ -15,6 +15,7 @@ import yesman.epicfight.api.utils.math.Vec2i;
 
 public class ClientConfig {
 	public final IntValue longPressCountConfig;
+	public final IntValue maxStuckProjectiles;
 	public final BooleanValue filterAnimation;
 	public final DoubleValue aimHelperColor;
 	public final BooleanValue enableAimHelper;
@@ -54,6 +55,7 @@ public class ClientConfig {
 	
 	public ClientConfig(ForgeConfigSpec.Builder config) {
 		this.longPressCountConfig = config.defineInRange("ingame.long_press_count", 2, 1, 10);
+		this.maxStuckProjectiles = config.defineInRange("ingame.max_hit_projectiles", 30, 0, 30);
 		this.healthBarShowOption = config.defineEnum("ingame.health_bar_show_option", HealthBarShowOptions.HURT);
 		this.showTargetIndicator = config.define("ingame.show_target_indicator", () -> true);
 		this.filterAnimation = config.define("ingame.filter_animation", () -> false);

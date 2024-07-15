@@ -44,8 +44,8 @@
 	
 	"death.attack.wither_beam": "%1$s was vaporized by wither beam",
 	"death.attack.shockwave": "%1$s was teared up by Shockwave",
-	"debug.armor_model_debugging.on": "Armor model debugging: On",
-	"debug.armor_model_debugging.off": "Armor model debugging: Off",
+	"debug.vanilla_model_debugging.on": "Vanilla model debugging: On",
+	"debug.vanilla_model_debugging.off": "Vanilla model debugging: Off",
 	"debug.show_epicfight_tooltip.on": "Show Epic Fight Tooltip: On",
 	"debug.show_epicfight_tooltip.off": "Show Epic Fight Tooltip: Off",
 	
@@ -180,6 +180,7 @@
 	"gui.epicfight.aiming_correction.off": "Aiming Correction: OFF",
 	"gui.epicfight.show_attributes.on": "Show Attributes: ON",
 	"gui.epicfight.show_attributes.off": "Show Attributes: OFF",
+	"gui.epicfight.max_stuck_projectiles": "Max Stuck Projectiles: %s",
 	
 	"gui.epicfight.auto_switching_items": "Auto Switching Items",
 	"gui.epicfight.export_custom_armor": "Export Armor Models",
@@ -194,6 +195,7 @@
 	"gui.epicfight.no_mining_in_combat.tooltip": "Enables/Disables the mining ability in combat mode",
 	"gui.epicfight.aiming_correction.tooltip": "Enables/Disables the camera correction when aiming ranged weapons",
 	"gui.epicfight.show_attributes.tooltip": "Enables/Disables epic fight attributes in item tooltips",
+	"gui.epicfight.max_stuck_projectiles.tooltip": "Determines the maximum number of visible projectiles stuck in the player's body in Battle mode.",
 	"gui.epicfight.auto_switching_items.tooltip": "Edit the list of items that will automatically switch between Battle/Mining mode",
 	"gui.epicfight.export_custom_armor.tooltip": "Export the all custom armor models as an resource pack",
 	"gui.epicfight.replace": "Following skill will be removed: %s",

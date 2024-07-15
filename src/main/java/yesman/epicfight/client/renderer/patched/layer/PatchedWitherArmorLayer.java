@@ -22,7 +22,7 @@ import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.boss.WitherPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PatchedWitherArmorLayer extends PatchedLayer<WitherBoss, WitherPatch, WitherBossModel<WitherBoss>, WitherArmorLayer, WitherMesh> {
+public class PatchedWitherArmorLayer extends ModelRenderLayer<WitherBoss, WitherPatch, WitherBossModel<WitherBoss>, WitherArmorLayer, WitherMesh> {
 	private static final ResourceLocation WITHER_ARMOR_LOCATION = new ResourceLocation("textures/entity/wither/wither_armor.png");
 	
 	public PatchedWitherArmorLayer() {
