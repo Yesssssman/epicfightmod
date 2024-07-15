@@ -1359,7 +1359,7 @@ public class DatapackEditScreen extends Screen {
 																								try {
 																									ColliderPreset.deserializeSimpleCollider(currentTag.getCompound("collider"));
 																									hasCustomCollider = true;
-																								} finally {
+																								} catch (IllegalArgumentException e) {
 																								}
 																							}
 																							
