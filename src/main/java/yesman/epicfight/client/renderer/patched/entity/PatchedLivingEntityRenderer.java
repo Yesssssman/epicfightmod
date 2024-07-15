@@ -78,8 +78,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 				EpicFightMod.LOGGER.error("Failed to parse layer file {} for {}", entry.getKey(), type);
 				jsonparseexception.printStackTrace();
 			} catch (NoSuchElementException | ClassNotFoundException e) {
-				EpicFightMod.LOGGER.error("Couldn't read layer file {} for {}", entry.getKey(), type);
-				e.printStackTrace();
+				EpicFightMod.LOGGER.error("{}: Couldn't read layer file {} for {}", e.getMessage(), entry.getKey(), type);
 			} finally {
 				try {
 					if (reader != null) {
