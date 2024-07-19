@@ -21,12 +21,10 @@ public abstract class ModelRenderLayer<E extends LivingEntity, T extends LivingE
 	}
 	
 	@Override
-	public void renderLayer(int z, T entitypatch, E entityliving, RenderLayer<E, M> vanillaLayer, PoseStack poseStack, MultiBufferSource buffer, int packedLight, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
+	public void renderLayer(E entityliving, T entitypatch, RenderLayer<E, M> vanillaLayer, PoseStack poseStack, MultiBufferSource buffer, int packedLight, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 		this.initMesh();
-		super.renderLayer(z, entitypatch, entityliving, vanillaLayer, poseStack, buffer, packedLight, poses, bob, yRot, xRot, partialTicks);
+		this.renderLayer(entitypatch, entityliving, this.castLayer(vanillaLayer), poseStack, buffer, packedLight, poses, bob, yRot, xRot, partialTicks);
 	}
-	
-	protected abstract void renderLayer(T entitypatch, E entityliving, R vanillaLayer, PoseStack poseStack, MultiBufferSource buffer, int packedLight, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks);
 	
 	protected void initMesh() {
 		if (this.mesh != null) {

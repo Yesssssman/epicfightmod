@@ -4,18 +4,17 @@ import java.io.IOException;
 import java.io.Reader;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.EntityModel;
@@ -43,9 +42,11 @@ import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.patched.layer.LayerUtil;
 import yesman.epicfight.client.renderer.patched.layer.PatchedLayer;
+import yesman.epicfight.client.renderer.patched.layer.RenderOriginalModelLayer;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -60,12 +61,14 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 	}
 	
 	protected Map<Class<?>, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>>> patchedLayers = Maps.newHashMap();
+	protected List<PatchedLayer<E, T, M, ? extends RenderLayer<E, M>>> customLayers = Lists.newArrayList();
 	
 	public PatchedLivingEntityRenderer(EntityRendererProvider.Context context, EntityType<?> entityType) {
 		super(context);
 		
 		ResourceLocation type = EntityType.getKey(entityType);
 		FileToIdConverter filetoidconverter = FileToIdConverter.json("animated_layers/" + type.getPath());
+		List<Pair<ResourceLocation, JsonElement>> layers = Lists.newArrayList();
 		
 		for (Map.Entry<ResourceLocation, Resource> entry : filetoidconverter.listMatchingResources(context.getResourceManager()).entrySet()) {
 			Reader reader = null;
@@ -73,12 +76,10 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 			try {
 				reader = entry.getValue().openAsReader();
 				JsonElement jsonelement = GsonHelper.fromJson(new GsonBuilder().create(), reader, JsonElement.class);
-				LayerUtil.addLayer(this, jsonelement);
+				layers.add(Pair.of(entry.getKey(), jsonelement));
 			} catch (IllegalArgumentException | IOException | JsonParseException jsonparseexception) {
 				EpicFightMod.LOGGER.error("Failed to parse layer file {} for {}", entry.getKey(), type);
 				jsonparseexception.printStackTrace();
-			} catch (NoSuchElementException | ClassNotFoundException e) {
-				EpicFightMod.LOGGER.error("{}: Couldn't read layer file {} for {}", e.getMessage(), entry.getKey(), type);
 			} finally {
 				try {
 					if (reader != null) {
@@ -88,6 +89,41 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 				}
 			}
 		}
+		
+		LayerUtil.addLayer(this, entityType, layers);
+	}
+	
+	@SuppressWarnings("unchecked")
+	public PatchedLivingEntityRenderer<E, T, M, R, AM> initLayerLast(EntityRendererProvider.Context context, EntityType<?> entityType) {
+		List<RenderLayer<E, M>> vanillaLayers = null;
+		
+		if (entityType == EntityType.PLAYER) {
+			if (context.getEntityRenderDispatcher().playerRenderers.get("default") instanceof LivingEntityRenderer livingentityrenderer) {
+				vanillaLayers = livingentityrenderer.layers;
+			}
+		} else {
+			if (context.getEntityRenderDispatcher().renderers.get(entityType) instanceof LivingEntityRenderer livingentityrenderer) {
+				vanillaLayers = livingentityrenderer.layers;
+			}
+		}
+		
+		if (vanillaLayers != null) {
+			for (RenderLayer<E, M> layer : vanillaLayers) {
+				Class<?> layerClass = layer.getClass();
+				
+				if (layerClass.isAnonymousClass()) {
+					layerClass = layer.getClass().getSuperclass();
+				}
+				
+				if (this.patchedLayers.containsKey(layerClass)) {
+					continue;
+				}
+				
+				this.addPatchedLayer(layerClass, new RenderOriginalModelLayer<> ("Root", new Vec3f(0.0F, this.getDefaultLayerHeightCorrection(), 0.0F), new Vec3f(0.0F, 0.0F, 0.0F)));
+			}
+		}
+		
+		return this;
 	}
 	
 	@Override
@@ -199,15 +235,32 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		mesh.initialize();
 	}
 	
-	protected void renderLayer(LivingEntityRenderer<E, M> renderer, T entitypatch, E entityIn, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLightIn, float partialTicks) {
+	protected void renderLayer(LivingEntityRenderer<E, M> renderer, T entitypatch, E entity, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
+		float f = MathUtils.lerpBetween(entity.yBodyRotO, entity.yBodyRot, partialTicks);
+        float f1 = MathUtils.lerpBetween(entity.yHeadRotO, entity.yHeadRot, partialTicks);
+        float f2 = f1 - f;
+		float f7 = entity.getViewXRot(partialTicks);
+		float bob = this.getVanillaRendererBob(entity, renderer, partialTicks);
+		
+		for (RenderLayer<E, M> layer : renderer.layers) {
+			Class<?> layerClass = layer.getClass();
+			
+			if (layerClass.isAnonymousClass()) {
+				layerClass = layerClass.getSuperclass();
+			}
+			
+			if (this.patchedLayers.containsKey(layerClass)) {
+				this.patchedLayers.get(layerClass).renderLayer(entity, entitypatch, layer, poseStack, buffer, packedLight, poses, bob, f2, f7, partialTicks);
+			}
+		}
+		
+		for (PatchedLayer<E, T, M, ? extends RenderLayer<E, M>> patchedLayer : this.customLayers) {
+			patchedLayer.renderLayer(entity, entitypatch, null, poseStack, buffer, packedLight, poses, bob, f2, f7, partialTicks);
+		}
+		
+		/**
 		List<RenderLayer<E, M>> layers = new ArrayList<>(renderer.layers);
 		Iterator<RenderLayer<E, M>> iter = layers.iterator();
-		
-		float f = MathUtils.lerpBetween(entityIn.yBodyRotO, entityIn.yBodyRot, partialTicks);
-        float f1 = MathUtils.lerpBetween(entityIn.yHeadRotO, entityIn.yHeadRot, partialTicks);
-        float f2 = f1 - f;
-		float f7 = entityIn.getViewXRot(partialTicks);
-		float bob = this.getVanillaRendererBob(entityIn, renderer, partialTicks);
 		
 		while (iter.hasNext()) {
 			RenderLayer<E, M> layer = iter.next();
@@ -218,7 +271,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 			}
 			
 			if (this.patchedLayers.containsKey(layerClass)) {
-				this.patchedLayers.get(layerClass).renderLayer(0, entitypatch, entityIn, layer, poseStack, buffer, packedLightIn, poses, bob, f2, f7, partialTicks);
+				this.patchedLayers.get(layerClass).renderLayer(0, entitypatch, entity, layer, poseStack, buffer, packedLight, poses, bob, f2, f7, partialTicks);
 				iter.remove();
 			}
 		}
@@ -229,7 +282,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		poseStack.pushPose();
 		MathUtils.translateStack(poseStack, modelMatrix);
 		MathUtils.rotateStack(poseStack, transpose);
-		poseStack.translate(0.0D, this.getLayerCorrection(), 0.0D);
+		poseStack.translate(0.0D, this.getDefaultLayerHeightCorrection(), 0.0D);
 		poseStack.scale(-1.0F, -1.0F, 1.0F);
 		
 		layers.forEach((layer) -> {
@@ -237,6 +290,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		});
 		
 		poseStack.popPose();
+		**/
 	}
 	
 	public RenderType getRenderType(E entityIn, T entitypatch, LivingEntityRenderer<E, M> renderer, boolean isVisible, boolean isVisibleToPlayer, boolean isGlowing) {
@@ -283,7 +337,11 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		this.patchedLayers.putIfAbsent(originalLayerClass, patchedLayer);
 	}
 	
-	protected double getLayerCorrection() {
-		return 1.15D;
+	public void addCustomLayer(PatchedLayer<E, T, M, ? extends RenderLayer<E, M>> patchedLayer) {
+		this.customLayers.add(patchedLayer);
+	}
+	
+	protected float getDefaultLayerHeightCorrection() {
+		return 1.15F;
 	}
 }

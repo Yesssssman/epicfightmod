@@ -32,15 +32,12 @@ public class PatchedGolemCrackLayer extends ModelRenderLayer<IronGolem, IronGole
 	}
 	
 	@Override
-	protected void renderLayer(IronGolemPatch entitypatch, IronGolem golementity, IronGolemCrackinessLayer vanillaLayer, PoseStack postStack, MultiBufferSource buffer, int packedLightIn,
-			OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
-		
+	protected void renderLayer(IronGolemPatch entitypatch, IronGolem golementity, IronGolemCrackinessLayer vanillaLayer, PoseStack postStack, MultiBufferSource buffer, int packedLight, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 		IronGolem.Crackiness crack = golementity.getCrackiness();
 		
 		if (crack != IronGolem.Crackiness.NONE) {
 			VertexConsumer ivertexbuilder = buffer.getBuffer(EpicFightRenderTypes.getTriangulated(RenderType.entityCutoutNoCull(CRACK_MAP.get(crack))));
-			
-			this.mesh.drawModelWithPose(postStack, ivertexbuilder, packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
+			this.mesh.drawModelWithPose(postStack, ivertexbuilder, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
 		}
 	}
 }

@@ -289,13 +289,11 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	public float getModifiedAttackSpeed(CapabilityItem itemCapability, float baseSpeed) {
 		AttackSpeedModifyEvent event = new AttackSpeedModifyEvent(this, itemCapability, baseSpeed);
 		this.eventListeners.triggerEvents(EventType.MODIFY_ATTACK_SPEED_EVENT, event);
-		
 		float weight = this.getWeight();
-
+		
 		if (weight > 40.0F) {
 			float attenuation = Mth.clamp(this.getOriginal().level().getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY), 0, 100) / 100.0F;
-
-			return event.getAttackSpeed() + (-0.1F * (weight / 40.0F) * (Math.max(event.getAttackSpeed() - 0.8F, 0.0F) * 1.5F) * attenuation);
+			return event.getAttackSpeed() + (-0.1F * (weight / 40.0F) * Math.max(event.getAttackSpeed() - 0.8F, 0.0F) * attenuation);
 		} else {
 			return event.getAttackSpeed();
 		}

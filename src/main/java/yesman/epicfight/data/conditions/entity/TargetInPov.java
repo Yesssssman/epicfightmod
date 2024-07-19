@@ -13,10 +13,10 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableEditBox;
-import yesman.epicfight.data.conditions.Condition.MobPatchCondition;
-import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
+import yesman.epicfight.data.conditions.Condition.EntityPatchCondition;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
-public class TargetInPov extends MobPatchCondition {
+public class TargetInPov extends EntityPatchCondition {
 	protected double min;
 	protected double max;
 	
@@ -54,7 +54,7 @@ public class TargetInPov extends MobPatchCondition {
 	}
 	
 	@Override
-	public boolean predicate(MobPatch<?> entitypatch) {
+	public boolean predicate(LivingEntityPatch<?> entitypatch) {
 		double degree = entitypatch.getAngleTo(entitypatch.getTarget());
 		return this.min < degree && degree < this.max;
 	}
@@ -81,7 +81,7 @@ public class TargetInPov extends MobPatchCondition {
 		}
 		
 		@Override
-		public boolean predicate(MobPatch<?> entitypatch) {
+		public boolean predicate(LivingEntityPatch<?> entitypatch) {
 			double degree = entitypatch.getAngleToHorizontal(entitypatch.getTarget());
 			return this.min < degree && degree < this.max;
 		}

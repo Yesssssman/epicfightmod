@@ -770,11 +770,14 @@ public class Animations {
 					entitypatch.getOriginal().level().addAlwaysVisibleParticle(EpicFightParticles.AIR_BURST.get(), pos.x, pos.y + entitypatch.getOriginal().getBbHeight() * 0.5D, pos.z, 0, -1, 2);
 				}, Side.CLIENT));
 		
-		FIST_AUTO1 = new BasicAttackAnimation(0.08F, 0.05F, 0.15F, 0.16F, InteractionHand.OFF_HAND, null, biped.toolL, "biped/combat/fist_auto1", biped)
+		FIST_AUTO1 = new BasicAttackAnimation(0.08F, 0.05F, 0.15F, 0.15F, InteractionHand.OFF_HAND, null, biped.toolL, "biped/combat/fist_auto1", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 3.2F)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT);
-		FIST_AUTO2 = new BasicAttackAnimation(0.08F, 0.05F, 0.15F, 0.16F, null, biped.toolR, "biped/combat/fist_auto2", biped)
+		FIST_AUTO2 = new BasicAttackAnimation(0.08F, 0.05F, 0.15F, 0.15F, null, biped.toolR, "biped/combat/fist_auto2", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 3.2F)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT);
 		FIST_AUTO3 = new BasicAttackAnimation(0.08F, 0.05F, 0.15F, 0.5F, InteractionHand.OFF_HAND, null, biped.toolL, "biped/combat/fist_auto3", biped)
+				.addProperty(AttackAnimationProperty.BASIS_ATTACK_SPEED, 3.2F)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT);
 		FIST_DASH = new DashAttackAnimation(0.06F, 0.05F, 0.15F, 0.3F, 0.7F, null, biped.shoulderR, "biped/combat/fist_dash", biped)
 				.addProperty(AttackPhaseProperty.PARTICLE, EpicFightParticles.HIT_BLUNT)

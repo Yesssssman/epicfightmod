@@ -36,7 +36,7 @@ import yesman.epicfight.client.gui.datapack.widgets.ResizableEditBox;
 import yesman.epicfight.client.gui.datapack.widgets.RowSpliter;
 import yesman.epicfight.client.gui.datapack.widgets.Static;
 import yesman.epicfight.data.conditions.Condition;
-import yesman.epicfight.data.conditions.Condition.MobPatchCondition;
+import yesman.epicfight.data.conditions.Condition.EntityPatchCondition;
 import yesman.epicfight.data.conditions.Condition.ParameterEditor;
 import yesman.epicfight.data.conditions.EpicFightConditions;
 import yesman.epicfight.main.EpicFightMod;
@@ -281,7 +281,7 @@ public class CombatBehaviorScreen extends Screen {
 										}
 									})
 									.addColumn(Grid.registryPopup("condition", EpicFightConditions.REGISTRY.get())
-													.filter((condition) -> condition.get() instanceof MobPatchCondition)
+													.filter((condition) -> condition.get() instanceof EntityPatchCondition)
 													.editable(true)
 													.toDisplayText((condition) -> ParseUtil.getRegistryName(condition, EpicFightConditions.REGISTRY.get()))
 													.valueChanged((event) -> {

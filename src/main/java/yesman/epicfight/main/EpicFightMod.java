@@ -190,6 +190,14 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  
  *  3. Fixed entity scaling issue
  *  
+ *  --- 20.8.1.8 ---
+ *  
+ *  1. Fixed Attribute grid not accepting negative value
+ *  
+ *  2. Corrected the attack speed of fists
+ *  
+ *  3. Fixed the crash in a dedicated server when Photon installed
+ *  
  *  --- TO DO ---
  *  
  *  1. Crash because {@link PlayerPatch#STAMINA} is unregistered at SynchedEntityData (Most likely a mod compatibility issue)
@@ -203,6 +211,8 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  5. Add functionality to blooming effect (resists wither effect)
  *  
  *  6. First person animation system by adding /data/ folder in the path, and few samples
+ *  
+ *  7. Still whirlwind crash in both 1.18.2 1.19.2
  *  
  *  @author yesman
  */
@@ -224,14 +234,12 @@ public class EpicFightMod {
     	instance = this;
     	
     	ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, ConfigManager.CLIENT_CONFIG);
-		IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+		final IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
 		
 		bus.addListener(this::constructMod);
-    	bus.addListener(this::doClientStuff);
     	bus.addListener(this::doCommonStuff);
     	bus.addListener(this::doServerStuff);
     	bus.addListener(this::addPackFindersEvent);
-    	bus.addListener(this::registerResourcepackReloadListnerEvent);
     	bus.addListener(this::buildCreativeTabWithSkillBooks);
     	bus.addListener(EpicFightAttributes::entityAttributeCreationEvent);
     	bus.addListener(EpicFightAttributes::entityAttributeModificationEvent);
@@ -241,7 +249,7 @@ public class EpicFightMod {
     	bus.addListener(EpicFightEntities::onSpawnPlacementRegister);
     	
     	MinecraftForge.EVENT_BUS.addListener(this::command);
-        MinecraftForge.EVENT_BUS.addListener(this::registerDatapackReloadListnerEvent);
+        MinecraftForge.EVENT_BUS.addListener(this::addReloadListnerEvent);
     	
     	LivingMotion.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, LivingMotions.class);
     	SkillCategory.ENUM_MANAGER.registerEnumCls(EpicFightMod.MODID, SkillCategories.class);
@@ -269,11 +277,12 @@ public class EpicFightMod {
         ConfigManager.loadConfig(ConfigManager.CLIENT_CONFIG, FMLPaths.CONFIGDIR.get().resolve(MODID + "-client.toml").toString());
         ConfigManager.loadConfig(ConfigManager.COMMON_CONFIG, FMLPaths.CONFIGDIR.get().resolve(CONFIG_FILE_PATH).toString());
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory(IngameConfigurationScreen::new));
-        
-        //
         ModLoadingContext.get().registerExtensionPoint(EpicFightExtensions.class, () -> new EpicFightExtensions(EpicFightCreativeTabs.ITEMS.get()));
         
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+        	bus.addListener(this::doClientStuff);
+        	bus.addListener(this::registerResourcepackReloadListnerEvent);
+        	
         	if (ModList.get().isLoaded("geckolib")) {
     			ICompatModule.loadCompatModule(GeckolibCompat.class);
     		}
@@ -365,7 +374,7 @@ public class EpicFightMod {
 		event.registerReloadListener(ItemSkins.INSTANCE);
 	}
 	
-	private void registerDatapackReloadListnerEvent(final AddReloadListenerEvent event) {
+	private void addReloadListnerEvent(final AddReloadListenerEvent event) {
 		if (!isPhysicalClient()) {
 			event.addListener(AnimationManager.getInstance());
 		}

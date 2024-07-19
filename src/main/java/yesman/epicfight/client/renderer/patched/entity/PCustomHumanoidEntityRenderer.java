@@ -29,7 +29,6 @@ public class PCustomHumanoidEntityRenderer<AM extends HumanoidMesh> extends Patc
 	
 	public PCustomHumanoidEntityRenderer(AM mesh, EntityRendererProvider.Context context, EntityType<?> entityType) {
 		super(context, entityType);
-		
 		this.mesh = mesh;
 		this.addPatchedLayer(ElytraLayer.class, new PatchedElytraLayer<>());
 		this.addPatchedLayer(ItemInHandLayer.class, new PatchedItemInHandLayer<>());
@@ -45,7 +44,7 @@ public class PCustomHumanoidEntityRenderer<AM extends HumanoidMesh> extends Patc
 	}
 	
 	@Override
-	protected double getLayerCorrection() {
+	protected float getDefaultLayerHeightCorrection() {
 		return 0.75F;
 	}
 	

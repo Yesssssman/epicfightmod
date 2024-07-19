@@ -45,7 +45,7 @@ public class PHumanoidRenderer<E extends LivingEntity, T extends LivingEntityPat
 	}
 	
 	@Override
-	protected double getLayerCorrection() {
+	protected float getDefaultLayerHeightCorrection() {
 		return 0.75F;
 	}
 

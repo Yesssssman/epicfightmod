@@ -1,21 +1,37 @@
 package yesman.epicfight.client.renderer;
 
+import java.util.Map;
 import java.util.OptionalDouble;
 import java.util.function.Function;
 
+import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.Util;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.client.event.RegisterShadersEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
+@Mod.EventBusSubscriber(modid = EpicFightMod.MODID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.MOD)
 public class EpicFightRenderTypes extends RenderType {
+	//Util class
+	private EpicFightRenderTypes() {
+		super(null, null, null, -1, false, false, null, null);
+	}
+	
+	private static final Map<String, ShaderInstance> ANIMATION_APPLYING_SHADERS = Maps.newHashMap();
+	
 	private static final Function<RenderType, RenderType> TRIANGULATED_RENDER_TYPES = Util.memoize((renderType$1) -> {
 		if (renderType$1 instanceof CompositeRenderType compositeRenderType) {
 			return new CompositeRenderType(renderType$1.name, renderType$1.format, VertexFormat.Mode.TRIANGLES, renderType$1.bufferSize(), renderType$1.affectsCrumbling(), renderType$1.sortOnUpload, compositeRenderType.state);
@@ -73,8 +89,12 @@ public class EpicFightRenderTypes extends RenderType {
 		return DEBUG_QUADS;
 	}
 	
-	//Util class
-	private EpicFightRenderTypes() {
-		super(null, null, null, -1, false, false, null, null);
+	@SubscribeEvent(priority = EventPriority.LOWEST)
+	public static void registerShadersEvent(RegisterShadersEvent event) {
+		/**
+		event.registerShader(new ShaderInstance(event.getResourceProvider(), new ResourceLocation(EpicFightMod.MODID, "solid_model"), DefaultVertexFormat.POSITION_COLOR_NORMAL), (reloadedShader) -> {
+			EpicFightShaders.positionColorNormalShader = reloadedShader;
+		});
+		**/
 	}
 }

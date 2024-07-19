@@ -13,10 +13,10 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableEditBox;
-import yesman.epicfight.data.conditions.Condition.MobPatchCondition;
-import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
+import yesman.epicfight.data.conditions.Condition.EntityPatchCondition;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
-public class TargetInDistance extends MobPatchCondition {
+public class TargetInDistance extends EntityPatchCondition {
 	private double min;
 	private double max;
 	
@@ -54,7 +54,7 @@ public class TargetInDistance extends MobPatchCondition {
 	}
 	
 	@Override
-	public boolean predicate(MobPatch<?> target) {
+	public boolean predicate(LivingEntityPatch<?> target) {
 		double distanceSqr = target.getOriginal().distanceToSqr(target.getTarget());
 		return this.min * this.min < distanceSqr && distanceSqr < this.max * this.max;
 	}

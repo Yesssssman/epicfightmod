@@ -90,14 +90,14 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 	}
 	
 	@Override
-	protected void renderLayer(LivingEntityRenderer<LocalPlayer, PlayerModel<LocalPlayer>> renderer, LocalPlayerPatch entitypatch, LocalPlayer entityIn, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLightIn, float partialTicks) {
+	protected void renderLayer(LivingEntityRenderer<LocalPlayer, PlayerModel<LocalPlayer>> renderer, LocalPlayerPatch entitypatch, LocalPlayer entity, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
 		Iterator<RenderLayer<LocalPlayer, PlayerModel<LocalPlayer>>> iter = renderer.layers.iterator();
 		
-		float f = MathUtils.lerpBetween(entityIn.yBodyRotO, entityIn.yBodyRot, partialTicks);
-        float f1 = MathUtils.lerpBetween(entityIn.yHeadRotO, entityIn.yHeadRot, partialTicks);
+		float f = MathUtils.lerpBetween(entity.yBodyRotO, entity.yBodyRot, partialTicks);
+        float f1 = MathUtils.lerpBetween(entity.yHeadRotO, entity.yHeadRot, partialTicks);
         float f2 = f1 - f;
-		float f7 = entityIn.getViewXRot(partialTicks);
-		float bob = this.getVanillaRendererBob(entityIn, renderer, partialTicks);
+		float f7 = entity.getViewXRot(partialTicks);
+		float bob = this.getVanillaRendererBob(entity, renderer, partialTicks);
 		
 		while (iter.hasNext()) {
 			RenderLayer<LocalPlayer, PlayerModel<LocalPlayer>> layer = iter.next();
@@ -108,7 +108,7 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 			}
 			
 			if (this.patchedLayers.containsKey(rendererClass)) {
-				this.patchedLayers.get(rendererClass).renderLayer(0, entitypatch, entityIn, layer, poseStack, buffer, packedLightIn, poses, bob, f2, f7, partialTicks);
+				this.patchedLayers.get(rendererClass).renderLayer(entity, entitypatch, layer, poseStack, buffer, packedLight, poses, bob, f2, f7, partialTicks);
 			}
 		}
 	}

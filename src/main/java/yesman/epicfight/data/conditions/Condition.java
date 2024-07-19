@@ -3,18 +3,25 @@ package yesman.epicfight.data.conditions;
 import java.util.List;
 import java.util.function.Function;
 
+import com.google.gson.JsonElement;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagParser;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
-import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 
 public interface Condition<T> {
+	default Condition<T> read(JsonElement json) throws CommandSyntaxException {
+		return this.read(TagParser.parseTag(json.toString()));
+	}
+	
 	public Condition<T> read(CompoundTag tag);
 	public CompoundTag serializePredicate();
 	public boolean predicate(T target);
@@ -26,9 +33,6 @@ public interface Condition<T> {
 	}
 	
 	public static abstract class EntityCondition implements Condition<Entity> {
-	}
-	
-	public static abstract class MobPatchCondition implements Condition<MobPatch<?>> {
 	}
 	
 	public static abstract class ItemStackCondition implements Condition<ItemStack> {

@@ -2200,12 +2200,12 @@ public class DatapackEditScreen extends Screen {
 			final ResizableEditBox scaleEditBox = new ResizableEditBox(DatapackEditScreen.this.getMinecraft().font, 0, 0, 0, 0, Component.literal("scale"), null, null);
 			final ResizableEditBox stunArmorBox = new ResizableEditBox(DatapackEditScreen.this.getMinecraft().font, 0, 0, 0, 0, Component.literal("stun_armor"), null, null);
 			
-			impactEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
-			armorNegationEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
-			maxStrikesEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Integer::parseInt));
-			chasingSpeedEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
+			impactEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
+			armorNegationEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
+			maxStrikesEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Integer::parseInt));
+			chasingSpeedEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
 			scaleEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
-			stunArmorBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
+			stunArmorBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
 			
 			this.attributeEditors.put("impact", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), impactEditBox));
 			this.attributeEditors.put("armor_negation", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), armorNegationEditBox));

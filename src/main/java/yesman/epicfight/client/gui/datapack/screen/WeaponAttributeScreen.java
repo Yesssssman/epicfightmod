@@ -63,13 +63,13 @@ public class WeaponAttributeScreen extends Screen {
 		final ResizableEditBox stunArmorEditBox = new ResizableEditBox(this.font, 0, 0, 0, 0, Component.literal("stun_armor"), null, null);
 		final ResizableEditBox weightEditBox = new ResizableEditBox(this.font, 0, 0, 0, 0, Component.literal("weight"), null, null);
 		
-		impactEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
-		armorNegationEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
-		maxStrikesEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Integer::parseInt));
-		damageBonusEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
-		speedBonusEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
-		stunArmorEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
-		weightEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
+		impactEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
+		armorNegationEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
+		maxStrikesEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Integer::parseInt));
+		damageBonusEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
+		speedBonusEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
+		stunArmorEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
+		weightEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
 		
 		this.weaponAttributeEditors.put("armor_negation", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), armorNegationEditBox));
 		this.weaponAttributeEditors.put("impact", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), impactEditBox));

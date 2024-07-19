@@ -55,7 +55,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 	
 	private final boolean firstPersonModel;
 	private final TextureAtlas armorTrimAtlas;
-
+	
 	public WearableItemLayer(AM mesh, boolean firstPersonModel, ModelManager modelManager) {
 		super(mesh);
 		

@@ -15,20 +15,14 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
-import yesman.epicfight.client.mesh.HumanoidMesh;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PatchedHeadLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E> & HeadedModel, AM extends HumanoidMesh> extends ModelRenderLayer<E, T, M, CustomHeadLayer<E, M>, AM> {
-	
-	public PatchedHeadLayer() {
-		super(null);
-	}
-
+public class PatchedHeadLayer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E> & HeadedModel> extends PatchedLayer<E, T, M, CustomHeadLayer<E, M>> {
 	@Override
-	protected void renderLayer(T entitypatch, E entityliving, CustomHeadLayer<E, M> vanillaLayer, PoseStack postStack, MultiBufferSource buffer, int packedLightIn,
-			OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
+	protected void renderLayer(T entitypatch, E entityliving, CustomHeadLayer<E, M> vanillaLayer, PoseStack postStack, MultiBufferSource buffer, int packedLightIn, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 		ItemStack itemstack = entityliving.getItemBySlot(EquipmentSlot.HEAD);
+		
 		if (!itemstack.isEmpty()) {
 			ModelPart model = vanillaLayer.getParentModel().getHead();
 			E entity = entitypatch.getOriginal();

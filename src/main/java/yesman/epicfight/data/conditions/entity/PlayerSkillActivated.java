@@ -20,11 +20,11 @@ import yesman.epicfight.skill.SkillContainer;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
-public class SkillActivated extends EntityPatchCondition {
+public class PlayerSkillActivated extends EntityPatchCondition {
 	private Skill skill;
 	
 	@Override
-	public SkillActivated read(CompoundTag tag) {
+	public PlayerSkillActivated read(CompoundTag tag) {
 		if (!tag.contains("skill") || StringUtil.isNullOrEmpty(tag.getString("skill"))) {
 			throw new IllegalArgumentException("Undefined skill");
 		}

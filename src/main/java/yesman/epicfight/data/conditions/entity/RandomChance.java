@@ -12,10 +12,10 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.client.gui.datapack.widgets.ResizableEditBox;
-import yesman.epicfight.data.conditions.Condition.MobPatchCondition;
-import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
+import yesman.epicfight.data.conditions.Condition.EntityPatchCondition;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
-public class RandomChance extends MobPatchCondition {
+public class RandomChance extends EntityPatchCondition {
 	private float chance;
 	
 	public RandomChance() {
@@ -46,7 +46,7 @@ public class RandomChance extends MobPatchCondition {
 	}
 	
 	@Override
-	public boolean predicate(MobPatch<?> target) {
+	public boolean predicate(LivingEntityPatch<?> target) {
 		return target.getOriginal().getRandom().nextFloat() < this.chance;
 	}
 	

@@ -6,10 +6,10 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.data.conditions.Condition.MobPatchCondition;
-import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
+import yesman.epicfight.data.conditions.Condition.EntityPatchCondition;
+import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
-public class TargetInEyeHeight extends MobPatchCondition {
+public class TargetInEyeHeight extends EntityPatchCondition {
 	@Override
 	public TargetInEyeHeight read(CompoundTag tag) {
 		return this;
@@ -21,7 +21,7 @@ public class TargetInEyeHeight extends MobPatchCondition {
 	}
 	
 	@Override
-	public boolean predicate(MobPatch<?> target) {
+	public boolean predicate(LivingEntityPatch<?> target) {
 		double veticalDistance = Math.abs(target.getOriginal().getY() - target.getTarget().getY());
 		return veticalDistance < target.getOriginal().getEyeHeight();
 	}

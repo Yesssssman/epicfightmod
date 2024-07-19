@@ -34,7 +34,6 @@ public class RenderOriginalModelLayer<E extends LivingEntity, T extends LivingEn
 		poseStack.pushPose();
 		MathUtils.translateStack(poseStack, modelMatrix);
 		MathUtils.rotateStack(poseStack, transpose);
-		
 		poseStack.translate(this.vec.x, this.vec.y, this.vec.z);
 		poseStack.mulPose(Axis.YP.rotationDegrees(this.rot.y));
 		poseStack.mulPose(Axis.XP.rotationDegrees(this.rot.x));
