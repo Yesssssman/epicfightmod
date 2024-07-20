@@ -375,7 +375,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	public float getStamina() {
-		return this.getMaxStamina() == 0 ? 0 : this.original.getEntityData().get(STAMINA).floatValue();
+		return this.getMaxStamina() <= 0.0F ? 0.0F : this.original.getEntityData().hasItem(STAMINA) ? this.original.getEntityData().get(STAMINA).floatValue() : 0.0F;
 	}
 	
 	public float getModifiedStaminaConsume(float amount) {
@@ -390,8 +390,10 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	public void setStamina(float value) {
-		float f1 = Math.max(Math.min(value, this.getMaxStamina()), 0.0F);
-		this.original.getEntityData().set(STAMINA, f1);
+		if (this.original.getEntityData().hasItem(STAMINA)) {
+			float f1 = Mth.clamp(value, 0.0F, this.getMaxStamina());
+			this.original.getEntityData().set(STAMINA, f1);
+		}
 	}
 	
 	public boolean consumeForSkill(Skill skill, Skill.Resource consumeResource) {
