@@ -2,6 +2,8 @@ package yesman.epicfight.api.client.model;
 
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
@@ -15,7 +17,7 @@ public class ModelPart<T extends VertexIndicator> {
 		this(vertices, null);
 	}
 	
-	public ModelPart(List<T> vertices, net.minecraft.client.model.geom.ModelPart vanillaModelPart) {
+	public ModelPart(List<T> vertices, @Nullable net.minecraft.client.model.geom.ModelPart vanillaModelPart) {
 		this.vertices = vertices;
 		this.vanillaModelPart = vanillaModelPart;
 	}

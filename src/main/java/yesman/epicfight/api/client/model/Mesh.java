@@ -107,14 +107,14 @@ public abstract class Mesh<T extends VertexIndicator> {
 	}
 	
 	public void drawRawModel(PoseStack poseStack, VertexConsumer builder, int packedLightIn, float r, float g, float b, float a, int overlayCoord) {
-		this.draw(poseStack, builder, DrawingFunction.ENTITY_TRANSLUCENT, packedLightIn, r, g, b, a, overlayCoord);
+		this.draw(poseStack, builder, RawMesh.DrawingFunction.ENTITY_TRANSLUCENT, packedLightIn, r, g, b, a, overlayCoord);
 	}
 	
 	public void drawRawModelNoLighting(PoseStack poseStack, VertexConsumer builder, int packedLightIn, float r, float g, float b, float a, int overlayCoord) {
-		this.draw(poseStack, builder, DrawingFunction.ENTITY_NO_LIGHTING, packedLightIn, r, g, b, a, overlayCoord);
+		this.draw(poseStack, builder, RawMesh.DrawingFunction.ENTITY_NO_LIGHTING, packedLightIn, r, g, b, a, overlayCoord);
 	}
 	
-	public void draw(PoseStack poseStack, VertexConsumer builder, DrawingFunction drawingFunction, int packedLightIn, float r, float g, float b, float a, int overlayCoord) {
+	public void draw(PoseStack poseStack, VertexConsumer builder, RawMesh.DrawingFunction drawingFunction, int packedLightIn, float r, float g, float b, float a, int overlayCoord) {
 		Matrix4f matrix4f = poseStack.last().pose();
 		Matrix3f matrix3f = poseStack.last().normal();
 		
@@ -150,36 +150,36 @@ public abstract class Mesh<T extends VertexIndicator> {
 			
 			return parts.get(name);
 		}
-	}
-	
-	@FunctionalInterface
-	public interface DrawingFunction {
-		public static final DrawingFunction ENTITY_TRANSLUCENT = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
-			builder.vertex(posVec.x(), posVec.y(), posVec.z(), r, g, b, a, u, v, overlay, packedLightIn, normalVec.x(), normalVec.y(), normalVec.z());
-		};
 		
-		public static final DrawingFunction ENTITY_PARTICLE = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
-			builder.vertex(posVec.x(), posVec.y(), posVec.z());
-			builder.color(r, g, b, a);
-			builder.uv2(packedLightIn);
-			builder.endVertex();
-		};
-		
-		public static final DrawingFunction ENTITY_SOLID = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
-			builder.vertex(posVec.x(), posVec.y(), posVec.z());
-			builder.color(r, g, b, a);
-			builder.normal(normalVec.x(), normalVec.y(), normalVec.z());
-			builder.endVertex();
-		};
-		
-		public static final DrawingFunction ENTITY_NO_LIGHTING = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
-			builder.vertex(posVec.x(), posVec.y(), posVec.z());
-			builder.color(r, g, b, a);
-			builder.uv(u, v);
-			builder.uv2(packedLightIn);
-			builder.endVertex();
-		};
-		
-		public void draw(VertexConsumer builder, Vector4f posVec, Vector3f normalVec, int packedLightIn, float r, float g, float b, float a, float u, float v, int overlay);
+		@FunctionalInterface
+		public interface DrawingFunction {
+			public static final DrawingFunction ENTITY_TRANSLUCENT = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
+				builder.vertex(posVec.x(), posVec.y(), posVec.z(), r, g, b, a, u, v, overlay, packedLightIn, normalVec.x(), normalVec.y(), normalVec.z());
+			};
+			
+			public static final DrawingFunction ENTITY_PARTICLE = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
+				builder.vertex(posVec.x(), posVec.y(), posVec.z());
+				builder.color(r, g, b, a);
+				builder.uv2(packedLightIn);
+				builder.endVertex();
+			};
+			
+			public static final DrawingFunction ENTITY_SOLID = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
+				builder.vertex(posVec.x(), posVec.y(), posVec.z());
+				builder.color(r, g, b, a);
+				builder.normal(normalVec.x(), normalVec.y(), normalVec.z());
+				builder.endVertex();
+			};
+			
+			public static final DrawingFunction ENTITY_NO_LIGHTING = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
+				builder.vertex(posVec.x(), posVec.y(), posVec.z());
+				builder.color(r, g, b, a);
+				builder.uv(u, v);
+				builder.uv2(packedLightIn);
+				builder.endVertex();
+			};
+			
+			public void draw(VertexConsumer builder, Vector4f posVec, Vector3f normalVec, int packedLightIn, float r, float g, float b, float a, float u, float v, int overlay);
+		}
 	}
 }

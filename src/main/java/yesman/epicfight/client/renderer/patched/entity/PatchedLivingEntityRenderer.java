@@ -257,40 +257,6 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		for (PatchedLayer<E, T, M, ? extends RenderLayer<E, M>> patchedLayer : this.customLayers) {
 			patchedLayer.renderLayer(entity, entitypatch, null, poseStack, buffer, packedLight, poses, bob, f2, f7, partialTicks);
 		}
-		
-		/**
-		List<RenderLayer<E, M>> layers = new ArrayList<>(renderer.layers);
-		Iterator<RenderLayer<E, M>> iter = layers.iterator();
-		
-		while (iter.hasNext()) {
-			RenderLayer<E, M> layer = iter.next();
-			Class<?> layerClass = layer.getClass();
-			
-			if (layerClass.isAnonymousClass()) {
-				layerClass = layerClass.getSuperclass();
-			}
-			
-			if (this.patchedLayers.containsKey(layerClass)) {
-				this.patchedLayers.get(layerClass).renderLayer(0, entitypatch, entity, layer, poseStack, buffer, packedLight, poses, bob, f2, f7, partialTicks);
-				iter.remove();
-			}
-		}
-		
-		OpenMatrix4f modelMatrix = new OpenMatrix4f().mulFront(poses[entitypatch.getArmature().getRootJoint().getId()]);
-		OpenMatrix4f transpose = OpenMatrix4f.transpose(modelMatrix, null);
-		
-		poseStack.pushPose();
-		MathUtils.translateStack(poseStack, modelMatrix);
-		MathUtils.rotateStack(poseStack, transpose);
-		poseStack.translate(0.0D, this.getDefaultLayerHeightCorrection(), 0.0D);
-		poseStack.scale(-1.0F, -1.0F, 1.0F);
-		
-		layers.forEach((layer) -> {
-			layer.render(poseStack, buffer, packedLightIn, entityIn, entityIn.walkAnimation.position(), entityIn.walkAnimation.speed(), partialTicks, bob, f2, f7);
-		});
-		
-		poseStack.popPose();
-		**/
 	}
 	
 	public RenderType getRenderType(E entityIn, T entitypatch, LivingEntityRenderer<E, M> renderer, boolean isVisible, boolean isVisibleToPlayer, boolean isGlowing) {

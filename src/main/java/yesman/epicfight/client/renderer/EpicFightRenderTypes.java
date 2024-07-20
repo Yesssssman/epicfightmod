@@ -1,23 +1,22 @@
 package yesman.epicfight.client.renderer;
 
-import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalDouble;
+import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
-import com.google.common.collect.Maps;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.Util;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderType.CompositeState.CompositeStateBuilder;
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import net.minecraftforge.client.event.RegisterShadersEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import yesman.epicfight.main.EpicFightMod;
@@ -30,18 +29,41 @@ public class EpicFightRenderTypes extends RenderType {
 		super(null, null, null, -1, false, false, null, null);
 	}
 	
-	private static final Map<String, ShaderInstance> ANIMATION_APPLYING_SHADERS = Maps.newHashMap();
-	
-	private static final Function<RenderType, RenderType> TRIANGULATED_RENDER_TYPES = Util.memoize((renderType$1) -> {
+	private static final BiFunction<RenderType, Boolean, RenderType> TRIANGULATED_RENDER_TYPES = Util.memoize((renderType$1, transformShader) -> {
 		if (renderType$1 instanceof CompositeRenderType compositeRenderType) {
-			return new CompositeRenderType(renderType$1.name, renderType$1.format, VertexFormat.Mode.TRIANGLES, renderType$1.bufferSize(), renderType$1.affectsCrumbling(), renderType$1.sortOnUpload, compositeRenderType.state);
+			Optional<Supplier<ShaderInstance>> shaderInstanceOptional = compositeRenderType.state.shaderState.shader;
+			
+			if (transformShader && shaderInstanceOptional.isPresent()) {
+				CompositeStateBuilder builder = CompositeState.builder();
+				builder.setTextureState(compositeRenderType.state.textureState);
+				builder.setShaderState(new ShaderStateShard(() -> AnimationShaderTransformer.getAnimationShader(shaderInstanceOptional.get().get().getName())));
+				builder.setTransparencyState(compositeRenderType.state.transparencyState);
+				builder.setDepthTestState(compositeRenderType.state.depthTestState);
+				builder.setCullState(compositeRenderType.state.cullState);
+				builder.setLightmapState(compositeRenderType.state.lightmapState);
+				builder.setOverlayState(compositeRenderType.state.overlayState);
+				builder.setLayeringState(compositeRenderType.state.layeringState);
+				builder.setOutputState(compositeRenderType.state.outputState);
+				builder.setTexturingState(compositeRenderType.state.texturingState);
+				builder.setWriteMaskState(compositeRenderType.state.writeMaskState);
+				builder.setLineState(compositeRenderType.state.lineState);
+				builder.setColorLogicState(compositeRenderType.state.colorLogicState);
+				
+				return new CompositeRenderType(renderType$1.name, renderType$1.format, VertexFormat.Mode.TRIANGLES, renderType$1.bufferSize(), renderType$1.affectsCrumbling(), renderType$1.sortOnUpload, builder.createCompositeState(compositeRenderType.state.outlineProperty));
+			} else {
+				return new CompositeRenderType(renderType$1.name, renderType$1.format, VertexFormat.Mode.TRIANGLES, renderType$1.bufferSize(), renderType$1.affectsCrumbling(), renderType$1.sortOnUpload, compositeRenderType.state);
+			}
 		} else {
 			return renderType$1;
 		}
 	});
 	
 	public static RenderType getTriangulated(RenderType renderType) {
-		return TRIANGULATED_RENDER_TYPES.apply(renderType);
+		return getTriangulated(renderType, true);
+	}
+	
+	public static RenderType getTriangulated(RenderType renderType, boolean transformShader) {
+		return TRIANGULATED_RENDER_TYPES.apply(renderType, transformShader);
 	}
 	
 	private static final Function<ResourceLocation, RenderType> ENTITY_INDICATOR = Util.memoize((textureLocation) -> {
@@ -87,14 +109,5 @@ public class EpicFightRenderTypes extends RenderType {
 	
 	public static RenderType debugQuads() {
 		return DEBUG_QUADS;
-	}
-	
-	@SubscribeEvent(priority = EventPriority.LOWEST)
-	public static void registerShadersEvent(RegisterShadersEvent event) {
-		/**
-		event.registerShader(new ShaderInstance(event.getResourceProvider(), new ResourceLocation(EpicFightMod.MODID, "solid_model"), DefaultVertexFormat.POSITION_COLOR_NORMAL), (reloadedShader) -> {
-			EpicFightShaders.positionColorNormalShader = reloadedShader;
-		});
-		**/
 	}
 }

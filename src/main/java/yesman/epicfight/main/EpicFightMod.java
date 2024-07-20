@@ -120,7 +120,7 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *
  *  11. Fixed Player head go through the body when using demolition leap
  *  
- *  --- 20.8.1.2 ---
+ *  --- 20.8.1.1 ---
  *
  *  1. Fixed Freecam mod disabling Epic Fight battle mode (Release fix)
  *  

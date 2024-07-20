@@ -2176,7 +2176,7 @@ public class DatapackEditScreen extends Screen {
 			this.modelPreviewer.setColliderJoint(Armatures.BIPED.searchJointByName("Tool_R"));
 			
 			this.meshPopupBox = new PopupBox.MeshPopupBox(DatapackEditScreen.this, DatapackEditScreen.this.font, 0, 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.model"), (pair) -> {
-				if (this.armaturePopupBox._getValue() != null && pair.getSecond() != null && pair.getSecond().getMaxJointId() > this.armaturePopupBox._getValue().getJointNumber()) {
+				if (this.armaturePopupBox._getValue() != null && pair.getSecond() != null && pair.getSecond().getMaxJointCount() > this.armaturePopupBox._getValue().getJointNumber()) {
 					this.meshPopupBox._setValue(null);
 					throw new IllegalArgumentException("The model is incompatible with an armature!");
 				}
@@ -2185,7 +2185,7 @@ public class DatapackEditScreen extends Screen {
 			});
 			
 			this.armaturePopupBox = new PopupBox.ArmaturePopupBox(DatapackEditScreen.this, DatapackEditScreen.this.font, 0, 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.armature"), (pair) -> {
-				if (this.meshPopupBox._getValue() != null && pair.getSecond() != null && this.meshPopupBox._getValue().getMaxJointId() > pair.getSecond().getJointNumber()) {
+				if (this.meshPopupBox._getValue() != null && pair.getSecond() != null && this.meshPopupBox._getValue().getMaxJointCount() > pair.getSecond().getJointNumber()) {
 					this.armaturePopupBox._setValue(null);
 					throw new IllegalArgumentException("The armature is incompatible with a model!");
 				}
