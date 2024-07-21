@@ -83,8 +83,8 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	@Override
-	public void onJoinWorld(T entityIn, EntityJoinLevelEvent event) {
-		super.onJoinWorld(entityIn, event);
+	public void onJoinWorld(T entity, EntityJoinLevelEvent event) {
+		super.onJoinWorld(entity, event);
 		
 		CapabilitySkill skillCapability = this.getSkillCapability();
 		skillCapability.skillContainers[SkillSlots.BASIC_ATTACK.universalOrdinal()].setSkill(EpicFightSkills.BASIC_ATTACK);

@@ -192,11 +192,15 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  
  *  --- 20.8.1.8 ---
  *  
- *  1. Fixed Attribute grid not accepting negative value
+ *  1. Fixed Attribute grid not accepting negative values
  *  
  *  2. Corrected the attack speed of fists
  *  
  *  3. Fixed the crash in a dedicated server when Photon installed
+ *  
+ *  4. Fixed players not controllable after respawned
+ *  
+ *  5. Fixed weapon innate skills deactivated in dedicated server
  *  
  *  --- TO DO ---
  *  

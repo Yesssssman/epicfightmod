@@ -62,9 +62,6 @@ public class WorldEvents {
     }
 	
 	private static void synchronizeWorldData(ServerPlayer player) {
-		List<CompoundTag> skillParams = SkillManager.getSkillParams();
-		
-		SPDatapackSyncSkill skillParamsPacket = new SPDatapackSyncSkill(skillParams.size(), SPDatapackSync.Type.SKILL_PARAMS);
 		ServerPlayerPatch serverplayerpatch = EpicFightCapabilities.getEntityPatch(player, ServerPlayerPatch.class);
 		CapabilitySkill skillCapability = serverplayerpatch.getSkillCapability();
 		
@@ -74,6 +71,9 @@ public class WorldEvents {
 				skill.setSkill(SkillManager.getSkill(skill.getSkill().toString()), true);
 			}
 		}
+		
+		List<CompoundTag> skillParams = SkillManager.getSkillParams();
+		SPDatapackSyncSkill skillParamsPacket = new SPDatapackSyncSkill(skillParams.size(), SPDatapackSync.Type.SKILL_PARAMS);
 		
 		for (SkillCategory category : SkillCategory.ENUM_MANAGER.universalValues()) {
 			if (skillCapability.hasCategory(category)) {

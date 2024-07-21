@@ -6,6 +6,8 @@ import com.google.common.collect.Lists;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import yesman.epicfight.api.data.reloader.SkillManager;
+import yesman.epicfight.api.exception.DatapackException;
 
 public class SPDatapackSyncSkill extends SPDatapackSync {
 	private final List<String> learnedSkills = Lists.newArrayList();
@@ -37,8 +39,13 @@ public class SPDatapackSyncSkill extends SPDatapackSync {
 		
 		for (int i = 0; i < learnedSkillCount; i++) {
 			String skillName = buf.readUtf();
-			
 			msg.learnedSkills.add(skillName);
+		}
+		
+		try {
+			SkillManager.processServerPacket(msg);
+		} catch (Exception e) {
+			throw new DatapackException(e.getMessage());
 		}
 		
 		return msg;
