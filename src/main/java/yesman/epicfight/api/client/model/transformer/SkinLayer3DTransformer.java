@@ -30,7 +30,7 @@ import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
-import yesman.epicfight.api.client.model.SingleVertex;
+import yesman.epicfight.api.client.model.BlenderSingleVertexBuilder;
 import yesman.epicfight.api.client.model.transformer.HumanoidModelTransformer.PartTransformer;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.api.utils.math.Vec2f;
@@ -154,7 +154,7 @@ public class SkinLayer3DTransformer extends CustomizableCube {
 	}
 	
 	private static AnimatedMesh bakeMeshFromCubes(AbstractClientPlayer abstractClientPlayer, List<ModelPartition> partitions) {
-		List<SingleVertex> vertices = Lists.newArrayList();
+		List<BlenderSingleVertexBuilder> vertices = Lists.newArrayList();
 		Map<String, IntList> indices = Maps.newHashMap();
 		PoseStack poseStack = new PoseStack();
 		PartTransformer.IndexCounter indexCounter = new PartTransformer.IndexCounter();
@@ -167,10 +167,10 @@ public class SkinLayer3DTransformer extends CustomizableCube {
 			bake(abstractClientPlayer, poseStack, modelpartition, vertices, indices, indexCounter);
 		}
 		
-		return SingleVertex.loadVertexInformation(vertices, indices);
+		return BlenderSingleVertexBuilder.loadVertexInformation(vertices, indices);
 	}
 	
-	private static void bake(AbstractClientPlayer abstractClientPlayer, PoseStack poseStack, ModelPartition modelpartition, List<SingleVertex> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+	private static void bake(AbstractClientPlayer abstractClientPlayer, PoseStack poseStack, ModelPartition modelpartition, List<BlenderSingleVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 		modelpartition.vanillaModelPart.loadPose(modelpartition.vanillaModelPart.getInitialPose());
 		ModelPart part = modelpartition.vanillaModelPart;
 		
@@ -233,7 +233,7 @@ public class SkinLayer3DTransformer extends CustomizableCube {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName, CustomizableCube cube, List<SingleVertex> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+		public void bakeCube(PoseStack poseStack, String partName, CustomizableCube cube, List<BlenderSingleVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 			CustomizableCube.Polygon[] polygons = null;
 			
 			try {
@@ -254,7 +254,7 @@ public class SkinLayer3DTransformer extends CustomizableCube {
 				for (CustomizableCube.Vertex vertex : polygon.vertices) {
 					Vector4f pos = new Vector4f(vertex.pos.x, vertex.pos.y, vertex.pos.z, 1.0F);
 					pos.mul(poseStack.last().pose());
-					vertices.add(new SingleVertex()
+					vertices.add(new BlenderSingleVertexBuilder()
 						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
 						.setTextureCoordinate(new Vec2f(vertex.u, vertex.v))
@@ -280,7 +280,7 @@ public class SkinLayer3DTransformer extends CustomizableCube {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName, CustomizableCube cube, List<SingleVertex> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+		public void bakeCube(PoseStack poseStack, String partName, CustomizableCube cube, List<BlenderSingleVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 			List<AnimatedPolygon> xClipPolygons = Lists.<AnimatedPolygon>newArrayList();
 			List<AnimatedPolygon> xyClipPolygons = Lists.<AnimatedPolygon>newArrayList();
 			
@@ -398,7 +398,7 @@ public class SkinLayer3DTransformer extends CustomizableCube {
 						weight1 = weight2;
 					}
 					
-					vertices.add(new SingleVertex()
+					vertices.add(new BlenderSingleVertexBuilder()
 						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
 						.setTextureCoordinate(new Vec2f(vertex.u, vertex.v))
@@ -470,7 +470,7 @@ public class SkinLayer3DTransformer extends CustomizableCube {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName, CustomizableCube cube, List<SingleVertex> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+		public void bakeCube(PoseStack poseStack, String partName, CustomizableCube cube, List<BlenderSingleVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 			List<AnimatedPolygon> animatedPolygons = Lists.<AnimatedPolygon>newArrayList();
 			CustomizableCube.Polygon[] polygons = null;
 			
@@ -564,7 +564,7 @@ public class SkinLayer3DTransformer extends CustomizableCube {
 				
 				for (AnimatedVertex vertex : quad.animatedVertexPositions) {
 					Vector4f pos = new Vector4f(vertex.pos, 1.0F);
-					vertices.add(new SingleVertex()
+					vertices.add(new BlenderSingleVertexBuilder()
 						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
 						.setTextureCoordinate(new Vec2f(vertex.u, vertex.v))

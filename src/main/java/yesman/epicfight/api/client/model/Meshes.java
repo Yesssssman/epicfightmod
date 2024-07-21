@@ -1,5 +1,6 @@
 package yesman.epicfight.api.client.model;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -16,9 +17,9 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.ModLoader;
-import yesman.epicfight.api.client.model.Mesh.RawMesh;
+import yesman.epicfight.api.client.model.AnimatedMesh.AnimatedModelPart;
 import yesman.epicfight.api.client.model.Mesh.RenderProperties;
-import yesman.epicfight.api.client.model.VertexIndicator.AnimatedVertexIndicator;
+import yesman.epicfight.api.client.model.RawMesh.RawModelPart;
 import yesman.epicfight.api.forgeevent.ModelBuildEvent;
 import yesman.epicfight.api.model.JsonModelLoader;
 import yesman.epicfight.client.mesh.CreeperMesh;
@@ -40,11 +41,11 @@ public class Meshes implements PreparableReloadListener {
 	public static final Meshes INSTANCE = new Meshes();
 	
 	@FunctionalInterface
-	public interface MeshContructor<V extends VertexIndicator, M extends Mesh<V>> {
-		M invoke(Map<String, float[]> arrayMap, M parent, RenderProperties properties, Map<String, ModelPart<V>> parts);
+	public interface MeshContructor<P extends ModelPart<V>, V extends BlenderVertexBuilder, M extends Mesh<P, V>> {
+		M invoke(Map<String, float[]> arrayMap, Map<String, List<V>> parts, M parent, RenderProperties properties);
 	}
-		
-	private static final BiMap<ResourceLocation, Mesh<?>> MESHES = HashBiMap.create();
+	
+	private static final BiMap<ResourceLocation, Mesh<?, ?>> MESHES = HashBiMap.create();
 	
 	public static HumanoidMesh ALEX;
 	public static HumanoidMesh BIPED;
@@ -117,7 +118,7 @@ public class Meshes implements PreparableReloadListener {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <M extends RawMesh> M getOrCreateRawMesh(ResourceManager rm, ResourceLocation rl, MeshContructor<VertexIndicator, M> constructor) {
+	public static <M extends RawMesh> M getOrCreateRawMesh(ResourceManager rm, ResourceLocation rl, MeshContructor<RawModelPart, BlenderVertexBuilder, M> constructor) {
 		return (M) MESHES.computeIfAbsent(rl, (key) -> {
 			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, wrapLocation(rl));
 			return jsonModelLoader.loadMesh(constructor);
@@ -125,27 +126,27 @@ public class Meshes implements PreparableReloadListener {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <M extends AnimatedMesh> M getOrCreateAnimatedMesh(ResourceManager rm, ResourceLocation rl, MeshContructor<AnimatedVertexIndicator, M> constructor) {
+	public static <M extends AnimatedMesh> M getOrCreateAnimatedMesh(ResourceManager rm, ResourceLocation rl, MeshContructor<AnimatedModelPart, BlenderAnimatedVertexBuilder, M> constructor) {
 		return (M) MESHES.computeIfAbsent(rl, (key) -> {
 			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, wrapLocation(rl));
 			return jsonModelLoader.loadAnimatedMesh(constructor);
 		});
 	}
 	
-	public static ResourceLocation getKey(Mesh<?> mesh) {
+	public static ResourceLocation getKey(Mesh<?, ?> mesh) {
 		return MESHES.inverse().get(mesh);
 	}
 	
-	public static Mesh<?> getMeshOrNull(ResourceLocation rl) {
+	public static Mesh<?, ?> getMeshOrNull(ResourceLocation rl) {
 		return MESHES.get(rl);
 	}
 	
-	public static void addMesh(ResourceLocation rl, Mesh<?> mesh) {
+	public static void addMesh(ResourceLocation rl, Mesh<?, ?> mesh) {
 		MESHES.put(rl, mesh);
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T extends Mesh<?>> Set<Map.Entry<ResourceLocation, T>> entries(Class<T> filterInstance) {
+	public static <T extends Mesh<?, ?>> Set<Map.Entry<ResourceLocation, T>> entries(Class<T> filterInstance) {
 		return MESHES.entrySet().stream().filter((entry) -> filterInstance.isAssignableFrom(entry.getValue().getClass())).map((entry) -> (Map.Entry<ResourceLocation, T>)entry).collect(Collectors.toSet());
 	}
 	

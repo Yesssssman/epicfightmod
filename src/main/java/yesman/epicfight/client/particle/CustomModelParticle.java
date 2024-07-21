@@ -1,7 +1,10 @@
 package yesman.epicfight.client.particle;
 
+import org.joml.Quaternionf;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
+
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -13,10 +16,8 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.Mesh;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
 
-import org.joml.Quaternionf;
-
 @OnlyIn(Dist.CLIENT)
-public abstract class CustomModelParticle<M extends Mesh<?>> extends Particle {
+public abstract class CustomModelParticle<M extends Mesh<?, ?>> extends Particle {
 	protected final M particleMesh;
 	protected float pitch;
 	protected float pitchO;
@@ -35,6 +36,7 @@ public abstract class CustomModelParticle<M extends Mesh<?>> extends Particle {
 		PoseStack poseStack = new PoseStack();
 		this.setupPoseStack(poseStack, camera, partialTicks);
 		this.prepareDraw(poseStack, partialTicks);
+		
 		this.particleMesh.drawRawModelNoLighting(poseStack, vertexConsumer, this.getLightColor(partialTicks), this.rCol, this.gCol, this.bCol, this.alpha, OverlayTexture.NO_OVERLAY);
 	}
 	

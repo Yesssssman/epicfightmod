@@ -1,43 +1,46 @@
 package yesman.epicfight.client.mesh;
 
+import java.util.List;
 import java.util.Map;
 
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.BlenderAnimatedVertexBuilder;
 import yesman.epicfight.api.client.model.Meshes;
-import yesman.epicfight.api.client.model.ModelPart;
-import yesman.epicfight.api.client.model.VertexIndicator.AnimatedVertexIndicator;
 
+@OnlyIn(Dist.CLIENT)
 public class HumanoidMesh extends AnimatedMesh {
-	public final ModelPart<AnimatedVertexIndicator> head;
-	public final ModelPart<AnimatedVertexIndicator> torso;
-	public final ModelPart<AnimatedVertexIndicator> leftArm;
-	public final ModelPart<AnimatedVertexIndicator> rightArm;
-	public final ModelPart<AnimatedVertexIndicator> leftLeg;
-	public final ModelPart<AnimatedVertexIndicator> rightLeg;
-	public final ModelPart<AnimatedVertexIndicator> hat;
-	public final ModelPart<AnimatedVertexIndicator> jacket;
-	public final ModelPart<AnimatedVertexIndicator> leftSleeve;
-	public final ModelPart<AnimatedVertexIndicator> rightSleeve;
-	public final ModelPart<AnimatedVertexIndicator> leftPants;
-	public final ModelPart<AnimatedVertexIndicator> rightPants;
+	public final AnimatedModelPart head;
+	public final AnimatedModelPart torso;
+	public final AnimatedModelPart leftArm;
+	public final AnimatedModelPart rightArm;
+	public final AnimatedModelPart leftLeg;
+	public final AnimatedModelPart rightLeg;
+	public final AnimatedModelPart hat;
+	public final AnimatedModelPart jacket;
+	public final AnimatedModelPart leftSleeve;
+	public final AnimatedModelPart rightSleeve;
+	public final AnimatedModelPart leftPants;
+	public final AnimatedModelPart rightPants;
 	
-	public HumanoidMesh(Map<String, float[]> arrayMap, AnimatedMesh parent, RenderProperties properties, Map<String, ModelPart<AnimatedVertexIndicator>> parts) {
-		super(arrayMap, parent, properties, parts);
+	public HumanoidMesh(Map<String, float[]> arrayMap, Map<String, List<BlenderAnimatedVertexBuilder>> parts, AnimatedMesh parent, RenderProperties properties) {
+		super(arrayMap, parts, parent, properties);
 		
-		this.head = this.getOrLogException(parts, "head");
-		this.torso = this.getOrLogException(parts, "torso");
-		this.leftArm = this.getOrLogException(parts, "leftArm");
-		this.rightArm = this.getOrLogException(parts, "rightArm");
-		this.leftLeg = this.getOrLogException(parts, "leftLeg");
-		this.rightLeg = this.getOrLogException(parts, "rightLeg");
+		this.head = this.getOrLogException(this.parts, "head");
+		this.torso = this.getOrLogException(this.parts, "torso");
+		this.leftArm = this.getOrLogException(this.parts, "leftArm");
+		this.rightArm = this.getOrLogException(this.parts, "rightArm");
+		this.leftLeg = this.getOrLogException(this.parts, "leftLeg");
+		this.rightLeg = this.getOrLogException(this.parts, "rightLeg");
 		
-		this.hat = this.getOrLogException(parts, "hat");
-		this.jacket = this.getOrLogException(parts, "jacket");
-		this.leftSleeve = this.getOrLogException(parts, "leftSleeve");
-		this.rightSleeve = this.getOrLogException(parts, "rightSleeve");
-		this.leftPants = this.getOrLogException(parts, "leftPants");
-		this.rightPants = this.getOrLogException(parts, "rightPants");
+		this.hat = this.getOrLogException(this.parts, "hat");
+		this.jacket = this.getOrLogException(this.parts, "jacket");
+		this.leftSleeve = this.getOrLogException(this.parts, "leftSleeve");
+		this.rightSleeve = this.getOrLogException(this.parts, "rightSleeve");
+		this.leftPants = this.getOrLogException(this.parts, "leftPants");
+		this.rightPants = this.getOrLogException(this.parts, "rightPants");
 	}
 	
 	public AnimatedMesh getHumanoidArmorModel(EquipmentSlot slot) {

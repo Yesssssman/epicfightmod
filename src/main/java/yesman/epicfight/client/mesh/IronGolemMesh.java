@@ -1,29 +1,32 @@
 package yesman.epicfight.client.mesh;
 
+import java.util.List;
 import java.util.Map;
 
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
-import yesman.epicfight.api.client.model.ModelPart;
-import yesman.epicfight.api.client.model.VertexIndicator.AnimatedVertexIndicator;
+import yesman.epicfight.api.client.model.BlenderAnimatedVertexBuilder;
 
+@OnlyIn(Dist.CLIENT)
 public class IronGolemMesh extends AnimatedMesh {
-	public final ModelPart<AnimatedVertexIndicator> head;
-	public final ModelPart<AnimatedVertexIndicator> chest;
-	public final ModelPart<AnimatedVertexIndicator> core;
-	public final ModelPart<AnimatedVertexIndicator> leftArm;
-	public final ModelPart<AnimatedVertexIndicator> rightArm;
-	public final ModelPart<AnimatedVertexIndicator> leftLeg;
-	public final ModelPart<AnimatedVertexIndicator> rightLeg;
+	public final AnimatedModelPart head;
+	public final AnimatedModelPart chest;
+	public final AnimatedModelPart core;
+	public final AnimatedModelPart leftArm;
+	public final AnimatedModelPart rightArm;
+	public final AnimatedModelPart leftLeg;
+	public final AnimatedModelPart rightLeg;
 	
-	public IronGolemMesh(Map<String, float[]> arrayMap, AnimatedMesh parent, RenderProperties properties, Map<String, ModelPart<AnimatedVertexIndicator>> parts) {
-		super(arrayMap, parent, properties, parts);
+	public IronGolemMesh(Map<String, float[]> arrayMap, Map<String, List<BlenderAnimatedVertexBuilder>> parts, AnimatedMesh parent, RenderProperties properties) {
+		super(arrayMap, parts, parent, properties);
 		
-		this.head = this.getOrLogException(parts, "head");
-		this.chest = this.getOrLogException(parts, "chest");
-		this.core = this.getOrLogException(parts, "core");
-		this.leftArm = this.getOrLogException(parts, "leftArm");
-		this.rightArm = this.getOrLogException(parts, "rightArm");
-		this.leftLeg = this.getOrLogException(parts, "leftLeg");
-		this.rightLeg = this.getOrLogException(parts, "rightLeg");
+		this.head = this.getOrLogException(this.parts, "head");
+		this.chest = this.getOrLogException(this.parts, "chest");
+		this.core = this.getOrLogException(this.parts, "core");
+		this.leftArm = this.getOrLogException(this.parts, "leftArm");
+		this.rightArm = this.getOrLogException(this.parts, "rightArm");
+		this.leftLeg = this.getOrLogException(this.parts, "leftLeg");
+		this.rightLeg = this.getOrLogException(this.parts, "rightLeg");
 	}
 }

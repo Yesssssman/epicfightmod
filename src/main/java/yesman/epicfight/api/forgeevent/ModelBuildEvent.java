@@ -9,12 +9,14 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.fml.event.IModBusEvent;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.AnimatedMesh.AnimatedModelPart;
+import yesman.epicfight.api.client.model.BlenderAnimatedVertexBuilder;
+import yesman.epicfight.api.client.model.BlenderVertexBuilder;
 import yesman.epicfight.api.client.model.Mesh;
-import yesman.epicfight.api.client.model.Mesh.RawMesh;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.client.model.Meshes.MeshContructor;
-import yesman.epicfight.api.client.model.VertexIndicator;
-import yesman.epicfight.api.client.model.VertexIndicator.AnimatedVertexIndicator;
+import yesman.epicfight.api.client.model.RawMesh;
+import yesman.epicfight.api.client.model.RawMesh.RawModelPart;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.gameasset.Armatures.ArmatureContructor;
@@ -37,16 +39,16 @@ public abstract class ModelBuildEvent<T> extends Event implements IModBusEvent {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public static class MeshBuild extends ModelBuildEvent<Mesh<?>> {
-		public MeshBuild(ResourceManager resourceManager, Map<ResourceLocation, Mesh<?>> registerMap) {
+	public static class MeshBuild extends ModelBuildEvent<Mesh<?, ?>> {
+		public MeshBuild(ResourceManager resourceManager, Map<ResourceLocation, Mesh<?, ?>> registerMap) {
 			super(resourceManager, registerMap);
 		}
 		
-		public <M extends RawMesh> M getRaw(String modid, String path, MeshContructor<VertexIndicator, M> constructor) {
+		public <M extends RawMesh> M getRaw(String modid, String path, MeshContructor<RawModelPart, BlenderVertexBuilder, M> constructor) {
 			return Meshes.getOrCreateRawMesh(this.resourceManager, new ResourceLocation(modid, path), constructor);
 		}
 		
-		public <M extends AnimatedMesh> M getAnimated(String modid, String path, MeshContructor<AnimatedVertexIndicator, M> constructor) {
+		public <M extends AnimatedMesh> M getAnimated(String modid, String path, MeshContructor<AnimatedModelPart, BlenderAnimatedVertexBuilder, M> constructor) {
 			return Meshes.getOrCreateAnimatedMesh(this.resourceManager, new ResourceLocation(modid, path), constructor);
 		}
 	}

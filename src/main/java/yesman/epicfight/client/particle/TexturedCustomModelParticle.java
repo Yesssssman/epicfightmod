@@ -7,7 +7,7 @@ import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.client.model.Mesh.RawMesh;
+import yesman.epicfight.api.client.model.RawMesh;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class TexturedCustomModelParticle extends CustomModelParticle<RawMesh> {

@@ -102,7 +102,7 @@ public class AnimationShaderTransformer {
 						//Replace vertex position
 						replaceLastMatching(sb, "gl_Position = .*Position.*;", "vec4 totalLocalPos = vec4(0.0);\r\n"
 																			 + "    \r\n"
-																			 + "    for(int i=0;i<3;i++)\r\n"
+																			 + "    for(int i=0;i<" + MAX_WEIGHTS + ";i++)\r\n"
 																			 + "    {\r\n"
 																			 + "        mat4 jointTransform = Poses[Joints[i]];\r\n"
 																			 + "        vec4 posePosition = jointTransform * vec4(Position, 1.0);\r\n"
@@ -114,7 +114,7 @@ public class AnimationShaderTransformer {
 						//Replace vertex normal
 						replaceLastMatching(sb, "normal = .*Normal.*;", "vec4 totalNormalPos = vec4(0.0);\r\n"
 																	  + "    \r\n"
-																	  + "    for(int i=0;i<3;i++)\r\n"
+																	  + "    for(int i=0;i<" + MAX_WEIGHTS + ";i++)\r\n"
 																	  + "    {\r\n"
 																	  + "        mat4 jointTransform = Poses[Joints[i]];\r\n"
 																	  + "        vec4 posePosition = jointTransform * vec4(Normal, 1.0);\r\n"

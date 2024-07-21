@@ -11,12 +11,11 @@ import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.client.model.VertexIndicator.AnimatedVertexIndicator;
 import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec3f;
 
 @OnlyIn(Dist.CLIENT)
-public class SingleVertex {
+public class BlenderSingleVertexBuilder {
 	private Vec3f position;
 	private Vec3f normal;
 	private Vec2f textureCoordinate;
@@ -24,45 +23,45 @@ public class SingleVertex {
 	private Vec3f effectiveJointWeights;
 	private int effectiveJointNumber;
 	
-	public SingleVertex() {
+	public BlenderSingleVertexBuilder() {
 		this.position = null;
 		this.normal = null;
 		this.textureCoordinate = null;
 	}
 	
-	public SingleVertex(SingleVertex vertex) {
+	public BlenderSingleVertexBuilder(BlenderSingleVertexBuilder vertex) {
 		this.position = vertex.position;
 		this.effectiveJointIDs = vertex.effectiveJointIDs;
 		this.effectiveJointWeights = vertex.effectiveJointWeights;
 		this.effectiveJointNumber = vertex.effectiveJointNumber;
 	}
 	
-	public SingleVertex setPosition(Vec3f position) {
+	public BlenderSingleVertexBuilder setPosition(Vec3f position) {
 		this.position = position;
 		return this;
 	}
 	
-	public SingleVertex setNormal(Vec3f vector) {
+	public BlenderSingleVertexBuilder setNormal(Vec3f vector) {
 		this.normal = vector;
 		return this;
 	}
 	
-	public SingleVertex setTextureCoordinate(Vec2f vector) {
+	public BlenderSingleVertexBuilder setTextureCoordinate(Vec2f vector) {
 		this.textureCoordinate = vector;
 		return this;
 	}
 	
-	public SingleVertex setEffectiveJointIDs(Vec3f effectiveJointIDs) {
+	public BlenderSingleVertexBuilder setEffectiveJointIDs(Vec3f effectiveJointIDs) {
 		this.effectiveJointIDs = effectiveJointIDs;
 		return this;
 	}
 	
-	public SingleVertex setEffectiveJointWeights(Vec3f effectiveJointWeights) {
+	public BlenderSingleVertexBuilder setEffectiveJointWeights(Vec3f effectiveJointWeights) {
 		this.effectiveJointWeights = effectiveJointWeights;
 		return this;
 	}
 	
-	public SingleVertex setEffectiveJointNumber(int count) {
+	public BlenderSingleVertexBuilder setEffectiveJointNumber(int count) {
 		this.effectiveJointNumber = count;
 		return this;
 	}
@@ -77,7 +76,7 @@ public class SingleVertex {
 		}
 	}
 	
-	public static AnimatedMesh loadVertexInformation(List<SingleVertex> vertices, Map<String, IntList> indices) {
+	public static AnimatedMesh loadVertexInformation(List<BlenderSingleVertexBuilder> vertices, Map<String, IntList> indices) {
 		FloatList positions = new FloatArrayList();
 		FloatList normals = new FloatArrayList();
 		FloatList texCoords = new FloatArrayList();
@@ -86,7 +85,7 @@ public class SingleVertex {
 		IntList affectCountList = new IntArrayList();
 		
 		for (int i = 0; i < vertices.size(); i++) {
-			SingleVertex vertex = vertices.get(i);
+			BlenderSingleVertexBuilder vertex = vertices.get(i);
 			Vec3f position = vertex.position;
 			Vec3f normal = vertex.normal;
 			Vec2f texCoord = vertex.textureCoordinate;
@@ -133,7 +132,7 @@ public class SingleVertex {
 		float[] jointWeightList = jointWeights.toFloatArray();
 		int[] affectJointCounts = affectCountList.toIntArray();
 		Map<String, float[]> arrayMap = Maps.newHashMap();
-		Map<String, ModelPart<AnimatedVertexIndicator>> meshMap = Maps.newHashMap();
+		Map<String, List<BlenderAnimatedVertexBuilder>> meshMap = Maps.newHashMap();
 		
 		arrayMap.put("positions", positionList);
 		arrayMap.put("normals", normalList);
@@ -141,10 +140,10 @@ public class SingleVertex {
 		arrayMap.put("weights", jointWeightList);
 		
 		for (Map.Entry<String, IntList> e : indices.entrySet()) {
-			meshMap.put(e.getKey(), new ModelPart<>(VertexIndicator.createAnimated(e.getValue().toIntArray(), affectJointCounts, animationIndexList)));
+			meshMap.put(e.getKey(), BlenderVertexBuilder.createAnimated(e.getValue().toIntArray(), affectJointCounts, animationIndexList));
 		}
 		
-		return new AnimatedMesh(arrayMap, null, Mesh.RenderProperties.create(), meshMap);
+		return new AnimatedMesh(arrayMap, meshMap, null, Mesh.RenderProperties.create());
 	}
 	
 	public enum State {

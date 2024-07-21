@@ -1,27 +1,30 @@
 package yesman.epicfight.client.mesh;
 
+import java.util.List;
 import java.util.Map;
 
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
-import yesman.epicfight.api.client.model.ModelPart;
-import yesman.epicfight.api.client.model.VertexIndicator.AnimatedVertexIndicator;
+import yesman.epicfight.api.client.model.BlenderAnimatedVertexBuilder;
 
+@OnlyIn(Dist.CLIENT)
 public class RavagerMesh extends AnimatedMesh {
-	public final ModelPart<AnimatedVertexIndicator> head;
-	public final ModelPart<AnimatedVertexIndicator> body;
-	public final ModelPart<AnimatedVertexIndicator> leftFrontLeg;
-	public final ModelPart<AnimatedVertexIndicator> rightFrontLeg;
-	public final ModelPart<AnimatedVertexIndicator> leftBackLeg;
-	public final ModelPart<AnimatedVertexIndicator> rightBackLeg;
+	public final AnimatedModelPart head;
+	public final AnimatedModelPart body;
+	public final AnimatedModelPart leftFrontLeg;
+	public final AnimatedModelPart rightFrontLeg;
+	public final AnimatedModelPart leftBackLeg;
+	public final AnimatedModelPart rightBackLeg;
 	
-	public RavagerMesh(Map<String, float[]> arrayMap, AnimatedMesh parent, RenderProperties properties, Map<String, ModelPart<AnimatedVertexIndicator>> parts) {
-		super(arrayMap, parent, properties, parts);
+	public RavagerMesh(Map<String, float[]> arrayMap, Map<String, List<BlenderAnimatedVertexBuilder>> parts, AnimatedMesh parent, RenderProperties properties) {
+		super(arrayMap, parts, parent, properties);
 		
-		this.head = this.getOrLogException(parts, "head");
-		this.body = this.getOrLogException(parts, "body");
-		this.leftFrontLeg = this.getOrLogException(parts, "leftFrontLeg");
-		this.rightFrontLeg = this.getOrLogException(parts, "rightFrontLeg");
-		this.leftBackLeg = this.getOrLogException(parts, "leftBackLeg");
-		this.rightBackLeg = this.getOrLogException(parts, "rightBackLeg");
+		this.head = this.getOrLogException(this.parts, "head");
+		this.body = this.getOrLogException(this.parts, "body");
+		this.leftFrontLeg = this.getOrLogException(this.parts, "leftFrontLeg");
+		this.rightFrontLeg = this.getOrLogException(this.parts, "rightFrontLeg");
+		this.leftBackLeg = this.getOrLogException(this.parts, "leftBackLeg");
+		this.rightBackLeg = this.getOrLogException(this.parts, "rightBackLeg");
 	}
 }

@@ -43,12 +43,12 @@ public class PatchedVillagerProfessionLayer extends ModelRenderLayer<ZombieVilla
 	        
 	        if (!(typeHat == VillagerMetaDataSection.Hat.NONE || typeHat == VillagerMetaDataSection.Hat.PARTIAL && professionHat != VillagerMetaDataSection.Hat.FULL)
 	        		|| !entityliving.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
-	        	this.mesh.head.hidden = true;
-	        	this.mesh.hat.hidden = true;
+	        	this.mesh.head.setHidden(true);
+	        	this.mesh.hat.setHidden(true);
 	        }
 	        
 	        if (!entitypatch.getOriginal().getItemBySlot(EquipmentSlot.LEGS).isEmpty()) {
-				this.mesh.jacket.hidden = true;
+				this.mesh.jacket.setHidden(true);
 			}
 	        
 			VertexConsumer builder1 = buffer.getBuffer(EpicFightRenderTypes.getTriangulated(RenderType.entityCutoutNoCull(vanillaLayer.getResourceLocation("type", BuiltInRegistries.VILLAGER_TYPE.getKey(villagerdata.getType())))));

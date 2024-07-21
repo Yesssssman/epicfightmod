@@ -8,9 +8,9 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.client.model.Mesh.RawMesh;
-import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.api.client.model.Meshes;
+import yesman.epicfight.api.client.model.RawMesh;
+import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
 public class AirBurstParticle extends TexturedCustomModelParticle {

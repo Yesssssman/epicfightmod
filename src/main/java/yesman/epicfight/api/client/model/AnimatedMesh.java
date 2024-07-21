@@ -1,127 +1,123 @@
 package yesman.epicfight.api.client.model;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 
-import org.joml.Matrix3f;
-import org.joml.Matrix4f;
-import org.joml.Vector3f;
-import org.joml.Vector4f;
+import javax.annotation.Nullable;
 
+import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
+import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
-import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderType.CompositeRenderType;
+import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import yesman.epicfight.api.client.model.VertexIndicator.AnimatedVertexIndicator;
-import yesman.epicfight.api.model.Armature;
+import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.client.model.AnimatedMesh.AnimatedModelPart;
 import yesman.epicfight.api.model.JsonModelLoader;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec4f;
+import yesman.epicfight.client.renderer.AnimationShaderInstance;
 import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
-public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
-	public static final ModelPart<AnimatedVertexIndicator> EMPTY = new ModelPart<> (null, null);
+public class AnimatedMesh extends Mesh<AnimatedModelPart, BlenderAnimatedVertexBuilder> {
+	private final int maxJointCount = -1;
+	protected final float[] weights;
 	
-	//final float[] weights;
-	private final int maxJointCount;
-	
-	public AnimatedMesh(Map<String, float[]> arrayMap, AnimatedMesh parent, RenderProperties properties, Map<String, ModelPart<AnimatedVertexIndicator>> parts) {
-		super(arrayMap, parent, properties, parts);
+	public AnimatedMesh(@Nullable Map<String, float[]> arrayMap, @Nullable Map<String, List<BlenderAnimatedVertexBuilder>> partBuilders, @Nullable AnimatedMesh parent, RenderProperties properties) {
+		super(arrayMap, partBuilders, parent, properties);
 		
-		//this.weights = (parent == null) ? arrayMap.get("weights") : parent.weights;
-		int maxJointId = 0;
-		
-		for (Map.Entry<String, ModelPart<AnimatedVertexIndicator>> entry : parts.entrySet()) {
-			for (AnimatedVertexIndicator vi : entry.getValue().getVertices()) {
-				for (int ji : vi.joint) {
-					if (ji > maxJointId) {
-						maxJointId = ji;
-					}
-				}
-			}
-		}
-		
-		this.maxJointCount = maxJointId;
+		this.weights = parent == null ? arrayMap.get("weights") : parent.uvs;
 	}
 	
 	@Override
-	protected ModelPart<AnimatedVertexIndicator> getOrLogException(Map<String, ModelPart<AnimatedVertexIndicator>> parts, String name) {
+	protected Map<String, AnimatedModelPart> createModelPart(Map<String, List<BlenderAnimatedVertexBuilder>> partBuilders) {
+		Map<String, AnimatedModelPart> parts = Maps.newHashMap();
+		
+		partBuilders.forEach((partName, vertexBuilder) -> {
+			parts.put(partName, new AnimatedModelPart(vertexBuilder));
+		});
+		
+		return parts;
+	}
+	
+	@Override
+	protected AnimatedModelPart getOrLogException(Map<String, AnimatedModelPart> parts, String name) {
 		if (!parts.containsKey(name)) {
 			EpicFightMod.LOGGER.debug("Cannot find the mesh part named " + name + " in " + this.getClass().getCanonicalName());
-			return EMPTY;
+			return null;
 		}
 		
 		return parts.get(name);
 	}
 	
-	public void draw(PoseStack poseStack, MultiBufferSource bufferSource, RenderType renderType, int packedLight, float r, float g, float b, float a, int overlay, Armature armature, OpenMatrix4f[] poses) {
-		Matrix4f matrix4f = poseStack.last().pose();
-		Matrix3f matrix3f = poseStack.last().normal();
-		OpenMatrix4f[] posesNoTranslation = new OpenMatrix4f[poses.length];
+	public void draw(PoseStack poseStack, RenderType renderType, BufferBuilder builder, Mesh.DrawingFunction drawingFunction, int packedLight, float r, float g, float b, float a, int overlay, OpenMatrix4f[] poses) {
+		Optional<Supplier<ShaderInstance>> renderTypeShader = ((CompositeRenderType)renderType).state.shaderState.shader;
 		
-		for (int i = 0; i < poses.length; i++) {
-			if (armature != null) {
-				posesNoTranslation[i] = OpenMatrix4f.mul(poses[i], armature.searchJointById(i).getToOrigin(), null).removeTranslation();
-			} else {
-				posesNoTranslation[i] = poses[i].removeTranslation();
-			}
-		}
-		
-		for (ModelPart<AnimatedVertexIndicator> part : this.parts.values()) {
-			if (!part.hidden) {
-				for (AnimatedVertexIndicator vi : part.getVertices()) {
-					int pos = vi.position * 3;
-					int norm = vi.normal * 3;
-					int uv = vi.uv * 2;
-					
-					Vec4f position = new Vec4f(this.positions[pos], this.positions[pos + 1], this.positions[pos + 2], 1.0F);
-					Vec4f normal = new Vec4f(this.normals[norm], this.normals[norm + 1], this.normals[norm + 2], 1.0F);
-					/**
-					Vec4f totalPos = new Vec4f(0.0F, 0.0F, 0.0F, 0.0F);
-					Vec4f totalNorm = new Vec4f(0.0F, 0.0F, 0.0F, 0.0F);
-					
-					for (int i = 0; i < vi.joint.size(); i++) {
-						int jointIndex = vi.joint.getInt(i);
-						int weightIndex = vi.weight.getInt(i);
-						float weight = this.weights[weightIndex];
-						
-						if (armature != null) {
-							Vec4f.add(OpenMatrix4f.transform(OpenMatrix4f.mul(poses[jointIndex], armature.searchJointById(jointIndex).getToOrigin(), null), position, null).scale(weight), totalPos, totalPos);
-						} else {
-							Vec4f.add(OpenMatrix4f.transform(poses[jointIndex], position, null).scale(weight), totalPos, totalPos);
-						}
-
-						Vec4f.add(OpenMatrix4f.transform(posesNoTranslation[jointIndex], normal, null).scale(weight), totalNorm, totalNorm);
-					}**/
-					
-					Vector4f posVec = new Vector4f(totalPos.x, totalPos.y, totalPos.z, 1.0F);
-					Vector3f normVec = new Vector3f(totalNorm.x, totalNorm.y, totalNorm.z);
-					posVec.mul(matrix4f);
-					normVec.mul(matrix3f);
-					
-					drawingFunction.draw(builder, posVec, normVec, packedLight, r, g, b, a, this.uvs[uv], this.uvs[uv + 1], overlay);
+		if (renderTypeShader.isPresent()) {
+			ShaderInstance shaderInstance = renderTypeShader.get().get();
+			
+			if (shaderInstance instanceof AnimationShaderInstance animationShaderInstance) {
+				if (animationShaderInstance.POSES != null) {
+					for (int i = 0; i < poses.length; i++) {
+						animationShaderInstance.POSES[i].set(OpenMatrix4f.exportToMojangMatrix(poses[i]));
+					}
 				}
+			} else {
+				throw new RuntimeException(renderType.toString() + " is not using animation shader");
 			}
 		}
+		
+		
+		for (AnimatedModelPart part : this.parts.values()) {
+			part.draw(poseStack, renderType, builder, drawingFunction, packedLight, r, g, b, a, overlay, poses);
+		}
+		
+		renderType.end(builder, RenderSystem.getVertexSorting());
 	}
 	
-	/**
-	public void drawModelWithPose(PoseStack poseStack, VertexConsumer builder, int packedLight, float r, float g, float b, float a, int overlayCoord, Armature armature, OpenMatrix4f[] poses) {
-		this.draw(poseStack, builder, packedLight, r, g, b, a, overlayCoord, armature, poses);
+	@OnlyIn(Dist.CLIENT)
+	public class AnimatedModelPart extends ModelPart<BlenderAnimatedVertexBuilder> {
+		public AnimatedModelPart(List<BlenderAnimatedVertexBuilder> animatedMeshPartList) {
+			super(animatedMeshPartList);
+		}
+		
+		public void draw(PoseStack poseStack, RenderType renderType, BufferBuilder builder, Mesh.DrawingFunction drawingFunction, int packedLight, float r, float g, float b, float a, int overlayCoord, OpenMatrix4f[] poses) {
+			if (this.isHidden()) {
+				return;
+			}
+			
+			//GlStateManager._vertexAttribPointer(overlayCoord, overlayCoord, overlayCoord, isHidden, packedLight, overlayCoord);
+			
+			/**
+			Matrix4f matrix4f = poseStack.last().pose();
+			Matrix3f matrix3f = poseStack.last().normal();
+			
+			for (BlenderVertexBuilder vi : this.getVertices()) {
+				int pos = vi.position * 3;
+				int norm = vi.normal * 3;
+				int uv = vi.uv * 2;
+				Vector4f posVec = new Vector4f(positions[pos], positions[pos + 1], positions[pos + 2], 1.0F);
+				Vector3f normVec = new Vector3f(normals[norm], normals[norm + 1], normals[norm + 2]);
+				posVec.mul(matrix4f);
+				normVec.mul(matrix3f);
+				drawingFunction.draw(builder, posVec, normVec, packedLightIn, r, g, b, a, uvs[uv], uvs[uv + 1], overlayCoord);
+			}
+			**/
+		}
 	}
-	
-	public void drawWithPoseNoTexture(PoseStack poseStack, VertexConsumer builder, int packedLight, float r, float g, float b, float a, int overlayCoord, OpenMatrix4f[] poses) {
-		this.draw(poseStack, builder, packedLight, r, g, b, a, overlayCoord, null, poses);
-	}
-	**/
 	
 	public JsonObject toJsonObject() {
 		JsonObject root = new JsonObject();
@@ -151,16 +147,16 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 		int[] indices = new int[this.totalVertices * 3];
 		int[] vcounts = new int[positions.length / 3];
 		IntList vIndexList = new IntArrayList();
-		Int2ObjectMap<AnimatedVertexIndicator> positionMap = new Int2ObjectOpenHashMap<>();
+		Int2ObjectMap<BlenderAnimatedVertexBuilder> positionMap = new Int2ObjectOpenHashMap<>();
 		int[] vIndices;
 		int i = 0;
 		
-		for (ModelPart<AnimatedVertexIndicator> part : this.parts.values()) {
-			for (AnimatedVertexIndicator vertexIndicator : part.getVertices()) {
+		for (AnimatedModelPart part : this.parts.values()) {
+			for (BlenderAnimatedVertexBuilder vertexIndicator : part.getVertices()) {
 				indices[i * 3] = vertexIndicator.position;
 				indices[i * 3 + 1] = vertexIndicator.uv;
 				indices[i * 3 + 2] = vertexIndicator.normal;
-				vcounts[vertexIndicator.position] = vertexIndicator.joint.size();
+				vcounts[vertexIndicator.position] = vertexIndicator.count;
 				positionMap.put(vertexIndicator.position, vertexIndicator);
 				i++;
 			}
@@ -168,7 +164,7 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 		
 		for (i = 0; i < vcounts.length; i++) {
 			for (int j = 0; j < vcounts[i]; j++) {
-				AnimatedVertexIndicator vi = positionMap.get(i);
+				BlenderAnimatedVertexBuilder vi = positionMap.get(i);
 				vIndexList.add(vi.joint.getInt(j));
 				vIndexList.add(vi.weight.getInt(j));
 			}
@@ -182,10 +178,10 @@ public class AnimatedMesh extends Mesh<AnimatedVertexIndicator> {
 		if (!this.parts.isEmpty()) {
 			JsonObject parts = new JsonObject();
 			
-			for (Map.Entry<String, ModelPart<VertexIndicator.AnimatedVertexIndicator>> partEntry : this.parts.entrySet()) {
+			for (Map.Entry<String, AnimatedModelPart> partEntry : this.parts.entrySet()) {
 				IntList indicesArray = new IntArrayList();
 				
-				for (VertexIndicator.AnimatedVertexIndicator vertexIndicator : partEntry.getValue().getVertices()) {
+				for (BlenderAnimatedVertexBuilder vertexIndicator : partEntry.getValue().getVertices()) {
 					indicesArray.add(vertexIndicator.position);
 					indicesArray.add(vertexIndicator.uv);
 					indicesArray.add(vertexIndicator.normal);

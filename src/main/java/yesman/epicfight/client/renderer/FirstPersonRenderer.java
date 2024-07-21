@@ -24,9 +24,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.client.model.AnimatedMesh.AnimatedModelPart;
 import yesman.epicfight.api.client.model.Meshes;
-import yesman.epicfight.api.client.model.ModelPart;
-import yesman.epicfight.api.client.model.VertexIndicator.AnimatedVertexIndicator;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -69,14 +68,14 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 		this.prepareModel(mesh, entityIn, entitypatch, renderer);
 		
 		if (!entitypatch.getOriginal().isInvisible()) {
-			for (ModelPart<AnimatedVertexIndicator> p : mesh.getAllParts()) {
-				p.hidden = true;
+			for (AnimatedModelPart p : mesh.getAllParts()) {
+				p.setHidden(true);
 			}
 			
-			mesh.leftArm.hidden = false;
-			mesh.rightArm.hidden = false;
-			mesh.leftSleeve.hidden = false;
-			mesh.rightSleeve.hidden = false;
+			mesh.leftArm.setHidden(false);
+			mesh.rightArm.setHidden(false);
+			mesh.leftSleeve.setHidden(false);
+			mesh.rightSleeve.setHidden(false);
 			
 			mesh.drawModelWithPose(matStackIn, buffer.getBuffer(EpicFightRenderTypes.getTriangulated(RenderType.entityCutoutNoCull(entityIn.getSkinTextureLocation()))),
 					packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
@@ -121,7 +120,7 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 	@Override
 	protected void prepareModel(HumanoidMesh mesh, LocalPlayer entity, LocalPlayerPatch entitypatch, LivingEntityRenderer<LocalPlayer, PlayerModel<LocalPlayer>> renderer) {
 		mesh.initialize();
-		mesh.head.hidden = true;
-		mesh.hat.hidden = true;
+		mesh.head.setHidden(true);
+		mesh.hat.setHidden(true);
 	}
 }

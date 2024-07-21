@@ -1,16 +1,19 @@
 package yesman.epicfight.client.mesh;
 
+import java.util.List;
 import java.util.Map;
 
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.BlenderAnimatedVertexBuilder;
 import yesman.epicfight.api.client.model.Meshes;
-import yesman.epicfight.api.client.model.ModelPart;
-import yesman.epicfight.api.client.model.VertexIndicator.AnimatedVertexIndicator;
 
+@OnlyIn(Dist.CLIENT)
 public class PiglinMesh extends HumanoidMesh {
-	public PiglinMesh(Map<String, float[]> arrayMap, AnimatedMesh parent, RenderProperties properties, Map<String, ModelPart<AnimatedVertexIndicator>> parts) {
-		super(arrayMap, parent, properties, parts);
+	public PiglinMesh(Map<String, float[]> arrayMap, Map<String, List<BlenderAnimatedVertexBuilder>> parts, AnimatedMesh parent, RenderProperties properties) {
+		super(arrayMap, parts, parent, properties);
 	}
 	
 	@Override

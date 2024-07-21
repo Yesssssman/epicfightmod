@@ -127,7 +127,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				
 				if (chestPart) {
 					if (armorMesh.hasPart("torso")) {
-						armorMesh.getPart("torso").hidden = true;
+						armorMesh.getPart("torso").setHidden(true);
 					}
 				}
 				
