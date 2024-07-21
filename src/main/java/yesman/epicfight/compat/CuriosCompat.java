@@ -74,7 +74,7 @@ public class CuriosCompat implements ICompatModule {
 			super(null);
 			
 			if (ModList.get().isLoaded("relics")) {
-				CURIO_MODEL_GETTERS.add(RelicsModelProvider::getCuriosModel);
+				//CURIO_MODEL_GETTERS.add(RelicsModelProvider::getCuriosModel);
 			}
 		}
 		
