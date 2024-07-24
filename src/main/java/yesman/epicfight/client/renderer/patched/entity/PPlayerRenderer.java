@@ -37,18 +37,18 @@ public class PPlayerRenderer extends PHumanoidRenderer<AbstractClientPlayer, Abs
 		renderer.setModelProperties(entity);
 		PlayerModel<AbstractClientPlayer> model = renderer.getModel();
 		
-		mesh.head.hidden = !model.head.visible;
-		mesh.hat.hidden = !model.hat.visible;
-		mesh.jacket.hidden = !model.jacket.visible;
-		mesh.torso.hidden = !model.body.visible;
-		mesh.leftArm.hidden = !model.leftArm.visible;
-		mesh.leftLeg.hidden = !model.leftLeg.visible;
-		mesh.leftPants.hidden = !model.leftPants.visible;
-		mesh.leftSleeve.hidden = !model.leftSleeve.visible;
-		mesh.rightArm.hidden = !model.rightArm.visible;
-		mesh.rightLeg.hidden = !model.rightLeg.visible;
-		mesh.rightPants.hidden = !model.rightPants.visible;
-		mesh.rightSleeve.hidden = !model.rightSleeve.visible;
+		mesh.head.setHidden(!model.head.visible);
+		mesh.hat.setHidden(!model.hat.visible);
+		mesh.jacket.setHidden(!model.jacket.visible);
+		mesh.torso.setHidden(!model.body.visible);
+		mesh.leftArm.setHidden(!model.leftArm.visible);
+		mesh.leftLeg.setHidden(!model.leftLeg.visible);
+		mesh.leftPants.setHidden(!model.leftPants.visible);
+		mesh.leftSleeve.setHidden(!model.leftSleeve.visible);
+		mesh.rightArm.setHidden(!model.rightArm.visible);
+		mesh.rightLeg.setHidden(!model.rightLeg.visible);
+		mesh.rightPants.setHidden(!model.rightPants.visible);
+		mesh.rightSleeve.setHidden(!model.rightSleeve.visible);
 	}
 	
 	@Override

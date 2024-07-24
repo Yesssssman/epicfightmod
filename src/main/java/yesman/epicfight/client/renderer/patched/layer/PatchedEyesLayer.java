@@ -1,7 +1,6 @@
 package yesman.epicfight.client.renderer.patched.layer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.model.EntityModel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -14,7 +13,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
-import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
@@ -24,12 +22,11 @@ public class PatchedEyesLayer<E extends LivingEntity, T extends LivingEntityPatc
 	public PatchedEyesLayer(ResourceLocation eyeTexture, AM mesh) {
 		super(mesh);
 		
-		this.renderType = EpicFightRenderTypes.getTriangulated(RenderType.eyes(eyeTexture));
+		this.renderType = RenderType.eyes(eyeTexture);
 	}
 	
 	@Override
 	protected void renderLayer(T entitypatch, E entityliving, EyesLayer<E, M> vanillaLayer, PoseStack postStack, MultiBufferSource buffer, int packedLightIn, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
-		VertexConsumer ivertexbuilder = buffer.getBuffer(this.renderType);
-		this.mesh.drawModelWithPose(postStack, ivertexbuilder, 15728640, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
+		this.mesh.drawAnimated(postStack, buffer, this.renderType, 15728640, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
 	}
 }

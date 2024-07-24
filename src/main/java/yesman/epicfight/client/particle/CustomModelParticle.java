@@ -37,7 +37,7 @@ public abstract class CustomModelParticle<M extends Mesh<?, ?>> extends Particle
 		this.setupPoseStack(poseStack, camera, partialTicks);
 		this.prepareDraw(poseStack, partialTicks);
 		
-		this.particleMesh.drawRawModelNoLighting(poseStack, vertexConsumer, this.getLightColor(partialTicks), this.rCol, this.gCol, this.bCol, this.alpha, OverlayTexture.NO_OVERLAY);
+		this.particleMesh.draw(poseStack, vertexConsumer, Mesh.DrawingFunction.ENTITY_NO_LIGHTING, this.getLightColor(partialTicks), this.rCol, this.gCol, this.bCol, this.alpha, OverlayTexture.NO_OVERLAY);
 	}
 	
 	@Override

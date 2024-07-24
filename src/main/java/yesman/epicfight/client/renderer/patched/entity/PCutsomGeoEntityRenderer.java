@@ -5,7 +5,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -54,8 +53,7 @@ public class PCutsomGeoEntityRenderer<E extends LivingEntity & GeoAnimatable> ex
 			PrepareModelEvent prepareModelEvent = new PrepareModelEvent(this, this.mesh, entitypatch, buffer, poseStack, packedLight, partialTicks);
 			
 			if (!MinecraftForge.EVENT_BUS.post(prepareModelEvent)) {
-				VertexConsumer builder = buffer.getBuffer(renderType);
-				this.mesh.drawModelWithPose(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, isVisibleToPlayer ? 0.15F : 1.0F, renderer.getPackedOverlay(entityIn, partialTicks), armature, poseMatrices);
+				this.mesh.drawAnimated(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, isVisibleToPlayer ? 0.15F : 1.0F, renderer.getPackedOverlay(entityIn, partialTicks), entitypatch.getArmature(), poseMatrices);
 			}
 		}
 		

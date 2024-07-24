@@ -41,7 +41,7 @@ public class Meshes implements PreparableReloadListener {
 	public static final Meshes INSTANCE = new Meshes();
 	
 	@FunctionalInterface
-	public interface MeshContructor<P extends ModelPart<V>, V extends BlenderVertexBuilder, M extends Mesh<P, V>> {
+	public interface MeshContructor<P extends ModelPart<V>, V extends VertexBuilder, M extends Mesh<P, V>> {
 		M invoke(Map<String, float[]> arrayMap, Map<String, List<V>> parts, M parent, RenderProperties properties);
 	}
 	
@@ -78,6 +78,7 @@ public class Meshes implements PreparableReloadListener {
 	public static RawMesh LASER;
 	
 	public static void build(ResourceManager resourceManager) {
+		MESHES.values().stream().filter((mesh) -> mesh instanceof AnimatedMesh).map((mesh) -> (AnimatedMesh)mesh).forEach(AnimatedMesh::destroy);
 		MESHES.clear();
 		ModelBuildEvent.MeshBuild event = new ModelBuildEvent.MeshBuild(resourceManager, MESHES);
 		
@@ -118,7 +119,7 @@ public class Meshes implements PreparableReloadListener {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <M extends RawMesh> M getOrCreateRawMesh(ResourceManager rm, ResourceLocation rl, MeshContructor<RawModelPart, BlenderVertexBuilder, M> constructor) {
+	public static <M extends RawMesh> M getOrCreateRawMesh(ResourceManager rm, ResourceLocation rl, MeshContructor<RawModelPart, VertexBuilder, M> constructor) {
 		return (M) MESHES.computeIfAbsent(rl, (key) -> {
 			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, wrapLocation(rl));
 			return jsonModelLoader.loadMesh(constructor);
@@ -126,7 +127,7 @@ public class Meshes implements PreparableReloadListener {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <M extends AnimatedMesh> M getOrCreateAnimatedMesh(ResourceManager rm, ResourceLocation rl, MeshContructor<AnimatedModelPart, BlenderAnimatedVertexBuilder, M> constructor) {
+	public static <M extends AnimatedMesh> M getOrCreateAnimatedMesh(ResourceManager rm, ResourceLocation rl, MeshContructor<AnimatedModelPart, AnimatedVertexBuilder, M> constructor) {
 		return (M) MESHES.computeIfAbsent(rl, (key) -> {
 			JsonModelLoader jsonModelLoader = new JsonModelLoader(rm, wrapLocation(rl));
 			return jsonModelLoader.loadAnimatedMesh(constructor);

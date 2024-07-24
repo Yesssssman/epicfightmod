@@ -34,12 +34,11 @@ public class RenderItemBase {
 		this.offhandCorrectionMatrix = offhandCorrectionMatrix;
 	}
 	
-	public void renderItemInHand(ItemStack stack, LivingEntityPatch<?> entitypatch, InteractionHand hand, HumanoidArmature armature, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLight) {
+	public void renderItemInHand(ItemStack stack, LivingEntityPatch<?> entitypatch, InteractionHand hand, HumanoidArmature armature, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
 		OpenMatrix4f modelMatrix = this.getCorrectionMatrix(stack, entitypatch, hand);
 		boolean isInMainhand = (hand == InteractionHand.MAIN_HAND);
 		Joint holdingHand = isInMainhand ? armature.toolR : armature.toolL;
-		OpenMatrix4f jointTransform = poses[holdingHand.getId()];
-		modelMatrix.mulFront(jointTransform);
+		modelMatrix.mulFront(poses[holdingHand.getId()]);
 		
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, modelMatrix);
@@ -49,9 +48,9 @@ public class RenderItemBase {
 		poseStack.popPose();
 	}
 	
-	public void renderUnusableItemMount(ItemStack stack, LivingEntityPatch<?> entitypatch, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLight) {
+	public void renderUnusableItemMount(ItemStack stack, LivingEntityPatch<?> entitypatch, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
 		OpenMatrix4f modelMatrix = new OpenMatrix4f(BACK_COORECTION);
-		modelMatrix.mulFront(poses[0]);
+		modelMatrix.mulFront(poses[entitypatch.getArmature().getRootJoint().getId()]);
 		
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, modelMatrix);

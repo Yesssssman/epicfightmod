@@ -52,7 +52,6 @@ import yesman.epicfight.api.client.model.transformer.SkinLayer3DTransformer;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.mesh.HumanoidMesh;
-import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.patched.entity.PPlayerRenderer;
 import yesman.epicfight.client.renderer.patched.layer.ModelRenderLayer;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.AbstractClientPlayerPatch;
@@ -98,12 +97,31 @@ public class SkinLayer3DCompat implements ICompatModule {
 					return cap == SKIN_LAYER_3D_CAPABILITY ? LazyOptional.of(() -> this.epicFight3dSkinLayerCapability).cast() :  LazyOptional.empty();
 				}
 			});
+			
+			event.addListener(() -> {
+				event.getObject().getCapability(SKIN_LAYER_3D_CAPABILITY).ifPresent((skinlayers3dMeshes) -> {
+					skinlayers3dMeshes.partMeshes.forEach((k, v) -> v.destroy());
+					skinlayers3dMeshes.partMeshes.clear();
+				});
+			});
 		}
 	}
 	
 	@OnlyIn(Dist.CLIENT)
 	public static class SkinLayer3DMeshes {
 		private final Map<PlayerModelPart, AnimatedMesh> partMeshes = Maps.newHashMap();
+		
+		public void put(PlayerModelPart playerModelPart, AnimatedMesh animatedMesh) {
+			if (this.partMeshes.containsKey(playerModelPart)) {
+				this.partMeshes.get(playerModelPart).destroy();
+			}
+			
+			this.partMeshes.put(playerModelPart, animatedMesh);
+		}
+		
+		public void onDestroyed() {
+			this.partMeshes.forEach((k, v) -> v.destroy());
+		}
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -136,7 +154,7 @@ public class SkinLayer3DCompat implements ICompatModule {
 		}
 		
 		@Override
-		protected void renderLayer(AbstractClientPlayerPatch<AbstractClientPlayer> entitypatch, AbstractClientPlayer player, CustomLayerFeatureRenderer vanillaLayer, PoseStack poseStack, MultiBufferSource buffer, int packedLightIn, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
+		protected void renderLayer(AbstractClientPlayerPatch<AbstractClientPlayer> entitypatch, AbstractClientPlayer player, CustomLayerFeatureRenderer vanillaLayer, PoseStack poseStack, MultiBufferSource buffer, int packedLight, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 			if (!player.isSkinLoaded() || player.isInvisible()) {
 				return;
 	        }
@@ -162,24 +180,24 @@ public class SkinLayer3DCompat implements ICompatModule {
 					if (player instanceof PlayerSettings playerSettings) {
 						switch (playerModelPart) {
 						case JACKET -> {
-							skin3dlayerMeshes.partMeshes.put(playerModelPart, createEpicFight3DSkinLayer(player, playerModelPart, playerSettings.getTorsoMesh(), vanillaLayer.getParentModel().body, 8, 12, 4, 16, 32, true, 0));
+							skin3dlayerMeshes.put(playerModelPart, createEpicFight3DSkinLayer(player, playerModelPart, playerSettings.getTorsoMesh(), vanillaLayer.getParentModel().body, 8, 12, 4, 16, 32, true, 0));
 						}
 						case LEFT_SLEEVE -> {
 							int armWidth = ((PlayerEntityModelAccessor)vanillaLayer.getParentModel()).hasThinArms() ? 3 : 4;
-							skin3dlayerMeshes.partMeshes.put(playerModelPart, createEpicFight3DSkinLayer(player, playerModelPart, playerSettings.getLeftArmMesh(), vanillaLayer.getParentModel().leftArm, armWidth, 12, 4, 48, 48, true, -2f));
+							skin3dlayerMeshes.put(playerModelPart, createEpicFight3DSkinLayer(player, playerModelPart, playerSettings.getLeftArmMesh(), vanillaLayer.getParentModel().leftArm, armWidth, 12, 4, 48, 48, true, -2f));
 						}
 						case RIGHT_SLEEVE -> {
 							int armWidth = ((PlayerEntityModelAccessor)vanillaLayer.getParentModel()).hasThinArms() ? 3 : 4;
-							skin3dlayerMeshes.partMeshes.put(playerModelPart, createEpicFight3DSkinLayer(player, playerModelPart, playerSettings.getRightArmMesh(), vanillaLayer.getParentModel().rightArm, armWidth, 12, 4, 40, 32, true, -2F));
+							skin3dlayerMeshes.put(playerModelPart, createEpicFight3DSkinLayer(player, playerModelPart, playerSettings.getRightArmMesh(), vanillaLayer.getParentModel().rightArm, armWidth, 12, 4, 40, 32, true, -2F));
 						}
 						case LEFT_PANTS_LEG -> {
-							skin3dlayerMeshes.partMeshes.put(playerModelPart, createEpicFight3DSkinLayer(player, playerModelPart, playerSettings.getLeftLegMesh(), vanillaLayer.getParentModel().leftLeg, 4, 12, 4, 0, 48, true, 0f));
+							skin3dlayerMeshes.put(playerModelPart, createEpicFight3DSkinLayer(player, playerModelPart, playerSettings.getLeftLegMesh(), vanillaLayer.getParentModel().leftLeg, 4, 12, 4, 0, 48, true, 0f));
 						}
 						case RIGHT_PANTS_LEG -> {
-							skin3dlayerMeshes.partMeshes.put(playerModelPart, createEpicFight3DSkinLayer(player, playerModelPart, playerSettings.getRightLegMesh(), vanillaLayer.getParentModel().rightLeg, 4, 12, 4, 0, 32, true, 0f));
+							skin3dlayerMeshes.put(playerModelPart, createEpicFight3DSkinLayer(player, playerModelPart, playerSettings.getRightLegMesh(), vanillaLayer.getParentModel().rightLeg, 4, 12, 4, 0, 32, true, 0f));
 						}
 						case HAT -> {
-							skin3dlayerMeshes.partMeshes.put(playerModelPart, createEpicFight3DSkinLayer(player, playerModelPart, playerSettings.getHeadMesh(), vanillaLayer.getParentModel().head, 8, 8, 8, 32, 0, false, 0.6F));
+							skin3dlayerMeshes.put(playerModelPart, createEpicFight3DSkinLayer(player, playerModelPart, playerSettings.getHeadMesh(), vanillaLayer.getParentModel().head, 8, 8, 8, 32, 0, false, 0.6F));
 						}
 						default -> {}
 						}
@@ -190,7 +208,7 @@ public class SkinLayer3DCompat implements ICompatModule {
 					AnimatedMesh mesh = skin3dlayerMeshes.partMeshes.get(playerModelPart);
 					
 					if (mesh != null) {
-						mesh.drawModelWithPose(poseStack, buffer.getBuffer(EpicFightRenderTypes.getTriangulated(RenderType.entityTranslucent(player.getSkinTextureLocation(), true))), packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, overlay, entitypatch.getArmature(), poses);
+						mesh.drawAnimated(poseStack, buffer, RenderType.entityTranslucent(player.getSkinTextureLocation(), true), packedLight, 1.0F, 1.0F, 1.0F, 1.0F, overlay, entitypatch.getArmature(), poses);
 					}
 				}
 			}

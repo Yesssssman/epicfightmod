@@ -37,7 +37,7 @@ public class EpicFightOptionList extends ContainerObjectSelectionList<EpicFightO
 	
 	@Override
 	protected int getScrollbarPosition() {
-		return super.getScrollbarPosition() + 32;
+		return super.getScrollbarPosition() + 46;
 	}
 	
 	@OnlyIn(Dist.CLIENT)

@@ -648,10 +648,10 @@ public class RenderEngine {
 			if (EpicFightMod.CLIENT_CONFIGS.aimingCorrection.getValue() && renderEngine.zoomCount > 0 && renderEngine.minecraft.options.getCameraType() == CameraType.THIRD_PERSON_BACK && event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
 				renderEngine.aimHelper.doRender(event.getPoseStack(), event.getPartialTick());
 			}
-			/**
+			
 			if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_WEATHER) {
-				renderEngine.betaWarningMessage.drawMessage(event.getPoseStack());
-			}**/
+				//renderEngine.betaWarningMessage.drawMessage(event.getPoseStack());
+			}
 		}
 		
 		@SuppressWarnings("unchecked")

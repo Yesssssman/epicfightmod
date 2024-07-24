@@ -45,6 +45,7 @@ public class EpicFightGraphicOptionScreen extends EpicFightOptionSubScreen {
 		BooleanOptionHandler aimingCorrection = this.config.aimingCorrection;
 		BooleanOptionHandler showEpicFightAttributes = this.config.showEpicFightAttributes;
 		IntegerOptionHandler maxHitProjectiles = this.config.maxStuckProjectiles;
+		BooleanOptionHandler useAnimationShader = this.config.useAnimationShader;
 		
 		int buttonHeight = -32;
 		
@@ -107,6 +108,8 @@ public class EpicFightGraphicOptionScreen extends EpicFightOptionSubScreen {
 		
 		this.optionsList.addSmall(aimingCorrectionButton, uiSetupButton);
 		
+		buttonHeight += 24;
+		
 		Button showEpicfightAttributesButton = Button.builder(Component.translatable("gui."+EpicFightMod.MODID+".show_attributes." + (showEpicFightAttributes.getValue() ? "on" : "off")), (button) -> {
 			showEpicFightAttributes.setValue(!showEpicFightAttributes.getValue());
 			button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".show_attributes." + (showEpicFightAttributes.getValue() ? "on" : "off")));
@@ -118,6 +121,15 @@ public class EpicFightGraphicOptionScreen extends EpicFightOptionSubScreen {
 		}).pos(this.width / 2 + 5, this.height / 4 + buttonHeight).size(160, 20).tooltip(Tooltip.create(Component.translatable("gui."+EpicFightMod.MODID+".max_stuck_projectiles.tooltip"))).build();
 		
 		this.optionsList.addSmall(showEpicfightAttributesButton, maxHitProjectilesButton);
+		
+		buttonHeight += 24;
+		
+		Button useAnimationShaderButton = Button.builder(Component.translatable("gui."+EpicFightMod.MODID+".use_animation_shader." + (useAnimationShader.getValue() ? "on" : "off")), (button) -> {
+			useAnimationShader.setValue(!useAnimationShader.getValue());
+			button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".use_animation_shader." + (useAnimationShader.getValue() ? "on" : "off")));
+		}).pos(this.width / 2 - 165, this.height / 4 + buttonHeight).size(160, 20).tooltip(Tooltip.create(Component.translatable("gui."+EpicFightMod.MODID+".use_animation_shader.tooltip"))).build();
+		
+		this.optionsList.addSmall(useAnimationShaderButton, null);
 		
 		buttonHeight += 30;
 		

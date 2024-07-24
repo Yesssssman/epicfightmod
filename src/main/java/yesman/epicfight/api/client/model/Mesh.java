@@ -6,9 +6,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-import org.joml.Vector3f;
-import org.joml.Vector4f;
-
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
@@ -17,7 +15,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class Mesh<P extends ModelPart<V>, V extends BlenderVertexBuilder> {
+public abstract class Mesh<P extends ModelPart<V>, V extends VertexBuilder> {
 	protected final float[] positions;
 	protected final float[] normals;
 	protected final float[] uvs;
@@ -33,17 +31,18 @@ public abstract class Mesh<P extends ModelPart<V>, V extends BlenderVertexBuilde
 	 * @param renderProperties
 	 */
 	public Mesh(@Nullable Map<String, float[]> arrayMap, @Nullable Map<String, List<V>> partBuilders, @Nullable Mesh<P, V> parent, RenderProperties renderProperties) {
-		this.positions = parent == null ? arrayMap.get("positions") : parent.positions;
-		this.normals = parent == null ? arrayMap.get("normals") : parent.normals;
-		this.uvs = parent == null ? arrayMap.get("uvs") : parent.uvs;
+		this.positions = (parent == null) ? arrayMap.get("positions") : parent.positions;
+		this.normals = (parent == null) ? arrayMap.get("normals") : parent.normals;
+		this.uvs = (parent == null) ? arrayMap.get("uvs") : parent.uvs;
+		this.vertexCount = (parent == null) ? this.positions.length / 3 : parent.vertexCount;
 		
 		this.renderProperties = renderProperties;
-		this.parts = parent == null ? this.createModelPart(partBuilders) : parent.parts;
-		this.vertexCount = parent.vertexCount;
+		this.parts = (parent == null) ? this.createModelPart(partBuilders) : parent.parts;
 	}
 	
 	protected abstract Map<String, P> createModelPart(Map<String, List<V>> partBuilders);
 	protected abstract P getOrLogException(Map<String, P> parts, String name);
+	public abstract void draw(PoseStack poseStack, VertexConsumer builder, Mesh.DrawingFunction drawingFunction, int packedLight, float r, float g, float b, float a, int overlay);
 	
 	public boolean hasPart(String part) {
 		return this.parts.containsKey(part);
@@ -111,32 +110,32 @@ public abstract class Mesh<P extends ModelPart<V>, V extends BlenderVertexBuilde
 	@OnlyIn(Dist.CLIENT)
 	@FunctionalInterface
 	public interface DrawingFunction {
-		public static final DrawingFunction ENTITY_TRANSLUCENT = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
-			builder.vertex(posVec.x(), posVec.y(), posVec.z(), r, g, b, a, u, v, overlay, packedLightIn, normalVec.x(), normalVec.y(), normalVec.z());
+		public static final DrawingFunction ENTITY_TEXTURED = (builder, posX, posY, posZ, normX, normY, normZ, packedLight, r, g, b, a, u, v, overlay) -> {
+			builder.vertex(posX, posY, posZ, r, g, b, a, u, v, overlay, packedLight, normX, normY, normZ);
 		};
 		
-		public static final DrawingFunction ENTITY_PARTICLE = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
-			builder.vertex(posVec.x(), posVec.y(), posVec.z());
+		public static final DrawingFunction ENTITY_PARTICLE = (builder, posX, posY, posZ, normX, normY, normZ, packedLight, r, g, b, a, u, v, overlay) -> {
+			builder.vertex(posX, posY, posZ);
 			builder.color(r, g, b, a);
-			builder.uv2(packedLightIn);
+			builder.uv2(packedLight);
 			builder.endVertex();
 		};
 		
-		public static final DrawingFunction ENTITY_SOLID = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
-			builder.vertex(posVec.x(), posVec.y(), posVec.z());
+		public static final DrawingFunction ENTITY_SOLID = (builder, posX, posY, posZ, normX, normY, normZ, packedLight, r, g, b, a, u, v, overlay) -> {
+			builder.vertex(posX, posY, posZ);
 			builder.color(r, g, b, a);
-			builder.normal(normalVec.x(), normalVec.y(), normalVec.z());
+			builder.normal(normX, normY, normZ);
 			builder.endVertex();
 		};
 		
-		public static final DrawingFunction ENTITY_NO_LIGHTING = (builder, posVec, normalVec, packedLightIn, r, g, b, a, u, v, overlay) -> {
-			builder.vertex(posVec.x(), posVec.y(), posVec.z());
+		public static final DrawingFunction ENTITY_NO_LIGHTING = (builder, posX, posY, posZ, normX, normY, normZ, packedLight, r, g, b, a, u, v, overlay) -> {
+			builder.vertex(posX, posY, posZ);
 			builder.color(r, g, b, a);
 			builder.uv(u, v);
-			builder.uv2(packedLightIn);
+			builder.uv2(packedLight);
 			builder.endVertex();
 		};
 		
-		public void draw(VertexConsumer builder, Vector4f posVec, Vector3f normalVec, int packedLight, float r, float g, float b, float a, float u, float v, int overlay);
+		public void draw(VertexConsumer builder, float posX, float posY, float posZ, float normX, float normY, float normZ, int packedLight, float r, float g, float b, float a, float u, float v, int overlay);
 	}
 }

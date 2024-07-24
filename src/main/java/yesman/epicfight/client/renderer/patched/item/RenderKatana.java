@@ -20,7 +20,7 @@ public class RenderKatana extends RenderItemBase {
 	private final ItemStack sheathStack = new ItemStack(EpicFightItems.UCHIGATANA_SHEATH.get());
 	
 	@Override
-	public void renderItemInHand(ItemStack stack, LivingEntityPatch<?> entitypatch, InteractionHand hand, HumanoidArmature armature, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLight) {
+	public void renderItemInHand(ItemStack stack, LivingEntityPatch<?> entitypatch, InteractionHand hand, HumanoidArmature armature, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
 		OpenMatrix4f modelMatrix = new OpenMatrix4f(this.mainhandcorrectionMatrix);
 		modelMatrix.mulFront(poses[armature.toolR.getId()]);
 		

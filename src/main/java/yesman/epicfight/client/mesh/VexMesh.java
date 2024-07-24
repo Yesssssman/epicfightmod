@@ -6,14 +6,14 @@ import java.util.Map;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
-import yesman.epicfight.api.client.model.BlenderAnimatedVertexBuilder;
+import yesman.epicfight.api.client.model.AnimatedVertexBuilder;
 
 @OnlyIn(Dist.CLIENT)
 public class VexMesh extends HumanoidMesh {
 	public final AnimatedModelPart leftWing;
 	public final AnimatedModelPart rightWing;
 	
-	public VexMesh(Map<String, float[]> arrayMap, Map<String, List<BlenderAnimatedVertexBuilder>> parts, AnimatedMesh parent, RenderProperties properties) {
+	public VexMesh(Map<String, float[]> arrayMap, Map<String, List<AnimatedVertexBuilder>> parts, AnimatedMesh parent, RenderProperties properties) {
 		super(arrayMap, parts, parent, properties);
 		
 		this.leftWing = this.getOrLogException(this.parts, "leftWing");

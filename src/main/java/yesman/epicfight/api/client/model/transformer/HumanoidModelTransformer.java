@@ -13,7 +13,7 @@ import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
-import yesman.epicfight.api.client.model.BlenderSingleVertexBuilder;
+import yesman.epicfight.api.client.model.SingleGroupVertexBuilder;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class HumanoidModelTransformer {
@@ -21,7 +21,7 @@ public abstract class HumanoidModelTransformer {
 	
 	public static abstract class PartTransformer<T> {
 		
-		public abstract void bakeCube(PoseStack poseStack, String partName, T cube, List<BlenderSingleVertexBuilder> vertices, Map<String, IntList> indices, IndexCounter indexCounter);
+		public abstract void bakeCube(PoseStack poseStack, String partName, T cube, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, IndexCounter indexCounter);
 		
 		static void triangluatePolygon(Map<String, IntList> indices, String partName, IndexCounter indexCounter) {
 			IntList list = indices.computeIfAbsent(partName, (key) -> new IntArrayList());

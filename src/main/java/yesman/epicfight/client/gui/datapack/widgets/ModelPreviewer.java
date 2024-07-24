@@ -311,7 +311,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 		
 		if (this.animator != null) {
 			Pose pose = this.animator.getPose(partialTicks);
-			OpenMatrix4f[] poseMatrices = this.getArmature().getPoseAsTransformMatrix(pose);
+			OpenMatrix4f[] poseMatrices = this.getArmature().getPoseAsTransformMatrix(pose, false);
 			guiGraphics.pose().pushPose();
 			
 			ShaderInstance prevShader = RenderSystem.getShader();
@@ -331,9 +331,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 			this.mesh.initialize();
 			Tesselator tesselator = RenderSystem.renderThreadTesselator();
 			BufferBuilder bufferbuilder = tesselator.getBuilder();
-			bufferbuilder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
-			this.mesh.draw(guiGraphics.pose(), bufferbuilder, RawMesh.DrawingFunction.ENTITY_SOLID, -1, 0.9411F, 0.9411F, 0.9411F, 1.0F, -1, this.getArmature(), poseMatrices);
-			BufferUploader.drawWithShader(bufferbuilder.end());
+			this.mesh.drawWithShader(guiGraphics.pose(), EpicFightShaders.getPositionColorNormalShader(), DefaultVertexFormat.POSITION_COLOR_NORMAL, -1, 0.9411F, 0.9411F, 0.9411F, 1.0F, -1, this.getArmature(), poseMatrices);
 			
 			if (this.item != null && this.showItemCheckbox._getValue()) {
 				BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();

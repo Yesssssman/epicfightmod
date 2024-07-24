@@ -15,7 +15,7 @@ import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec3f;
 
 @OnlyIn(Dist.CLIENT)
-public class BlenderSingleVertexBuilder {
+public class SingleGroupVertexBuilder {
 	private Vec3f position;
 	private Vec3f normal;
 	private Vec2f textureCoordinate;
@@ -23,45 +23,45 @@ public class BlenderSingleVertexBuilder {
 	private Vec3f effectiveJointWeights;
 	private int effectiveJointNumber;
 	
-	public BlenderSingleVertexBuilder() {
+	public SingleGroupVertexBuilder() {
 		this.position = null;
 		this.normal = null;
 		this.textureCoordinate = null;
 	}
 	
-	public BlenderSingleVertexBuilder(BlenderSingleVertexBuilder vertex) {
+	public SingleGroupVertexBuilder(SingleGroupVertexBuilder vertex) {
 		this.position = vertex.position;
 		this.effectiveJointIDs = vertex.effectiveJointIDs;
 		this.effectiveJointWeights = vertex.effectiveJointWeights;
 		this.effectiveJointNumber = vertex.effectiveJointNumber;
 	}
 	
-	public BlenderSingleVertexBuilder setPosition(Vec3f position) {
+	public SingleGroupVertexBuilder setPosition(Vec3f position) {
 		this.position = position;
 		return this;
 	}
 	
-	public BlenderSingleVertexBuilder setNormal(Vec3f vector) {
+	public SingleGroupVertexBuilder setNormal(Vec3f vector) {
 		this.normal = vector;
 		return this;
 	}
 	
-	public BlenderSingleVertexBuilder setTextureCoordinate(Vec2f vector) {
+	public SingleGroupVertexBuilder setTextureCoordinate(Vec2f vector) {
 		this.textureCoordinate = vector;
 		return this;
 	}
 	
-	public BlenderSingleVertexBuilder setEffectiveJointIDs(Vec3f effectiveJointIDs) {
+	public SingleGroupVertexBuilder setEffectiveJointIDs(Vec3f effectiveJointIDs) {
 		this.effectiveJointIDs = effectiveJointIDs;
 		return this;
 	}
 	
-	public BlenderSingleVertexBuilder setEffectiveJointWeights(Vec3f effectiveJointWeights) {
+	public SingleGroupVertexBuilder setEffectiveJointWeights(Vec3f effectiveJointWeights) {
 		this.effectiveJointWeights = effectiveJointWeights;
 		return this;
 	}
 	
-	public BlenderSingleVertexBuilder setEffectiveJointNumber(int count) {
+	public SingleGroupVertexBuilder setEffectiveJointNumber(int count) {
 		this.effectiveJointNumber = count;
 		return this;
 	}
@@ -76,7 +76,7 @@ public class BlenderSingleVertexBuilder {
 		}
 	}
 	
-	public static AnimatedMesh loadVertexInformation(List<BlenderSingleVertexBuilder> vertices, Map<String, IntList> indices) {
+	public static AnimatedMesh loadVertexInformation(List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices) {
 		FloatList positions = new FloatArrayList();
 		FloatList normals = new FloatArrayList();
 		FloatList texCoords = new FloatArrayList();
@@ -85,7 +85,7 @@ public class BlenderSingleVertexBuilder {
 		IntList affectCountList = new IntArrayList();
 		
 		for (int i = 0; i < vertices.size(); i++) {
-			BlenderSingleVertexBuilder vertex = vertices.get(i);
+			SingleGroupVertexBuilder vertex = vertices.get(i);
 			Vec3f position = vertex.position;
 			Vec3f normal = vertex.normal;
 			Vec2f texCoord = vertex.textureCoordinate;
@@ -132,7 +132,7 @@ public class BlenderSingleVertexBuilder {
 		float[] jointWeightList = jointWeights.toFloatArray();
 		int[] affectJointCounts = affectCountList.toIntArray();
 		Map<String, float[]> arrayMap = Maps.newHashMap();
-		Map<String, List<BlenderAnimatedVertexBuilder>> meshMap = Maps.newHashMap();
+		Map<String, List<AnimatedVertexBuilder>> meshMap = Maps.newHashMap();
 		
 		arrayMap.put("positions", positionList);
 		arrayMap.put("normals", normalList);
@@ -140,7 +140,7 @@ public class BlenderSingleVertexBuilder {
 		arrayMap.put("weights", jointWeightList);
 		
 		for (Map.Entry<String, IntList> e : indices.entrySet()) {
-			meshMap.put(e.getKey(), BlenderVertexBuilder.createAnimated(e.getValue().toIntArray(), affectJointCounts, animationIndexList));
+			meshMap.put(e.getKey(), VertexBuilder.createAnimated(e.getValue().toIntArray(), affectJointCounts, animationIndexList));
 		}
 		
 		return new AnimatedMesh(arrayMap, meshMap, null, Mesh.RenderProperties.create());

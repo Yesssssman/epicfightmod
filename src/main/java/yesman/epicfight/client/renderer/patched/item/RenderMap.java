@@ -23,12 +23,11 @@ public class RenderMap extends RenderItemBase {
 	private static final RenderType MAP_BACKGROUND = RenderType.text(new ResourceLocation("textures/map/map_background.png"));
 	
 	@Override
-	public void renderItemInHand(ItemStack stack, LivingEntityPatch<?> entitypatch, InteractionHand hand, HumanoidArmature armature, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLight) {
+	public void renderItemInHand(ItemStack stack, LivingEntityPatch<?> entitypatch, InteractionHand hand, HumanoidArmature armature, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
 		OpenMatrix4f modelMatrix = this.getCorrectionMatrix(stack, entitypatch, hand);
 		boolean isInMainhand = (hand == InteractionHand.MAIN_HAND);
 		Joint holdingHand = isInMainhand ? armature.toolR : armature.toolL;
-		OpenMatrix4f jointTransform = poses[holdingHand.getId()];
-		modelMatrix.mulFront(jointTransform);
+		modelMatrix.mulFront(poses[holdingHand.getId()]);
 		
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, modelMatrix);

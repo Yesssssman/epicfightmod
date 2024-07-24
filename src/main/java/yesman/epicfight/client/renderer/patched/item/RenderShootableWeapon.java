@@ -21,10 +21,9 @@ public class RenderShootableWeapon extends RenderItemBase {
 	}
 	
 	@Override
-	public void renderItemInHand(ItemStack stack, LivingEntityPatch<?> entitypatch, InteractionHand hand, HumanoidArmature armature, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLight) {
+	public void renderItemInHand(ItemStack stack, LivingEntityPatch<?> entitypatch, InteractionHand hand, HumanoidArmature armature, OpenMatrix4f[] poses, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
 		OpenMatrix4f modelMatrix = this.getCorrectionMatrix(stack, entitypatch, hand);
-		OpenMatrix4f jointTransform = poses[armature.toolL.getId()];
-		modelMatrix.mulFront(jointTransform);
+		modelMatrix.mulFront(poses[armature.toolL.getId()]);
 		
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, modelMatrix);

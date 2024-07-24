@@ -13,7 +13,6 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.client.Minecraft;
@@ -43,7 +42,6 @@ import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
-import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.patched.layer.LayerUtil;
 import yesman.epicfight.client.renderer.patched.layer.PatchedLayer;
 import yesman.epicfight.client.renderer.patched.layer.RenderOriginalModelLayer;
@@ -142,15 +140,13 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		
 		if (renderType != null) {
 		    this.prepareVanillaModel(entityIn, renderer.getModel(), renderer, partialTicks);
-			
 			AM mesh = this.getMesh(entitypatch);
 			this.prepareModel(mesh, entityIn, entitypatch, renderer);
 			
 			PrepareModelEvent prepareModelEvent = new PrepareModelEvent(this, mesh, entitypatch, buffer, poseStack, packedLight, partialTicks);
 			
 			if (!MinecraftForge.EVENT_BUS.post(prepareModelEvent)) {
-				VertexConsumer builder = buffer.getBuffer(renderType);
-				mesh.drawModelWithPose(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, isVisibleToPlayer ? 0.15F : 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), armature, poseMatrices);
+				mesh.drawAnimated(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, isVisibleToPlayer ? 0.15F : 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), armature, poseMatrices);
 			}
 		}
 		
@@ -261,13 +257,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 	
 	public RenderType getRenderType(E entityIn, T entitypatch, LivingEntityRenderer<E, M> renderer, boolean isVisible, boolean isVisibleToPlayer, boolean isGlowing) {
 		try {
-			RenderType renderType = (RenderType)getRenderType.invoke(renderer, entityIn, isVisible, isVisibleToPlayer, isGlowing);
-			
-			if (renderType != null) {
-				renderType = EpicFightRenderTypes.getTriangulated(renderType);
-			}
-			
-			return renderType;
+			return (RenderType)getRenderType.invoke(renderer, entityIn, isVisible, isVisibleToPlayer, isGlowing);
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
 			EpicFightMod.LOGGER.error("Reflection Exception");
 			e.printStackTrace();

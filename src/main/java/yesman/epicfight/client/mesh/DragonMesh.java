@@ -6,7 +6,7 @@ import java.util.Map;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
-import yesman.epicfight.api.client.model.BlenderAnimatedVertexBuilder;
+import yesman.epicfight.api.client.model.AnimatedVertexBuilder;
 
 @OnlyIn(Dist.CLIENT)
 public class DragonMesh extends AnimatedMesh {
@@ -21,7 +21,7 @@ public class DragonMesh extends AnimatedMesh {
 	public final AnimatedModelPart rightWing;
 	public final AnimatedModelPart tail;
 	
-	public DragonMesh(Map<String, float[]> arrayMap, Map<String, List<BlenderAnimatedVertexBuilder>> parts, AnimatedMesh parent, RenderProperties properties) {
+	public DragonMesh(Map<String, float[]> arrayMap, Map<String, List<AnimatedVertexBuilder>> parts, AnimatedMesh parent, RenderProperties properties) {
 		super(arrayMap, parts, parent, properties);
 		
 		this.head = this.getOrLogException(this.parts, "head");

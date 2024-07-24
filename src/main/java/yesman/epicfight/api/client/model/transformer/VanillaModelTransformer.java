@@ -27,7 +27,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.Meshes;
-import yesman.epicfight.api.client.model.BlenderSingleVertexBuilder;
+import yesman.epicfight.api.client.model.SingleGroupVertexBuilder;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -129,7 +129,7 @@ public class VanillaModelTransformer extends HumanoidModelTransformer {
 	}
 	
 	private static AnimatedMesh bakeMeshFromCubes(List<VanillaModelPartition> partitions) {
-		List<BlenderSingleVertexBuilder> vertices = Lists.newArrayList();
+		List<SingleGroupVertexBuilder> vertices = Lists.newArrayList();
 		Map<String, IntList> indices = Maps.newHashMap();
 		PoseStack poseStack = new PoseStack();
 		PartTransformer.IndexCounter indexCounter = new PartTransformer.IndexCounter();
@@ -142,10 +142,10 @@ public class VanillaModelTransformer extends HumanoidModelTransformer {
 			bake(poseStack, modelpartition.partName, modelpartition, modelpartition.modelPart, vertices, indices, indexCounter);
 		}
 		
-		return BlenderSingleVertexBuilder.loadVertexInformation(vertices, indices);
+		return SingleGroupVertexBuilder.loadVertexInformation(vertices, indices);
 	}
 	
-	private static void bake(PoseStack poseStack, String partName, VanillaModelPartition modelpartition, ModelPart part, List<BlenderSingleVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+	private static void bake(PoseStack poseStack, String partName, VanillaModelPartition modelpartition, ModelPart part, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 		part.loadPose(part.getInitialPose());
 		
 		poseStack.pushPose();
@@ -178,7 +178,7 @@ public class VanillaModelTransformer extends HumanoidModelTransformer {
 			this.jointId = jointId;
 		}
 		
-		public void bakeCube(PoseStack poseStack, String partName, ModelPart.Cube cube, List<BlenderSingleVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+		public void bakeCube(PoseStack poseStack, String partName, ModelPart.Cube cube, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 			for (ModelPart.Polygon quad : cube.polygons) {
 				Vector3f norm = new Vector3f(quad.normal);
 				norm.mul(poseStack.last().normal());
@@ -186,7 +186,7 @@ public class VanillaModelTransformer extends HumanoidModelTransformer {
 				for (ModelPart.Vertex vertex : quad.vertices) {
 					Vector4f pos = new Vector4f(vertex.pos, 1.0F);
 					pos.mul(poseStack.last().pose());
-					vertices.add(new BlenderSingleVertexBuilder()
+					vertices.add(new SingleGroupVertexBuilder()
 						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
 						.setTextureCoordinate(new Vec2f(vertex.u, vertex.v))
@@ -218,7 +218,7 @@ public class VanillaModelTransformer extends HumanoidModelTransformer {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName, ModelPart.Cube cube, List<BlenderSingleVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+		public void bakeCube(PoseStack poseStack, String partName, ModelPart.Cube cube, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 			Vec3 centerOfCube = getCenterOfCube(poseStack, cube);
 			
 			if (!this.noneAttachmentArea.contains(centerOfCube)) {
@@ -337,7 +337,7 @@ public class VanillaModelTransformer extends HumanoidModelTransformer {
 						weight1 = weight2;
 					}
 					
-					vertices.add(new BlenderSingleVertexBuilder()
+					vertices.add(new SingleGroupVertexBuilder()
 						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
 						.setTextureCoordinate(new Vec2f(vertex.u, vertex.v))
@@ -415,7 +415,7 @@ public class VanillaModelTransformer extends HumanoidModelTransformer {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName,  ModelPart.Cube cube, List<BlenderSingleVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+		public void bakeCube(PoseStack poseStack, String partName,  ModelPart.Cube cube, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 			List<AnimatedPolygon> polygons = Lists.<AnimatedPolygon>newArrayList();
 			
 			for (ModelPart.Polygon quad : cube.polygons) {
@@ -497,7 +497,7 @@ public class VanillaModelTransformer extends HumanoidModelTransformer {
 				
 				for (AnimatedVertex vertex : quad.animatedVertexPositions) {
 					Vector4f pos = new Vector4f(vertex.pos, 1.0F);
-					vertices.add(new BlenderSingleVertexBuilder()
+					vertices.add(new SingleGroupVertexBuilder()
 						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()).scale(0.0625F))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
 						.setTextureCoordinate(new Vec2f(vertex.u, vertex.v))

@@ -1,7 +1,6 @@
 package yesman.epicfight.client.renderer.patched.layer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.model.WitherBossModel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -17,7 +16,6 @@ import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.mesh.WitherMesh;
-import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.boss.WitherPatch;
 
@@ -30,14 +28,14 @@ public class PatchedWitherArmorLayer extends ModelRenderLayer<WitherBoss, Wither
 	}
 	
 	@Override
-	protected void renderLayer(WitherPatch entitypatch, WitherBoss entityliving, WitherArmorLayer vanillaLayer, PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn,
+	protected void renderLayer(WitherPatch entitypatch, WitherBoss entityliving, WitherArmorLayer vanillaLayer, PoseStack poseStack, MultiBufferSource buffer, int packedLight,
 			OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 		
 		if (entitypatch.isArmorActivated()) {
 			float progress = (float)entityliving.tickCount + partialTicks;
-			matrixStackIn.pushPose();
-			matrixStackIn.translate(0.0D, -0.1D, 0.0D);
-			matrixStackIn.scale(1.05F, 1.05F, 1.05F);
+			poseStack.pushPose();
+			poseStack.translate(0.0D, -0.1D, 0.0D);
+			poseStack.scale(1.05F, 1.05F, 1.05F);
 			int transparencyCount = entitypatch.getTransparency();
 			float transparency = 1.0F;
 			
@@ -56,9 +54,10 @@ public class PatchedWitherArmorLayer extends ModelRenderLayer<WitherBoss, Wither
 				}
 			}
 			
-			VertexConsumer ivertexbuilder = buffer.getBuffer(EpicFightRenderTypes.getTriangulated(RenderType.energySwirl(WITHER_ARMOR_LOCATION, Mth.cos(progress * 0.02F) * 3.0F % 1.0F, progress * 0.01F % 1.0F)));
-			this.mesh.drawModelWithPose(matrixStackIn, ivertexbuilder, packedLightIn, transparency * 0.5F, transparency * 0.5F, transparency * 0.5F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
-			matrixStackIn.popPose();
+			RenderType renderType = RenderType.energySwirl(WITHER_ARMOR_LOCATION, Mth.cos(progress * 0.02F) * 3.0F % 1.0F, progress * 0.01F % 1.0F);
+			
+			this.mesh.drawAnimated(poseStack, buffer, renderType, packedLight, transparency * 0.5F, transparency * 0.5F, transparency * 0.5F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
+			poseStack.popPose();
 		}
 	}
 }

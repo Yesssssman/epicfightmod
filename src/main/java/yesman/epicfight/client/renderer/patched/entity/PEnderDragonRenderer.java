@@ -24,7 +24,6 @@ import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.mesh.DragonMesh;
-import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.LightningRenderHelper;
 import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.DragonCrystalLinkPhase;
 import yesman.epicfight.world.capabilities.entitypatch.boss.enderdragon.EnderDragonPatch;
@@ -51,13 +50,10 @@ public class PEnderDragonRenderer extends PatchedEntityRenderer<EnderDragon, End
 		if (entityIn.dragonDeathTime > 0) {
 			poseStack.translate(entityIn.getRandom().nextGaussian() * 0.08D, 0.0D, entityIn.getRandom().nextGaussian() * 0.08D);
 			float deathTimeProgression = ((float) entityIn.dragonDeathTime + partialTicks) / 200.0F;
-			VertexConsumer builder = buffer.getBuffer(EpicFightRenderTypes.getTriangulated(RenderType.dragonExplosionAlpha(DRAGON_EXPLODING_LOCATION)));
-			mesh.drawModelWithPose(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, deathTimeProgression, OverlayTexture.NO_OVERLAY, armature, poses);
-			VertexConsumer builder2 = buffer.getBuffer(EpicFightRenderTypes.getTriangulated(RenderType.entityDecal(DRAGON_LOCATION)));
-			mesh.drawModelWithPose(poseStack, builder2, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), armature, poses);
+			mesh.drawAnimated(poseStack, buffer, RenderType.dragonExplosionAlpha(DRAGON_EXPLODING_LOCATION), packedLight, 1.0F, 1.0F, 1.0F, deathTimeProgression, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
+			mesh.drawAnimated(poseStack, buffer, RenderType.entityDecal(DRAGON_LOCATION), packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), entitypatch.getArmature(), poses);
 		} else {
-			VertexConsumer builder = buffer.getBuffer(EpicFightRenderTypes.getTriangulated(RenderType.entityCutoutNoCull(DRAGON_LOCATION)));
-			mesh.drawModelWithPose(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), armature, poses);
+			mesh.drawAnimated(poseStack, buffer, RenderType.entityCutoutNoCull(DRAGON_LOCATION), packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), entitypatch.getArmature(), poses);
 		}
 		
 		if (Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes()) {

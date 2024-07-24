@@ -10,24 +10,24 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
-public class BlenderVertexBuilder {
-	public static List<BlenderVertexBuilder> createVertexIndicator(int[] drawingIndices) {
-		List<BlenderVertexBuilder> vertexIndicators = Lists.newArrayList();
+public class VertexBuilder {
+	public static List<VertexBuilder> createVertexIndicator(int[] drawingIndices) {
+		List<VertexBuilder> vertexIndicators = Lists.newArrayList();
 		
 		for (int i = 0; i < drawingIndices.length / 3; i++) {
 			int k = i * 3;
 			int position = drawingIndices[k];
 			int uv = drawingIndices[k + 1];
 			int normal = drawingIndices[k + 2];
-			BlenderVertexBuilder vi = new BlenderVertexBuilder(position, uv, normal);
+			VertexBuilder vi = new VertexBuilder(position, uv, normal);
 			vertexIndicators.add(vi);
 		}
 		
 		return vertexIndicators;
 	}
 	
-	public static List<BlenderAnimatedVertexBuilder> createAnimated(int[] drawingIndices, int[] affectingJointCount, int[] animationIndices) {
-		List<BlenderAnimatedVertexBuilder> vertexIndicators = Lists.newArrayList();
+	public static List<AnimatedVertexBuilder> createAnimated(int[] drawingIndices, int[] affectingJointCount, int[] animationIndices) {
+		List<AnimatedVertexBuilder> vertexIndicators = Lists.newArrayList();
 		Vector3i[] aJointId = new Vector3i[affectingJointCount.length];
 		Vector3i[] aWeights = new Vector3i[affectingJointCount.length];
 		int[] counts = new int[affectingJointCount.length];
@@ -35,21 +35,21 @@ public class BlenderVertexBuilder {
 		
 		for (int i = 0; i < affectingJointCount.length; i++) {
 			int count = affectingJointCount[i];
-			Vector3i joinId = new Vector3i();
-			Vector3i weights = new Vector3i();
+			Vector3i jointId = new Vector3i(-1, -1, -1);
+			Vector3i weights = new Vector3i(-1, -1, -1);
 			
 			for (int j = 0; j < count; j++) {
 				switch (j) {
 				case 0 -> {
-					joinId.x = animationIndices[indexPointer * 2];
+					jointId.x = animationIndices[indexPointer * 2];
 					weights.x = animationIndices[indexPointer * 2 + 1];
 				}
 				case 1 -> {
-					joinId.y = animationIndices[indexPointer * 2];
+					jointId.y = animationIndices[indexPointer * 2];
 					weights.y = animationIndices[indexPointer * 2 + 1];
 				}
 				case 2 -> {
-					joinId.z = animationIndices[indexPointer * 2];
+					jointId.z = animationIndices[indexPointer * 2];
 					weights.z = animationIndices[indexPointer * 2 + 1];
 				}
 				}
@@ -58,7 +58,7 @@ public class BlenderVertexBuilder {
 			}
 			
 			counts[i] = count;
-			aJointId[i] = joinId;
+			aJointId[i] = jointId;
 			aWeights[i] = weights;
 		}
 		
@@ -67,7 +67,7 @@ public class BlenderVertexBuilder {
 			int position = drawingIndices[k];
 			int uv = drawingIndices[k + 1];
 			int normal = drawingIndices[k + 2];
-			BlenderAnimatedVertexBuilder vi = new BlenderAnimatedVertexBuilder(position, uv, normal, aJointId[position], aWeights[position], counts[i]);
+			AnimatedVertexBuilder vi = new AnimatedVertexBuilder(position, uv, normal, aJointId[position], aWeights[position], counts[position]);
 			vertexIndicators.add(vi);
 		}
 		
@@ -78,9 +78,30 @@ public class BlenderVertexBuilder {
 	public final int uv;
 	public final int normal;
 	
-	public BlenderVertexBuilder(int position, int uv, int normal) {
+	public VertexBuilder(int position, int uv, int normal) {
 		this.position = position;
 		this.uv = uv;
 		this.normal = normal;
 	}
+	
+	@Override
+	public boolean equals(Object o) {
+		if (o instanceof VertexBuilder vb) {
+			return this.position == vb.position && this.uv == vb.uv && this.normal == vb.normal;
+		}
+		
+		return false;
+	}
+	
+	@Override
+	public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        
+        result = prime * result + this.position;
+        result = prime * result + this.uv;
+        result = prime * result + this.normal;
+        
+        return result;
+    }
 }

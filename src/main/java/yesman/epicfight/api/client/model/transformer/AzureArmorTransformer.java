@@ -34,7 +34,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.forgeevent.AnimatedArmorTextureEvent;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.Meshes;
-import yesman.epicfight.api.client.model.BlenderSingleVertexBuilder;
+import yesman.epicfight.api.client.model.SingleGroupVertexBuilder;
 import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec3f;
 
@@ -168,7 +168,7 @@ public class AzureArmorTransformer extends HumanoidModelTransformer {
 	}
 	
 	private static AnimatedMesh bakeMeshFromCubes(List<GeoModelPartition> partitions) {
-		List<BlenderSingleVertexBuilder> vertices = Lists.newArrayList();
+		List<SingleGroupVertexBuilder> vertices = Lists.newArrayList();
 		Map<String, IntList> indices = Maps.newHashMap();
 		PoseStack poseStack = new PoseStack();
 		PartTransformer.IndexCounter indexCounter = new PartTransformer.IndexCounter();
@@ -177,10 +177,10 @@ public class AzureArmorTransformer extends HumanoidModelTransformer {
 			bake(poseStack, modelpartition, modelpartition.geoBone, vertices, indices, indexCounter);
 		}
 		
-		return BlenderSingleVertexBuilder.loadVertexInformation(vertices, indices);
+		return SingleGroupVertexBuilder.loadVertexInformation(vertices, indices);
 	}
 	
-	private static void bake(PoseStack poseStack, GeoModelPartition modelpartition, GeoBone geoBone, List<BlenderSingleVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+	private static void bake(PoseStack poseStack, GeoModelPartition modelpartition, GeoBone geoBone, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 		if (geoBone == null) {
 			return;
 		}
@@ -219,7 +219,7 @@ public class AzureArmorTransformer extends HumanoidModelTransformer {
 			this.jointId = jointId;
 		}
 		
-		public void bakeCube(PoseStack poseStack, String partName, GeoCube cube, List<BlenderSingleVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+		public void bakeCube(PoseStack poseStack, String partName, GeoCube cube, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 			for (GeoQuad quad : cube.quads()) {
 				if (quad == null) {
 					continue;
@@ -232,7 +232,7 @@ public class AzureArmorTransformer extends HumanoidModelTransformer {
 					Vector4f pos = new Vector4f(vertex.position(), 1.0F);
 					pos.mul(poseStack.last().pose());
 					
-					vertices.add(new BlenderSingleVertexBuilder()
+					vertices.add(new SingleGroupVertexBuilder()
 						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z())/*.scale(0.0625F)*/)
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
 						.setTextureCoordinate(new Vec2f(vertex.texU(), vertex.texV()))
@@ -265,7 +265,7 @@ public class AzureArmorTransformer extends HumanoidModelTransformer {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName, GeoCube cube, List<BlenderSingleVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+		public void bakeCube(PoseStack poseStack, String partName, GeoCube cube, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 			Vec3 centerOfCube = getCenterOfCube(poseStack, cube);
 			
 			if (!this.noneAttachmentArea.contains(centerOfCube)) {
@@ -382,7 +382,7 @@ public class AzureArmorTransformer extends HumanoidModelTransformer {
 						weight1 = weight2;
 					}
 					
-					vertices.add(new BlenderSingleVertexBuilder()
+					vertices.add(new SingleGroupVertexBuilder()
 						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
 						.setTextureCoordinate(new Vec2f(vertex.u, vertex.v))
@@ -460,7 +460,7 @@ public class AzureArmorTransformer extends HumanoidModelTransformer {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName, GeoCube cube, List<BlenderSingleVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+		public void bakeCube(PoseStack poseStack, String partName, GeoCube cube, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 			Vec3 centerOfCube = getCenterOfCube(poseStack, cube);
 			
 			if (!this.noneAttachmentArea.contains(centerOfCube)) {
@@ -555,7 +555,7 @@ public class AzureArmorTransformer extends HumanoidModelTransformer {
 				for (AnimatedVertex vertex : quad.animatedVertexPositions) {
 					Vector4f pos = new Vector4f(vertex.pos, 1.0F);
 					
-					vertices.add(new BlenderSingleVertexBuilder()
+					vertices.add(new SingleGroupVertexBuilder()
 						.setPosition(new Vec3f(pos.x(), pos.y(), pos.z()))
 						.setNormal(new Vec3f(norm.x(), norm.y(), norm.z()))
 						.setTextureCoordinate(new Vec2f(vertex.u, vertex.v))

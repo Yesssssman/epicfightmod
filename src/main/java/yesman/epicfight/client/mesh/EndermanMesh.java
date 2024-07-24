@@ -6,7 +6,7 @@ import java.util.Map;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
-import yesman.epicfight.api.client.model.BlenderAnimatedVertexBuilder;
+import yesman.epicfight.api.client.model.AnimatedVertexBuilder;
 
 @OnlyIn(Dist.CLIENT)
 public class EndermanMesh extends AnimatedMesh {
@@ -18,7 +18,7 @@ public class EndermanMesh extends AnimatedMesh {
 	public final AnimatedModelPart leftLeg;
 	public final AnimatedModelPart rightLeg;
 	
-	public EndermanMesh(Map<String, float[]> arrayMap, Map<String, List<BlenderAnimatedVertexBuilder>> parts, AnimatedMesh parent, RenderProperties properties) {
+	public EndermanMesh(Map<String, float[]> arrayMap, Map<String, List<AnimatedVertexBuilder>> parts, AnimatedMesh parent, RenderProperties properties) {
 		super(arrayMap, parts, parent, properties);
 		
 		this.headTop = this.getOrLogException(this.parts, "headTop");

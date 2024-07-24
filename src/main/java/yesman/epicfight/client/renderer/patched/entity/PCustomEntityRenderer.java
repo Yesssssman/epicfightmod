@@ -1,7 +1,6 @@
 package yesman.epicfight.client.renderer.patched.entity;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -20,7 +19,6 @@ import yesman.epicfight.api.client.forgeevent.PrepareModelEvent;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
-import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
@@ -39,7 +37,7 @@ public class PCustomEntityRenderer extends PatchedEntityRenderer<LivingEntity, L
 		Minecraft mc = Minecraft.getInstance();
 		boolean isGlowing = mc.shouldEntityAppearGlowing(entity);
 		ResourceLocation textureLocation = renderer.getTextureLocation(entity);
-		RenderType renderType = EpicFightRenderTypes.getTriangulated(isGlowing ? RenderType.outline(textureLocation) : RenderType.entityCutoutNoCull(textureLocation));
+		RenderType renderType = isGlowing ? RenderType.outline(textureLocation) : RenderType.entityCutoutNoCull(textureLocation);
 		Armature armature = entitypatch.getArmature();
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, armature, entity, entitypatch, partialTicks);
@@ -50,8 +48,7 @@ public class PCustomEntityRenderer extends PatchedEntityRenderer<LivingEntity, L
 			PrepareModelEvent prepareModelEvent = new PrepareModelEvent(this, this.mesh, entitypatch, buffer, poseStack, packedLight, partialTicks);
 			
 			if (!MinecraftForge.EVENT_BUS.post(prepareModelEvent)) {
-				VertexConsumer builder = buffer.getBuffer(renderType);
-				mesh.drawModelWithPose(poseStack, builder, packedLight, 1.0F, 1.0F, 1.0F, !entity.isInvisibleTo(mc.player) ? 0.15F : 1.0F, this.getOverlayCoord(entity, entitypatch, partialTicks), armature, poseMatrices);
+				mesh.drawAnimated(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, !entity.isInvisibleTo(mc.player) ? 0.15F : 1.0F, this.getOverlayCoord(entity, entitypatch, partialTicks), entitypatch.getArmature(), poseMatrices);
 			}
 		}
 		

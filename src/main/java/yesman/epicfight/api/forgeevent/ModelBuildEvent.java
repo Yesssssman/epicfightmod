@@ -10,8 +10,8 @@ import net.minecraftforge.eventbus.api.Event;
 import net.minecraftforge.fml.event.IModBusEvent;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.AnimatedMesh.AnimatedModelPart;
-import yesman.epicfight.api.client.model.BlenderAnimatedVertexBuilder;
-import yesman.epicfight.api.client.model.BlenderVertexBuilder;
+import yesman.epicfight.api.client.model.AnimatedVertexBuilder;
+import yesman.epicfight.api.client.model.VertexBuilder;
 import yesman.epicfight.api.client.model.Mesh;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.client.model.Meshes.MeshContructor;
@@ -44,11 +44,11 @@ public abstract class ModelBuildEvent<T> extends Event implements IModBusEvent {
 			super(resourceManager, registerMap);
 		}
 		
-		public <M extends RawMesh> M getRaw(String modid, String path, MeshContructor<RawModelPart, BlenderVertexBuilder, M> constructor) {
+		public <M extends RawMesh> M getRaw(String modid, String path, MeshContructor<RawModelPart, VertexBuilder, M> constructor) {
 			return Meshes.getOrCreateRawMesh(this.resourceManager, new ResourceLocation(modid, path), constructor);
 		}
 		
-		public <M extends AnimatedMesh> M getAnimated(String modid, String path, MeshContructor<AnimatedModelPart, BlenderAnimatedVertexBuilder, M> constructor) {
+		public <M extends AnimatedMesh> M getAnimated(String modid, String path, MeshContructor<AnimatedModelPart, AnimatedVertexBuilder, M> constructor) {
 			return Meshes.getOrCreateAnimatedMesh(this.resourceManager, new ResourceLocation(modid, path), constructor);
 		}
 	}

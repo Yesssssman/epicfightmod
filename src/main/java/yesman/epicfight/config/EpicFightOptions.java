@@ -32,6 +32,7 @@ public class EpicFightOptions {
 	public final BooleanOptionHandler aimingCorrection;
 	public final BooleanOptionHandler showEpicFightAttributes;
 	public final IntegerOptionHandler maxStuckProjectiles;
+	public final BooleanOptionHandler useAnimationShader;
 	public final Set<Item> battleAutoSwitchItems;
 	public final Set<Item> miningAutoSwitchItems;
 	public int aimHelperRealColor;
@@ -73,6 +74,8 @@ public class EpicFightOptions {
 		this.aimingCorrection = new BooleanOptionHandler(config.aimingCorrection.get());
 		this.showEpicFightAttributes = new BooleanOptionHandler(config.showEpicFightAttributes.get());
 		this.maxStuckProjectiles = new IntegerOptionHandler(config.maxStuckProjectiles.get(), 1, 30);
+		this.useAnimationShader = new BooleanOptionHandler(config.useAnimationShader.get());
+		
 		this.battleAutoSwitchItems = config.battleAutoSwitchItems.get().stream()
 				.map(itemName -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName)))
 				.filter(Objects::nonNull)

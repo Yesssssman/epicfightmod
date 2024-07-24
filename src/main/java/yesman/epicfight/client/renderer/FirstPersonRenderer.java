@@ -26,7 +26,6 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.client.model.AnimatedMesh.AnimatedModelPart;
 import yesman.epicfight.api.client.model.Meshes;
-import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -54,18 +53,17 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 	}
 	
 	@Override
-	public void render(LocalPlayer entityIn, LocalPlayerPatch entitypatch, LivingEntityRenderer<LocalPlayer, PlayerModel<LocalPlayer>> renderer, MultiBufferSource buffer, PoseStack matStackIn, int packedLightIn, float partialTicks) {
-		Armature armature = entitypatch.getArmature();
+	public void render(LocalPlayer entity, LocalPlayerPatch entitypatch, LivingEntityRenderer<LocalPlayer, PlayerModel<LocalPlayer>> renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
 		Pose pose = entitypatch.getAnimator().getPose(partialTicks);
-		OpenMatrix4f[] poses = armature.getPoseAsTransformMatrix(pose);
-		matStackIn.pushPose();
+		OpenMatrix4f[] poses = entitypatch.getArmature().getPoseAsTransformMatrix(pose, false);
+		poseStack.pushPose();
 		OpenMatrix4f mat = entitypatch.getArmature().getBindedTransformFor(pose, Armatures.BIPED.head);
 		mat.translate(0, 0.2F, 0);
 		
 		Vec3f translateVectorOfHead = mat.toTranslationVector();
-		matStackIn.translate(-translateVectorOfHead.x, -translateVectorOfHead.y, -translateVectorOfHead.z);
+		poseStack.translate(-translateVectorOfHead.x, -translateVectorOfHead.y, -translateVectorOfHead.z);
 		HumanoidMesh mesh = this.getMesh(entitypatch);
-		this.prepareModel(mesh, entityIn, entitypatch, renderer);
+		this.prepareModel(mesh, entity, entitypatch, renderer);
 		
 		if (!entitypatch.getOriginal().isInvisible()) {
 			for (AnimatedModelPart p : mesh.getAllParts()) {
@@ -77,15 +75,15 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 			mesh.leftSleeve.setHidden(false);
 			mesh.rightSleeve.setHidden(false);
 			
-			mesh.drawModelWithPose(matStackIn, buffer.getBuffer(EpicFightRenderTypes.getTriangulated(RenderType.entityCutoutNoCull(entityIn.getSkinTextureLocation()))),
-					packedLightIn, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
+			RenderType renderType = RenderType.entityCutoutNoCull(entity.getSkinTextureLocation());
+			mesh.drawAnimated(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
 		}
 		
-		if (!entityIn.isSpectator()) {
-			renderLayer(renderer, entitypatch, entityIn, poses, buffer, matStackIn, packedLightIn, partialTicks);
+		if (!entity.isSpectator()) {
+			renderLayer(renderer, entitypatch, entity, poses, buffer, poseStack, packedLight, partialTicks);
 		}
 		
-		matStackIn.popPose();
+		poseStack.popPose();
 	}
 	
 	@Override

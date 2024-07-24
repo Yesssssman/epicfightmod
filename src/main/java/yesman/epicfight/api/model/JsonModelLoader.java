@@ -40,8 +40,8 @@ import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.AnimatedMesh.AnimatedModelPart;
-import yesman.epicfight.api.client.model.BlenderAnimatedVertexBuilder;
-import yesman.epicfight.api.client.model.BlenderVertexBuilder;
+import yesman.epicfight.api.client.model.AnimatedVertexBuilder;
+import yesman.epicfight.api.client.model.VertexBuilder;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.client.model.Meshes.MeshContructor;
 import yesman.epicfight.api.client.model.RawMesh;
@@ -153,7 +153,7 @@ public class JsonModelLoader {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public <T extends RawMesh> T loadMesh(MeshContructor<RawModelPart, BlenderVertexBuilder, T> constructor) {
+	public <T extends RawMesh> T loadMesh(MeshContructor<RawModelPart, VertexBuilder, T> constructor) {
 		ResourceLocation parent = this.getParent();
 		
 		if (parent != null) {
@@ -192,7 +192,7 @@ public class JsonModelLoader {
 			float[] uvArray = ParseUtil.toFloatArray(uvs.get("array").getAsJsonArray());
 			
 			Map<String, float[]> arrayMap = Maps.newHashMap();
-			Map<String, List<BlenderVertexBuilder>> meshMap = Maps.newHashMap();
+			Map<String, List<VertexBuilder>> meshMap = Maps.newHashMap();
 			
 			arrayMap.put("positions", positionArray);
 			arrayMap.put("normals", normalArray);
@@ -200,12 +200,12 @@ public class JsonModelLoader {
 			
 			if (parts != null) {
 				for (Map.Entry<String, JsonElement> e : parts.entrySet()) {
-					meshMap.put(e.getKey(), BlenderVertexBuilder.createVertexIndicator(ParseUtil.toIntArray(e.getValue().getAsJsonObject().get("array").getAsJsonArray())));
+					meshMap.put(e.getKey(), VertexBuilder.createVertexIndicator(ParseUtil.toIntArray(e.getValue().getAsJsonObject().get("array").getAsJsonArray())));
 				}
 			}
 			
 			if (indices != null) {
-				meshMap.put("noGroups", BlenderVertexBuilder.createVertexIndicator(ParseUtil.toIntArray(indices.get("array").getAsJsonArray())));
+				meshMap.put("noGroups", VertexBuilder.createVertexIndicator(ParseUtil.toIntArray(indices.get("array").getAsJsonArray())));
 			}
 			
 			return constructor.invoke(arrayMap, meshMap, null, this.getRenderProperties());
@@ -213,7 +213,7 @@ public class JsonModelLoader {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public <T extends AnimatedMesh> T loadAnimatedMesh(MeshContructor<AnimatedModelPart, BlenderAnimatedVertexBuilder, T> constructor) {
+	public <T extends AnimatedMesh> T loadAnimatedMesh(MeshContructor<AnimatedModelPart, AnimatedVertexBuilder, T> constructor) {
 		ResourceLocation parent = this.getParent();
 		
 		if (parent != null) {
@@ -258,7 +258,7 @@ public class JsonModelLoader {
 			int[] vcountArray = ParseUtil.toIntArray(vcounts.get("array").getAsJsonArray());
 			
 			Map<String, float[]> arrayMap = Maps.newHashMap();
-			Map<String, List<BlenderAnimatedVertexBuilder>> meshMap = Maps.newHashMap();
+			Map<String, List<AnimatedVertexBuilder>> meshMap = Maps.newHashMap();
 			
 			arrayMap.put("positions", positionArray);
 			arrayMap.put("normals", normalArray);
@@ -267,12 +267,12 @@ public class JsonModelLoader {
 			
 			if (parts != null) {
 				for (Map.Entry<String, JsonElement> e : parts.entrySet()) {
-					meshMap.put(e.getKey(), (BlenderVertexBuilder.createAnimated(ParseUtil.toIntArray(e.getValue().getAsJsonObject().get("array").getAsJsonArray()), vcountArray, animationIndexArray)));
+					meshMap.put(e.getKey(), VertexBuilder.createAnimated(ParseUtil.toIntArray(e.getValue().getAsJsonObject().get("array").getAsJsonArray()), vcountArray, animationIndexArray));
 				}
 			}
 			
 			if (indices != null) {
-				meshMap.put("noGroups", (BlenderVertexBuilder.createAnimated(ParseUtil.toIntArray(indices.get("array").getAsJsonArray()), vcountArray, animationIndexArray)));
+				meshMap.put("noGroups", VertexBuilder.createAnimated(ParseUtil.toIntArray(indices.get("array").getAsJsonArray()), vcountArray, animationIndexArray));
 			}
 			
 			return constructor.invoke(arrayMap, meshMap, null, this.getRenderProperties());

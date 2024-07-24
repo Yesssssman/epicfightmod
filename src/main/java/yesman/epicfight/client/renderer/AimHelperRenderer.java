@@ -1,5 +1,7 @@
 package yesman.epicfight.client.renderer;
 
+import org.joml.Matrix4f;
+
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
@@ -16,13 +18,12 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
-import org.joml.Matrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
 public class AimHelperRenderer {
-	public void doRender(PoseStack matStackIn, float partialTicks) {
+	public void doRender(PoseStack poseStack, float partialTicks) {
 		if (!EpicFightMod.CLIENT_CONFIGS.enableAimHelperPointer.getValue()) {
 			return;
 		}
@@ -38,10 +39,10 @@ public class AimHelperRenderer {
 		
 		Camera renderInfo = minecraft.gameRenderer.getMainCamera();
 		Vec3 projectedView = renderInfo.getPosition();
-		matStackIn.pushPose();
-		matStackIn.translate(-projectedView.x, -projectedView.y, -projectedView.z);
+		poseStack.pushPose();
+		poseStack.translate(-projectedView.x, -projectedView.y, -projectedView.z);
 		
-		Matrix4f matrix = matStackIn.last().pose();
+		Matrix4f matrix = poseStack.last().pose();
 		
 		int color = EpicFightMod.CLIENT_CONFIGS.aimHelperRealColor;
 		float f1 = (float)(color >> 16 & 255) / 255.0F;
@@ -61,6 +62,6 @@ public class AimHelperRenderer {
 		bufferBuilder.vertex(matrix, pos1.x, pos1.y, pos1.z).color(f1, f2, f3, 0.5F).normal(pos2.x - pos1.x, pos2.y - pos1.y, pos2.z - pos1.z).endVertex();
 		tesselator.end();
 		
-		matStackIn.popPose();
+		poseStack.popPose();
 	}
 }

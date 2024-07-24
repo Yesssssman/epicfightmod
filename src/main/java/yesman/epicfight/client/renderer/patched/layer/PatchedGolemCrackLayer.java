@@ -4,7 +4,6 @@ import java.util.Map;
 
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.blaze3d.vertex.VertexConsumer;
 
 import net.minecraft.client.model.IronGolemModel;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -17,7 +16,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.mesh.IronGolemMesh;
-import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.world.capabilities.entitypatch.mob.IronGolemPatch;
 
 @OnlyIn(Dist.CLIENT)
@@ -36,8 +34,7 @@ public class PatchedGolemCrackLayer extends ModelRenderLayer<IronGolem, IronGole
 		IronGolem.Crackiness crack = golementity.getCrackiness();
 		
 		if (crack != IronGolem.Crackiness.NONE) {
-			VertexConsumer ivertexbuilder = buffer.getBuffer(EpicFightRenderTypes.getTriangulated(RenderType.entityCutoutNoCull(CRACK_MAP.get(crack))));
-			this.mesh.drawModelWithPose(postStack, ivertexbuilder, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
+			this.mesh.drawAnimated(postStack, buffer, RenderType.entityCutoutNoCull(CRACK_MAP.get(crack)), packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
 		}
 	}
 }
