@@ -496,7 +496,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		return this.chargingSkill;
 	}
 	
-	public boolean footsOnGround() {
+	public boolean isInAir() {
 		return this.original.isFallFlying() || this.currentLivingMotion == LivingMotions.FALL;
 	}
 	

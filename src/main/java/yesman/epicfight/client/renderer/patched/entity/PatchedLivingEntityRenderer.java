@@ -136,7 +136,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		Armature armature = entitypatch.getArmature();
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
-		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks);
+		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks, false);
 		
 		if (renderType != null) {
 		    this.prepareVanillaModel(entityIn, renderer.getModel(), renderer, partialTicks);

@@ -66,10 +66,10 @@ public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends Li
 		}
 	}
 	
-	public OpenMatrix4f[] getPoseMatrices(T entitypatch, Armature armature, float partialTicks) {
+	public OpenMatrix4f[] getPoseMatrices(T entitypatch, Armature armature, float partialTicks, boolean toOrigin) {
 		Pose pose = entitypatch.getAnimator().getPose(partialTicks);
         this.setJointTransforms(entitypatch, armature, pose, partialTicks);
-		OpenMatrix4f[] poseMatrices = armature.getPoseAsTransformMatrix(pose, false);
+		OpenMatrix4f[] poseMatrices = armature.getPoseAsTransformMatrix(pose, toOrigin);
 		
 		return poseMatrices;
 	}

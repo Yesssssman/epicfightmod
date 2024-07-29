@@ -1706,7 +1706,7 @@ public class Animations {
 				.addProperty(StaticAnimationProperty.PLAY_SPEED_MODIFIER, Animations.ReusableSources.CONSTANT_ONE)
 				.addEvents(
 					TimeStampedEvent.create(0.05F, ReusableSources.PLAY_SOUND, AnimationEvent.Side.SERVER).params(EpicFightSounds.SWORD_IN.get()),
-					TimeStampedEvent.create(0.7F, (entitypatch, animation, params) -> {
+					TimeStampedEvent.create(0.65F, (entitypatch, animation, params) -> {
 						Entity entity = entitypatch.getOriginal();
 						entity.level().addParticle(EpicFightParticles.ENTITY_AFTER_IMAGE.get(), entity.getX(), entity.getY(), entity.getZ(), Double.longBitsToDouble(entity.getId()), 0, 0);
 						RandomSource random = entitypatch.getOriginal().getRandom();

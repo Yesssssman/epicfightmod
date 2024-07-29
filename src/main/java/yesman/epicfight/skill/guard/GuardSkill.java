@@ -347,7 +347,7 @@ public class GuardSkill extends Skill {
 	
 	@Override
 	public boolean isExecutableState(PlayerPatch<?> executer) {
-		return !(executer.footsOnGround() || executer.getEntityState().hurt()) && executer.getEntityState().canUseSkill() && executer.isBattleMode();
+		return !(executer.isInAir() || executer.getEntityState().hurt()) && executer.getEntityState().canUseSkill() && executer.isBattleMode();
 	}
 	
 	protected boolean isBlockableSource(DamageSource damageSource, boolean advanced) {

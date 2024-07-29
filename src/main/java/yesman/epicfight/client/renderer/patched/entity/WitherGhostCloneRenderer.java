@@ -35,7 +35,7 @@ public class WitherGhostCloneRenderer extends PatchedEntityRenderer<WitherGhostC
 		
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
-		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks);
+		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks, false);
 		mesh.draw(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, tranparency, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poseMatrices);
 		
 		if (Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes()) {

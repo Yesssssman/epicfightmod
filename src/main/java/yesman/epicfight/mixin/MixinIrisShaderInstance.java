@@ -48,17 +48,18 @@ public abstract class MixinIrisShaderInstance {
 			IRISCompat.putIrisShaderProvider(name, () -> {
 				try {
 					ShaderParser shaderParser = new ShaderParser(resourceFactory, name);
+					boolean hasNormalAttribute = shaderParser.hasAttribute("Normal");
 					
 					if (shaderParser.hasAttribute("Color")) {
-						shaderParser.addUniform("iris_Color", ShaderParser.GLSLType.VEC4, "in vec4 iris_Color;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, new Double[] {1.0D, 1.0D, 1.0D, 1.0D});
+						shaderParser.addUniform("iris_Color", ShaderParser.GLSLType.VEC4, "in .* iris_Color;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, new Double[] {1.0D, 1.0D, 1.0D, 1.0D});
 					}
 					
 					if (shaderParser.hasAttribute("UV1")) {
-						shaderParser.addUniform("iris_UV1", ShaderParser.GLSLType.IVEC2, "in ivec2 iris_UV1;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, new Integer[] {0, 0});
+						shaderParser.addUniform("iris_UV1", ShaderParser.GLSLType.IVEC2, "in .* iris_UV1;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, new Integer[] {0, 0});
 					}
 					
 					if (shaderParser.hasAttribute("UV2")) {
-						shaderParser.addUniform("iris_UV2", ShaderParser.GLSLType.IVEC2, "in ivec2 iris_UV2;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, new Integer[] {0, 0});
+						shaderParser.addUniform("iris_UV2", ShaderParser.GLSLType.IVEC2, "in .* iris_UV2;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, new Integer[] {0, 0});
 					}
 					
 					shaderParser.remove("Color", ShaderParser.Usage.ATTRIBUTE, ShaderParser.ExceptionHandler.IGNORE);
@@ -70,14 +71,23 @@ public abstract class MixinIrisShaderInstance {
 					shaderParser.addAttribute("Joints", ShaderParser.GLSLType.IVEC3);
 					shaderParser.addAttribute("Weights", ShaderParser.GLSLType.VEC3);
 					
-					shaderParser.addUniform("iris_Normal_Mv_Matrix", ShaderParser.GLSLType.MATRIX3F, null);
+					if (hasNormalAttribute) {
+						shaderParser.addUniform("iris_Normal_Mv_Matrix", ShaderParser.GLSLType.MATRIX3F, null);
+					}
+					
 					shaderParser.addUniformArray("iris_Poses", ShaderParser.GLSLType.MATRIX4F, null, ShaderParser.MAX_JOINTS);
 					
 					shaderParser.replaceScript("iris_Position", "Position_a", -1, ShaderParser.ExceptionHandler.NO_MATCHES, "in vec3 iris_Position;");
-					shaderParser.replaceScript("iris_Normal", "Normal_a", -1, ShaderParser.ExceptionHandler.NO_MATCHES, "in vec3 iris_Normal;", "iris_NormalMat", "uniform mat3 iris_Normal_Mv_Matrix;");
+					
+					if (hasNormalAttribute) {
+						shaderParser.replaceScript("iris_Normal", "Normal_a", -1, ShaderParser.ExceptionHandler.NO_MATCHES, "in .* iris_Normal;", "iris_NormalMat", "uniform mat3 iris_Normal_Mv_Matrix;");
+					}
 					
 					shaderParser.insertToScript("in vec3 iris_Position;", "\nvec3 Position_a = vec3(0.0);", 0, ShaderParser.InsertPosition.FOLLOWING);
-					shaderParser.insertToScript("in vec3 iris_Normal;", "\nvec3 Normal_a = vec3(0.0);", 0, ShaderParser.InsertPosition.FOLLOWING);
+					
+					if (hasNormalAttribute) {
+						shaderParser.insertToScript("in vec3 iris_Normal;", "\nvec3 Normal_a = vec3(0.0);", 0, ShaderParser.InsertPosition.FOLLOWING);
+					}
 					
 					shaderParser.insertToScript("void main\\(\\) \\{",
 											    "\n\nvoid setAnimationPosition() {\n"
@@ -87,23 +97,26 @@ public abstract class MixinIrisShaderInstance {
 											  + "        vec4 posePosition = jointTransform * vec4(iris_Position, 1.0);\n"
 											  + "        Position_a += vec3(posePosition.xyz) * Weights[i];\n"
 											  + "    }\n"
-											  + "}\n"
-											  + "\n"
-											  + "void setAnimationNormal() {\n"
-											  + "    \n"
-											  + "    for(int i=0;i<3;i++)\n"
-											  + "    {\n"
-											  + "        mat4 jointTransform = iris_Poses[Joints[i]];\n"
-											  + "        vec4 poseNormal = jointTransform * vec4(iris_Normal, 1.0);\n"
-											  + "        Normal_a += vec3(poseNormal.xyz) * Weights[i];\n"
-											  + "    }\n"
-											  + "    \n"
-											  + "    Normal_a = iris_Normal_Mv_Matrix * Normal_a;\n"
 											  + "}\n", 0, ShaderParser.InsertPosition.PRECEDING);
 					
-					shaderParser.insertToScript("void main\\(\\) \\{",
-											    "\n    setAnimationPosition();"
-											  + "\n    setAnimationNormal();", 0, ShaderParser.InsertPosition.FOLLOWING);
+					if (hasNormalAttribute) {
+						shaderParser.insertToScript("void main\\(\\) \\{",
+												    "\n\nvoid setAnimationNormal() {\n"
+												  + "    \n"
+												  + "    for(int i=0;i<3;i++)\n"
+												  + "    {\n"
+												  + "        mat4 jointTransform = iris_Poses[Joints[i]];\n"
+												  + "        vec4 poseNormal = jointTransform * vec4(iris_Normal, 1.0);\n"
+												  + "        Normal_a += vec3(poseNormal.xyz) * Weights[i];\n"
+												  + "    }\n"
+												  + "    \n"
+												  + "    Normal_a = iris_Normal_Mv_Matrix * Normal_a;\n"
+												  + "}\n", 0, ShaderParser.InsertPosition.PRECEDING);
+						
+						shaderParser.insertToScript("void main\\(\\) \\{", "\n    setAnimationNormal();", 0, ShaderParser.InsertPosition.FOLLOWING);
+					}
+					
+					shaderParser.insertToScript("void main\\(\\) \\{", "\n    setAnimationPosition();", 0, ShaderParser.InsertPosition.FOLLOWING);
 					
 					Map<ResourceLocation, Resource> cache = Maps.newHashMap();
 					shaderParser.addToResourceCache(cache);
@@ -111,8 +124,8 @@ public abstract class MixinIrisShaderInstance {
 					ResourceLocation rl = new ResourceLocation(name);
 					VertexFormat animationvertexFormat = EpicFightRenderTypes.getAnimationVertexFormat(vertexFormat);
 					
-					return new IrisAnimationShader(resourceProvider, EpicFightMod.MODID + ":" + rl.getPath(), animationvertexFormat, usesTessellation, writingToBeforeTranslucent, writingToAfterTranslucent, blendModeOverride, alphaTest, uniformCreator,
-													samplerCreator, isIntensity, parent, bufferBlendOverrides, customUniforms);
+					return new IrisAnimationShader(resourceProvider, EpicFightMod.MODID + ":" + rl.getPath(), animationvertexFormat, usesTessellation, writingToBeforeTranslucent, writingToAfterTranslucent, blendModeOverride, alphaTest,
+													uniformCreator, samplerCreator, isIntensity, parent, bufferBlendOverrides, customUniforms);
 				} catch (IOException e) {
 					throw new ShaderParsingException(e);
 				}

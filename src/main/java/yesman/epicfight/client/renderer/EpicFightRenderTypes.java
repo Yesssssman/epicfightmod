@@ -190,17 +190,18 @@ public class EpicFightRenderTypes extends RenderType {
 				ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
 				ResourceLocation shaderLocation = new ResourceLocation(shaderInstance.getName());
 				ShaderParser shaderParser = new ShaderParser(resourceManager, shaderInstance.getName());
+				boolean hasNormalAttribute = shaderParser.hasAttribute("Normal");
 				
 				if (shaderParser.hasAttribute("Color")) {
-					shaderParser.addUniform("Color", ShaderParser.GLSLType.VEC4, "in vec4 Color;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, new Double[] {1.0D, 1.0D, 1.0D, 1.0D});
+					shaderParser.addUniform("Color", ShaderParser.GLSLType.VEC4, "in .* Color;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, new Double[] {1.0D, 1.0D, 1.0D, 1.0D});
 				}
 				
 				if (shaderParser.hasAttribute("UV1")) {
-					shaderParser.addUniform("UV1", ShaderParser.GLSLType.IVEC2, "in ivec2 UV1;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, new Integer[] {0, 0});
+					shaderParser.addUniform("UV1", ShaderParser.GLSLType.IVEC2, "in .* UV1;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, new Integer[] {0, 0});
 				}
 				
 				if (shaderParser.hasAttribute("UV2")) {
-					shaderParser.addUniform("UV2", ShaderParser.GLSLType.IVEC2, "in ivec2 UV2;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, new Integer[] {0, 0});
+					shaderParser.addUniform("UV2", ShaderParser.GLSLType.IVEC2, "in .* UV2;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, new Integer[] {0, 0});
 				}
 				
 				shaderParser.remove("Color", ShaderParser.Usage.ATTRIBUTE, ShaderParser.ExceptionHandler.IGNORE);
@@ -208,16 +209,26 @@ public class EpicFightRenderTypes extends RenderType {
 				shaderParser.remove("UV2", ShaderParser.Usage.ATTRIBUTE, ShaderParser.ExceptionHandler.IGNORE);
 				shaderParser.addAttribute("Joints", ShaderParser.GLSLType.IVEC3);
 				shaderParser.addAttribute("Weights", ShaderParser.GLSLType.VEC3);
-				shaderParser.addUniform("Normal_Mv_Matrix", ShaderParser.GLSLType.MATRIX3F, null);
-				shaderParser.addUniformArray("Poses", ShaderParser.GLSLType.MATRIX4F, null, ShaderParser.MAX_JOINTS);
 				
+				if (hasNormalAttribute) {
+					shaderParser.addUniform("Normal_Mv_Matrix", ShaderParser.GLSLType.MATRIX3F, null);
+				}
+				
+				shaderParser.addUniformArray("Poses", ShaderParser.GLSLType.MATRIX4F, null, ShaderParser.MAX_JOINTS);
 				shaderParser.replaceScript("Position", "Position_a", -1, ShaderParser.ExceptionHandler.NO_MATCHES, "gl_Position", "in vec3 Position;");
-				shaderParser.replaceScript("Normal", "Normal_a", -1, ShaderParser.ExceptionHandler.NO_MATCHES, "uniform mat3 Normal_Mv_Matrix;", "in vec3 Normal;");
+				
+				if (hasNormalAttribute) {
+					shaderParser.replaceScript("Normal", "Normal_a", -1, ShaderParser.ExceptionHandler.NO_MATCHES, "uniform mat3 Normal_Mv_Matrix;", "in vec3 Normal;");
+				}
+				
+				shaderParser.insertToScript("in vec3 Position;", "\nvec3 Position_a = vec3(0.0);", 0, ShaderParser.InsertPosition.FOLLOWING);
+				
+				if (hasNormalAttribute) {
+					shaderParser.insertToScript("in vec3 Normal;", "\nvec3 Normal_a = vec3(0.0);", 0, ShaderParser.InsertPosition.FOLLOWING);
+				}
 				
 				shaderParser.insertToScript("void main\\(\\) \\{",
-											"\nvec3 Position_a = vec3(0.0);\n"
-										  + "vec3 Normal_a = vec3(0.0);\n"
-										  + "void setAnimationPosition() {\n"
+										    "void setAnimationPosition() {\n"
 										  + "    for(int i=0;i<3;i++)\n"
 										  + "    {\n"
 										  + "        mat4 jointTransform = Poses[Joints[i]];\n"
@@ -225,22 +236,26 @@ public class EpicFightRenderTypes extends RenderType {
 										  + "        Position_a += vec3(posePosition.xyz) * Weights[i];\n"
 										  + "    }\n"
 										  + "}\n"
-										  + "\n"
-										  + "void setAnimationNormal() {\n"
-										  + "    \n"
-										  + "    for(int i=0;i<3;i++)\n"
-										  + "    {\n"
-										  + "        mat4 jointTransform = Poses[Joints[i]];\n"
-										  + "        vec4 poseNormal = jointTransform * vec4(Normal, 1.0);\n"
-										  + "        Normal_a += vec3(poseNormal.xyz) * Weights[i];\n"
-										  + "    }\n"
-										  + "    \n"
-										  + "    Normal_a = Normal_Mv_Matrix * Normal_a;\n"
-										  + "}\n", 0, ShaderParser.InsertPosition.PRECEDING);
+										  + "\n", 0, ShaderParser.InsertPosition.PRECEDING);
 				
-				shaderParser.insertToScript("void main\\(\\) \\{",
-										    "\n    setAnimationPosition();"
-										  + "\n    setAnimationNormal();", 0, ShaderParser.InsertPosition.FOLLOWING);
+				if (hasNormalAttribute) {
+					shaderParser.insertToScript("void main\\(\\) \\{",
+											    "void setAnimationNormal() {\n"
+											  + "    \n"
+											  + "    for(int i=0;i<3;i++)\n"
+											  + "    {\n"
+											  + "        mat4 jointTransform = Poses[Joints[i]];\n"
+											  + "        vec4 poseNormal = jointTransform * vec4(Normal, 1.0);\n"
+											  + "        Normal_a += vec3(poseNormal.xyz) * Weights[i];\n"
+											  + "    }\n"
+											  + "    \n"
+											  + "    Normal_a = Normal_Mv_Matrix * Normal_a;\n"
+											  + "}\n", 0, ShaderParser.InsertPosition.PRECEDING);
+					
+					shaderParser.insertToScript("void main\\(\\) \\{", "\n    setAnimationNormal();", 0, ShaderParser.InsertPosition.FOLLOWING);
+				}
+				
+				shaderParser.insertToScript("void main\\(\\) \\{", "\n    setAnimationPosition();", 0, ShaderParser.InsertPosition.FOLLOWING);
 				
 				Map<ResourceLocation, Resource> cache = Maps.newHashMap();
 				cache.putAll(SHADER_LIBS);

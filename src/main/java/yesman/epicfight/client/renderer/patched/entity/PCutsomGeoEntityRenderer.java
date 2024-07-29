@@ -46,7 +46,7 @@ public class PCutsomGeoEntityRenderer<E extends LivingEntity & GeoAnimatable> ex
 		Armature armature = entitypatch.getArmature();
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
-		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks);
+		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks, false);
 		
 		if (renderType != null) {
 			this.mesh.initialize();

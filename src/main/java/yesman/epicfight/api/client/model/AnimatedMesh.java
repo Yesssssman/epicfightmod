@@ -93,6 +93,9 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 		List<Float> weightList = Lists.newArrayList();
 		Map<AnimatedVertexBuilder, Integer> vertexBuilderMap = Maps.newHashMap();
 		
+		int currentBoundVao = GlStateManager._getInteger(GL30.GL_VERTEX_ARRAY_BINDING);
+		int currentBoundVbo = GlStateManager._getInteger(GL30.GL_VERTEX_ARRAY_BUFFER_BINDING);
+		
 		GlStateManager._glBindVertexArray(this.arrayObjectId);
 		
 		for (AnimatedModelPart part : this.parts.values()) {
@@ -105,7 +108,8 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 		this.jointsBuffer.bindVertexData(jointList);
 		this.weightsBuffer.bindVertexData(weightList);
 		
-		GlStateManager._glBindVertexArray(0);
+		GlStateManager._glBindVertexArray(currentBoundVao);
+		GlStateManager._glBindBuffer(GL15.GL_ARRAY_BUFFER, currentBoundVbo);
 	}
 	
 	public void pointPositionsBuffer(int attrIndex) {
@@ -332,6 +336,9 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 		
 		animationShaderInstance.setupShaderLights();
 		
+		int currentBoundVao = GlStateManager._getInteger(GL30.GL_VERTEX_ARRAY_BINDING);
+		int currentBoundVbo = GlStateManager._getInteger(GL30.GL_VERTEX_ARRAY_BUFFER_BINDING);
+		
 		GlStateManager._glBindVertexArray(this.arrayObjectId);
 		EpicFightVertexFormatElement.bindDrawing(this);
 		
@@ -345,9 +352,10 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 		animationShaderInstance._clear();
 		animationShaderInstance._getVertexFormat().clearBufferState();
 		
-		GlStateManager._glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		EpicFightVertexFormatElement.unbindDrawing();
-		GlStateManager._glBindVertexArray(0);
+		
+		GlStateManager._glBindVertexArray(currentBoundVao);
+		GlStateManager._glBindBuffer(GL15.GL_ARRAY_BUFFER, currentBoundVbo);
 	}
 	
 	public int getMaxJointCount() {
@@ -463,6 +471,7 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 			
 			GlStateManager._glBindBuffer(GL15.GL_ARRAY_BUFFER, this.vertexBufferIds);
 			GlStateManager._glBufferData(GL15.GL_ARRAY_BUFFER, buf, GL15.GL_STATIC_DRAW);
+			GlStateManager._glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
 		}
 		
 		public void vertexAttribPointer(int attrIndex) {

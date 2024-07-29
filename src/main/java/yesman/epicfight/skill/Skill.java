@@ -133,7 +133,7 @@ public abstract class Skill {
 	}
 	
 	public boolean isExecutableState(PlayerPatch<?> executor) {
-		return !executor.getOriginal().isSpectator() && !executor.footsOnGround() && executor.getEntityState().canUseSkill();
+		return !executor.getOriginal().isSpectator() && !executor.isInAir() && executor.getEntityState().canUseSkill();
 	}
 	
 	public boolean canExecute(PlayerPatch<?> executor) {

@@ -46,7 +46,7 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 		Armature armature = entitypatch.getArmature();
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
-		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks);
+		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks, false);
 		
 		if (renderType != null) {
 			int transparencyCount = entitypatch.getTransparency();

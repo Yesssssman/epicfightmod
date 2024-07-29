@@ -44,7 +44,7 @@ public class PEnderDragonRenderer extends PatchedEntityRenderer<EnderDragon, End
 		Armature armature = entitypatch.getArmature();
 		poseStack.pushPose();
         this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
-		OpenMatrix4f[] poses = this.getPoseMatrices(entitypatch, armature, partialTicks);
+		OpenMatrix4f[] poses = this.getPoseMatrices(entitypatch, armature, partialTicks, false);
 		poses[0] = OpenMatrix4f.rotate(-90.0F, Vec3f.X_AXIS, poses[0], null);
 		
 		if (entityIn.dragonDeathTime > 0) {

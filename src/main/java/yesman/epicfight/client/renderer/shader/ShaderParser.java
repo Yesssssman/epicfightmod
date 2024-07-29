@@ -156,11 +156,11 @@ public class ShaderParser {
 	
 	private IoSupplier<InputStream> getVertexShaderScript() {
 		return () -> {
-			//System.out.println("Old script");
-			//System.out.println(this.vertexShaderScript.toString());
+			System.out.println("Old script");
+			System.out.println(this.vertexShaderScript.toString());
 			this.formatters.forEach((formatter) -> formatter.reformScript(this.vertexShaderScript));
-			//System.out.println("\nNew script");
-			//System.out.println(this.vertexShaderScript.toString());
+			System.out.println("\nNew script");
+			System.out.println(this.vertexShaderScript.toString());
 			return new ByteArrayInputStream(this.vertexShaderScript.toString().getBytes());
 		};
 	}

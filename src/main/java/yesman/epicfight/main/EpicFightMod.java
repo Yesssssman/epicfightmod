@@ -246,8 +246,6 @@ public class EpicFightMod {
     	bus.addListener(this::doServerStuff);
     	bus.addListener(this::addPackFindersEvent);
     	bus.addListener(this::buildCreativeTabWithSkillBooks);
-    	bus.addListener(EpicFightAttributes::entityAttributeCreationEvent);
-    	bus.addListener(EpicFightAttributes::entityAttributeModificationEvent);
     	bus.addListener(SkillManager::createSkillRegistry);
     	bus.addListener(SkillManager::registerSkills);
     	bus.addListener(EpicFightCapabilities::registerCapabilities);

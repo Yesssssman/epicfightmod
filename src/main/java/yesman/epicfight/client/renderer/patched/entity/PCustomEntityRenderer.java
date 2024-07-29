@@ -41,7 +41,7 @@ public class PCustomEntityRenderer extends PatchedEntityRenderer<LivingEntity, L
 		Armature armature = entitypatch.getArmature();
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, armature, entity, entitypatch, partialTicks);
-		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks);
+		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks, false);
 		
 		if (renderType != null) {
 		    AnimatedMesh mesh = this.getMesh(entitypatch);

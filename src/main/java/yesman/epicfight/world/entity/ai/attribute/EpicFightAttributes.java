@@ -12,6 +12,9 @@ import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.monster.AbstractSkeleton;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.event.entity.EntityAttributeModificationEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
@@ -33,6 +36,7 @@ import yesman.epicfight.world.capabilities.entitypatch.mob.ZombiePatch;
 import yesman.epicfight.world.entity.EpicFightEntities;
 import yesman.epicfight.world.entity.WitherGhostClone;
 
+@Mod.EventBusSubscriber(modid = EpicFightMod.MODID, bus=EventBusSubscriber.Bus.MOD)
 public class EpicFightAttributes {
 	static {
 		Attributes.ATTACK_DAMAGE.setSyncable(true);
@@ -60,12 +64,14 @@ public class EpicFightAttributes {
 	public static final UUID ATTACK_DAMAGE_MODIFIER = UUID.fromString("1c224694-19f3-11ec-9621-0242ac130002");
 	public static final UUID ATTACK_SPEED_MODIFIER = UUID.fromString("1c2249f0-19f3-11ec-9621-0242ac130002");
 	
+	@SubscribeEvent
 	public static void entityAttributeCreationEvent(EntityAttributeCreationEvent event) {
 		event.put(EpicFightEntities.WITHER_SKELETON_MINION.get(), AbstractSkeleton.createAttributes().build());
 		event.put(EpicFightEntities.WITHER_GHOST_CLONE.get(), WitherGhostClone.createAttributes().build());
 		event.put(EpicFightEntities.DODGE_LEFT.get(), LivingEntity.createLivingAttributes().build());
 	}
 	
+	@SubscribeEvent
 	public static void entityAttributeModificationEvent(EntityAttributeModificationEvent event) {
 		common(EntityType.CAVE_SPIDER, event);
 		common(EntityType.EVOKER, event);
