@@ -76,7 +76,7 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 			mesh.rightSleeve.setHidden(false);
 			
 			RenderType renderType = RenderType.entityCutoutNoCull(entity.getSkinTextureLocation());
-			mesh.drawAnimated(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
+			mesh.draw(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
 		}
 		
 		if (!entity.isSpectator()) {

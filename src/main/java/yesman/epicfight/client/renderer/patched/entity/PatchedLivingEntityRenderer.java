@@ -146,7 +146,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 			PrepareModelEvent prepareModelEvent = new PrepareModelEvent(this, mesh, entitypatch, buffer, poseStack, packedLight, partialTicks);
 			
 			if (!MinecraftForge.EVENT_BUS.post(prepareModelEvent)) {
-				mesh.drawAnimated(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, isVisibleToPlayer ? 0.15F : 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), armature, poseMatrices);
+				mesh.draw(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, isVisibleToPlayer ? 0.15F : 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), armature, poseMatrices);
 			}
 		}
 		

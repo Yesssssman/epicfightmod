@@ -27,6 +27,6 @@ public class PatchedEyesLayer<E extends LivingEntity, T extends LivingEntityPatc
 	
 	@Override
 	protected void renderLayer(T entitypatch, E entityliving, EyesLayer<E, M> vanillaLayer, PoseStack postStack, MultiBufferSource buffer, int packedLightIn, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
-		this.mesh.drawAnimated(postStack, buffer, this.renderType, 15728640, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
+		this.mesh.draw(postStack, buffer, this.renderType, 15728640, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
 	}
 }

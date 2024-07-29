@@ -56,7 +56,7 @@ public class PatchedWitherArmorLayer extends ModelRenderLayer<WitherBoss, Wither
 			
 			RenderType renderType = RenderType.energySwirl(WITHER_ARMOR_LOCATION, Mth.cos(progress * 0.02F) * 3.0F % 1.0F, progress * 0.01F % 1.0F);
 			
-			this.mesh.drawAnimated(poseStack, buffer, renderType, packedLight, transparency * 0.5F, transparency * 0.5F, transparency * 0.5F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
+			this.mesh.draw(poseStack, buffer, renderType, packedLight, transparency * 0.5F, transparency * 0.5F, transparency * 0.5F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
 			poseStack.popPose();
 		}
 	}

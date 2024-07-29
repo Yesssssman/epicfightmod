@@ -34,7 +34,7 @@ public class PatchedGolemCrackLayer extends ModelRenderLayer<IronGolem, IronGole
 		IronGolem.Crackiness crack = golementity.getCrackiness();
 		
 		if (crack != IronGolem.Crackiness.NONE) {
-			this.mesh.drawAnimated(postStack, buffer, RenderType.entityCutoutNoCull(CRACK_MAP.get(crack)), packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
+			this.mesh.draw(postStack, buffer, RenderType.entityCutoutNoCull(CRACK_MAP.get(crack)), packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
 		}
 	}
 }

@@ -130,7 +130,7 @@ public class ClientEvents {
 	}
 	
 	/**
-	 * Bad code: should be fixed after Forge allows to access any data that can figure out a respawn occurs from dimension changes
+	 * Bad code: should be fixed after Forge provides any parameters that can figure out if respawning caused by dimension changes
 	 */
 	@Deprecated
 	public static ClientboundRespawnPacket packet;
@@ -140,6 +140,9 @@ public class ClientEvents {
 		LocalPlayerPatch oldCap = EpicFightCapabilities.getEntityPatch(event.getOldPlayer(), LocalPlayerPatch.class);
 		LocalPlayerPatch newCap = EpicFightCapabilities.getEntityPatch(event.getNewPlayer(), LocalPlayerPatch.class);
 		
+		/**
+		 * oldCap == null when a player revives after it disappears
+		 */
 		if (oldCap != null) {
 			if (newCap != null) {
 				if (packet != null && packet.shouldKeep((byte)3)) {

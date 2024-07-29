@@ -53,7 +53,7 @@ public class PCutsomGeoEntityRenderer<E extends LivingEntity & GeoAnimatable> ex
 			PrepareModelEvent prepareModelEvent = new PrepareModelEvent(this, this.mesh, entitypatch, buffer, poseStack, packedLight, partialTicks);
 			
 			if (!MinecraftForge.EVENT_BUS.post(prepareModelEvent)) {
-				this.mesh.drawAnimated(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, isVisibleToPlayer ? 0.15F : 1.0F, renderer.getPackedOverlay(entityIn, partialTicks), entitypatch.getArmature(), poseMatrices);
+				this.mesh.draw(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, isVisibleToPlayer ? 0.15F : 1.0F, renderer.getPackedOverlay(entityIn, partialTicks), entitypatch.getArmature(), poseMatrices);
 			}
 		}
 		

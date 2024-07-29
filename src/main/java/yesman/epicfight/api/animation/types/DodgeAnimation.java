@@ -13,11 +13,13 @@ import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+import yesman.epicfight.world.damagesource.EpicFightDamageType;
 import yesman.epicfight.world.entity.DodgeLeft;
 
 public class DodgeAnimation extends ActionAnimation {
 	public static final Function<DamageSource, AttackResult.ResultType> DODGEABLE_SOURCE_VALIDATOR = (damagesource) -> {
-		if (damagesource.getEntity() != null && !damagesource.is(DamageTypeTags.IS_EXPLOSION) && !damagesource.is(DamageTypes.MAGIC) && !damagesource.is(DamageTypeTags.BYPASSES_ARMOR) && !damagesource.is(DamageTypeTags.BYPASSES_INVULNERABILITY)) {
+		if (damagesource.getEntity() != null && !damagesource.is(DamageTypeTags.IS_EXPLOSION) && !damagesource.is(DamageTypes.MAGIC) && !damagesource.is(DamageTypeTags.BYPASSES_ARMOR)
+												&& !damagesource.is(DamageTypeTags.BYPASSES_INVULNERABILITY) && !damagesource.is(EpicFightDamageType.BYPASS_DODGE)) {
 			return AttackResult.ResultType.MISSED;
 		}
 		
@@ -41,7 +43,7 @@ public class DodgeAnimation extends ActionAnimation {
 			.addState(EntityState.INACTION, true)
 			.newTimePair(0.0F, Float.MAX_VALUE)
 			.addState(EntityState.ATTACK_RESULT, DODGEABLE_SOURCE_VALIDATOR);
-
+		
 		this.addProperty(ActionAnimationProperty.AFFECT_SPEED, true);
 		this.addEvents(StaticAnimationProperty.ON_END_EVENTS, AnimationEvent.create(Animations.ReusableSources.RESTORE_BOUNDING_BOX, AnimationEvent.Side.BOTH));
 		this.addEvents(StaticAnimationProperty.EVENTS, AnimationEvent.create(Animations.ReusableSources.RESIZE_BOUNDING_BOX, AnimationEvent.Side.BOTH).params(EntityDimensions.scalable(width, height)));

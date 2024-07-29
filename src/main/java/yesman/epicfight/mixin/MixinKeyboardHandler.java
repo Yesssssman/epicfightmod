@@ -12,7 +12,6 @@ import net.minecraft.Util;
 import net.minecraft.client.KeyboardHandler;
 import yesman.epicfight.client.ClientEngine;
 
-
 @Mixin(value = KeyboardHandler.class)
 public abstract class MixinKeyboardHandler {
 	@Shadow

@@ -116,8 +116,6 @@ public class SkillManager extends SimpleJsonResourceReloadListener {
 	public static void processServerPacket(SPDatapackSyncSkill packet) {
 		IForgeRegistry<Skill> skillRegistry = getSkillRegistry();
 		
-		System.out.println("WTFWTF");
-		
 		for (CompoundTag tag : packet.getTags()) {
 			if (!skillRegistry.containsKey(new ResourceLocation(tag.getString("id")))) {
 				EpicFightMod.LOGGER.warn("Failed to syncronize Datapack for skill: " + tag.getString("id"));

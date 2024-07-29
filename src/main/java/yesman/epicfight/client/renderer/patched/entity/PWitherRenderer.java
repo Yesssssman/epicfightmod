@@ -53,7 +53,7 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 			
 			if (transparencyCount == 0) {
 				if (!entitypatch.isGhost()) {
-					mesh.drawAnimated(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), entitypatch.getArmature(), poseMatrices);
+					mesh.draw(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), entitypatch.getArmature(), poseMatrices);
 				}
 			} else {
 				float transparency = (Math.abs(transparencyCount) + partialTicks) / 41.0F;
@@ -62,8 +62,8 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 					transparency = 1.0F - transparency;
 				}
 				
-				mesh.drawAnimated(poseStack, buffer, RenderType.entityTranslucent(WITHER_LOCATION), packedLight, 1.0F, 1.0F, 1.0F, transparency, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poseMatrices);
-				mesh.drawAnimated(poseStack, buffer, RenderType.entityTranslucent(WITHER_INVULNERABLE_LOCATION), packedLight, 1.0F, 1.0F, 1.0F, Mth.sin(transparency * 3.1415F), OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poseMatrices);
+				mesh.draw(poseStack, buffer, RenderType.entityTranslucent(WITHER_LOCATION), packedLight, 1.0F, 1.0F, 1.0F, transparency, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poseMatrices);
+				mesh.draw(poseStack, buffer, RenderType.entityTranslucent(WITHER_INVULNERABLE_LOCATION), packedLight, 1.0F, 1.0F, 1.0F, Mth.sin(transparency * 3.1415F), OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poseMatrices);
 			}
 			
 			this.renderLayer(renderer, entitypatch, entityIn, poseMatrices, buffer, poseStack, packedLight, partialTicks);

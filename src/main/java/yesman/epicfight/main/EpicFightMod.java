@@ -55,6 +55,7 @@ import yesman.epicfight.compat.CuriosCompat;
 import yesman.epicfight.compat.FirstPersonCompat;
 import yesman.epicfight.compat.GeckolibCompat;
 import yesman.epicfight.compat.ICompatModule;
+import yesman.epicfight.compat.IRISCompat;
 import yesman.epicfight.compat.SkinLayer3DCompat;
 import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.config.EpicFightOptions;
@@ -309,6 +310,10 @@ public class EpicFightMod {
     		
     		if (ModList.get().isLoaded("skinlayers3d")) {
     			ICompatModule.loadCompatModule(SkinLayer3DCompat.class);
+    		}
+    		
+    		if (ModList.get().isLoaded("oculus")) {
+    			ICompatModule.loadCompatModule(IRISCompat.class);
     		}
 		});
 	}

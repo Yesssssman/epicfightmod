@@ -24,15 +24,14 @@ import yesman.epicfight.world.item.EpicFightItems;
 
 @Mod.EventBusSubscriber(modid = EpicFightMod.MODID)
 public class EpicFightLootTables {
-
 	public static final DeferredRegister<Codec<? extends IGlobalLootModifier>> LOOT_MODIFIERS = DeferredRegister.create(ForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, "epicfight");
-
 	public static final RegistryObject<Codec<? extends IGlobalLootModifier>> SKILLS = LOOT_MODIFIERS.register("skillbook_loot_table_modifier", SkillBookLootModifier.SKILL_CODEC);
-
+	public static final LootItemFunctionType SET_SKILLBOOK_SKILL = new LootItemFunctionType(new SetSkillFunction.Serializer());
+	
 	public static void registerLootItemFunctionType() {
-		Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE, new ResourceLocation("epicfight", "set_skill"), new LootItemFunctionType(new SetSkillFunction.Serializer()));
+		Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE, new ResourceLocation(EpicFightMod.MODID, "set_skill"), SET_SKILLBOOK_SKILL);
 	}
-
+	
 	@SubscribeEvent
 	public static void modifyVanillaLootPools(final LootTableLoadEvent event) {
 		int modifier = ConfigManager.SKILL_BOOK_CHEST_LOOT_MODIFYER.get();

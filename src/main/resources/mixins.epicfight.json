@@ -12,7 +12,9 @@
 		"MixinLightTexture",
 		"MixinKeyboardHandler",
 		"MixinLocalPlayer",
-		"MixinMinecraft"
+		"MixinMinecraft",
+		"MixinIrisShaderInstance",
+		"MixinPipelineManager"
 	],
 	"mixins": [
 		"MixinEndCrystal",

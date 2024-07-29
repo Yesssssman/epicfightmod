@@ -2,10 +2,8 @@ package yesman.epicfight.client.particle;
 
 import org.joml.Matrix4f;
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.VertexConsumer;
-import com.mojang.blaze3d.vertex.VertexFormat;
 
 import net.minecraft.client.Camera;
 import net.minecraft.client.multiplayer.ClientLevel;
@@ -22,10 +20,9 @@ import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.ClientEngine;
-import yesman.epicfight.client.renderer.AnimationShaderInstance;
-import yesman.epicfight.client.renderer.AnimationShaderTransformer;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.patched.entity.PatchedEntityRenderer;
+import yesman.epicfight.client.renderer.shader.AnimationShaderInstance;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
@@ -61,10 +58,8 @@ public class EntityAfterImageParticle extends CustomModelParticle<AnimatedMesh> 
 		poseStack.mulPoseMatrix(this.modelMatrix);
 		float alpha = this.alphaO + (this.alpha - this.alphaO) * partialTicks;
 		
-		AnimationShaderInstance animShader = AnimationShaderTransformer.getAnimationShader(GameRenderer.getPositionColorLightmapShader());
-		VertexFormat vertexFormat = EpicFightRenderTypes.getAnimationVertexFormat(DefaultVertexFormat.POSITION_COLOR_LIGHTMAP);
-		
-		this.particleMesh.drawWithShader(poseStack, animShader, vertexFormat, this.getLightColor(partialTicks), this.rCol, this.gCol, this.bCol, alpha, OverlayTexture.NO_OVERLAY, null, this.poseMatrices);
+		AnimationShaderInstance animShader = EpicFightRenderTypes.getAnimationShader(GameRenderer.getPositionColorLightmapShader());
+		this.particleMesh.drawWithShader(poseStack, animShader, this.getLightColor(partialTicks), this.rCol, this.gCol, this.bCol, alpha, OverlayTexture.NO_OVERLAY, null, this.poseMatrices);
 	}
 	
 	@Override

@@ -48,7 +48,7 @@ public class PCustomEntityRenderer extends PatchedEntityRenderer<LivingEntity, L
 			PrepareModelEvent prepareModelEvent = new PrepareModelEvent(this, this.mesh, entitypatch, buffer, poseStack, packedLight, partialTicks);
 			
 			if (!MinecraftForge.EVENT_BUS.post(prepareModelEvent)) {
-				mesh.drawAnimated(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, !entity.isInvisibleTo(mc.player) ? 0.15F : 1.0F, this.getOverlayCoord(entity, entitypatch, partialTicks), entitypatch.getArmature(), poseMatrices);
+				mesh.draw(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, !entity.isInvisibleTo(mc.player) ? 0.15F : 1.0F, this.getOverlayCoord(entity, entitypatch, partialTicks), entitypatch.getArmature(), poseMatrices);
 			}
 		}
 		

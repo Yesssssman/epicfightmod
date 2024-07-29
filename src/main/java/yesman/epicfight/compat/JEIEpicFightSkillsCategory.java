@@ -10,7 +10,7 @@ import net.minecraft.resources.ResourceLocation;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.skill.SkillCategories;
 
-public class EpicFightSkillsCategory implements IRecipeCategory<SkillCategories> {
+public class JEIEpicFightSkillsCategory implements IRecipeCategory<SkillCategories> {
 	public static final ResourceLocation UID = new ResourceLocation(EpicFightMod.MODID, "skills");
 	
 	@Override

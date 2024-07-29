@@ -130,6 +130,10 @@ public class ParseUtil {
 		}
 	}
 	
+	public static <T> T nvl(T a, T b) {
+		return a == null ? b : a;
+	}
+	
 	public static String snakeToSpacedCamel(Object obj) {
 		if (obj == null) {
 			return "";

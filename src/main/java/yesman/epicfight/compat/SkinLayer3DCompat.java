@@ -208,7 +208,7 @@ public class SkinLayer3DCompat implements ICompatModule {
 					AnimatedMesh mesh = skin3dlayerMeshes.partMeshes.get(playerModelPart);
 					
 					if (mesh != null) {
-						mesh.drawAnimated(poseStack, buffer, RenderType.entityTranslucent(player.getSkinTextureLocation(), true), packedLight, 1.0F, 1.0F, 1.0F, 1.0F, overlay, entitypatch.getArmature(), poses);
+						mesh.draw(poseStack, buffer, RenderType.entityTranslucent(player.getSkinTextureLocation(), true), packedLight, 1.0F, 1.0F, 1.0F, 1.0F, overlay, entitypatch.getArmature(), poses);
 					}
 				}
 			}

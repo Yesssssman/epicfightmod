@@ -82,7 +82,9 @@ public class SetSkillFunction implements LootItemFunction {
 	
 	@Override
 	public LootItemFunctionType getType() {
+		// 20.7.4
 		return LootItemFunctions.SET_NBT;
+		//return EpicFightLootTables.SET_SKILLBOOK_SKILL;
 	}
 	
 	public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<SetSkillFunction> {

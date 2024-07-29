@@ -50,10 +50,10 @@ public class PEnderDragonRenderer extends PatchedEntityRenderer<EnderDragon, End
 		if (entityIn.dragonDeathTime > 0) {
 			poseStack.translate(entityIn.getRandom().nextGaussian() * 0.08D, 0.0D, entityIn.getRandom().nextGaussian() * 0.08D);
 			float deathTimeProgression = ((float) entityIn.dragonDeathTime + partialTicks) / 200.0F;
-			mesh.drawAnimated(poseStack, buffer, RenderType.dragonExplosionAlpha(DRAGON_EXPLODING_LOCATION), packedLight, 1.0F, 1.0F, 1.0F, deathTimeProgression, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
-			mesh.drawAnimated(poseStack, buffer, RenderType.entityDecal(DRAGON_LOCATION), packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), entitypatch.getArmature(), poses);
+			mesh.draw(poseStack, buffer, RenderType.dragonExplosionAlpha(DRAGON_EXPLODING_LOCATION), packedLight, 1.0F, 1.0F, 1.0F, deathTimeProgression, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
+			mesh.draw(poseStack, buffer, RenderType.entityDecal(DRAGON_LOCATION), packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), entitypatch.getArmature(), poses);
 		} else {
-			mesh.drawAnimated(poseStack, buffer, RenderType.entityCutoutNoCull(DRAGON_LOCATION), packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), entitypatch.getArmature(), poses);
+			mesh.draw(poseStack, buffer, RenderType.entityCutoutNoCull(DRAGON_LOCATION), packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), entitypatch.getArmature(), poses);
 		}
 		
 		if (Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes()) {

@@ -37,6 +37,11 @@ public interface EpicFightDamageType {
 	 */
 	TagKey<DamageType> PARTIAL_DAMAGE = create("partial_damage");
 	
+	/**
+	 * This tag means if the damage source is part of the other damage source
+	 */
+	TagKey<DamageType> BYPASS_DODGE = create("bypass_dodge");
+	
 	private static TagKey<DamageType> create(String tagName) {
 		return TagKey.create(Registries.DAMAGE_TYPE, new ResourceLocation(EpicFightMod.MODID, tagName));
 	}

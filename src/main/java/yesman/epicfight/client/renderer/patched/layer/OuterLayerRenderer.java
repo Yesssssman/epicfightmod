@@ -27,7 +27,7 @@ public class OuterLayerRenderer extends ModelRenderLayer<Drowned, DrownedPatch, 
 	@Override
 	protected void renderLayer(DrownedPatch entitypatch, Drowned entityliving, DrownedOuterLayer<Drowned> vanillaLayer, PoseStack poseStack, MultiBufferSource buffer, int packedLight,
 			OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
-		this.mesh.drawAnimated(poseStack, buffer, RenderType.entityCutoutNoCull(DROWNED_OUTER_LAYER), packedLight, 1.0F, 1.0F, 1.0F, 1.0F, LivingEntityRenderer.getOverlayCoords(entityliving, 0.0F), entitypatch.getArmature(), poses);
+		this.mesh.draw(poseStack, buffer, RenderType.entityCutoutNoCull(DROWNED_OUTER_LAYER), packedLight, 1.0F, 1.0F, 1.0F, 1.0F, LivingEntityRenderer.getOverlayCoords(entityliving, 0.0F), entitypatch.getArmature(), poses);
 	}
 	
 	@Override

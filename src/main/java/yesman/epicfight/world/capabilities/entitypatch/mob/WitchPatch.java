@@ -3,8 +3,6 @@ package yesman.epicfight.world.capabilities.entitypatch.mob;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.monster.Witch;
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.gameasset.Animations;
