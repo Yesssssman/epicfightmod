@@ -137,7 +137,7 @@ public class LayerUtil {
 		ResourceLocation textureLocation = new ResourceLocation(properties.get("texture").getAsString());
 		AnimatedMesh mesh = Meshes.getOrCreateAnimatedMesh(Minecraft.getInstance().getResourceManager(), new ResourceLocation(properties.get("model").getAsString()), AnimatedMesh::new);
 		
-		return new PatchedEyesLayer<> (textureLocation, mesh);
+		return new PatchedEyesLayer<> (textureLocation, () -> mesh);
 	}
 	
 	private static <E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, R extends LivingEntityRenderer<E, M>, AM extends AnimatedMesh> PatchedLayer<E, T, M, ? extends RenderLayer<E, M>> getOriginalModelLayer(JsonObject properties) {

@@ -600,6 +600,8 @@ public class RenderEngine {
 				if (Minecraft.renderNames() && !(Minecraft.getInstance().screen instanceof UISetupScreen)) {
 					renderEngine.battleModeUI.renderGui(playerpatch, event.getGuiGraphics(), event.getPartialTick());
 				}
+				
+				renderEngine.betaWarningMessage.render(event.getGuiGraphics());
 			}
 		}
 		
@@ -647,10 +649,6 @@ public class RenderEngine {
 		public static void renderWorldLast(RenderLevelStageEvent event) {
 			if (EpicFightMod.CLIENT_CONFIGS.aimingCorrection.getValue() && renderEngine.zoomCount > 0 && renderEngine.minecraft.options.getCameraType() == CameraType.THIRD_PERSON_BACK && event.getStage() == RenderLevelStageEvent.Stage.AFTER_PARTICLES) {
 				renderEngine.aimHelper.doRender(event.getPoseStack(), event.getPartialTick());
-			}
-			
-			if (event.getStage() == RenderLevelStageEvent.Stage.AFTER_WEATHER) {
-				//renderEngine.betaWarningMessage.drawMessage(event.getPoseStack());
 			}
 		}
 		

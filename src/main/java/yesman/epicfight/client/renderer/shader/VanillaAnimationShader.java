@@ -128,7 +128,12 @@ public class VanillaAnimationShader extends ShaderInstance implements AnimationS
 	public Uniform getScreenSizeUniform() {
 		return this.SCREEN_SIZE;
 	}
-
+	
+	@Override
+	public void _setSampler(String samplerName, Object texture) {
+		this.setSampler(samplerName, texture);
+	}
+	
 	@Override
 	public String _getName() {
 		return super.getName();

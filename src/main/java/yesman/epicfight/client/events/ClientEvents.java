@@ -127,6 +127,7 @@ public class ClientEvents {
 		}
 		
 		ClientEngine.getInstance().renderEngine.battleModeUI.reset();
+		ClientEngine.getInstance().renderEngine.betaWarningMessage.reset();
 	}
 	
 	/**
@@ -157,6 +158,7 @@ public class ClientEvents {
 		
 		ClientEngine.getInstance().controllEngine.setPlayerPatch(newCap);
 		ClientEngine.getInstance().renderEngine.battleModeUI.reset();
+		ClientEngine.getInstance().renderEngine.betaWarningMessage.reset();
 	}
 	
 	@SubscribeEvent

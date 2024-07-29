@@ -9,7 +9,6 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.client.gui.widgets.EpicFightOptionList;
 import yesman.epicfight.config.EpicFightOptions;
-import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
 public class EpicFightOptionSubScreen extends Screen {
@@ -25,7 +24,7 @@ public class EpicFightOptionSubScreen extends Screen {
 	@Override
 	protected void init() {
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {
-			EpicFightMod.CLIENT_CONFIGS.save();
+			this.config.save();
 			this.onClose();
 		}).bounds(this.width / 2 - 100, this.height - 28, 200, 20).build());
 	}

@@ -25,7 +25,7 @@ import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 @OnlyIn(Dist.CLIENT)
 public class PatchedVillagerProfessionLayer extends ModelRenderLayer<ZombieVillager, MobPatch<ZombieVillager>, ZombieVillagerModel<ZombieVillager>, VillagerProfessionLayer<ZombieVillager, ZombieVillagerModel<ZombieVillager>>, HumanoidMesh> {
 	public PatchedVillagerProfessionLayer() {
-		super(Meshes.VILLAGER_ZOMBIE);
+		super(() -> Meshes.VILLAGER_ZOMBIE);
 	}
 	
 	@Override
@@ -41,19 +41,19 @@ public class PatchedVillagerProfessionLayer extends ModelRenderLayer<ZombieVilla
 	        
 	        if (!(typeHat == VillagerMetaDataSection.Hat.NONE || typeHat == VillagerMetaDataSection.Hat.PARTIAL && professionHat != VillagerMetaDataSection.Hat.FULL)
 	        		|| !entityliving.getItemBySlot(EquipmentSlot.HEAD).isEmpty()) {
-	        	this.mesh.head.setHidden(true);
-	        	this.mesh.hat.setHidden(true);
+	        	this.mesh.get().head.setHidden(true);
+	        	this.mesh.get().hat.setHidden(true);
 	        }
 	        
 	        if (!entitypatch.getOriginal().getItemBySlot(EquipmentSlot.LEGS).isEmpty()) {
-				this.mesh.jacket.setHidden(true);
+				this.mesh.get().jacket.setHidden(true);
 			}
 	        
-			this.mesh.draw(postStack, buffer, RenderType.entityCutoutNoCull(vanillaLayer.getResourceLocation("type", BuiltInRegistries.VILLAGER_TYPE.getKey(villagerdata.getType()))),
+			this.mesh.get().draw(postStack, buffer, RenderType.entityCutoutNoCull(vanillaLayer.getResourceLocation("type", BuiltInRegistries.VILLAGER_TYPE.getKey(villagerdata.getType()))),
 					packedLight, 1.0F, 1.0F, 1.0F, 1.0F, LivingEntityRenderer.getOverlayCoords(entityliving, 0.0F), entitypatch.getArmature(), poses);
 			
 			if (villagerdata.getProfession() != VillagerProfession.NONE) {
-				this.mesh.draw(postStack, buffer, RenderType.entityCutoutNoCull(vanillaLayer.getResourceLocation("profession", ForgeRegistries.VILLAGER_PROFESSIONS.getKey(villagerdata.getProfession()))),
+				this.mesh.get().draw(postStack, buffer, RenderType.entityCutoutNoCull(vanillaLayer.getResourceLocation("profession", ForgeRegistries.VILLAGER_PROFESSIONS.getKey(villagerdata.getProfession()))),
 						packedLight, 1.0F, 1.0F, 1.0F, 1.0F, LivingEntityRenderer.getOverlayCoords(entityliving, 0.0F), entitypatch.getArmature(), poses);
 			}
 		}

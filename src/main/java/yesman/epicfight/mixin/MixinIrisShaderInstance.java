@@ -46,20 +46,24 @@ public abstract class MixinIrisShaderInstance {
 	{
 		if (!(this instanceof AnimationShaderInstance)) {
 			IRISCompat.putIrisShaderProvider(name, () -> {
+				ShaderParser shaderParser = null;
+				
 				try {
-					ShaderParser shaderParser = new ShaderParser(resourceFactory, name);
+					shaderParser = new ShaderParser(resourceFactory, name);
+					ResourceLocation shaderLocation = new ResourceLocation(name);
 					boolean hasNormalAttribute = shaderParser.hasAttribute("Normal");
+					boolean isEyesShader = "rendertype_eyes".equals(shaderLocation.getPath());
 					
 					if (shaderParser.hasAttribute("Color")) {
-						shaderParser.addUniform("iris_Color", ShaderParser.GLSLType.VEC4, "in .* iris_Color;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, new Double[] {1.0D, 1.0D, 1.0D, 1.0D});
+						shaderParser.addUniform("iris_Color", ShaderParser.GLSLType.VEC4, "in .* iris_Color;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, ShaderParser.ExceptionHandler.THROW, new Double[] {1.0D, 1.0D, 1.0D, 1.0D});
 					}
 					
-					if (shaderParser.hasAttribute("UV1")) {
-						shaderParser.addUniform("iris_UV1", ShaderParser.GLSLType.IVEC2, "in .* iris_UV1;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, new Integer[] {0, 0});
+					if (shaderParser.hasAttribute("UV1") && !isEyesShader) {
+						shaderParser.addUniform("iris_UV1", ShaderParser.GLSLType.IVEC2, "in .* iris_UV1;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, ShaderParser.ExceptionHandler.THROW, new Integer[] {0, 0});
 					}
 					
-					if (shaderParser.hasAttribute("UV2")) {
-						shaderParser.addUniform("iris_UV2", ShaderParser.GLSLType.IVEC2, "in .* iris_UV2;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, new Integer[] {0, 0});
+					if (shaderParser.hasAttribute("UV2") && !isEyesShader) {
+						shaderParser.addUniform("iris_UV2", ShaderParser.GLSLType.IVEC2, "in .* iris_UV2;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, ShaderParser.ExceptionHandler.IGNORE, new Integer[] {0, 0});
 					}
 					
 					shaderParser.remove("Color", ShaderParser.Usage.ATTRIBUTE, ShaderParser.ExceptionHandler.IGNORE);
@@ -68,24 +72,24 @@ public abstract class MixinIrisShaderInstance {
 					shaderParser.remove("iris_Color", ShaderParser.Usage.ATTRIBUTE, ShaderParser.ExceptionHandler.IGNORE);
 					shaderParser.remove("iris_UV1", ShaderParser.Usage.ATTRIBUTE, ShaderParser.ExceptionHandler.IGNORE);
 					shaderParser.remove("iris_UV2", ShaderParser.Usage.ATTRIBUTE, ShaderParser.ExceptionHandler.IGNORE);
-					shaderParser.addAttribute("Joints", ShaderParser.GLSLType.IVEC3);
-					shaderParser.addAttribute("Weights", ShaderParser.GLSLType.VEC3);
+					shaderParser.addAttribute("Joints", ShaderParser.ExceptionHandler.THROW, ShaderParser.GLSLType.IVEC3);
+					shaderParser.addAttribute("Weights", ShaderParser.ExceptionHandler.THROW, ShaderParser.GLSLType.VEC3);
 					
-					if (hasNormalAttribute) {
-						shaderParser.addUniform("iris_Normal_Mv_Matrix", ShaderParser.GLSLType.MATRIX3F, null);
+					if (hasNormalAttribute && !isEyesShader) {
+						shaderParser.addUniform("iris_Normal_Mv_Matrix", ShaderParser.GLSLType.MATRIX3F, ShaderParser.ExceptionHandler.THROW, null);
 					}
 					
-					shaderParser.addUniformArray("iris_Poses", ShaderParser.GLSLType.MATRIX4F, null, ShaderParser.MAX_JOINTS);
+					shaderParser.addUniformArray("iris_Poses", ShaderParser.GLSLType.MATRIX4F, ShaderParser.ExceptionHandler.THROW, null, ShaderParser.MAX_JOINTS);
 					
-					shaderParser.replaceScript("iris_Position", "Position_a", -1, ShaderParser.ExceptionHandler.NO_MATCHES, "in vec3 iris_Position;");
+					shaderParser.replaceScript("iris_Position", "Position_a", -1, ShaderParser.ExceptionHandler.THROW, "in vec3 iris_Position;");
 					
-					if (hasNormalAttribute) {
-						shaderParser.replaceScript("iris_Normal", "Normal_a", -1, ShaderParser.ExceptionHandler.NO_MATCHES, "in .* iris_Normal;", "iris_NormalMat", "uniform mat3 iris_Normal_Mv_Matrix;");
+					if (hasNormalAttribute && !isEyesShader) {
+						shaderParser.replaceScript("iris_Normal", "Normal_a", -1, ShaderParser.ExceptionHandler.THROW, "in .* iris_Normal;", "iris_NormalMat", "uniform mat3 iris_Normal_Mv_Matrix;");
 					}
 					
 					shaderParser.insertToScript("in vec3 iris_Position;", "\nvec3 Position_a = vec3(0.0);", 0, ShaderParser.InsertPosition.FOLLOWING);
 					
-					if (hasNormalAttribute) {
+					if (hasNormalAttribute && !isEyesShader) {
 						shaderParser.insertToScript("in vec3 iris_Normal;", "\nvec3 Normal_a = vec3(0.0);", 0, ShaderParser.InsertPosition.FOLLOWING);
 					}
 					
@@ -99,7 +103,7 @@ public abstract class MixinIrisShaderInstance {
 											  + "    }\n"
 											  + "}\n", 0, ShaderParser.InsertPosition.PRECEDING);
 					
-					if (hasNormalAttribute) {
+					if (hasNormalAttribute && !isEyesShader) {
 						shaderParser.insertToScript("void main\\(\\) \\{",
 												    "\n\nvoid setAnimationNormal() {\n"
 												  + "    \n"
@@ -126,8 +130,14 @@ public abstract class MixinIrisShaderInstance {
 					
 					return new IrisAnimationShader(resourceProvider, EpicFightMod.MODID + ":" + rl.getPath(), animationvertexFormat, usesTessellation, writingToBeforeTranslucent, writingToAfterTranslucent, blendModeOverride, alphaTest,
 													uniformCreator, samplerCreator, isIntensity, parent, bufferBlendOverrides, customUniforms);
-				} catch (IOException e) {
-					throw new ShaderParsingException(e);
+				} catch (IOException | ShaderParsingException e) {
+					e.printStackTrace();
+					
+					if (shaderParser != null) {
+						EpicFightMod.LOGGER.warn("Shader Script\n " + shaderParser.getOriginalScript());
+					}
+					
+					throw new RuntimeException(e);
 				}
 			});
 		}

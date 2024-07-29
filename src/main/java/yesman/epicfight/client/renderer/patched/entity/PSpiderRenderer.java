@@ -20,7 +20,7 @@ public class PSpiderRenderer extends PatchedLivingEntityRenderer<Spider, SpiderP
 	
 	public PSpiderRenderer(EntityRendererProvider.Context context, EntityType<?> entityType) {
 		super(context, entityType);
-		this.addPatchedLayer(SpiderEyesLayer.class, new PatchedEyesLayer<>(SPIDER_EYE_TEXTURE, Meshes.SPIDER));
+		this.addPatchedLayer(SpiderEyesLayer.class, new PatchedEyesLayer<>(SPIDER_EYE_TEXTURE, () -> Meshes.SPIDER));
 	}
 	
 	@Override

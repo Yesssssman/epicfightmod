@@ -43,7 +43,7 @@ public class ShaderParser {
 	
 	private final String shaderName;
 	private final JsonObject propertiesJson;
-	private final StringBuilder vertexShaderScript;
+	private final String vertexShaderScript;
 	private final List<Formatter> formatters = Lists.newArrayList();
 	private final Resource rProperties;
 	private final Resource rVsh;
@@ -69,7 +69,7 @@ public class ShaderParser {
 		Resource rVsh = resourceProvider.getResourceOrThrow(rlVsh);
 		Resource rFsh = resourceProvider.getResourceOrThrow(rlFsh);
 		
-		this.vertexShaderScript = new StringBuilder(new String(rVsh.open().readAllBytes(), StandardCharsets.UTF_8));
+		this.vertexShaderScript = new String(rVsh.open().readAllBytes(), StandardCharsets.UTF_8);
 		this.rProperties = rProperties;
 		this.rVsh = rVsh;
 		this.rFsh = rFsh;
@@ -92,43 +92,43 @@ public class ShaderParser {
 		this.formatters.add(new ScriptInserter(regex, toInsert, ordinal, insertPosition));
 	}
 	
-	public void replaceScript(String regex, String toReplace, int ordinal, ExceptionHandler action) {
-		this.replaceScript(regex, toReplace, ordinal, action, (String[])null);
+	public void replaceScript(String regex, String toReplace, int ordinal, ExceptionHandler exceptionHandler) {
+		this.replaceScript(regex, toReplace, ordinal, exceptionHandler, (String[])null);
 	}
 	
-	public void replaceScript(String regex, String toReplace, int ordinal, ExceptionHandler action, String... exceptionsRegex) {
-		this.formatters.add(new ScriptReplacer(regex, toReplace, ordinal, action, exceptionsRegex));
+	public void replaceScript(String regex, String toReplace, int ordinal, ExceptionHandler exceptionHandler, String... exceptionsRegex) {
+		this.formatters.add(new ScriptReplacer(regex, toReplace, ordinal, exceptionHandler, exceptionsRegex));
 	}
 	
-	public void addAttribute(String name, GLSLType type) {
-		this.formatters.add(new Inserter(name, Usage.ATTRIBUTE, type, null));
+	public void addAttribute(String name, ExceptionHandler exceptionHandler, GLSLType type) {
+		this.formatters.add(new Inserter(name, Usage.ATTRIBUTE, type, exceptionHandler, null));
 	}
 	
-	public void replaceAttribute(String name, String replacedName, GLSLType type, ExceptionHandler action) {
-		this.formatters.add(new Replacer(name, replacedName, Usage.ATTRIBUTE, type, action, null));
+	public void replaceAttribute(String name, String replacedName, GLSLType type, ExceptionHandler exceptionHandler) {
+		this.formatters.add(new Replacer(name, replacedName, Usage.ATTRIBUTE, type, exceptionHandler, null));
 	}
 	
-	public void remove(String name, Usage usage, ExceptionHandler action) {
-		this.formatters.add(new Remover(name, usage, action));
+	public void remove(String name, Usage usage, ExceptionHandler exceptionHandler) {
+		this.formatters.add(new Remover(name, usage, exceptionHandler));
 	}
 	
-	public void addUniform(String name, GLSLType type, Number[] defaultUniformValues) {
-		this.formatters.add(new Inserter(name, Usage.UNIFORM, type, defaultUniformValues));
+	public void addUniform(String name, GLSLType type, ExceptionHandler exceptionHandler, Number[] defaultUniformValues) {
+		this.formatters.add(new Inserter(name, Usage.UNIFORM, type, exceptionHandler, defaultUniformValues));
 	}
 	
-	public void addUniform(String name, GLSLType type, String positionRegex, InsertPosition insertPosition, int ordinal, Number[] defaultUniformValues) {
-		this.formatters.add(new Inserter(name, Usage.UNIFORM, type, positionRegex, insertPosition, ordinal, defaultUniformValues, -1));
+	public void addUniform(String name, GLSLType type, String positionRegex, InsertPosition insertPosition, int ordinal, ExceptionHandler exceptionHandler, Number[] defaultUniformValues) {
+		this.formatters.add(new Inserter(name, Usage.UNIFORM, type, exceptionHandler, positionRegex, insertPosition, ordinal, defaultUniformValues, -1));
 	}
 	
-	public void addUniformArray(String name, GLSLType type, Number[] defaultUniformValues, int arraySize) {
-		this.formatters.add(new Inserter(name, Usage.UNIFORM_ARRAY, type, defaultUniformValues, arraySize));
+	public void addUniformArray(String name, GLSLType type, ExceptionHandler exceptionHandler, Number[] defaultUniformValues, int arraySize) {
+		this.formatters.add(new Inserter(name, Usage.UNIFORM_ARRAY, type, exceptionHandler, defaultUniformValues, arraySize));
 	}
 	
-	public void replaceUniform(String name, String replacedName, GLSLType type, ExceptionHandler action, Number[] defaultUniformValues) {
-		this.formatters.add(new Replacer(name, replacedName, Usage.UNIFORM, type, action, defaultUniformValues));
+	public void replaceUniform(String name, String replacedName, GLSLType type, ExceptionHandler exceptionHandler, Number[] defaultUniformValues) {
+		this.formatters.add(new Replacer(name, replacedName, Usage.UNIFORM, type, exceptionHandler, defaultUniformValues));
 	}
 	
-	public void addToResourceCache(Map<ResourceLocation, Resource> cache) {
+	public void addToResourceCache(Map<ResourceLocation, Resource> cache) throws ShaderParsingException {
 		ResourceLocation shaderLocation = new ResourceLocation(this.shaderName);
 		ResourceLocation rlProperties = new ResourceLocation(shaderLocation.getNamespace(), "shaders/core/" + shaderLocation.getPath() + ".json");
 		ResourceLocation vShaderLocation = new ResourceLocation(GsonHelper.getAsString(this.propertiesJson, "vertex"));
@@ -154,14 +154,16 @@ public class ShaderParser {
 		};
 	}
 	
+	public String getOriginalScript() {
+		return this.vertexShaderScript;
+	}
+	
 	private IoSupplier<InputStream> getVertexShaderScript() {
 		return () -> {
-			System.out.println("Old script");
-			System.out.println(this.vertexShaderScript.toString());
-			this.formatters.forEach((formatter) -> formatter.reformScript(this.vertexShaderScript));
-			System.out.println("\nNew script");
-			System.out.println(this.vertexShaderScript.toString());
-			return new ByteArrayInputStream(this.vertexShaderScript.toString().getBytes());
+			StringBuilder sb = new StringBuilder(this.vertexShaderScript);
+			this.formatters.forEach((formatter) -> formatter.reformScript(sb));
+			
+			return new ByteArrayInputStream(sb.toString().getBytes());
 		};
 	}
 	
@@ -202,7 +204,7 @@ public class ShaderParser {
 	
 	@OnlyIn(Dist.CLIENT)
 	public enum ExceptionHandler {
-		IGNORE, NO_MATCHES
+		IGNORE, THROW
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -218,8 +220,8 @@ public class ShaderParser {
 	
 	@OnlyIn(Dist.CLIENT)
 	private abstract class Formatter {
-		public abstract void reformJson(JsonObject propertiesJson);
-		public abstract void reformScript(StringBuilder stringBuilder);
+		public abstract void reformJson(JsonObject propertiesJson) throws ShaderParsingException;
+		public abstract void reformScript(StringBuilder stringBuilder) throws ShaderParsingException;
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -240,7 +242,7 @@ public class ShaderParser {
 		public void reformJson(JsonObject propertiesJson) {}
 		
 		@Override
-		public void reformScript(StringBuilder stringBuilder) {
+		public void reformScript(StringBuilder stringBuilder) throws ShaderParsingException {
 			Pattern pattern = Pattern.compile(this.regex);
 			Matcher matcher = pattern.matcher(stringBuilder.toString());
 			int start = -1;
@@ -289,7 +291,7 @@ public class ShaderParser {
 		public void reformJson(JsonObject propertiesJson) {}
 		
 		@Override
-		public void reformScript(StringBuilder stringBuilder) {
+		public void reformScript(StringBuilder stringBuilder) throws ShaderParsingException {
 			List<Pair<Integer, Integer>> boundaries = Lists.newArrayList();
 			
 			if (!this.exceptionsRegex.isEmpty()) {
@@ -335,7 +337,7 @@ public class ShaderParser {
 				ordinal++;
 			}
 			
-			if (ordinal == 0 && this.exceptionHandler == ExceptionHandler.NO_MATCHES) {
+			if (ordinal == 0 && this.exceptionHandler == ExceptionHandler.THROW) {
 				throw new ShaderParsingException("Can't find matching regular expression " + this.regex + " in the glsl script.");
 			}
 		}
@@ -346,26 +348,28 @@ public class ShaderParser {
 		private final String name;
 		private final Usage usage;
 		private final GLSLType type;
+		private final ExceptionHandler exceptionHandler;
 		
 		private final InsertPosition insertPosition;
-		private final String positionRegex;
 		private final int ordinal;
+		private String positionRegex;
 		
 		private final Number[] uniformDefaultValues;
 		private final int arraySize;
 		
-		private Inserter(String name, Usage usage, GLSLType type, Number[] uniformDefault) {
-			this(name, usage, type, uniformDefault, -1);
+		private Inserter(String name, Usage usage, GLSLType type, ExceptionHandler exceptionHandler, Number[] uniformDefault) {
+			this(name, usage, type, exceptionHandler, uniformDefault, -1);
 		}
 		
-		private Inserter(String name, Usage usage, GLSLType type, Number[] uniformDefault, int arraySize) {
-			this(name, usage, type, usage == Usage.UNIFORM_ARRAY ? String.format(Usage.UNIFORM.format, ".*", ".*") : String.format(usage.format, ".*", ".*"), InsertPosition.FOLLOWING, Integer.MAX_VALUE, uniformDefault, arraySize);
+		private Inserter(String name, Usage usage, GLSLType type, ExceptionHandler exceptionHandler, Number[] uniformDefault, int arraySize) {
+			this(name, usage, type, exceptionHandler, usage == Usage.UNIFORM_ARRAY ? String.format(Usage.UNIFORM.format, ".*", ".*") : String.format(usage.format, ".*", ".*"), InsertPosition.FOLLOWING, Integer.MAX_VALUE, uniformDefault, arraySize);
 		}
 		
-		private Inserter(String name, Usage usage, GLSLType type, String positionRegex, InsertPosition insertPosition, int ordinal, Number[] uniformDefault, int arraySize) {
+		private Inserter(String name, Usage usage, GLSLType type, ExceptionHandler exceptionHandler, String positionRegex, InsertPosition insertPosition, int ordinal, Number[] uniformDefault, int arraySize) {
 			this.name = name;
 			this.usage = usage;
 			this.type = type;
+			this.exceptionHandler = exceptionHandler;
 			this.positionRegex = positionRegex;
 			this.insertPosition = insertPosition;
 			this.ordinal = ordinal;
@@ -420,7 +424,7 @@ public class ShaderParser {
 		}
 		
 		@Override
-		public void reformScript(StringBuilder stringBuilder) {
+		public void reformScript(StringBuilder stringBuilder) throws ShaderParsingException {
 			String regex = this.positionRegex;
 			Pattern pattern = Pattern.compile(regex);
 			Matcher matcher = pattern.matcher(stringBuilder.toString());
@@ -440,7 +444,13 @@ public class ShaderParser {
 			}
 			
 			if (start == -1 && end == -1) {
-				throw new ShaderParsingException("No " + regex + " expression.");
+				if (this.exceptionHandler == ExceptionHandler.IGNORE) {
+					this.positionRegex = String.format(this.usage.format, ".*", ".*");
+					this.reformScript(stringBuilder);
+					return;
+				} else {
+					throw new ShaderParsingException("No " + regex + " expression.");
+				}
 			}
 			
 			stringBuilder.insert(this.insertPosition.positionGetter.apply(start, end), "\n" + ((this.usage == Usage.UNIFORM_ARRAY) ?
@@ -454,27 +464,27 @@ public class ShaderParser {
 		private final String replacedName;
 		private final Usage usage;
 		private final GLSLType type;
-		private final ExceptionHandler action;
+		private final ExceptionHandler exceptionHandler;
 		private final Number[] uniformDefaultValues;
 		
-		private Replacer(String name, String replacedName, Usage usage, GLSLType type, ExceptionHandler action, Number[] uniformDefault) {
+		private Replacer(String name, String replacedName, Usage usage, GLSLType type, ExceptionHandler exceptionHandler, Number[] uniformDefault) {
 			this.name = name;
 			this.replacedName = replacedName;
 			this.usage = usage;
 			this.type = type;
-			this.action = action;
+			this.exceptionHandler = exceptionHandler;
 			this.uniformDefaultValues = uniformDefault;
 		}
 		
 		@Override
-		public void reformJson(JsonObject propertiesJson) {
+		public void reformJson(JsonObject propertiesJson) throws ShaderParsingException {
 			switch (this.usage) {
 			case ATTRIBUTE -> {
 				JsonArray attributesArray = GsonHelper.getAsJsonArray(propertiesJson, "attributes");
 				
 				if (attributesArray.remove(new JsonPrimitive(this.name))) {
 					attributesArray.add(this.name);
-				} else if (this.action == ExceptionHandler.NO_MATCHES) {
+				} else if (this.exceptionHandler == ExceptionHandler.THROW) {
 					throw new ShaderParsingException("No target attribute to replace " + this.name);
 				}
 			}
@@ -503,7 +513,7 @@ public class ShaderParser {
 					}
 				}
 				
-				if (this.action == ExceptionHandler.NO_MATCHES) {
+				if (this.exceptionHandler == ExceptionHandler.THROW) {
 					throw new ShaderParsingException("No target uniform to replace " + this.name);
 				}
 			}
@@ -512,7 +522,7 @@ public class ShaderParser {
 		}
 		
 		@Override
-		public void reformScript(StringBuilder stringBuilder) {
+		public void reformScript(StringBuilder stringBuilder) throws ShaderParsingException {
 			String regex = String.format(this.usage.format, ".*", this.name);
 			Pattern pattern = Pattern.compile(regex);
 			Matcher matcher = pattern.matcher(stringBuilder.toString());
@@ -527,7 +537,7 @@ public class ShaderParser {
 				end = matcher.end();
 			}
 			
-			if (!find && this.action == ExceptionHandler.NO_MATCHES) {
+			if (!find && this.exceptionHandler == ExceptionHandler.THROW) {
 				throw new ShaderParsingException("No " + regex + " expression.");
 			}
 			
@@ -539,16 +549,16 @@ public class ShaderParser {
 	private class Remover extends Formatter {
 		private final String name;
 		private final Usage usage;
-		private final ExceptionHandler action;
+		private final ExceptionHandler exceptionHandler;
 		
-		private Remover(String name, Usage usage, ExceptionHandler action) {
+		private Remover(String name, Usage usage, ExceptionHandler exceptionHandler) {
 			this.name = name;
 			this.usage = usage;
-			this.action = action;
+			this.exceptionHandler = exceptionHandler;
 		}
 		
 		@Override
-		public void reformJson(JsonObject propertiesJson) {
+		public void reformJson(JsonObject propertiesJson) throws ShaderParsingException {
 			switch (this.usage) {
 			case ATTRIBUTE -> {
 				GsonHelper.getAsJsonArray(propertiesJson, "attributes").remove(new JsonPrimitive(this.name));
@@ -566,7 +576,7 @@ public class ShaderParser {
 					}
 				}
 				
-				if (this.action == ExceptionHandler.NO_MATCHES) {
+				if (this.exceptionHandler == ExceptionHandler.THROW) {
 					throw new ShaderParsingException("No matching " + this.name + " expression");
 				}
 			}
@@ -575,7 +585,7 @@ public class ShaderParser {
 		}
 		
 		@Override
-		public void reformScript(StringBuilder stringBuilder) {
+		public void reformScript(StringBuilder stringBuilder) throws ShaderParsingException {
 			String regex = "\n" + String.format(this.usage.format, ".*", this.name);
 			Pattern pattern = Pattern.compile(regex);
 			Matcher matcher = pattern.matcher(stringBuilder.toString());
@@ -592,7 +602,7 @@ public class ShaderParser {
 			
 			if (find) {
 				stringBuilder.replace(start, end, "");
-			} else if (this.action == ExceptionHandler.NO_MATCHES) {
+			} else if (this.exceptionHandler == ExceptionHandler.THROW) {
 				throw new ShaderParsingException("No matching " + regex + " expression");
 			}
 		}

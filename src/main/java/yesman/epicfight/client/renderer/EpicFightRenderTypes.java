@@ -17,12 +17,14 @@ import com.mojang.blaze3d.vertex.VertexFormat;
 import com.mojang.blaze3d.vertex.VertexFormatElement;
 import com.mojang.datafixers.util.Pair;
 
+import net.minecraft.ChatFormatting;
 import net.minecraft.Util;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.RenderStateShard;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.ShaderInstance;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -32,6 +34,7 @@ import net.minecraftforge.client.event.RegisterShadersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import yesman.epicfight.api.exception.ShaderParsingException;
 import yesman.epicfight.client.renderer.EpicFightVertexFormat.AnimationVertexFormat;
 import yesman.epicfight.client.renderer.shader.AnimationShaderInstance;
 import yesman.epicfight.client.renderer.shader.ShaderParser;
@@ -125,15 +128,37 @@ public class EpicFightRenderTypes extends RenderType {
 			return animationShaderInstance;
 		}
 		
-		return ANIMATION_SHADERS.computeIfAbsent(shaderInstance.getName(), (name) -> {
-			for (ShaderTransformer shaderTransformer : ANIMATION_SHADERS_TRANSFORMERS) {
-				if (shaderTransformer.predicate().test(shaderInstance)) {
-					return shaderTransformer.transformer().apply(shaderInstance);
+		try {
+			if (!ANIMATION_SHADERS.containsKey(shaderInstance.getName())) {
+				AnimationShaderInstance animationShaderInstance = null;
+				
+				for (ShaderTransformer shaderTransformer : ANIMATION_SHADERS_TRANSFORMERS) {
+					if (shaderTransformer.predicate().test(shaderInstance)) {
+						animationShaderInstance = shaderTransformer.transformer().apply(shaderInstance);
+						break;
+					}
+				}
+				
+				if (animationShaderInstance == null) {
+					animationShaderInstance = ShaderTransformer.VANILLA_TRANSFORMER.transformer.apply(shaderInstance);
+				}
+				
+				if (animationShaderInstance != null) {
+					ANIMATION_SHADERS.put(shaderInstance.getName(), animationShaderInstance);
 				}
 			}
+		} catch (RuntimeException e) {
+			e.printStackTrace();
+			EpicFightMod.LOGGER.warn("Failed to create shader with " + e.getMessage() + ". Automatically switches animation shader mode off.");
+			Minecraft.getInstance().levelRenderer.allChanged();
+			Minecraft.getInstance().gui.getChat().addMessage(Component.translatable("epicfight.messages.shader_transform_fail", shaderInstance.getName()).withStyle(ChatFormatting.RED));
 			
-			return ShaderTransformer.VANILLA_TRANSFORMER.transformer.apply(shaderInstance);
-		});
+			EpicFightMod.CLIENT_CONFIGS.shaderModeSwitchingLocked = true;
+			EpicFightMod.CLIENT_CONFIGS.useAnimationShader.setValue(false);
+			EpicFightMod.CLIENT_CONFIGS.save();
+		}
+		
+		return ANIMATION_SHADERS.get(shaderInstance.getName());
 	}
 	
 	public static AnimationShaderInstance getAnimationShader(RenderType renderType) {
@@ -169,7 +194,8 @@ public class EpicFightRenderTypes extends RenderType {
 			return s.endsWith(".glsl");
 		});
 		
-		SHADER_LIBS = ImmutableMap.copyOf(shaderLibs);
+		SHADER_LIBS = ImmutableMap.copyOf(shaderLibs); 
+		EpicFightMod.CLIENT_CONFIGS.shaderModeSwitchingLocked = false;
 	}
 	
 	public static void clearAnimationShaderInstance(String shaderName) {
@@ -186,44 +212,47 @@ public class EpicFightRenderTypes extends RenderType {
 	@OnlyIn(Dist.CLIENT)
 	private record ShaderTransformer(Predicate<ShaderInstance> predicate, Function<ShaderInstance, AnimationShaderInstance> transformer) {
 		public static final ShaderTransformer VANILLA_TRANSFORMER = new ShaderTransformer((shaderInstance) -> true, (shaderInstance) -> {
+			ShaderParser shaderParser = null;
+			
 			try {
 				ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
 				ResourceLocation shaderLocation = new ResourceLocation(shaderInstance.getName());
-				ShaderParser shaderParser = new ShaderParser(resourceManager, shaderInstance.getName());
+				shaderParser = new ShaderParser(resourceManager, shaderInstance.getName());
 				boolean hasNormalAttribute = shaderParser.hasAttribute("Normal");
+				boolean isEyesShader = "rendertype_eyes".equals(shaderLocation.getPath());
 				
 				if (shaderParser.hasAttribute("Color")) {
-					shaderParser.addUniform("Color", ShaderParser.GLSLType.VEC4, "in .* Color;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, new Double[] {1.0D, 1.0D, 1.0D, 1.0D});
+					shaderParser.addUniform("Color", ShaderParser.GLSLType.VEC4, "in .* Color;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, ShaderParser.ExceptionHandler.THROW, new Double[] {1.0D, 1.0D, 1.0D, 1.0D});
 				}
 				
-				if (shaderParser.hasAttribute("UV1")) {
-					shaderParser.addUniform("UV1", ShaderParser.GLSLType.IVEC2, "in .* UV1;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, new Integer[] {0, 0});
+				if (shaderParser.hasAttribute("UV1") && !isEyesShader) {
+					shaderParser.addUniform("UV1", ShaderParser.GLSLType.IVEC2, "in .* UV1;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, ShaderParser.ExceptionHandler.THROW, new Integer[] {0, 0});
 				}
 				
-				if (shaderParser.hasAttribute("UV2")) {
-					shaderParser.addUniform("UV2", ShaderParser.GLSLType.IVEC2, "in .* UV2;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, new Integer[] {0, 0});
+				if (shaderParser.hasAttribute("UV2") && !isEyesShader) {
+					shaderParser.addUniform("UV2", ShaderParser.GLSLType.IVEC2, "in .* UV2;", ShaderParser.InsertPosition.FOLLOWING, Integer.MAX_VALUE, ShaderParser.ExceptionHandler.THROW, new Integer[] {0, 0});
 				}
 				
 				shaderParser.remove("Color", ShaderParser.Usage.ATTRIBUTE, ShaderParser.ExceptionHandler.IGNORE);
 				shaderParser.remove("UV1", ShaderParser.Usage.ATTRIBUTE, ShaderParser.ExceptionHandler.IGNORE);
 				shaderParser.remove("UV2", ShaderParser.Usage.ATTRIBUTE, ShaderParser.ExceptionHandler.IGNORE);
-				shaderParser.addAttribute("Joints", ShaderParser.GLSLType.IVEC3);
-				shaderParser.addAttribute("Weights", ShaderParser.GLSLType.VEC3);
+				shaderParser.addAttribute("Joints", ShaderParser.ExceptionHandler.THROW, ShaderParser.GLSLType.IVEC3);
+				shaderParser.addAttribute("Weights", ShaderParser.ExceptionHandler.THROW, ShaderParser.GLSLType.VEC3);
 				
-				if (hasNormalAttribute) {
-					shaderParser.addUniform("Normal_Mv_Matrix", ShaderParser.GLSLType.MATRIX3F, null);
+				if (hasNormalAttribute && !isEyesShader) {
+					shaderParser.addUniform("Normal_Mv_Matrix", ShaderParser.GLSLType.MATRIX3F, ShaderParser.ExceptionHandler.THROW, null);
 				}
 				
-				shaderParser.addUniformArray("Poses", ShaderParser.GLSLType.MATRIX4F, null, ShaderParser.MAX_JOINTS);
-				shaderParser.replaceScript("Position", "Position_a", -1, ShaderParser.ExceptionHandler.NO_MATCHES, "gl_Position", "in vec3 Position;");
+				shaderParser.addUniformArray("Poses", ShaderParser.GLSLType.MATRIX4F, ShaderParser.ExceptionHandler.THROW, null, ShaderParser.MAX_JOINTS);
+				shaderParser.replaceScript("Position", "Position_a", -1, ShaderParser.ExceptionHandler.THROW, "gl_Position", "in vec3 Position;");
 				
-				if (hasNormalAttribute) {
-					shaderParser.replaceScript("Normal", "Normal_a", -1, ShaderParser.ExceptionHandler.NO_MATCHES, "uniform mat3 Normal_Mv_Matrix;", "in vec3 Normal;");
+				if (hasNormalAttribute && !isEyesShader) {
+					shaderParser.replaceScript("Normal", "Normal_a", -1, ShaderParser.ExceptionHandler.THROW, "uniform mat3 Normal_Mv_Matrix;", "in vec3 Normal;");
 				}
 				
 				shaderParser.insertToScript("in vec3 Position;", "\nvec3 Position_a = vec3(0.0);", 0, ShaderParser.InsertPosition.FOLLOWING);
 				
-				if (hasNormalAttribute) {
+				if (hasNormalAttribute && !isEyesShader) {
 					shaderParser.insertToScript("in vec3 Normal;", "\nvec3 Normal_a = vec3(0.0);", 0, ShaderParser.InsertPosition.FOLLOWING);
 				}
 				
@@ -238,7 +267,7 @@ public class EpicFightRenderTypes extends RenderType {
 										  + "}\n"
 										  + "\n", 0, ShaderParser.InsertPosition.PRECEDING);
 				
-				if (hasNormalAttribute) {
+				if (hasNormalAttribute && !isEyesShader) {
 					shaderParser.insertToScript("void main\\(\\) \\{",
 											    "void setAnimationNormal() {\n"
 											  + "    \n"
@@ -263,8 +292,13 @@ public class EpicFightRenderTypes extends RenderType {
 				GameRenderer.ResourceCache resourceProvider = new GameRenderer.ResourceCache(resourceManager, cache);
 				
 				return new VanillaAnimationShader(resourceProvider, new ResourceLocation(EpicFightMod.MODID, shaderLocation.getPath()), EpicFightRenderTypes.getAnimationVertexFormat(shaderInstance.getVertexFormat()));
-			} catch (IOException e) {
+			} catch (IOException | ShaderParsingException e) {
 				e.printStackTrace();
+				
+				if (shaderParser != null) {
+					EpicFightMod.LOGGER.warn("Shader Script\n " + shaderParser.getOriginalScript());
+				}
+				
 				throw new RuntimeException("Can't create animation shader", e);
 			}
 		});

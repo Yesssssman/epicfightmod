@@ -33,6 +33,9 @@ public class EpicFightOptions {
 	public final BooleanOptionHandler showEpicFightAttributes;
 	public final IntegerOptionHandler maxStuckProjectiles;
 	public final BooleanOptionHandler useAnimationShader;
+	
+	public boolean shaderModeSwitchingLocked = false;
+	
 	public final Set<Item> battleAutoSwitchItems;
 	public final Set<Item> miningAutoSwitchItems;
 	public int aimHelperRealColor;

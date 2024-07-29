@@ -66,7 +66,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 	private final TextureAtlas armorTrimAtlas;
 	
 	public WearableItemLayer(AM mesh, boolean firstPersonModel, ModelManager modelManager) {
-		super(mesh);
+		super(() -> mesh);
 		
 		this.firstPersonModel = firstPersonModel;
 		this.armorTrimAtlas = modelManager.getAtlas(Sheets.ARMOR_TRIMS_SHEET);
@@ -182,7 +182,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				Model customModel = ForgeHooksClient.getArmorModel(entityliving, stack, slot, originalModel);
 				
 				if (customModel == originalModel || !(customModel instanceof HumanoidModel<?> humanoidModel)) {
-					model = this.mesh.getHumanoidArmorModel(slot);
+					model = this.mesh.get().getHumanoidArmorModel(slot);
 				} else {
 					model = CustomModelBakery.bakeArmor(humanoidModel, armorItem, slot);
 				}

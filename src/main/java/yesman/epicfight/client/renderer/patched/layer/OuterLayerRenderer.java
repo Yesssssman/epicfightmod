@@ -21,17 +21,17 @@ public class OuterLayerRenderer extends ModelRenderLayer<Drowned, DrownedPatch, 
 	public static final ResourceLocation DROWNED_OUTER_LAYER = new ResourceLocation("textures/entity/zombie/drowned_outer_layer.png");
 	
 	public OuterLayerRenderer() {
-		super(Meshes.BIPED_OUTLAYER);
+		super(() -> Meshes.BIPED_OUTLAYER);
 	}
 	
 	@Override
 	protected void renderLayer(DrownedPatch entitypatch, Drowned entityliving, DrownedOuterLayer<Drowned> vanillaLayer, PoseStack poseStack, MultiBufferSource buffer, int packedLight,
 			OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
-		this.mesh.draw(poseStack, buffer, RenderType.entityCutoutNoCull(DROWNED_OUTER_LAYER), packedLight, 1.0F, 1.0F, 1.0F, 1.0F, LivingEntityRenderer.getOverlayCoords(entityliving, 0.0F), entitypatch.getArmature(), poses);
+		this.mesh.get().draw(poseStack, buffer, RenderType.entityCutoutNoCull(DROWNED_OUTER_LAYER), packedLight, 1.0F, 1.0F, 1.0F, 1.0F, LivingEntityRenderer.getOverlayCoords(entityliving, 0.0F), entitypatch.getArmature(), poses);
 	}
 	
 	@Override
 	protected void initMesh() {
-		this.mesh.initialize();
+		this.mesh.get().initialize();
 	}
 }

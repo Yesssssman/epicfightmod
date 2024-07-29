@@ -201,6 +201,7 @@
 	"gui.epicfight.auto_switching_items.tooltip": "Edit the list of items that will automatically switch between Battle/Mining mode",
 	"gui.epicfight.export_custom_armor.tooltip": "Export the all custom armor models as an resource pack",
 	"gui.epicfight.use_animation_shader.tooltip": "Turn on/off animation shader. Turning on animation shader enhances the frame rate but may not be compatible with some shader packs",
+	"gui.epicfight.use_animation_shader.locked.tooltip": "This option is locked because you're using shader pack that is incompatible. Please reload the shader pack to unlock this option.",
 	"gui.epicfight.replace": "Following skill will be removed: %s",
 	"gui.epicfight.require_learning": "You must learn \"%s\" skill first!",
 	"gui.epicfight.learn": "Learn",
@@ -555,5 +556,8 @@
 	"datapack_edit.mob_patch.combat_behavior.animation": "Animation",
 	"datapack_edit.mob_patch.combat_behavior.animation.tooltip": "Defines an attack animation",
 	
-	"beta_warning": "The current version of Epic Fight is a closed beta and contains some experimental functions that may not working properly or stop your game. If you don't want to use this mod, delete it from your mod list."
+	"epicfight.messages.test_version_warning_line1": "Epic Fight is testing version.",
+	"epicfight.messages.test_version_warning_line2": "(%s)",
+	
+	"epicfight.messages.shader_transform_fail": "Failed to create shader %s. Automatically switches animation shader mode off."
 }

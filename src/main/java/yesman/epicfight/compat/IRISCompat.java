@@ -8,6 +8,7 @@ import com.google.common.collect.Maps;
 import net.minecraftforge.eventbus.api.IEventBus;
 import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.client.renderer.shader.AnimationShaderInstance;
+import yesman.epicfight.main.EpicFightMod;
 
 public class IRISCompat implements ICompatModule {
 	private static final Map<String, Supplier<AnimationShaderInstance>> IRIS_SHADER_PROVIDERS = Maps.newHashMap();
@@ -18,6 +19,7 @@ public class IRISCompat implements ICompatModule {
 	}
 	
 	public static void clearIrisShaders() {
+		EpicFightMod.CLIENT_CONFIGS.shaderModeSwitchingLocked = false;
 		IRIS_SHADER_PROVIDERS.clear();
 	}
 	

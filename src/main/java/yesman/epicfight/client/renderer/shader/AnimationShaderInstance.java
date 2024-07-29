@@ -44,7 +44,7 @@ public interface AnimationShaderInstance {
 	
 	public Uniform getPoses(int i);
 	
-	public void setSampler(String samplerName, Object texture);
+	public void _setSampler(String samplerName, Object texture);
 	
 	default void setupShaderLights() {
 		RenderSystem.setupShaderLights((ShaderInstance)this);

@@ -129,6 +129,11 @@ public class EpicFightGraphicOptionScreen extends EpicFightOptionSubScreen {
 			button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".use_animation_shader." + (useAnimationShader.getValue() ? "on" : "off")));
 		}).pos(this.width / 2 - 165, this.height / 4 + buttonHeight).size(160, 20).tooltip(Tooltip.create(Component.translatable("gui."+EpicFightMod.MODID+".use_animation_shader.tooltip"))).build();
 		
+		if (this.config.shaderModeSwitchingLocked) {
+			useAnimationShaderButton.active = false;
+			useAnimationShaderButton.setTooltip(Tooltip.create(Component.translatable("gui." + EpicFightMod.MODID + ".use_animation_shader.locked.tooltip")));
+		}
+		
 		this.optionsList.addSmall(useAnimationShaderButton, null);
 		
 		buttonHeight += 30;

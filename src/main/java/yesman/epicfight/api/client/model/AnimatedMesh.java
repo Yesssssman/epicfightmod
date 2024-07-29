@@ -258,9 +258,13 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 			throw new IllegalStateException("Mesh destroyed");
 		}
 		
+		if (animationShaderInstance == null) {
+			return;
+		}
+		
 		for (int i = 0; i < 12; ++i) {
 			int j = RenderSystem.getShaderTexture(i);
-			animationShaderInstance.setSampler("Sampler" + i, j);
+			animationShaderInstance._setSampler("Sampler" + i, j);
 		}
 		
 		if (animationShaderInstance.getModelViewMatrixUniform() != null) {

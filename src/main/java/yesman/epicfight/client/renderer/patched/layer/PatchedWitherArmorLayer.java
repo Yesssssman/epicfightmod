@@ -24,7 +24,7 @@ public class PatchedWitherArmorLayer extends ModelRenderLayer<WitherBoss, Wither
 	private static final ResourceLocation WITHER_ARMOR_LOCATION = new ResourceLocation("textures/entity/wither/wither_armor.png");
 	
 	public PatchedWitherArmorLayer() {
-		super(Meshes.WITHER);
+		super(() -> Meshes.WITHER);
 	}
 	
 	@Override
@@ -56,7 +56,7 @@ public class PatchedWitherArmorLayer extends ModelRenderLayer<WitherBoss, Wither
 			
 			RenderType renderType = RenderType.energySwirl(WITHER_ARMOR_LOCATION, Mth.cos(progress * 0.02F) * 3.0F % 1.0F, progress * 0.01F % 1.0F);
 			
-			this.mesh.draw(poseStack, buffer, renderType, packedLight, transparency * 0.5F, transparency * 0.5F, transparency * 0.5F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
+			this.mesh.get().draw(poseStack, buffer, renderType, packedLight, transparency * 0.5F, transparency * 0.5F, transparency * 0.5F, 1.0F, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poses);
 			poseStack.popPose();
 		}
 	}

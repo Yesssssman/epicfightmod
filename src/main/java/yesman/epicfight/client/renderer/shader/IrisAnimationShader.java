@@ -144,6 +144,11 @@ public class IrisAnimationShader extends ExtendedShader implements AnimationShad
 	}
 	
 	@Override
+	public void _setSampler(String samplerName, Object texture) {
+		this.setSampler(samplerName, texture);
+	}
+	
+	@Override
 	public String _getName() {
 		return super.getName();
 	}

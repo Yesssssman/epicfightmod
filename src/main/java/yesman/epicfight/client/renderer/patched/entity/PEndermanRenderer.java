@@ -21,7 +21,7 @@ public class PEndermanRenderer extends PatchedLivingEntityRenderer<EnderMan, End
 	public PEndermanRenderer(EntityRendererProvider.Context context, EntityType<?> entityType) {
 		super(context, entityType);
 		
-		this.addPatchedLayer(EnderEyesLayer.class, new PatchedEyesLayer<>(ENDERMAN_EYE_TEXTURE, Meshes.ENDERMAN));
+		this.addPatchedLayer(EnderEyesLayer.class, new PatchedEyesLayer<>(ENDERMAN_EYE_TEXTURE, () -> Meshes.ENDERMAN));
 	}
 	
 	@Override
