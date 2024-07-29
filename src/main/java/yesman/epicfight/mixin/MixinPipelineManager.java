@@ -11,7 +11,7 @@ import yesman.epicfight.compat.IRISCompat;
 
 @Mixin(targets = {"net.irisshaders.iris.pipeline.PipelineManager"})
 public abstract class MixinPipelineManager {
-	@Inject(at = @At(value = "INVOKE", target = "Lnet/irisshaders/iris/uniforms/SystemTimeUniforms$Timer;reset()V", shift = At.Shift.AFTER), method = "preparePipeline(Lnet/irisshaders/iris/shaderpack/materialmap/NamespacedId;)V", cancellable = true)
+	@Inject(at = @At(value = "INVOKE", target = "Lnet/irisshaders/iris/uniforms/SystemTimeUniforms$Timer;reset()V", shift = At.Shift.AFTER), method = "preparePipeline(Lnet/irisshaders/iris/shaderpack/materialmap/NamespacedId;)V", remap = false)
 	private void epicfight_preparePipeline(NamespacedId id, CallbackInfoReturnable<WorldRenderingPipeline> info) {
 		IRISCompat.clearIrisShaders();
 	}
