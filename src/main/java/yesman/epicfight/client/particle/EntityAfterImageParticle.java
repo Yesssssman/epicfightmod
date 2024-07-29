@@ -33,7 +33,7 @@ import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class EntityAfterImageParticle extends CustomModelParticle<MeshProvider<AnimatedMesh>> {
+public class EntityAfterImageParticle extends CustomModelParticle<AnimatedMesh> {
 	private final OpenMatrix4f[] poseMatrices;
 	private final Matrix4f modelMatrix;
 	private float alphaO;

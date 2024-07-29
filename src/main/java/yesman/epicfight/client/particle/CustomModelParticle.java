@@ -18,8 +18,8 @@ import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class CustomModelParticle<M extends MeshProvider<?>> extends Particle {
-	protected final M particleMeshProvider;
+public abstract class CustomModelParticle<M extends Mesh<?, ?>> extends Particle {
+	protected final MeshProvider<M> particleMeshProvider;
 	protected float pitch;
 	protected float pitchO;
 	protected float yaw;
@@ -27,7 +27,7 @@ public abstract class CustomModelParticle<M extends MeshProvider<?>> extends Par
 	protected float scale = 1.0F;
 	protected float scaleO = 1.0F;
 	
-	public CustomModelParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, M particleMesh) {
+	public CustomModelParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, MeshProvider<M> particleMesh) {
 		super(level, x, y, z, xd, yd, zd);
 		this.particleMeshProvider = particleMesh;
 	}

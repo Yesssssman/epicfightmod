@@ -11,7 +11,7 @@ import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.RawMesh;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class TexturedCustomModelParticle extends CustomModelParticle<MeshProvider<RawMesh>> {
+public abstract class TexturedCustomModelParticle extends CustomModelParticle<RawMesh> {
 	protected final ResourceLocation texture;
 	
 	public TexturedCustomModelParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, MeshProvider<RawMesh> particleMesh, ResourceLocation texture) {
