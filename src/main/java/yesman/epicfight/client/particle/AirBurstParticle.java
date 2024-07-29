@@ -44,7 +44,7 @@ public class AirBurstParticle extends TexturedCustomModelParticle {
 	public static class Provider implements ParticleProvider<SimpleParticleType> {
 		@Override
 		public Particle createParticle(SimpleParticleType typeIn, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-			return new AirBurstParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, () -> Meshes.AIR_BURST, AIR_BURST_PARTICLE);
+			return new AirBurstParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, Meshes.AIR_BURST, AIR_BURST_PARTICLE);
 		}
 	}
 }

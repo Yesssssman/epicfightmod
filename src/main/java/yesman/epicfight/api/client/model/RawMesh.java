@@ -18,7 +18,7 @@ import yesman.epicfight.api.client.model.RawMesh.RawModelPart;
 import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
-public class RawMesh extends Mesh<RawModelPart, VertexBuilder> {
+public class RawMesh extends Mesh<RawModelPart, VertexBuilder> implements MeshProvider<RawMesh> {
 	public RawMesh(Map<String, float[]> arrayMap, Map<String, List<VertexBuilder>> partBuilders, RawMesh parent, RenderProperties properties) {
 		super(arrayMap, partBuilders, parent, properties);
 	}
@@ -75,5 +75,10 @@ public class RawMesh extends Mesh<RawModelPart, VertexBuilder> {
 				drawingFunction.draw(builder, posVec.x(), posVec.x(), posVec.z(), normVec.x(), normVec.y(), normVec.z(), packedLight, r, g, b, a, uvs[uv], uvs[uv + 1], overlay);
 			}
 		}
+	}
+	
+	@Override
+	public RawMesh get() {
+		return this;
 	}
 }
