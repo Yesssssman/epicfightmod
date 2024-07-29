@@ -10,6 +10,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -31,7 +32,7 @@ public class PHoglinRenderer<E extends Mob & HoglinBase, T extends MobPatch<E>> 
 	}
 	
 	@Override
-	public HoglinMesh getMesh(T entitypatch) {
+	public MeshProvider<HoglinMesh> getMeshProvider(T entitypatch) {
 		return Meshes.HOGLIN;
 	}
 }

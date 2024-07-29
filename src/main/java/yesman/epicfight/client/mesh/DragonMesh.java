@@ -7,9 +7,10 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.AnimatedVertexBuilder;
+import yesman.epicfight.api.client.model.MeshProvider;
 
 @OnlyIn(Dist.CLIENT)
-public class DragonMesh extends AnimatedMesh {
+public class DragonMesh extends AnimatedMesh implements MeshProvider<DragonMesh> {
 	public final AnimatedModelPart head;
 	public final AnimatedModelPart neck;
 	public final AnimatedModelPart torso;
@@ -34,5 +35,10 @@ public class DragonMesh extends AnimatedMesh {
 		this.leftWing = this.getOrLogException(this.parts, "leftWing");
 		this.rightWing = this.getOrLogException(this.parts, "rightWing");
 		this.tail = this.getOrLogException(this.parts, "tail");
+	}
+
+	@Override
+	public DragonMesh get() {
+		return this;
 	}
 }

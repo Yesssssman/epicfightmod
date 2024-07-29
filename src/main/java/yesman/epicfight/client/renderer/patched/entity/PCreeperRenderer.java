@@ -9,6 +9,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Creeper;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.client.mesh.CreeperMesh;
 import yesman.epicfight.world.capabilities.entitypatch.mob.CreeperPatch;
@@ -27,7 +28,7 @@ public class PCreeperRenderer extends PatchedLivingEntityRenderer<Creeper, Creep
 	}
 	
 	@Override
-	public CreeperMesh getMesh(CreeperPatch entitypatch) {
+	public MeshProvider<CreeperMesh> getMeshProvider(CreeperPatch entitypatch) {
 		return Meshes.CREEPER;
 	}
 }

@@ -16,7 +16,7 @@ import yesman.epicfight.world.capabilities.entitypatch.mob.DrownedPatch;
 @OnlyIn(Dist.CLIENT)
 public class PDrownedRenderer extends PHumanoidRenderer<Drowned, DrownedPatch, DrownedModel<Drowned>, DrownedRenderer, HumanoidMesh> {
 	public PDrownedRenderer(EntityRendererProvider.Context context, EntityType<?> entityType) {
-		super(Meshes.BIPED, context, entityType);
+		super(() -> Meshes.BIPED, context, entityType);
 		this.addPatchedLayer(DrownedOuterLayer.class, new OuterLayerRenderer());
 	}
 }

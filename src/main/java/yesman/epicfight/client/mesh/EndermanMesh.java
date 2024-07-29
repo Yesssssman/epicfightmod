@@ -7,9 +7,10 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.AnimatedVertexBuilder;
+import yesman.epicfight.api.client.model.MeshProvider;
 
 @OnlyIn(Dist.CLIENT)
-public class EndermanMesh extends AnimatedMesh {
+public class EndermanMesh extends AnimatedMesh implements MeshProvider<EndermanMesh> {
 	public final AnimatedModelPart headTop;
 	public final AnimatedModelPart headBottom;
 	public final AnimatedModelPart torso;
@@ -28,5 +29,10 @@ public class EndermanMesh extends AnimatedMesh {
 		this.rightArm = this.getOrLogException(this.parts, "rightArm");
 		this.leftLeg = this.getOrLogException(this.parts, "leftLeg");
 		this.rightLeg = this.getOrLogException(this.parts, "rightLeg");
+	}
+	
+	@Override
+	public EndermanMesh get() {
+		return this;
 	}
 }

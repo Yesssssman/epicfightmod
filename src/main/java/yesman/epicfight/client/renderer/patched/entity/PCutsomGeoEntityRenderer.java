@@ -21,6 +21,7 @@ import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.forgeevent.PrepareModelEvent;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -28,9 +29,9 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class PCutsomGeoEntityRenderer<E extends LivingEntity & GeoAnimatable> extends PatchedEntityRenderer<E, LivingEntityPatch<E>, GeoEntityRenderer<E>, AnimatedMesh> {
-	private final AnimatedMesh mesh;
+	private final MeshProvider<AnimatedMesh> mesh;
 	
-	public PCutsomGeoEntityRenderer(AnimatedMesh mesh, EntityRendererProvider.Context context) {
+	public PCutsomGeoEntityRenderer(MeshProvider<AnimatedMesh> mesh, EntityRendererProvider.Context context) {
 		super(context);
 		
 		this.mesh = mesh;
@@ -49,11 +50,13 @@ public class PCutsomGeoEntityRenderer<E extends LivingEntity & GeoAnimatable> ex
 		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks, false);
 		
 		if (renderType != null) {
-			this.mesh.initialize();
-			PrepareModelEvent prepareModelEvent = new PrepareModelEvent(this, this.mesh, entitypatch, buffer, poseStack, packedLight, partialTicks);
+			AnimatedMesh mesh = this.mesh.get();
+			
+			mesh.initialize();
+			PrepareModelEvent prepareModelEvent = new PrepareModelEvent(this, mesh, entitypatch, buffer, poseStack, packedLight, partialTicks);
 			
 			if (!MinecraftForge.EVENT_BUS.post(prepareModelEvent)) {
-				this.mesh.draw(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, isVisibleToPlayer ? 0.15F : 1.0F, renderer.getPackedOverlay(entityIn, partialTicks), entitypatch.getArmature(), poseMatrices);
+				mesh.draw(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, isVisibleToPlayer ? 0.15F : 1.0F, renderer.getPackedOverlay(entityIn, partialTicks), entitypatch.getArmature(), poseMatrices);
 			}
 		}
 		
@@ -136,7 +139,7 @@ public class PCutsomGeoEntityRenderer<E extends LivingEntity & GeoAnimatable> ex
 	}
 	
 	@Override
-	public AnimatedMesh getMesh(LivingEntityPatch<E> entitypatch) {
+	public MeshProvider<AnimatedMesh> getMeshProvider(LivingEntityPatch<E> entitypatch) {
 		return this.mesh;
 	}
 }

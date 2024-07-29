@@ -7,9 +7,10 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.AnimatedVertexBuilder;
+import yesman.epicfight.api.client.model.MeshProvider;
 
 @OnlyIn(Dist.CLIENT)
-public class SpiderMesh extends AnimatedMesh {
+public class SpiderMesh extends AnimatedMesh implements MeshProvider<SpiderMesh> {
 	public final AnimatedModelPart head;
 	public final AnimatedModelPart middleStomach;
 	public final AnimatedModelPart bottomStomach;
@@ -36,5 +37,10 @@ public class SpiderMesh extends AnimatedMesh {
 		this.rightLeg2 = this.getOrLogException(this.parts, "rightLeg2");
 		this.rightLeg3 = this.getOrLogException(this.parts, "rightLeg3");
 		this.rightLeg4 = this.getOrLogException(this.parts, "rightLeg4");
+	}
+	
+	@Override
+	public SpiderMesh get() {
+		return this;
 	}
 }

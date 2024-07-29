@@ -12,6 +12,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.client.animation.Layer;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -29,7 +30,7 @@ public class WitherGhostCloneRenderer extends PatchedEntityRenderer<WitherGhostC
 	@Override
 	public void render(WitherGhostClone entityIn, WitherGhostPatch entitypatch, NoopLivingEntityRenderer<WitherGhostClone> renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
 		RenderType renderType = RenderType.entityTranslucent(PWitherRenderer.WITHER_INVULNERABLE_LOCATION);
-		WitherMesh mesh = this.getMesh(entitypatch);
+		WitherMesh mesh = this.getMeshProvider(entitypatch).get();
 		Armature armature = entitypatch.getArmature();
 		float tranparency = entityIn.isNoAi() ? 0.6F : Mth.sin((entityIn.tickCount + partialTicks) * 0.025F * Mth.PI) * 0.6F;
 		
@@ -50,7 +51,7 @@ public class WitherGhostCloneRenderer extends PatchedEntityRenderer<WitherGhostC
 	}
 
 	@Override
-	public WitherMesh getMesh(WitherGhostPatch entitypatch) {
+	public MeshProvider<WitherMesh> getMeshProvider(WitherGhostPatch entitypatch) {
 		return Meshes.WITHER;
 	}
 }

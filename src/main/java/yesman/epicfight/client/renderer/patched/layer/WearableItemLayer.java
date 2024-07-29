@@ -34,6 +34,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.client.forgeevent.AnimatedArmorTextureEvent;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Mesh.DrawingFunction;
 import yesman.epicfight.api.client.model.transformer.CustomModelBakery;
 import yesman.epicfight.api.model.Armature;
@@ -65,8 +66,8 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 	private final boolean firstPersonModel;
 	private final TextureAtlas armorTrimAtlas;
 	
-	public WearableItemLayer(AM mesh, boolean firstPersonModel, ModelManager modelManager) {
-		super(() -> mesh);
+	public WearableItemLayer(MeshProvider<AM> meshProvider, boolean firstPersonModel, ModelManager modelManager) {
+		super(meshProvider);
 		
 		this.firstPersonModel = firstPersonModel;
 		this.armorTrimAtlas = modelManager.getAtlas(Sheets.ARMOR_TRIMS_SHEET);

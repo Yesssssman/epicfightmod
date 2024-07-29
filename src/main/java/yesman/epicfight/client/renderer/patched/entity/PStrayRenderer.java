@@ -16,7 +16,7 @@ import yesman.epicfight.world.capabilities.entitypatch.mob.SkeletonPatch;
 @OnlyIn(Dist.CLIENT)
 public class PStrayRenderer extends PHumanoidRenderer<PathfinderMob, SkeletonPatch<PathfinderMob>, HumanoidModel<PathfinderMob>, HumanoidMobRenderer<PathfinderMob, HumanoidModel<PathfinderMob>>, HumanoidMesh> {
 	public PStrayRenderer(EntityRendererProvider.Context context, EntityType<?> entityType) {
-		super(Meshes.SKELETON, context, entityType);
+		super(() -> Meshes.SKELETON, context, entityType);
 		this.addPatchedLayer(StrayClothingLayer.class, new EmptyLayer<>());
 	}
 }

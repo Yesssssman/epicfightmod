@@ -19,17 +19,12 @@ import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 @OnlyIn(Dist.CLIENT)
 public class PWitherSkeletonMinionRenderer extends PHumanoidRenderer<PathfinderMob, HumanoidMobPatch<PathfinderMob>, HumanoidModel<PathfinderMob>, HumanoidMobRenderer<PathfinderMob, HumanoidModel<PathfinderMob>>, HumanoidMesh> {
 	public PWitherSkeletonMinionRenderer(EntityRendererProvider.Context context, EntityType<?> entityType) {
-		super(Meshes.SKELETON, context, entityType);
+		super(() -> Meshes.SKELETON, context, entityType);
 	}
 
 	@Override
 	protected void setJointTransforms(HumanoidMobPatch<PathfinderMob> entitypatch, Armature armature, Pose pose, float partialTicks) {
 		Vec3f rootScale = pose.getOrDefaultTransform("Root").scale();
 		pose.getOrDefaultTransform("Head").jointLocal(JointTransform.getScale(new Vec3f(1.0F / rootScale.x, 1.0F / rootScale.y, 1.0F / rootScale.z)), OpenMatrix4f::mul);
-	}
-	
-	@Override
-	public HumanoidMesh getMesh(HumanoidMobPatch<PathfinderMob> entitypatch) {
-		return Meshes.SKELETON;
 	}
 }

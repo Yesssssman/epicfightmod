@@ -9,6 +9,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Spider;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.client.mesh.SpiderMesh;
 import yesman.epicfight.client.renderer.patched.layer.PatchedEyesLayer;
@@ -24,7 +25,7 @@ public class PSpiderRenderer extends PatchedLivingEntityRenderer<Spider, SpiderP
 	}
 	
 	@Override
-	public SpiderMesh getMesh(SpiderPatch<Spider> entitypatch) {
+	public MeshProvider<SpiderMesh> getMeshProvider(SpiderPatch<Spider> entitypatch) {
 		return Meshes.SPIDER;
 	}
 }

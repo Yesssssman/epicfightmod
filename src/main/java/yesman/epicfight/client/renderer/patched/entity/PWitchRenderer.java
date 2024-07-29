@@ -8,20 +8,21 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Witch;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Meshes;
-import yesman.epicfight.client.mesh.HumanoidMesh;
+import yesman.epicfight.client.mesh.VillagerMesh;
 import yesman.epicfight.client.renderer.patched.layer.PatchedItemInHandLayer;
 import yesman.epicfight.world.capabilities.entitypatch.mob.WitchPatch;
 
 @OnlyIn(Dist.CLIENT)
-public class PWitchRenderer extends PatchedLivingEntityRenderer<Witch, WitchPatch, WitchModel<Witch>, WitchRenderer, HumanoidMesh> {
+public class PWitchRenderer extends PatchedLivingEntityRenderer<Witch, WitchPatch, WitchModel<Witch>, WitchRenderer, VillagerMesh> {
 	public PWitchRenderer(EntityRendererProvider.Context context, EntityType<?> entityType) {
 		super(context, entityType);
 		this.addPatchedLayer(WitchItemLayer.class, new PatchedItemInHandLayer<>());
 	}
 	
 	@Override
-	public HumanoidMesh getMesh(WitchPatch entitypatch) {
+	public MeshProvider<VillagerMesh> getMeshProvider(WitchPatch entitypatch) {
 		return Meshes.WITCH;
 	}
 }

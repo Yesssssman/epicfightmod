@@ -16,7 +16,7 @@ import yesman.epicfight.world.capabilities.entitypatch.MobPatch;
 @OnlyIn(Dist.CLIENT)
 public class PZombieVillagerRenderer extends PHumanoidRenderer<ZombieVillager, MobPatch<ZombieVillager>, ZombieVillagerModel<ZombieVillager>, ZombieVillagerRenderer, HumanoidMesh> {
 	public PZombieVillagerRenderer(EntityRendererProvider.Context context, EntityType<?> entityType) {
-		super(Meshes.VILLAGER_ZOMBIE, context, entityType);
+		super(() -> Meshes.VILLAGER_ZOMBIE, context, entityType);
 		this.addPatchedLayer(VillagerProfessionLayer.class, new PatchedVillagerProfessionLayer());
 	}
 }

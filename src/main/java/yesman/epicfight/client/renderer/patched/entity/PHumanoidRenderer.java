@@ -13,6 +13,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.JointTransform;
 import yesman.epicfight.api.animation.Pose;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -25,9 +26,9 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
 public class PHumanoidRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends HumanoidModel<E>, R extends LivingEntityRenderer<E, M>, AM extends HumanoidMesh> extends PatchedLivingEntityRenderer<E, T, M, R, AM> {
-	private final AM mesh;
+	private final MeshProvider<AM> mesh;
 	
-	public PHumanoidRenderer(AM mesh, EntityRendererProvider.Context context, EntityType<?> entityType) {
+	public PHumanoidRenderer(MeshProvider<AM> mesh, EntityRendererProvider.Context context, EntityType<?> entityType) {
 		super(context, entityType);
 		
 		this.mesh = mesh;
@@ -50,7 +51,7 @@ public class PHumanoidRenderer<E extends LivingEntity, T extends LivingEntityPat
 	}
 
 	@Override
-	public AM getMesh(T entitypatch) {
+	public MeshProvider<AM> getMeshProvider(T entitypatch) {
 		return this.mesh;
 	}
 }

@@ -7,9 +7,10 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.AnimatedVertexBuilder;
+import yesman.epicfight.api.client.model.MeshProvider;
 
 @OnlyIn(Dist.CLIENT)
-public class CreeperMesh extends AnimatedMesh {
+public class CreeperMesh extends AnimatedMesh implements MeshProvider<CreeperMesh> {
 	public final AnimatedModelPart head;
 	public final AnimatedModelPart torso;
 	public final AnimatedModelPart legRF;
@@ -26,5 +27,10 @@ public class CreeperMesh extends AnimatedMesh {
 		this.legLF = this.getOrLogException(this.parts, "legLF");
 		this.legRB = this.getOrLogException(this.parts, "legRB");
 		this.legLB = this.getOrLogException(this.parts, "legLB");
+	}
+
+	@Override
+	public CreeperMesh get() {
+		return this;
 	}
 }

@@ -7,6 +7,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Ravager;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.client.mesh.RavagerMesh;
 import yesman.epicfight.world.capabilities.entitypatch.mob.RavagerPatch;
@@ -18,7 +19,7 @@ public class PRavagerRenderer extends PatchedLivingEntityRenderer<Ravager, Ravag
 	}
 	
 	@Override
-	public RavagerMesh getMesh(RavagerPatch entitypatch) {
+	public MeshProvider<RavagerMesh> getMeshProvider(RavagerPatch entitypatch) {
 		return Meshes.RAVAGER;
 	}
 }

@@ -8,6 +8,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.animal.IronGolem;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.client.mesh.IronGolemMesh;
 import yesman.epicfight.client.renderer.patched.layer.PatchedGolemCrackLayer;
@@ -21,7 +22,7 @@ public class PIronGolemRenderer extends PatchedLivingEntityRenderer<IronGolem, I
 	}
 	
 	@Override
-	public IronGolemMesh getMesh(IronGolemPatch entitypatch) {
+	public MeshProvider<IronGolemMesh> getMeshProvider(IronGolemPatch entitypatch) {
 		return Meshes.IRON_GOLEM;
 	}
 }

@@ -18,6 +18,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.client.animation.Layer;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
@@ -40,7 +41,7 @@ public class PEnderDragonRenderer extends PatchedEntityRenderer<EnderDragon, End
 	
 	@Override
 	public void render(EnderDragon entityIn, EnderDragonPatch entitypatch, EnderDragonRenderer renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
-		DragonMesh mesh = this.getMesh(entitypatch);
+		DragonMesh mesh = this.getMeshProvider(entitypatch).get();
 		Armature armature = entitypatch.getArmature();
 		poseStack.pushPose();
         this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
@@ -115,7 +116,7 @@ public class PEnderDragonRenderer extends PatchedEntityRenderer<EnderDragon, End
 	}
 
 	@Override
-	public DragonMesh getMesh(EnderDragonPatch entitypatch) {
+	public MeshProvider<DragonMesh> getMeshProvider(EnderDragonPatch entitypatch) {
 		return Meshes.DRAGON;
 	}
 }

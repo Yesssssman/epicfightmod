@@ -7,9 +7,10 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.AnimatedVertexBuilder;
+import yesman.epicfight.api.client.model.MeshProvider;
 
 @OnlyIn(Dist.CLIENT)
-public class RavagerMesh extends AnimatedMesh {
+public class RavagerMesh extends AnimatedMesh implements MeshProvider<RavagerMesh> {
 	public final AnimatedModelPart head;
 	public final AnimatedModelPart body;
 	public final AnimatedModelPart leftFrontLeg;
@@ -26,5 +27,10 @@ public class RavagerMesh extends AnimatedMesh {
 		this.rightFrontLeg = this.getOrLogException(this.parts, "rightFrontLeg");
 		this.leftBackLeg = this.getOrLogException(this.parts, "leftBackLeg");
 		this.rightBackLeg = this.getOrLogException(this.parts, "rightBackLeg");
+	}
+
+	@Override
+	public RavagerMesh get() {
+		return this;
 	}
 }

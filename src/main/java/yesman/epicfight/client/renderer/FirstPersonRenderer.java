@@ -25,6 +25,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.client.model.AnimatedMesh.AnimatedModelPart;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -44,7 +45,7 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 		
 		this.addPatchedLayer(ElytraLayer.class, new EmptyLayer<>());
 		this.addPatchedLayer(PlayerItemInHandLayer.class, new PatchedItemInHandLayer<>());
-		this.addPatchedLayer(HumanoidArmorLayer.class, new WearableItemLayer<>(Meshes.BIPED, true, context.getModelManager()));
+		this.addPatchedLayer(HumanoidArmorLayer.class, new WearableItemLayer<>(() -> Meshes.BIPED, true, context.getModelManager()));
 		this.addPatchedLayer(CustomHeadLayer.class, new EmptyLayer<>());
 		this.addPatchedLayer(ArrowLayer.class, new EmptyLayer<>());
 		this.addPatchedLayer(BeeStingerLayer.class, new EmptyLayer<>());
@@ -62,7 +63,7 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 		
 		Vec3f translateVectorOfHead = mat.toTranslationVector();
 		poseStack.translate(-translateVectorOfHead.x, -translateVectorOfHead.y, -translateVectorOfHead.z);
-		HumanoidMesh mesh = this.getMesh(entitypatch);
+		HumanoidMesh mesh = this.getMeshProvider(entitypatch).get();
 		this.prepareModel(mesh, entity, entitypatch, renderer);
 		
 		if (!entitypatch.getOriginal().isInvisible()) {
@@ -111,8 +112,8 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 	}
 	
 	@Override
-	public HumanoidMesh getMesh(LocalPlayerPatch entitypatch) {
-		return entitypatch.getOriginal().getModelName().equals("slim") ? Meshes.ALEX : Meshes.BIPED;
+	public MeshProvider<HumanoidMesh> getMeshProvider(LocalPlayerPatch entitypatch) {
+		return entitypatch.getOriginal().getModelName().equals("slim") ? () -> Meshes.ALEX : () -> Meshes.BIPED;
 	}
 	
 	@Override

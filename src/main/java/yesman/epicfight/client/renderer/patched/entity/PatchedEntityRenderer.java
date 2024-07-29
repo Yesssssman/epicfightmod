@@ -20,6 +20,7 @@ import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
@@ -74,7 +75,7 @@ public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends Li
 		return poseMatrices;
 	}
 	
-	public abstract AM getMesh(T entitypatch);
+	public abstract MeshProvider<AM> getMeshProvider(T entitypatch);
 	
 	protected void setJointTransforms(T entitypatch, Armature armature, Pose pose, float partialTicks) {
 	}

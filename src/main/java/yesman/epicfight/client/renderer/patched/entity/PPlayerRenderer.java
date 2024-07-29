@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.entity.player.PlayerRenderer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.client.mesh.HumanoidMesh;
 import yesman.epicfight.client.renderer.patched.layer.PatchedArrowLayer;
@@ -22,7 +23,7 @@ import yesman.epicfight.client.world.capabilites.entitypatch.player.AbstractClie
 @OnlyIn(Dist.CLIENT)
 public class PPlayerRenderer extends PHumanoidRenderer<AbstractClientPlayer, AbstractClientPlayerPatch<AbstractClientPlayer>, PlayerModel<AbstractClientPlayer>, PlayerRenderer, HumanoidMesh> {
 	public PPlayerRenderer(EntityRendererProvider.Context context, EntityType<?> entityType) {
-		super(Meshes.BIPED, context, entityType);
+		super(() -> Meshes.BIPED, context, entityType);
 		
 		this.addPatchedLayer(ArrowLayer.class, new PatchedArrowLayer<> (context));
 		this.addPatchedLayer(BeeStingerLayer.class, new PatchedBeeStingerLayer<> ());
@@ -52,7 +53,7 @@ public class PPlayerRenderer extends PHumanoidRenderer<AbstractClientPlayer, Abs
 	}
 	
 	@Override
-	public HumanoidMesh getMesh(AbstractClientPlayerPatch<AbstractClientPlayer> entitypatch) {
-		return entitypatch.getOriginal().getModelName().equals("slim") ? Meshes.ALEX : Meshes.BIPED;
+	public MeshProvider<HumanoidMesh> getMeshProvider(AbstractClientPlayerPatch<AbstractClientPlayer> entitypatch) {
+		return entitypatch.getOriginal().getModelName().equals("slim") ? () -> Meshes.ALEX : () -> Meshes.BIPED;
 	}
 }

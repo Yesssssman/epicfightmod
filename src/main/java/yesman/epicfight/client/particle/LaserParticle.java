@@ -17,18 +17,19 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.client.model.RawMesh;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
 
 @OnlyIn(Dist.CLIENT)
-public class LaserParticle extends CustomModelParticle<RawMesh> {
+public class LaserParticle extends CustomModelParticle<MeshProvider<RawMesh>> {
 	private final float length;
 	private final float xRot;
 	private final float yRot;
 	
 	public LaserParticle(ClientLevel level, double x, double y, double z, double toX, double toY, double toZ) {
-		super(level, x, y, z, 0, 0, 0, Meshes.LASER);
+		super(level, x, y, z, 0, 0, 0, () -> Meshes.LASER);
 		this.lifetime = 5;
 		
 		Vec3 direction = new Vec3(toX - x, toY - y, toZ - z);

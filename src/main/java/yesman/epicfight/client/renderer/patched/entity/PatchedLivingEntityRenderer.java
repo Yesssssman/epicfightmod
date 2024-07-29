@@ -140,7 +140,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		
 		if (renderType != null) {
 		    this.prepareVanillaModel(entityIn, renderer.getModel(), renderer, partialTicks);
-			AM mesh = this.getMesh(entitypatch);
+			AM mesh = this.getMeshProvider(entitypatch).get();
 			this.prepareModel(mesh, entityIn, entitypatch, renderer);
 			
 			PrepareModelEvent prepareModelEvent = new PrepareModelEvent(this, mesh, entitypatch, buffer, poseStack, packedLight, partialTicks);

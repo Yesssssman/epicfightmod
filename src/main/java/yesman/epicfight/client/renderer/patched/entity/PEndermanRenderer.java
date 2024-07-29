@@ -9,6 +9,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.EnderMan;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.client.mesh.EndermanMesh;
 import yesman.epicfight.client.renderer.patched.layer.PatchedEyesLayer;
@@ -25,7 +26,7 @@ public class PEndermanRenderer extends PatchedLivingEntityRenderer<EnderMan, End
 	}
 	
 	@Override
-	public EndermanMesh getMesh(EndermanPatch entitypatch) {
+	public MeshProvider<EndermanMesh> getMeshProvider(EndermanPatch entitypatch) {
 		return Meshes.ENDERMAN;
 	}
 }

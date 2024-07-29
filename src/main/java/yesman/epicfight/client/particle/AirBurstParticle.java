@@ -8,6 +8,7 @@ import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.client.model.RawMesh;
 import yesman.epicfight.main.EpicFightMod;
@@ -16,7 +17,7 @@ import yesman.epicfight.main.EpicFightMod;
 public class AirBurstParticle extends TexturedCustomModelParticle {
 	public static final ResourceLocation AIR_BURST_PARTICLE = new ResourceLocation(EpicFightMod.MODID, "textures/particle/air_burst.png");
 	
-	public AirBurstParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, RawMesh particleMesh, ResourceLocation texture) {
+	public AirBurstParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, MeshProvider<RawMesh> particleMesh, ResourceLocation texture) {
 		super(level, x, y, z, xd, yd, zd, particleMesh, texture);
 		
 		this.scale = 0.1F;
@@ -43,7 +44,7 @@ public class AirBurstParticle extends TexturedCustomModelParticle {
 	public static class Provider implements ParticleProvider<SimpleParticleType> {
 		@Override
 		public Particle createParticle(SimpleParticleType typeIn, ClientLevel level, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
-			return new AirBurstParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, Meshes.AIR_BURST, AIR_BURST_PARTICLE);
+			return new AirBurstParticle(level, x, y, z, xSpeed, ySpeed, zSpeed, () -> Meshes.AIR_BURST, AIR_BURST_PARTICLE);
 		}
 	}
 }

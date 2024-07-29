@@ -14,11 +14,12 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.Mesh;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
 
 @OnlyIn(Dist.CLIENT)
-public abstract class CustomModelParticle<M extends Mesh<?, ?>> extends Particle {
-	protected final M particleMesh;
+public abstract class CustomModelParticle<M extends MeshProvider<?>> extends Particle {
+	protected final M particleMeshProvider;
 	protected float pitch;
 	protected float pitchO;
 	protected float yaw;
@@ -28,7 +29,7 @@ public abstract class CustomModelParticle<M extends Mesh<?, ?>> extends Particle
 	
 	public CustomModelParticle(ClientLevel level, double x, double y, double z, double xd, double yd, double zd, M particleMesh) {
 		super(level, x, y, z, xd, yd, zd);
-		this.particleMesh = particleMesh;
+		this.particleMeshProvider = particleMesh;
 	}
 	
 	@Override
@@ -36,8 +37,7 @@ public abstract class CustomModelParticle<M extends Mesh<?, ?>> extends Particle
 		PoseStack poseStack = new PoseStack();
 		this.setupPoseStack(poseStack, camera, partialTicks);
 		this.prepareDraw(poseStack, partialTicks);
-		
-		this.particleMesh.draw(poseStack, vertexConsumer, Mesh.DrawingFunction.ENTITY_NO_LIGHTING, this.getLightColor(partialTicks), this.rCol, this.gCol, this.bCol, this.alpha, OverlayTexture.NO_OVERLAY);
+		this.particleMeshProvider.get().draw(poseStack, vertexConsumer, Mesh.DrawingFunction.ENTITY_NO_LIGHTING, this.getLightColor(partialTicks), this.rCol, this.gCol, this.bCol, this.alpha, OverlayTexture.NO_OVERLAY);
 	}
 	
 	@Override
