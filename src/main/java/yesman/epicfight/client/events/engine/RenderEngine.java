@@ -256,11 +256,9 @@ public class RenderEngine {
 																						this.minecraft.getResourceManager(), this.minecraft.getEntityModels(), this.minecraft.font);
 			
 			if (compound.getBoolean("humanoid")) {
-				HumanoidMesh mesh = Meshes.getOrCreateAnimatedMesh(this.minecraft.getResourceManager(), new ResourceLocation(compound.getString("model")), HumanoidMesh::new);
-				this.entityRendererCache.put(entityType, new PCustomHumanoidEntityRenderer<> (() -> mesh, context, entityType));
+				this.entityRendererCache.put(entityType, new PCustomHumanoidEntityRenderer<> (() -> Meshes.getOrCreateAnimatedMesh(this.minecraft.getResourceManager(), new ResourceLocation(compound.getString("model")), HumanoidMesh::new), context, entityType));
 			} else {
-				AnimatedMesh mesh = Meshes.getOrCreateAnimatedMesh(this.minecraft.getResourceManager(), new ResourceLocation(compound.getString("model")), AnimatedMesh::new);
-				this.entityRendererCache.put(entityType, new PCustomEntityRenderer(() -> mesh, context));
+				this.entityRendererCache.put(entityType, new PCustomEntityRenderer(() -> Meshes.getOrCreateAnimatedMesh(this.minecraft.getResourceManager(), new ResourceLocation(compound.getString("model")), AnimatedMesh::new), context));
 			}
 		} else {
 			EntityType<?> presetEntityType = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(renderer));

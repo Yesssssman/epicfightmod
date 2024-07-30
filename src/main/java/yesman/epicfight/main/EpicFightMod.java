@@ -203,6 +203,10 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  
  *  5. Fixed weapon innate skills deactivated in dedicated server
  *  
+ *  --- 20.8.1.209 ---
+ *  
+ *  1. Added animation shader (Release fix)
+ *  
  *  --- TO DO ---
  *  
  *  1. Crash because {@link PlayerPatch#STAMINA} is unregistered at SynchedEntityData (Most likely a mod compatibility issue)
