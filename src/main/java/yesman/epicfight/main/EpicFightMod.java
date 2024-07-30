@@ -21,6 +21,7 @@ import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
@@ -247,7 +248,6 @@ public class EpicFightMod {
 		
 		bus.addListener(this::constructMod);
     	bus.addListener(this::doCommonStuff);
-    	bus.addListener(this::doServerStuff);
     	bus.addListener(this::addPackFindersEvent);
     	bus.addListener(this::buildCreativeTabWithSkillBooks);
     	bus.addListener(SkillManager::createSkillRegistry);
@@ -287,9 +287,6 @@ public class EpicFightMod {
         ModLoadingContext.get().registerExtensionPoint(EpicFightExtensions.class, () -> new EpicFightExtensions(EpicFightCreativeTabs.ITEMS.get()));
         
         DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-        	bus.addListener(this::doClientStuff);
-        	bus.addListener(this::registerResourcepackReloadListnerEvent);
-        	
         	if (ModList.get().isLoaded("geckolib")) {
     			ICompatModule.loadCompatModule(GeckolibCompat.class);
     		}
@@ -331,20 +328,6 @@ public class EpicFightMod {
     	WeaponCategory.ENUM_MANAGER.loadEnum();
     }
     
-	private void doClientStuff(final FMLClientSetupEvent event) {
-		CLIENT_CONFIGS = new EpicFightOptions();
-    	new ClientEngine();
-    	
-        this.animatorProvider = ClientAnimator::getAnimator;
-		EntityPatchProvider.registerEntityPatchesClient();
-		SkillBookScreen.registerIconItems();
-		EpicFightItemProperties.registerItemProperties();
-    }
-	
-	private void doServerStuff(final FMLDedicatedServerSetupEvent event) {
-		this.animatorProvider = ServerAnimator::getAnimator;
-	}
-	
 	private void doCommonStuff(final FMLCommonSetupEvent event) {
 		event.enqueueWork(EpicFightCommandArgumentTypes::registerArgumentTypes);
 		event.enqueueWork(EpicFightPotions::addRecipes);
@@ -354,6 +337,7 @@ public class EpicFightMod {
 		event.enqueueWork(EpicFightGamerules::registerRules);
 		event.enqueueWork(WeaponTypeReloadListener::registerDefaultWeaponTypes);
 		event.enqueueWork(EpicFightMobEffects::addOffhandModifier);
+		event.enqueueWork(EpicFightLootTables::registerLootItemFunctionType);
     }
 	
 	/**
@@ -378,13 +362,6 @@ public class EpicFightMod {
         }
     }
 	
-	private void registerResourcepackReloadListnerEvent(final RegisterClientReloadListenersEvent event) {
-		event.registerReloadListener(new JointMaskReloadListener());
-		event.registerReloadListener(Meshes.INSTANCE);
-		event.registerReloadListener(AnimationManager.getInstance());
-		event.registerReloadListener(ItemSkins.INSTANCE);
-	}
-	
 	private void addReloadListnerEvent(final AddReloadListenerEvent event) {
 		if (!isPhysicalClient()) {
 			event.addListener(AnimationManager.getInstance());
@@ -396,6 +373,36 @@ public class EpicFightMod {
 		event.addListener(new ItemCapabilityReloadListener());
 		event.addListener(new MobPatchReloadListener());
 	}
+	
+	@Mod.EventBusSubscriber(modid = EpicFightMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    public static class ClientModEvents {
+        @SubscribeEvent
+        public static void onClientSetup(FMLClientSetupEvent event) {
+        	CLIENT_CONFIGS = new EpicFightOptions();
+        	new ClientEngine();
+        	
+        	EpicFightMod.getInstance().animatorProvider = ClientAnimator::getAnimator;
+    		EntityPatchProvider.registerEntityPatchesClient();
+    		SkillBookScreen.registerIconItems();
+    		EpicFightItemProperties.registerItemProperties();
+        }
+        
+        @SubscribeEvent
+        public static void registerResourcepackReloadListnerEvent(final RegisterClientReloadListenersEvent event) {
+    		event.registerReloadListener(new JointMaskReloadListener());
+    		event.registerReloadListener(Meshes.INSTANCE);
+    		event.registerReloadListener(AnimationManager.getInstance());
+    		event.registerReloadListener(ItemSkins.INSTANCE);
+    	}
+    }
+	
+	@Mod.EventBusSubscriber(modid = EpicFightMod.MODID, bus = Mod.EventBusSubscriber.Bus.MOD, value = Dist.DEDICATED_SERVER)
+    public static class ServerModEvents {
+		@SubscribeEvent
+		public static void doServerStuff(final FMLDedicatedServerSetupEvent event) {
+			EpicFightMod.getInstance().animatorProvider = ServerAnimator::getAnimator;
+		}
+    }
 	
 	private void buildCreativeTabWithSkillBooks(final BuildCreativeModeTabContentsEvent event) {
 		/**

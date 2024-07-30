@@ -38,7 +38,7 @@ public interface EpicFightDamageType {
 	TagKey<DamageType> PARTIAL_DAMAGE = create("partial_damage");
 	
 	/**
-	 * This tag means if the damage source is part of the other damage source
+	 * This tag means if the damage source bypasses the dodge invulnerability
 	 */
 	TagKey<DamageType> BYPASS_DODGE = create("bypass_dodge");
 	
