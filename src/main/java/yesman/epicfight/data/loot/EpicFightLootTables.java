@@ -1,12 +1,10 @@
 package yesman.epicfight.data.loot;
 
 import com.mojang.serialization.Codec;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceLocation;
+
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import net.minecraftforge.common.loot.IGlobalLootModifier;
@@ -25,11 +23,7 @@ import yesman.epicfight.world.item.EpicFightItems;
 public class EpicFightLootTables {
 	public static final DeferredRegister<Codec<? extends IGlobalLootModifier>> LOOT_MODIFIERS = DeferredRegister.create(ForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS, "epicfight");
 	public static final RegistryObject<Codec<? extends IGlobalLootModifier>> SKILLS = LOOT_MODIFIERS.register("skillbook_loot_table_modifier", SkillBookLootModifier.SKILL_CODEC);
-
-	public static void registerLootItemFunctionType() {
-		Registry.register(Registry.LOOT_FUNCTION_TYPE, new ResourceLocation("epicfight", "set_skill"), new LootItemFunctionType(new SetSkillFunction.Serializer()));
-	}
-
+	
 	@SubscribeEvent
 	public static void modifyVanillaLootPools(final LootTableLoadEvent event) {
 		int modifier = ConfigManager.SKILL_BOOK_CHEST_LOOT_MODIFYER.get();

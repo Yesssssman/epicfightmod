@@ -13,6 +13,7 @@ import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -42,6 +43,7 @@ import yesman.epicfight.compat.ICompatModule;
 import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.config.ConfigurationIngame;
 import yesman.epicfight.data.loot.EpicFightLootTables;
+import yesman.epicfight.data.loot.SkillBookLootModifier;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.gameasset.EpicFightSkills;
 import yesman.epicfight.gameasset.EpicFightSounds;
@@ -98,7 +100,6 @@ public class EpicFightMod {
     	bus.addListener(this::doClientStuff);
     	bus.addListener(this::doCommonStuff);
     	bus.addListener(this::doServerStuff);
-    	bus.addListener(this::registerClientReloadListnerEvent);
     	bus.addListener(EpicFightAttributes::registerNewMobs);
     	bus.addListener(EpicFightAttributes::modifyExistingMobs);
     	bus.addListener(EpicFightCapabilities::registerCapabilities);
@@ -134,12 +135,15 @@ public class EpicFightMod {
 		if (ModList.get().isLoaded("azurelib")) {
 			ICompatModule.loadCompatModule(AzureLibCompat.class);
 		}
+		
+		DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
+			bus.addListener(this::registerClientReloadListnerEvent);
+		});
 	}
     
 	private void doClientStuff(final FMLClientSetupEvent event) {
 		CLIENT_INGAME_CONFIG = new ConfigurationIngame();
     	new ClientEngine();
-		//IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
     	
         this.animatorProvider = ClientAnimator::getAnimator;
 		EntityPatchProvider.registerEntityPatchesClient();
@@ -164,7 +168,7 @@ public class EpicFightMod {
 		event.enqueueWork(EpicFightGamerules::registerRules);
 		event.enqueueWork(WeaponCapabilityPresets::register);
 		event.enqueueWork(EpicFightMobEffects::addOffhandModifier);
-		//event.enqueueWork(EpicFightLootModifiers::registerLootItemFunctionType);
+		event.enqueueWork(SkillBookLootModifier::registerLootItemFunctionType);
     }
 	
 	private void registerClientReloadListnerEvent(final RegisterClientReloadListenersEvent event) {
