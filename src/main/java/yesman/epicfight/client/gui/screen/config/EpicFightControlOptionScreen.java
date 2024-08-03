@@ -8,6 +8,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.gui.widgets.EpicFightOptionList;
 import yesman.epicfight.client.gui.widgets.RewindableButton;
 import yesman.epicfight.config.EpicFightOptions;
@@ -83,6 +84,7 @@ public class EpicFightControlOptionScreen extends EpicFightOptionSubScreen {
 	
 	@Override
 	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
+		ClientEngine.getInstance().renderEngine.versionNotifier.render(guiGraphics, false);
 		this.basicListRender(guiGraphics, this.optionsList, mouseX, mouseY, partialTicks);
 	}
 }

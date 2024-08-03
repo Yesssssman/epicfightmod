@@ -71,7 +71,7 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.gui.BattleModeGui;
-import yesman.epicfight.client.gui.BetaWarningMessage;
+import yesman.epicfight.client.gui.VersionNotifier;
 import yesman.epicfight.client.gui.EntityIndicator;
 import yesman.epicfight.client.gui.screen.config.UISetupScreen;
 import yesman.epicfight.client.gui.screen.overlay.OverlayManager;
@@ -131,7 +131,7 @@ public class RenderEngine {
 	private static final Vec3f AIMING_CORRECTION = new Vec3f(-1.5F, 0.0F, 1.25F);
 	
 	public final BattleModeGui battleModeUI = new BattleModeGui(Minecraft.getInstance());
-	public final BetaWarningMessage betaWarningMessage = new BetaWarningMessage(Minecraft.getInstance());
+	public final VersionNotifier versionNotifier = new VersionNotifier(Minecraft.getInstance());
 	public final Minecraft minecraft;
 	
 	private final BiMap<EntityType<?>, Function<EntityType<?>, PatchedEntityRenderer>> entityRendererProvider;
@@ -599,7 +599,8 @@ public class RenderEngine {
 					renderEngine.battleModeUI.renderGui(playerpatch, event.getGuiGraphics(), event.getPartialTick());
 				}
 				
-				renderEngine.betaWarningMessage.render(event.getGuiGraphics());
+				//Shows the epic fight version in beta
+				//renderEngine.betaWarningMessage.render(event.getGuiGraphics(), true);
 			}
 		}
 		

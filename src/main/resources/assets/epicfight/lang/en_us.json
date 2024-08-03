@@ -561,6 +561,7 @@
 	
 	"epicfight.messages.test_version_warning_line1": "Epic Fight is testing version.",
 	"epicfight.messages.test_version_warning_line2": "(%s)",
+	"epicfight.messages.version_notifier": "EpicFight-%s",
 	
 	"epicfight.messages.shader_transform_fail": "Failed to create shader %s. Automatically switches animation shader mode off."
 }
