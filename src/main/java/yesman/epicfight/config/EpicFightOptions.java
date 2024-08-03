@@ -33,6 +33,7 @@ public class EpicFightOptions {
 	public final BooleanOptionHandler showEpicFightAttributes;
 	public final IntegerOptionHandler maxStuckProjectiles;
 	public final BooleanOptionHandler useAnimationShader;
+	public final BooleanOptionHandler firstPersonModel;
 	
 	public boolean shaderModeSwitchingLocked = false;
 	
@@ -78,6 +79,7 @@ public class EpicFightOptions {
 		this.showEpicFightAttributes = new BooleanOptionHandler(config.showEpicFightAttributes.get());
 		this.maxStuckProjectiles = new IntegerOptionHandler(config.maxStuckProjectiles.get(), 1, 30);
 		this.useAnimationShader = new BooleanOptionHandler(config.useAnimationShader.get());
+		this.firstPersonModel = new BooleanOptionHandler(config.firstPersonModel.get());
 		
 		this.battleAutoSwitchItems = config.battleAutoSwitchItems.get().stream()
 				.map(itemName -> ForgeRegistries.ITEMS.getValue(new ResourceLocation(itemName)))
@@ -124,6 +126,11 @@ public class EpicFightOptions {
 		this.noMiningInCombat.setDefaultValue();
 		this.aimingCorrection.setDefaultValue();
 		this.showEpicFightAttributes.setDefaultValue();
+		
+		if (!this.shaderModeSwitchingLocked) {
+			this.useAnimationShader.setDefaultValue();
+		}
+		
 		this.aimHelperRealColor = ColorWidget.toColorInteger(this.aimHelperColor.getValue());
 		this.staminaBarX.setDefaultValue();
 		this.staminaBarY.setDefaultValue();
@@ -159,6 +166,9 @@ public class EpicFightOptions {
 		config.noMiningInCombat.set(this.noMiningInCombat.getValue());
 		config.aimingCorrection.set(this.aimingCorrection.getValue());
 		config.showEpicFightAttributes.set(this.showEpicFightAttributes.getValue());
+		config.useAnimationShader.set(this.useAnimationShader.getValue());
+		config.firstPersonModel.set(this.firstPersonModel.getValue());
+		
 		this.aimHelperRealColor = ColorWidget.toColorInteger(this.aimHelperColor.getValue());
 		config.battleAutoSwitchItems.set(Lists.newArrayList(this.battleAutoSwitchItems.stream().map((item) -> ForgeRegistries.ITEMS.getKey(item).toString()).iterator()));
 		config.miningAutoSwitchItems.set(Lists.newArrayList(this.miningAutoSwitchItems.stream().map((item) -> ForgeRegistries.ITEMS.getKey(item).toString()).iterator()));

@@ -4,6 +4,7 @@ import dev.tr7zw.firstperson.api.ActivationHandler;
 import dev.tr7zw.firstperson.api.FirstPersonAPI;
 import net.minecraftforge.eventbus.api.IEventBus;
 import yesman.epicfight.client.ClientEngine;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class FirstPersonCompat implements ICompatModule {
@@ -13,7 +14,7 @@ public class FirstPersonCompat implements ICompatModule {
 			public boolean preventFirstperson() {
 				PlayerPatch<?> playerpatch = ClientEngine.getInstance().getPlayerPatch();
 				
-				if (playerpatch != null && playerpatch.getPlayerMode() == PlayerPatch.PlayerMode.BATTLE) {
+				if (playerpatch != null && playerpatch.getPlayerMode() == PlayerPatch.PlayerMode.BATTLE && EpicFightMod.CLIENT_CONFIGS.firstPersonModel.getValue()) {
 					return true;
 				}
 				

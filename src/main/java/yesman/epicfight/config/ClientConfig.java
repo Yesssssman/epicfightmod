@@ -26,6 +26,7 @@ public class ClientConfig {
 	public final BooleanValue aimingCorrection;
 	public final BooleanValue showEpicFightAttributes;
 	public final BooleanValue useAnimationShader;
+	public final BooleanValue firstPersonModel;
 	
 	public final ConfigValue<List<? extends String>> battleAutoSwitchItems;
 	public final ConfigValue<List<? extends String>> miningAutoSwitchItems;
@@ -69,6 +70,7 @@ public class ClientConfig {
 		this.aimingCorrection = config.define("ingame.aiming_correction", () -> true);
 		this.showEpicFightAttributes = config.define("ingame.show_epicfight_attributes", () -> true);
 		this.useAnimationShader = config.define("ingame.use_animation_shader", () -> true);
+		this.firstPersonModel = config.define("ingame.first_person_model", () -> true);
 		
 		this.battleAutoSwitchItems = config.defineList("ingame.battle_autoswitch_items", Lists.newArrayList(), (element) -> {
 			if (element instanceof String str) {

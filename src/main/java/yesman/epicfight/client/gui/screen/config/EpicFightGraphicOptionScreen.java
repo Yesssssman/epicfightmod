@@ -46,6 +46,7 @@ public class EpicFightGraphicOptionScreen extends EpicFightOptionSubScreen {
 		BooleanOptionHandler showEpicFightAttributes = this.config.showEpicFightAttributes;
 		IntegerOptionHandler maxHitProjectiles = this.config.maxStuckProjectiles;
 		BooleanOptionHandler useAnimationShader = this.config.useAnimationShader;
+		BooleanOptionHandler firstPersonModel = this.config.firstPersonModel;
 		
 		int buttonHeight = -32;
 		
@@ -124,17 +125,22 @@ public class EpicFightGraphicOptionScreen extends EpicFightOptionSubScreen {
 		
 		buttonHeight += 24;
 		
+		Button firstPersonModelButton = Button.builder(Component.translatable("gui."+EpicFightMod.MODID+".first_person_model." + (firstPersonModel.getValue() ? "on" : "off")), (button) -> {
+			firstPersonModel.setValue(!firstPersonModel.getValue());
+			button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".first_person_model." + (firstPersonModel.getValue() ? "on" : "off")));
+		}).pos(this.width / 2 - 165, this.height / 4 + buttonHeight).size(160, 20).tooltip(Tooltip.create(Component.translatable("gui."+EpicFightMod.MODID+".first_person_model.tooltip"))).build();
+		
 		Button useAnimationShaderButton = Button.builder(Component.translatable("gui."+EpicFightMod.MODID+".use_animation_shader." + (useAnimationShader.getValue() ? "on" : "off")), (button) -> {
 			useAnimationShader.setValue(!useAnimationShader.getValue());
 			button.setMessage(Component.translatable("gui."+EpicFightMod.MODID+".use_animation_shader." + (useAnimationShader.getValue() ? "on" : "off")));
-		}).pos(this.width / 2 - 165, this.height / 4 + buttonHeight).size(160, 20).tooltip(Tooltip.create(Component.translatable("gui."+EpicFightMod.MODID+".use_animation_shader.tooltip"))).build();
+		}).pos(this.width / 2 + 5, this.height / 4 + buttonHeight).size(160, 20).tooltip(Tooltip.create(Component.translatable("gui."+EpicFightMod.MODID+".use_animation_shader.tooltip"))).build();
 		
 		if (this.config.shaderModeSwitchingLocked) {
 			useAnimationShaderButton.active = false;
 			useAnimationShaderButton.setTooltip(Tooltip.create(Component.translatable("gui." + EpicFightMod.MODID + ".use_animation_shader.locked.tooltip")));
 		}
 		
-		this.optionsList.addSmall(useAnimationShaderButton, null);
+		this.optionsList.addSmall(firstPersonModelButton, useAnimationShaderButton);
 		
 		buttonHeight += 30;
 		

@@ -208,6 +208,18 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	}
 	
 	@Override
+	public boolean overrideRender() {
+		// Disable rendering the player when animated first person model disabled
+		if (this.original.is(this.minecraft.player)) {
+			if (this.minecraft.options.getCameraType().isFirstPerson() && !EpicFightMod.CLIENT_CONFIGS.firstPersonModel.getValue()) {
+				return false;
+			}
+		}
+		
+		return super.overrideRender();
+	}
+	
+	@Override
 	public void updateHeldItem(CapabilityItem mainHandCap, CapabilityItem offHandCap) {
 		super.updateHeldItem(mainHandCap, offHandCap);
 		

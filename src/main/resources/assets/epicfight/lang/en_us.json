@@ -181,6 +181,8 @@
 	"gui.epicfight.show_attributes.on": "Show Attributes: ON",
 	"gui.epicfight.show_attributes.off": "Show Attributes: OFF",
 	"gui.epicfight.max_stuck_projectiles": "Max Stuck Projectiles: %s",
+	"gui.epicfight.first_person_model.on": "First Person Model: ON",
+	"gui.epicfight.first_person_model.off": "First Person Model: OFF",
 	"gui.epicfight.use_animation_shader.on": "Use Animation Shader: ON",
 	"gui.epicfight.use_animation_shader.off": "Use Animation Shader: OFF",
 	
@@ -200,6 +202,7 @@
 	"gui.epicfight.max_stuck_projectiles.tooltip": "Determines the maximum number of visible projectiles stuck in the player's body in Battle mode.",
 	"gui.epicfight.auto_switching_items.tooltip": "Edit the list of items that will automatically switch between Battle/Mining mode",
 	"gui.epicfight.export_custom_armor.tooltip": "Export the all custom armor models as an resource pack",
+	"gui.epicfight.first_person_model.tooltip": "Turn on/off the animated model in the first person.",
 	"gui.epicfight.use_animation_shader.tooltip": "Turn on/off animation shader. Turning on animation shader enhances the frame rate but may not be compatible with some shader packs",
 	"gui.epicfight.use_animation_shader.locked.tooltip": "This option is locked because you're using shader pack that is incompatible. Please reload the shader pack to unlock this option.",
 	"gui.epicfight.replace": "Following skill will be removed: %s",
