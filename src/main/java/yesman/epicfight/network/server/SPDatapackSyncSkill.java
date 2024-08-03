@@ -1,11 +1,13 @@
 package yesman.epicfight.network.server;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 import com.google.common.collect.Lists;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraftforge.network.NetworkEvent;
 import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.api.exception.DatapackException;
 
@@ -42,12 +44,6 @@ public class SPDatapackSyncSkill extends SPDatapackSync {
 			msg.learnedSkills.add(skillName);
 		}
 		
-		try {
-			SkillManager.processServerPacket(msg);
-		} catch (Exception e) {
-			throw new DatapackException(e.getMessage());
-		}
-		
 		return msg;
 	}
 	
@@ -64,5 +60,18 @@ public class SPDatapackSyncSkill extends SPDatapackSync {
 		for (String skill : msg.learnedSkills) {
 			buf.writeUtf(skill);
 		}
+	}
+	
+	public static void handle(SPDatapackSyncSkill msg, Supplier<NetworkEvent.Context> ctx) {
+		ctx.get().enqueueWork(() -> {
+			try {
+				SkillManager.processServerPacket(msg);
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new DatapackException(e.getMessage());
+			}
+		});
+		
+		ctx.get().setPacketHandled(true);
 	}
 }

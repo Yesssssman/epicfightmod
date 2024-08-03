@@ -99,7 +99,7 @@ public class EpicFightNetworkManager {
 		INSTANCE.registerMessage(id++, SPChangePlayerMode.class, SPChangePlayerMode::toBytes, SPChangePlayerMode::fromBytes, SPChangePlayerMode::handle);
 		INSTANCE.registerMessage(id++, SPAddLearnedSkill.class, SPAddLearnedSkill::toBytes, SPAddLearnedSkill::fromBytes, SPAddLearnedSkill::handle);
 		INSTANCE.registerMessage(id++, SPDatapackSync.class, SPDatapackSync::toBytes, SPDatapackSync::fromBytes, SPDatapackSync::handle);
-		INSTANCE.registerMessage(id++, SPDatapackSyncSkill.class, SPDatapackSyncSkill::toBytes, SPDatapackSyncSkill::fromBytes, SPDatapackSync::handle);
+		INSTANCE.registerMessage(id++, SPDatapackSyncSkill.class, SPDatapackSyncSkill::toBytes, SPDatapackSyncSkill::fromBytes, SPDatapackSyncSkill::handle);
 		INSTANCE.registerMessage(id++, SPSetAttackTarget.class, SPSetAttackTarget::toBytes, SPSetAttackTarget::fromBytes, SPSetAttackTarget::handle);
 		INSTANCE.registerMessage(id++, SPClearSkills.class, SPClearSkills::toBytes, SPClearSkills::fromBytes, SPClearSkills::handle);
 		INSTANCE.registerMessage(id++, SPRemoveSkill.class, SPRemoveSkill::toBytes, SPRemoveSkill::fromBytes, SPRemoveSkill::handle);

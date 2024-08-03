@@ -184,7 +184,7 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 		if (EpicFightMod.CLIENT_CONFIGS.useAnimationShader.getValue()) {
 			renderType.setupRenderState();
 			AnimationShaderInstance animationShader = EpicFightRenderTypes.getAnimationShader(renderType);
-			this.drawWithShader(poseStack, animationShader, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
+			this.drawWithShader(poseStack, animationShader, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, overlay, armature, poses);
 			renderType.clearRenderState();
 		} else {
 			VertexConsumer vertexConsumer = multiBufferSource.getBuffer(EpicFightRenderTypes.getTriangulated(renderType));
@@ -403,7 +403,7 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 			
 			indicesBuffer.flip();
 			
-			this.indexBufferId = GL15.glGenBuffers();
+			this.indexBufferId = GlStateManager._glGenBuffers();
 			GlStateManager._glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, this.indexBufferId);
 			GlStateManager._glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL15.GL_STATIC_DRAW);
 			GlStateManager._glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
@@ -453,7 +453,7 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 		private final BiConsumer<ByteBuffer, T> bufferUploader;
 		
 		public VertexBuffer(int glType, int size, boolean normalize, BiConsumer<ByteBuffer, T> bufferUploader) {
-			this.vertexBufferIds = GL15.glGenBuffers();
+			this.vertexBufferIds = GlStateManager._glGenBuffers();
 			this.glType = glType;
 			this.size = size;
 			this.normalize = normalize;

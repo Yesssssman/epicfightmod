@@ -47,17 +47,7 @@ public class SPDatapackSync {
 			msg.tags[i] = buf.readNbt();
 		}
 		
-		try {
-			switch (msg.getType()) {
-			case MOB -> MobPatchReloadListener.processServerPacket(msg);
-			case SKILL_PARAMS -> {/** Processed on {@link SPDatapackSyncSkill} **/}
-			case WEAPON -> ItemCapabilityReloadListener.processServerPacket(msg);
-			case ARMOR -> ItemCapabilityReloadListener.processServerPacket(msg);
-			case WEAPON_TYPE -> WeaponTypeReloadListener.processServerPacket(msg);
-			}
-		} catch (Exception e) {
-			throw new DatapackException(e.getMessage());
-		}
+		
 		
 		return msg;
 	}
@@ -73,6 +63,18 @@ public class SPDatapackSync {
 	
 	public static void handle(SPDatapackSync msg, Supplier<NetworkEvent.Context> ctx) {
 		ctx.get().enqueueWork(() -> {
+			try {
+				switch (msg.getType()) {
+				case MOB -> MobPatchReloadListener.processServerPacket(msg);
+				case SKILL_PARAMS -> {/** Processed on {@link SPDatapackSyncSkill} **/}
+				case WEAPON -> ItemCapabilityReloadListener.processServerPacket(msg);
+				case ARMOR -> ItemCapabilityReloadListener.processServerPacket(msg);
+				case WEAPON_TYPE -> WeaponTypeReloadListener.processServerPacket(msg);
+				}
+			} catch (Exception e) {
+				e.printStackTrace();
+				throw new DatapackException(e.getMessage());
+			}
 		});
 		
 		ctx.get().setPacketHandled(true);
