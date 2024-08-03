@@ -13,8 +13,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import yesman.epicfight.api.data.reloader.SkillManager;
+import yesman.epicfight.data.loot.SkillBookLootModifier;
 import yesman.epicfight.skill.Skill;
 
 public class SetSkillFunction implements LootItemFunction {
@@ -82,7 +82,7 @@ public class SetSkillFunction implements LootItemFunction {
 	
 	@Override
 	public LootItemFunctionType getType() {
-		return LootItemFunctions.SET_NBT;
+		return SkillBookLootModifier.SET_SKILL;
 	}
 	
 	public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<SetSkillFunction> {

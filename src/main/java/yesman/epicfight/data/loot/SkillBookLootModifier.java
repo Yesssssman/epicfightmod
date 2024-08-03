@@ -7,6 +7,7 @@ import java.util.Set;
 import com.google.common.collect.Maps;
 import com.google.gson.JsonObject;
 
+import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -15,6 +16,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.LootPool;
 import net.minecraft.world.level.storage.loot.LootTable;
 import net.minecraft.world.level.storage.loot.entries.LootItem;
+import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceCondition;
@@ -25,9 +27,16 @@ import net.minecraftforge.fml.ModLoader;
 import yesman.epicfight.api.forgeevent.SkillLootTableRegistryEvent;
 import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.data.loot.function.SetSkillFunction;
+import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.item.EpicFightItems;
 
 public class SkillBookLootModifier extends LootModifier {
+	public static final LootItemFunctionType SET_SKILL = new LootItemFunctionType(new SetSkillFunction.Serializer());
+	
+	public static void registerLootItemFunctionType() {
+		Registry.register(Registry.LOOT_FUNCTION_TYPE, new ResourceLocation(EpicFightMod.MODID, "set_skill"), SET_SKILL);
+	}
+	
 	private static final Map<EntityType<?>, LootTable> SKILL_LOOT_TABLE = Maps.newHashMap();
 	
 	public static LootTable getLootTableFor(EntityType<?> entityType) {
