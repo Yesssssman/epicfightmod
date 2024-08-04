@@ -204,6 +204,8 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		this.xo = this.original.getX();
 		this.yo = this.original.getY();
 		this.zo = this.original.getZ();
+		
+		//System.out.println(this.original.getAttributes().getInstance(Attributes.ATTACK_DAMAGE).getModifiers());
 	}
 	
 	@Override
@@ -301,12 +303,15 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	
 	public double getWeaponAttribute(Attribute attribute, ItemStack itemstack) {
 		AttributeInstance attrInstance = new AttributeInstance(attribute, (ai)->{});
-		Collection<AttributeModifier> itemModifiers = itemstack.getAttributeModifiers(EquipmentSlot.MAINHAND).get(attribute);
+		
+		Set<AttributeModifier> itemModifiers = Set.copyOf(CapabilityItem.getAttributeModifiers(attribute, EquipmentSlot.MAINHAND, itemstack, this));
+		Set<AttributeModifier> mainhandModifiers = Set.copyOf(CapabilityItem.getAttributeModifiers(attribute, EquipmentSlot.MAINHAND, this.original.getMainHandItem(), this));
+		
 		double baseValue = this.original.getAttribute(attribute) == null ? attribute.getDefaultValue() : this.original.getAttribute(attribute).getBaseValue();
 		attrInstance.setBaseValue(baseValue);
 		
 		for (AttributeModifier modifier : this.original.getAttribute(attribute).getModifiers()) {
-			if (!itemModifiers.contains(modifier)) {
+			if (!itemModifiers.contains(modifier) && !mainhandModifiers.contains(modifier)) {
 				attrInstance.addTransientModifier(modifier);
 			}
 		}
@@ -334,8 +339,9 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	public AttackResult attack(EpicFightDamageSource damageSource, Entity target, InteractionHand hand) {
 		float fallDist = this.original.fallDistance;
 		boolean onGround = this.original.onGround;
-		Collection<AttributeModifier> mainHandAttributes = this.original.getMainHandItem().getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE);
-		Collection<AttributeModifier> offHandAttributes = this.isOffhandItemValid() ? this.getOriginal().getOffhandItem().getAttributeModifiers(EquipmentSlot.MAINHAND).get(Attributes.ATTACK_DAMAGE) : Set.of();
+		
+		Collection<AttributeModifier> mainHandAttributes = CapabilityItem.getAttributeModifiers(Attributes.ATTACK_DAMAGE, EquipmentSlot.MAINHAND, this.original.getMainHandItem(), this);
+		Collection<AttributeModifier> offHandAttributes = this.isOffhandItemValid() ? CapabilityItem.getAttributeModifiers(Attributes.ATTACK_DAMAGE, EquipmentSlot.MAINHAND, this.original.getOffhandItem(), this) : Set.of();
 		
 		// Prevents crit and sweeping edge effect
 		this.epicFightDamageSource = damageSource;

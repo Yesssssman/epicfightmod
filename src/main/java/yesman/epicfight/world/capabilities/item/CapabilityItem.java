@@ -1,6 +1,7 @@
 package yesman.epicfight.world.capabilities.item;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.function.Function;
@@ -65,6 +66,28 @@ public class CapabilityItem {
 		return commonAutoAttackMotion;
 	}
 	
+	public static List<AttributeModifier> getAttributeModifiers(Attribute attribute, EquipmentSlot slot, ItemStack itemstack, @Nullable LivingEntityPatch<?> entitypatch) {
+		List<AttributeModifier> attributeModifiers = Lists.newArrayList();
+		
+		itemstack.getAttributeModifiers(slot).forEach((attribute$1, modifier) -> {
+			if (attribute$1 == attribute) {
+				attributeModifiers.add(modifier);
+			}
+		});
+		
+		CapabilityItem itemCap = EpicFightCapabilities.getItemStackCapability(itemstack);
+		
+		if (!itemCap.isEmpty()) {
+			itemCap.getAttributeModifiers(slot, entitypatch).forEach((attribute$1, modifier) -> {
+				if (attribute$1 == attribute) {
+					attributeModifiers.add(modifier);
+				}
+			});
+		}
+		
+		return attributeModifiers;
+	}
+	
 	protected Map<Style, Map<Attribute, AttributeModifier>> attributeMap;
 	
 	protected CapabilityItem(CapabilityItem.Builder builder) {
@@ -73,11 +96,9 @@ public class CapabilityItem {
 	}
 	
 	public void modifyItemTooltip(ItemStack itemstack, List<Component> itemTooltip, LivingEntityPatch<?> entitypatch) {
-		if (!this.getStyle(entitypatch).canUseOffhand()) {
-			itemTooltip.add(1, Component.literal(" ").append(Component.translatable("attribute.name." + EpicFightMod.MODID + ".twohanded").withStyle(ChatFormatting.DARK_GRAY)));
-		}
+		Style style = this instanceof RangedWeaponCapability ? Styles.RANGED : this.getStyle(entitypatch);
+		itemTooltip.add(1, Component.translatable(EpicFightMod.MODID + ".style." + style.toString().toLowerCase(Locale.ROOT)).withStyle(ChatFormatting.DARK_GRAY));
 		
-		Map<Attribute, AttributeModifier> attribute = this.getDamageAttributesInCondition(this.getStyle(entitypatch));
 		int index = 0;
 		boolean modifyIn = false;
 
@@ -92,6 +113,8 @@ public class CapabilityItem {
 		}
 		
 		index++;
+		
+		Map<Attribute, AttributeModifier> attribute = this.getDamageAttributesInCondition(style);
 		
 		if (attribute != null) {
 			if (!modifyIn) {

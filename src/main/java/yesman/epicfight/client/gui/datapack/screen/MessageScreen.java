@@ -27,6 +27,8 @@ public class MessageScreen<T> extends Screen {
 	protected final DataBindingComponent<T, ?> inputWidget;
 	protected int messageBoxWidth;
 	protected int messageBoxHeight;
+	protected Component okButtomTitle;
+	protected Component cancelButtomTitle;
 	
 	public MessageScreen(String title, String message, Screen parentScreen, Button.OnPress onOkPres, int width, int height) {
 		this(title, message, parentScreen, onOkPres, null, width, height);
@@ -70,23 +72,37 @@ public class MessageScreen<T> extends Screen {
 		return this;
 	}
 	
+	public MessageScreen<T> withOkTitle(Component okButtomTitle) {
+		this.okButtomTitle = okButtomTitle;
+		return this;
+	}
+	
+	public MessageScreen<T> withCancelTitle(Component cancelButtomTitle) {
+		this.cancelButtomTitle = cancelButtomTitle;
+		return this;
+	}
+	
 	@Override
 	protected void init() {
 		this.parentScreen.init(this.minecraft, this.width, this.height);
 		int height = this.messageBoxHeight / 2;
 		
+		int stringWidthOk = this.minecraft.font.width(this.okButtomTitle != null ? this.okButtomTitle : CommonComponents.GUI_OK) + 10;
+		int stringWidthCancel = this.minecraft.font.width(this.cancelButtomTitle != null ? this.cancelButtomTitle : CommonComponents.GUI_CANCEL) + 10;
+		int buttonWidht = Math.max(Math.max(stringWidthOk, stringWidthCancel), 55);
+		
 		if (this.onOkPress != null || this.onOkPressWithInput != null) {
-			this.addRenderableWidget(Button.builder(CommonComponents.GUI_OK, (button) -> {
+			this.addRenderableWidget(Button.builder(this.okButtomTitle != null ? this.okButtomTitle : CommonComponents.GUI_OK, (button) -> {
 				if (this.onOkPress != null) {
 					this.onOkPress.onPress(button);
 				} else {
 					this.onOkPressWithInput.accept(this.inputWidget._getValue());
 				}
-			}).bounds(this.width / 2 - 56, this.height / 2 + height - 20, 55 + (this.onCancelPress == null ? 57 : 0), 16).build());
+			}).bounds(this.width / 2 - (buttonWidht + 1), this.height / 2 + height - 20, buttonWidht + (this.onCancelPress == null ? (buttonWidht + 2) : 0), 16).build());
 		}
 		
 		if (this.onCancelPress != null) {
-			this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, this.onCancelPress).bounds(this.width / 2 + 1, this.height / 2 + height - 20, 55, 16).build());
+			this.addRenderableWidget(Button.builder(this.cancelButtomTitle != null ? this.cancelButtomTitle : CommonComponents.GUI_CANCEL, this.onCancelPress).bounds(this.width / 2 + 1, this.height / 2 + height - 20, buttonWidht, 16).build());
 		}
 		
 		if (this.inputWidget != null) {

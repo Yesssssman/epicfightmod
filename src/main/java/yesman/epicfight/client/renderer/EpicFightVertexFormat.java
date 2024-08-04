@@ -20,6 +20,7 @@ public class EpicFightVertexFormat {
 	public static final VertexFormatElement ELEMENT_NORMAL = new EpicFightVertexFormatElement(0, VertexFormatElement.Type.BYTE, VertexFormatElement.Usage.NORMAL, 3, AnimatedMesh::normalPositionsBuffer);
 	public static final VertexFormatElement ELEMENT_JOINTS = new EpicFightVertexFormatElement(0, VertexFormatElement.Type.SHORT, VertexFormatElement.Usage.GENERIC, 3, AnimatedMesh::jointPositionsBuffer);
 	public static final VertexFormatElement ELEMENT_WEIGHTS = new EpicFightVertexFormatElement(0, VertexFormatElement.Type.FLOAT, VertexFormatElement.Usage.GENERIC, 3, AnimatedMesh::weightPositionsBuffer);
+	public static final VertexFormat SOLID_MODEL = new VertexFormat(ImmutableMap.<String, VertexFormatElement>builder().put("Position", ELEMENT_POSITION).put("Normal", ELEMENT_NORMAL).put("Joints", ELEMENT_JOINTS).put("Weights", ELEMENT_WEIGHTS).build());
 	
 	private static final Set<VertexFormatElement> FILTERTED_FORMATS = ImmutableSet.of(DefaultVertexFormat.ELEMENT_COLOR, DefaultVertexFormat.ELEMENT_UV1, DefaultVertexFormat.ELEMENT_UV2);
 	

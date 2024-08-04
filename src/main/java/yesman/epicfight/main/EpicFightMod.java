@@ -98,117 +98,15 @@ import yesman.epicfight.world.level.block.EpicFightBlocks;
 import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 
 /**
- *  Changes from 20.7.4 -> 20.8.1
+ *  Changes from 20.8.2 -> 20.8.3
  *  
- *  1. Datapack Edit Screen added
+ *  1. Fixed animation not applied to the model in Datapack editor screen
  *  
- *  2. Skillbook screen revamped
+ *  2. Now you can export the datapack with exceptional cases, allowing to fix all temporary issues and to work later
  *  
- *  3. Skill Consume event changed
+ *  3. Fixed player can execute basic attack and skill when downed by Player Revive
  *  
- *  4. Armor Negation calculation changed
- *  
- *  5. Weight base value calculation changed to (entity dimension width * height * {@link LivingEntityPatch#WEIGHT_CORRECTION})
- *  
- *  6. Animations now won't be interpolated from between the previous and current pose but from animation clip resulting in increased animation accuracy
- *  
- *  7. Skill registration changed
- *  
- *  8. Added {@link EpicFightExtensions}. Now you can decide a creative tab that you want to display your skills of your mod. (see the usage below)
- *  
- *  9. Fixed crash when item broken in player's offhand by attacking any entities
- *  
- *  10. Added a selectable built-in resource pack with legacy weapon textures
- *
- *  11. Fixed Player head go through the body when using demolition leap
- *  
- *  --- 20.8.1.1 ---
- *
- *  1. Fixed Freecam mod disabling Epic Fight battle mode (Release fix)
- *  
- *  2. Fixed Ender dragon breath hitting a player in creative mode (Release fix)
- *  
- *  --- 20.8.1.2 ---
- *  
- *  1. Fixed Demolition leap unable to jump forward when you cast it with a wall behind (Release fix)
- *  
- *  2. Fixed the skills are not removed even tho keepSkills gamerule is set to false (Release fix)
- *  
- *  3. Added translations for sound subtitles. (Release fix)
- *  
- *  4. Fixed players dealing a weapon's damage when they drop a weapon and attack at the same time (Release fix)
- *  
- *  --- 20.8.1.3 ---
- *  
- *  1. Fixed epic fight legacy resource pack not loaded properly
- *  
- *  2. Fixed trail textures broken when trails that have different textures from each other are on the screen (Release fix)
- *  
- *  3. Added missing translations for attributes (GitHub issues #1678) (Release fix)
- *  
- *  4. Fixed Armor negation dealing more damage when it exceeds 100
- *  
- *  5. Deactivated Bloom effect
- *  
- *  6. Now players can select any skills in the skill edit screen(Default Keybind: K) when they're in creative mode.
- *  
- *  7. Fixed epic fight attributes not being applied to entities via commands (Release fix)
- *  
- *  8. Fixed epic fight attributes being reset when joining the world (GitHub issues #1354) (Release fix)
- *  
- *  9. Fixed Gecko & Azurelib based entities' texture broken when the health bar is activated (Release fix)
- *  
- *  10. Fixed server loading crash (GitHub issues #1680) (Release fix)
- *  
- *  11. Fixed a crash when spawning Witches in a dedicated server
- *  
- *  --- 20.8.1.4 ---
- *  
- *  1. Fixed a crash when loading weapon types from datapack
- *  
- *  2. Datapack editor screen automatically updates the old condition format
- *  
- *  --- 20.8.1.5 ---
- *  
- *  1. Fixed Weapon innate skills remaining after the player respawns
- *  
- *  2. Fixed custom animations not shown on the animation select screen
- *  
- *  3. Now Epic Fight is compatible with the latest Azurelib (release fix)
- *  
- *  4. Now Armor trims work normally in the animated models (release fix) (GitHub issues #1689)
- *  
- *  --- 20.8.1.6 ---
- *  
- *  1. Fixed Item capability attribute values are exported in string format
- *  
- *  2. Added BLOCK type animation in the living animations screen in weapon type datapack editor.
- *  
- *  --- 20.8.1.101 ---
- *  
- *  1. Added arrow and bee stinger stuck effect for player
- *  
- *  2. Added config value to modulate the maximum number of arrows & bee stingers stuck in player's body
- *  
- *  3. Fixed entity scaling issue
- *  
- *  --- 20.8.1.8 ---
- *  
- *  1. Fixed Attribute grid not accepting negative values
- *  
- *  2. Corrected the attack speed of fists
- *  
- *  3. Fixed the crash in a dedicated server when Photon installed (Release fix)
- *  
- *  4. Fixed players not controllable after respawned (Release fix)
- *  
- *  5. Fixed weapon innate skills deactivated in dedicated server
- *  
- *  --- 20.8.1.209 ---
- *  
- *  1. Added animation shader (Release fix)
- *  
- *  2. Added config option to disable animated model in first person
+ *  4. Fixed "damage_bonus" property remaining after changing main hand item.
  *  
  *  --- TO DO ---
  *  
@@ -223,8 +121,6 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  5. Add functionality to blooming effect (resists wither effect)
  *  
  *  6. First person animation system by adding /data/ folder in the path, and few samples
- *  
- *  7. Still whirlwind crash in both 1.18.2 1.19.2
  *  
  *  @author yesman
  */

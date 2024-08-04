@@ -4,8 +4,6 @@ import java.io.IOException;
 
 import javax.annotation.Nullable;
 
-import com.mojang.blaze3d.vertex.DefaultVertexFormat;
-
 import net.minecraft.client.renderer.ShaderInstance;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
@@ -14,6 +12,7 @@ import net.minecraftforge.client.event.RegisterShadersEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import yesman.epicfight.client.renderer.shader.VanillaAnimationShader;
 import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
@@ -28,7 +27,7 @@ public class EpicFightShaders {
 	
 	@SubscribeEvent
 	public static void registerShadersEvent(RegisterShadersEvent event) throws IOException {
-		event.registerShader(new ShaderInstance(event.getResourceProvider(), new ResourceLocation(EpicFightMod.MODID, "solid_model"), DefaultVertexFormat.POSITION_COLOR_NORMAL), (reloadedShader) -> {
+		event.registerShader(new VanillaAnimationShader(event.getResourceProvider(), new ResourceLocation(EpicFightMod.MODID, "solid_model"), EpicFightVertexFormat.SOLID_MODEL), (reloadedShader) -> {
 			EpicFightShaders.positionColorNormalShader = reloadedShader;
 		});
 	}

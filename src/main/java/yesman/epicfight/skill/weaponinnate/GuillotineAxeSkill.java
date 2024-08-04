@@ -5,14 +5,12 @@ import java.util.Set;
 import java.util.UUID;
 
 import com.google.common.collect.Lists;
-import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.MobType;
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
@@ -69,13 +67,12 @@ public class GuillotineAxeSkill extends SimpleWeaponInnateSkill {
 		List<Component> list = Lists.newArrayList();
 		List<Object> tooltipArgs = Lists.newArrayList();
 		String traslatableText = this.getTranslationKey();
-		Multimap<Attribute, AttributeModifier> attributes = itemstack.getAttributeModifiers(EquipmentSlot.MAINHAND);
 		double damage = playerpatch.getOriginal().getAttribute(Attributes.ATTACK_DAMAGE).getBaseValue() + EnchantmentHelper.getDamageBonus(itemstack, MobType.UNDEFINED);
 		ValueModifier damageModifier = ValueModifier.empty();
 		
 		Set<AttributeModifier> damageModifiers = Sets.newHashSet();
 		damageModifiers.addAll(playerpatch.getOriginal().getAttribute(Attributes.ATTACK_DAMAGE).getModifiers());
-		damageModifiers.addAll(attributes.get(Attributes.ATTACK_DAMAGE));
+		damageModifiers.addAll(CapabilityItem.getAttributeModifiers(Attributes.ATTACK_DAMAGE, EquipmentSlot.MAINHAND, itemstack, playerpatch));
 		
 		for (AttributeModifier modifier : damageModifiers) {
 			damage += modifier.getAmount();

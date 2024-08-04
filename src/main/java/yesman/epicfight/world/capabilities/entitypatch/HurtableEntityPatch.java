@@ -1,6 +1,6 @@
 package yesman.epicfight.world.capabilities.entitypatch;
 
-import java.util.Collection;
+import java.util.List;
 
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -13,6 +13,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.entity.living.LivingEvent;
 import yesman.epicfight.api.animation.types.EntityState;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
+import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 
@@ -79,8 +80,8 @@ public abstract class HurtableEntityPatch<T extends LivingEntity> extends Entity
 	}
 	
 	public void setDefaultStunReduction(EquipmentSlot equipmentslot, ItemStack from, ItemStack to) {
-		Collection<AttributeModifier> modifiersToAdd = to.getAttributeModifiers(equipmentslot).get(EpicFightAttributes.STUN_ARMOR.get());
-		Collection<AttributeModifier> modifiersToRemove = from.getAttributeModifiers(equipmentslot).get(EpicFightAttributes.STUN_ARMOR.get());
+		List<AttributeModifier> modifiersToAdd = CapabilityItem.getAttributeModifiers(EpicFightAttributes.STUN_ARMOR.get(), equipmentslot, to, null);
+		List<AttributeModifier> modifiersToRemove = CapabilityItem.getAttributeModifiers(EpicFightAttributes.STUN_ARMOR.get(), equipmentslot, from, null);
 		
 		AttributeInstance tempAttr = new AttributeInstance(EpicFightAttributes.STUN_ARMOR.get(), (i)->{});
 		tempAttr.replaceFrom(this.original.getAttribute(EpicFightAttributes.STUN_ARMOR.get()));

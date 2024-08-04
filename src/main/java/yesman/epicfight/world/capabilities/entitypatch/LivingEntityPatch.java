@@ -238,7 +238,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		}
 		
 		/**
-		 * Swap hand items
+		 * Swap hand items to decrease the durability of offhand item
 		 */
 		ItemStack mainHandItem = this.getOriginal().getMainHandItem();
 		ItemStack offHandItem = this.getOriginal().getOffhandItem();

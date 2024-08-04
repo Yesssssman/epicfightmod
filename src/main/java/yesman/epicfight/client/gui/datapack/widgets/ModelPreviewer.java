@@ -294,7 +294,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 	@Override
 	public void renderWidget(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		Minecraft minecraft = Minecraft.getInstance();
-		partialTicks = minecraft.getPartialTick();
+		partialTicks = minecraft.getFrameTime();
 		minecraft.getMainRenderTarget().unbindWrite();
 		
 		ScreenRectangle screenrectangle = null;

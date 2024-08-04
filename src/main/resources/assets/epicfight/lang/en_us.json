@@ -2,8 +2,6 @@
 	"attribute.name.epicfight.impact": "Impact",
 	"attribute.name.epicfight.armor_negation": "Armor Negation",
 	"attribute.name.epicfight.max_strikes": "Max Strikes",
-	"attribute.name.epicfight.mainhand_only": "Mainhand Only",
-	"attribute.name.epicfight.twohanded": "TwoHanded",
 	"attribute.name.epicfight.stun_armor": "Stun Armor",
 	"attribute.name.epicfight.weight": "Weight",
 	"attribute.name.epicfight.staminar": "Max Stamina",
@@ -15,7 +13,7 @@
 	"attribute.name.epicfight.offhand_max_strikes": "Offhand Max Strikes",
 	
 	"attribute.name.epicfight.impact.value": "%s Impact",
-	"attribute.name.epicfight.armor_negation.value": "%s Armor Negation",
+	"attribute.name.epicfight.armor_negation.value": "%s%% Armor Negation",
 	"attribute.name.epicfight.max_strikes.value": "Hit %s Enemies per Swing",
 	
 	"attribute.name.generic.max_health.skillbook_tooltip": "Increases player's max health",
@@ -99,6 +97,20 @@
 	"epicfight.skill_category.guard": "Guard",
 	
 	"epicfight.skill_slot.dodge": "Dodge",
+	"epicfight.skill_slot.passive1": "Passive 1",
+	"epicfight.skill_slot.passive2": "Passive 2",
+	"epicfight.skill_slot.passive3": "Passive 3",
+	"epicfight.skill_slot.guard": "Guard",
+	"epicfight.skill_slot.identity": "Identity",
+	"epicfight.skill_slot.mover": "Mobility",
+	
+	"epicfight.style.one_hand": "One Handed",
+	"epicfight.style.two_hand": "Two Handed",
+	"epicfight.style.mount": "Mount",
+	"epicfight.style.ranged": "Ranged",
+	"epicfight.style.sheath": "Sheathed",
+	"epicfight.style.ochs": "Guard Stance",
+	
 	"epicfight.skill_slot.passive1": "Passive 1",
 	"epicfight.skill_slot.passive2": "Passive 2",
 	"epicfight.skill_slot.passive3": "Passive 3",
@@ -431,6 +443,7 @@
 	"datapack_edit.import_model": "Import Model",
 	"datapack_edit.import_model.meshes": "Meshes",
 	"datapack_edit.import_model.armatures": "Armatures",
+	"datapack_edit.export_with_exceptions": "Export Anyway!",
 	
 	"datapack_edit.collider": "Collider",
 	"datapack_edit.collider.tooltip": "Defines a collider of a weapon. Get from the collider registry or define a custom one\n(mandatory)",

@@ -388,27 +388,12 @@ public class DatapackEditScreen extends Screen {
 				this.mobCapabilityTab.validateBeforeExport();
 			} catch (Exception e) {
 				e.printStackTrace();
-				this.minecraft.setScreen(new MessageScreen<>("", e.getMessage(), this, (button2) -> this.minecraft.setScreen(this), 400, 110).autoCalculateHeight());
+				this.minecraft.setScreen(new MessageScreen<>("", e.getMessage(), this, (button2) -> this.minecraft.setScreen(this.createExportScreen()),
+															(button3) -> this.minecraft.setScreen(this), 400, 110).autoCalculateHeight().withOkTitle(Component.translatable("datapack_edit.export_with_exceptions")));
 				return;
 			}
 			
-			this.minecraft.setScreen(new MessageScreen<>("", "Enter the pack title", this, null, 180, 70) {
-				@Override
-				protected void init() {
-					this.parentScreen.init(this.minecraft, this.width, this.height);
-					int height = this.messageBoxHeight / 2;
-					
-					final EditBox titleEditBox = new EditBox(this.font, this.width / 2 - 72, this.height / 2 - 6, 144, 16, Component.literal("pack_title_input_box"));
-					
-					this.addRenderableWidget(titleEditBox);
-					this.addRenderableWidget(Button.builder(CommonComponents.GUI_OK, (button$2) -> {
-						if (DatapackEditScreen.this.exportDataPack(titleEditBox.getValue())) {
-							DatapackEditScreen.this.minecraft.setScreen(DatapackEditScreen.this);
-						}
-					}).bounds(this.width / 2 - 56, this.height / 2 + height - 20, 55, 16).build());
-					this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, (button$2) -> this.minecraft.setScreen(DatapackEditScreen.this)).bounds(this.width / 2 + 1, this.height / 2 + height - 20, 55, 16).build());
-				}
-			});
+			this.minecraft.setScreen(this.createExportScreen());
 		}).build());
 		
 		gridlayout$rowhelper.addChild(Button.builder(CommonComponents.GUI_CANCEL, (button) -> {
@@ -505,6 +490,26 @@ public class DatapackEditScreen extends Screen {
 		this.renderBackground(guiGraphics);
 		guiGraphics.blit(CreateWorldScreen.FOOTER_SEPERATOR, 0, Mth.roundToward(this.height - 36 - 2, 2), 0.0F, 0.0F, this.width, 2, 32, 2);
 		super.render(guiGraphics, mouseX, mouseY, partialTick);
+	}
+	
+	private <T> MessageScreen<T> createExportScreen() {
+		return new MessageScreen<>("", "Enter the pack title", this, null, 180, 70) {
+			@Override
+			protected void init() {
+				this.parentScreen.init(this.minecraft, this.width, this.height);
+				int height = this.messageBoxHeight / 2;
+				
+				final EditBox titleEditBox = new EditBox(this.font, this.width / 2 - 72, this.height / 2 - 6, 144, 16, Component.literal("pack_title_input_box"));
+				
+				this.addRenderableWidget(titleEditBox);
+				this.addRenderableWidget(Button.builder(CommonComponents.GUI_OK, (button$2) -> {
+					if (DatapackEditScreen.this.exportDataPack(titleEditBox.getValue())) {
+						DatapackEditScreen.this.minecraft.setScreen(DatapackEditScreen.this);
+					}
+				}).bounds(this.width / 2 - 56, this.height / 2 + height - 20, 55, 16).build());
+				this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, (button$2) -> this.minecraft.setScreen(DatapackEditScreen.this)).bounds(this.width / 2 + 1, this.height / 2 + height - 20, 55, 16).build());
+			}
+		};
 	}
 	
 	private void importUserData(PackResources packResources) {
@@ -1138,8 +1143,13 @@ public class DatapackEditScreen extends Screen {
 				JsonObject jsonObject = Streams.parse(jsonReader).getAsJsonObject();
 				CompoundTag compTag = TagParser.parseTag(jsonObject.toString());
 				
-				WeaponCapability.Builder builder = WeaponTypeReloadListener.deserializeWeaponCapabilityBuilder(registryName, compTag);
-				WeaponTypeReloadListener.register(registryName, builder);
+				try {
+					WeaponCapability.Builder builder = WeaponTypeReloadListener.deserializeWeaponCapabilityBuilder(registryName, compTag);
+					WeaponTypeReloadListener.register(registryName, builder);
+				} catch (Exception e) {
+					EpicFightMod.LOGGER.warn("Failed to deserialize weapon type from datapack.");
+					e.printStackTrace();
+				}
 				
 				this.packList.add(PackEntry.ofValue(registryName, compTag));
 				this.packListGrid.addRowWithDefaultValues("pack_item", registryName.toString());

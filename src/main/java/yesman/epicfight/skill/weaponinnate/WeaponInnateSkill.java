@@ -6,14 +6,10 @@ import java.util.Optional;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
-import com.google.common.collect.Multimap;
 
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantments;
@@ -64,7 +60,6 @@ public abstract class WeaponInnateSkill extends Skill {
 	}
 	
 	protected void generateTooltipforPhase(List<Component> list, ItemStack itemstack, CapabilityItem itemcap, PlayerPatch<?> playerpatch, Map<AttackPhaseProperty<?>, Object> propertyMap, String title) {
-		Multimap<Attribute, AttributeModifier> capAttributes = itemcap.getAttributeModifiers(EquipmentSlot.MAINHAND, playerpatch);
 		double damage = playerpatch.getWeaponAttribute(Attributes.ATTACK_DAMAGE, itemstack);
 		double armorNegation = playerpatch.getWeaponAttribute(EpicFightAttributes.ARMOR_NEGATION.get(), itemstack);
 		double impact = playerpatch.getWeaponAttribute(EpicFightAttributes.IMPACT.get(), itemstack);
@@ -73,18 +68,6 @@ public abstract class WeaponInnateSkill extends Skill {
 		ValueModifier armorNegationModifier = ValueModifier.empty();
 		ValueModifier impactModifier = ValueModifier.empty();
 		ValueModifier maxStrikesModifier = ValueModifier.empty();
-		
-		for (AttributeModifier modifier : capAttributes.get(EpicFightAttributes.ARMOR_NEGATION.get())) {
-			armorNegation += modifier.getAmount();
-		}
-		
-		for (AttributeModifier modifier : capAttributes.get(EpicFightAttributes.IMPACT.get())) {
-			impact += modifier.getAmount();
-		}
-		
-		for (AttributeModifier modifier : capAttributes.get(EpicFightAttributes.MAX_STRIKES.get())) {
-			maxStrikes += modifier.getAmount();
-		}
 		
 		this.getProperty(AttackPhaseProperty.DAMAGE_MODIFIER, propertyMap).ifPresent(damageModifier::merge);
 		this.getProperty(AttackPhaseProperty.ARMOR_NEGATION_MODIFIER, propertyMap).ifPresent(armorNegationModifier::merge);
@@ -115,10 +98,10 @@ public abstract class WeaponInnateSkill extends Skill {
 		list.add(damageComponent);
 		
 		if (armorNegation != 0.0D) {
-			list.add(Component.translatable(EpicFightAttributes.ARMOR_NEGATION.get().getDescriptionId() + ".value",
-											Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(armorNegation) + "%")
-														.withStyle(ChatFormatting.GOLD))
-											.withStyle(ChatFormatting.DARK_GRAY));
+			list.add(Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(armorNegation) + "% ")
+								.withStyle(ChatFormatting.GOLD)
+								.append(Component.translatable(EpicFightAttributes.ARMOR_NEGATION.get().getDescriptionId())
+													.withStyle(ChatFormatting.DARK_GRAY)));
 		}
 		
 		if (impact != 0.0D) {

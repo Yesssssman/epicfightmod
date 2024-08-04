@@ -193,7 +193,8 @@ public class AttackAnimation extends ActionAnimation {
 		float prevElapsedTime = player.getPrevElapsedTime();
 		float elapsedTime = player.getElapsedTime();
 		EntityState prevState = this.getState(entitypatch, animation, prevElapsedTime);
-		EntityState state = this.getState(entitypatch, animation, elapsedTime);
+		//For link animations, it gets the state from the next animation if the elapsed time exceeds total playing time.
+		EntityState state = (animation.isLinkAnimation() && player.isEnd()) ? this.getState(entitypatch, animation.getRealAnimation(), ((LinkAnimation)animation).getNextStartTime()) : this.getState(entitypatch, animation, elapsedTime);
 		Phase phase = this.getPhaseByTime(animation.isLinkAnimation() ? 0.0F : elapsedTime);
 		
 		if (state.getLevel() == 1 && !state.turningLocked()) {

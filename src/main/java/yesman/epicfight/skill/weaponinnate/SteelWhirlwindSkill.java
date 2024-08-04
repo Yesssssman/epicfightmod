@@ -13,7 +13,6 @@ import yesman.epicfight.api.animation.AttackAnimationProvider;
 import yesman.epicfight.api.animation.StaticAnimationProvider;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.AttackAnimation.Phase;
-import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.events.engine.ControllEngine;
 import yesman.epicfight.client.input.EpicFightKeyMappings;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
@@ -60,7 +59,7 @@ public class SteelWhirlwindSkill extends WeaponInnateSkill implements Chargeable
 				clientPlayer.setSprinting(false);
 				clientPlayer.sprintTriggerTime = -1;
 				Minecraft mc = Minecraft.getInstance();
-				ClientEngine.getInstance().controllEngine.setKeyBind(mc.options.keySprint, false);
+				ControllEngine.setKeyBind(mc.options.keySprint, false);
 				
 				event.getMovementInput().forwardImpulse *= 1.0F - 0.8F * event.getPlayerPatch().getSkillChargingTicks() / 30.0F;
 			}

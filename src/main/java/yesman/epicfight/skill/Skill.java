@@ -441,6 +441,10 @@ public abstract class Skill {
 		
 	}
 	
+	/**
+	 * @param itemStack.getCapability() == @param cap
+	 * @return
+	 */
 	@OnlyIn(Dist.CLIENT)
 	public List<Component> getTooltipOnItem(ItemStack itemStack, CapabilityItem cap, PlayerPatch<?> playerpatch) {
 		return Lists.newArrayList();

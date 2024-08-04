@@ -132,8 +132,7 @@ public class WeaponCapabilityPresets {
 	public static final Function<Item, CapabilityItem.Builder> SPEAR = (item) ->
 		WeaponCapability.builder()
 			.category(WeaponCategories.SPEAR)
-			.styleProvider((playerpatch) -> (playerpatch.getHoldingItemCapability(InteractionHand.OFF_HAND).getWeaponCategory() == WeaponCategories.SHIELD) ? 
-					Styles.ONE_HAND : Styles.TWO_HAND)
+			.styleProvider((playerpatch) -> (playerpatch.getHoldingItemCapability(InteractionHand.OFF_HAND).getWeaponCategory() == WeaponCategories.SHIELD) ? Styles.ONE_HAND : Styles.TWO_HAND)
 			.collider(ColliderPreset.SPEAR)
 			.hitSound(EpicFightSounds.BLADE_HIT.get())
 			.canBePlacedOffhand(false)

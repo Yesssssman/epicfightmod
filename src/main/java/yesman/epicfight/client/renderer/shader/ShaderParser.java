@@ -162,7 +162,6 @@ public class ShaderParser {
 		return () -> {
 			StringBuilder sb = new StringBuilder(this.vertexShaderScript);
 			this.formatters.forEach((formatter) -> formatter.reformScript(sb));
-			
 			return new ByteArrayInputStream(sb.toString().getBytes());
 		};
 	}

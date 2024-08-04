@@ -89,17 +89,17 @@ public class ControllEngine {
 	}
 	
 	public void handleEpicFightKeyMappings() {
-		if (EpicFightKeyMappings.SKILL_EDIT.consumeClick()) {
+		if (keyPressed(EpicFightKeyMappings.SKILL_EDIT, false)) {
 			if (this.playerpatch.getSkillCapability() != null) {
 				Minecraft.getInstance().setScreen(new SkillEditScreen(this.player, this.playerpatch.getSkillCapability()));
 			}
 		}
 		
-		if (EpicFightKeyMappings.CONFIG.consumeClick()) {
+		if (keyPressed(EpicFightKeyMappings.CONFIG, false)) {
 			Minecraft.getInstance().setScreen(new IngameConfigurationScreen(this.minecraft, null));
 		}
 		
-		while (EpicFightKeyMappings.ATTACK.consumeClick()) {
+		while (keyPressed(EpicFightKeyMappings.ATTACK, true)) {
 			if (this.playerpatch.isBattleMode() && this.currentChargingKey != EpicFightKeyMappings.ATTACK) {
 				if (!EpicFightKeyMappings.ATTACK.getKey().equals(EpicFightKeyMappings.WEAPON_INNATE_SKILL.getKey())) {
 					SkillSlot slot = (!this.player.onGround() && !this.player.isInWater() && this.player.getDeltaMovement().y > 0.05D) ? SkillSlots.AIR_ATTACK : SkillSlots.BASIC_ATTACK;
@@ -126,12 +126,12 @@ public class ControllEngine {
 				
 				//Disable vanilla attack
 				if (this.options.keyAttack.getKey() == EpicFightKeyMappings.ATTACK.getKey()) {
-					this.disableKey(this.options.keyAttack);
+					disableKey(this.options.keyAttack);
 				}
 			}
 		}
 		
-		while (EpicFightKeyMappings.DODGE.consumeClick()) {
+		while (keyPressed(EpicFightKeyMappings.DODGE, true)) {
 			if (this.playerpatch.isBattleMode() && this.currentChargingKey != EpicFightKeyMappings.DODGE) {
 				if (EpicFightKeyMappings.DODGE.getKey().getValue() == this.options.keyShift.getKey().getValue()) {
 					if (this.player.getVehicle() == null) {
@@ -150,10 +150,10 @@ public class ControllEngine {
 			}
 		}
 		
-		while (EpicFightKeyMappings.GUARD.consumeClick()) {
+		while (keyPressed(EpicFightKeyMappings.GUARD, true)) {
 		}
 		
-		while (EpicFightKeyMappings.WEAPON_INNATE_SKILL.consumeClick()) {
+		while (keyPressed(EpicFightKeyMappings.WEAPON_INNATE_SKILL, true)) {
 			if (this.playerpatch.isBattleMode() && this.currentChargingKey != EpicFightKeyMappings.WEAPON_INNATE_SKILL) {
 				if (!EpicFightKeyMappings.ATTACK.getKey().equals(EpicFightKeyMappings.WEAPON_INNATE_SKILL.getKey())) {
 					if (this.playerpatch.getSkill(SkillSlots.WEAPON_INNATE).sendExecuteRequest(this.playerpatch, this).shouldReserverKey()) {
@@ -167,7 +167,7 @@ public class ControllEngine {
 			}
 		}
 		
-		while (EpicFightKeyMappings.MOVER_SKILL.consumeClick()) {
+		while (keyPressed(EpicFightKeyMappings.MOVER_SKILL, true)) {
 			if (this.playerpatch.isBattleMode() && !this.playerpatch.isChargingSkill()) {
 				if (EpicFightKeyMappings.MOVER_SKILL.getKey().getValue() == this.options.keyJump.getKey().getValue()) {
 					SkillContainer skillContainer = this.playerpatch.getSkill(SkillSlots.MOVER);
@@ -185,19 +185,19 @@ public class ControllEngine {
 			}
 		}
 		
-		while (EpicFightKeyMappings.SWITCH_MODE.consumeClick()) {
+		while (keyPressed(EpicFightKeyMappings.SWITCH_MODE, false)) {
 			if (this.playerpatch.getOriginal().level().getGameRules().getBoolean(EpicFightGamerules.CAN_SWITCH_COMBAT)) {
 				this.playerpatch.toggleMode();
 			}
 		}
 		
-		while (EpicFightKeyMappings.LOCK_ON.consumeClick()) {
+		while (keyPressed(EpicFightKeyMappings.LOCK_ON, false)) {
 			this.playerpatch.toggleLockOn();
 		}
 		
 		//Disable swap hand items
 		if (this.playerpatch.getEntityState().inaction() || (!this.playerpatch.getHoldingItemCapability(InteractionHand.MAIN_HAND).canBePlacedOffhand())) {
-			this.disableKey(this.minecraft.options.keySwapOffhand);
+			disableKey(this.minecraft.options.keySwapOffhand);
 		}
 		
 		this.tick();
@@ -213,7 +213,7 @@ public class ControllEngine {
 		}
 		
 		if (this.weaponInnatePressToggle) {
-			if (!this.isKeyDown(EpicFightKeyMappings.WEAPON_INNATE_SKILL)) {
+			if (!isKeyDown(EpicFightKeyMappings.WEAPON_INNATE_SKILL)) {
 				this.attackLightPressToggle = true;
 				this.weaponInnatePressToggle = false;
 				this.weaponInnatePressCounter = 0;
@@ -222,7 +222,7 @@ public class ControllEngine {
 					if (this.weaponInnatePressCounter > EpicFightMod.CLIENT_CONFIGS.longPressCount.getValue()) {
 						if (this.minecraft.hitResult.getType() == HitResult.Type.BLOCK && this.playerpatch.getTarget() == null && !EpicFightMod.CLIENT_CONFIGS.noMiningInCombat.getValue()) {
 				            this.minecraft.startAttack();
-				            this.setKeyBind(EpicFightKeyMappings.ATTACK, true);
+				            setKeyBind(EpicFightKeyMappings.ATTACK, true);
 						} else if (this.playerpatch.getSkill(SkillSlots.WEAPON_INNATE).sendExecuteRequest(this.playerpatch, this).shouldReserverKey()) {
 							if (!this.player.isSpectator()) {
 								this.reserveKey(SkillSlots.WEAPON_INNATE, EpicFightKeyMappings.WEAPON_INNATE_SKILL);
@@ -260,7 +260,7 @@ public class ControllEngine {
 		}
 		
 		if (this.sneakPressToggle) {
-			if (!this.isKeyDown(this.options.keyShift)) {
+			if (!isKeyDown(this.options.keyShift)) {
 				SkillSlot skillSlot = (this.playerpatch.getEntityState().knockDown()) ? SkillSlots.KNOCKDOWN_WAKEUP : SkillSlots.DODGE;
 				SkillContainer skill = this.playerpatch.getSkill(skillSlot);
 				
@@ -284,7 +284,7 @@ public class ControllEngine {
 			SkillContainer skill = this.playerpatch.getSkill(this.reservedOrChargingSkillSlot);
 			
 			if (skill.getSkill() instanceof ChargeableSkill chargingSkill) {
-				if (!this.isKeyDown(this.currentChargingKey)) {
+				if (!isKeyDown(this.currentChargingKey)) {
 					this.chargeKeyUnpressed = true;
 				}
 				
@@ -333,7 +333,7 @@ public class ControllEngine {
 	
 	private void inputTick(Input input) {
 		if (this.moverPressToggle) {
-			if (!this.isKeyDown(this.options.keyJump)) {
+			if (!isKeyDown(this.options.keyJump)) {
 				this.moverPressToggle = false;
 				this.moverPressCounter = 0;
 				
@@ -394,25 +394,6 @@ public class ControllEngine {
 		this.reservedKey = null;
 	}
 	
-	public boolean isKeyDown(KeyMapping key) {
-		if (key.getKey().getType() == InputConstants.Type.KEYSYM) {
-			return key.isDown() || GLFW.glfwGetKey(Minecraft.getInstance().getWindow().getWindow(), key.getKey().getValue()) > 0;
-		} else if(key.getKey().getType() == InputConstants.Type.MOUSE) {
-			return key.isDown() || GLFW.glfwGetMouseButton(Minecraft.getInstance().getWindow().getWindow(), key.getKey().getValue()) > 0;
-		} else {
-			return false;
-		}
-	}
-	
-	public void disableKey(KeyMapping keyMapping) {
-		while (keyMapping.consumeClick()) {}
-		this.setKeyBind(keyMapping, false);
-	}
-	
-	public void setKeyBind(KeyMapping key, boolean setter) {
-		KeyMapping.set(key.getKey(), setter);
-	}
-	
 	public void lockHotkeys() {
 		this.hotbarLocked = true;
 		this.lastHotbarLockedTime = this.player.tickCount;
@@ -428,6 +409,39 @@ public class ControllEngine {
 	
 	public void addPacketToSend(Object packet) {
 		this.packets.add(packet);
+	}
+	
+	public static boolean isKeyDown(KeyMapping key) {
+		if (key.getKey().getType() == InputConstants.Type.KEYSYM) {
+			return key.isDown() || GLFW.glfwGetKey(Minecraft.getInstance().getWindow().getWindow(), key.getKey().getValue()) > 0;
+		} else if(key.getKey().getType() == InputConstants.Type.MOUSE) {
+			return key.isDown() || GLFW.glfwGetMouseButton(Minecraft.getInstance().getWindow().getWindow(), key.getKey().getValue()) > 0;
+		} else {
+			return false;
+		}
+	}
+	
+	private static boolean keyPressed(KeyMapping key, boolean eventCheck) {
+		if (eventCheck) {
+			int mouseButton = InputConstants.Type.MOUSE == key.getKey().getType() ? key.getKey().getValue() : -1;
+			
+			InputEvent.InteractionKeyMappingTriggered inputEvent = net.minecraftforge.client.ForgeHooksClient.onClickInput(mouseButton, key, InteractionHand.MAIN_HAND);
+			
+	        if (inputEvent.isCanceled()) {
+	        	return false;
+	        }
+		}
+        
+    	return key.consumeClick();
+	}
+	
+	public static void disableKey(KeyMapping keyMapping) {
+		while (keyMapping.consumeClick()) {}
+		setKeyBind(keyMapping, false);
+	}
+	
+	public static void setKeyBind(KeyMapping key, boolean setter) {
+		KeyMapping.set(key.getKey(), setter);
 	}
 	
 	@OnlyIn(Dist.CLIENT)

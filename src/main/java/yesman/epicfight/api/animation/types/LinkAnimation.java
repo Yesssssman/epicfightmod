@@ -147,6 +147,10 @@ public class LinkAnimation extends DynamicAnimation {
 		trnasforms.putAll(this.getTransfroms());
 	}
 	
+	public float getNextStartTime() {
+		return this.nextStartTime;
+	}
+	
 	public void setNextStartTime(float nextStartTime) {
 		this.nextStartTime = nextStartTime;
 	}
