@@ -108,6 +108,8 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  
  *  4. Fixed "damage_bonus" property remaining after changing main hand item.
  *  
+ *  5. Fixed dual sword dash attack passing through entities without hitting.
+ *  
  *  --- TO DO ---
  *  
  *  1. Crash because {@link PlayerPatch#STAMINA} is unregistered at SynchedEntityData (Most likely a mod compatibility issue)
