@@ -56,7 +56,7 @@ public class LivingAnimationsScreen extends Screen {
 		this.rootTag = rootTag;
 		this.font = parentScreen.getMinecraft().font;
 		
-		this.modelPreviewer = new ModelPreviewer(106, 200, 60, 49, HorizontalSizing.LEFT_RIGHT, VerticalSizing.TOP_BOTTOM, Armatures.BIPED, Meshes.BIPED);
+		this.modelPreviewer = new ModelPreviewer(106, 200, 60, 49, HorizontalSizing.LEFT_RIGHT, VerticalSizing.TOP_BOTTOM, Armatures.BIPED, () -> Meshes.BIPED);
 		
 		this.stylesGrid = Grid.builder(this, parentScreen.getMinecraft())
 								.xy1(12, 60)

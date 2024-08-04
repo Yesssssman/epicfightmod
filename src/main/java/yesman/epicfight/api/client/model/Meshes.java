@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.mojang.datafixers.util.Pair;
 
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.PreparableReloadListener;
@@ -147,8 +148,8 @@ public class Meshes implements PreparableReloadListener {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public static <T extends Mesh<?, ?>> Set<Map.Entry<ResourceLocation, T>> entries(Class<T> filterInstance) {
-		return MESHES.entrySet().stream().filter((entry) -> filterInstance.isAssignableFrom(entry.getValue().getClass())).map((entry) -> (Map.Entry<ResourceLocation, T>)entry).collect(Collectors.toSet());
+	public static <T extends Mesh<?, ?>> Set<Pair<ResourceLocation, MeshProvider<T>>> entries(Class<T> filterInstance) {
+		return MESHES.entrySet().stream().filter((entry) -> filterInstance.isAssignableFrom(entry.getValue().getClass())).map((entry) -> Pair.of(entry.getKey(), (MeshProvider<T>)() -> (T)MESHES.get(entry.getKey()))).collect(Collectors.toSet());
 	}
 	
 	public static ResourceLocation wrapLocation(ResourceLocation rl) {

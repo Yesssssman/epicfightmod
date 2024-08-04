@@ -184,7 +184,7 @@ public class WeaponComboScreen extends Screen {
 								})
 								.build();
 		
-		this.modelPreviewer = new ModelPreviewer(110, 200, 45, 49, HorizontalSizing.LEFT_RIGHT, VerticalSizing.TOP_BOTTOM, Armatures.BIPED, Meshes.BIPED);
+		this.modelPreviewer = new ModelPreviewer(110, 200, 45, 49, HorizontalSizing.LEFT_RIGHT, VerticalSizing.TOP_BOTTOM, Armatures.BIPED, () -> Meshes.BIPED);
 		
 		CompoundTag colliderTag = rootTag.getCompound("collider");
 		

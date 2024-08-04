@@ -89,6 +89,7 @@ import yesman.epicfight.api.animation.types.datapack.FakeAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimationDataReader;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.collider.MultiOBBCollider;
@@ -786,7 +787,7 @@ public class DatapackEditScreen extends Screen {
 			Font font = DatapackEditScreen.this.font;
 			ScreenRectangle rect = DatapackEditScreen.this.getRectangle();
 			
-			this.modelPreviewer = new ModelPreviewer(9, 15, 0, 140, HorizontalSizing.LEFT_RIGHT, null, Armatures.BIPED, Meshes.BIPED);
+			this.modelPreviewer = new ModelPreviewer(9, 15, 0, 140, HorizontalSizing.LEFT_RIGHT, null, Armatures.BIPED, () -> Meshes.BIPED);
 			this.modelPreviewer.setColliderJoint(Armatures.BIPED.searchJointByName("Tool_R"));
 			
 			this.inputComponentsList = new InputComponentList<>(DatapackEditScreen.this, 0, 0, 0, 0, 30) {
@@ -1203,7 +1204,7 @@ public class DatapackEditScreen extends Screen {
 			
 			Screen parentScreen = DatapackEditScreen.this;
 			
-			this.modelPreviewer = new ModelPreviewer(20, 15, 0, 150, HorizontalSizing.LEFT_RIGHT, null, Armatures.BIPED, Meshes.BIPED);
+			this.modelPreviewer = new ModelPreviewer(20, 15, 0, 150, HorizontalSizing.LEFT_RIGHT, null, Armatures.BIPED, () -> Meshes.BIPED);
 			this.responder = (itemType) -> {
 				CompoundTag tag = this.packList.get(this.packListGrid.getRowposition()).getValue();
 				tag.tags.clear();
@@ -2147,7 +2148,7 @@ public class DatapackEditScreen extends Screen {
 		
 		private final Map<String, ParameterEditor> attributeEditors = Maps.newLinkedHashMap();
 		
-		private PopupBox<AnimatedMesh> meshPopupBox;
+		private PopupBox<MeshProvider<AnimatedMesh>> meshPopupBox;
 		private PopupBox<Armature> armaturePopupBox;
 		
 		public MobCapabilityTab() {
@@ -2182,11 +2183,11 @@ public class DatapackEditScreen extends Screen {
 				}
 			};
 			
-			this.modelPreviewer = new ModelPreviewer(9, 15, 0, 140, HorizontalSizing.LEFT_RIGHT, null, Armatures.BIPED, Meshes.BIPED);
+			this.modelPreviewer = new ModelPreviewer(9, 15, 0, 140, HorizontalSizing.LEFT_RIGHT, null, Armatures.BIPED, () -> Meshes.BIPED);
 			this.modelPreviewer.setColliderJoint(Armatures.BIPED.searchJointByName("Tool_R"));
 			
 			this.meshPopupBox = new PopupBox.MeshPopupBox(DatapackEditScreen.this, DatapackEditScreen.this.font, 0, 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.model"), (pair) -> {
-				if (this.armaturePopupBox._getValue() != null && pair.getSecond() != null && pair.getSecond().getMaxJointCount() > this.armaturePopupBox._getValue().getJointNumber()) {
+				if (this.armaturePopupBox._getValue() != null && pair.getSecond() != null && pair.getSecond().get().getMaxJointCount() > this.armaturePopupBox._getValue().getJointNumber()) {
 					this.meshPopupBox._setValue(null);
 					throw new IllegalArgumentException("The model is incompatible with an armature!");
 				}
@@ -2195,7 +2196,7 @@ public class DatapackEditScreen extends Screen {
 			});
 			
 			this.armaturePopupBox = new PopupBox.ArmaturePopupBox(DatapackEditScreen.this, DatapackEditScreen.this.font, 0, 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.armature"), (pair) -> {
-				if (this.meshPopupBox._getValue() != null && pair.getSecond() != null && this.meshPopupBox._getValue().getMaxJointCount() > pair.getSecond().getJointNumber()) {
+				if (this.meshPopupBox._getValue() != null && pair.getSecond() != null && this.meshPopupBox._getValue().get().getMaxJointCount() > pair.getSecond().getJointNumber()) {
 					this.armaturePopupBox._setValue(null);
 					throw new IllegalArgumentException("The armature is incompatible with a model!");
 				}
@@ -2382,7 +2383,7 @@ public class DatapackEditScreen extends Screen {
 																						livingMotionTag.putString(ParseUtil.nullOrToString(event.postValue, (livingmotion) -> livingmotion.name().toLowerCase(Locale.ROOT)), "");
 																					}).editable(true).width(100))
 																	.addColumn(Grid.popup("animation", PopupBox.AnimationPopupBox::new).filter((animation) -> !(animation instanceof MainFrameAnimation) || animation instanceof LongHitAnimation)
-																					.editWidgetCreated((popupBox) -> popupBox.setModel(() -> this.armaturePopupBox._getValue(), () -> this.meshPopupBox._getValue()))
+																					.editWidgetCreated((popupBox) -> popupBox.setModel(() -> this.armaturePopupBox._getValue(), this.meshPopupBox._getValue()))
 																					.valueChanged((event) -> {
 																						CompoundTag livingMotionTag = ParseUtil.getOrSupply(this.packList.get(this.packListGrid.getRowposition()).getValue(), "default_livingmotions", CompoundTag::new);
 																						livingMotionTag.putString(ParseUtil.nullOrToString((LivingMotions)event.grid.getValue(event.rowposition, "living_motion"), (livingmotion) -> livingmotion.name().toLowerCase(Locale.ROOT)),
@@ -2427,7 +2428,7 @@ public class DatapackEditScreen extends Screen {
 																					}).editable(true).width(100))
 																	.addColumn(Grid.popup("animation", PopupBox.AnimationPopupBox::new)
 																					.filter((animation) -> animation instanceof HitAnimation || animation instanceof LongHitAnimation)
-																					.editWidgetCreated((popupBox) -> popupBox.setModel(() -> this.armaturePopupBox._getValue(), () -> this.meshPopupBox._getValue()))
+																					.editWidgetCreated((popupBox) -> popupBox.setModel(() -> this.armaturePopupBox._getValue(), this.meshPopupBox._getValue()))
 																					.valueChanged((event) -> {
 																						CompoundTag stunTypeTag = ParseUtil.getOrSupply(this.packList.get(this.packListGrid.getRowposition()).getValue(), "stun_animations", CompoundTag::new);
 																						stunTypeTag.putString(ParseUtil.nullOrToString((StunType)event.grid.getValue(event.rowposition, "stun_type"), (stunType) -> stunType.name().toLowerCase(Locale.ROOT)),
@@ -2518,7 +2519,7 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.setDataBindingComponenets(new Object[] {
 				false,
 				EntityType.byString(tag.getString("preset")).orElse(null),
-				Meshes.getMeshOrNull(new ResourceLocation(tag.getString("model"))),
+				(MeshProvider<?>)(() -> Meshes.getMeshOrNull(new ResourceLocation(tag.getString("model")))),
 				Armatures.getArmatureOrNull(new ResourceLocation(tag.getString("armature"))),
 				new ResourceLocation(tag.getString("renderer")),
 				tag.getBoolean("isHumanoid"),

@@ -36,6 +36,7 @@ import yesman.epicfight.api.animation.types.datapack.ClipHoldingAnimation;
 import yesman.epicfight.api.animation.types.datapack.FakeAnimation;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.collider.MultiOBBCollider;
 import yesman.epicfight.api.collider.OBBCollider;
@@ -67,7 +68,7 @@ public class ImportAnimationsScreen extends Screen {
 	private Consumer<FakeAnimation.AnimationType> responder;
 	private Map<ResourceLocation, PackEntry<FakeAnimation, ClipHoldingAnimation>> userAnimations;
 	
-	public ImportAnimationsScreen(SelectAnimationScreen caller, Armature armature, AnimatedMesh mesh) {
+	public ImportAnimationsScreen(SelectAnimationScreen caller, Armature armature, MeshProvider<AnimatedMesh> mesh) {
 		super(Component.literal("register_animation_screen"));
 		
 		this.userAnimations = DatapackEditScreen.getCurrentScreen().getUserAniamtions();

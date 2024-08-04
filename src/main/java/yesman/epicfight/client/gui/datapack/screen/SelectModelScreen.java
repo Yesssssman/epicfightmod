@@ -16,6 +16,7 @@ import net.minecraft.util.StringUtil;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.client.gui.datapack.widgets.ModelPreviewer;
 
@@ -25,9 +26,9 @@ public class SelectModelScreen extends Screen {
 	private final ModelList modelList;
 	private final ModelPreviewer modelPreviewer;
 	private final EditBox searchBox;
-	private final BiConsumer<String, AnimatedMesh> selectCallback;
+	private final BiConsumer<String, MeshProvider<AnimatedMesh>> selectCallback;
 	
-	public SelectModelScreen(Screen parentScreen, BiConsumer<String, AnimatedMesh> selectCallback) {
+	public SelectModelScreen(Screen parentScreen, BiConsumer<String, MeshProvider<AnimatedMesh>> selectCallback) {
 		super(Component.translatable("gui.epicfight.select.models"));
 		
 		this.modelPreviewer = new ModelPreviewer(10, 20, 36, 60, null, null, null, null);
@@ -140,16 +141,16 @@ public class SelectModelScreen extends Screen {
 			this.setScrollAmount(0.0D);
 			this.children().clear();
 			
-			Meshes.entries(AnimatedMesh.class).stream().filter((entry) -> StringUtil.isNullOrEmpty(keyward) ? true : entry.getKey().toString().contains(keyward)).map((entry) -> new ModelEntry(entry.getKey().toString(), entry.getValue()))
+			Meshes.entries(AnimatedMesh.class).stream().filter((entry) -> StringUtil.isNullOrEmpty(keyward) ? true : entry.getFirst().toString().contains(keyward)).map((entry) -> new ModelEntry(entry.getFirst().toString(), entry.getSecond()))
 														.sorted((entry$1, entry$2) -> entry$1.registryName.compareTo(entry$2.registryName)).forEach(this::addEntry);
 		}
 		
 		@OnlyIn(Dist.CLIENT)
 		class ModelEntry extends ObjectSelectionList.Entry<ModelList.ModelEntry> {
 			private final String registryName;
-			private final AnimatedMesh mesh;
+			private final MeshProvider<AnimatedMesh> mesh;
 			
-			public ModelEntry(String registryName, AnimatedMesh mesh) {
+			public ModelEntry(String registryName, MeshProvider<AnimatedMesh> mesh) {
 				this.registryName = registryName;
 				this.mesh = mesh;
 			}

@@ -61,7 +61,7 @@ public class ImportModelScreen extends Screen {
 								.rowEditable(RowEditButton.REMOVE)
 								.transparentBackground(true)
 								.rowpositionChanged((rowposition, values) -> {
-									this.modelPreviewer.setMesh(this.userMeshes.get(rowposition).getValue());
+									this.modelPreviewer.setMesh(() -> this.userMeshes.get(rowposition).getValue());
 								})
 								.addColumn(Grid.editbox("mesh_name")
 												.editWidgetCreated((editbox) -> editbox.setFilter(ResourceLocation::isValidResourceLocation))

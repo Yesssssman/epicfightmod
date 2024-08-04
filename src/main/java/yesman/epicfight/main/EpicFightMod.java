@@ -100,15 +100,19 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 /**
  *  Changes from 20.8.2 -> 20.8.3
  *  
- *  1. Fixed animation not applied to the model in Datapack editor screen
+ *  1. Fixed animations not applied to the model in Datapack editor screen
  *  
  *  2. Now you can export the datapack with exceptional cases, allowing to fix all temporary issues and to work later
  *  
- *  3. Fixed player can execute basic attack and skill when downed by Player Revive
+ *  3. Fixed player can execute basic attack and skill when downed by Player Revive #1090
  *  
- *  4. Fixed "damage_bonus" property remaining after changing main hand item.
+ *  4. Fixed "damage_bonus" property remaining after changing main hand item. #1717
  *  
  *  5. Fixed dual sword dash attack passing through entities without hitting.
+ *  
+ *  6. Fixed crash when reloading previous data pack #1719
+ *  
+ *  7. Fixed armor trim visual bug
  *  
  *  --- TO DO ---
  *  

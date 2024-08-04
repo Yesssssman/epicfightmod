@@ -19,6 +19,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.client.gui.datapack.widgets.ModelPreviewer;
 
@@ -31,7 +32,7 @@ public class SelectAnimationScreen extends Screen {
 	private final Predicate<StaticAnimation> filter;
 	private final EditBox searchBox;
 	
-	public SelectAnimationScreen(Screen parentScreen, Consumer<StaticAnimation> selectCallback, Predicate<StaticAnimation> filter, Armature armature, AnimatedMesh mesh) {
+	public SelectAnimationScreen(Screen parentScreen, Consumer<StaticAnimation> selectCallback, Predicate<StaticAnimation> filter, Armature armature, MeshProvider<AnimatedMesh> mesh) {
 		super(Component.translatable("gui.epicfight.select.animations"));
 		
 		this.modelPreviewer = new ModelPreviewer(10, 20, 36, 60, null, null, armature, mesh);

@@ -25,6 +25,7 @@ import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.MainFrameAnimation;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.client.gui.datapack.widgets.ComboBox;
@@ -47,7 +48,7 @@ public class HumanoidWeaponMotionScreen extends Screen {
 	private final Screen caller;
 	private final CompoundTag rootTag;
 	
-	protected HumanoidWeaponMotionScreen(Screen caller, CompoundTag rootTag, Armature armature, AnimatedMesh mesh) {
+	protected HumanoidWeaponMotionScreen(Screen caller, CompoundTag rootTag, Armature armature, MeshProvider<AnimatedMesh> mesh) {
 		super(Component.translatable("datapack_edit.mob_patch.humanoid_weapon_motions"));
 		
 		this.font = caller.getMinecraft().font;
@@ -184,7 +185,7 @@ public class HumanoidWeaponMotionScreen extends Screen {
 																				livingMotionTag.putString(ParseUtil.nullOrToString(event.postValue, (livingmotion) -> livingmotion.name().toLowerCase(Locale.ROOT)), "");
 																			}).editable(true).width(100))
 															.addColumn(Grid.popup("animation", PopupBox.AnimationPopupBox::new).filter((animation) -> !(animation instanceof MainFrameAnimation))
-																			.editWidgetCreated((popupBox) -> popupBox.setModel(() -> armature, () -> mesh))
+																			.editWidgetCreated((popupBox) -> popupBox.setModel(() -> armature, mesh))
 																			.valueChanged((event) -> {
 																				CompoundTag livingMotionTag = ParseUtil.getOrSupply(this.motionSetList.get(this.motionSetGrid.getRowposition()), "livingmotions", CompoundTag::new);
 																				livingMotionTag.putString(ParseUtil.nullOrToString((LivingMotions)event.grid.getValue(event.rowposition, "living_motion"), (livingmotion) -> livingmotion.name().toLowerCase(Locale.ROOT)),

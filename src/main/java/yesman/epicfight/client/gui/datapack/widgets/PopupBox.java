@@ -38,6 +38,7 @@ import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.animation.property.JointMask.JointMaskSet;
 import yesman.epicfight.api.client.animation.property.JointMaskReloadListener;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Armature;
@@ -190,13 +191,13 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 	@OnlyIn(Dist.CLIENT)
 	public static class AnimationPopupBox extends PopupBox<StaticAnimation> {
 		private Supplier<Armature> armature;
-		private Supplier<AnimatedMesh> mesh;
+		private MeshProvider<AnimatedMesh> mesh;
 		
 		public AnimationPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<Pair<String, StaticAnimation>> responder) {
 			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (animation) -> ParseUtil.nullOrToString(animation, (a) -> a.getRegistryName().toString()), responder);
 		}
 		
-		public void setModel(Supplier<Armature> armature, Supplier<AnimatedMesh> mesh) {
+		public void setModel(Supplier<Armature> armature, MeshProvider<AnimatedMesh> mesh) {
 			this.armature = armature;
 			this.mesh = mesh;
 		}
@@ -207,7 +208,7 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 				if (this.armature.get() == null || this.mesh.get() == null) {
 					this.owner.getMinecraft().setScreen(new MessageScreen<>("", "Define model and armature first.", this.owner, (button2) -> this.owner.getMinecraft().setScreen(this.owner), 180, 60));
 				} else {
-					this.owner.getMinecraft().setScreen(new SelectAnimationScreen(this.owner, this::_setValue, this.getFilter(), this.armature.get(), this.mesh.get()));
+					this.owner.getMinecraft().setScreen(new SelectAnimationScreen(this.owner, this::_setValue, this.getFilter(), this.armature.get(), this.mesh));
 				}
 			}
 		}
@@ -292,9 +293,9 @@ public abstract class PopupBox<T> extends AbstractWidget implements DataBindingC
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public static class MeshPopupBox extends PopupBox<AnimatedMesh> {
-		public MeshPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<Pair<String, AnimatedMesh>> responder) {
-			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (mesh) -> ParseUtil.nullParam(Meshes.getKey(mesh)), responder);
+	public static class MeshPopupBox extends PopupBox<MeshProvider<AnimatedMesh>> {
+		public MeshPopupBox(Screen owner, Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component title, Consumer<Pair<String, MeshProvider<AnimatedMesh>>> responder) {
+			super(owner, font, x1, x2, y1, y2, horizontal, vertical, title, (mesh) -> ParseUtil.nullParam(Meshes.getKey(mesh.get())), responder);
 		}
 		
 		@Override

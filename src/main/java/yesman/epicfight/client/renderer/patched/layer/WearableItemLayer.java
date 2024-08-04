@@ -42,6 +42,7 @@ import yesman.epicfight.api.model.JsonModelLoader;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.mesh.HumanoidMesh;
+import yesman.epicfight.client.renderer.EpicFightRenderTypes;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
@@ -83,10 +84,8 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 	
 	private void renderTrim(PoseStack poseStack, MultiBufferSource multiBufferSource, int packedLight, AnimatedMesh model, Armature armature, ArmorMaterial armorMaterial, ArmorTrim armorTrim, EquipmentSlot slot, OpenMatrix4f[] poses) {
 		TextureAtlasSprite textureatlassprite = this.armorTrimAtlas.getSprite(innerModel(slot) ? armorTrim.innerTexture(armorMaterial) : armorTrim.outerTexture(armorMaterial));
-		VertexConsumer vertexConsumer = textureatlassprite.wrap(multiBufferSource.getBuffer(Sheets.armorTrimsSheet()));
-		model.drawToBuffer(poseStack, vertexConsumer, DrawingFunction.ENTITY_SOLID, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
-		//RenderSystem.setTextureMatrix(null);
-		//model.drawWithShader(poseStack, vertexConsumer, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, poses);
+		VertexConsumer vertexConsumer = textureatlassprite.wrap(multiBufferSource.getBuffer(EpicFightRenderTypes.getTriangulated(Sheets.armorTrimsSheet())));
+		model.drawToBuffer(poseStack, vertexConsumer, DrawingFunction.ENTITY_TEXTURED, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
 	}
 	
 	@Override

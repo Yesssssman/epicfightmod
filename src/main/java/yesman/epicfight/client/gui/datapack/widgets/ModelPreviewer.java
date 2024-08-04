@@ -68,6 +68,7 @@ import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.RawMesh;
 import yesman.epicfight.api.collider.Collider;
 import yesman.epicfight.api.model.Armature;
@@ -100,13 +101,13 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 	private int index;
 	private float attackTimeBegin;
 	private float attackTimeEnd;
-	private AnimatedMesh mesh;
+	private MeshProvider<AnimatedMesh> mesh;
 	private Joint colliderJoint;
 	private Collider collider;
 	private List<TrailInfo> trailInfoList = Lists.newArrayList();
 	private Item item;
 	
-	public ModelPreviewer(int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Armature armature, AnimatedMesh mesh) {
+	public ModelPreviewer(int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Armature armature, MeshProvider<AnimatedMesh> mesh) {
 		super(x1, y1, x2, y2, Component.literal(""));
 		
 		if (armature != null) {
@@ -136,7 +137,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 		patch.setAnimator();
 	}
 	
-	public void setMesh(AnimatedMesh mesh) {
+	public void setMesh(MeshProvider<AnimatedMesh> mesh) {
 		this.mesh = mesh;
 	}
 	
@@ -144,7 +145,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 		return this.animator.getEntityPatch().getArmature();
 	}
 	
-	public AnimatedMesh getMesh() {
+	public MeshProvider<AnimatedMesh> getMesh() {
 		return this.mesh;
 	}
 	
@@ -316,7 +317,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 			
 			ShaderInstance prevShader = RenderSystem.getShader();
 			Matrix4f oldProjection = RenderSystem.getProjectionMatrix();
-			RenderSystem.setShader(EpicFightShaders::getPositionColorNormalShader);
+			RenderSystem.setShader(EpicFightShaders::getAnimationPositionColorNormalShader);
 			Matrix4f perspective = (new Matrix4f()).setPerspective(70.0F, (float)this.width / (float)this.height, 0.05F, 100.0F);
 			
 			RenderSystem.setProjectionMatrix(perspective, VertexSorting.DISTANCE_TO_ORIGIN);
@@ -328,10 +329,10 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 			guiGraphics.pose().mulPose(Axis.XP.rotationDegrees(this.xRot));
 			guiGraphics.pose().mulPose(Axis.YP.rotationDegrees(this.yRot));
 			
-			this.mesh.initialize();
+			this.mesh.get().initialize();
 			Tesselator tesselator = RenderSystem.renderThreadTesselator();
 			BufferBuilder bufferbuilder = tesselator.getBuilder();
-			this.mesh.drawWithShader(guiGraphics.pose(), EpicFightShaders.getPositionColorNormalShader(), -1, 0.9411F, 0.9411F, 0.9411F, 1.0F, -1, this.getArmature(), poseMatrices);
+			this.mesh.get().drawWithShader(guiGraphics.pose(), EpicFightShaders.getAnimationPositionColorNormalShader(), -1, 0.9411F, 0.9411F, 0.9411F, 1.0F, -1, this.getArmature(), poseMatrices);
 			
 			if (this.item != null && this.showItemCheckbox._getValue()) {
 				BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();
@@ -424,6 +425,7 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 			ShaderInstance prevShader = RenderSystem.getShader();
 			Matrix4f oldProjection = RenderSystem.getProjectionMatrix();
 			RenderSystem.setShader(EpicFightShaders::getPositionColorNormalShader);
+			
 			Matrix4f perspective = (new Matrix4f()).setPerspective(70.0F, (float)this.width / (float)this.height, 0.05F, 100.0F);
 			
 			RenderSystem.setProjectionMatrix(perspective, VertexSorting.DISTANCE_TO_ORIGIN);
@@ -435,14 +437,13 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 			guiGraphics.pose().mulPose(Axis.XP.rotationDegrees(this.xRot));
 			guiGraphics.pose().mulPose(Axis.YP.rotationDegrees(this.yRot));
 			
-			this.mesh.initialize();
-			
+			this.mesh.get().initialize();
 			Tesselator tesselator = RenderSystem.renderThreadTesselator();
 			BufferBuilder bufferbuilder = tesselator.getBuilder();
 			bufferbuilder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
-			this.mesh.draw(guiGraphics.pose(), bufferbuilder, RawMesh.DrawingFunction.ENTITY_SOLID, -1, 0.9411F, 0.9411F, 0.9411F, 1.0F, -1);
-			BufferUploader.drawWithShader(bufferbuilder.end());
 			
+			this.mesh.get().draw(guiGraphics.pose(), bufferbuilder, RawMesh.DrawingFunction.ENTITY_SOLID, -1, 0.9411F, 0.9411F, 0.9411F, 1.0F, OverlayTexture.NO_OVERLAY);
+			BufferUploader.drawWithShader(bufferbuilder.end());
 			guiGraphics.pose().popPose();
 			
 			RenderSystem.setProjectionMatrix(oldProjection, VertexSorting.ORTHOGRAPHIC_Z);
