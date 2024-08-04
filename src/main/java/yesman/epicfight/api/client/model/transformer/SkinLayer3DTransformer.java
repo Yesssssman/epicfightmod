@@ -492,7 +492,7 @@ public class SkinLayer3DTransformer extends CustomizableCube {
 				ModelPart.Vertex pos2 = getTranslatedVertex(polygon.vertices[2], matrix);
 				ModelPart.Vertex pos3 = getTranslatedVertex(polygon.vertices[3], matrix);
 				Direction direction = getDirectionFromVector(polygon.normal.x, polygon.normal.y, polygon.normal.z);
-				//System.out.println(partName + " " + polygon.vertices[0].pos +" "+ polygon.vertices[1].pos +" "+ polygon.vertices[2].pos +" "+ polygon.vertices[3].pos);
+				
 				if (pos1.pos.y() > this.yClipCoord != pos2.pos.y() > this.yClipCoord) {
 					float distance = pos2.pos.y() - pos1.pos.y();
 					float textureV = pos1.v + (pos2.v - pos1.v) * ((this.yClipCoord - pos1.pos.y()) / distance);
