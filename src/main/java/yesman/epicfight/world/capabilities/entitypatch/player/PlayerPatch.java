@@ -204,8 +204,6 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		this.xo = this.original.getX();
 		this.yo = this.original.getY();
 		this.zo = this.original.getZ();
-		
-		//System.out.println(this.original.getAttributes().getInstance(Attributes.ATTACK_DAMAGE).getModifiers());
 	}
 	
 	@Override
