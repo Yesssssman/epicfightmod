@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
+import com.google.common.collect.Sets;
 import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -71,8 +72,8 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.gui.BattleModeGui;
-import yesman.epicfight.client.gui.VersionNotifier;
 import yesman.epicfight.client.gui.EntityIndicator;
+import yesman.epicfight.client.gui.VersionNotifier;
 import yesman.epicfight.client.gui.screen.config.UISetupScreen;
 import yesman.epicfight.client.gui.screen.overlay.OverlayManager;
 import yesman.epicfight.client.input.EpicFightKeyMappings;
@@ -138,15 +139,18 @@ public class RenderEngine {
 	private final Map<EntityType<?>, PatchedEntityRenderer> entityRendererCache;
 	private final Map<Item, RenderItemBase> itemRendererMapByInstance;
 	private final Map<Class<?>, RenderItemBase> itemRendererMapByClass;
+	private final Set<Component> sentMessages;
 	private final OverlayManager overlayManager;
 	
 	private AimHelperRenderer aimHelper;
 	private FirstPersonRenderer firstPersonRenderer;
 	private PHumanoidRenderer<?, ?, ?, ?, ?> basicHumanoidRenderer;
 	private boolean zoomingIn;
+	private int modelInitTimer;
+	
+	private final int maxZoomCount = 20;
 	private int zoomOutStandbyTicks = 0;
 	private int zoomCount = 0;
-	private final int maxZoomCount = 20;
 	
 	public RenderEngine() {
 		Events.renderEngine = this;
@@ -158,6 +162,7 @@ public class RenderEngine {
 		this.entityRendererCache = Maps.newHashMap();
 		this.itemRendererMapByInstance = Maps.newHashMap();
 		this.itemRendererMapByClass = Maps.newHashMap();
+		this.sentMessages = Sets.newHashSet();
 		this.overlayManager = new OverlayManager();
 	}
 	
@@ -234,6 +239,7 @@ public class RenderEngine {
 	}
 	
 	public void resetRenderers() {
+		this.sentMessages.clear();
 		this.entityRendererCache.clear();
 		
 		for (Map.Entry<EntityType<?>, Function<EntityType<?>, PatchedEntityRenderer>> entry : this.entityRendererProvider.entrySet()) {
@@ -303,8 +309,8 @@ public class RenderEngine {
 	}
 	
 	@SuppressWarnings("unchecked")
-	public void renderEntityArmatureModel(LivingEntity livingEntity, LivingEntityPatch<?> entitypatch, EntityRenderer<? extends Entity> renderer, MultiBufferSource buffer, PoseStack matStack, int packedLightIn, float partialTicks) {
-		this.getEntityRenderer(livingEntity).render(livingEntity, entitypatch, renderer, buffer, matStack, packedLightIn, partialTicks);
+	public void renderEntityArmatureModel(LivingEntity livingEntity, LivingEntityPatch<?> entitypatch, EntityRenderer<? extends Entity> renderer, MultiBufferSource buffer, PoseStack matStack, int packedLight, float partialTicks) {
+		this.getEntityRenderer(livingEntity).render(livingEntity, entitypatch, renderer, buffer, matStack, packedLight, partialTicks);
 	}
 	
 	public PatchedEntityRenderer getEntityRenderer(Entity entity) {
@@ -339,6 +345,21 @@ public class RenderEngine {
 		if (this.zoomingIn) {
 			this.zoomingIn = false;
 			this.zoomOutStandbyTicks = zoomOutTicks;
+		}
+	}
+	
+	public void setModelInitializerTimer(int tick) {
+		this.modelInitTimer = tick;
+	}
+	
+	public void addMessage(Component message) {
+		Minecraft.getInstance().gui.getChat().addMessage(message);
+	}
+	
+	public void addMessageIfAbsent(Component message) {
+		if (!this.sentMessages.contains(message)) {
+			this.sentMessages.add(message);
+			this.addMessage(message);
 		}
 	}
 	
@@ -445,6 +466,10 @@ public class RenderEngine {
 		this.battleModeUI.slideDown();
 	}
 	
+	public boolean shouldRenderVanillaModel() {
+		return ClientEngine.getInstance().isVanillaModelDebuggingMode() || this.modelInitTimer > 0;
+	}
+	
 	@Mod.EventBusSubscriber(modid = EpicFightMod.MODID, value = Dist.CLIENT)
 	public static class Events {
 		static RenderEngine renderEngine;
@@ -459,28 +484,43 @@ public class RenderEngine {
 			
 			if (renderEngine.hasRendererFor(livingentity)) {
 				LivingEntityPatch<?> entitypatch = EpicFightCapabilities.getEntityPatch(livingentity, LivingEntityPatch.class);
-				LocalPlayerPatch playerpatch = null;
 				float originalYRot = 0.0F;
 				
+				//Draw the player in inventory
 				if ((event.getPartialTick() == 0.0F || event.getPartialTick() == 1.0F) && entitypatch instanceof LocalPlayerPatch localPlayerPatch) {
-					playerpatch = localPlayerPatch;
-					originalYRot = playerpatch.getModelYRot();
-					playerpatch.setModelYRotInGui(livingentity.getYRot());
-					event.getPoseStack().translate(0, 0.1D, 0);
+					if (entitypatch.overrideRender()) {
+						originalYRot = localPlayerPatch.getModelYRot();
+						localPlayerPatch.setModelYRotInGui(livingentity.getYRot());
+						event.getPoseStack().translate(0, 0.1D, 0);
+						
+						boolean usingShader = EpicFightMod.CLIENT_CONFIGS.useAnimationShader.getValue();
+						
+						if (usingShader) {
+							EpicFightMod.CLIENT_CONFIGS.useAnimationShader.setValue(false);
+						}
+						
+						renderEngine.renderEntityArmatureModel(livingentity, entitypatch, event.getRenderer(), event.getMultiBufferSource(), event.getPoseStack(), event.getPackedLight(), event.getPartialTick());
+						
+						if (usingShader) {
+							EpicFightMod.CLIENT_CONFIGS.useAnimationShader.setValue(true);
+						}
+						
+						localPlayerPatch.disableModelYRotInGui(originalYRot);
+						event.setCanceled(true);
+					}
+					
+					return;
 				}
 				
 				if (entitypatch != null && entitypatch.overrideRender()) {
 					renderEngine.renderEntityArmatureModel(livingentity, entitypatch, event.getRenderer(), event.getMultiBufferSource(), event.getPoseStack(), event.getPackedLight(), event.getPartialTick());
 					
-					if (ClientEngine.getInstance().isVanillaModelDebuggingMode()) {
+					if (renderEngine.shouldRenderVanillaModel()) {
 						event.getPoseStack().translate(1.0F, 0.0F, 0.0F);
+						--renderEngine.modelInitTimer;
 					} else {
 						event.setCanceled(true);
 					}
-				}
-				
-				if (playerpatch != null) {
-					playerpatch.disableModelYRotInGui(originalYRot);
 				}
 			}
 			
@@ -494,7 +534,7 @@ public class RenderEngine {
 				}
 			}
 		}
-
+		
 		@SubscribeEvent
 		public static void itemTooltip(ItemTooltipEvent event) {
 			if (event.getEntity() != null && event.getEntity().level().isClientSide) {

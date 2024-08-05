@@ -98,21 +98,19 @@ import yesman.epicfight.world.level.block.EpicFightBlocks;
 import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 
 /**
- *  Changes from 20.8.2 -> 20.8.3
+ *  Changes from 20.8.3 -> 20.8.4
  *  
- *  1. Fixed animations not applied to the model in Datapack editor screen
+ *  1. Fixed scroll bar not moving by dragging.
  *  
- *  2. Now you can export the datapack with exceptional cases, allowing to fix all temporary issues and to work later
+ *  2. Fixed a crash if you enter an invalid file name when exporting datapack.
  *  
- *  3. Fixed player can execute basic attack and skill when downed by Player Revive #1090
+ *  3. Fixed a crash when enabling vanilla model debugging mode
  *  
- *  4. Fixed "damage_bonus" property remaining after changing main hand item. #1717
+ *  4. Fixed the player model being invisible in the inventory screen when animation shader is turned on
  *  
- *  5. Fixed dual sword dash attack passing through entities without hitting.
+ *  5. Fixed 3d skin layer model broken when you rejoin a world
  *  
- *  6. Fixed crash when reloading previous data pack #1719
- *  
- *  7. Fixed armor trim visual bug
+ *  6. Now 3d skin layer is automatically initialized without a need to turn on vanilla model debugging mode
  *  
  *  --- TO DO ---
  *  

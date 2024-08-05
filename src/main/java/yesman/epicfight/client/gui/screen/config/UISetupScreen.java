@@ -91,7 +91,12 @@ public class UISetupScreen extends Screen {
 
 	@Override
 	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
-		this.renderDirtBackground(guiGraphics);
+		if (this.minecraft.level == null) {
+			this.renderDirtBackground(guiGraphics);
+		} else {
+			this.renderBackground(guiGraphics);
+		}
+		
 		super.render(guiGraphics, mouseX, mouseY, partialTicks);
 	}
 	

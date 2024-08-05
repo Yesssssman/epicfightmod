@@ -296,6 +296,15 @@ public class AttackAnimationPropertyScreen extends Screen {
 	}
 	
 	@Override
+	public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
+		if (this.inputComponentsList.mouseDragged(mouseX, mouseY, button, dx, dy)) {
+			return true;
+		}
+		
+		return super.mouseDragged(mouseX, mouseY, button, dx, dy);
+	}
+	
+	@Override
 	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		this.renderDirtBackground(guiGraphics);
 		

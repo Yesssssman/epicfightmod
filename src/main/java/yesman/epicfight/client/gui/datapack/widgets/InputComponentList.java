@@ -143,6 +143,8 @@ public abstract class InputComponentList<T> extends ContainerObjectSelectionList
 			return false;
 		}
 		
+		this.updateScrollingState(x, y, button);
+		
 		if (this.focusingEntry != null) {
 			int i = this.children().indexOf(this.focusingEntry);
 			int j1 = this.getRowTop(i);

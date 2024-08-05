@@ -28,6 +28,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.LivingEntityRenderer;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -76,7 +77,7 @@ public class SkinLayer3DCompat implements ICompatModule {
 		
 		eventBus.<PatchedRenderersEvent.Modify>addListener((event) -> {
 			if (event.get(EntityType.PLAYER) instanceof PPlayerRenderer playerrenderer) {
-				playerrenderer.addPatchedLayer(CustomLayerFeatureRenderer.class, new EpicFight3DSkinLayerRenderer());
+				playerrenderer.addPatchedLayerAlways(CustomLayerFeatureRenderer.class, new EpicFight3DSkinLayerRenderer());
 			}
 		});
 	}
@@ -113,7 +114,11 @@ public class SkinLayer3DCompat implements ICompatModule {
 		
 		public void put(PlayerModelPart playerModelPart, AnimatedMesh animatedMesh) {
 			if (this.partMeshes.containsKey(playerModelPart)) {
-				this.partMeshes.get(playerModelPart).destroy();
+				AnimatedMesh oldMesh = this.partMeshes.get(playerModelPart);
+				
+				if (oldMesh != animatedMesh) {
+					oldMesh.destroy();
+				}
 			}
 			
 			this.partMeshes.put(playerModelPart, animatedMesh);
@@ -176,7 +181,9 @@ public class SkinLayer3DCompat implements ICompatModule {
 					continue;
 				}
 				
-				if (!skin3dlayerMeshes.partMeshes.containsKey(playerModelPart) || ClientEngine.getInstance().isVanillaModelDebuggingMode()) {
+				boolean noModel = !skin3dlayerMeshes.partMeshes.containsKey(playerModelPart);
+				
+				if (noModel || ClientEngine.getInstance().renderEngine.shouldRenderVanillaModel()) {
 					if (player instanceof PlayerSettings playerSettings) {
 						switch (playerModelPart) {
 						case JACKET -> {
@@ -201,6 +208,12 @@ public class SkinLayer3DCompat implements ICompatModule {
 						}
 						default -> {}
 						}
+					}
+					
+					//Initialize model
+					if (noModel) {
+						ClientEngine.getInstance().renderEngine.addMessageIfAbsent(Component.translatable("epicfight.message.skinlayer3d_model_initialize"));
+						ClientEngine.getInstance().renderEngine.setModelInitializerTimer(60);
 					}
 				}
 				

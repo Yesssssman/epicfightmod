@@ -70,6 +70,7 @@ import net.minecraft.server.packs.repository.PackSource;
 import net.minecraft.server.packs.resources.IoSupplier;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.Item;
 import net.minecraftforge.api.distmarker.Dist;
@@ -294,7 +295,9 @@ public class DatapackEditScreen extends Screen {
 			e.printStackTrace();
 			
 			try {
-				out.close();
+				if (out != null) {
+					out.close();
+				}
 			} catch (IOException e1) {
 				e1.printStackTrace();
 			}
@@ -2152,7 +2155,9 @@ public class DatapackEditScreen extends Screen {
 		private PopupBox<Armature> armaturePopupBox;
 		
 		public MobCapabilityTab() {
-			super(Component.translatable("gui." + EpicFightMod.MODID + ".tab.datapack.mob_patch"), MobPatchReloadListener.DIRECTORY, ForgeRegistries.ENTITY_TYPES, (entityType) -> entityType.getCategory() != MobCategory.MISC);
+			super(Component.translatable("gui." + EpicFightMod.MODID + ".tab.datapack.mob_patch"), MobPatchReloadListener.DIRECTORY, ForgeRegistries.ENTITY_TYPES, (entityType) -> {
+				return entityType.getCategory() != MobCategory.MISC && entityType != EntityType.ENDER_DRAGON;
+			});
 			
 			this.inputComponentsList = new InputComponentList<>(DatapackEditScreen.this, 0, 0, 0, 0, 30) {
 				@Override

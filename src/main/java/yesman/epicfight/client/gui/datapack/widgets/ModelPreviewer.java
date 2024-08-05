@@ -68,6 +68,7 @@ import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.animation.property.ClientAnimationProperties;
 import yesman.epicfight.api.client.animation.property.TrailInfo;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.Mesh;
 import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.RawMesh;
 import yesman.epicfight.api.collider.Collider;
@@ -317,7 +318,6 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 			
 			ShaderInstance prevShader = RenderSystem.getShader();
 			Matrix4f oldProjection = RenderSystem.getProjectionMatrix();
-			RenderSystem.setShader(EpicFightShaders::getAnimationPositionColorNormalShader);
 			Matrix4f perspective = (new Matrix4f()).setPerspective(70.0F, (float)this.width / (float)this.height, 0.05F, 100.0F);
 			
 			RenderSystem.setProjectionMatrix(perspective, VertexSorting.DISTANCE_TO_ORIGIN);
@@ -330,9 +330,12 @@ public class ModelPreviewer extends AbstractWidget implements ResizableComponent
 			guiGraphics.pose().mulPose(Axis.YP.rotationDegrees(this.yRot));
 			
 			this.mesh.get().initialize();
+			RenderSystem.setShader(EpicFightShaders::getPositionColorNormalShader);
 			Tesselator tesselator = RenderSystem.renderThreadTesselator();
 			BufferBuilder bufferbuilder = tesselator.getBuilder();
-			this.mesh.get().drawWithShader(guiGraphics.pose(), EpicFightShaders.getAnimationPositionColorNormalShader(), -1, 0.9411F, 0.9411F, 0.9411F, 1.0F, -1, this.getArmature(), poseMatrices);
+			bufferbuilder.begin(VertexFormat.Mode.TRIANGLES, DefaultVertexFormat.POSITION_COLOR_NORMAL);
+			this.mesh.get().drawToBuffer(guiGraphics.pose(), bufferbuilder, Mesh.DrawingFunction.ENTITY_SOLID, -1, 0.9411F, 0.9411F, 0.9411F, 1.0F, -1, this.getArmature(), poseMatrices);
+			BufferUploader.drawWithShader(bufferbuilder.end());
 			
 			if (this.item != null && this.showItemCheckbox._getValue()) {
 				BufferSource bufferSource = Minecraft.getInstance().renderBuffers().bufferSource();

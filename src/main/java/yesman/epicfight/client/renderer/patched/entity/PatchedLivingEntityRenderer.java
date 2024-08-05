@@ -36,6 +36,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.client.animation.Layer;
+import yesman.epicfight.api.client.forgeevent.PatchedRenderersEvent;
 import yesman.epicfight.api.client.forgeevent.PrepareModelEvent;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.model.Armature;
@@ -125,33 +126,33 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 	}
 	
 	@Override
-	public void render(E entityIn, T entitypatch, R renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
-		super.render(entityIn, entitypatch, renderer, buffer, poseStack, packedLight, partialTicks);
+	public void render(E entity, T entitypatch, R renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
+		super.render(entity, entitypatch, renderer, buffer, poseStack, packedLight, partialTicks);
 		
 		Minecraft mc = Minecraft.getInstance();
-		boolean isVisible = this.isVisible(renderer, entityIn);
-		boolean isVisibleToPlayer = !isVisible && !entityIn.isInvisibleTo(mc.player);
-		boolean isGlowing = mc.shouldEntityAppearGlowing(entityIn);
-		RenderType renderType = this.getRenderType(entityIn, entitypatch, renderer, isVisible, isVisibleToPlayer, isGlowing);
+		boolean isVisible = this.isVisible(renderer, entity);
+		boolean isVisibleToPlayer = !isVisible && !entity.isInvisibleTo(mc.player);
+		boolean isGlowing = mc.shouldEntityAppearGlowing(entity);
+		RenderType renderType = this.getRenderType(entity, entitypatch, renderer, isVisible, isVisibleToPlayer, isGlowing);
 		Armature armature = entitypatch.getArmature();
 		poseStack.pushPose();
-		this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
+		this.mulPoseStack(poseStack, armature, entity, entitypatch, partialTicks);
 		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks, false);
 		
 		if (renderType != null) {
-		    this.prepareVanillaModel(entityIn, renderer.getModel(), renderer, partialTicks);
+		    this.prepareVanillaModel(entity, renderer.getModel(), renderer, partialTicks);
 			AM mesh = this.getMeshProvider(entitypatch).get();
-			this.prepareModel(mesh, entityIn, entitypatch, renderer);
+			this.prepareModel(mesh, entity, entitypatch, renderer);
 			
 			PrepareModelEvent prepareModelEvent = new PrepareModelEvent(this, mesh, entitypatch, buffer, poseStack, packedLight, partialTicks);
 			
 			if (!MinecraftForge.EVENT_BUS.post(prepareModelEvent)) {
-				mesh.draw(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, isVisibleToPlayer ? 0.15F : 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), armature, poseMatrices);
+				mesh.draw(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, isVisibleToPlayer ? 0.15F : 1.0F, this.getOverlayCoord(entity, entitypatch, partialTicks), armature, poseMatrices);
 			}
 		}
 		
-		if (!entityIn.isSpectator()) {
-			this.renderLayer(renderer, entitypatch, entityIn, poseMatrices, buffer, poseStack, packedLight, partialTicks);
+		if (!entity.isSpectator()) {
+			this.renderLayer(renderer, entitypatch, entity, poseMatrices, buffer, poseStack, packedLight, partialTicks);
 		}
 		
 		if (renderType != null) {
@@ -291,6 +292,13 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 	
 	public void addPatchedLayer(Class<?> originalLayerClass, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>> patchedLayer) {
 		this.patchedLayers.putIfAbsent(originalLayerClass, patchedLayer);
+	}
+	
+	/**
+	 * Use this method in {@link PatchedRenderersEvent.Modify}}
+	 */
+	public void addPatchedLayerAlways(Class<?> originalLayerClass, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>> patchedLayer) {
+		this.patchedLayers.put(originalLayerClass, patchedLayer);
 	}
 	
 	public void addCustomLayer(PatchedLayer<E, T, M, ? extends RenderLayer<E, M>> patchedLayer) {

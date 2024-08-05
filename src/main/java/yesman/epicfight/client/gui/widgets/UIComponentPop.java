@@ -125,45 +125,38 @@ public class UIComponentPop<T extends UIComponent> extends Screen implements Con
 			if (popupOut && parentOut) {
 				this.enable = false;
 			}
-
+			
 			PoseStack poseStack = guiGraphics.pose();
 			poseStack.pushPose();
 			poseStack.translate(0, 0, 200); // zlevel
-			
 			this.renderPopup(guiGraphics, this.x, this.y, this.width, this.height);
 			super.render(guiGraphics, mouseX, mouseY, partialTicks);
-
-			poseStack.popPose();;
+			
+			poseStack.popPose();
 		}
 	}
 	
 	protected void renderPopup(GuiGraphics guiGraphics, int x, int y, int width, int height) {
-		PoseStack poseStack = guiGraphics.pose();
-
 		int i = width;
 		int j = height;
 		int j2 = x;
 		int k2 = y;
 		
-		poseStack.pushPose();
-		
 		RenderSystem.setShader(GameRenderer::getPositionColorShader);
-
+		
 		int backgroundStart = 0xf0100010;
 		int backgroundEnd = 0xf0100010;
 		int boarderStart = 0x505000FF;
 		int boarderEnd = 0x5028007F;
-		guiGraphics.fillGradient(j2 - 3, k2 - 4, j2 + i + 3, k2 - 3, 400, backgroundStart, backgroundStart);
-		guiGraphics.fillGradient(j2 - 3, k2 + j + 3, j2 + i + 3, k2 + j + 4, 400, backgroundEnd, backgroundEnd);
-		guiGraphics.fillGradient(j2 - 3, k2 - 3, j2 + i + 3, k2 + j + 3, 400, backgroundStart, backgroundEnd);
-		guiGraphics.fillGradient(j2 - 4, k2 - 3, j2 - 3, k2 + j + 3, 400, backgroundStart, backgroundEnd);
-		guiGraphics.fillGradient(j2 + i + 3, k2 - 3, j2 + i + 4, k2 + j + 3, 400, backgroundStart, backgroundEnd);
-		guiGraphics.fillGradient(j2 - 3, k2 - 3 + 1, j2 - 3 + 1, k2 + j + 3 - 1, 400, boarderStart, boarderEnd);
-		guiGraphics.fillGradient(j2 + i + 2, k2 - 3 + 1, j2 + i + 3, k2 + j + 3 - 1, 400, boarderStart, boarderEnd);
-		guiGraphics.fillGradient(j2 - 3, k2 - 3, j2 + i + 3, k2 - 3 + 1, 400, boarderStart, boarderStart);
-		guiGraphics.fillGradient(j2 - 3, k2 + j + 2, j2 + i + 3, k2 + j + 3, 400, boarderEnd, boarderEnd);
-
-		poseStack.popPose();
+		guiGraphics.fillGradient(j2 - 3, k2 - 4, j2 + i + 3, k2 - 3, 0, backgroundStart, backgroundStart);
+		guiGraphics.fillGradient(j2 - 3, k2 + j + 3, j2 + i + 3, k2 + j + 4, 0, backgroundEnd, backgroundEnd);
+		guiGraphics.fillGradient(j2 - 3, k2 - 3, j2 + i + 3, k2 + j + 3, 0, backgroundStart, backgroundEnd);
+		guiGraphics.fillGradient(j2 - 4, k2 - 3, j2 - 3, k2 + j + 3, 0, backgroundStart, backgroundEnd);
+		guiGraphics.fillGradient(j2 + i + 3, k2 - 3, j2 + i + 4, k2 + j + 3, 0, backgroundStart, backgroundEnd);
+		guiGraphics.fillGradient(j2 - 3, k2 - 3 + 1, j2 - 3 + 1, k2 + j + 3 - 1, 0, boarderStart, boarderEnd);
+		guiGraphics.fillGradient(j2 + i + 2, k2 - 3 + 1, j2 + i + 3, k2 + j + 3 - 1, 0, boarderStart, boarderEnd);
+		guiGraphics.fillGradient(j2 - 3, k2 - 3, j2 + i + 3, k2 - 3 + 1, 0, boarderStart, boarderStart);
+		guiGraphics.fillGradient(j2 - 3, k2 + j + 2, j2 + i + 3, k2 + j + 3, 0, boarderEnd, boarderEnd);
 	}
 	
 	@OnlyIn(Dist.CLIENT)

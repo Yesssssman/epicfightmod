@@ -315,6 +315,10 @@ public class WeaponComboScreen extends Screen {
 			return true;
 		}
 		
+		if (this.inputComponentsList.mouseDragged(mouseX, mouseY, button, dx, dy)) {
+			return true;
+		}
+		
 		return super.mouseDragged(mouseX, mouseY, button, dx, dy);
 	}
 	

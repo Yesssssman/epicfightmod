@@ -35,6 +35,7 @@ import yesman.epicfight.client.mesh.SpiderMesh;
 import yesman.epicfight.client.mesh.VexMesh;
 import yesman.epicfight.client.mesh.VillagerMesh;
 import yesman.epicfight.client.mesh.WitherMesh;
+import yesman.epicfight.client.renderer.patched.layer.WearableItemLayer;
 import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
@@ -81,6 +82,8 @@ public class Meshes implements PreparableReloadListener {
 	public static void build(ResourceManager resourceManager) {
 		MESHES.values().stream().filter((mesh) -> mesh instanceof AnimatedMesh).map((mesh) -> (AnimatedMesh)mesh).forEach(AnimatedMesh::destroy);
 		MESHES.clear();
+		WearableItemLayer.clearModels();
+		
 		ModelBuildEvent.MeshBuild event = new ModelBuildEvent.MeshBuild(resourceManager, MESHES);
 		
 		//Entities

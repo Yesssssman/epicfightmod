@@ -28,7 +28,7 @@ public class PPlayerRenderer extends PHumanoidRenderer<AbstractClientPlayer, Abs
 		this.addPatchedLayer(ArrowLayer.class, new PatchedArrowLayer<> (context));
 		this.addPatchedLayer(BeeStingerLayer.class, new PatchedBeeStingerLayer<> ());
 		this.addPatchedLayer(CapeLayer.class, new PatchedCapeLayer());
-		this.addPatchedLayer(PlayerItemInHandLayer.class, new PatchedItemInHandLayer<>());
+		this.addPatchedLayer(PlayerItemInHandLayer.class, new PatchedItemInHandLayer<> ());
 	}
 	
 	@Override

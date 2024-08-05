@@ -58,7 +58,11 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 	
 	public static void putModel(ResourceLocation rl, AnimatedMesh animatedMesh) {
 		if (ARMOR_MODELS.containsKey(rl)) {
-			ARMOR_MODELS.get(rl).destroy();
+			AnimatedMesh oldModel = ARMOR_MODELS.get(rl);
+			
+			if (oldModel != animatedMesh) {
+				ARMOR_MODELS.get(rl).destroy();
+			}
 		}
 		
 		ARMOR_MODELS.put(rl, animatedMesh);
@@ -168,7 +172,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 	private AnimatedMesh getArmorModel(HumanoidArmorLayer<E, M, M> originalRenderer, M originalModel, E entityliving, ArmorItem armorItem, ItemStack stack, EquipmentSlot slot) {
 		ResourceLocation registryName = ForgeRegistries.ITEMS.getKey(armorItem);
 		
-		if (ARMOR_MODELS.containsKey(registryName) && !ClientEngine.getInstance().isVanillaModelDebuggingMode()) {
+		if (ARMOR_MODELS.containsKey(registryName) && !ClientEngine.getInstance().renderEngine.shouldRenderVanillaModel()) {
 			return ARMOR_MODELS.get(registryName);
 		} else {
 			ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();

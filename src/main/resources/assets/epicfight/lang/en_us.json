@@ -62,6 +62,7 @@
 	"effect.epicfight.instability": "Instability",
 	
 	"entity.epicfight.wither_skeleton_minion": "Wither's Minion",
+	"entity.epicfight.area_effect_breath": "Dragon Breath",
 	
 	"epicfight.gui.configuration.autoswitching": "Auto Switching Items",
 	"epicfight.gui.to_battle_mode": "To Battle Mode",
@@ -576,5 +577,6 @@
 	"epicfight.messages.test_version_warning_line2": "(%s)",
 	"epicfight.messages.version_notifier": "EpicFight-%s",
 	
-	"epicfight.messages.shader_transform_fail": "Failed to create shader %s. Automatically switches animation shader mode off."
+	"epicfight.messages.shader_transform_fail": "Failed to create shader %s. Automatically switches animation shader mode off.",
+	"epicfight.message.skinlayer3d_model_initialize": "Found 3D Skin Layers... Initialize the player model."
 }
