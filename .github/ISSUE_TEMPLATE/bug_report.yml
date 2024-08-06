@@ -19,7 +19,7 @@ body:
       label: "Please check you're using proper versions."
       description: "Check you're using proper Minecraft, Modloader, Epic Fight, and its add-on versions. We do not support outdated versions."
       options:
-        - label: "I checked they're all in the right version."
+        - label: "I checked all of them in the right version."
           required: true
   - type: checkboxes
     id: checkbox3
@@ -27,7 +27,7 @@ body:
       label: "Please check if this issue's from out of our area"
       description: "Basically, we support issues from Epic Fight first. Please check if you have a ton of mods in your mod list or use another API rather than Forge like Optifine or Bukkit. And please consider that the issue could not be fixed forever if it's true."
       options:
-        - label: "I checked the problem. "
+        - label: "I understood the problem."
           required: true
   - type: input
     id: specify-mod
