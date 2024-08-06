@@ -64,7 +64,7 @@ body:
   - type: textarea
     id: step-to-reproduce
     attributes:
-      label: Step to Reproduce?
+      label: Steps to Reproduce
       description: "Please tell us how we can reproduce the issue. You can post videos, images, or lines of steps to get the same result."
     validations:
       required: true
