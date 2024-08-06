@@ -35,7 +35,6 @@ body:
       label: The name of the mod
       description: "If the issue's from another mod, Please specify the name of it. This is so important because you can save our time inspecting all mods in your crash report."
       placeholder: Mod name or URL where we can download the mod.
-      width: 500
     validations:
       required: false
   - type: checkboxes
