@@ -55,7 +55,7 @@ body:
     validations:
       required: true
   - type: textarea
-    id: the issue
+    id: the-issue
     attributes:
       label: The Issue
       description: "Please tell us what went wrong in as much detail as possible."
