@@ -171,12 +171,12 @@ public class StaticAnimationPropertyScreen extends Screen {
 		this.compositeLayerMasks.clear();
 		
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data.layer_type"));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data.layer_type"));
 		this.inputComponentsList.addComponentCurrentRow(this.layerTypeCombo.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 		
 		if (layerType == LayerOptions.BASE_LAYER || layerType == LayerOptions.COMPOSITE_LAYER) {
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data.priority"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data.priority"));
 			this.inputComponentsList.addComponentCurrentRow(new ComboBox<>(this, this.font, this.inputComponentsList.nextStart(5), 124, 100, 15, HorizontalSizing.LEFT_WIDTH, null, 8, Component.translatable("datapack_edit.import_animation.client_data.layer_type"),
 																			List.of(Layer.Priority.values()), ParseUtil::snakeToSpacedCamel, (priority) -> {
 																				if (layerType == LayerOptions.BASE_LAYER) {
@@ -188,7 +188,7 @@ public class StaticAnimationPropertyScreen extends Screen {
 			
 			if (layerType == LayerOptions.COMPOSITE_LAYER) {
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data.mask"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data.mask"));
 				
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.newRow();
@@ -220,17 +220,17 @@ public class StaticAnimationPropertyScreen extends Screen {
 			}
 		} else if (layerType == LayerOptions.MULTILAYER) {
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(12), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data.base_layer"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(12), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data.base_layer"));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(26), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data.priority"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(26), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data.priority"));
 			this.inputComponentsList.addComponentCurrentRow(new ComboBox<>(this, this.font, this.inputComponentsList.nextStart(5), 124, 100, 15, HorizontalSizing.LEFT_WIDTH, null, 8, Component.translatable("datapack_edit.import_animation.client_data.layer_type"),
 																			List.of(Layer.Priority.values()), ParseUtil::snakeToSpacedCamel, (priority) -> {
 																				this.baseLayerPriority = priority;
 																			}));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(26), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data.mask"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(26), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data.mask"));
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(
@@ -260,17 +260,17 @@ public class StaticAnimationPropertyScreen extends Screen {
 			this.inputComponentsList.newRow();
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(12), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.client_data.composite_layer")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(12), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.client_data.composite_layer")));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(26), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.client_data.priority")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(26), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.client_data.priority")));
 			this.inputComponentsList.addComponentCurrentRow(new ComboBox<>(this, this.font, this.inputComponentsList.nextStart(5), 124, 100, 15, HorizontalSizing.LEFT_WIDTH, null, 8, Component.translatable("datapack_edit.import_animation.client_data.layer_type"),
 																			List.of(Layer.Priority.values()), ParseUtil::snakeToSpacedCamel, (priority) -> {
 																				this.compositeLayerPriority = priority;
 																			}));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(26), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data.mask"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(26), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data.mask"));
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(

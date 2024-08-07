@@ -185,7 +185,8 @@ public class CapabilityItem {
 		
 		return null;
 	}
-
+	
+	@Deprecated /*Fix the mistype in the future */
 	public List<AnimationProvider<?>> getAutoAttckMotion(PlayerPatch<?> playerpatch) {
 		return getBasicAutoAttackMotion();
 	}

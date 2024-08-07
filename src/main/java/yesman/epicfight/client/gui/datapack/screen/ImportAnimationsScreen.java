@@ -256,7 +256,7 @@ public class ImportAnimationsScreen extends Screen {
 		
 		if (this.fakeAnimations.isEmpty()) {
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 5, 60, 15, HorizontalSizing.LEFT_RIGHT, null, "datapack_edit.import_animation.place_tooltip"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 5, 60, 15, HorizontalSizing.LEFT_RIGHT, null, "datapack_edit.import_animation.place_tooltip"));
 		}
 		
 		this.responder = (clz) -> {
@@ -285,7 +285,7 @@ public class ImportAnimationsScreen extends Screen {
 		
 		this.inputComponentsList.clearComponents();
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.type"));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.type"));
 		this.inputComponentsList.addComponentCurrentRow(this.animationType.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 		
 		if (animationClass != null) {
@@ -309,15 +309,15 @@ public class ImportAnimationsScreen extends Screen {
 			convertTime.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Float::parseFloat));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.convert_time"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.convert_time"));
 			this.inputComponentsList.addComponentCurrentRow(convertTime.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.repeat"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.repeat"));
 			this.inputComponentsList.addComponentCurrentRow(repeat.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data"));
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
 				return new StaticAnimationPropertyScreen(this, this.fakeAnimations.get(this.animationGrid.getRowposition()));
 			}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
@@ -335,7 +335,7 @@ public class ImportAnimationsScreen extends Screen {
 			convertTime.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Float::parseFloat));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.convert_time"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.convert_time"));
 			this.inputComponentsList.addComponentCurrentRow(convertTime.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 		}
 		break;
@@ -676,68 +676,68 @@ public class ImportAnimationsScreen extends Screen {
 			colliderPopup.applyFilter((collider) -> collider instanceof OBBCollider || collider instanceof MultiOBBCollider);
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.convert_time"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.convert_time"));
 			this.inputComponentsList.addComponentCurrentRow(convertTime.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new RowSpliter(this.inputComponentsList.nextStart(5), 10, 60, 15, HorizontalSizing.LEFT_RIGHT, null));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.phases"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.phases"));
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(phasesGrid);
 			this.inputComponentsList.newRow();
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.antic"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.antic"));
 			this.inputComponentsList.addComponentCurrentRow(antic.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.pre_delay"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.pre_delay"));
 			this.inputComponentsList.addComponentCurrentRow(preDelay.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.contact"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.contact"));
 			this.inputComponentsList.addComponentCurrentRow(contact.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.recovery"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.recovery"));
 			this.inputComponentsList.addComponentCurrentRow(recovery.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.hand"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.hand"));
 			this.inputComponentsList.addComponentCurrentRow(interactionHand.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.collider"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.collider"));
 			this.inputComponentsList.addComponentCurrentRow(colliderPopup.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider.count"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider.count"));
 			this.inputComponentsList.addComponentCurrentRow(colliderCount.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.collider.center")));
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(5), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.collider.center")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(5), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
 			this.inputComponentsList.addComponentCurrentRow(colliderCenterX.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
 			this.inputComponentsList.addComponentCurrentRow(colliderCenterY.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
 			this.inputComponentsList.addComponentCurrentRow(colliderCenterZ.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.collider.size")));
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(5), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.collider.size")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(5), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
 			this.inputComponentsList.addComponentCurrentRow(colliderSizeX.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
 			this.inputComponentsList.addComponentCurrentRow(colliderSizeY.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
 			this.inputComponentsList.addComponentCurrentRow(colliderSizeZ.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.joint"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.joint"));
 			this.inputComponentsList.addComponentCurrentRow(colliderJoint.relocateX(screenRect, this.inputComponentsList.nextStart(5)));
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new RowSpliter(this.inputComponentsList.nextStart(5), 10, 60, 15, HorizontalSizing.LEFT_RIGHT, null));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 85, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.import_animation.client_data"));
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
 				return new AttackAnimationPropertyScreen(this, this.fakeAnimations.get(this.animationGrid.getRowposition()), this.modelPreviewer.getArmature().rootJoint.getAllJoints(), this.modelPreviewer);
 			}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
@@ -747,7 +747,7 @@ public class ImportAnimationsScreen extends Screen {
 		}
 		
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 60, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.preview")));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 60, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.import_animation.preview")));
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.newRow();

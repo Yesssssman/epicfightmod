@@ -37,14 +37,14 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		return INSTANCE;
 	}
 	
-	private final Map<ResourceLocation, AnimationClip> animationClips = Maps.newHashMap();
+	private final Map<StaticAnimation, AnimationClip> animationClips = Maps.newHashMap();
 	private final Map<ResourceLocation, StaticAnimation> animationRegistry = Maps.newHashMap();
 	private final Map<ResourceLocation, StaticAnimation> userAnimations = Maps.newHashMap();
 	private final ClearableIdMapper<StaticAnimation> animationIdMap = new ClearableIdMapper<> ();
 	private String currentWorkingModid;
 	
 	public AnimationManager() {
-		super((new GsonBuilder()).create(), "animmodels/animations");
+		super(new GsonBuilder().create(), "animmodels/animations");
 	}
 	
 	public StaticAnimation byId(int animationId) {
@@ -72,11 +72,11 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	}
 	
 	public AnimationClip getStaticAnimationClip(StaticAnimation animation) {
-		if (!this.animationClips.containsKey(animation.getLocation())) {
+		if (!this.animationClips.containsKey(animation)) {
 			animation.loadAnimation(resourceManager);
 		}
 		
-		return this.animationClips.get(animation.getLocation());
+		return this.animationClips.get(animation);
 	}
 	
 	public Map<ResourceLocation, StaticAnimation> getAnimations(Predicate<StaticAnimation> filter) {
@@ -132,15 +132,15 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	}
 	
 	public void loadAnimationClip(StaticAnimation animation, Function<StaticAnimation, AnimationClip> clipProvider) {
-		if (!this.animationClips.containsKey(animation.getLocation())) {
+		if (!this.animationClips.containsKey(animation)) {
 			AnimationClip animationClip = clipProvider.apply(animation);
-			this.animationClips.put(animation.getLocation(), animationClip);
+			this.animationClips.put(animation, animationClip);
 		}
 	}
 	
 	public void onFailed(StaticAnimation animation) {
-		if (!this.animationClips.containsKey(animation.getLocation())) {
-			this.animationClips.put(animation.getLocation(), AnimationClip.EMPTY_CLIP);
+		if (!this.animationClips.containsKey(animation)) {
+			this.animationClips.put(animation, AnimationClip.EMPTY_CLIP);
 		}
 	}
 	
@@ -161,12 +161,12 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		reloadResourceManager(resourceManager);
 		Armatures.build(resourceManager);
 		
-		this.animationClips.clear();
 		this.animationIdMap.clear();
 		this.animationRegistry.clear();
 		
 		Map<String, Runnable> registryMap = Maps.newLinkedHashMap();
 		ModLoader.get().postEvent(new AnimationRegistryEvent(registryMap));
+		this.animationClips.clear();
 		
 		registryMap.entrySet().forEach((entry) -> {
 			EpicFightMod.LOGGER.info("Register animations from " + entry.getKey());

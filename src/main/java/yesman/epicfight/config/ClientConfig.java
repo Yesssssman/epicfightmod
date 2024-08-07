@@ -69,7 +69,7 @@ public class ClientConfig {
 		this.noMiningInCombat = config.define("ingame.no_mining_in_combat", () -> true);
 		this.aimingCorrection = config.define("ingame.aiming_correction", () -> true);
 		this.showEpicFightAttributes = config.define("ingame.show_epicfight_attributes", () -> true);
-		this.useAnimationShader = config.define("ingame.use_animation_shader", () -> true);
+		this.useAnimationShader = config.define("ingame.use_animation_shader", () -> false);
 		this.firstPersonModel = config.define("ingame.first_person_model", () -> true);
 		
 		this.battleAutoSwitchItems = config.defineList("ingame.battle_autoswitch_items", Lists.newArrayList(), (element) -> {

@@ -32,7 +32,6 @@ import yesman.epicfight.client.renderer.blockentity.FractureBlockRenderer;
 import yesman.epicfight.client.renderer.entity.DroppedNetherStarRenderer;
 import yesman.epicfight.client.renderer.entity.WitherGhostRenderer;
 import yesman.epicfight.client.renderer.entity.WitherSkeletonMinionRenderer;
-import yesman.epicfight.client.renderer.patched.layer.WearableItemLayer;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.world.entity.EpicFightEntities;
@@ -82,6 +81,5 @@ public class ClientModBusEvent {
 	@SubscribeEvent
 	public static void addLayersEvent(EntityRenderersEvent.AddLayers event) {
 		ClientEngine.getInstance().renderEngine.bootstrap(event.getContext());
-		WearableItemLayer.clearModels();
 	}
 }

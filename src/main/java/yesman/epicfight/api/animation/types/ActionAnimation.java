@@ -64,6 +64,7 @@ public class ActionAnimation extends MainFrameAnimation {
 	
 	public <V> ActionAnimation addProperty(ActionAnimationProperty<V> propertyType, V value) {
 		this.properties.put(propertyType, value);
+		
 		return this;
 	}
 	

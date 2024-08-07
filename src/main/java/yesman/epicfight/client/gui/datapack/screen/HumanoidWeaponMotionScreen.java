@@ -124,7 +124,7 @@ public class HumanoidWeaponMotionScreen extends Screen {
 		this.inputComponentsList.setLeftPos(164);
 		
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(5), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.humanoid_weapon_motions.weapon_categories"));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(5), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.humanoid_weapon_motions.weapon_categories"));
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.addComponentCurrentRow(Grid.builder(this, caller.getMinecraft())
@@ -160,7 +160,7 @@ public class HumanoidWeaponMotionScreen extends Screen {
 		this.inputComponentsList.newRow();
 		
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(5), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.humanoid_weapon_motions.style"));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(5), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.humanoid_weapon_motions.style"));
 		this.inputComponentsList.addComponentCurrentRow(new ComboBox<>(this, this.font, this.inputComponentsList.nextStart(5), 116, 15, 53, HorizontalSizing.LEFT_WIDTH, VerticalSizing.HEIGHT_BOTTOM, 8, Component.translatable("datapack_edit.weapon_type.styles.default"),
 				new ArrayList<>(Style.ENUM_MANAGER.universalValues()), ParseUtil::snakeToSpacedCamel, (style) -> {
 					CompoundTag tag = this.motionSetList.get(this.motionSetGrid.getRowposition());
@@ -168,7 +168,7 @@ public class HumanoidWeaponMotionScreen extends Screen {
 				}));
 		
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(5), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.humanoid_weapon_motions.living_animations"));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(5), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.humanoid_weapon_motions.living_animations"));
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.addComponentCurrentRow(Grid.builder(this, caller.getMinecraft())

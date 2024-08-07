@@ -18,8 +18,10 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.model.Meshes;
@@ -92,6 +94,7 @@ public class WeaponComboScreen extends Screen {
 		};
 		this.inputComponentsList.setLeftPos(parentScreen.width - 205);
 		this.rootTag = ParseUtil.getOrDefaultTag(rootTag, "combos", new CompoundTag());
+		this.minecraft = parentScreen.getMinecraft();
 		this.font = parentScreen.getMinecraft().font;
 		
 		this.stylesGrid = Grid.builder(this, parentScreen.getMinecraft())
@@ -221,7 +224,7 @@ public class WeaponComboScreen extends Screen {
 		this.airSlashPopupbox.applyFilter((animation) -> animation instanceof AttackAnimation);
 		
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, 80, 110, -1, 15, HorizontalSizing.WIDTH_RIGHT, null, "datapack_edit.weapon_type.combos.combo_attacks"));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this, 80, 110, -1, 15, HorizontalSizing.WIDTH_RIGHT, null, "datapack_edit.weapon_type.combos.combo_attacks"));
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.newRow();
@@ -230,11 +233,11 @@ public class WeaponComboScreen extends Screen {
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, 60, 130, -1, 15, HorizontalSizing.WIDTH_RIGHT, null, "datapack_edit.weapon_type.combos.dash_attak"));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this, 60, 130, -1, 15, HorizontalSizing.WIDTH_RIGHT, null, "datapack_edit.weapon_type.combos.dash_attak"));
 		this.inputComponentsList.addComponentCurrentRow(this.dashAttackPopupbox);
 		
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, 60, 130, -1, 15, HorizontalSizing.WIDTH_RIGHT, null, "datapack_edit.weapon_type.combos.air_slash"));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this, 60, 130, -1, 15, HorizontalSizing.WIDTH_RIGHT, null, "datapack_edit.weapon_type.combos.air_slash"));
 		this.inputComponentsList.addComponentCurrentRow(this.airSlashPopupbox);
 		
 		this.inputComponentsList.setComponentsActive(false);
@@ -274,13 +277,35 @@ public class WeaponComboScreen extends Screen {
 				styles.add(entry.getKey());
 			}
 			
-			this.rootTag.tags.clear();
+			boolean allTagsNormal = true;
+			String animation = null;
+			String style = null;
 			
+			exit:
 			for (PackEntry<String, ListTag> entry : this.styles) {
-				this.rootTag.put(entry.getKey(), entry.getValue());
+				for (Tag tag : entry.getValue()) {
+					if (AnimationManager.getInstance().byKey(new ResourceLocation(tag.getAsString())) == null) {
+						animation = tag.getAsString();
+						style = entry.getKey();
+						allTagsNormal = false;
+						break exit;
+					}
+				}
 			}
 			
-			this.onClose();
+			if (!allTagsNormal) {
+				this.minecraft.setScreen(new MessageScreen<>("Save Failed", "No animation named: " + animation + " in " + style, this, (button2) -> {
+					this.minecraft.setScreen(this);
+				}, 180, 90));
+			} else {
+				this.rootTag.tags.clear();
+				
+				for (PackEntry<String, ListTag> entry : this.styles) {
+					this.rootTag.put(entry.getKey(), entry.getValue());
+				}
+				
+				this.onClose();
+			}
 		}).pos(this.width / 2 - 162, this.height - 32).size(160, 21).build());
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, (button) -> {
@@ -292,7 +317,7 @@ public class WeaponComboScreen extends Screen {
 														}, 180, 70));
 		}).pos(this.width / 2 + 2, this.height - 32).size(160, 21).build());
 		
-		this.addRenderableWidget(new Static(this.font, 12, 60, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.styles"), Component.translatable("datapack_edit.styles.tooltip.mandatory")));
+		this.addRenderableWidget(new Static(this, 12, 60, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.styles"), Component.translatable("datapack_edit.styles.tooltip.mandatory")));
 		this.addRenderableWidget(this.stylesGrid);
 		this.addRenderableWidget(this.modelPreviewer);
 		this.addRenderableWidget(this.inputComponentsList);

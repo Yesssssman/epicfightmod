@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -35,6 +36,7 @@ import yesman.epicfight.skill.ChargeableSkill;
 import yesman.epicfight.skill.Skill;
 import yesman.epicfight.skill.SkillCategory;
 import yesman.epicfight.skill.SkillContainer;
+import yesman.epicfight.skill.SkillDataKeys;
 import yesman.epicfight.skill.SkillSlot;
 import yesman.epicfight.skill.SkillSlots;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
@@ -54,10 +56,18 @@ import yesman.epicfight.world.entity.eventlistener.SkillConsumeEvent;
 import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T> {
+	public static EntityDataAccessor<Float> STAMINA;
+	
+	public static void initPlayerDataAccessor() {
+		STAMINA = SynchedEntityData.defineId(Player.class, EntityDataSerializers.FLOAT);
+	}
+	
+	public static void createSyncedEntityData(LivingEntity livingentity) {
+		livingentity.getEntityData().define(STAMINA, Float.valueOf(0.0F));
+	}
+	
 	protected static final UUID PLAYER_EVENT_UUID = UUID.fromString("e6beeac4-77d2-11eb-9439-0242ac130002");
 	protected static final float PLAYER_SCALE = 0.9375F;
-	
-	public static final EntityDataAccessor<Float> STAMINA = new EntityDataAccessor<Float> (253, EntityDataSerializers.FLOAT);
 	protected PlayerEventListener eventListeners;
 	protected PlayerMode playerMode = PlayerMode.MINING;
 	protected double xo;
@@ -70,16 +80,9 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	protected int lastChargingTick;
 	protected int chargingAmount;
 	protected ChargeableSkill chargingSkill;
-
+	
 	public PlayerPatch() {
 		this.eventListeners = new PlayerEventListener(this);
-	}
-	
-	@Override
-	public void onConstructed(T entityIn) {
-		super.onConstructed(entityIn);
-		
-		entityIn.getEntityData().define(STAMINA, Float.valueOf(0.0F));
 	}
 	
 	@Override
@@ -363,6 +366,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 		damagesource.setImpact(this.getImpact(hand));
 		damagesource.setArmorNegation(this.getArmorNegation(hand));
 		damagesource.setHurtItem(this.getOriginal().getItemInHand(hand));
+		damagesource.setBasicAttack(this.getSkill(SkillSlots.BASIC_ATTACK).getDataManager().getDataValue(SkillDataKeys.BASIC_ATTACK_ACTIVATE.get()));
 		
 		return damagesource;
 	}

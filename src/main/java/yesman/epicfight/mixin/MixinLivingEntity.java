@@ -31,6 +31,16 @@ public abstract class MixinLivingEntity {
 	@Shadow
 	protected void hurtArmor(DamageSource p_21122_, float p_21123_) {}
 	
+	@Inject(at = @At(value = "TAIL"), method = "<clinit>")
+	private static void epicfight_staticInitialize(CallbackInfo callbackInfo) {
+		LivingEntityPatch.initLivingEntityDataAccessor();
+	}
+	
+	@Inject(at = @At(value = "TAIL"), method = "defineSynchedData()V", cancellable = true)
+	protected void epicfight_defineSynchedData(CallbackInfo info) {
+		LivingEntityPatch.createSyncedEntityData((LivingEntity)(Object)this);
+	}
+	
 	@Inject(at = @At(value = "TAIL"), method = "blockUsingShield(Lnet/minecraft/world/entity/LivingEntity;)V", cancellable = true)
 	private void epicfight_blockUsingShield(LivingEntity p_21200_, CallbackInfo info) {
 		LivingEntity self = (LivingEntity)((Object)this);

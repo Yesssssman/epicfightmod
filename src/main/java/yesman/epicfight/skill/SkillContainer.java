@@ -38,10 +38,12 @@ public class SkillContainer {
 		this.skillDataManager = new SkillDataManager(skillSlot.universalOrdinal(), this);
 	}
 	
+	/* Fix the mistype in the future */
 	public void setExecuter(PlayerPatch<?> executor) {
 		this.executor = executor;
 	}
 	
+	/* Fix the mistype in the future */
 	public PlayerPatch<?> getExecuter() {
 		return this.executor;
 	}

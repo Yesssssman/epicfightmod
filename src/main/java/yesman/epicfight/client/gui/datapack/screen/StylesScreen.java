@@ -322,16 +322,16 @@ public class StylesScreen extends Screen {
 			this.minecraft.setScreen(new MessageScreen<>("", "Do you want to quit without saving changes?", this, (button2) -> this.onClose(), (button2) -> this.minecraft.setScreen(this), 180, 70));
 		}).pos(this.width / 2 + 2, this.height - 32).size(160, 21).build());
 		
-		Static defaultStyleTitle = new Static(this.font, 12, 100, 15, 53, HorizontalSizing.LEFT_WIDTH, VerticalSizing.HEIGHT_BOTTOM, "datapack_edit.weapon_type.styles.default");
+		Static defaultStyleTitle = new Static(this, 12, 100, 15, 53, HorizontalSizing.LEFT_WIDTH, VerticalSizing.HEIGHT_BOTTOM, "datapack_edit.weapon_type.styles.default");
 		defaultStyleTitle.resize(screenRectangle);
 		
-		Static conditionTitle = new Static(this.font, 187, 100, 40, 15, HorizontalSizing.LEFT_WIDTH, VerticalSizing.TOP_HEIGHT, "datapack_edit.weapon_type.styles.condition");
+		Static conditionTitle = new Static(this, 187, 100, 40, 15, HorizontalSizing.LEFT_WIDTH, VerticalSizing.TOP_HEIGHT, "datapack_edit.weapon_type.styles.condition");
 		conditionTitle.resize(screenRectangle);
 		
-		Static parameterTitle = new Static(this.font, 187, 100, 115, 15, HorizontalSizing.LEFT_WIDTH, VerticalSizing.TOP_HEIGHT, "datapack_edit.weapon_type.styles.parameters");
+		Static parameterTitle = new Static(this, 187, 100, 115, 15, HorizontalSizing.LEFT_WIDTH, VerticalSizing.TOP_HEIGHT, "datapack_edit.weapon_type.styles.parameters");
 		parameterTitle.resize(screenRectangle);
 		
-		this.addRenderableWidget(new Static(this.font, 12, 60, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.styles"), Component.translatable("datapack_edit.styles.tooltip.optional")));
+		this.addRenderableWidget(new Static(this, 12, 60, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.styles"), Component.translatable("datapack_edit.styles.tooltip.optional")));
 		this.addRenderableWidget(this.stylesGrid);
 		this.addRenderableWidget(defaultStyleTitle);
 		this.addRenderableWidget(this.defaultStyle);

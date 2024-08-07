@@ -5,28 +5,31 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.AbstractWidget;
 import net.minecraft.client.gui.components.Tooltip;
 import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.network.chat.Component;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 
 @OnlyIn(Dist.CLIENT)
 public class Static extends AbstractWidget implements ResizableComponent {
-	private Font font;
-	private Component tooltip;
+	private final Screen owner;
+	private final Font font;
+	private final Component tooltip;
 	private int fontColor = 0xFFFFFFFF;
 	
-	public Static(Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, String translateKey) {
-		this(font, x1, x2, y1, y2, horizontal, vertical, Component.translatable(translateKey), Component.translatable(translateKey + ".tooltip"));
+	public Static(Screen owner, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, String translateKey) {
+		this(owner, x1, x2, y1, y2, horizontal, vertical, Component.translatable(translateKey), Component.translatable(translateKey + ".tooltip"));
 	}
 	
-	public Static(Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component message) {
-		this(font, x1, x2, y1, y2, horizontal, vertical, message, null);
+	public Static(Screen owner, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component message) {
+		this(owner, x1, x2, y1, y2, horizontal, vertical, message, null);
 	}
 	
-	public Static(Font font, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component message, Component tooltip) {
+	public Static(Screen owner, int x1, int x2, int y1, int y2, HorizontalSizing horizontal, VerticalSizing vertical, Component message, Component tooltip) {
 		super(x1, y1, x2, y2, message);
 		
-		this.font = font;
+		this.owner = owner;
+		this.font = owner.getMinecraft().font;
 		this.x1 = x1;
 		this.x2 = x2;
 		this.y1 = y1;
@@ -42,7 +45,7 @@ public class Static extends AbstractWidget implements ResizableComponent {
 		//16777215
 		guiGraphics.drawString(this.font, correctedString, this._getX(), this._getY() + this.height / 2 - this.font.lineHeight / 2, this.fontColor, false);
 		
-		if (this.tooltip != null) {
+		if (this.owner == this.owner.getMinecraft().screen && this.tooltip != null) {
 			this.setTooltip(this.isMouseOver(mouseX, mouseY) ? Tooltip.create(this.tooltip) : null);
 		}
 	}

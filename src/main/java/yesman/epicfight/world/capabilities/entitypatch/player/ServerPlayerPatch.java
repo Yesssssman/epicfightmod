@@ -99,9 +99,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 		for (SkillContainer container : this.getSkillCapability().skillContainers) {
 			for (SkillDataKey<?> key : container.getDataManager().keySet()) {
 				if (key.syncronizeTrackingPlayers()) {
-					EpicFightNetworkManager.sendToPlayer(
-							new SPAddOrRemoveSkillData(key, container.getSlot().universalOrdinal(), container.getDataManager().getDataValue(key), SPAddOrRemoveSkillData.AddRemove.ADD, this.original.getId()),
-							trackingPlayer);
+					EpicFightNetworkManager.sendToPlayer(new SPAddOrRemoveSkillData(key, container.getSlot().universalOrdinal(), container.getDataManager().getDataValue(key), SPAddOrRemoveSkillData.AddRemove.ADD, this.original.getId()), trackingPlayer);
 				}
 			}
 		}

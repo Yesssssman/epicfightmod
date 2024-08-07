@@ -577,6 +577,6 @@
 	"epicfight.messages.test_version_warning_line2": "(%s)",
 	"epicfight.messages.version_notifier": "EpicFight-%s",
 	
-	"epicfight.messages.shader_transform_fail": "Failed to create shader %s. Automatically switches animation shader mode off.",
+	"epicfight.messages.shader_transform_fail": "Failed to create shader %s. Don't turn on animation shader in your environment...",
 	"epicfight.message.skinlayer3d_model_initialize": "Found 3D Skin Layers... Initialize the player model."
 }

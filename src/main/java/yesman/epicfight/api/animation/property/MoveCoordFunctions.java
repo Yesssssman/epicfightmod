@@ -25,11 +25,17 @@ import yesman.epicfight.api.utils.math.Vec4f;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class MoveCoordFunctions {
+	/**
+	 * Defines how {@link ActionAnimation} coord set at the beginning
+	 */
 	@FunctionalInterface
 	public interface MoveCoordSetter {
 		void set(DynamicAnimation animation, LivingEntityPatch<?> entitypatch, TransformSheet transformSheet);
 	}
 	
+	/**
+	 * Defines how coord data should be read
+	 */
 	@FunctionalInterface
 	public interface MoveCoordGetter {
 		Vec3f get(DynamicAnimation animation, LivingEntityPatch<?> entitypatch, TransformSheet transformSheet);

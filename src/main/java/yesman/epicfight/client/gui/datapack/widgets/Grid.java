@@ -496,7 +496,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		
 		for (Button editButton : this.rowEditButtons) {
 			if (editButton.mouseClicked(x, y, button)) {
-				return this.owner.getFocused() == this ? false : true;
+				return true;
 			}
 		}
 		
@@ -511,7 +511,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 		}
 		
 		if (super.mouseClicked(x, y, button)) {
-			return this.owner.getFocused() == this ? false : true;
+			return true;
 		}
 		
 		return false;
@@ -1350,6 +1350,7 @@ public class Grid extends ObjectSelectionList<Grid.Row> implements DataBindingCo
 	public void reset() {
 		this.rowposition = -1;
 		this.children().clear();
+		this.setScrollAmount(0.0D);
 		this.setSelected(null);
 		this.editingColumn = null;
 		this.editingWidget = null;

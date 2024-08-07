@@ -53,6 +53,7 @@ public class WeaponAttributeScreen extends Screen {
 		this.itemType = itemType;
 		this.parentScreen = parentScreen;
 		this.rootTag = rootTag;
+		this.minecraft = parentScreen.getMinecraft();
 		this.font = parentScreen.getMinecraft().font;
 		
 		final ResizableEditBox impactEditBox = new ResizableEditBox(this.font, 0, 0, 0, 0, Component.literal("impact"), null, null);
@@ -65,19 +66,19 @@ public class WeaponAttributeScreen extends Screen {
 		
 		impactEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
 		armorNegationEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
-		maxStrikesEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Integer::parseInt));
+		maxStrikesEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Integer::parseInt));
 		damageBonusEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
 		speedBonusEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
 		stunArmorEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
 		weightEditBox.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
 		
-		this.weaponAttributeEditors.put("armor_negation", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), armorNegationEditBox));
-		this.weaponAttributeEditors.put("impact", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), impactEditBox));
-		this.weaponAttributeEditors.put("max_strikes", ParameterEditor.of((value) -> IntTag.valueOf(Integer.parseInt(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), maxStrikesEditBox));
-		this.weaponAttributeEditors.put("damage_bonus", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), damageBonusEditBox));
-		this.weaponAttributeEditors.put("speed_bonus", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), speedBonusEditBox));
-		this.armorAttributeEditors.put("stun_armor", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), stunArmorEditBox));
-		this.armorAttributeEditors.put("weight", ParameterEditor.of((value) -> DoubleTag.valueOf(Double.parseDouble(value.toString())), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), weightEditBox));
+		this.weaponAttributeEditors.put("armor_negation", ParameterEditor.of((value) -> DoubleTag.valueOf(ParseUtil.parseOrGet(value.toString(), Double::parseDouble, 0.0D)), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), armorNegationEditBox));
+		this.weaponAttributeEditors.put("impact", ParameterEditor.of((value) -> DoubleTag.valueOf(ParseUtil.parseOrGet(value.toString(), Double::parseDouble, 0.0D)), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), impactEditBox));
+		this.weaponAttributeEditors.put("max_strikes", ParameterEditor.of((value) -> IntTag.valueOf(ParseUtil.parseOrGet(value.toString(), Integer::parseInt, 0)), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), maxStrikesEditBox));
+		this.weaponAttributeEditors.put("damage_bonus", ParameterEditor.of((value) -> DoubleTag.valueOf(ParseUtil.parseOrGet(value.toString(), Double::parseDouble, 0.0D)), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), damageBonusEditBox));
+		this.weaponAttributeEditors.put("speed_bonus", ParameterEditor.of((value) -> DoubleTag.valueOf(ParseUtil.parseOrGet(value.toString(), Double::parseDouble, 0.0D)), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), speedBonusEditBox));
+		this.armorAttributeEditors.put("stun_armor", ParameterEditor.of((value) -> DoubleTag.valueOf(ParseUtil.parseOrGet(value.toString(), Double::parseDouble, 0.0D)), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), stunArmorEditBox));
+		this.armorAttributeEditors.put("weight", ParameterEditor.of((value) -> DoubleTag.valueOf(ParseUtil.parseOrGet(value.toString(), Double::parseDouble, 0.0D)), (tag) -> ParseUtil.valueOfOmittingType(tag.getAsString()), weightEditBox));
 		
 		if (itemType == ItemType.WEAPON) {
 			this.stylesGrid = Grid.builder(this, parentScreen.getMinecraft())
@@ -93,7 +94,7 @@ public class WeaponAttributeScreen extends Screen {
 										
 										for (Map.Entry<String, Tag> entry : this.styles.get(rowposition).getValue().tags.entrySet()) {
 											ParameterEditor paramEditor = this.weaponAttributeEditors.get(entry.getKey());
-											packImporter.newRow().newValue("attribute", this.weaponAttributeEditors.get(entry.getKey())).newValue("amount", paramEditor.fromTag.apply(entry.getValue()));
+											packImporter.newRow().newValue("attribute", this.weaponAttributeEditors.get(entry.getKey())).newValue("amount", paramEditor == null ? "" : paramEditor.fromTag.apply(entry.getValue()));
 										}
 										
 										this.attributesGrid._setActive(true);
@@ -249,12 +250,12 @@ public class WeaponAttributeScreen extends Screen {
 	protected void init() {
 		if (this.itemType == ItemType.WEAPON) {
 			this.stylesGrid.resize(this.getRectangle());
-			this.addRenderableWidget(new Static(this.font, 20, 60, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.styles")));
+			this.addRenderableWidget(new Static(this, 20, 60, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.styles")));
 			this.addRenderableWidget(this.stylesGrid);
 		}
 		
 		this.attributesGrid.resize(this.getRectangle());
-		this.addRenderableWidget(new Static(this.font, this.itemType == ItemType.WEAPON ? 120 : 20, 60, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.attributes")));
+		this.addRenderableWidget(new Static(this, this.itemType == ItemType.WEAPON ? 120 : 20, 60, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.item_capability.attributes")));
 		this.addRenderableWidget(this.attributesGrid);
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {

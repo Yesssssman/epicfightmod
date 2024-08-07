@@ -39,6 +39,6 @@ public class ComboCounterHandleEvent extends PlayerEvent<ServerPlayerPatch> {
 	}
 	
 	public enum Causal {
-		BASIC_ATTACK_COUNT, ACTION_ANIMATION_RESET, TIME_EXPIRED_RESET
+		ANOTHER_ACTION_ANIMATION, TIME_EXPIRED
 	}
 }

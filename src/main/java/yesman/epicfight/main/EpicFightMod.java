@@ -98,19 +98,11 @@ import yesman.epicfight.world.level.block.EpicFightBlocks;
 import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 
 /**
- *  Changes from 20.8.3 -> 20.8.4
+ *  Changes from 20.8.5 -> 20.8.6
  *  
- *  1. Fixed scroll bar not moving by dragging.
+ *  1. Now Datapack editor screen checks the null animations.
  *  
- *  2. Fixed a crash if you enter an invalid file name when exporting datapack.
- *  
- *  3. Fixed a crash when enabling vanilla model debugging mode
- *  
- *  4. Fixed the player model being invisible in the inventory screen when animation shader is turned on
- *  
- *  5. Fixed 3d skin layer model broken when you rejoin a world
- *  
- *  6. Now 3d skin layer is automatically initialized without a need to turn on vanilla model debugging mode
+ *  2. Fixed moving animations broken when reloading resources while playing the animation.
  *  
  *  --- TO DO ---
  *  

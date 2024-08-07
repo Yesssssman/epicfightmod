@@ -460,6 +460,15 @@ public class DatapackEditScreen extends Screen {
 	}
 	
 	@Override
+	public boolean mouseClicked(double x, double y, int button) {
+		if (this.getFocused() != null && this.getFocused().mouseClicked(x, y, button)) {
+			return true;
+		}
+		
+		return super.mouseClicked(x, y, button);
+	}
+	
+	@Override
 	public boolean keyPressed(int keycode, int p_100876_, int p_100877_) {
 		if (this.tabNavigationBar.keyPressed(keycode)) {
 			return true;
@@ -846,37 +855,37 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.setLeftPos(164);
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.category"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.category"));
 			this.inputComponentsList.addComponentCurrentRow(new ComboBox<>(parentScreen, parentScreen.getMinecraft().font, this.inputComponentsList.nextStart(5), 124, 100, 15, HorizontalSizing.LEFT_WIDTH, null, 8,
 																			Component.translatable("datapack_edit.weapon_type.category"), new ArrayList<>(WeaponCategory.ENUM_MANAGER.universalValues()), ParseUtil::snakeToSpacedCamel,
 																			(weaponCategory) -> this.packList.get(this.packListGrid.getRowposition()).getValue().putString("category", ParseUtil.nullParam(weaponCategory).toLowerCase(Locale.ROOT))));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.hit_particle"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.hit_particle"));
 			this.inputComponentsList.addComponentCurrentRow(new PopupBox.RegistryPopupBox<>(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 																			Component.translatable("datapack_edit.weapon_type.hit_particle"), ForgeRegistries.PARTICLE_TYPES,
 																			(pair) -> this.packList.get(this.packListGrid.getRowposition()).getValue().putString("hit_particle", ParseUtil.getRegistryName(pair.getSecond(), ForgeRegistries.PARTICLE_TYPES))));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.hit_sound"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.hit_sound"));
 			this.inputComponentsList.addComponentCurrentRow(new PopupBox.SoundPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 																			Component.translatable("datapack_edit.weapon_type.hit_sound"),
 																			(pair) -> this.packList.get(this.packListGrid.getRowposition()).getValue().putString("hit_sound", ParseUtil.getRegistryName(pair.getSecond(), ForgeRegistries.SOUND_EVENTS))));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.swing_sound"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.swing_sound"));
 			this.inputComponentsList.addComponentCurrentRow(new PopupBox.SoundPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 																			Component.translatable("datapack_edit.weapon_type.swing_sound"),
 																			(pair) -> this.packList.get(this.packListGrid.getRowposition()).getValue().putString("swing_sound", ParseUtil.getRegistryName(pair.getSecond(), ForgeRegistries.SOUND_EVENTS))));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.styles"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.styles"));
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
 				return new StylesScreen(DatapackEditScreen.this, this.packList.get(this.packListGrid.getRowposition()).getValue());
 			}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 100, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.offhand_validator"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 100, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.offhand_validator"));
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
 				return new OffhandValidatorScreen(DatapackEditScreen.this, this.packList.get(this.packListGrid.getRowposition()).getValue());
 			}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
@@ -991,7 +1000,7 @@ public class DatapackEditScreen extends Screen {
 			colliderSizeZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider"));
 			this.inputComponentsList.addComponentCurrentRow(new PopupBox.ColliderPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.collider"),
 																							(pair) -> {
 																								if (pair.getSecond() != null) {
@@ -1015,25 +1024,25 @@ public class DatapackEditScreen extends Screen {
 																							}).applyFilter((collider) -> collider instanceof OBBCollider || collider instanceof MultiOBBCollider));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider.count"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider.count"));
 			this.inputComponentsList.addComponentCurrentRow(colliderCount.relocateX(rect, this.inputComponentsList.nextStart(5)));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider.center"));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider.center"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(5), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
 			this.inputComponentsList.addComponentCurrentRow(colliderCenterX.relocateX(rect, this.inputComponentsList.nextStart(5)));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
 			this.inputComponentsList.addComponentCurrentRow(colliderCenterY.relocateX(rect, this.inputComponentsList.nextStart(5)));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
 			this.inputComponentsList.addComponentCurrentRow(colliderCenterZ.relocateX(rect, this.inputComponentsList.nextStart(5)));
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider.size"));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider.size"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(5), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
 			this.inputComponentsList.addComponentCurrentRow(colliderSizeX.relocateX(rect, this.inputComponentsList.nextStart(5)));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
 			this.inputComponentsList.addComponentCurrentRow(colliderSizeY.relocateX(rect, this.inputComponentsList.nextStart(5)));
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
 			this.inputComponentsList.addComponentCurrentRow(colliderSizeZ.relocateX(rect, this.inputComponentsList.nextStart(5)));
 			
 			this.inputComponentsList.newRow();
@@ -1044,13 +1053,13 @@ public class DatapackEditScreen extends Screen {
 			this.inputComponentsList.newRow();
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.combos"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.combos"));
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
 				return new WeaponComboScreen(DatapackEditScreen.this, this.packList.get(this.packListGrid.getRowposition()).getValue());
 			}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.innate_skill"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.innate_skill"));
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.newRow();
@@ -1089,7 +1098,7 @@ public class DatapackEditScreen extends Screen {
 			
 			this.inputComponentsList.newRow();
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 80, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.living_animations"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 80, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.living_animations"));
 			
 			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
 				return new LivingAnimationsScreen(DatapackEditScreen.this, ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "livingmotion_modifier", new CompoundTag()));
@@ -1321,7 +1330,7 @@ public class DatapackEditScreen extends Screen {
 			};
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.item_type"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.item_type"));
 			this.inputComponentsList.addComponentCurrentRow(this.itemTypeCombo.relocateX(DatapackEditScreen.this.getRectangle(), this.inputComponentsList.nextStart(5)));
 			this.inputComponentsList.setComponentsActive(false);
 		}
@@ -1333,18 +1342,18 @@ public class DatapackEditScreen extends Screen {
 			ScreenRectangle rect = DatapackEditScreen.this.getRectangle();
 			
 			this.inputComponentsList.newRow();
-			this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.item_type"));
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.item_type"));
 			this.inputComponentsList.addComponentCurrentRow(this.itemTypeCombo.relocateX(rect, this.inputComponentsList.nextStart(5)));
 			
 			if (itemType == ItemType.WEAPON) {
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.attributes"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.attributes"));
 				this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
 					return new WeaponAttributeScreen(DatapackEditScreen.this, ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "attributes", new CompoundTag()), itemType);
 				}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.type"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.type"));
 				this.inputComponentsList.addComponentCurrentRow(new PopupBox.WeaponTypePopupBox(DatapackEditScreen.this, font, this.inputComponentsList.nextStart(5), 15, 15, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.item_capability.type"),
 																				(pair) -> {
 																					CompoundTag currentTag = this.packList.get(this.packListGrid.getRowposition()).getValue();
@@ -1536,7 +1545,7 @@ public class DatapackEditScreen extends Screen {
 				colliderSizeZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Double::parseDouble));
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.collider"), Component.translatable("datapack_edit.item_capability.collider.tooltip")));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.collider"), Component.translatable("datapack_edit.item_capability.collider.tooltip")));
 				this.inputComponentsList.addComponentCurrentRow(new PopupBox.ColliderPopupBox(DatapackEditScreen.this, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.collider"),
 																								(pair) -> {
 																									if (pair.getSecond() != null) {
@@ -1560,29 +1569,29 @@ public class DatapackEditScreen extends Screen {
 																								}).applyFilter((collider) -> collider instanceof OBBCollider || collider instanceof MultiOBBCollider));
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider.count"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider.count"));
 				this.inputComponentsList.addComponentCurrentRow(colliderCount.relocateX(rect, this.inputComponentsList.nextStart(5)));
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider.center"));
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider.center"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(5), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
 				this.inputComponentsList.addComponentCurrentRow(colliderCenterX.relocateX(rect, this.inputComponentsList.nextStart(5)));
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
 				this.inputComponentsList.addComponentCurrentRow(colliderCenterY.relocateX(rect, this.inputComponentsList.nextStart(5)));
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
 				this.inputComponentsList.addComponentCurrentRow(colliderCenterZ.relocateX(rect, this.inputComponentsList.nextStart(5)));
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider.size"));
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(20), 40, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.collider.size"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(5), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
 				this.inputComponentsList.addComponentCurrentRow(colliderSizeX.relocateX(rect, this.inputComponentsList.nextStart(5)));
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
 				this.inputComponentsList.addComponentCurrentRow(colliderSizeY.relocateX(rect, this.inputComponentsList.nextStart(5)));
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(8), 8, 60, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
 				this.inputComponentsList.addComponentCurrentRow(colliderSizeZ.relocateX(rect, this.inputComponentsList.nextStart(5)));
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.trail"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 90, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.trail"));
 				
 				final ResizableEditBox colorR = new ResizableEditBox(font, 0, 30, 0, 15, Component.translatable("datapack_edit.item_capability.trail.color.r"), HorizontalSizing.LEFT_WIDTH, null);
 				final ResizableEditBox colorG = new ResizableEditBox(font, 0, 30, 0, 15, Component.translatable("datapack_edit.item_capability.trail.color.g"), HorizontalSizing.LEFT_WIDTH, null);
@@ -1646,13 +1655,13 @@ public class DatapackEditScreen extends Screen {
 				colorB.setFilter((context) -> StringUtil.isNullOrEmpty(context) || (ParseUtil.isParsable(context, Integer::parseInt) && ParseUtil.parseOrGet(context, Integer::parseInt, 0) < 256));
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 28, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.color"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(20), 28, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.color"));
 				this.inputComponentsList.addComponentCurrentRow(colorWidget.relocateX(rect, this.inputComponentsList.nextStart(4)));
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(41), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("R: ")));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(41), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("R: ")));
 				this.inputComponentsList.addComponentCurrentRow(colorR.relocateX(rect, this.inputComponentsList.nextStart(4)));
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("G: ")));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(8), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("G: ")));
 				this.inputComponentsList.addComponentCurrentRow(colorG.relocateX(rect, this.inputComponentsList.nextStart(4)));
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("B: ")));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(8), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("B: ")));
 				this.inputComponentsList.addComponentCurrentRow(colorB.relocateX(rect, this.inputComponentsList.nextStart(4)));
 				
 				final ResizableEditBox beginX = new ResizableEditBox(font, 0, 35, 0, 15, Component.translatable("datapack_edit.item_capability.trail.begin_pos.x"), HorizontalSizing.LEFT_WIDTH, null);
@@ -1713,12 +1722,12 @@ public class DatapackEditScreen extends Screen {
 				beginZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.begin_pos"));
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.begin_pos"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(5), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
 				this.inputComponentsList.addComponentCurrentRow(beginX.relocateX(rect, this.inputComponentsList.nextStart(4)));
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(8), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
 				this.inputComponentsList.addComponentCurrentRow(beginY.relocateX(rect, this.inputComponentsList.nextStart(4)));
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(8), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
 				this.inputComponentsList.addComponentCurrentRow(beginZ.relocateX(rect, this.inputComponentsList.nextStart(4)));
 				
 				final ResizableEditBox endX = new ResizableEditBox(font, 0, 35, 0, 15, Component.translatable("datapack_edit.item_capability.trail.end_pos.x"), HorizontalSizing.LEFT_WIDTH, null);
@@ -1782,12 +1791,12 @@ public class DatapackEditScreen extends Screen {
 				endZ.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsableAllowingMinus(context, Double::parseDouble));
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.end_pos"));
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(5), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.end_pos"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(5), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("X: ")));
 				this.inputComponentsList.addComponentCurrentRow(endX.relocateX(rect, this.inputComponentsList.nextStart(4)));
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(8), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Y: ")));
 				this.inputComponentsList.addComponentCurrentRow(endY.relocateX(rect, this.inputComponentsList.nextStart(4)));
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(8), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(8), 8, 0, 15, HorizontalSizing.LEFT_WIDTH, null, Component.literal("Z: ")));
 				this.inputComponentsList.addComponentCurrentRow(endZ.relocateX(rect, this.inputComponentsList.nextStart(4)));
 				
 				final ResizableEditBox lifetime = new ResizableEditBox(font, 0, 30, 0, 15, Component.translatable("datapack_edit.item_capability.trail.lifetime"), HorizontalSizing.LEFT_WIDTH, null);
@@ -1815,11 +1824,11 @@ public class DatapackEditScreen extends Screen {
 				interpolation.setFilter((context) -> StringUtil.isNullOrEmpty(context) || ParseUtil.isParsable(context, Integer::parseInt));
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.lifetime"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.lifetime"));
 				this.inputComponentsList.addComponentCurrentRow(lifetime.relocateX(rect, this.inputComponentsList.nextStart(8)));
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.interpolations"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.interpolations"));
 				this.inputComponentsList.addComponentCurrentRow(interpolation.relocateX(rect, this.inputComponentsList.nextStart(8)));
 				
 				final ResizableEditBox texturePath = new ResizableEditBox(font, 0, 15, 0, 15, Component.translatable("datapack_edit.item_capability.trail.end_pos.z"), HorizontalSizing.LEFT_RIGHT, null);
@@ -1848,11 +1857,11 @@ public class DatapackEditScreen extends Screen {
 				particlePopup._setValue(EpicFightParticles.SWING_TRAIL.get());
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.texture_path"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.texture_path"));
 				this.inputComponentsList.addComponentCurrentRow(texturePath.relocateX(rect, this.inputComponentsList.nextStart(8)));
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.particle_type"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(20), 80, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.particle_type"));
 				this.inputComponentsList.addComponentCurrentRow(particlePopup.relocateX(rect, this.inputComponentsList.nextStart(8)));
 				
 				this.inputComponentsList.newRow();
@@ -1863,7 +1872,7 @@ public class DatapackEditScreen extends Screen {
 				this.inputComponentsList.newRow();
 			} else if (itemType == ItemType.ARMOR) {
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.attributes"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.item_capability.attributes"));
 				this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
 					return new WeaponAttributeScreen(DatapackEditScreen.this, ParseUtil.getOrDefaultTag(this.packList.get(this.packListGrid.getRowposition()).getValue(), "attributes", new CompoundTag()), itemType);
 				}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
@@ -2242,11 +2251,11 @@ public class DatapackEditScreen extends Screen {
 				this.disableCheckBox._setResponder(MobCapabilityTab.this.disableResponder);
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.disabled"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.disabled"));
 				this.inputComponentsList.addComponentCurrentRow(this.disableCheckBox.relocateX(screen, this.inputComponentsList.nextStart(5)));
 			} else if (usePreset) {
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.preset"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.preset"));
 				this.inputComponentsList.addComponentCurrentRow(this.presetCombo.relocateX(screen, this.inputComponentsList.nextStart(5)));
 				this.presetCombo._setResponder(this.presetResponder);
 			} else {
@@ -2255,63 +2264,63 @@ public class DatapackEditScreen extends Screen {
 				this.disableCheckBox._setResponder(MobCapabilityTab.this.disableResponder);
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.disabled"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.disabled"));
 				this.inputComponentsList.addComponentCurrentRow(this.disableCheckBox.relocateX(screen, this.inputComponentsList.nextStart(5)));
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.preset"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.preset"));
 				this.inputComponentsList.addComponentCurrentRow(this.presetCombo.relocateX(screen, this.inputComponentsList.nextStart(5)));
 				this.presetCombo._setResponder(this.presetResponder);
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.model"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.model"));
 				this.inputComponentsList.addComponentCurrentRow(this.meshPopupBox.relocateX(screen, this.inputComponentsList.nextStart(5)));
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.armature"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.armature"));
 				this.inputComponentsList.addComponentCurrentRow(this.armaturePopupBox.relocateX(screen, this.inputComponentsList.nextStart(5)));
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.renderer"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.renderer"));
 				this.inputComponentsList.addComponentCurrentRow(new PopupBox.RendererPopupBox(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null,
 					Component.translatable("datapack_edit.weapon_type.renderer"), (pair) -> {
 						this.packList.get(this.packListGrid.getRowposition()).getValue().putString("renderer", pair.getFirst());
 					}));
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.humanoid"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.humanoid"));
 				this.inputComponentsList.addComponentCurrentRow(this.isHumanoidCheckbox.relocateX(screen, this.inputComponentsList.nextStart(5)));
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.faction"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.faction"));
 				this.inputComponentsList.addComponentCurrentRow(new ComboBox<>(parentScreen, parentScreen.getMinecraft().font, this.inputComponentsList.nextStart(5), 124, 100, 15, HorizontalSizing.LEFT_WIDTH, null, 8,
 					Component.translatable("datapack_edit.mob_patch.faction"), List.of(Faction.values()), (faction) -> ParseUtil.snakeToSpacedCamel(faction), (faction) -> {
 						this.packList.get(this.packListGrid.getRowposition()).getValue().putString("faction", ParseUtil.nullOrToString(faction, (value) -> value.toString().toLowerCase(Locale.ROOT)));
 					}));
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.swing_sound"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.swing_sound"));
 				this.inputComponentsList.addComponentCurrentRow(new PopupBox.SoundPopupBox(parentScreen, parentScreen.getMinecraft().font, this.inputComponentsList.nextStart(5), 15, 0, 15, HorizontalSizing.LEFT_RIGHT, null,
 					Component.translatable("datapack_edit.mob_patch.swing_sound"), (soundevent) -> {
 						this.packList.get(this.packListGrid.getRowposition()).getValue().putString("swing_sound", ParseUtil.getRegistryName(soundevent.getSecond(), ForgeRegistries.SOUND_EVENTS));
 					}));
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.hit_sound"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.hit_sound"));
 				this.inputComponentsList.addComponentCurrentRow(new PopupBox.SoundPopupBox(parentScreen, parentScreen.getMinecraft().font, this.inputComponentsList.nextStart(5), 15, 0, 15, HorizontalSizing.LEFT_RIGHT, null,
 					Component.translatable("datapack_edit.mob_patch.hit_sound"), (soundevent) -> {
 						this.packList.get(this.packListGrid.getRowposition()).getValue().putString("hit_sound", ParseUtil.getRegistryName(soundevent.getSecond(), ForgeRegistries.SOUND_EVENTS));
 					}));
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.hit_particle"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.hit_particle"));
 				this.inputComponentsList.addComponentCurrentRow(new PopupBox.RegistryPopupBox<>(parentScreen, font, this.inputComponentsList.nextStart(5), 15, 0, 15, HorizontalSizing.LEFT_RIGHT, null,
 					Component.translatable("datapack_edit.weapon_type.hit_particle"), ForgeRegistries.PARTICLE_TYPES, (pair) -> {
 						this.packList.get(this.packListGrid.getRowposition()).getValue().putString("hit_particle", ParseUtil.getRegistryName(pair.getSecond(), ForgeRegistries.PARTICLE_TYPES));
 					}));
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.attributes"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.attributes"));
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(Grid.builder(parentScreen, parentScreen.getMinecraft())
@@ -2370,7 +2379,7 @@ public class DatapackEditScreen extends Screen {
 				this.inputComponentsList.newRow();
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.default_livingmotions"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.default_livingmotions"));
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(Grid.builder(DatapackEditScreen.this)
@@ -2413,7 +2422,7 @@ public class DatapackEditScreen extends Screen {
 				this.inputComponentsList.newRow();
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.stun_animations"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.stun_animations"));
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.newRow();
 				this.inputComponentsList.addComponentCurrentRow(Grid.builder(DatapackEditScreen.this)
@@ -2459,7 +2468,7 @@ public class DatapackEditScreen extends Screen {
 				
 				if (isHumanoid) {
 					this.inputComponentsList.newRow();
-					this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 140, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.humanoid_weapon_motions"));
+					this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 140, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.humanoid_weapon_motions"));
 					this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
 						if (this.armaturePopupBox._getValue() == null || this.meshPopupBox._getValue() == null) {
 							return new MessageScreen<>("", "Define model and armature first.", DatapackEditScreen.this, (button2) -> DatapackEditScreen.this.getMinecraft().setScreen(DatapackEditScreen.this), 180, 60);
@@ -2470,7 +2479,7 @@ public class DatapackEditScreen extends Screen {
 				}
 				
 				this.inputComponentsList.newRow();
-				this.inputComponentsList.addComponentCurrentRow(new Static(font, this.inputComponentsList.nextStart(4), 140, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior"));
+				this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 140, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior"));
 				this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
 					if (this.armaturePopupBox._getValue() == null || this.meshPopupBox._getValue() == null) {
 						return new MessageScreen<>("", "Define model and armature first.", DatapackEditScreen.this, (button2) -> DatapackEditScreen.this.getMinecraft().setScreen(DatapackEditScreen.this), 180, 60);
@@ -2587,6 +2596,15 @@ public class DatapackEditScreen extends Screen {
 				jsonReader.setLenient(true);
 				JsonObject jsonObject = Streams.parse(jsonReader).getAsJsonObject();
 				CompoundTag compTag = TagParser.parseTag(jsonObject.toString());
+				
+				if (compTag.getBoolean("isHumanoid")) {
+					ListTag combatBehaviorList = compTag.getList("combat_behavior", Tag.TAG_COMPOUND);
+					
+					if (!combatBehaviorList.isEmpty()) {
+						compTag.remove("combat_behavior");
+						compTag.put("combat_behavior_humanoid", combatBehaviorList);
+					}
+				}
 				
 				this.packList.add(PackEntry.of(registryName, () -> compTag));
 				this.packListGrid.addRowWithDefaultValues("pack_item", registryName.toString());

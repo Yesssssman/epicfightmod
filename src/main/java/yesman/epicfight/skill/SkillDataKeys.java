@@ -27,6 +27,7 @@ public class SkillDataKeys {
 	public static final DeferredRegister<SkillDataKey<?>> DATA_KEYS = DeferredRegister.create(new ResourceLocation(EpicFightMod.MODID, "skill_data_keys"), EpicFightMod.MODID);
 	public static final Supplier<IForgeRegistry<SkillDataKey<?>>> REGISTRY = DATA_KEYS.makeRegistry(BUILDER);
 	
+	public static final RegistryObject<SkillDataKey<Boolean>> BASIC_ATTACK_ACTIVATE = DATA_KEYS.register("basic_attack_active", () -> SkillDataKey.createBooleanKey(false, false, BasicAttack.class));
 	public static final RegistryObject<SkillDataKey<Integer>> COMBO_COUNTER = DATA_KEYS.register("combo_counter", () -> SkillDataKey.createIntKey(0, false, BasicAttack.class, BladeRushSkill.class));
 	public static final RegistryObject<SkillDataKey<Boolean>> SHEATH = DATA_KEYS.register("sheath", () -> SkillDataKey.createBooleanKey(false, false, BattojutsuPassive.class, BattojutsuSkill.class));
 	public static final RegistryObject<SkillDataKey<Integer>> PENALTY_RESTORE_COUNTER = DATA_KEYS.register("penalty_restore_counter", () -> SkillDataKey.createIntKey(0, false, GuardSkill.class));

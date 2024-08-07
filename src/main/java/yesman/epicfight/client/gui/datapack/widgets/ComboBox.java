@@ -56,9 +56,14 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 	@Override
 	public boolean mouseClicked(double x, double y, int button) {
 		if (this.active && this.visible) {
+			
 			if (this.listOpened && this.comboItemList.mouseClicked(x, y, button)) {
+				if (x < this.comboItemList.getScrollbarPosition() || x > this.comboItemList.getScrollbarPosition() + 6) {
+					this.listOpened = false;
+				}
+				
 				this.playDownSound(Minecraft.getInstance().getSoundManager());
-				this.listOpened = false;
+				
 				return true;
 			} else {
 				if (this.isValidClickButton(button)) {
@@ -72,9 +77,9 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 			}
 			
 			return false;
-		} else {
-			return false;
 		}
+		
+		return false;
 	}
 	
 	@Override
@@ -86,6 +91,15 @@ public class ComboBox<T> extends AbstractWidget implements DataBindingComponent<
 		return false;
 	}
 	
+	@Override
+	public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+		if (this.listOpened) {
+			return this.comboItemList.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+		}
+		
+		return false;
+	}
+
 	@Override
 	protected boolean clicked(double x, double y) {
 		return this.active && this.visible && x >= (double)this._getX() && y >= (double) this._getY() && x < (double) (this._getX() + this.width) && y < (double) (this._getY() + this.height);

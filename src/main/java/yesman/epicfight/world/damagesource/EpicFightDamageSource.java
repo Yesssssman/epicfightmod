@@ -1,6 +1,5 @@
 package yesman.epicfight.world.damagesource;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import org.jetbrains.annotations.Nullable;
@@ -15,18 +14,19 @@ import net.minecraft.world.damagesource.DamageType;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
-import yesman.epicfight.api.animation.types.AttackAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.utils.math.ValueModifier;
 import yesman.epicfight.gameasset.Animations;
 
 public class EpicFightDamageSource extends DamageSource {
-	private DamageSourceElements damageSourceElements = new DamageSourceElements();
-	private HashSet<TagKey<DamageType>> runtimeTags = new HashSet<>();
-	private HashSet<ResourceKey<DamageType>> runtimeTypes = new HashSet<>();
+	private final DamageSourceElements damageSourceElements = new DamageSourceElements();
+	private final Set<TagKey<DamageType>> runtimeTags = Sets.newHashSet();
+	private final Set<ResourceKey<DamageType>> runtimeTypes = Sets.newHashSet();
+	
 	private StaticAnimation animation;
 	private Vec3 initialPosition;
-
+	private boolean basicAttack;
+	
 	public EpicFightDamageSource(DamageSource damageSource) {
 		this(damageSource.typeHolder(), damageSource.getDirectEntity(), damageSource.getEntity(), damageSource.getSourcePosition());
 	}
@@ -108,12 +108,13 @@ public class EpicFightDamageSource extends DamageSource {
 	public Vec3 getInitialPosition() {
 		return initialPosition;
 	}
-
+	
+	public void setBasicAttack(boolean basicAttack) {
+		this.basicAttack = basicAttack;
+	}
+	
 	public boolean isBasicAttack() {
-		if (this.animation instanceof AttackAnimation) {
-			return this.animation.isBasicAttackAnimation();
-		}
-		return false;
+		return basicAttack;
 	}
 	
 	public EpicFightDamageSource setAnimation(StaticAnimation animation) {

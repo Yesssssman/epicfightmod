@@ -21,7 +21,7 @@ public class StepSkill extends DodgeSkill {
 	@Override
 	public void onInitiate(SkillContainer container) {
 		container.getExecuter().getEventListener().addEventListener(EventType.COMBO_COUNTER_HANDLE_EVENT, EVENT_UUID, (event) -> {
-			if (event.getCausal() == ComboCounterHandleEvent.Causal.ACTION_ANIMATION_RESET && event.getAnimation().in(this.animations)) {
+			if (event.getCausal() == ComboCounterHandleEvent.Causal.ANOTHER_ACTION_ANIMATION && event.getAnimation().in(this.animations)) {
 				event.setNextValue(event.getPrevValue());
 			}
 		});

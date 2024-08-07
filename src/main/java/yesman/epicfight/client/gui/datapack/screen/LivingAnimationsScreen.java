@@ -19,8 +19,10 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.MainFrameAnimation;
@@ -53,6 +55,7 @@ public class LivingAnimationsScreen extends Screen {
 		super(Component.translatable("datapack_edit.weapon_type.living_animations"));
 		
 		this.parentScreen = parentScreen;
+		this.minecraft = parentScreen.getMinecraft();
 		this.rootTag = rootTag;
 		this.font = parentScreen.getMinecraft().font;
 		
@@ -205,14 +208,36 @@ public class LivingAnimationsScreen extends Screen {
 				}
 				styles.add(entry.getKey());
 			}
+
+			boolean allTagsNormal = true;
+			String animation = null;
+			String style = null;
 			
-			this.rootTag.tags.clear();
-			
+			exit:
 			for (PackEntry<String, CompoundTag> entry : this.styles) {
-				this.rootTag.put(entry.getKey(), entry.getValue());
+				for (Tag tag : entry.getValue().tags.values()) {
+					if (AnimationManager.getInstance().byKey(new ResourceLocation(tag.getAsString())) == null) {
+						animation = tag.getAsString();
+						style = entry.getKey();
+						allTagsNormal = false;
+						break exit;
+					}
+				}
 			}
 			
-			this.onClose();
+			if (!allTagsNormal) {
+				this.minecraft.setScreen(new MessageScreen<>("Save Failed", "No animation named: " + animation + " in " + style, this, (button2) -> {
+					this.minecraft.setScreen(this);
+				}, 180, 90));
+			} else {
+				this.rootTag.tags.clear();
+				
+				for (PackEntry<String, CompoundTag> entry : this.styles) {
+					this.rootTag.put(entry.getKey(), entry.getValue());
+				}
+				
+				this.onClose();
+			}
 		}).pos(this.width / 2 - 162, this.height - 32).size(160, 21).build());
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, (button) -> {
@@ -224,10 +249,10 @@ public class LivingAnimationsScreen extends Screen {
 														}, 180, 70));
 		}).pos(this.width / 2 + 2, this.height - 32).size(160, 21).build());
 		
-		this.addRenderableWidget(new Static(this.font, 14, 100, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.styles"), Component.translatable("datapack_edit.styles.tooltip.mandatory")));
+		this.addRenderableWidget(new Static(this, 14, 100, 40, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.styles"), Component.translatable("datapack_edit.styles.tooltip.mandatory")));
 		this.addRenderableWidget(this.stylesGrid);
 		this.addRenderableWidget(this.modelPreviewer);
-		this.addRenderableWidget(new Static(this.font, this.width - 188, 100, 40, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.living_animations.modifiers"));
+		this.addRenderableWidget(new Static(this, this.width - 188, 100, 40, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.living_animations.modifiers"));
 		this.addRenderableWidget(this.animationsGrid);
 	}
 	

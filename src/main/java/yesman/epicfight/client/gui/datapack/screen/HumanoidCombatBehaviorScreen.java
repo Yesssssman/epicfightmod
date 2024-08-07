@@ -32,7 +32,6 @@ import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.Horizonta
 import yesman.epicfight.client.gui.datapack.widgets.ResizableComponent.VerticalSizing;
 import yesman.epicfight.client.gui.datapack.widgets.Static;
 import yesman.epicfight.client.gui.datapack.widgets.SubScreenOpenButton;
-import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.Style;
 import yesman.epicfight.world.capabilities.item.WeaponCategory;
@@ -147,13 +146,13 @@ public class HumanoidCombatBehaviorScreen extends Screen {
 									.build();
 		
 		this.styleCombo = new ComboBox<> (this, this.font, 55, 116, 0, 16, HorizontalSizing.LEFT_WIDTH, null, 8, Component.translatable("datapack_edit.style"),
-				new ArrayList<>(ParseUtil.remove(Style.ENUM_MANAGER.universalValues(), CapabilityItem.Styles.COMMON)), ParseUtil::snakeToSpacedCamel, (style) -> {
+				new ArrayList<>(Style.ENUM_MANAGER.universalValues()), ParseUtil::snakeToSpacedCamel, (style) -> {
 					CompoundTag weaponBehaviorTag = this.weaponList.get(this.weaponGrid.getRowposition());
 					weaponBehaviorTag.putString("style", ParseUtil.nullParam(style).toLowerCase(Locale.ROOT));
 				});
 		
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 100, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.mob_patch.humanoid_weapon_motions.weapon_categories")));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 100, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.mob_patch.humanoid_weapon_motions.weapon_categories")));
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.newRow();
@@ -162,11 +161,11 @@ public class HumanoidCombatBehaviorScreen extends Screen {
 		this.inputComponentsList.newRow();
 		
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 100, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.style")));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 100, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.style")));
 		this.inputComponentsList.addComponentCurrentRow(this.styleCombo.relocateX(this.getRectangle(), this.inputComponentsList.nextStart(5)));
 		
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 100, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.mob_patch.combat_behavior")));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 100, 100, 15, HorizontalSizing.LEFT_WIDTH, null, Component.translatable("datapack_edit.mob_patch.combat_behavior")));
 		this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
 			return new CombatBehaviorScreen(this, this.weaponList.get(this.weaponGrid.getRowposition()), armature, mesh, true);
 		}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());

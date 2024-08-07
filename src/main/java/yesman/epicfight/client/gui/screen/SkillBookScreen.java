@@ -474,7 +474,7 @@ public class SkillBookScreen extends Screen {
 				
 				this.icons.add(new AttributeIcon(0, 0, 12, 12, attribute, textureInfo));
 				
-				Static abilityString = new Static(SkillBookScreen.this.font, 0, 140, 0, 15, null, null, Component.literal(operator + amountString + " " + Component.translatable(attribute.getDescriptionId()).getString()));
+				Static abilityString = new Static(SkillBookScreen.this, 0, 140, 0, 15, null, null, Component.literal(operator + amountString + " " + Component.translatable(attribute.getDescriptionId()).getString()));
 				abilityString.setColor(0, 0, 0);
 				
 				this.icons.add(abilityString);
@@ -483,7 +483,7 @@ public class SkillBookScreen extends Screen {
 			private ProvidingAttributeEntry(Component customTooltip, Component customDescription, TextureInfo textureInfo) {
 				this.icons.add(new AttributeIcon(0, 0, 12, 12, customTooltip, textureInfo));
 				
-				Static abilityString = new Static(SkillBookScreen.this.font, 0, 140, 0, 15, null, null, customDescription);
+				Static abilityString = new Static(SkillBookScreen.this, 0, 140, 0, 15, null, null, customDescription);
 				abilityString.setColor(0, 0, 0);
 				
 				this.icons.add(abilityString);

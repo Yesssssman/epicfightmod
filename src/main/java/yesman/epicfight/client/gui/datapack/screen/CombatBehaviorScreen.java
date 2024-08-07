@@ -142,6 +142,7 @@ public class CombatBehaviorScreen extends Screen {
 						
 						if (!condtionName.contains(":")) {
 							condtionName = EpicFightMod.MODID + ":" + condtionName;
+							((CompoundTag)conditionTag).putString("predicate", condtionName);
 						}
 						
 						conditionImporter.newRow();
@@ -365,21 +366,21 @@ public class CombatBehaviorScreen extends Screen {
 									.build();
 		
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior.weight"));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior.weight"));
 		this.inputComponentsList.addComponentCurrentRow(weightEditBox.relocateX(caller.getRectangle(), this.inputComponentsList.nextStart(5)));
 		
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior.cooldown"));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior.cooldown"));
 		this.inputComponentsList.addComponentCurrentRow(cooldownEditBox.relocateX(caller.getRectangle(), this.inputComponentsList.nextStart(5)));
 		
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior.interceptable"));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior.interceptable"));
 		this.inputComponentsList.addComponentCurrentRow(new CheckBox(this.font, this.inputComponentsList.nextStart(5), 60, 0, 10, HorizontalSizing.LEFT_WIDTH, null, null, Component.literal(""), (value) -> {
 			this.movesetList.get(this.movesetGrid.getRowposition()).putBoolean("canBeInterrupted", value);
 		}));
 		
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(4), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior.loop"));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(4), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior.loop"));
 		this.inputComponentsList.addComponentCurrentRow(new CheckBox(this.font, this.inputComponentsList.nextStart(5), 60, 0, 10, HorizontalSizing.LEFT_WIDTH, null, null, Component.literal(""), (value) -> {
 			this.movesetList.get(this.movesetGrid.getRowposition()).putBoolean("looping", value);
 		}));
@@ -388,7 +389,7 @@ public class CombatBehaviorScreen extends Screen {
 		this.inputComponentsList.addComponentCurrentRow(new RowSpliter(this.inputComponentsList.nextStart(0), 10, 60, 15, HorizontalSizing.LEFT_RIGHT, null));
 		
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(63), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior.conditions"));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(63), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior.conditions"));
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.addComponentCurrentRow(this.conditionGrid.relocateX(caller.getRectangle(), this.inputComponentsList.nextStart(60)));
@@ -397,19 +398,19 @@ public class CombatBehaviorScreen extends Screen {
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.addComponentCurrentRow(this.behaviorGrid);
 		
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(7), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior.parameters"));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(7), 100, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior.parameters"));
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.newRow();
 		this.inputComponentsList.addComponentCurrentRow(this.parameterGrid.relocateX(caller.getRectangle(), this.inputComponentsList.nextStart(60)));
 		this.inputComponentsList.newRow();
 		
 		this.inputComponentsList.newRow();
-		this.inputComponentsList.addComponentCurrentRow(new Static(this.font, this.inputComponentsList.nextStart(63), 55, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior.animation"));
+		this.inputComponentsList.addComponentCurrentRow(new Static(this, this.inputComponentsList.nextStart(63), 55, 0, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.mob_patch.combat_behavior.animation"));
 		this.inputComponentsList.addComponentCurrentRow(animationPopupBox.relocateX(caller.getRectangle(), this.inputComponentsList.nextStart(5)));
 		
-		if (this.rootTag.contains("combat_behavior")) {
+		if (this.rootTag.contains("combat_behavior") || this.isHumanoidSubTag && this.rootTag.contains("behavior_series")) {
 			Grid.PackImporter packImporter = new Grid.PackImporter();
-			ListTag list = this.rootTag.getList("combat_behavior", Tag.TAG_COMPOUND);
+			ListTag list = this.rootTag.getList(this.isHumanoidSubTag ? "behavior_series" : "combat_behavior", Tag.TAG_COMPOUND);
 			
 			for (int i = 0; i < list.size(); i++) {
 				this.movesetList.add(list.getCompound(i));

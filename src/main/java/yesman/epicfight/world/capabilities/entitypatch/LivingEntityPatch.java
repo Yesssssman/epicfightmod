@@ -10,6 +10,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
+import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
@@ -70,10 +71,25 @@ import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType
 import yesman.epicfight.world.entity.eventlistener.TargetIndicatorCheckEvent;
 
 public abstract class LivingEntityPatch<T extends LivingEntity> extends HurtableEntityPatch<T> {
-	public static final EntityDataAccessor<Float> STUN_SHIELD = new EntityDataAccessor<Float> (251, EntityDataSerializers.FLOAT);
-	public static final EntityDataAccessor<Float> MAX_STUN_SHIELD = new EntityDataAccessor<Float> (252, EntityDataSerializers.FLOAT);
-	public static final EntityDataAccessor<Integer> EXECUTION_RESISTANCE = new EntityDataAccessor<Integer> (254, EntityDataSerializers.INT);
-	public static final EntityDataAccessor<Boolean> AIRBORNE = new EntityDataAccessor<Boolean> (250, EntityDataSerializers.BOOLEAN);
+	protected static EntityDataAccessor<Float> STUN_SHIELD;
+	protected static EntityDataAccessor<Float> MAX_STUN_SHIELD;
+	protected static EntityDataAccessor<Integer> EXECUTION_RESISTANCE;
+	protected static EntityDataAccessor<Boolean> AIRBORNE;
+	
+	public static void initLivingEntityDataAccessor() {
+		STUN_SHIELD = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.FLOAT);
+		MAX_STUN_SHIELD = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.FLOAT);
+		EXECUTION_RESISTANCE = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.INT);
+		AIRBORNE = SynchedEntityData.defineId(LivingEntity.class, EntityDataSerializers.BOOLEAN);
+	}
+	
+	public static void createSyncedEntityData(LivingEntity livingentity) {
+		livingentity.getEntityData().define(STUN_SHIELD, Float.valueOf(0.0F));
+		livingentity.getEntityData().define(MAX_STUN_SHIELD, Float.valueOf(0.0F));
+		livingentity.getEntityData().define(EXECUTION_RESISTANCE, Integer.valueOf(0));
+		livingentity.getEntityData().define(AIRBORNE, Boolean.valueOf(false));
+	}
+	
 	public static final double WEIGHT_CORRECTION = 37.037D;
 	
 	protected ResultType lastResultType;
@@ -97,10 +113,6 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		this.armature = Armatures.getArmatureFor(this);
 		this.animator = EpicFightMod.getAnimator(this);
 		this.animator.init();
-		this.original.getEntityData().define(STUN_SHIELD, Float.valueOf(0.0F));
-		this.original.getEntityData().define(MAX_STUN_SHIELD, Float.valueOf(0.0F));
-		this.original.getEntityData().define(EXECUTION_RESISTANCE, Integer.valueOf(0));
-		this.original.getEntityData().define(AIRBORNE, Boolean.valueOf(false));
 	}
 	
 	@Override
@@ -209,6 +221,7 @@ public abstract class LivingEntityPatch<T extends LivingEntity> extends Hurtable
 		damagesource.setImpact(this.getImpact(hand));
 		damagesource.setArmorNegation(this.getArmorNegation(hand));
 		damagesource.setHurtItem(this.original.getItemInHand(hand));
+		
 		return damagesource;
 	}
 	

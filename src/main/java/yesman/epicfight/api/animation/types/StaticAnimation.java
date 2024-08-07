@@ -44,6 +44,10 @@ import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
+import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
+import yesman.epicfight.world.entity.eventlistener.AnimationBeginEvent;
+import yesman.epicfight.world.entity.eventlistener.AnimationEndEvent;
+import yesman.epicfight.world.entity.eventlistener.PlayerEventListener.EventType;
 
 public class StaticAnimation extends DynamicAnimation implements AnimationProvider<StaticAnimation> {
 	protected final Map<AnimationProperty<?>, Object> properties = Maps.newHashMap();
@@ -244,10 +248,18 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 				}
 			});
 		}
+		
+		if (entitypatch instanceof PlayerPatch<?> playerpatch) {
+			playerpatch.getEventListener().triggerEvents(EventType.ANIMATION_BEGIN_EVENT, new AnimationBeginEvent(playerpatch, this));
+		}
 	}
 	
 	@Override
 	public void end(LivingEntityPatch<?> entitypatch, DynamicAnimation nextAnimation, boolean isEnd) {
+		if (entitypatch instanceof PlayerPatch<?> playerpatch) {
+			playerpatch.getEventListener().triggerEvents(EventType.ANIMATION_END_EVENT, new AnimationEndEvent(playerpatch, this, isEnd));
+		}
+		
 		this.getProperty(StaticAnimationProperty.ON_END_EVENTS).ifPresent((events) -> {
 			for (AnimationEvent event : events) {
 				event.executeIfRightSide(entitypatch, this);

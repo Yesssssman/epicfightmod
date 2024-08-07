@@ -112,9 +112,9 @@ public class ImportModelScreen extends Screen {
 		this.armatureGrid.setLeftPos(10);
 		this.armatureGrid.resize(screenRect);
 		
-		this.addRenderableWidget(new Static(this.font, 10, 100, 14, 15, null, null, Component.translatable("datapack_edit.import_model.meshes"), Component.literal("")));
+		this.addRenderableWidget(new Static(this, 10, 100, 14, 15, null, null, Component.translatable("datapack_edit.import_model.meshes"), Component.literal("")));
 		this.addRenderableWidget(this.meshGrid);
-		this.addRenderableWidget(new Static(this.font, 10, 100, heightSplit - 8, 15, null, null, Component.translatable("datapack_edit.import_model.armatures"), Component.literal("")));
+		this.addRenderableWidget(new Static(this, 10, 100, heightSplit - 8, 15, null, null, Component.translatable("datapack_edit.import_model.armatures"), Component.literal("")));
 		this.addRenderableWidget(this.armatureGrid);
 		
 		this.modelPreviewer.setX1(widthSplit + 10);

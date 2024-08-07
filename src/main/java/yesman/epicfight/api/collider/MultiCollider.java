@@ -32,8 +32,8 @@ public abstract class MultiCollider<T extends Collider> extends Collider {
 	
 	@SafeVarargs
 	public MultiCollider(T... colliders) {
-		super(null, null);
-
+		super(new Vec3(colliders[0].modelCenter.x, colliders[0].modelCenter.y, colliders[0].modelCenter.z), null);
+		
 		Collections.addAll(this.colliders, colliders);
 		this.numberOfColliders = colliders.length;
 	}

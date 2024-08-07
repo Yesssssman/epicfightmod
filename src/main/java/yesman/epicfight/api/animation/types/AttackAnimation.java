@@ -236,11 +236,11 @@ public class AttackAnimation extends ActionAnimation {
 				if (trueEntity != null && trueEntity.isAlive() && !entitypatch.getCurrenltyAttackedEntities().contains(trueEntity) && !entitypatch.isTeammate(hitten)) {
 					if (hitten instanceof LivingEntity || hitten instanceof PartEntity) {
 						if (entity.hasLineOfSight(hitten)) {
-							EpicFightDamageSource source = this.getEpicFightDamageSource(entitypatch, hitten, phase);
+							EpicFightDamageSource damagesource = this.getEpicFightDamageSource(entitypatch, hitten, phase);
 							int prevInvulTime = hitten.invulnerableTime;
 							hitten.invulnerableTime = 0;
 							
-							AttackResult attackResult = entitypatch.attack(source, hitten, phase.hand);
+							AttackResult attackResult = entitypatch.attack(damagesource, hitten, phase.hand);
 							hitten.invulnerableTime = prevInvulTime;
 							
 							if (attackResult.resultType.dealtDamage()) {
