@@ -34,10 +34,16 @@ public abstract class Mesh<P extends ModelPart<V>, V extends VertexBuilder> {
 		this.positions = (parent == null) ? arrayMap.get("positions") : parent.positions;
 		this.normals = (parent == null) ? arrayMap.get("normals") : parent.normals;
 		this.uvs = (parent == null) ? arrayMap.get("uvs") : parent.uvs;
-		this.vertexCount = (parent == null) ? this.positions.length / 3 : parent.vertexCount;
-		
 		this.renderProperties = renderProperties;
 		this.parts = (parent == null) ? this.createModelPart(partBuilders) : parent.parts;
+		
+		int totalV = 0;
+		
+		for (ModelPart<V> modelpart : this.parts.values()) {
+			totalV += modelpart.getVertices().size();
+		}
+		
+		this.vertexCount = totalV;
 	}
 	
 	protected abstract Map<String, P> createModelPart(Map<String, List<V>> partBuilders);
