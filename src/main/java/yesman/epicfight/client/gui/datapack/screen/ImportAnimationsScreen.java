@@ -188,7 +188,7 @@ public class ImportAnimationsScreen extends Screen {
 					
 					for (int i = 0; i < phasesTag.size(); i++) {
 						packImporter.newRow();
-						packImporter.newValue("phase", String.format("Phase%s", ++i));
+						packImporter.newValue("phase", String.format("Phase%s", i));
 					}
 					
 					this.setDataBindingComponenets(new Object[] {
@@ -473,12 +473,19 @@ public class ImportAnimationsScreen extends Screen {
 											}
 											
 											phases.add(new CompoundTag());
-											int rowposition = grid.addRowWithDefaultValues("phase", String.format("Phase%d", grid.children().size() + 1));
+											
+											int rowposition = grid.addRowWithDefaultValues("phase", String.format("Phase%d", grid.children().size()));
 											grid.setGridFocus(rowposition, "phase");
 										})
 										.pressRemove((grid, button) -> {
 											grid.removeRow((removedRow) -> {
 												ListTag phases = this.fakeAnimations.get(this.animationGrid.getRowposition()).getParameter("phases");
+												
+												//Rename rows
+												for (int i = 0; i < grid.children().size(); i++) {
+													grid.setValue(i, "phase", "Phase"+i);
+												}
+												
 												phases.remove(removedRow);
 												
 												if (phases.isEmpty()) {
@@ -883,7 +890,7 @@ public class ImportAnimationsScreen extends Screen {
 					ClipHoldingAnimation result = fakeAnimation.createAnimation();
 					this.userAnimations.put(fakeAnimation.getRegistryName(), PackEntry.ofValue(fakeAnimation, result));
 					AnimationManager.getInstance().registerUserAnimation(result);
-				} catch (Exception e) {
+				} catch (Throwable e) {
 					hasException = true;
 					sb.append(String.format("%s : %s\n", fakeAnimation.getParameter("path"), e.getMessage()));
 					e.printStackTrace();

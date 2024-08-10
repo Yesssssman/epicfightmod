@@ -1,6 +1,7 @@
 package yesman.epicfight.api.animation.types.datapack;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -195,7 +196,7 @@ public class FakeAnimation extends StaticAnimation {
 	}
 	
 	@SuppressWarnings("rawtypes")
-	public ClipHoldingAnimation createAnimation() throws Exception {
+	public ClipHoldingAnimation createAnimation() throws Throwable {
 		try {
 			if (this.animationType == null) {
 				throw new IllegalStateException("Animation type is not defined.");
@@ -226,6 +227,9 @@ public class FakeAnimation extends StaticAnimation {
 			}
 			
 			throw new IllegalArgumentException(String.format("Invalid arguments for %s: %s", ParseUtil.snakeToSpacedCamel(this.animationType.toString()), sb.toString()));
+		} catch (InvocationTargetException e) {
+			e.printStackTrace();
+			throw e.getTargetException();
 		} catch (Exception e) {
 			e.printStackTrace();
 			throw e;

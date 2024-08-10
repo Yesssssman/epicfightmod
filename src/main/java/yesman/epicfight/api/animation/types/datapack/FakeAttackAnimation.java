@@ -1,6 +1,7 @@
 package yesman.epicfight.api.animation.types.datapack;
 
 import java.util.Locale;
+import java.util.NoSuchElementException;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -32,6 +33,30 @@ public class FakeAttackAnimation extends AttackAnimation implements ClipHoldingA
 		
 		for (Tag phaseTag : listTag) {
 			CompoundTag phaseCompTag = (CompoundTag)phaseTag;
+			
+			if (!phaseCompTag.contains("antic")) {
+				throw new NoSuchElementException("Phase" + i + ": Antic not specified");
+			}
+			
+			if (!phaseCompTag.contains("preDelay")) {
+				throw new NoSuchElementException("Phase" + i + ": Pre-Delay not specified");
+			}
+			
+			if (!phaseCompTag.contains("contact")) {
+				throw new NoSuchElementException("Phase" + i + ": Contact not specified");
+			}
+			
+			if (!phaseCompTag.contains("recovery")) {
+				throw new NoSuchElementException("Phase" + i + ": Recovery not specified");
+			}
+			
+			if (!phaseCompTag.contains("hand")) {
+				throw new NoSuchElementException("Phase" + i + ": Hand not specified");
+			}
+			
+			if (!phaseCompTag.contains("joint")) {
+				throw new NoSuchElementException("Phase" + i + ": Joint not specified");
+			}
 			
 			float antic = phaseCompTag.getFloat("antic");
 			float preDelay = phaseCompTag.getFloat("preDelay");

@@ -422,9 +422,10 @@ public class ControllEngine {
 	}
 	
 	private static boolean keyPressed(KeyMapping key, boolean eventCheck) {
-		if (eventCheck) {
+		boolean consumes = key.consumeClick();
+		
+		if (consumes && eventCheck) {
 			int mouseButton = InputConstants.Type.MOUSE == key.getKey().getType() ? key.getKey().getValue() : -1;
-			
 			InputEvent.InteractionKeyMappingTriggered inputEvent = net.minecraftforge.client.ForgeHooksClient.onClickInput(mouseButton, key, InteractionHand.MAIN_HAND);
 			
 	        if (inputEvent.isCanceled()) {
@@ -432,7 +433,7 @@ public class ControllEngine {
 	        }
 		}
         
-    	return key.consumeClick();
+    	return consumes;
 	}
 	
 	public static void disableKey(KeyMapping keyMapping) {

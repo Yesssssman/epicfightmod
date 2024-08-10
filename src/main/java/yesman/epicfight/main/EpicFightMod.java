@@ -98,11 +98,13 @@ import yesman.epicfight.world.level.block.EpicFightBlocks;
 import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 
 /**
- *  Changes from 20.8.5 -> 20.8.6
+ *  Changes from 20.8.7 -> 20.8.8
  *  
- *  1. Now Datapack editor screen checks the null animations.
+ *  1. Fixed OpenGL error message spamming in some OS or graphic driver
  *  
- *  2. Fixed moving animations broken when reloading resources while playing the animation.
+ *  2. Fixed player opening Create chests automatically (Also expect to fix other automatic pressing issues with mods)
+ *  
+ *  3. Fixed some phase removed when setting user animations in datapack editor screen
  *  
  *  --- TO DO ---
  *  
