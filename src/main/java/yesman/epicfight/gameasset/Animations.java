@@ -374,7 +374,6 @@ public class Animations {
 	public static StaticAnimation FIST_DASH;
 	public static StaticAnimation FIST_AIR_SLASH;
 	public static StaticAnimation SPEAR_ONEHAND_AUTO;
-	public static StaticAnimation SPEAR_BLOCK_AUTO;
 	public static StaticAnimation SPEAR_ONEHAND_AIR_SLASH;
 	public static StaticAnimation SPEAR_TWOHAND_AUTO1;
 	public static StaticAnimation SPEAR_TWOHAND_AUTO2;

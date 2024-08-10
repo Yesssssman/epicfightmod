@@ -12,9 +12,6 @@ import org.joml.Matrix3f;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
-import org.lwjgl.opengl.GL11;
-import org.lwjgl.opengl.GL15;
-import org.lwjgl.opengl.GL30;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -41,6 +38,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh.AnimatedModelPart;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.model.JsonModelLoader;
+import yesman.epicfight.api.utils.GLConstants;
 import yesman.epicfight.api.utils.ParseUtil;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec4f;
@@ -55,11 +53,11 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 	private final int maxJointCount;
 	private int arrayObjectId;
 	
-	private VertexBuffer<Float> positionsBuffer = new VertexBuffer<> (GL11.GL_FLOAT, 3, false, ByteBuffer::putFloat);
-	private VertexBuffer<Float> uvsBuffer = new VertexBuffer<> (GL11.GL_FLOAT, 2, false, ByteBuffer::putFloat);
-	private VertexBuffer<Byte> normalsBuffer = new VertexBuffer<> (GL11.GL_BYTE, 3, true, ByteBuffer::put);
-	private VertexBuffer<Short> jointsBuffer = new VertexBuffer<> (GL11.GL_SHORT, 3, false, ByteBuffer::putShort);
-	private VertexBuffer<Float> weightsBuffer = new VertexBuffer<> (GL11.GL_FLOAT, 3, false, ByteBuffer::putFloat);
+	private VertexBuffer<Float> positionsBuffer = new VertexBuffer<> (GLConstants.GL_FLOAT, 3, false, ByteBuffer::putFloat);
+	private VertexBuffer<Float> uvsBuffer = new VertexBuffer<> (GLConstants.GL_FLOAT, 2, false, ByteBuffer::putFloat);
+	private VertexBuffer<Byte> normalsBuffer = new VertexBuffer<> (GLConstants.GL_BYTE, 3, true, ByteBuffer::put);
+	private VertexBuffer<Short> jointsBuffer = new VertexBuffer<> (GLConstants.GL_SHORT, 3, false, ByteBuffer::putShort);
+	private VertexBuffer<Float> weightsBuffer = new VertexBuffer<> (GLConstants.GL_FLOAT, 3, false, ByteBuffer::putFloat);
 	
 	public AnimatedMesh(@Nullable Map<String, float[]> arrayMap, @Nullable Map<String, List<AnimatedVertexBuilder>> partBuilders, @Nullable AnimatedMesh parent, RenderProperties properties) {
 		super(arrayMap, partBuilders, parent, properties);
@@ -84,7 +82,7 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 		}
 		
 		this.maxJointCount = maxJointId;
-		this.arrayObjectId = GL30.glGenVertexArrays();
+		this.arrayObjectId = GlStateManager._glGenVertexArrays();
 		
 		List<Float> positionList = Lists.newArrayList();
 		List<Float> uvList = Lists.newArrayList();
@@ -93,8 +91,8 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 		List<Float> weightList = Lists.newArrayList();
 		Map<AnimatedVertexBuilder, Integer> vertexBuilderMap = Maps.newHashMap();
 		
-		int currentBoundVao = GlStateManager._getInteger(GL30.GL_VERTEX_ARRAY_BINDING);
-		int currentBoundVbo = GlStateManager._getInteger(GL30.GL_VERTEX_ARRAY_BUFFER_BINDING);
+		int currentBoundVao = GlStateManager._getInteger(GLConstants.GL_VERTEX_ARRAY_BINDING);
+		int currentBoundVbo = GlStateManager._getInteger(GLConstants.GL_VERTEX_ARRAY_BUFFER_BINDING);
 		
 		GlStateManager._glBindVertexArray(this.arrayObjectId);
 		
@@ -109,7 +107,7 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 		this.weightsBuffer.bindVertexData(weightList);
 		
 		GlStateManager._glBindVertexArray(currentBoundVao);
-		GlStateManager._glBindBuffer(GL15.GL_ARRAY_BUFFER, currentBoundVbo);
+		GlStateManager._glBindBuffer(GLConstants.GL_ARRAY_BUFFER, currentBoundVbo);
 	}
 	
 	public void pointPositionsBuffer(int attrIndex) {
@@ -340,8 +338,8 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 		
 		animationShaderInstance.setupShaderLights();
 		
-		int currentBoundVao = GlStateManager._getInteger(GL30.GL_VERTEX_ARRAY_BINDING);
-		int currentBoundVbo = GlStateManager._getInteger(GL30.GL_VERTEX_ARRAY_BUFFER_BINDING);
+		int currentBoundVao = GlStateManager._getInteger(GLConstants.GL_VERTEX_ARRAY_BINDING);
+		int currentBoundVbo = GlStateManager._getInteger(GLConstants.GL_VERTEX_ARRAY_BUFFER_BINDING);
 		
 		GlStateManager._glBindVertexArray(this.arrayObjectId);
 		EpicFightVertexFormatElement.bindDrawing(this);
@@ -359,7 +357,7 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 		EpicFightVertexFormatElement.unbindDrawing();
 		
 		GlStateManager._glBindVertexArray(currentBoundVao);
-		GlStateManager._glBindBuffer(GL15.GL_ARRAY_BUFFER, currentBoundVbo);
+		GlStateManager._glBindBuffer(GLConstants.GL_ARRAY_BUFFER, currentBoundVbo);
 	}
 	
 	public int getMaxJointCount() {
@@ -404,9 +402,9 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 			indicesBuffer.flip();
 			
 			this.indexBufferId = GlStateManager._glGenBuffers();
-			GlStateManager._glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, this.indexBufferId);
-			GlStateManager._glBufferData(GL15.GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GL15.GL_STATIC_DRAW);
-			GlStateManager._glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
+			GlStateManager._glBindBuffer(GLConstants.GL_ELEMENT_ARRAY_BUFFER, this.indexBufferId);
+			GlStateManager._glBufferData(GLConstants.GL_ELEMENT_ARRAY_BUFFER, indicesBuffer, GLConstants.GL_STATIC_DRAW);
+			GlStateManager._glBindBuffer(GLConstants.GL_ELEMENT_ARRAY_BUFFER, 0);
 		}
 		
 		@Override
@@ -434,9 +432,9 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 				return;
 			}
 			
-			GlStateManager._glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, this.indexBufferId);
+			GlStateManager._glBindBuffer(GLConstants.GL_ELEMENT_ARRAY_BUFFER, this.indexBufferId);
 			RenderSystem.drawElements(VertexFormat.Mode.TRIANGLES.asGLMode, this.getVertices().size(), VertexFormat.IndexType.INT.asGLType);
-			GlStateManager._glBindBuffer(GL15.GL_ELEMENT_ARRAY_BUFFER, 0);
+			GlStateManager._glBindBuffer(GLConstants.GL_ELEMENT_ARRAY_BUFFER, 0);
 		}
 		
 		static byte normalIntValue(float f) {
@@ -473,9 +471,9 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 			
 			buf.flip();
 			
-			GlStateManager._glBindBuffer(GL15.GL_ARRAY_BUFFER, this.vertexBufferIds);
-			GlStateManager._glBufferData(GL15.GL_ARRAY_BUFFER, buf, GL15.GL_STATIC_DRAW);
-			GlStateManager._glBindBuffer(GL15.GL_ARRAY_BUFFER, 0);
+			GlStateManager._glBindBuffer(GLConstants.GL_ARRAY_BUFFER, this.vertexBufferIds);
+			GlStateManager._glBufferData(GLConstants.GL_ARRAY_BUFFER, buf, GLConstants.GL_STATIC_DRAW);
+			GlStateManager._glBindBuffer(GLConstants.GL_ARRAY_BUFFER, 0);
 		}
 		
 		public void vertexAttribPointer(int attrIndex) {
@@ -483,13 +481,13 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 				throw new RuntimeException("vertex buffer is already destroyed");
 			}
 			
-			GlStateManager._glBindBuffer(GL15.GL_ARRAY_BUFFER, this.vertexBufferIds);
+			GlStateManager._glBindBuffer(GLConstants.GL_ARRAY_BUFFER, this.vertexBufferIds);
 			
 			switch (this.glType) {
-			case GL11.GL_DOUBLE, GL11.GL_FLOAT -> {
+			case GLConstants.GL_DOUBLE, GLConstants.GL_FLOAT -> {
 				GlStateManager._vertexAttribPointer(attrIndex, this.size, this.glType, this.normalize, 0, 0);
 			}
-			case GL11.GL_BYTE, GL11.GL_SHORT, GL11.GL_INT -> {
+			case GLConstants.GL_BYTE, GLConstants.GL_SHORT, GLConstants.GL_INT -> {
 				if (this.normalize) {
 					GlStateManager._vertexAttribPointer(attrIndex, this.size, this.glType, true, 0, 0);
 				} else {
