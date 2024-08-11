@@ -45,7 +45,7 @@ public class ConfigManager {
 		SKILL_BOOK_MOB_DROP_CHANCE_MODIFIER = server.defineInRange("loot.skill_book_mob_drop_chance_modifier", 0, -100, 100);
 		SKILL_BOOK_CHEST_LOOT_MODIFYER = server.defineInRange("loot.skill_book_chest_drop_chance_modifier", 0, -100, 100);
 		CAN_SWITCH_COMBAT = server.define("default_gamerule.canSwitchCombat", true);
-		INITIAL_PLAYER_MODE = server.defineEnum("default_gamerule.setBattleModeOnJoin", PlayerPatch.PlayerMode.MINING);
+		INITIAL_PLAYER_MODE = server.defineEnum("default_gamerule.initialPlayerMode", PlayerPatch.PlayerMode.MINING);
 		
 		INGAME_CONFIG = new ClientConfig(client);
 		CLIENT_CONFIG = client.build();
