@@ -98,7 +98,7 @@ import yesman.epicfight.world.level.block.EpicFightBlocks;
 import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 
 /**
- *  Changes from 20.8.7 -> 20.8.8
+ *  Changes from 20.8.8 -> 20.8.9
  *  
  *  1. Added a new gamerule & config option that can set the default player mode(mining, battle) for newcomers
  *  
@@ -106,7 +106,7 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  
  *  3. Fixed player head rotating on a horse or boat
  *  
- *  4. Fixed Ender dragon
+ *  4. Fixed Ender dragon animations broken
  *  
  *  --- TO DO ---
  *  
