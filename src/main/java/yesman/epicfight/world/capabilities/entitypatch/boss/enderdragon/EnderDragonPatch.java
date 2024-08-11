@@ -32,8 +32,10 @@ import net.minecraftforge.event.entity.living.LivingEvent;
 import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotion;
 import yesman.epicfight.api.animation.LivingMotions;
+import yesman.epicfight.api.animation.Pose;
 import yesman.epicfight.api.animation.TransformSheet;
 import yesman.epicfight.api.animation.types.ActionAnimation;
+import yesman.epicfight.api.animation.types.DynamicAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.animation.types.procedural.IKInfo;
 import yesman.epicfight.api.animation.types.procedural.TipPointAnimation;
@@ -160,6 +162,7 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 		}
 		
 		this.updateTipPoints();
+		
 		Entity bodyPart = this.original.getParts()[2];
 		AABB bodyBoundingBox = bodyPart.getBoundingBox();
 		List<Entity> list = this.original.level().getEntities(this.original, bodyBoundingBox, EntitySelector.pushableBy(this.original));
@@ -196,10 +199,16 @@ public class EnderDragonPatch extends MobPatch<EnderDragon> {
 	}
 	
 	@Override
+	public void poseTick(DynamicAnimation animation, Pose pose, float elapsedTime, float partialTicks) {
+	}
+	
+	@Override
 	public void clientTick(LivingEvent.LivingTickEvent event) {
 		this.xRootO = this.xRoot;
 		this.zRootO = this.zRoot;
+		
 		super.clientTick(event);
+		
 		this.updateTipPoints();
 	}
 	

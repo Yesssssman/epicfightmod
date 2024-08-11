@@ -28,7 +28,7 @@ public class TipPointAnimation {
 	}
 	
 	public float getTime(float partialTicks) {
-		float curTime = this.time - this.dt * (1.0F - partialTicks);
+		float curTime = this.time - this.dt * (1.0F - (this.isWorking ? partialTicks : 1.0F));
 		return curTime * (this.totalTime - this.startTime) + this.startTime;
 	}
 	
@@ -39,7 +39,7 @@ public class TipPointAnimation {
 		Keyframe[] keyframes = animation.getKeyframes();
 		this.startTime = keyframes[0].time();
 		this.totalTime = keyframes[keyframes.length - 1].time();
-		this.dt = (1.0F / (this.totalTime - this.startTime) * 0.05F) * speed;// * 0.05F;
+		this.dt = (1.0F / (this.totalTime - this.startTime) * 0.05F) * speed;
 		
 		if (this.animation != animation) { 
 			this.animation.readFrom(animation);

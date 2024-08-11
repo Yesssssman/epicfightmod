@@ -158,7 +158,7 @@ public class MobCombatBehaviors {
 				.nextBehavior(Behavior.<EnderDragonPatch>builder().animationBehavior(Animations.DRAGON_ATTACK1).randomChance(0.4F).withinDistance(0.0D, 7.0D))
 		).newBehaviorSeries(
 			BehaviorSeries.<EnderDragonPatch>builder().weight(50.0F).cooldown(200).simultaneousCooldown(3).canBeInterrupted(false).looping(false)
-				.nextBehavior(Behavior.<EnderDragonPatch>builder().animationBehavior(Animations.DRAGON_ATTACK4).withinDistance(10.0D, 15.0D).withinAngle(0.0F, 40.0F))
+				.nextBehavior(Behavior.<EnderDragonPatch>builder().animationBehavior(Animations.DRAGON_ATTACK4).withinDistance(15.0D, 20.0D).withinAngle(0.0F, 40.0F))
 		).newBehaviorSeries(
 			BehaviorSeries.<EnderDragonPatch>builder().weight(100.0F).cooldown(100).simultaneousCooldown(2).canBeInterrupted(false).looping(false)
 				.nextBehavior(Behavior.<EnderDragonPatch>builder().animationBehavior(Animations.DRAGON_BACKJUMP_PREPARE).withinDistance(0.0D, 4.0D).withinAngle(90.0F, 180.0F))

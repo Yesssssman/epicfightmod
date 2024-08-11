@@ -16,6 +16,7 @@ public class EpicFightGamerules {
 	public static GameRules.Key<GameRules.BooleanValue> CAN_SWITCH_COMBAT;
 	public static GameRules.Key<GameRules.BooleanValue> STIFF_COMBO_ATTACKS;
 	public static GameRules.Key<GameRules.BooleanValue> NO_MOBS_IN_BOSSFIGHT;
+	public static GameRules.Key<GameRules.IntegerValue> INITIAL_PLAYER_MODE;
 	
 	public static void registerRules() {
 		DO_VANILLA_ATTACK = GameRules.register("doVanillaAttack", GameRules.Category.PLAYER, GameRules.BooleanValue.create(ConfigManager.DO_VANILLA_ATTACK.get()));
@@ -40,6 +41,9 @@ public class EpicFightGamerules {
 		
 		NO_MOBS_IN_BOSSFIGHT = GameRules.register("noMobsInBossfight", GameRules.Category.SPAWNING, GameRules.BooleanValue.create(ConfigManager.NO_MOBS_IN_BOSSFIGHT.get(), (server, value) -> {
 			EpicFightNetworkManager.sendToAll(new SPChangeGamerule(SynchronizedGameRules.NO_MOBS_IN_BOSSFIGHT, value.get()));
+		}));
+		INITIAL_PLAYER_MODE = GameRules.register("initialMode", GameRules.Category.PLAYER, GameRules.IntegerValue.create(ConfigManager.INITIAL_PLAYER_MODE.get().ordinal(), (server, value) -> {
+			EpicFightNetworkManager.sendToAll(new SPChangeGamerule(SynchronizedGameRules.INITIAL_PLAYER_MODE, value.get()));
 		}));
 	}
 }

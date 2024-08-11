@@ -1,5 +1,7 @@
 package yesman.epicfight.events;
 
+import java.io.File;
+
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -10,7 +12,6 @@ import net.minecraft.world.item.UseAnim;
 import net.minecraftforge.common.util.FakePlayer;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.player.AttackEntityEvent;
-import net.minecraftforge.event.entity.player.PlayerContainerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.StartTracking;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent.RightClickItem;
@@ -39,6 +40,17 @@ public class PlayerEvents {
 		
 		if (entitypatch != null) {
 			entitypatch.onStartTracking((ServerPlayer)event.getEntity());
+		}
+	}
+	
+	@SubscribeEvent
+	public static void playerLoadEvent(PlayerEvent.LoadFromFile event) {
+		ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(event.getEntity(), ServerPlayerPatch.class);
+		File file = new File(event.getPlayerDirectory(), event.getPlayerUUID() +".dat");
+		
+		if (!file.exists()) {
+			int initialMode = Math.min(event.getEntity().level().getGameRules().getInt(EpicFightGamerules.INITIAL_PLAYER_MODE), PlayerPatch.PlayerMode.values().length - 1);
+			playerpatch.toMode(PlayerPatch.PlayerMode.values()[initialMode], true);
 		}
 	}
 	
@@ -111,11 +123,6 @@ public class PlayerEvents {
 		
 		EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.WEIGHT_PENALTY, player.level().getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY)), (ServerPlayer)player);
 		EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.DIABLE_ENTITY_UI, player.level().getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI)), (ServerPlayer)player);
-	}
-	
-	@SubscribeEvent
-	public static void test(PlayerContainerEvent.Open event) {
-		new Exception().printStackTrace();;
 	}
 	
 	@SubscribeEvent

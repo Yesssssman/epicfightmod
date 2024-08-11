@@ -233,7 +233,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 			}
 		}
 		
-		if (this.getEntityState().inaction()) {
+		if (this.getEntityState().inaction() && this.original.getControlledVehicle() == null) {
 			this.original.yBodyRot = this.original.getYRot();
 			this.original.yHeadRot = this.original.getYRot();
 		}

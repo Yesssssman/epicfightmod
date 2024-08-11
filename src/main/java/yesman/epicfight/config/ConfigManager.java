@@ -8,6 +8,7 @@ import com.electronwill.nightconfig.core.io.WritingMode;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.loading.FMLPaths;
 import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class ConfigManager {
 	public static final ForgeConfigSpec COMMON_CONFIG;
@@ -21,6 +22,7 @@ public class ConfigManager {
 	public static final ForgeConfigSpec.BooleanValue CAN_SWITCH_COMBAT;
 	public static final ForgeConfigSpec.BooleanValue STIFF_COMBO_ATTACKS;
 	public static final ForgeConfigSpec.BooleanValue NO_MOBS_IN_BOSSFIGHT;
+	public static final ForgeConfigSpec.EnumValue<PlayerPatch.PlayerMode> INITIAL_PLAYER_MODE;
 	
 	public static final ForgeConfigSpec.IntValue WEIGHT_PENALTY;
 	public static final ForgeConfigSpec.IntValue SKILL_BOOK_MOB_DROP_CHANCE_MODIFIER;
@@ -43,6 +45,7 @@ public class ConfigManager {
 		SKILL_BOOK_MOB_DROP_CHANCE_MODIFIER = server.defineInRange("loot.skill_book_mob_drop_chance_modifier", 0, -100, 100);
 		SKILL_BOOK_CHEST_LOOT_MODIFYER = server.defineInRange("loot.skill_book_chest_drop_chance_modifier", 0, -100, 100);
 		CAN_SWITCH_COMBAT = server.define("default_gamerule.canSwitchCombat", true);
+		INITIAL_PLAYER_MODE = server.defineEnum("default_gamerule.setBattleModeOnJoin", PlayerPatch.PlayerMode.MINING);
 		
 		INGAME_CONFIG = new ClientConfig(client);
 		CLIENT_CONFIG = client.build();

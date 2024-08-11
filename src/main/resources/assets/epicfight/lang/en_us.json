@@ -160,6 +160,8 @@
 	"gamerule.canSwitchCombat": "Enable switching between Battle/Mining mode",
 	"gamerule.noMobsInBossfight": "Disable mob spawn during Bossfight",
 	"gamerule.stiffComboAttacks": "Disable player movement while attacking",
+	"gamerule.initialMode": "Default player mode for newcomers",
+	"gamerule.initialMode.description": "0: Mining\n1: Battle",
 	
 	"gui.epicfight.configurations": "Epic Fight Configurations",
 	"gui.epicfight.graphic_options": "Epic Fight Graphics",
@@ -577,6 +579,5 @@
 	"epicfight.messages.test_version_warning_line2": "(%s)",
 	"epicfight.messages.version_notifier": "EpicFight-%s",
 	
-	"epicfight.messages.shader_transform_fail": "Failed to create shader %s. Don't turn on animation shader in your environment...",
-	"epicfight.message.skinlayer3d_model_initialize": "Found 3D Skin Layers... Initialize the player model."
+	"epicfight.messages.shader_transform_fail": "Failed to create shader %s. Don't turn on animation shader in your environment..."
 }

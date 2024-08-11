@@ -100,11 +100,13 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 /**
  *  Changes from 20.8.7 -> 20.8.8
  *  
- *  1. Fixed OpenGL error message spamming in some OS or graphic driver
+ *  1. Added a new gamerule & config option that can set the default player mode(mining, battle) for newcomers
  *  
- *  2. Fixed player opening Create chests automatically (Also expect to fix other automatic pressing issues with mods)
+ *  2. Fixed player pov jittering when attacking on a horse
  *  
- *  3. Fixed some phase removed when setting user animations in datapack editor screen
+ *  3. Fixed player head rotating on a horse or boat
+ *  
+ *  4. Fixed Ender dragon
  *  
  *  --- TO DO ---
  *  

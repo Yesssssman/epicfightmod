@@ -52,7 +52,8 @@ public class SPChangeGamerule {
 		DIABLE_ENTITY_UI((level) -> level.getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI), (level, value) -> level.getGameRules().getRule(EpicFightGamerules.DISABLE_ENTITY_UI).set((boolean)value, null), (buf, val) -> buf.writeBoolean((boolean)val), ByteBuf::readBoolean),
 		CAN_SWITCH_COMBAT((level) -> level.getGameRules().getBoolean(EpicFightGamerules.CAN_SWITCH_COMBAT), (level, value) -> level.getGameRules().getRule(EpicFightGamerules.CAN_SWITCH_COMBAT).set((boolean)value, null), (buf, val) -> buf.writeBoolean((boolean)val), ByteBuf::readBoolean),
 		STIFF_COMBO_ATTACKS((level) -> level.getGameRules().getBoolean(EpicFightGamerules.STIFF_COMBO_ATTACKS), (level, value) -> level.getGameRules().getRule(EpicFightGamerules.STIFF_COMBO_ATTACKS).set((boolean)value, null), (buf, val) -> buf.writeBoolean((boolean)val), ByteBuf::readBoolean),
-		NO_MOBS_IN_BOSSFIGHT((level) -> level.getGameRules().getBoolean(EpicFightGamerules.NO_MOBS_IN_BOSSFIGHT), (level, value) -> level.getGameRules().getRule(EpicFightGamerules.NO_MOBS_IN_BOSSFIGHT).set((boolean)value, null), (buf, val) -> buf.writeBoolean((boolean)val), ByteBuf::readBoolean);
+		NO_MOBS_IN_BOSSFIGHT((level) -> level.getGameRules().getBoolean(EpicFightGamerules.NO_MOBS_IN_BOSSFIGHT), (level, value) -> level.getGameRules().getRule(EpicFightGamerules.NO_MOBS_IN_BOSSFIGHT).set((boolean)value, null), (buf, val) -> buf.writeBoolean((boolean)val), ByteBuf::readBoolean),
+		INITIAL_PLAYER_MODE((level) -> level.getGameRules().getInt(EpicFightGamerules.INITIAL_PLAYER_MODE), (level, value) -> level.getGameRules().getRule(EpicFightGamerules.INITIAL_PLAYER_MODE).tryDeserialize(value.toString()), (buf, val) -> buf.writeInt((int)val), ByteBuf::readInt);
 		
 		public Function<Level, Object> getRule;
 		public BiConsumer<Level, Object> setRule;

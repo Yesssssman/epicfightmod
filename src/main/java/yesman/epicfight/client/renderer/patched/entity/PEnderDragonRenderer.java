@@ -58,9 +58,10 @@ public class PEnderDragonRenderer extends PatchedEntityRenderer<EnderDragon, End
 		}
 		
 		if (Minecraft.getInstance().getEntityRenderDispatcher().shouldRenderHitBoxes()) {
-			for (Layer.Priority priority : Layer.Priority.HIGHEST.lowers()) {
-				AnimationPlayer animPlayer = entitypatch.getClientAnimator().getCompositeLayer(priority).animationPlayer;
+			for (Layer layer : entitypatch.getClientAnimator().getAllLayers()) {
+				AnimationPlayer animPlayer = layer.animationPlayer;
 				float playTime = animPlayer.getPrevElapsedTime() + (animPlayer.getElapsedTime() - animPlayer.getPrevElapsedTime()) * partialTicks;
+				
 				animPlayer.getAnimation().renderDebugging(poseStack, buffer, entitypatch, playTime, partialTicks);
 			}
 		}
