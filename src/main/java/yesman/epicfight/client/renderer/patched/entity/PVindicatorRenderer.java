@@ -20,7 +20,7 @@ public class PVindicatorRenderer extends PIllagerRenderer<AbstractIllager, MobPa
 	public PVindicatorRenderer(EntityRendererProvider.Context context, EntityType<?> entityType) {
 		super(context, entityType);
 		
-		this.addPatchedLayer(ItemInHandLayer.class, new PatchedItemInHandLayer<>() {
+		this.addPatchedLayerAlways(ItemInHandLayer.class, new PatchedItemInHandLayer<>() {
 			@Override
 			public void renderLayer(MobPatch<AbstractIllager> entitypatch, AbstractIllager entityliving, RenderLayer<AbstractIllager, IllagerModel<AbstractIllager>> originalRenderer, PoseStack matrixStackIn, MultiBufferSource buffer, int packedLightIn, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 				if (entityliving.isAggressive()) {
