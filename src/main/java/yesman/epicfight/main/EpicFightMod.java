@@ -77,7 +77,6 @@ import yesman.epicfight.skill.SkillSlot;
 import yesman.epicfight.skill.SkillSlots;
 import yesman.epicfight.world.capabilities.EpicFightCapabilities;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
-import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.Styles;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.capabilities.item.Style;
@@ -98,29 +97,29 @@ import yesman.epicfight.world.level.block.EpicFightBlocks;
 import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 
 /**
- *  Changes from 20.8.8 -> 20.8.9
+ *  Changes from 20.8.9 -> 20.8.10
  *  
- *  1. Added a new gamerule & config option that can set the default player mode(mining, battle) for newcomers
+ *  1. First person model translation is corrected not to clip the model
  *  
- *  2. Fixed player pov jittering when attacking on a horse
- *  
- *  3. Fixed player head rotating on a horse or boat
- *  
- *  4. Fixed Ender dragon animations broken
+ *  2. Fixed a crash when specifying non existing skill name in epicfight:set_skill loot function
  *  
  *  --- TO DO ---
  *  
- *  1. Crash because {@link PlayerPatch#STAMINA} is unregistered at SynchedEntityData (Most likely a mod compatibility issue)
+ *  Update language files (always)
  *  
- *  2. Add an reach property to attack animation (idea)
+ *  Add an reach property to attack animation (idea)
  *  
- *  3. Add an alert function when an entity targeting the player tries grappling or execution attack
+ *  Add an alert function when an entity targeting the player tries grappling or execution attack
  *  
- *  4. Add UI for execution resistance
+ *  Add UI for execution resistance
  *  
- *  5. Add functionality to blooming effect (resists wither effect)
+ *  Add functionality to blooming effect (resists wither effect)
  *  
- *  6. First person animation system by adding /data/ folder in the path, and few samples
+ *  First person animation system by adding /data/ folder in the path, and few samples
+ *  
+ *  Enhance the stun system (maybe remove or barely leave knockback)
+ *  
+ *  Add toasts & achievements to guide beginners
  *  
  *  @author yesman
  */

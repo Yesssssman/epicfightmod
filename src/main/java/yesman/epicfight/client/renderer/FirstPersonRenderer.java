@@ -2,6 +2,8 @@ package yesman.epicfight.client.renderer;
 
 import java.util.Iterator;
 
+import org.joml.Matrix4f;
+
 import com.mojang.blaze3d.vertex.PoseStack;
 
 import net.minecraft.client.model.PlayerModel;
@@ -29,14 +31,12 @@ import yesman.epicfight.api.client.model.MeshProvider;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.utils.math.MathUtils;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
-import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.client.mesh.HumanoidMesh;
 import yesman.epicfight.client.renderer.patched.entity.PatchedLivingEntityRenderer;
 import yesman.epicfight.client.renderer.patched.layer.EmptyLayer;
 import yesman.epicfight.client.renderer.patched.layer.PatchedItemInHandLayer;
 import yesman.epicfight.client.renderer.patched.layer.WearableItemLayer;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
-import yesman.epicfight.gameasset.Armatures;
 
 @OnlyIn(Dist.CLIENT)
 public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer, LocalPlayerPatch, PlayerModel<LocalPlayer>, LivingEntityRenderer<LocalPlayer, PlayerModel<LocalPlayer>>, HumanoidMesh> {
@@ -58,11 +58,12 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 		Pose pose = entitypatch.getAnimator().getPose(partialTicks);
 		OpenMatrix4f[] poses = entitypatch.getArmature().getPoseAsTransformMatrix(pose, false);
 		poseStack.pushPose();
-		OpenMatrix4f mat = entitypatch.getArmature().getBindedTransformFor(pose, Armatures.BIPED.head);
-		mat.translate(0, 0.2F, 0);
 		
-		Vec3f translateVectorOfHead = mat.toTranslationVector();
-		poseStack.translate(-translateVectorOfHead.x, -translateVectorOfHead.y, -translateVectorOfHead.z);
+		Matrix4f lastPose = new Matrix4f(poseStack.last().pose());
+		poseStack.setIdentity();
+		poseStack.translate(0.0F, -entity.getEyeHeight() - 0.05F, 0.0F);
+		poseStack.mulPoseMatrix(lastPose);
+		
 		HumanoidMesh mesh = this.getMeshProvider(entitypatch).get();
 		this.prepareModel(mesh, entity, entitypatch, renderer);
 		

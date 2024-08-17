@@ -1,6 +1,7 @@
 package yesman.epicfight.data.loot.function;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import com.google.common.collect.Lists;
 import com.google.gson.JsonArray;
@@ -13,8 +14,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
-import net.minecraft.world.level.storage.loot.functions.LootItemFunctions;
 import yesman.epicfight.api.data.reloader.SkillManager;
+import yesman.epicfight.data.loot.EpicFightLootTables;
 import yesman.epicfight.skill.Skill;
 
 public class SetSkillFunction implements LootItemFunction {
@@ -31,13 +32,17 @@ public class SetSkillFunction implements LootItemFunction {
 			}
 		}
 		
-		return SkillManager.getSkill(this.skillsAndWeight.get(0).second());
+		return this.skillsAndWeight.isEmpty() ? null : SkillManager.getSkill(this.skillsAndWeight.get(0).second());
 	}
 	
 	@Override
 	public ItemStack apply(ItemStack itemstack, LootContext lootContext) {
 		float val = lootContext.getRandom().nextFloat();
-		itemstack.getOrCreateTag().putString("skill", this.getSkillForSeed(val).toString());
+		Skill skill = this.getSkillForSeed(val);
+		
+		if (skill != null) {
+			itemstack.getOrCreateTag().putString("skill", skill.toString());
+		}
 		
 		return itemstack;
 	}
@@ -82,9 +87,7 @@ public class SetSkillFunction implements LootItemFunction {
 	
 	@Override
 	public LootItemFunctionType getType() {
-		// 20.7.4
-		return LootItemFunctions.SET_NBT;
-		//return EpicFightLootTables.SET_SKILLBOOK_SKILL;
+		return EpicFightLootTables.SET_SKILLBOOK_SKILL;
 	}
 	
 	public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<SetSkillFunction> {
@@ -107,7 +110,6 @@ public class SetSkillFunction implements LootItemFunction {
 			JsonArray skillArray = jsonObj.getAsJsonArray("skills");
 			JsonArray weightArray = jsonObj.getAsJsonArray("weights");
 			List<FloatObjectPair<String>> list = Lists.newArrayList();
-			
 			float totalWeights = 0.0F;
 			
 			for (int i = 0; i < skillArray.size(); i++) {
@@ -115,6 +117,11 @@ public class SetSkillFunction implements LootItemFunction {
 			}
 			
 			for (int i = 0; i < skillArray.size(); i++) {
+				if (SkillManager.getSkill(skillArray.get(i).getAsString()) == null) {
+					(new NoSuchElementException("SetSkillFunction: There is no skill named " + skillArray.get(i).getAsString())).printStackTrace();
+					continue;
+				}
+				
 				list.add(FloatObjectPair.of(weightArray.get(i).getAsFloat() / totalWeights, skillArray.get(i).getAsString()));
 			}
 			
