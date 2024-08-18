@@ -2067,8 +2067,9 @@ public class DatapackEditScreen extends Screen {
 		@Override
 		public void exportEntries(ZipOutputStream out) throws Exception {
 			for (PackEntry<ResourceLocation, CompoundTag> packEntry : this.packList) {
+				String sItemType = packEntry.getValue().getString("item_type");
+				
 				try {
-					String sItemType = packEntry.getValue().getString("item_type");
 					ItemType itemType = ItemType.valueOf(sItemType);
 					packEntry.getValue().remove("item_type");
 					
@@ -2106,6 +2107,8 @@ public class DatapackEditScreen extends Screen {
 				} catch (Exception e) {
 					e.printStackTrace();
 					throw new IllegalStateException("Failded to export " + packEntry.getKey() +". "+ e.getMessage());
+				} finally {
+					packEntry.getValue().putString("item_type", sItemType);
 				}
 			}
 		}

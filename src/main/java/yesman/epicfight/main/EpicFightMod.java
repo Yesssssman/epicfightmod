@@ -103,6 +103,10 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  
  *  2. Fixed a crash when specifying non existing skill name in epicfight:set_skill loot function
  *  
+ *  3. Fixed multiple phases not exported in datapack editor
+ *  
+ *  4. Fixed Vindicators' holding item visible when not aggressive
+ *  
  *  --- TO DO ---
  *  
  *  Update language files (always)

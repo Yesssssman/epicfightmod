@@ -125,20 +125,20 @@ public class FakeAnimation extends StaticAnimation {
 			return String.format("(%s#F,%s#java.lang.String,%s#" + Armature.class.getTypeName() + ")#%s", this.constructorParams.get("convertTime"), this.constructorParams.get("path"), this.constructorParams.get("armature"), this.animationType.animCls.getTypeName());
 		case ATTACK, BASIC_ATTACK:
 			ListTag phasesTag = this.getParameter("phases");
-			Iterator<Tag> iter = phasesTag.iterator();
 			StringBuilder sb = new StringBuilder("[");
 			float start = 0.0F;
 			
-			while (iter.hasNext()) {
-				CompoundTag phaseCompound = (CompoundTag)iter.next();
+			
+			for (int i = 0; i < phasesTag.size(); i++) {
+				CompoundTag phaseCompound = phasesTag.getCompound(i);
 				float antic = phaseCompound.getFloat("antic");
 				float preDelay = phaseCompound.getFloat("preDelay");
 				float contact = phaseCompound.getFloat("contact");
 				float recovery = phaseCompound.getFloat("recovery");
 				float end;
 				
-				if (iter.hasNext()) {
-					CompoundTag nextTag = (CompoundTag)iter.next();
+				if (i < phasesTag.size() - 1) {
+					CompoundTag nextTag = phasesTag.getCompound(i + 1);
 					end = nextTag.getFloat("antic");
 				} else {
 					end = recovery;
@@ -165,7 +165,7 @@ public class FakeAnimation extends StaticAnimation {
 				
 				sb.append(String.format("(%s#F,%s#F,%s#F,%s#F,%s#F,%s#F,%s#net.minecraft.world.InteractionHand,%s#" + Joint.class.getTypeName() + ",%s)", start, antic, preDelay, contact, recovery, end, hand, joint, colliderInvokeCommand));
 				
-				if (iter.hasNext()) {
+				if (i < phasesTag.size() - 1) {
 					sb.append(",");
 					start = end;
 				}
