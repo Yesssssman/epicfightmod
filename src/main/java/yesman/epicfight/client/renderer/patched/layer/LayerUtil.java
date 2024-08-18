@@ -27,7 +27,7 @@ import yesman.epicfight.api.client.forgeevent.RegisterResourceLayersEvent;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.utils.math.Vec3f;
-import yesman.epicfight.client.renderer.patched.entity.PatchedLivingEntityRenderer;
+import yesman.epicfight.client.renderer.LayerRenderer;
 import yesman.epicfight.data.conditions.Condition.EntityPatchCondition;
 import yesman.epicfight.data.conditions.EpicFightConditions;
 import yesman.epicfight.main.EpicFightMod;
@@ -40,7 +40,7 @@ public class LayerUtil {
 		PatchedLayer<E, T, M, ? extends RenderLayer<E, M>> getLayer(JsonObject properties);
 	}
 	
-	public static <E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, R extends LivingEntityRenderer<E, M>, AM extends AnimatedMesh> void addLayer(PatchedLivingEntityRenderer<E, T, M, R, AM> renderer, EntityType<?> entityType, List<Pair<ResourceLocation, JsonElement>> layers) {
+	public static <E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, R extends LivingEntityRenderer<E, M>, AM extends AnimatedMesh> void addLayer(LayerRenderer<E, T, M> renderer, EntityType<?> entityType, List<Pair<ResourceLocation, JsonElement>> layers) {
 		Map<ResourceLocation, LayerProvider<E, T, M, R, AM>> layersbyid = Maps.newHashMap();
 		
 		layersbyid.put(new ResourceLocation(EpicFightMod.MODID, "invisible"), LayerUtil::getInvisibleLayer);

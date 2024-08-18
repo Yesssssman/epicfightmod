@@ -101,6 +101,8 @@ import yesman.epicfight.client.renderer.patched.entity.PWitherRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PWitherSkeletonMinionRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PZombieVillagerRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PatchedEntityRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PatchedLivingEntityRenderer;
+import yesman.epicfight.client.renderer.patched.entity.PresetRendererWrapper;
 import yesman.epicfight.client.renderer.patched.entity.WitherGhostCloneRenderer;
 import yesman.epicfight.client.renderer.patched.item.RenderBow;
 import yesman.epicfight.client.renderer.patched.item.RenderCrossbow;
@@ -249,30 +251,37 @@ public class RenderEngine {
 		ModLoader.get().postEvent(new PatchedRenderersEvent.Modify(this.entityRendererCache));
 	}
 	
-	public void registerCustomEntityRenderer(EntityType<?> entityType, String renderer, CompoundTag compound) {
-		if ("".equals(renderer)) {
+	@SuppressWarnings("unchecked")
+	public void registerCustomEntityRenderer(EntityType<?> entityType, String rendererName, CompoundTag compound) {
+		if ("".equals(rendererName)) {
 			return;
 		}
 		
-		if ("player".equals(renderer)) {
+		EntityRenderDispatcher erd = this.minecraft.getEntityRenderDispatcher();
+		EntityRendererProvider.Context context = new EntityRendererProvider.Context(erd, this.minecraft.getItemRenderer(), this.minecraft.getBlockRenderer(), erd.getItemInHandRenderer(),
+																					this.minecraft.getResourceManager(), this.minecraft.getEntityModels(), this.minecraft.font);
+		
+		if ("player".equals(rendererName)) {
 			this.entityRendererCache.put(entityType, this.basicHumanoidRenderer);
-		} else if ("epicfight:custom".equals(renderer)) {
-			EntityRenderDispatcher erd = this.minecraft.getEntityRenderDispatcher();
-			EntityRendererProvider.Context context = new EntityRendererProvider.Context(erd, this.minecraft.getItemRenderer(), this.minecraft.getBlockRenderer(), erd.getItemInHandRenderer(),
-																						this.minecraft.getResourceManager(), this.minecraft.getEntityModels(), this.minecraft.font);
-			
+		} else if ("epicfight:custom".equals(rendererName)) {
 			if (compound.getBoolean("humanoid")) {
 				this.entityRendererCache.put(entityType, new PCustomHumanoidEntityRenderer<> (() -> Meshes.getOrCreateAnimatedMesh(this.minecraft.getResourceManager(), new ResourceLocation(compound.getString("model")), HumanoidMesh::new), context, entityType));
 			} else {
 				this.entityRendererCache.put(entityType, new PCustomEntityRenderer(() -> Meshes.getOrCreateAnimatedMesh(this.minecraft.getResourceManager(), new ResourceLocation(compound.getString("model")), AnimatedMesh::new), context));
 			}
 		} else {
-			EntityType<?> presetEntityType = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(renderer));
+			EntityType<?> presetEntityType = ForgeRegistries.ENTITY_TYPES.getValue(new ResourceLocation(rendererName));
 			
 			if (this.entityRendererProvider.containsKey(presetEntityType)) {
-				this.entityRendererCache.put(entityType, this.entityRendererProvider.get(presetEntityType).apply(entityType));
+				PatchedEntityRenderer renderer = this.entityRendererProvider.get(presetEntityType).apply(entityType);
+				
+				if (!(this.minecraft.getEntityRenderDispatcher().renderers.get(entityType) instanceof LivingEntityRenderer) && (renderer instanceof PatchedLivingEntityRenderer patchedLivingEntityRenderer)) {
+					this.entityRendererCache.put(entityType, new PresetRendererWrapper(context, entityType, patchedLivingEntityRenderer));
+				} else {
+					this.entityRendererCache.put(entityType, this.entityRendererProvider.get(presetEntityType).apply(entityType));
+				}
 			} else {
-				throw new IllegalArgumentException("Datapack Mob Patch Crash: Invalid Renderer type " + renderer);
+				throw new IllegalArgumentException("Datapack Mob Patch Crash: Invalid Renderer type " + rendererName);
 			}
 		}
 	}
