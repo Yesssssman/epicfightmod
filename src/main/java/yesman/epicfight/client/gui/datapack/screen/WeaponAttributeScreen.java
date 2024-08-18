@@ -161,7 +161,7 @@ public class WeaponAttributeScreen extends Screen {
 											grid.setGridFocus(rowposition, "attribute");
 										})
 										.pressRemove((grid, button) -> {
-											this.styles.get(this.stylesGrid.getRowposition()).getValue().remove(grid.getValue(grid.getRowposition(), "attribute"));
+											this.styles.get(this.stylesGrid.getRowposition()).getValue().remove(((ParameterEditor)grid.getValue(grid.getRowposition(), "attribute")).editWidget.getMessage().getString());
 											grid.removeRow((removedRow) -> {});
 										})
 										.build();

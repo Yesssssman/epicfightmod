@@ -97,15 +97,11 @@ import yesman.epicfight.world.level.block.EpicFightBlocks;
 import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 
 /**
- *  Changes from 20.8.9 -> 20.8.10
+ *  Changes from 20.8.10 -> 20.8.11
  *  
- *  1. First person model translation is corrected not to clip the model
+ *  1. Fixed a crash when you remove a row in weapon attribute screen
  *  
- *  2. Fixed a crash when specifying non existing skill name in epicfight:set_skill loot function
  *  
- *  3. Fixed multiple phases not exported in datapack editor
- *  
- *  4. Fixed Vindicators' holding item visible when not aggressive
  *  
  *  --- TO DO ---
  *  

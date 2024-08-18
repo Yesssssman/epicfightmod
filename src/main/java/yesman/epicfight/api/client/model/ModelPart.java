@@ -38,12 +38,4 @@ public abstract class ModelPart<T extends VertexBuilder> {
 	public List<T> getVertices() {
 		return this.verticies;
 	}
-	
-	/**
-	public void setVanillaTransfrom() {
-		if (this.vanillaModelPart != null) {
-			
-		}
-	}
-	**/
 }
