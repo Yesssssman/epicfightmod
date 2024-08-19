@@ -1,4 +1,4 @@
-package yesman.epicfight.world.entity.ai.brain.task;
+package yesman.epicfight.world.entity.ai.behavior;
 
 import com.google.common.collect.ImmutableMap;
 
@@ -18,10 +18,11 @@ import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 
 public class AnimatedCombatBehavior<T extends MobPatch<?>> extends Behavior<Mob> {
 	protected final T mobpatch;
-	protected final CombatBehaviors<T> combatBehaviors;
+	protected final CombatBehaviors<? super T> combatBehaviors;
 	
-	public AnimatedCombatBehavior(T mobpatch, CombatBehaviors<T> combatBehaviors) {
+	public AnimatedCombatBehavior(T mobpatch, CombatBehaviors<? super T> combatBehaviors) {
 		super(ImmutableMap.of(MemoryModuleType.LOOK_TARGET, MemoryStatus.REGISTERED, MemoryModuleType.ATTACK_TARGET, MemoryStatus.VALUE_PRESENT));
+		
 	    this.mobpatch = mobpatch;
 	    this.combatBehaviors = combatBehaviors;
 	}
@@ -43,7 +44,7 @@ public class AnimatedCombatBehavior<T extends MobPatch<?>> extends Behavior<Mob>
 		
 		if (this.combatBehaviors.hasActivatedMove()) {
 			if (state.canBasicAttack()) {
-				CombatBehaviors.Behavior<T> result = this.combatBehaviors.tryProceed();
+				CombatBehaviors.Behavior<? super T> result = this.combatBehaviors.tryProceed();
 				
 				if (result != null) {
 					result.execute(this.mobpatch);
@@ -51,7 +52,7 @@ public class AnimatedCombatBehavior<T extends MobPatch<?>> extends Behavior<Mob>
 			}
 		} else {
 			if (!state.inaction()) {
-				CombatBehaviors.Behavior<T> result = this.combatBehaviors.selectRandomBehaviorSeries();
+				CombatBehaviors.Behavior<? super T> result = this.combatBehaviors.selectRandomBehaviorSeries();
 				
 				if (result != null) {
 					result.execute(this.mobpatch);

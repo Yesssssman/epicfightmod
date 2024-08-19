@@ -1,4 +1,4 @@
-package yesman.epicfight.world.entity.ai.brain.task;
+package yesman.epicfight.world.entity.ai.behavior;
 
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Mob;
@@ -13,6 +13,7 @@ public class MoveToTargetSinkStopInaction extends MoveToTargetSink {
 			MobPatch<?> mobpatch = EpicFightCapabilities.getEntityPatch(mob, MobPatch.class);
 			return !mobpatch.getEntityState().inaction();
 		}
+		
 		return false;
 	}
 }

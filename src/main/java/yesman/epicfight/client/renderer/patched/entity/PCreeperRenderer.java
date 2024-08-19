@@ -28,7 +28,7 @@ public class PCreeperRenderer extends PatchedLivingEntityRenderer<Creeper, Creep
 	}
 	
 	@Override
-	public MeshProvider<CreeperMesh> getMeshProvider(CreeperPatch entitypatch) {
+	public MeshProvider<CreeperMesh> getDefaultMesh() {
 		return Meshes.CREEPER;
 	}
 }

@@ -50,7 +50,7 @@ public class PCustomHumanoidEntityRenderer<AM extends HumanoidMesh> extends Patc
 	}
 	
 	@Override
-	public MeshProvider<AM> getMeshProvider(LivingEntityPatch<LivingEntity> entitypatch) {
+	public MeshProvider<AM> getDefaultMesh() {
 		return this.mesh;
 	}
 }

@@ -75,7 +75,11 @@ public abstract class PatchedEntityRenderer<E extends LivingEntity, T extends Li
 		return poseMatrices;
 	}
 	
-	public abstract MeshProvider<AM> getMeshProvider(T entitypatch);
+	public MeshProvider<AM> getMeshProvider(T entitypatch) {
+		return this.getDefaultMesh();
+	}
+	
+	public abstract MeshProvider<AM> getDefaultMesh();
 	
 	protected void setJointTransforms(T entitypatch, Armature armature, Pose pose, float partialTicks) {
 	}

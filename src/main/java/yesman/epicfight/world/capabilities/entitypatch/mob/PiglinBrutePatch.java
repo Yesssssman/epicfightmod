@@ -5,7 +5,6 @@ import java.util.Set;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.ai.behavior.MeleeAttack;
-import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.monster.piglin.PiglinBrute;
 import net.minecraft.world.entity.schedule.Activity;
@@ -17,9 +16,9 @@ import yesman.epicfight.gameasset.Animations;
 import yesman.epicfight.world.capabilities.entitypatch.Faction;
 import yesman.epicfight.world.capabilities.entitypatch.HumanoidMobPatch;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+import yesman.epicfight.world.entity.ai.behavior.AnimatedCombatBehavior;
+import yesman.epicfight.world.entity.ai.behavior.MoveToTargetSinkStopInaction;
 import yesman.epicfight.world.entity.ai.brain.BrainRecomposer;
-import yesman.epicfight.world.entity.ai.brain.task.AnimatedCombatBehavior;
-import yesman.epicfight.world.entity.ai.brain.task.MoveToTargetSinkStopInaction;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 
 public class PiglinBrutePatch extends HumanoidMobPatch<PiglinBrute> {
@@ -55,17 +54,11 @@ public class PiglinBrutePatch extends HumanoidMobPatch<PiglinBrute> {
 	@Override
 	public void setAIAsInfantry(boolean holdingRanedWeapon) {
 		CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
-		
-		if (builder != null) {
-			BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.FIGHT, 12, AnimatedCombatBehavior.class, new AnimatedCombatBehavior<>(this, builder.build(this)));
-		}
-		
-		BrainRecomposer.replaceBehavior(this.original.getBrain(), Activity.CORE, 1, MoveToTargetSink.class, new MoveToTargetSinkStopInaction());
+		BrainRecomposer.recomposePiglinBruteBrain(this.original.getBrain(), (builder != null) ? new AnimatedCombatBehavior<>(this, builder.build(this)) : null, new MoveToTargetSinkStopInaction());
 	}
 	
 	@Override
 	public void setAIAsMounted(Entity ridingEntity) {
-		
 	}
 	
 	@Override

@@ -102,7 +102,7 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 	}
 	
 	@Override
-	public MeshProvider<WitherMesh> getMeshProvider(WitherPatch entitypatch) {
+	public MeshProvider<WitherMesh> getDefaultMesh() {
 		return Meshes.WITHER;
 	}
 }

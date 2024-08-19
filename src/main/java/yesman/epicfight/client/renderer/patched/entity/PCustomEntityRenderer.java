@@ -69,7 +69,7 @@ public class PCustomEntityRenderer extends PatchedEntityRenderer<LivingEntity, L
 	}
 	
 	@Override
-	public MeshProvider<AnimatedMesh> getMeshProvider(LivingEntityPatch<LivingEntity> entitypatch) {
+	public MeshProvider<AnimatedMesh> getDefaultMesh() {
 		return this.mesh;
 	}
 }

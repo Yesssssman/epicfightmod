@@ -15,6 +15,9 @@ import yesman.epicfight.particle.HitParticleType;
 import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+import yesman.epicfight.world.entity.ai.behavior.AnimatedCombatBehavior;
+import yesman.epicfight.world.entity.ai.behavior.MoveToTargetSinkStopInaction;
+import yesman.epicfight.world.entity.ai.brain.BrainRecomposer;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
@@ -32,8 +35,16 @@ public class CustomMobPatch<T extends PathfinderMob> extends MobPatch<T> {
 	@Override
 	protected void initAI() {
 		super.initAI();
-		this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, ((CombatBehaviors.Builder<CustomMobPatch<T>>)this.provider.getCombatBehaviorsBuilder()).build(this)));
-		this.original.goalSelector.addGoal(1, new TargetChasingGoal(this, this.getOriginal(), this.provider.getChasingSpeed(), true));
+		
+		boolean useBrain = !this.original.getBrain().availableBehaviorsByPriority.isEmpty();
+		CombatBehaviors<CustomMobPatch<T>> combatBehaviors = ((CombatBehaviors.Builder<CustomMobPatch<T>>)this.provider.getCombatBehaviorsBuilder()).build(this);
+		
+		if (useBrain) {
+			BrainRecomposer.recomposeBrainByType(this.original.getType(), this.original.getBrain(), new AnimatedCombatBehavior<>(this, combatBehaviors), new MoveToTargetSinkStopInaction());
+		} else {
+			this.original.goalSelector.addGoal(0, new AnimatedAttackGoal<>(this, combatBehaviors));
+			this.original.goalSelector.addGoal(1, new TargetChasingGoal(this, this.getOriginal(), this.provider.getChasingSpeed(), true));
+		}
 	}
 	
 	public void initAttributes() {

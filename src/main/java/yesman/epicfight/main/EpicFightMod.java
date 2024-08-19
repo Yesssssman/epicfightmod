@@ -101,7 +101,9 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  
  *  1. Fixed a crash when you remove a row in weapon attribute screen
  *  
+ *  2. Fixed entities' AI broken with datapack when giving custom moveset for nether hostile creatures(Piglin, Piglin brute, Hoglin, Zoglin)
  *  
+ *  3. Fixed a crash when spawning modded entities with mob capability presets applied (iron's spells 'n spellbooks)
  *  
  *  --- TO DO ---
  *  

@@ -22,7 +22,7 @@ public class PIronGolemRenderer extends PatchedLivingEntityRenderer<IronGolem, I
 	}
 	
 	@Override
-	public MeshProvider<IronGolemMesh> getMeshProvider(IronGolemPatch entitypatch) {
+	public MeshProvider<IronGolemMesh> getDefaultMesh() {
 		return Meshes.IRON_GOLEM;
 	}
 }

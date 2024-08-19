@@ -165,7 +165,9 @@ public class LevelUtil {
 				
 				level.setBlock(bp, fractureBlockState, 0);
 				
-				createParticle(level, bp, bs);
+				if (bs.shouldSpawnParticlesOnBreak()) {
+					createParticle(level, bp, bs);
+				}
 			} else {
 				for (Entity entity : entitiesInArea) { 
 					boolean inSameY = bp.getY() + 1 >= entity.getY() && bp.getY() <= entity.getY();

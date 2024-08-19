@@ -115,9 +115,9 @@ public class PEnderDragonRenderer extends PatchedEntityRenderer<EnderDragon, End
 		
 		return OverlayTexture.pack(OverlayTexture.u(progression), OverlayTexture.v(entity.hurtTime > 5 || entity.deathTime > 0));
 	}
-
+	
 	@Override
-	public MeshProvider<DragonMesh> getMeshProvider(EnderDragonPatch entitypatch) {
+	public MeshProvider<DragonMesh> getDefaultMesh() {
 		return Meshes.DRAGON;
 	}
 }

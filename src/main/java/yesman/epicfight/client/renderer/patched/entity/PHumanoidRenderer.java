@@ -49,9 +49,9 @@ public class PHumanoidRenderer<E extends LivingEntity, T extends LivingEntityPat
 	protected float getDefaultLayerHeightCorrection() {
 		return 0.75F;
 	}
-
+	
 	@Override
-	public MeshProvider<AM> getMeshProvider(T entitypatch) {
+	public MeshProvider<AM> getDefaultMesh() {
 		return this.mesh;
 	}
 }

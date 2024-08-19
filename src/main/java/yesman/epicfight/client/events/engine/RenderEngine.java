@@ -32,6 +32,7 @@ import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.contents.TranslatableContents;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
+import net.minecraft.util.StringUtil;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
@@ -102,7 +103,7 @@ import yesman.epicfight.client.renderer.patched.entity.PWitherSkeletonMinionRend
 import yesman.epicfight.client.renderer.patched.entity.PZombieVillagerRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PatchedEntityRenderer;
 import yesman.epicfight.client.renderer.patched.entity.PatchedLivingEntityRenderer;
-import yesman.epicfight.client.renderer.patched.entity.PresetRendererWrapper;
+import yesman.epicfight.client.renderer.patched.entity.PresetRenderer;
 import yesman.epicfight.client.renderer.patched.entity.WitherGhostCloneRenderer;
 import yesman.epicfight.client.renderer.patched.item.RenderBow;
 import yesman.epicfight.client.renderer.patched.item.RenderCrossbow;
@@ -253,13 +254,12 @@ public class RenderEngine {
 	
 	@SuppressWarnings("unchecked")
 	public void registerCustomEntityRenderer(EntityType<?> entityType, String rendererName, CompoundTag compound) {
-		if ("".equals(rendererName)) {
+		if (StringUtil.isNullOrEmpty(rendererName)) {
 			return;
 		}
 		
 		EntityRenderDispatcher erd = this.minecraft.getEntityRenderDispatcher();
-		EntityRendererProvider.Context context = new EntityRendererProvider.Context(erd, this.minecraft.getItemRenderer(), this.minecraft.getBlockRenderer(), erd.getItemInHandRenderer(),
-																					this.minecraft.getResourceManager(), this.minecraft.getEntityModels(), this.minecraft.font);
+		EntityRendererProvider.Context context = new EntityRendererProvider.Context(erd, this.minecraft.getItemRenderer(), this.minecraft.getBlockRenderer(), erd.getItemInHandRenderer(), this.minecraft.getResourceManager(), this.minecraft.getEntityModels(), this.minecraft.font);
 		
 		if ("player".equals(rendererName)) {
 			this.entityRendererCache.put(entityType, this.basicHumanoidRenderer);
@@ -276,7 +276,7 @@ public class RenderEngine {
 				PatchedEntityRenderer renderer = this.entityRendererProvider.get(presetEntityType).apply(entityType);
 				
 				if (!(this.minecraft.getEntityRenderDispatcher().renderers.get(entityType) instanceof LivingEntityRenderer) && (renderer instanceof PatchedLivingEntityRenderer patchedLivingEntityRenderer)) {
-					this.entityRendererCache.put(entityType, new PresetRendererWrapper(context, entityType, patchedLivingEntityRenderer));
+					this.entityRendererCache.put(entityType, new PresetRenderer(context, entityType, (LivingEntityRenderer<LivingEntity, EntityModel<LivingEntity>>)context.getEntityRenderDispatcher().renderers.get(presetEntityType), patchedLivingEntityRenderer.getDefaultMesh()));
 				} else {
 					this.entityRendererCache.put(entityType, this.entityRendererProvider.get(presetEntityType).apply(entityType));
 				}

@@ -19,7 +19,7 @@ public class PRavagerRenderer extends PatchedLivingEntityRenderer<Ravager, Ravag
 	}
 	
 	@Override
-	public MeshProvider<RavagerMesh> getMeshProvider(RavagerPatch entitypatch) {
+	public MeshProvider<RavagerMesh> getDefaultMesh() {
 		return Meshes.RAVAGER;
 	}
 }

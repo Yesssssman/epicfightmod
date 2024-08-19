@@ -75,7 +75,7 @@ public class FractureBlockEntity extends BlockEntity {
 	
 	@OnlyIn(Dist.CLIENT)
 	public static void lifeTimeTick(Level level, BlockPos blockPos, BlockState blockState, FractureBlockEntity blockEntity) {
-		if (blockEntity.maxLifeTime - blockEntity.lifeTime < 10) {
+		if (blockEntity.originalBlockState.shouldSpawnParticlesOnBreak() && blockEntity.maxLifeTime - blockEntity.lifeTime < 10) {
 			Particle blockParticle = new TerrainParticle((ClientLevel)level, blockPos.getX(), blockPos.getY(), blockPos.getZ(), 0, 0, 0, blockEntity.originalBlockState, blockPos);
 			blockParticle.setParticleSpeed((Math.random() - 0.5D) * 0.3D, Math.random() * 0.5D, (Math.random() - 0.5D) * 0.3D);
 			blockParticle.setLifetime(10 + new Random().nextInt(60));

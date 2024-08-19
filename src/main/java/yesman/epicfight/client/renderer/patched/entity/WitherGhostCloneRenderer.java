@@ -49,9 +49,9 @@ public class WitherGhostCloneRenderer extends PatchedEntityRenderer<WitherGhostC
 		
 		poseStack.popPose();
 	}
-
+	
 	@Override
-	public MeshProvider<WitherMesh> getMeshProvider(WitherGhostPatch entitypatch) {
+	public MeshProvider<WitherMesh> getDefaultMesh() {
 		return Meshes.WITHER;
 	}
 }

@@ -26,7 +26,7 @@ public class PEndermanRenderer extends PatchedLivingEntityRenderer<EnderMan, End
 	}
 	
 	@Override
-	public MeshProvider<EndermanMesh> getMeshProvider(EndermanPatch entitypatch) {
+	public MeshProvider<EndermanMesh> getDefaultMesh() {
 		return Meshes.ENDERMAN;
 	}
 }

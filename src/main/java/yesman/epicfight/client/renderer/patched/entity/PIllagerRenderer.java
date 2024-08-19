@@ -25,7 +25,7 @@ public class PIllagerRenderer<E extends AbstractIllager, T extends MobPatch<E>> 
 	}
 	
 	@Override
-	public MeshProvider<HumanoidMesh> getMeshProvider(T entitypatch) {
+	public MeshProvider<HumanoidMesh> getDefaultMesh() {
 		return () -> Meshes.ILLAGER;
 	}
 }

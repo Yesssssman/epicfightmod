@@ -32,7 +32,7 @@ public class PHoglinRenderer<E extends Mob & HoglinBase, T extends MobPatch<E>> 
 	}
 	
 	@Override
-	public MeshProvider<HoglinMesh> getMeshProvider(T entitypatch) {
+	public MeshProvider<HoglinMesh> getDefaultMesh() {
 		return Meshes.HOGLIN;
 	}
 }

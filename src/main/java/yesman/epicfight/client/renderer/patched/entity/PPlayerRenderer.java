@@ -56,4 +56,9 @@ public class PPlayerRenderer extends PHumanoidRenderer<AbstractClientPlayer, Abs
 	public MeshProvider<HumanoidMesh> getMeshProvider(AbstractClientPlayerPatch<AbstractClientPlayer> entitypatch) {
 		return entitypatch.getOriginal().getModelName().equals("slim") ? () -> Meshes.ALEX : () -> Meshes.BIPED;
 	}
+	
+	@Override
+	public MeshProvider<HumanoidMesh> getDefaultMesh() {
+		return () -> Meshes.BIPED;
+	}
 }

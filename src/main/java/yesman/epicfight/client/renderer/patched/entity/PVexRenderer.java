@@ -22,7 +22,7 @@ public class PVexRenderer extends PatchedLivingEntityRenderer<Vex, VexPatch, Vex
 	}
 	
 	@Override
-	public MeshProvider<VexMesh> getMeshProvider(VexPatch entitypatch) {
+	public MeshProvider<VexMesh> getDefaultMesh() {
 		return Meshes.VEX;
 	}
 }

@@ -22,7 +22,7 @@ public class PWitchRenderer extends PatchedLivingEntityRenderer<Witch, WitchPatc
 	}
 	
 	@Override
-	public MeshProvider<VillagerMesh> getMeshProvider(WitchPatch entitypatch) {
+	public MeshProvider<VillagerMesh> getDefaultMesh() {
 		return Meshes.WITCH;
 	}
 }

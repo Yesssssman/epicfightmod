@@ -61,7 +61,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 			delta += rescaledWeight.getFloat(i);
 			
 			if (random < delta) {
-				this.behaviorSeriesList.get(index).resetCooldown(this, true);
+				this.resetCooldown(index, true);
 				return index;
 			}
 		}
@@ -78,7 +78,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 		this.currentBehaviorPointer = seriesPointer;
 		BehaviorSeries<T> behaviorSeries = this.behaviorSeriesList.get(seriesPointer);
 		Behavior<T> behavior = behaviorSeries.behaviors.get(behaviorSeries.nextBehaviorPointer);
-		behaviorSeries.upCounter();
+		behaviorSeries.count();
 		behavior.execute(this.mobpatch);
 	}
 	
@@ -93,7 +93,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 			this.currentBehaviorPointer = seriesPointer;
 			BehaviorSeries<T> behaviorSeries = this.behaviorSeriesList.get(seriesPointer);
 			Behavior<T> behavior = behaviorSeries.behaviors.get(behaviorSeries.nextBehaviorPointer);
-			behaviorSeries.upCounter();
+			behaviorSeries.count();
 			
 			if (behaviorSeries.loopFinished && !behaviorSeries.looping) {
 				behaviorSeries.loopFinished = false;
@@ -128,7 +128,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 		Behavior<T> nextBehavior = currentBehaviorSeries.behaviors.get(currentBehaviorSeries.nextBehaviorPointer);
 		
 		if (nextBehavior.checkPredicates(this.mobpatch)) {
-			currentBehaviorSeries.upCounter();
+			currentBehaviorSeries.count();
 			return nextBehavior;
 		} else {
 			this.currentBehaviorPointer = -1;
@@ -146,6 +146,10 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 	}
 	
 	public void tick() {
+		if (this.mobpatch.getEntityState().inaction()) {
+			return;
+		}
+		
 		for (BehaviorSeries<T> behaviorSeries : this.behaviorSeriesList) {
 			behaviorSeries.tick();
 		}
@@ -175,9 +179,9 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 		private final float weight;
 		private final int maxCooldown;
 		private final IntList cooldownShares;
+		private boolean loopFinished;
 		private int cooldown;
 		private int nextBehaviorPointer;
-		private boolean loopFinished;
 		
 		private BehaviorSeries(BehaviorSeries.Builder<T> builder) {
 			this.behaviors = builder.behaviors.stream().map(Behavior.Builder::build).toList();
@@ -196,7 +200,7 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 			return this.behaviors.get(this.nextBehaviorPointer).checkPredicates(mobpatch);
 		}
 		
-		public void upCounter() {
+		public void count() {
 			++this.nextBehaviorPointer;
 			this.loopFinished = false;
 			int behaviorsNum = this.behaviors.size();
@@ -208,7 +212,9 @@ public class CombatBehaviors<T extends MobPatch<?>> {
 		}
 		
 		public void tick() {
-			this.cooldown--;
+			if (this.cooldown > 0) {
+				this.cooldown--;
+			}
 		}
 		
 		public void resetCooldown(CombatBehaviors<T> mobBehavior, boolean resetSharingCooldown) {

@@ -5,13 +5,7 @@ import com.mojang.datafixers.util.Pair;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.Brain;
 import net.minecraft.world.entity.ai.attributes.Attributes;
-import net.minecraft.world.entity.ai.behavior.MeleeAttack;
-import net.minecraft.world.entity.ai.behavior.MoveToTargetSink;
-import net.minecraft.world.entity.ai.behavior.OneShot;
-import net.minecraft.world.entity.ai.behavior.declarative.BehaviorBuilder;
-import net.minecraft.world.entity.schedule.Activity;
 import net.minecraft.world.item.CrossbowItem;
 import net.minecraft.world.item.UseAnim;
 import yesman.epicfight.api.animation.Animator;
@@ -26,10 +20,9 @@ import yesman.epicfight.world.capabilities.item.CapabilityItem;
 import yesman.epicfight.world.capabilities.item.CapabilityItem.WeaponCategories;
 import yesman.epicfight.world.damagesource.StunType;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
+import yesman.epicfight.world.entity.ai.behavior.AnimatedCombatBehavior;
+import yesman.epicfight.world.entity.ai.behavior.MoveToTargetSinkStopInaction;
 import yesman.epicfight.world.entity.ai.brain.BrainRecomposer;
-import yesman.epicfight.world.entity.ai.brain.task.AnimatedCombatBehavior;
-import yesman.epicfight.world.entity.ai.brain.task.BackUpIfTooCloseStopInaction;
-import yesman.epicfight.world.entity.ai.brain.task.MoveToTargetSinkStopInaction;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
 import yesman.epicfight.world.entity.ai.goal.CombatBehaviors;
 import yesman.epicfight.world.entity.ai.goal.TargetChasingGoal;
@@ -44,21 +37,14 @@ public class CustomHumanoidMobPatch<T extends PathfinderMob> extends HumanoidMob
 		this.weaponAttackMotions = this.provider.getHumanoidCombatBehaviors();
 	}
 	
-	@SuppressWarnings("unchecked")
 	@Override
 	public void setAIAsInfantry(boolean holdingRanedWeapon) {
-		boolean isUsingBrain = !this.getOriginal().getBrain().availableBehaviorsByPriority.isEmpty();
+		boolean useBrain = !this.original.getBrain().availableBehaviorsByPriority.isEmpty();
 		
-		if (isUsingBrain) {
+		if (useBrain) {
 			if (!holdingRanedWeapon) {
 				CombatBehaviors.Builder<HumanoidMobPatch<?>> builder = this.getHoldingItemWeaponMotionBuilder();
-
-				if (builder != null) {
-					BrainRecomposer.replaceBehaviors((Brain<T>)this.original.getBrain(), Activity.FIGHT, MeleeAttack.class, new AnimatedCombatBehavior<>(this, builder.build(this)));
-				}
-
-				BrainRecomposer.replaceBehaviors((Brain<T>)this.original.getBrain(), Activity.FIGHT, OneShot.class, BehaviorBuilder.triggerIf((entity) -> entity.isHolding(is -> is.getItem() instanceof CrossbowItem), BackUpIfTooCloseStopInaction.create(5, 0.75F)));
-				BrainRecomposer.replaceBehaviors((Brain<T>)this.original.getBrain(), Activity.CORE, MoveToTargetSink.class, new MoveToTargetSinkStopInaction());
+				BrainRecomposer.recomposeBrainByType(this.original.getType(), this.original.getBrain(), (builder != null) ? new AnimatedCombatBehavior<>(this, builder.build(this)) : null, new MoveToTargetSinkStopInaction());
 			}
 		} else {
 			if (!holdingRanedWeapon) {
@@ -174,6 +160,7 @@ public class CustomHumanoidMobPatch<T extends PathfinderMob> extends HumanoidMob
 	@Override
 	public OpenMatrix4f getModelMatrix(float partialTicks) {
 		float scale = this.provider.getScale();
+		
 		return super.getModelMatrix(partialTicks).scale(scale, scale, scale);
 	}
 }

@@ -25,7 +25,7 @@ public class PSpiderRenderer extends PatchedLivingEntityRenderer<Spider, SpiderP
 	}
 	
 	@Override
-	public MeshProvider<SpiderMesh> getMeshProvider(SpiderPatch<Spider> entitypatch) {
+	public MeshProvider<SpiderMesh> getDefaultMesh() {
 		return Meshes.SPIDER;
 	}
 }

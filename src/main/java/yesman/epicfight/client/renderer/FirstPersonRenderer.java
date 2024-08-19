@@ -118,6 +118,11 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
 	}
 	
 	@Override
+	public MeshProvider<HumanoidMesh> getDefaultMesh() {
+		return () -> Meshes.BIPED;
+	}
+	
+	@Override
 	protected void prepareModel(HumanoidMesh mesh, LocalPlayer entity, LocalPlayerPatch entitypatch, LivingEntityRenderer<LocalPlayer, PlayerModel<LocalPlayer>> renderer) {
 		mesh.initialize();
 		mesh.head.setHidden(true);
