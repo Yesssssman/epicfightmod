@@ -37,6 +37,7 @@ import yesman.epicfight.client.renderer.patched.layer.EmptyLayer;
 import yesman.epicfight.client.renderer.patched.layer.PatchedItemInHandLayer;
 import yesman.epicfight.client.renderer.patched.layer.WearableItemLayer;
 import yesman.epicfight.client.world.capabilites.entitypatch.player.LocalPlayerPatch;
+import yesman.epicfight.mixin.MixinLivingEntityRenderer;
 
 @OnlyIn(Dist.CLIENT)
 public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer, LocalPlayerPatch, PlayerModel<LocalPlayer>, LivingEntityRenderer<LocalPlayer, PlayerModel<LocalPlayer>>, HumanoidMesh> {
@@ -96,7 +97,7 @@ public class FirstPersonRenderer extends PatchedLivingEntityRenderer<LocalPlayer
         float f1 = MathUtils.lerpBetween(entity.yHeadRotO, entity.yHeadRot, partialTicks);
         float f2 = f1 - f;
 		float f7 = entity.getViewXRot(partialTicks);
-		float bob = this.getVanillaRendererBob(entity, renderer, partialTicks);
+		float bob = ((MixinLivingEntityRenderer)renderer).invokeGetBob(entity, partialTicks);
 		
 		while (iter.hasNext()) {
 			RenderLayer<LocalPlayer, PlayerModel<LocalPlayer>> layer = iter.next();

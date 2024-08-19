@@ -2,6 +2,9 @@ package yesman.epicfight.api.client.model;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 import org.joml.Matrix3f;
 import org.joml.Matrix4f;
@@ -15,20 +18,21 @@ import com.mojang.blaze3d.vertex.VertexConsumer;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.RawMesh.RawModelPart;
+import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
 public class RawMesh extends Mesh<RawModelPart, VertexBuilder> implements MeshProvider<RawMesh> {
-	public RawMesh(Map<String, float[]> arrayMap, Map<String, List<VertexBuilder>> partBuilders, RawMesh parent, RenderProperties properties) {
+	public RawMesh(Map<String, float[]> arrayMap, Map<MeshPartDefinition, List<VertexBuilder>> partBuilders, RawMesh parent, RenderProperties properties) {
 		super(arrayMap, partBuilders, parent, properties);
 	}
 	
 	@Override
-	protected Map<String, RawModelPart> createModelPart(Map<String, List<VertexBuilder>> partBuilders) {
+	protected Map<String, RawModelPart> createModelPart(Map<MeshPartDefinition, List<VertexBuilder>> partBuilders) {
 		Map<String, RawModelPart> parts = Maps.newHashMap();
 		
-		partBuilders.forEach((partName, vertexBuilder) -> {
-			parts.put(partName, new RawModelPart(vertexBuilder));
+		partBuilders.forEach((partDefinition, vertexBuilder) -> {
+			parts.put(partDefinition.partName(), new RawModelPart(vertexBuilder, partDefinition.getModelPartAnimationProvider()));
 		});
 		
 		return parts;
@@ -44,6 +48,7 @@ public class RawMesh extends Mesh<RawModelPart, VertexBuilder> implements MeshPr
 		return parts.get(name);
 	}
 	
+	@Override
 	public void draw(PoseStack poseStack, VertexConsumer builder, Mesh.DrawingFunction drawingFunction, int packedLight, float r, float g, float b, float a, int overlay) {
 		for (RawModelPart part : this.parts.values()) {
 			part.draw(poseStack, builder, drawingFunction, packedLight, r, g, b, a, overlay);
@@ -52,8 +57,8 @@ public class RawMesh extends Mesh<RawModelPart, VertexBuilder> implements MeshPr
 	
 	@OnlyIn(Dist.CLIENT)
 	public class RawModelPart extends ModelPart<VertexBuilder> {
-		public RawModelPart(List<VertexBuilder> verticies) {
-			super(verticies);
+		public RawModelPart(List<VertexBuilder> verticies, @Nullable Supplier<OpenMatrix4f> vanillaPartTracer) {
+			super(verticies, vanillaPartTracer);
 		}
 		
 		@Override

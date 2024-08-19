@@ -1,9 +1,12 @@
 package yesman.epicfight.api.client.model.transformer;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.joml.Matrix4f;
+import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 
@@ -18,25 +21,33 @@ import mod.azure.azurelib.cache.object.GeoCube;
 import mod.azure.azurelib.cache.object.GeoQuad;
 import mod.azure.azurelib.cache.object.GeoVertex;
 import mod.azure.azurelib.core.animatable.GeoAnimatable;
+import mod.azure.azurelib.core.state.BoneSnapshot;
 import mod.azure.azurelib.renderer.GeoArmorRenderer;
 import mod.azure.azurelib.util.RenderUtils;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.forgeevent.AnimatedArmorTextureEvent;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.MeshPartDefinition;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.client.model.SingleGroupVertexBuilder;
+import yesman.epicfight.api.client.model.transformer.GeoModelTransformer.GeoMeshPartDefinition;
+import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.client.mesh.HumanoidMesh;
 
 @OnlyIn(Dist.CLIENT)
 public class AzureModelTransformer extends HumanoidModelTransformer {
@@ -49,6 +60,7 @@ public class AzureModelTransformer extends HumanoidModelTransformer {
 	static final PartTransformer<GeoCube> RIGHT_LEG = new LimbPartTransformer(1, 2, 3, 0.375F, true, AABB.ofSize(new Vec3(0.15D, 0.375D, 0), 0.5D, 0.85D, 0.5D));
 	static final PartTransformer<GeoCube> CHEST = new ChestPartTransformer(8, 7, 1.125F, AABB.ofSize(new Vec3(0, 1.125D, 0), 0.9D, 0.85D, 0.45D));
 	
+	@OnlyIn(Dist.CLIENT)
 	static class GeoModelPartition {
 		final PartTransformer<GeoCube> partTransformer;
 		final GeoBone geoBone;
@@ -72,13 +84,12 @@ public class AzureModelTransformer extends HumanoidModelTransformer {
 		}
 	}
 	
-	@SuppressWarnings("rawtypes")
-	public AnimatedMesh transformArmorModel(HumanoidModel<?> model, ResourceLocation modelName, EquipmentSlot slot) {
-		if (!(model instanceof GeoArmorRenderer<?>)) {
+	@Override
+	public AnimatedMesh transformArmorModel(ResourceLocation modelLocation, LivingEntity entityLiving, ItemStack itemstack, ArmorItem armorItem, EquipmentSlot slot, HumanoidModel<?> originalModel, Model forgeModel, HumanoidModel<?> entityModel, HumanoidMesh entityMesh) {
+		if (!(forgeModel instanceof GeoArmorRenderer<?> geoModel)) {
 			return null;
 		}
 		
-		GeoArmorRenderer geoModel = (GeoArmorRenderer)model;
 		List<GeoModelPartition> boxes = Lists.newArrayList();
 		
 		GeoBone headBone = geoModel.getHeadBone();
@@ -138,72 +149,75 @@ public class AzureModelTransformer extends HumanoidModelTransformer {
 			leftBootBone.setRotZ(0);
 		}
 		
-		switch (slot) {
-		case HEAD:
-			boxes.add(new GeoModelPartition(HEAD, headBone));
-			break;
-		case CHEST:
-			boxes.add(new GeoModelPartition(CHEST, bodyBone));
-			boxes.add(new GeoModelPartition(RIGHT_ARM, rightArmBone));
-			boxes.add(new GeoModelPartition(LEFT_ARM, leftArmBone));
-			break;
-		case LEGS:
-			boxes.add(new GeoModelPartition(CHEST, bodyBone));
-			boxes.add(new GeoModelPartition(LEFT_LEG, leftLegBone));
-			boxes.add(new GeoModelPartition(RIGHT_LEG, rightLegBone));
-			break;
-		case FEET:
-			boxes.add(new GeoModelPartition(LEFT_FEET, leftBootBone));
-			boxes.add(new GeoModelPartition(RIGHT_FEET, rightBootBone));
-			break;
-		default:
-			return null;
-		}
+		boxes.add(new GeoModelPartition(HEAD, headBone));
+		boxes.add(new GeoModelPartition(CHEST, bodyBone));
+		boxes.add(new GeoModelPartition(RIGHT_ARM, rightArmBone));
+		boxes.add(new GeoModelPartition(LEFT_ARM, leftArmBone));
+		boxes.add(new GeoModelPartition(LEFT_LEG, leftLegBone));
+		boxes.add(new GeoModelPartition(RIGHT_LEG, rightLegBone));
+		boxes.add(new GeoModelPartition(LEFT_FEET, leftBootBone));
+		boxes.add(new GeoModelPartition(RIGHT_FEET, rightBootBone));
 		
 		AnimatedMesh mesh = bakeMeshFromCubes(boxes);
-		Meshes.addMesh(modelName, mesh);
+		Meshes.addMesh(modelLocation, mesh);
 		
 		return mesh;
 	}
 	
 	private static AnimatedMesh bakeMeshFromCubes(List<GeoModelPartition> partitions) {
 		List<SingleGroupVertexBuilder> vertices = Lists.newArrayList();
-		Map<String, IntList> indices = Maps.newHashMap();
+		Map<MeshPartDefinition, IntList> indices = Maps.newHashMap();
 		PoseStack poseStack = new PoseStack();
 		PartTransformer.IndexCounter indexCounter = new PartTransformer.IndexCounter();
 		
 		for (GeoModelPartition modelpartition : partitions) {
-			bake(poseStack, modelpartition, modelpartition.geoBone, vertices, indices, indexCounter);
+			bake(poseStack, modelpartition, modelpartition.geoBone.getName(), modelpartition.geoBone, vertices, indices, Lists.newArrayList(), indexCounter, false);
 		}
 		
 		return SingleGroupVertexBuilder.loadVertexInformation(vertices, indices);
 	}
 	
-	private static void bake(PoseStack poseStack, GeoModelPartition modelpartition, GeoBone geoBone, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+	private static void bake(PoseStack poseStack, GeoModelPartition modelpartition, String partName, GeoBone geoBone, List<SingleGroupVertexBuilder> vertices, Map<MeshPartDefinition, IntList> indices, List<String> path, PartTransformer.IndexCounter indexCounter, boolean bindPartAnimation) {
 		if (geoBone == null) {
 			return;
 		}
 		
 		poseStack.pushPose();
 		
+		RenderUtils.prepMatrixForBone(poseStack, geoBone);
+		
+		List<String> newList = new ArrayList<>(path);
+		
+		if (bindPartAnimation) {
+			newList.add(partName);
+		}
+		
 		if (!geoBone.isHidden()) {
-			RenderUtils.prepMatrixForBone(poseStack, geoBone);
-			
 			for (GeoCube cube : geoBone.getCubes()) {
 				poseStack.pushPose();
 				
 				RenderUtils.translateToPivotPoint(poseStack, cube);
 				RenderUtils.rotateMatrixAroundCube(poseStack, cube);
 				RenderUtils.translateAwayFromPivotPoint(poseStack, cube);
+				MeshPartDefinition partDefinition = GeoMeshPartDefinition.of(partName);
 				
-				modelpartition.partTransformer.bakeCube(poseStack, geoBone.getName(), cube, vertices, indices, indexCounter);
+				if (bindPartAnimation) {
+					OpenMatrix4f invertedParentTransform = OpenMatrix4f.importFromMojangMatrix(poseStack.last().pose());
+					invertedParentTransform.m30 *= 0.0625F;
+					invertedParentTransform.m31 *= 0.0625F;
+					invertedParentTransform.m32 *= 0.0625F;
+					invertedParentTransform.invert();
+					partDefinition = AzureMeshPartDefinition.of(partName, newList, invertedParentTransform, modelpartition.geoBone);
+				}
+				
+				modelpartition.partTransformer.bakeCube(poseStack, partDefinition, cube, vertices, indices, indexCounter);
 				poseStack.popPose();
 			}
 		}
 		
 		if (!geoBone.isHidingChildren()) {
 			for (GeoBone childBone : geoBone.getChildBones()) {
-				bake(poseStack, modelpartition, childBone, vertices, indices, indexCounter);
+				bake(poseStack, modelpartition, partName, childBone, vertices, indices, newList, indexCounter, true);
 			}
 		}
 		
@@ -218,7 +232,7 @@ public class AzureModelTransformer extends HumanoidModelTransformer {
 			this.jointId = jointId;
 		}
 		
-		public void bakeCube(PoseStack poseStack, String partName, GeoCube cube, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+		public void bakeCube(PoseStack poseStack, MeshPartDefinition partName, GeoCube cube, List<SingleGroupVertexBuilder> vertices, Map<MeshPartDefinition, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 			for (GeoQuad quad : cube.quads()) {
 				if (quad == null) {
 					continue;
@@ -264,7 +278,7 @@ public class AzureModelTransformer extends HumanoidModelTransformer {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName, GeoCube cube, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+		public void bakeCube(PoseStack poseStack, MeshPartDefinition partName, GeoCube cube, List<SingleGroupVertexBuilder> vertices, Map<MeshPartDefinition, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 			Vec3 centerOfCube = getCenterOfCube(poseStack, cube);
 			
 			if (!this.noneAttachmentArea.contains(centerOfCube)) {
@@ -459,7 +473,7 @@ public class AzureModelTransformer extends HumanoidModelTransformer {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName, GeoCube cube, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+		public void bakeCube(PoseStack poseStack, MeshPartDefinition partName, GeoCube cube, List<SingleGroupVertexBuilder> vertices, Map<MeshPartDefinition, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 			Vec3 centerOfCube = getCenterOfCube(poseStack, cube);
 			
 			if (!this.noneAttachmentArea.contains(centerOfCube)) {
@@ -683,6 +697,87 @@ public class AzureModelTransformer extends HumanoidModelTransformer {
 			positionsIn[2] = new AnimatedVertex(positionsIn[2], positionsIn[2].u, positionsIn[2].v - cor, positionsIn[2].jointId, positionsIn[2].weight);
 			positionsIn[3] = new AnimatedVertex(positionsIn[3], positionsIn[3].u, positionsIn[3].v - cor, positionsIn[3].jointId, positionsIn[3].weight);
 			this.normal = directionIn.step();
+		}
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public record AzureMeshPartDefinition(String partName, List<String> path, OpenMatrix4f invertedParentTransform, GeoBone root) implements MeshPartDefinition {
+		public static MeshPartDefinition of(String partName) {
+			return new AzureMeshPartDefinition(partName, null, null, null);
+		}
+		
+		public static MeshPartDefinition of(String partName, List<String> path, OpenMatrix4f invertedParentTransform, GeoBone root) {
+			return new AzureMeshPartDefinition(partName, path, invertedParentTransform, root);
+		}
+		
+		public static GeoBone getChildBone(GeoBone bone, String boneName) {
+			for (GeoBone childBone : bone.getChildBones()) {
+				if (childBone.getName().equals(boneName)) {
+					return childBone;
+				}
+			}
+			
+			return null;
+		}
+		
+		public Supplier<OpenMatrix4f> getModelPartAnimationProvider() {
+			return this.root == null ? () -> null : () -> {
+				PoseStack poseStack = new PoseStack();
+				this.progress(this.root, poseStack, false);
+				GeoBone bone = this.root;
+				int idx = 0;
+				
+				for (String childPartName : this.path) {
+					bone = getChildBone(bone, childPartName);
+					
+					if (bone == null) {
+						return null;
+					}
+					
+					idx++;
+					this.progress(bone, poseStack, idx == this.path.size());
+				}
+				
+				OpenMatrix4f parentTransform = OpenMatrix4f.importFromMojangMatrix(poseStack.last().pose());
+				GeoBone lastBone = bone;
+				BoneSnapshot boneSnapshot = bone.getInitialSnapshot();
+				OpenMatrix4f partAnimation = OpenMatrix4f.mulMatrices(parentTransform,
+																	  new OpenMatrix4f().mulBack(OpenMatrix4f.fromQuaternion(new Quaternionf().rotationZYX(boneSnapshot.getRotZ(), boneSnapshot.getRotY(), boneSnapshot.getRotX())).transpose().invert())
+																	  					.translate(new Vec3f(lastBone.getPosX() - boneSnapshot.getOffsetX(), lastBone.getPosY() - boneSnapshot.getOffsetY(), lastBone.getPosZ() - boneSnapshot.getOffsetZ()).scale(0.0625F))
+																						.mulBack(OpenMatrix4f.fromQuaternion(new Quaternionf().rotationZYX(boneSnapshot.getRotZ(), boneSnapshot.getRotY(), boneSnapshot.getRotX())).transpose())
+																						.mulBack(OpenMatrix4f.fromQuaternion(new Quaternionf().rotationZYX(boneSnapshot.getRotZ() - lastBone.getRotZ(), boneSnapshot.getRotY() - lastBone.getRotY(), boneSnapshot.getRotX() - lastBone.getRotX())))
+																						.scale(new Vec3f(lastBone.getScaleX(), lastBone.getScaleY(), lastBone.getScaleZ())),
+																	  this.invertedParentTransform);
+				
+				return partAnimation;
+			};
+		}
+		
+		private void progress(GeoBone bone, PoseStack poseStack, boolean last) {
+			BoneSnapshot boneSnapshot = bone.getInitialSnapshot();
+			
+			if (last) {
+				poseStack.translate(boneSnapshot.getOffsetX(), boneSnapshot.getOffsetY(), boneSnapshot.getOffsetZ());
+				poseStack.mulPose(new Quaternionf().rotationZYX(boneSnapshot.getRotZ(), boneSnapshot.getRotY(), boneSnapshot.getRotX()));
+			} else {
+				poseStack.translate(bone.getPosX(), bone.getPosY(), bone.getPosZ());
+				poseStack.mulPose(new Quaternionf().rotationZYX(bone.getRotZ(), bone.getRotY(), bone.getRotX()));
+				poseStack.scale(bone.getScaleX(), bone.getScaleY(), bone.getScaleZ());
+			}
+		}
+		
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			} else if (o instanceof MeshPartDefinition comparision) {
+				return this.partName.equals(comparision.partName());
+			}
+			
+			return false;
+		}
+		
+		public int hashCode() {
+			return this.partName.hashCode();
 		}
 	}
 }

@@ -1,8 +1,9 @@
 package yesman.epicfight.api.client.model.transformer;
 
-import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 import org.joml.Matrix4f;
 import org.joml.Quaternionf;
@@ -17,20 +18,28 @@ import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
+import net.minecraft.client.model.geom.PartPose;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.MeshPartDefinition;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.client.model.SingleGroupVertexBuilder;
+import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.client.ClientEngine;
+import yesman.epicfight.client.mesh.HumanoidMesh;
 
 @OnlyIn(Dist.CLIENT)
 public class VanillaModelTransformer extends HumanoidModelTransformer {
@@ -43,128 +52,120 @@ public class VanillaModelTransformer extends HumanoidModelTransformer {
 	public static final PartTransformer<ModelPart.Cube> RIGHT_LEG = new LimbPartTransformer(1, 2, 3, 6.0F, true, AABB.ofSize(new Vec3(2.0D, 6.0D, 0), 8.0D, 14.0D, 8.0D));
 	public static final PartTransformer<ModelPart.Cube> CHEST = new ChestPartTransformer(8, 7, 18.0F, AABB.ofSize(new Vec3(0, 18.0D, 0), 12.0D, 14.0D, 6.0D));
 	
-	static class VanillaModelPartition {
-		final PartTransformer<ModelPart.Cube> partTransformer;
-		final ModelPart modelPart;
-		final String partName;
-		
-		private VanillaModelPartition(PartTransformer<ModelPart.Cube> partTransformer, ModelPart modelPart, String partName) {
-			this.partTransformer = partTransformer;
-			this.modelPart = modelPart;
-			this.partName = partName;
-		}
+	@OnlyIn(Dist.CLIENT)
+	static record VanillaModelPartition(PartTransformer<ModelPart.Cube> partTransformer, ModelPart modelPart, String partName) {
 	}
 	
 	@Override
-	public AnimatedMesh transformArmorModel(HumanoidModel<?> model, ResourceLocation modelName, EquipmentSlot slot) {
-		List<VanillaModelPartition> boxes = Lists.newArrayList();
-		//List<ModelPart> modelParts = getAllParts(model);
-		
-		model.head.setRotation(0.0F, 0.0F, 0.0F);
-		model.hat.setRotation(0.0F, 0.0F, 0.0F);
-		model.body.setRotation(0.0F, 0.0F, 0.0F);
-	    model.rightArm.setRotation(0.0F, 0.0F, 0.0F);
-	    model.leftArm.setRotation(0.0F, 0.0F, 0.0F);
-	    model.rightLeg.setRotation(0.0F, 0.0F, 0.0F);
-	    model.leftLeg.setRotation(0.0F, 0.0F, 0.0F);
-		
-	    switch (slot) {
-		case HEAD:
-			boxes.add(new VanillaModelPartition(HEAD, model.head, "head"));
-			boxes.add(new VanillaModelPartition(HEAD, model.hat, "hat"));
-			break;
-		case CHEST:
-			boxes.add(new VanillaModelPartition(CHEST, model.body, "body"));
-			boxes.add(new VanillaModelPartition(RIGHT_ARM, model.rightArm, "rightArm"));
-			boxes.add(new VanillaModelPartition(LEFT_ARM, model.leftArm, "leftArm"));
-			break;
-		case LEGS:
-			boxes.add(new VanillaModelPartition(CHEST, model.body, "body"));
-			boxes.add(new VanillaModelPartition(LEFT_LEG, model.leftLeg, "leftLeg"));
-			boxes.add(new VanillaModelPartition(RIGHT_LEG, model.rightLeg, "rightLeg"));
-			break;
-		case FEET:
-			boxes.add(new VanillaModelPartition(LEFT_FEET, model.leftLeg, "leftLeg"));
-			boxes.add(new VanillaModelPartition(RIGHT_FEET, model.rightLeg, "rightLeg"));
-			break;
-		default:
-			return null;
+	public AnimatedMesh transformArmorModel(ResourceLocation modelLocation, LivingEntity entityLiving, ItemStack itemstack, ArmorItem armorItem, EquipmentSlot slot, HumanoidModel<?> originalModel, Model forgeModel, HumanoidModel<?> entityModel, HumanoidMesh entityMesh) {
+		if (forgeModel == originalModel || !(forgeModel instanceof HumanoidModel humanoidModel)) {
+			return entityMesh.getHumanoidArmorModel(slot);
 		}
 		
+		if (!ClientEngine.getInstance().isVanillaModelDebuggingMode()) {
+			humanoidModel.setAllVisible(false);
+			
+			switch (slot) {
+			case HEAD -> {
+				humanoidModel.head.visible = true;
+				humanoidModel.hat.visible = true;
+			}
+			case CHEST -> {
+				humanoidModel.body.visible = true;
+				humanoidModel.rightArm.visible = true;
+				humanoidModel.leftArm.visible = true;
+			}
+			case LEGS -> {
+				humanoidModel.body.visible = true;
+				humanoidModel.rightLeg.visible = true;
+				humanoidModel.leftLeg.visible = true;
+			}
+			case FEET -> {
+				humanoidModel.rightLeg.visible = true;
+				humanoidModel.leftLeg.visible = true;
+			}
+			default -> {}
+			}
+		}
+		
+		List<VanillaModelPartition> boxes = Lists.newArrayList();
+		
+		//Remove entity animation
+		humanoidModel.head.loadPose(humanoidModel.head.getInitialPose());
+		humanoidModel.hat.loadPose(humanoidModel.hat.getInitialPose());
+		humanoidModel.body.loadPose(humanoidModel.body.getInitialPose());
+		humanoidModel.leftArm.loadPose(humanoidModel.leftArm.getInitialPose());
+		humanoidModel.rightArm.loadPose(humanoidModel.rightArm.getInitialPose());
+		humanoidModel.leftLeg.loadPose(humanoidModel.leftLeg.getInitialPose());
+		humanoidModel.rightLeg.loadPose(humanoidModel.rightLeg.getInitialPose());
+		
+		boxes.add(new VanillaModelPartition(HEAD, humanoidModel.head, "head"));
+		boxes.add(new VanillaModelPartition(HEAD, humanoidModel.hat, "hat"));
+		boxes.add(new VanillaModelPartition(CHEST, humanoidModel.body, "body"));
+		boxes.add(new VanillaModelPartition(RIGHT_ARM, humanoidModel.rightArm, "rightArm"));
+		boxes.add(new VanillaModelPartition(LEFT_ARM, humanoidModel.leftArm, "leftArm"));
+		boxes.add(new VanillaModelPartition(LEFT_LEG, humanoidModel.leftLeg, "leftLeg"));
+		boxes.add(new VanillaModelPartition(RIGHT_LEG, humanoidModel.rightLeg, "rightLeg"));
+		
 		AnimatedMesh mesh = bakeMeshFromCubes(boxes);
-		Meshes.addMesh(modelName, mesh);
+		Meshes.addMesh(modelLocation, mesh);
 		
 		return mesh;
 	}
 	
-	public static List<ModelPart> getAllParts(Model model) {
-		Class<?> cls = model.getClass();
-		List<Class<?>> superClasses = Lists.newArrayList();
-		
-		while (Model.class.isAssignableFrom(cls)) {
-			superClasses.add(cls);
-			cls = cls.getSuperclass();
-		}
-		
-		List<ModelPart> modelParts = Lists.newArrayList();
-		
-		for (Class<?> modelClss : superClasses) {
-			Field[] modelFields = modelClss.getDeclaredFields();
-			
-			for (Field field : modelFields) {
-				if (field.getType().isAssignableFrom(ModelPart.class)) {
-					field.setAccessible(true);
-					try {
-						ModelPart modelPart = (ModelPart)field.get(model);
-						
-						if (modelPart.visible) {
-							modelParts.add(modelPart);
-						}
-					} catch(Exception e) {}
-				}
-			}
-		}
-		
-		return modelParts;
-	}
-	
 	private static AnimatedMesh bakeMeshFromCubes(List<VanillaModelPartition> partitions) {
 		List<SingleGroupVertexBuilder> vertices = Lists.newArrayList();
-		Map<String, IntList> indices = Maps.newHashMap();
+		Map<MeshPartDefinition, IntList> indices = Maps.newHashMap();
 		PoseStack poseStack = new PoseStack();
 		PartTransformer.IndexCounter indexCounter = new PartTransformer.IndexCounter();
 		
 		poseStack.mulPose(QuaternionUtils.YP.rotationDegrees(180.0F));
 		poseStack.mulPose(QuaternionUtils.XP.rotationDegrees(180.0F));
-		poseStack.translate(0, -24, 0);
+		poseStack.translate(0.0F, -24.0F, 0.0F);
 		
 		for (VanillaModelPartition modelpartition : partitions) {
-			bake(poseStack, modelpartition.partName, modelpartition, modelpartition.modelPart, vertices, indices, indexCounter);
+			bake(poseStack, modelpartition.partName, modelpartition, modelpartition.modelPart, vertices, indices, Lists.newArrayList(), indexCounter, false);
 		}
 		
 		return SingleGroupVertexBuilder.loadVertexInformation(vertices, indices);
 	}
 	
-	private static void bake(PoseStack poseStack, String partName, VanillaModelPartition modelpartition, ModelPart part, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
-		part.loadPose(part.getInitialPose());
+	private static void bake(PoseStack poseStack, String partName, VanillaModelPartition modelpartition, ModelPart part, List<SingleGroupVertexBuilder> vertices, Map<MeshPartDefinition, IntList> indices, List<String> path, PartTransformer.IndexCounter indexCounter, boolean bindPart) {
+		PartPose initialPose = part.getInitialPose();
 		
 		poseStack.pushPose();
-		poseStack.translate(part.x, part.y, part.z);
+		poseStack.translate(initialPose.x, initialPose.y, initialPose.z);
+		poseStack.mulPose(new Quaternionf().rotationZYX(initialPose.zRot, initialPose.yRot, initialPose.xRot));
 		
-		if (part.xRot != 0.0F || part.yRot != 0.0F || part.zRot != 0.0F) {
-			poseStack.mulPose((new Quaternionf()).rotationZYX(part.zRot, part.yRot, part.xRot));
-		}
-		
-		if (part.xScale != 1.0F || part.yScale != 1.0F || part.zScale != 1.0F) {
+		if (!bindPart) {
 			poseStack.scale(part.xScale, part.yScale, part.zScale);
 		}
 		
-		for (ModelPart.Cube cube : part.cubes) {
-			modelpartition.partTransformer.bakeCube(poseStack, partName, cube, vertices, indices, indexCounter);
+		List<String> newList = new ArrayList<>(path);
+		
+		if (bindPart) {
+			newList.add(partName);
+		}
+		
+		if (part.visible) {
+			MeshPartDefinition partDefinition = VanillaMeshPartDefinition.of(partName);
+			
+			if (bindPart) {
+				OpenMatrix4f invertedParentTransform = OpenMatrix4f.importFromMojangMatrix(poseStack.last().pose());
+				invertedParentTransform.m30 *= 0.0625F;
+				invertedParentTransform.m31 *= 0.0625F;
+				invertedParentTransform.m32 *= 0.0625F;
+				invertedParentTransform.invert();
+				partDefinition = VanillaMeshPartDefinition.of(partName, newList, invertedParentTransform, modelpartition.modelPart);
+			}
+			
+			for (ModelPart.Cube cube : part.cubes) {
+				modelpartition.partTransformer.bakeCube(poseStack, partDefinition, cube, vertices, indices, indexCounter);
+			}
 		}
 		
 		for (Map.Entry<String, ModelPart> child : part.children.entrySet()) {
-			bake(poseStack, child.getKey(), modelpartition, child.getValue(), vertices, indices, indexCounter);
+			bake(poseStack, child.getKey(), modelpartition, child.getValue(), vertices, indices, newList, indexCounter, true);
 		}
 		
 		poseStack.popPose();
@@ -178,7 +179,7 @@ public class VanillaModelTransformer extends HumanoidModelTransformer {
 			this.jointId = jointId;
 		}
 		
-		public void bakeCube(PoseStack poseStack, String partName, ModelPart.Cube cube, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+		public void bakeCube(PoseStack poseStack, MeshPartDefinition partDefinition, ModelPart.Cube cube, List<SingleGroupVertexBuilder> vertices, Map<MeshPartDefinition, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 			for (ModelPart.Polygon quad : cube.polygons) {
 				Vector3f norm = new Vector3f(quad.normal);
 				norm.mul(poseStack.last().normal());
@@ -196,7 +197,7 @@ public class VanillaModelTransformer extends HumanoidModelTransformer {
 					);
 				}
 				
-				triangluatePolygon(indices, partName, indexCounter);
+				triangluatePolygon(indices, partDefinition, indexCounter);
 			}
 		}
 	}
@@ -218,14 +219,14 @@ public class VanillaModelTransformer extends HumanoidModelTransformer {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName, ModelPart.Cube cube, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+		public void bakeCube(PoseStack poseStack, MeshPartDefinition partDefinition, ModelPart.Cube cube, List<SingleGroupVertexBuilder> vertices, Map<MeshPartDefinition, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 			Vec3 centerOfCube = getCenterOfCube(poseStack, cube);
 			
 			if (!this.noneAttachmentArea.contains(centerOfCube)) {
 				if (centerOfCube.y < this.yClipCoord) {
-					this.lowerAttachmentTransformer.bakeCube(poseStack, partName, cube, vertices, indices, indexCounter);
+					this.lowerAttachmentTransformer.bakeCube(poseStack, partDefinition, cube, vertices, indices, indexCounter);
 				} else {
-					this.upperAttachmentTransformer.bakeCube(poseStack, partName, cube, vertices, indices, indexCounter);
+					this.upperAttachmentTransformer.bakeCube(poseStack, partDefinition, cube, vertices, indices, indexCounter);
 				}
 				
 				return;
@@ -347,7 +348,7 @@ public class VanillaModelTransformer extends HumanoidModelTransformer {
 					);
 				}
 				
-				triangluatePolygon(indices, partName, indexCounter);
+				triangluatePolygon(indices, partDefinition, indexCounter);
 			}
 		}
 		
@@ -415,7 +416,7 @@ public class VanillaModelTransformer extends HumanoidModelTransformer {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName,  ModelPart.Cube cube, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+		public void bakeCube(PoseStack poseStack, MeshPartDefinition partDefinition,  ModelPart.Cube cube, List<SingleGroupVertexBuilder> vertices, Map<MeshPartDefinition, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 			List<AnimatedPolygon> polygons = Lists.<AnimatedPolygon>newArrayList();
 			
 			for (ModelPart.Polygon quad : cube.polygons) {
@@ -507,7 +508,7 @@ public class VanillaModelTransformer extends HumanoidModelTransformer {
 					);
 				}
 				
-				triangluatePolygon(indices, partName, indexCounter);
+				triangluatePolygon(indices, partDefinition, indexCounter);
 			}
 		}
 	}
@@ -626,6 +627,80 @@ public class VanillaModelTransformer extends HumanoidModelTransformer {
 			positionsIn[2] = new AnimatedVertex(positionsIn[2], positionsIn[2].u, positionsIn[2].v - cor, positionsIn[2].jointId, positionsIn[2].weight);
 			positionsIn[3] = new AnimatedVertex(positionsIn[3], positionsIn[3].u, positionsIn[3].v - cor, positionsIn[3].jointId, positionsIn[3].weight);
 			this.normal = directionIn.step();
+		}
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	public record VanillaMeshPartDefinition(String partName, List<String> path, OpenMatrix4f invertedParentTransform, ModelPart root) implements MeshPartDefinition {
+		public static MeshPartDefinition of(String partName) {
+			return new VanillaMeshPartDefinition(partName, null, null, null);
+		}
+		
+		public static MeshPartDefinition of(String partName, List<String> path, OpenMatrix4f invertedParentTransform, ModelPart root) {
+			return new VanillaMeshPartDefinition(partName, path, invertedParentTransform, root);
+		}
+		
+		public Supplier<OpenMatrix4f> getModelPartAnimationProvider() {
+			return this.root == null ? () -> null : () -> {
+				PoseStack poseStack = new PoseStack();
+				poseStack.mulPose(QuaternionUtils.YP.rotationDegrees(180.0F));
+				poseStack.mulPose(QuaternionUtils.XP.rotationDegrees(180.0F));
+				poseStack.translate(0.0F, -24.0F, 0.0F);
+				
+				this.progress(this.root, poseStack, false);
+				ModelPart part = this.root;
+				int idx = 0;
+				
+				for (String childPartName : this.path) {
+					idx++;
+					part = part.getChild(childPartName);
+					this.progress(part, poseStack, idx == this.path.size());
+				}
+				
+				OpenMatrix4f animParentTransform = OpenMatrix4f.importFromMojangMatrix(poseStack.last().pose());
+				animParentTransform.m30 *= 0.0625F;
+				animParentTransform.m31 *= 0.0625F;
+				animParentTransform.m32 *= 0.0625F;
+				
+				ModelPart lastPart = part;
+				PartPose partPose = part.getInitialPose();
+				OpenMatrix4f partAnimation = OpenMatrix4f.mulMatrices(animParentTransform,
+																	  new OpenMatrix4f().mulBack(OpenMatrix4f.fromQuaternion(new Quaternionf().rotationZYX(partPose.zRot, partPose.yRot, partPose.xRot)).transpose().invert())
+																						.translate(new Vec3f(lastPart.x - partPose.x, lastPart.y - partPose.y, lastPart.z - partPose.z).scale(0.0625F))
+																						.mulBack(OpenMatrix4f.fromQuaternion(new Quaternionf().rotationZYX(partPose.zRot, partPose.yRot, partPose.xRot)).transpose())
+																						.mulBack(OpenMatrix4f.fromQuaternion(new Quaternionf().rotationZYX(lastPart.zRot - partPose.zRot, lastPart.yRot - partPose.yRot, lastPart.xRot - partPose.xRot)).transpose())
+																						.scale(new Vec3f(lastPart.xScale, lastPart.yScale, lastPart.zScale)),
+																	  this.invertedParentTransform);
+				
+				return partAnimation;
+			};
+		}
+		
+		private void progress(ModelPart part, PoseStack poseStack, boolean last) {
+			PartPose initialPose = part.getInitialPose();
+			
+			if (last) {
+				poseStack.translate(initialPose.x, initialPose.y, initialPose.z);
+				poseStack.mulPose(new Quaternionf().rotationZYX(initialPose.zRot, initialPose.yRot, initialPose.xRot));
+			} else {
+				poseStack.translate(part.x, part.y, part.z);
+				poseStack.mulPose(new Quaternionf().rotationZYX(part.zRot, part.yRot, part.xRot));
+				poseStack.scale(part.xScale, part.yScale, part.zScale);
+			}
+		}
+		
+		public boolean equals(Object o) {
+			if (this == o) {
+				return true;
+			} else if (o instanceof MeshPartDefinition comparision) {
+				return this.partName.equals(comparision.partName());
+			}
+			
+			return false;
+		}
+		
+		public int hashCode() {
+			return this.partName.hashCode();
 		}
 	}
 }

@@ -2,8 +2,6 @@ package yesman.epicfight.client.renderer.patched.entity;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 
@@ -33,7 +31,6 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.util.ObfuscationReflectionHelper;
 import yesman.epicfight.api.animation.AnimationPlayer;
 import yesman.epicfight.api.client.animation.Layer;
 import yesman.epicfight.api.client.forgeevent.PatchedRenderersEvent;
@@ -48,24 +45,15 @@ import yesman.epicfight.client.renderer.patched.layer.LayerUtil;
 import yesman.epicfight.client.renderer.patched.layer.PatchedLayer;
 import yesman.epicfight.client.renderer.patched.layer.RenderOriginalModelLayer;
 import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.mixin.MixinLivingEntityRenderer;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T extends LivingEntityPatch<E>, M extends EntityModel<E>, R extends LivingEntityRenderer<E, M>, AM extends AnimatedMesh> extends PatchedEntityRenderer<E, T, R, AM> implements LayerRenderer<E, T, M> {
-	protected static Method isBodyVisible;
-	protected static Method getRenderType;
-	
-	static {
-		isBodyVisible = ObfuscationReflectionHelper.findMethod(LivingEntityRenderer.class, "m_5933_", LivingEntity.class);
-		getRenderType = ObfuscationReflectionHelper.findMethod(LivingEntityRenderer.class, "m_7225_", LivingEntity.class, boolean.class, boolean.class, boolean.class);
-	}
-	
 	protected final Map<Class<?>, PatchedLayer<E, T, M, ? extends RenderLayer<E, M>>> patchedLayers = Maps.newHashMap();
 	protected final List<PatchedLayer<E, T, M, ? extends RenderLayer<E, M>>> customLayers = Lists.newArrayList();
 	
 	public PatchedLivingEntityRenderer(EntityRendererProvider.Context context, EntityType<?> entityType) {
-		super(context);
-		
 		ResourceLocation type = EntityType.getKey(entityType);
 		FileToIdConverter filetoidconverter = FileToIdConverter.json("animated_layers/" + type.getPath());
 		List<Pair<ResourceLocation, JsonElement>> layers = Lists.newArrayList();
@@ -131,17 +119,19 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		super.render(entity, entitypatch, renderer, buffer, poseStack, packedLight, partialTicks);
 		
 		Minecraft mc = Minecraft.getInstance();
-		boolean isVisible = this.isVisible(renderer, entity);
+		MixinLivingEntityRenderer livingEntityRendererAccessor = (MixinLivingEntityRenderer)renderer;
+		
+		boolean isVisible = livingEntityRendererAccessor.invokeIsBodyVisible(entity);
 		boolean isVisibleToPlayer = !isVisible && !entity.isInvisibleTo(mc.player);
 		boolean isGlowing = mc.shouldEntityAppearGlowing(entity);
-		RenderType renderType = this.getRenderType(entity, entitypatch, renderer, isVisible, isVisibleToPlayer, isGlowing);
+		RenderType renderType = livingEntityRendererAccessor.invokeGetRenderType(entity, isVisible, isVisibleToPlayer, isGlowing);
 		Armature armature = entitypatch.getArmature();
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, armature, entity, entitypatch, partialTicks);
+		this.prepareVanillaModel(entity, renderer.getModel(), renderer, partialTicks);
 		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks, false);
 		
 		if (renderType != null) {
-		    this.prepareVanillaModel(entity, renderer.getModel(), renderer, partialTicks);
 			AM mesh = this.getMeshProvider(entitypatch).get();
 			this.prepareModel(mesh, entity, entitypatch, renderer);
 			
@@ -169,20 +159,15 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		poseStack.popPose();
 	}
 	
-	// can't transform the access modifier of getBob method because of overriding
-	public float getVanillaRendererBob(E entity, LivingEntityRenderer<E, M> renderer, float partialTicks) {
-		return entity.tickCount + partialTicks;
-	}
-	
-	protected void prepareVanillaModel(E entityIn, M model, LivingEntityRenderer<E, M> renderer, float partialTicks) {
-		boolean shouldSit = entityIn.isPassenger() && (entityIn.getVehicle() != null && entityIn.getVehicle().shouldRiderSit());
+	protected void prepareVanillaModel(E entity, M model, LivingEntityRenderer<E, M> renderer, float partialTicks) {
+		boolean shouldSit = entity.isPassenger() && (entity.getVehicle() != null && entity.getVehicle().shouldRiderSit());
 		model.riding = shouldSit;
-		model.young = entityIn.isBaby();
-		float f = Mth.rotLerp(partialTicks, entityIn.yBodyRotO, entityIn.yBodyRot);
-		float f1 = Mth.rotLerp(partialTicks, entityIn.yHeadRotO, entityIn.yHeadRot);
+		model.young = entity.isBaby();
+		float f = Mth.rotLerp(partialTicks, entity.yBodyRotO, entity.yBodyRot);
+		float f1 = Mth.rotLerp(partialTicks, entity.yHeadRotO, entity.yHeadRot);
 		float f2 = f1 - f;
 		
-		if (shouldSit && entityIn.getVehicle() instanceof LivingEntity livingentity) {
+		if (shouldSit && entity.getVehicle() instanceof LivingEntity livingentity) {
 			f = Mth.rotLerp(partialTicks, livingentity.yBodyRotO, livingentity.yBodyRot);
 			f2 = f1 - f;
 			float f3 = Mth.wrapDegrees(f2);
@@ -202,21 +187,21 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 			f2 = f1 - f;
 		}
 
-		float f6 = Mth.lerp(partialTicks, entityIn.xRotO, entityIn.getXRot());
+		float f6 = Mth.lerp(partialTicks, entity.xRotO, entity.getXRot());
 		
-		if (LivingEntityRenderer.isEntityUpsideDown(entityIn)) {
+		if (LivingEntityRenderer.isEntityUpsideDown(entity)) {
 			f6 *= -1.0F;
 			f2 *= -1.0F;
 		}
 		
-		float f7 = this.getVanillaRendererBob(entityIn, renderer, partialTicks);
+		float f7 = ((MixinLivingEntityRenderer)renderer).invokeGetBob(entity, partialTicks);
 		float f8 = 0.0F;
 		float f5 = 0.0F;
 		
-		if (!shouldSit && entityIn.isAlive()) {
-			f8 = entityIn.walkAnimation.speed(partialTicks);
-			f5 = entityIn.walkAnimation.position() - entityIn.walkAnimation.speed() * (1.0F - partialTicks);
-			if (entityIn.isBaby()) {
+		if (!shouldSit && entity.isAlive()) {
+			f8 = entity.walkAnimation.speed(partialTicks);
+			f5 = entity.walkAnimation.position() - entity.walkAnimation.speed() * (1.0F - partialTicks);
+			if (entity.isBaby()) {
 				f5 *= 3.0F;
 			}
 
@@ -225,8 +210,8 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 			}
 		}
 		
-		model.prepareMobModel(entityIn, f5, f8, partialTicks);
-		model.setupAnim(entityIn, f5, f8, f7, f2, f6);
+		model.prepareMobModel(entity, f5, f8, partialTicks);
+		model.setupAnim(entity, f5, f8, f7, f2, f6);
 	}
 	
 	protected void prepareModel(AM mesh, E entity, T entitypatch, R renderer) {
@@ -238,7 +223,7 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
         float f1 = MathUtils.lerpBetween(entity.yHeadRotO, entity.yHeadRot, partialTicks);
         float f2 = f1 - f;
 		float f7 = entity.getViewXRot(partialTicks);
-		float bob = this.getVanillaRendererBob(entity, renderer, partialTicks);
+		float bob = ((MixinLivingEntityRenderer)renderer).invokeGetBob(entity, partialTicks);
 		
 		for (RenderLayer<E, M> layer : renderer.layers) {
 			Class<?> layerClass = layer.getClass();
@@ -254,27 +239,6 @@ public abstract class PatchedLivingEntityRenderer<E extends LivingEntity, T exte
 		
 		for (PatchedLayer<E, T, M, ? extends RenderLayer<E, M>> patchedLayer : this.customLayers) {
 			patchedLayer.renderLayer(entity, entitypatch, null, poseStack, buffer, packedLight, poses, bob, f2, f7, partialTicks);
-		}
-	}
-	
-	public RenderType getRenderType(E entityIn, T entitypatch, LivingEntityRenderer<E, M> renderer, boolean isVisible, boolean isVisibleToPlayer, boolean isGlowing) {
-		try {
-			return (RenderType)getRenderType.invoke(renderer, entityIn, isVisible, isVisibleToPlayer, isGlowing);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			EpicFightMod.LOGGER.error("Reflection Exception");
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	public boolean isVisible(LivingEntityRenderer<E, M> renderer, E entityIn) {
-		try {
-			return (boolean) isBodyVisible.invoke(renderer, entityIn);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			EpicFightMod.LOGGER.error("Reflection Exception");
-			e.printStackTrace();
-			
-			return true;
 		}
 	}
 	

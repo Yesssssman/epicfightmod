@@ -92,6 +92,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		model.drawToBuffer(poseStack, vertexConsumer, DrawingFunction.ENTITY_TEXTURED, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, OverlayTexture.NO_OVERLAY, armature, poses);
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public void renderLayer(T entitypatch, E entityliving, HumanoidArmorLayer<E, M, M> vanillaLayer, PoseStack poseStack, MultiBufferSource buf, int packedLight, OpenMatrix4f[] poses, float bob, float yRot, float xRot, float partialTicks) {
 		for (EquipmentSlot slot : EquipmentSlot.values()) {
@@ -129,11 +130,40 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				}
 				
 				M defaultModel = vanillaLayer.getArmorModel(slot);
-				AnimatedMesh armorMesh = this.getArmorModel(vanillaLayer, defaultModel, entityliving, armorItem, itemstack, slot);
+				Model armorModel = ForgeHooksClient.getArmorModel(entityliving, itemstack, slot, defaultModel);
+				AnimatedMesh armorMesh = this.getArmorModel(vanillaLayer, defaultModel, armorModel, entityliving, armorItem, itemstack, slot);
 				
 				if (armorMesh == null) {
 					poseStack.popPose();
 					return;
+				}
+				
+				if (armorModel instanceof HumanoidModel humanoidModel) {
+					boolean shouldSit = entityliving.isPassenger() && (entityliving.getVehicle() != null && entityliving.getVehicle().shouldRiderSit());
+					float f8 = 0.0F;
+					float f5 = 0.0F;
+					
+					if (!shouldSit && entityliving.isAlive()) {
+						f8 = entityliving.walkAnimation.speed(partialTicks);
+						f5 = entityliving.walkAnimation.position(partialTicks);
+						
+						if (entityliving.isBaby()) {
+							f5 *= 3.0F;
+						}
+						
+						if (f8 > 1.0F) {
+							f8 = 1.0F;
+						}
+					}
+					
+					humanoidModel.setupAnim(entityliving, f8, f5, bob, yRot, xRot);
+					humanoidModel.head.loadPose(humanoidModel.head.getInitialPose());
+					humanoidModel.hat.loadPose(humanoidModel.hat.getInitialPose());
+					humanoidModel.body.loadPose(humanoidModel.body.getInitialPose());
+					humanoidModel.leftArm.loadPose(humanoidModel.leftArm.getInitialPose());
+					humanoidModel.rightArm.loadPose(humanoidModel.rightArm.getInitialPose());
+					humanoidModel.leftLeg.loadPose(humanoidModel.leftLeg.getInitialPose());
+					humanoidModel.rightLeg.loadPose(humanoidModel.rightLeg.getInitialPose());
 				}
 				
 				armorMesh.initialize();
@@ -169,7 +199,7 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		}
 	}
 	
-	private AnimatedMesh getArmorModel(HumanoidArmorLayer<E, M, M> originalRenderer, M originalModel, E entityliving, ArmorItem armorItem, ItemStack stack, EquipmentSlot slot) {
+	private AnimatedMesh getArmorModel(HumanoidArmorLayer<E, M, M> originalRenderer, M originalModel, Model forgeModel, E entityliving, ArmorItem armorItem, ItemStack itemstack, EquipmentSlot slot) {
 		ResourceLocation registryName = ForgeRegistries.ITEMS.getKey(armorItem);
 		
 		if (ARMOR_MODELS.containsKey(registryName) && !ClientEngine.getInstance().renderEngine.shouldRenderVanillaModel()) {
@@ -177,24 +207,18 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 		} else {
 			ResourceManager resourceManager = Minecraft.getInstance().getResourceManager();
 			ResourceLocation rl = new ResourceLocation(ForgeRegistries.ITEMS.getKey(armorItem).getNamespace(), "animmodels/armor/" + ForgeRegistries.ITEMS.getKey(armorItem).getPath() + ".json");
-			AnimatedMesh model = null;
+			AnimatedMesh animatedMesh = null;
 			
 			if (resourceManager.getResource(rl).isPresent()){
 				JsonModelLoader modelLoader = new JsonModelLoader(resourceManager, rl);
-				model = modelLoader.loadAnimatedMesh(AnimatedMesh::new);
+				animatedMesh = modelLoader.loadAnimatedMesh(AnimatedMesh::new);
 			} else {
-				Model customModel = ForgeHooksClient.getArmorModel(entityliving, stack, slot, originalModel);
-				
-				if (customModel == originalModel || !(customModel instanceof HumanoidModel<?> humanoidModel)) {
-					model = this.mesh.get().getHumanoidArmorModel(slot);
-				} else {
-					model = CustomModelBakery.bakeArmor(humanoidModel, armorItem, slot);
-				}
+				animatedMesh = CustomModelBakery.bakeArmor(entityliving, itemstack, armorItem, slot, originalModel, forgeModel, originalRenderer.getParentModel(), this.mesh.get());
 			}
 			
-			putModel(registryName, model);
+			putModel(registryName, animatedMesh);
 			
-			return model;
+			return animatedMesh;
 		}
 	}
 	

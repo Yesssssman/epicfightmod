@@ -1,6 +1,5 @@
 package yesman.epicfight.api.client.model.transformer;
 
-import java.lang.reflect.Field;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
@@ -30,11 +29,15 @@ import net.minecraft.world.entity.player.PlayerModelPart;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.MeshPartDefinition;
 import yesman.epicfight.api.client.model.SingleGroupVertexBuilder;
 import yesman.epicfight.api.client.model.transformer.HumanoidModelTransformer.PartTransformer;
+import yesman.epicfight.api.client.model.transformer.VanillaModelTransformer.VanillaMeshPartDefinition;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec3f;
+import yesman.epicfight.mixin.SkinLayer3DMixinCustomModelPart;
+import yesman.epicfight.mixin.SkinLayer3DMixinCustomizableCubeWrapper.SkinLayer3DMixinCustomModelCube;
 
 @OnlyIn(Dist.CLIENT)
 public class SkinLayer3DTransformer extends CustomizableCube {
@@ -51,36 +54,7 @@ public class SkinLayer3DTransformer extends CustomizableCube {
 	static final PartTransformer<CustomizableCube> RIGHT_LEG = new LimbPartTransformer(1, 2, 3, 6.0F, true);
 	static final PartTransformer<CustomizableCube> CHEST = new ChestPartTransformer(18.0F);
 	
-	private static Field customModelPart$x;
-	private static Field customModelPart$y;
-	private static Field customModelPart$z;
-	private static Field customModelPart$xRot;
-	private static Field customModelPart$yRot;
-	private static Field customModelPart$zRot;
-	private static Field customizableCube$polygons;
-	
-	static {
-		try {
-			customModelPart$x = CustomModelPart.class.getDeclaredField("x");
-			customModelPart$y = CustomModelPart.class.getDeclaredField("y");
-			customModelPart$z = CustomModelPart.class.getDeclaredField("z");
-			customModelPart$xRot = CustomModelPart.class.getDeclaredField("xRot");
-			customModelPart$yRot = CustomModelPart.class.getDeclaredField("yRot");
-			customModelPart$zRot = CustomModelPart.class.getDeclaredField("zRot");
-			customizableCube$polygons = CustomizableCube.class.getDeclaredField("polygons");
-		} catch (NoSuchFieldException | SecurityException e) {
-			e.printStackTrace();
-		}
-		
-		customModelPart$x.setAccessible(true);
-		customModelPart$y.setAccessible(true);
-		customModelPart$z.setAccessible(true);
-		customModelPart$xRot.setAccessible(true);
-		customModelPart$yRot.setAccessible(true);
-		customModelPart$zRot.setAccessible(true);
-		customizableCube$polygons.setAccessible(true);
-	}
-	
+	@OnlyIn(Dist.CLIENT)
 	static class ModelPartition {
 		final PartTransformer<ModelPart.Cube> vanillaPartTransformer;
 		final PartTransformer<CustomizableCube> partTransformer;
@@ -155,7 +129,7 @@ public class SkinLayer3DTransformer extends CustomizableCube {
 	
 	private static AnimatedMesh bakeMeshFromCubes(AbstractClientPlayer abstractClientPlayer, List<ModelPartition> partitions) {
 		List<SingleGroupVertexBuilder> vertices = Lists.newArrayList();
-		Map<String, IntList> indices = Maps.newHashMap();
+		Map<MeshPartDefinition, IntList> indices = Maps.newHashMap();
 		PoseStack poseStack = new PoseStack();
 		PartTransformer.IndexCounter indexCounter = new PartTransformer.IndexCounter();
 		
@@ -170,7 +144,7 @@ public class SkinLayer3DTransformer extends CustomizableCube {
 		return SingleGroupVertexBuilder.loadVertexInformation(vertices, indices);
 	}
 	
-	private static void bake(AbstractClientPlayer abstractClientPlayer, PoseStack poseStack, ModelPartition modelpartition, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+	private static void bake(AbstractClientPlayer abstractClientPlayer, PoseStack poseStack, ModelPartition modelpartition, List<SingleGroupVertexBuilder> vertices, Map<MeshPartDefinition, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 		modelpartition.vanillaModelPart.loadPose(modelpartition.vanillaModelPart.getInitialPose());
 		ModelPart part = modelpartition.vanillaModelPart;
 		
@@ -189,36 +163,20 @@ public class SkinLayer3DTransformer extends CustomizableCube {
 		LayerFeatureTransformerAPI.getTransformer().transform(abstractClientPlayer, poseStack, modelpartition.vanillaModelPart);
 		modelpartition.transformFunction.accept(poseStack);
 		
-		float posX = 0;
-		float posY = 0;
-		float posZ = 0;
-		float xRot = 0;
-		float yRot = 0;
-		float zRot = 0;
+		SkinLayer3DMixinCustomModelPart customModelPart = (SkinLayer3DMixinCustomModelPart)modelpartition.skinlayerModelPart;
+		poseStack.translate(customModelPart.getX(), customModelPart.getY(), customModelPart.getZ());
 		
-		try {
-			posX = (float)customModelPart$x.get(modelpartition.skinlayerModelPart);
-			posY = (float)customModelPart$y.get(modelpartition.skinlayerModelPart);
-			posZ = (float)customModelPart$z.get(modelpartition.skinlayerModelPart);
-			xRot = (float)customModelPart$xRot.get(modelpartition.skinlayerModelPart);
-			yRot = (float)customModelPart$yRot.get(modelpartition.skinlayerModelPart);
-			zRot = (float)customModelPart$zRot.get(modelpartition.skinlayerModelPart);
-		} catch (IllegalArgumentException | IllegalAccessException e) {
-		}
-		
-		poseStack.translate(posX, posY, posZ);
-		
-        if (xRot != 0.0F || yRot != 0.0F || zRot != 0.0F) {
-            poseStack.mulPose((new Quaternionf()).rotationZYX(zRot, yRot, xRot));
+        if (customModelPart.getXRot() != 0.0F || customModelPart.getYRot() != 0.0F || customModelPart.getZRot() != 0.0F) {
+            poseStack.mulPose(new Quaternionf().rotationZYX(customModelPart.getXRot(), customModelPart.getYRot(), customModelPart.getZRot()));
         }
 		
 		for (ModelPart.Cube cube : modelpartition.vanillaCubes) {
 			transformer.transform(cube);
-			modelpartition.vanillaPartTransformer.bakeCube(poseStack, modelpartition.partName, cube, vertices, indices, indexCounter);
+			modelpartition.vanillaPartTransformer.bakeCube(poseStack, VanillaMeshPartDefinition.of(modelpartition.partName), cube, vertices, indices, indexCounter);
 		}
 		
 		for (CustomizableCube cube : modelpartition.customizableCubes) {
-			modelpartition.partTransformer.bakeCube(poseStack, modelpartition.partName, cube, vertices, indices, indexCounter);
+			modelpartition.partTransformer.bakeCube(poseStack, VanillaMeshPartDefinition.of(modelpartition.partName), cube, vertices, indices, indexCounter);
 		}
 		
 		poseStack.popPose();
@@ -233,15 +191,8 @@ public class SkinLayer3DTransformer extends CustomizableCube {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName, CustomizableCube cube, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
-			CustomizableCube.Polygon[] polygons = null;
-			
-			try {
-				polygons = (CustomizableCube.Polygon[])customizableCube$polygons.get(cube);
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				e.printStackTrace();
-				return;
-			}
+		public void bakeCube(PoseStack poseStack, MeshPartDefinition partName, CustomizableCube cube, List<SingleGroupVertexBuilder> vertices, Map<MeshPartDefinition, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+			CustomizableCube.Polygon[] polygons = ((SkinLayer3DMixinCustomModelCube)cube).getPolygons();
 			
 			for (CustomizableCube.Polygon polygon : polygons) {
 				if (polygon == null) {
@@ -280,18 +231,10 @@ public class SkinLayer3DTransformer extends CustomizableCube {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName, CustomizableCube cube, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+		public void bakeCube(PoseStack poseStack, MeshPartDefinition partName, CustomizableCube cube, List<SingleGroupVertexBuilder> vertices, Map<MeshPartDefinition, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 			List<AnimatedPolygon> xClipPolygons = Lists.<AnimatedPolygon>newArrayList();
 			List<AnimatedPolygon> xyClipPolygons = Lists.<AnimatedPolygon>newArrayList();
-			
-			CustomizableCube.Polygon[] polygons = null;
-			
-			try {
-				polygons = (CustomizableCube.Polygon[])customizableCube$polygons.get(cube);
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				e.printStackTrace();
-				return;
-			}
+			CustomizableCube.Polygon[] polygons = ((SkinLayer3DMixinCustomModelCube)cube).getPolygons();
 			
 			for (CustomizableCube.Polygon polygon : polygons) {
 				if (polygon == null) {
@@ -470,16 +413,9 @@ public class SkinLayer3DTransformer extends CustomizableCube {
 		}
 		
 		@Override
-		public void bakeCube(PoseStack poseStack, String partName, CustomizableCube cube, List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices, PartTransformer.IndexCounter indexCounter) {
+		public void bakeCube(PoseStack poseStack, MeshPartDefinition partName, CustomizableCube cube, List<SingleGroupVertexBuilder> vertices, Map<MeshPartDefinition, IntList> indices, PartTransformer.IndexCounter indexCounter) {
 			List<AnimatedPolygon> animatedPolygons = Lists.<AnimatedPolygon>newArrayList();
-			CustomizableCube.Polygon[] polygons = null;
-			
-			try {
-				polygons = (CustomizableCube.Polygon[])customizableCube$polygons.get(cube);
-			} catch (IllegalArgumentException | IllegalAccessException e) {
-				e.printStackTrace();
-				return;
-			}
+			CustomizableCube.Polygon[] polygons = ((SkinLayer3DMixinCustomModelCube)cube).getPolygons();
 			
 			for (CustomizableCube.Polygon polygon : polygons) {
 				if (polygon == null) {

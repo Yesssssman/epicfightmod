@@ -296,6 +296,16 @@ public class OpenMatrix4f {
 		return dest;
 	}
 	
+	public static OpenMatrix4f mulMatrices(OpenMatrix4f... srcs) {
+		OpenMatrix4f dest = new OpenMatrix4f();
+		
+		for (OpenMatrix4f src : srcs) {
+			dest.mulBack(src);
+		}
+		
+		return dest;
+	}
+	
 	public static OpenMatrix4f mulAsOrigin(OpenMatrix4f left, OpenMatrix4f right, OpenMatrix4f dest) {
 		float x = right.m30;
 		float y = right.m31;

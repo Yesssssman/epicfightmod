@@ -27,7 +27,6 @@ public class PCustomEntityRenderer extends PatchedEntityRenderer<LivingEntity, L
 	private final MeshProvider<AnimatedMesh> mesh;
 	
 	public PCustomEntityRenderer(MeshProvider<AnimatedMesh> mesh, EntityRendererProvider.Context context) {
-		super(context);
 		this.mesh = mesh;
 	}
 	

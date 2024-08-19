@@ -24,6 +24,7 @@ import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.client.mesh.WitherMesh;
 import yesman.epicfight.client.renderer.patched.layer.PatchedWitherArmorLayer;
+import yesman.epicfight.mixin.MixinLivingEntityRenderer;
 import yesman.epicfight.world.capabilities.entitypatch.boss.WitherPatch;
 
 @OnlyIn(Dist.CLIENT)
@@ -37,16 +38,17 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 	}
 	
 	@Override
-	public void render(WitherBoss entityIn, WitherPatch entitypatch, WitherBossRenderer renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
+	public void render(WitherBoss entity, WitherPatch entitypatch, WitherBossRenderer renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
 		Minecraft mc = Minecraft.getInstance();
-		boolean isVisible = this.isVisible(entityIn, entitypatch);
-		boolean isVisibleToPlayer = !isVisible && !entityIn.isInvisibleTo(mc.player);
-		boolean isGlowing = mc.shouldEntityAppearGlowing(entityIn);
-		RenderType renderType = this.getRenderType(entityIn, entitypatch, renderer, isVisible, isVisibleToPlayer, isGlowing);
+		MixinLivingEntityRenderer livingEntityRendererAccessor = (MixinLivingEntityRenderer)renderer;
+		boolean isVisible = this.isVisible(entity, entitypatch);
+		boolean isVisibleToPlayer = !isVisible && !entity.isInvisibleTo(mc.player);
+		boolean isGlowing = mc.shouldEntityAppearGlowing(entity);
+		RenderType renderType = livingEntityRendererAccessor.invokeGetRenderType(entity, isVisible, isVisibleToPlayer, isGlowing);
 		WitherMesh mesh = this.getMeshProvider(entitypatch).get();
 		Armature armature = entitypatch.getArmature();
 		poseStack.pushPose();
-		this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
+		this.mulPoseStack(poseStack, armature, entity, entitypatch, partialTicks);
 		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks, false);
 		
 		if (renderType != null) {
@@ -54,7 +56,7 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 			
 			if (transparencyCount == 0) {
 				if (!entitypatch.isGhost()) {
-					mesh.draw(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entityIn, entitypatch, partialTicks), entitypatch.getArmature(), poseMatrices);
+					mesh.draw(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, 1.0F, this.getOverlayCoord(entity, entitypatch, partialTicks), entitypatch.getArmature(), poseMatrices);
 				}
 			} else {
 				float transparency = (Math.abs(transparencyCount) + partialTicks) / 41.0F;
@@ -67,7 +69,7 @@ public class PWitherRenderer extends PatchedLivingEntityRenderer<WitherBoss, Wit
 				mesh.draw(poseStack, buffer, RenderType.entityTranslucent(WITHER_INVULNERABLE_LOCATION), packedLight, 1.0F, 1.0F, 1.0F, Mth.sin(transparency * 3.1415F), OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poseMatrices);
 			}
 			
-			this.renderLayer(renderer, entitypatch, entityIn, poseMatrices, buffer, poseStack, packedLight, partialTicks);
+			this.renderLayer(renderer, entitypatch, entity, poseMatrices, buffer, poseStack, packedLight, partialTicks);
 		}
 		
 		if (renderType != null) {

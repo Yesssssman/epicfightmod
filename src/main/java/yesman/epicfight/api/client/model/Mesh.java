@@ -30,7 +30,7 @@ public abstract class Mesh<P extends ModelPart<V>, V extends VertexBuilder> {
 	 * @param parent Null if arrayMap and parts are not null
 	 * @param renderProperties
 	 */
-	public Mesh(@Nullable Map<String, float[]> arrayMap, @Nullable Map<String, List<V>> partBuilders, @Nullable Mesh<P, V> parent, RenderProperties renderProperties) {
+	public Mesh(@Nullable Map<String, float[]> arrayMap, @Nullable Map<MeshPartDefinition, List<V>> partBuilders, @Nullable Mesh<P, V> parent, RenderProperties renderProperties) {
 		this.positions = (parent == null) ? arrayMap.get("positions") : parent.positions;
 		this.normals = (parent == null) ? arrayMap.get("normals") : parent.normals;
 		this.uvs = (parent == null) ? arrayMap.get("uvs") : parent.uvs;
@@ -46,7 +46,7 @@ public abstract class Mesh<P extends ModelPart<V>, V extends VertexBuilder> {
 		this.vertexCount = totalV;
 	}
 	
-	protected abstract Map<String, P> createModelPart(Map<String, List<V>> partBuilders);
+	protected abstract Map<String, P> createModelPart(Map<MeshPartDefinition, List<V>> partBuilders);
 	protected abstract P getOrLogException(Map<String, P> parts, String name);
 	public abstract void draw(PoseStack poseStack, VertexConsumer builder, Mesh.DrawingFunction drawingFunction, int packedLight, float r, float g, float b, float a, int overlay);
 	

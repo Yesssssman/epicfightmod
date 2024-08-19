@@ -38,7 +38,7 @@ import yesman.epicfight.compat.IRISCompat;
 import yesman.epicfight.main.EpicFightMod;
 
 @Mixin(targets = {"net.irisshaders.iris.pipeline.programs.ExtendedShader"})
-public abstract class MixinIrisShaderInstance {
+public abstract class IrisMixinExtendedShader {
 	@Inject(at = @At(value = "TAIL"), method = "<init>", cancellable = true)
 	private void epicfight_constructor(ResourceProvider resourceFactory, String name, VertexFormat vertexFormat, boolean usesTessellation, GlFramebuffer writingToBeforeTranslucent, GlFramebuffer writingToAfterTranslucent,
 			BlendModeOverride blendModeOverride, AlphaTest alphaTest, Consumer<DynamicLocationalUniformHolder> uniformCreator, BiConsumer<SamplerHolder, ImageHolder> samplerCreator, boolean isIntensity, IrisRenderingPipeline parent,

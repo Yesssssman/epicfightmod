@@ -5,6 +5,7 @@ import java.nio.ByteOrder;
 import java.util.List;
 import java.util.Map;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
@@ -59,7 +60,7 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 	private VertexBuffer<Short> jointsBuffer = new VertexBuffer<> (GLConstants.GL_SHORT, 3, false, ByteBuffer::putShort);
 	private VertexBuffer<Float> weightsBuffer = new VertexBuffer<> (GLConstants.GL_FLOAT, 3, false, ByteBuffer::putFloat);
 	
-	public AnimatedMesh(@Nullable Map<String, float[]> arrayMap, @Nullable Map<String, List<AnimatedVertexBuilder>> partBuilders, @Nullable AnimatedMesh parent, RenderProperties properties) {
+	public AnimatedMesh(@Nullable Map<String, float[]> arrayMap, @Nullable Map<MeshPartDefinition, List<AnimatedVertexBuilder>> partBuilders, @Nullable AnimatedMesh parent, RenderProperties properties) {
 		super(arrayMap, partBuilders, parent, properties);
 		
 		this.weights = parent == null ? arrayMap.get("weights") : parent.weights;
@@ -143,11 +144,11 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 	}
 	
 	@Override
-	protected Map<String, AnimatedModelPart> createModelPart(Map<String, List<AnimatedVertexBuilder>> partBuilders) {
+	protected Map<String, AnimatedModelPart> createModelPart(Map<MeshPartDefinition, List<AnimatedVertexBuilder>> partBuilders) {
 		Map<String, AnimatedModelPart> parts = Maps.newHashMap();
 		
-		partBuilders.forEach((partName, vertexBuilder) -> {
-			parts.put(partName, new AnimatedModelPart(vertexBuilder));
+		partBuilders.forEach((partDefinition, vertexBuilder) -> {
+			parts.put(partDefinition.partName(), new AnimatedModelPart(vertexBuilder, partDefinition.getModelPartAnimationProvider()));
 		});
 		
 		return parts;
@@ -368,8 +369,8 @@ public class AnimatedMesh extends Mesh<AnimatedModelPart, AnimatedVertexBuilder>
 	public class AnimatedModelPart extends ModelPart<AnimatedVertexBuilder> {
 		private int indexBufferId;
 		
-		public AnimatedModelPart(List<AnimatedVertexBuilder> animatedMeshPartList) {
-			super(animatedMeshPartList);
+		public AnimatedModelPart(List<AnimatedVertexBuilder> animatedMeshPartList, @Nullable Supplier<OpenMatrix4f> vanillaPartTracer) {
+			super(animatedMeshPartList, vanillaPartTracer);
 		}
 		
 		private void createVbo(Map<AnimatedVertexBuilder, Integer> vertexBuilderMap, float positions[], float uvs[], float normals[], float weights[], List<Float> position, List<Float> uv, List<Byte> normal, List<Short> joint, List<Float> weight) {

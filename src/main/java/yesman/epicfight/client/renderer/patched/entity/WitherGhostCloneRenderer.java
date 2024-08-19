@@ -5,7 +5,6 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.Mth;
 import net.minecraftforge.api.distmarker.Dist;
@@ -23,19 +22,15 @@ import yesman.epicfight.world.entity.WitherGhostClone;
 
 @OnlyIn(Dist.CLIENT)
 public class WitherGhostCloneRenderer extends PatchedEntityRenderer<WitherGhostClone, WitherGhostPatch, NoopLivingEntityRenderer<WitherGhostClone>, WitherMesh> {
-	public WitherGhostCloneRenderer(EntityRendererProvider.Context context) {
-		super(context);
-	}
-	
 	@Override
-	public void render(WitherGhostClone entityIn, WitherGhostPatch entitypatch, NoopLivingEntityRenderer<WitherGhostClone> renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
+	public void render(WitherGhostClone entity, WitherGhostPatch entitypatch, NoopLivingEntityRenderer<WitherGhostClone> renderer, MultiBufferSource buffer, PoseStack poseStack, int packedLight, float partialTicks) {
 		RenderType renderType = RenderType.entityTranslucent(PWitherRenderer.WITHER_INVULNERABLE_LOCATION);
 		WitherMesh mesh = this.getMeshProvider(entitypatch).get();
 		Armature armature = entitypatch.getArmature();
-		float tranparency = entityIn.isNoAi() ? 0.6F : Mth.sin((entityIn.tickCount + partialTicks) * 0.025F * Mth.PI) * 0.6F;
+		float tranparency = entity.isNoAi() ? 0.6F : Mth.sin((entity.tickCount + partialTicks) * 0.025F * Mth.PI) * 0.6F;
 		
 		poseStack.pushPose();
-		this.mulPoseStack(poseStack, armature, entityIn, entitypatch, partialTicks);
+		this.mulPoseStack(poseStack, armature, entity, entitypatch, partialTicks);
 		OpenMatrix4f[] poseMatrices = this.getPoseMatrices(entitypatch, armature, partialTicks, false);
 		mesh.draw(poseStack, buffer, renderType, packedLight, 1.0F, 1.0F, 1.0F, tranparency, OverlayTexture.NO_OVERLAY, entitypatch.getArmature(), poseMatrices);
 		

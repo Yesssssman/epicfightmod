@@ -18,14 +18,19 @@ import com.google.gson.JsonObject;
 
 import net.minecraft.SharedConstants;
 import net.minecraft.client.model.HumanoidModel;
+import net.minecraft.client.model.Model;
+import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.client.mesh.HumanoidMesh;
 import yesman.epicfight.main.EpicFightMod;
 
 @OnlyIn(Dist.CLIENT)
@@ -34,6 +39,12 @@ public class CustomModelBakery {
 	static final List<HumanoidModelTransformer> MODEL_TRANSFORMERS = Lists.newArrayList();
 	static final HumanoidModelTransformer VANILLA_TRANSFORMER = new VanillaModelTransformer();
 	static final Set<ArmorItem> EXCEPTIONAL_MODELS = Sets.newHashSet();
+	static final Set<ModelPart> MODEL_PARTS = Sets.newHashSet();
+	
+	@OnlyIn(Dist.CLIENT)
+	public interface ModelProvider {
+		public Model get(LivingEntity entityLiving, ItemStack itemStack, EquipmentSlot slot, HumanoidModel<?> _default);
+	}
 	
 	public static void registerNewTransformer(HumanoidModelTransformer transformer) {
 		MODEL_TRANSFORMERS.add(transformer);
@@ -65,7 +76,7 @@ public class CustomModelBakery {
 		out.close();
 	}
 	
-	public static AnimatedMesh bakeArmor(HumanoidModel<?> armorModel, ArmorItem armorItem, EquipmentSlot slot) {
+	public static AnimatedMesh bakeArmor(LivingEntity entityLiving, ItemStack itemstack, ArmorItem armorItem, EquipmentSlot slot, HumanoidModel<?> originalModel, Model forgeModel, HumanoidModel<?> entityModel, HumanoidMesh entityMesh) {
 		AnimatedMesh animatedArmorModel = null;
 		
 		if (!EXCEPTIONAL_MODELS.contains(armorItem)) {
@@ -73,7 +84,7 @@ public class CustomModelBakery {
 			
 			for (HumanoidModelTransformer modelTransformer : MODEL_TRANSFORMERS) {
 				try {
-					animatedArmorModel = modelTransformer.transformArmorModel(armorModel, modelName, slot);
+					animatedArmorModel = modelTransformer.transformArmorModel(modelName, entityLiving, itemstack, armorItem, slot, originalModel, forgeModel, entityModel, entityMesh);
 				} catch (Exception e) {
 					EpicFightMod.LOGGER.warn("Can't transform the model of " + ForgeRegistries.ITEMS.getKey(armorItem) + " because of :");
 					e.printStackTrace();
@@ -86,7 +97,7 @@ public class CustomModelBakery {
 			}
 			
 			if (animatedArmorModel == null) {
-				animatedArmorModel = VANILLA_TRANSFORMER.transformArmorModel(armorModel, modelName, slot);
+				animatedArmorModel = VANILLA_TRANSFORMER.transformArmorModel(modelName, entityLiving, itemstack, armorItem, slot, originalModel, forgeModel, entityModel, entityMesh);
 			}
 		}
 		

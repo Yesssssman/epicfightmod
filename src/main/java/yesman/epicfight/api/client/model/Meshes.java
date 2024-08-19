@@ -44,7 +44,7 @@ public class Meshes implements PreparableReloadListener {
 	
 	@FunctionalInterface
 	public interface MeshContructor<P extends ModelPart<V>, V extends VertexBuilder, M extends Mesh<P, V>> {
-		M invoke(Map<String, float[]> arrayMap, Map<String, List<V>> parts, M parent, RenderProperties properties);
+		M invoke(Map<String, float[]> arrayMap, Map<MeshPartDefinition, List<V>> parts, M parent, RenderProperties properties);
 	}
 	
 	private static final BiMap<ResourceLocation, Mesh<?, ?>> MESHES = HashBiMap.create();

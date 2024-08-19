@@ -76,7 +76,7 @@ public class SingleGroupVertexBuilder {
 		}
 	}
 	
-	public static AnimatedMesh loadVertexInformation(List<SingleGroupVertexBuilder> vertices, Map<String, IntList> indices) {
+	public static AnimatedMesh loadVertexInformation(List<SingleGroupVertexBuilder> vertices, Map<MeshPartDefinition, IntList> indices) {
 		FloatList positions = new FloatArrayList();
 		FloatList normals = new FloatArrayList();
 		FloatList texCoords = new FloatArrayList();
@@ -132,14 +132,14 @@ public class SingleGroupVertexBuilder {
 		float[] jointWeightList = jointWeights.toFloatArray();
 		int[] affectJointCounts = affectCountList.toIntArray();
 		Map<String, float[]> arrayMap = Maps.newHashMap();
-		Map<String, List<AnimatedVertexBuilder>> meshMap = Maps.newHashMap();
+		Map<MeshPartDefinition, List<AnimatedVertexBuilder>> meshMap = Maps.newHashMap();
 		
 		arrayMap.put("positions", positionList);
 		arrayMap.put("normals", normalList);
 		arrayMap.put("uvs", texCoordList);
 		arrayMap.put("weights", jointWeightList);
 		
-		for (Map.Entry<String, IntList> e : indices.entrySet()) {
+		for (Map.Entry<MeshPartDefinition, IntList> e : indices.entrySet()) {
 			meshMap.put(e.getKey(), VertexBuilder.createAnimated(e.getValue().toIntArray(), affectJointCounts, animationIndexList));
 		}
 		

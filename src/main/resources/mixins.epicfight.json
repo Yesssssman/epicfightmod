@@ -13,8 +13,13 @@
 		"MixinKeyboardHandler",
 		"MixinLocalPlayer",
 		"MixinMinecraft",
-		"MixinIrisShaderInstance",
-		"MixinPipelineManager"
+		"MixinEntityRenderer",
+		"MixinLivingEntityRenderer",
+		"IrisMixinExtendedShader",
+		"IrisMixinPipelineManager",
+		"SkinLayer3DMixinSkinUtil",
+		"SkinLayer3DMixinCustomModelPart",
+		"SkinLayer3DMixinCustomizableCubeWrapper$SkinLayer3DMixinCustomModelCube"
 	],
 	"mixins": [
 		"MixinEndCrystal",

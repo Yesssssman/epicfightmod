@@ -2,7 +2,6 @@ package yesman.epicfight.client.renderer.patched.entity;
 
 import java.io.IOException;
 import java.io.Reader;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 
@@ -45,6 +44,7 @@ import yesman.epicfight.client.renderer.LayerRenderer;
 import yesman.epicfight.client.renderer.patched.layer.LayerUtil;
 import yesman.epicfight.client.renderer.patched.layer.PatchedLayer;
 import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.mixin.MixinLivingEntityRenderer;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 /**
@@ -58,8 +58,6 @@ public class PresetRenderer extends PatchedEntityRenderer<LivingEntity, LivingEn
 	protected final MeshProvider<AnimatedMesh> mesh;
 	
 	public PresetRenderer(EntityRendererProvider.Context context, EntityType<?> entityType, LivingEntityRenderer<LivingEntity, EntityModel<LivingEntity>> renderer, MeshProvider<AnimatedMesh> mesh) {
-		super(null);
-		
 		this.presetRenderer = renderer;
 		this.mesh = mesh;
 		
@@ -95,10 +93,12 @@ public class PresetRenderer extends PatchedEntityRenderer<LivingEntity, LivingEn
 		super.render(entity, entitypatch, renderer, buffer, poseStack, packedLight, partialTicks);
 		
 		Minecraft mc = Minecraft.getInstance();
-		boolean isVisible = this.isVisible(this.presetRenderer, entity);
+		MixinLivingEntityRenderer livingEntityRendererAccessor = (MixinLivingEntityRenderer)this.presetRenderer;
+		
+		boolean isVisible = livingEntityRendererAccessor.invokeIsBodyVisible(entity);
 		boolean isVisibleToPlayer = !isVisible && !entity.isInvisibleTo(mc.player);
 		boolean isGlowing = mc.shouldEntityAppearGlowing(entity);
-		RenderType renderType = this.getRenderType(entity, entitypatch, this.presetRenderer, isVisible, isVisibleToPlayer, isGlowing);
+		RenderType renderType = livingEntityRendererAccessor.invokeGetRenderType(entity, isVisible, isVisibleToPlayer, isGlowing);
 		Armature armature = entitypatch.getArmature();
 		poseStack.pushPose();
 		this.mulPoseStack(poseStack, armature, entity, entitypatch, partialTicks);
@@ -218,27 +218,6 @@ public class PresetRenderer extends PatchedEntityRenderer<LivingEntity, LivingEn
 		
 		for (PatchedLayer<LivingEntity, LivingEntityPatch<LivingEntity>, EntityModel<LivingEntity>, ? extends RenderLayer<LivingEntity, EntityModel<LivingEntity>>> patchedLayer : this.customLayers) {
 			patchedLayer.renderLayer(entity, entitypatch, null, poseStack, buffer, packedLight, poses, bob, f2, f7, partialTicks);
-		}
-	}
-	
-	public RenderType getRenderType(LivingEntity entityIn, LivingEntityPatch<LivingEntity> entitypatch, LivingEntityRenderer<LivingEntity, EntityModel<LivingEntity>> renderer, boolean isVisible, boolean isVisibleToPlayer, boolean isGlowing) {
-		try {
-			return (RenderType)PatchedLivingEntityRenderer.getRenderType.invoke(renderer, entityIn, isVisible, isVisibleToPlayer, isGlowing);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			EpicFightMod.LOGGER.error("Reflection Exception");
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	public boolean isVisible(LivingEntityRenderer<LivingEntity, EntityModel<LivingEntity>> renderer, LivingEntity entityIn) {
-		try {
-			return (boolean)PatchedLivingEntityRenderer.isBodyVisible.invoke(renderer, entityIn);
-		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException e) {
-			EpicFightMod.LOGGER.error("Reflection Exception");
-			e.printStackTrace();
-			
-			return true;
 		}
 	}
 	
