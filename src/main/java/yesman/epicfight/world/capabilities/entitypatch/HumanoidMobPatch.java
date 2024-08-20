@@ -112,7 +112,7 @@ public abstract class HumanoidMobPatch<T extends PathfinderMob> extends MobPatch
 			}
 		}
 		
-		return null;
+		return this.original.getMainHandItem().isEmpty() ? MobCombatBehaviors.HUMANOID_FIST : MobCombatBehaviors.HUMANOID_ONEHAND_TOOLS;
 	}
 	
 	public void setAIAsInfantry(boolean holdingRanedWeapon) {
