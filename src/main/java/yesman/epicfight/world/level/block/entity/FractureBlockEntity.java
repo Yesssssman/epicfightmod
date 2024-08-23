@@ -2,6 +2,9 @@ package yesman.epicfight.world.level.block.entity;
 
 import java.util.Random;
 
+import org.joml.Quaternionf;
+import org.joml.Vector3f;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.client.particle.Particle;
@@ -13,9 +16,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.world.level.block.FractureBlockState;
-
-import org.joml.Quaternionf;
-import org.joml.Vector3f;
 
 public class FractureBlockEntity extends BlockEntity {
 	private Vector3f translate;
@@ -37,16 +37,6 @@ public class FractureBlockEntity extends BlockEntity {
 		this.translate = fractureBlockState.getTranslate();
 		this.rotation = fractureBlockState.getRotation();
 		this.maxLifeTime = fractureBlockState.getLifeTime();
-	}
-	
-	public FractureBlockEntity(BlockPos blockPos, BlockState blockState, Vector3f translate, Quaternionf rotation, double bouncing, int maxLifeTime) {
-		super(EpicFightBlockEntities.FRACTURE.get(), blockPos, blockState);
-		
-		this.originalBlockState = blockState;
-		this.translate = translate;
-		this.rotation = rotation;
-		this.bouncing = bouncing;
-		this.maxLifeTime = maxLifeTime;
 	}
 	
 	public BlockState getOriginalBlockState() {
@@ -74,9 +64,9 @@ public class FractureBlockEntity extends BlockEntity {
 	}
 	
 	@OnlyIn(Dist.CLIENT)
-	public static void lifeTimeTick(Level level, BlockPos blockPos, BlockState blockState, FractureBlockEntity blockEntity) {
-		if (blockEntity.originalBlockState.shouldSpawnParticlesOnBreak() && blockEntity.maxLifeTime - blockEntity.lifeTime < 10) {
-			Particle blockParticle = new TerrainParticle((ClientLevel)level, blockPos.getX(), blockPos.getY(), blockPos.getZ(), 0, 0, 0, blockEntity.originalBlockState, blockPos);
+	public static void lifeTimeTick(Level level, BlockPos blockPos, BlockState blockState, FractureBlockEntity fractureBlockEntity) {
+		if (fractureBlockEntity.originalBlockState.shouldSpawnParticlesOnBreak() && fractureBlockEntity.maxLifeTime - fractureBlockEntity.lifeTime < 10) {
+			Particle blockParticle = new TerrainParticle((ClientLevel)level, blockPos.getX(), blockPos.getY(), blockPos.getZ(), 0, 0, 0, fractureBlockEntity.originalBlockState, blockPos);
 			blockParticle.setParticleSpeed((Math.random() - 0.5D) * 0.3D, Math.random() * 0.5D, (Math.random() - 0.5D) * 0.3D);
 			blockParticle.setLifetime(10 + new Random().nextInt(60));
 			
@@ -84,11 +74,10 @@ public class FractureBlockEntity extends BlockEntity {
 			mc.particleEngine.add(blockParticle);
 		}
 		
-		if (blockEntity.lifeTime++ > blockEntity.maxLifeTime) {
-			level.setBlock(blockPos, blockEntity.getOriginalBlockState(), 0);
+		if (fractureBlockEntity.lifeTime++ > fractureBlockEntity.maxLifeTime) {
 			level.removeBlockEntity(blockPos);
-			
 			FractureBlockState.remove(blockPos);
+			level.setBlock(blockPos, fractureBlockEntity.getOriginalBlockState(), 0);
 		}
 	}
 }

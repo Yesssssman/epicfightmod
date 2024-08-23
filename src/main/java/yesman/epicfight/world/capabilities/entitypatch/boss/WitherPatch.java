@@ -58,6 +58,7 @@ import yesman.epicfight.world.entity.DroppedNetherStar;
 import yesman.epicfight.world.entity.WitherGhostClone;
 import yesman.epicfight.world.entity.ai.attribute.EpicFightAttributes;
 import yesman.epicfight.world.entity.ai.goal.AnimatedAttackGoal;
+import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 public class WitherPatch extends MobPatch<WitherBoss> {
 	private static final EntityDataAccessor<Boolean> DATA_ARMOR_ACTIVED = SynchedEntityData.defineId(WitherBoss.class, EntityDataSerializers.BOOLEAN);
@@ -292,7 +293,7 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	public void onDeath(LivingDeathEvent event) {
 		super.onDeath(event);
 		
-		if (!this.isLogicalClient() && this.original.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT)) {
+		if (!this.isLogicalClient() && this.original.level().getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT) && this.original.level().getGameRules().getBoolean(EpicFightGamerules.EPIC_DROP)) {
 			Vec3 startMovement = this.original.getLookAngle().scale(0.4D).add(0.0D, 0.63D, 0.0D);
 			ItemEntity itemEntity = new DroppedNetherStar(this.original.level(), this.original.position().add(0.0D, this.original.getBbHeight() * 0.5D, 0.0D), startMovement);
 			this.original.level().addFreshEntity(itemEntity);
@@ -301,7 +302,10 @@ public class WitherPatch extends MobPatch<WitherBoss> {
 	
 	@Override
 	public boolean onDrop(LivingDropsEvent event) {
-		event.getDrops().removeIf((itemEntity) -> itemEntity.getItem().is(Items.NETHER_STAR));
+		if (this.original.level().getGameRules().getBoolean(EpicFightGamerules.EPIC_DROP)) {
+			event.getDrops().removeIf((itemEntity) -> itemEntity.getItem().is(Items.NETHER_STAR));
+		}
+		
 		return false;
 	}
 	

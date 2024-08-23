@@ -17,6 +17,7 @@ public class EpicFightGamerules {
 	public static GameRules.Key<GameRules.BooleanValue> STIFF_COMBO_ATTACKS;
 	public static GameRules.Key<GameRules.BooleanValue> NO_MOBS_IN_BOSSFIGHT;
 	public static GameRules.Key<GameRules.IntegerValue> INITIAL_PLAYER_MODE;
+	public static GameRules.Key<GameRules.BooleanValue> EPIC_DROP;
 	
 	public static void registerRules() {
 		DO_VANILLA_ATTACK = GameRules.register("doVanillaAttack", GameRules.Category.PLAYER, GameRules.BooleanValue.create(ConfigManager.DO_VANILLA_ATTACK.get()));
@@ -45,5 +46,6 @@ public class EpicFightGamerules {
 		INITIAL_PLAYER_MODE = GameRules.register("initialMode", GameRules.Category.PLAYER, GameRules.IntegerValue.create(ConfigManager.INITIAL_PLAYER_MODE.get().ordinal(), (server, value) -> {
 			EpicFightNetworkManager.sendToAll(new SPChangeGamerule(SynchronizedGameRules.INITIAL_PLAYER_MODE, value.get()));
 		}));
+		EPIC_DROP = GameRules.register("epicDrop", GameRules.Category.DROPS, GameRules.BooleanValue.create(ConfigManager.EPIC_DROP.get()));
 	}
 }

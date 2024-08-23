@@ -162,6 +162,7 @@
 	"gamerule.stiffComboAttacks": "Disable player movement while attacking",
 	"gamerule.initialMode": "Default player mode for newcomers",
 	"gamerule.initialMode.description": "0: Mining\n1: Battle",
+	"gamerule.epicDrop": "Enable the fancy drop effect of the boss loots",
 	
 	"gui.epicfight.configurations": "Epic Fight Configurations",
 	"gui.epicfight.graphic_options": "Epic Fight Graphics",

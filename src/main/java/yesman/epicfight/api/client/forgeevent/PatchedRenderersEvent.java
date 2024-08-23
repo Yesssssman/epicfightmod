@@ -40,6 +40,7 @@ public abstract class PatchedRenderersEvent extends Event implements IModBusEven
 		}
 	}
 	
+	@OnlyIn(Dist.CLIENT)
 	public static class Modify extends PatchedRenderersEvent {
 		private final Map<EntityType<?>, PatchedEntityRenderer> renderers;
 		

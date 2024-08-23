@@ -1920,7 +1920,7 @@ public class Animations {
 			Vec3 weaponEdge = OpenMatrix4f.transform(modelTransform, ((Vec3f)params[0]).toDoubleVector());
 			Vec3 slamStartPos;
 			BlockHitResult hitResult = level.clip(new ClipContext(position.add(0.0D, 0.1D, 0.0D), weaponEdge, ClipContext.Block.COLLIDER, ClipContext.Fluid.NONE, entitypatch.getOriginal()));
-
+			
 			if (hitResult.getType() == HitResult.Type.BLOCK) {
 				Direction direction = hitResult.getDirection();
 				BlockPos collidePos = hitResult.getBlockPos().offset(direction.getStepX(), direction.getStepY(), direction.getStepZ());
@@ -1928,12 +1928,12 @@ public class Animations {
 				if (!LevelUtil.canTransferShockWave(level, collidePos, level.getBlockState(collidePos))) {
 					collidePos = collidePos.below();
 				}
-
+				
 				slamStartPos = new Vec3(collidePos.getX(), collidePos.getY(), collidePos.getZ());
 			} else {
 				slamStartPos = weaponEdge.subtract(0.0D, 1.0D, 0.0D);
 			}
-
+			
 			LevelUtil.circleSlamFracture(entitypatch.getOriginal(), level, slamStartPos, (double)params[2], false, false);
 		};
 		

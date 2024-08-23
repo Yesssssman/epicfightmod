@@ -26,6 +26,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
@@ -145,7 +146,7 @@ public class LevelUtil {
 			}
 			
 			if (level.isClientSide) {
-				if (!canTransferShockWave(level, bp, bs) || bs instanceof FractureBlockState) {
+				if (!canTransferShockWave(level, bp, bs) || bs instanceof FractureBlockState || bs.getBlock() instanceof EntityBlock) {
 					continue;
 				}
 				
@@ -297,7 +298,4 @@ public class LevelUtil {
 		
 		return 0 < u && u < 1 && 0 < v && v < 1;
 	}
-	/**
-	 * Slam code ends
-	 */
 }

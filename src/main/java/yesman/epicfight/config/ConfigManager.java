@@ -22,6 +22,7 @@ public class ConfigManager {
 	public static final ForgeConfigSpec.BooleanValue CAN_SWITCH_COMBAT;
 	public static final ForgeConfigSpec.BooleanValue STIFF_COMBO_ATTACKS;
 	public static final ForgeConfigSpec.BooleanValue NO_MOBS_IN_BOSSFIGHT;
+	public static final ForgeConfigSpec.BooleanValue EPIC_DROP;
 	public static final ForgeConfigSpec.EnumValue<PlayerPatch.PlayerMode> INITIAL_PLAYER_MODE;
 	
 	public static final ForgeConfigSpec.IntValue WEIGHT_PENALTY;
@@ -41,6 +42,7 @@ public class ConfigManager {
 		DISABLE_ENTITY_UI = server.define("default_gamerule.disapleEntityUI", false);
 		STIFF_COMBO_ATTACKS = server.define("default_gamerule.stiffComboAttacks", true);
 		NO_MOBS_IN_BOSSFIGHT = server.define("default_gamerule.noMobsInBossfight", true);
+		EPIC_DROP = server.define("default_gamerule.epicDrop", true);
 		WEIGHT_PENALTY = server.defineInRange("default_gamerule.weightPenalty", 100, 0, 100);
 		SKILL_BOOK_MOB_DROP_CHANCE_MODIFIER = server.defineInRange("loot.skill_book_mob_drop_chance_modifier", 0, -100, 100);
 		SKILL_BOOK_CHEST_LOOT_MODIFYER = server.defineInRange("loot.skill_book_chest_drop_chance_modifier", 0, -100, 100);

@@ -880,6 +880,12 @@ public class DatapackEditScreen extends Screen {
 																			(pair) -> this.packList.get(this.packListGrid.getRowposition()).getValue().putString("swing_sound", ParseUtil.getRegistryName(pair.getSecond(), ForgeRegistries.SOUND_EVENTS))));
 			
 			this.inputComponentsList.newRow();
+			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.styles"));
+			this.inputComponentsList.addComponentCurrentRow(SubScreenOpenButton.builder().subScreen(() -> {
+				return new StylesScreen(DatapackEditScreen.this, this.packList.get(this.packListGrid.getRowposition()).getValue());
+			}).bounds(this.inputComponentsList.nextStart(4), 0, 15, 15).build());
+			
+			this.inputComponentsList.newRow();
 			this.inputComponentsList.addComponentCurrentRow(new Static(parentScreen, this.inputComponentsList.nextStart(4), 100, 60, 15, HorizontalSizing.LEFT_WIDTH, null, "datapack_edit.weapon_type.offhand_usability"));
 			this.inputComponentsList.addComponentCurrentRow(new CheckBox(font, this.inputComponentsList.nextStart(4), 60, 0, 10, HorizontalSizing.LEFT_WIDTH, null, null, Component.literal(""), (val) -> {
 				this.packList.get(this.packListGrid.getRowposition()).getValue().putBoolean("usable_in_offhand", val);

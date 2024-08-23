@@ -83,7 +83,7 @@ public class FractureBlockState extends BlockState {
 	
 	@Override
 	public int getLightEmission(BlockGetter level, BlockPos blockPos) {
-		return this.owner.getLightEmission(this, level, blockPos);
+		return ORIGINAL_BLOCK_STATE_CACHE.containsKey(blockPos.hashCode()) ? ORIGINAL_BLOCK_STATE_CACHE.get(blockPos.hashCode()).getLightEmission(level, blockPos) : this.owner.getLightEmission(this, level, blockPos);
 	}
 	
 	@Override

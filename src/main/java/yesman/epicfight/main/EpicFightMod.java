@@ -97,13 +97,15 @@ import yesman.epicfight.world.level.block.EpicFightBlocks;
 import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 
 /**
- *  Changes from 20.8.10 -> 20.8.11
+ *  Changes from 20.9.1 -> 20.9.2
  *  
- *  1. Fixed a crash when you remove a row in weapon attribute screen
+ *  1. Style button revived in Weapon type tab
  *  
- *  2. Fixed entities' AI broken with datapack when giving custom moveset for nether hostile creatures(Piglin, Piglin brute, Hoglin, Zoglin)
+ *  2. Added a new game rule that enables/disables the drop effect of Nether star (/gamerule epicDrop true/false)
  *  
- *  3. Fixed a crash when spawning modded entities with mob capability presets applied (iron's spells 'n spellbooks)
+ *  3. Fixed missing particles created when cast meteor slam on the block with no block below
+ *  
+ *  4. Now Block entities are not affected by the slam fracture
  *  
  *  --- TO DO ---
  *  
