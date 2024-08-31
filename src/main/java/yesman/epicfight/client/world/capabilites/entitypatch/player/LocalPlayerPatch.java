@@ -193,11 +193,6 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 		}
 	}
 	
-	@Override
-	protected boolean isMoving() {
-		return Math.abs(this.original.xxa) > 0.0004F || Math.abs(this.original.zza) > 0.0004F;
-	}
-	
 	public void playAnimationClientPreemptive(StaticAnimation animation, float convertTimeModifier) {
 		this.animator.playAnimation(animation, convertTimeModifier);
 		EpicFightNetworkManager.sendToServer(new CPPlayAnimation(animation.getId(), convertTimeModifier, false, false));

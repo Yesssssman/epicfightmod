@@ -70,9 +70,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	protected static final float PLAYER_SCALE = 0.9375F;
 	protected PlayerEventListener eventListeners;
 	protected PlayerMode playerMode = PlayerMode.MINING;
-	protected double xo;
-	protected double yo;
-	protected double zo;
+	
 	protected float modelYRotO;
 	protected float modelYRot;
 	protected boolean useModelYRot;
@@ -80,6 +78,15 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	protected int lastChargingTick;
 	protected int chargingAmount;
 	protected ChargeableSkill chargingSkill;
+	
+	// Manage the previous position here because playerpatch#tick called before entity#travel method.
+	protected double xo;
+	protected double yo;
+	protected double zo;
+	
+	// Manager the player's horizontal delta movement here instead of directly modifying entity#xxa, entity#zza (it causes potential issues)
+	public double dx;
+	public double dz;
 	
 	public PlayerPatch() {
 		this.eventListeners = new PlayerEventListener(this);

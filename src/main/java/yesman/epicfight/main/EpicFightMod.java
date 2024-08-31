@@ -97,15 +97,15 @@ import yesman.epicfight.world.level.block.EpicFightBlocks;
 import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 
 /**
- *  Changes from 20.9.1 -> 20.9.2
+ *  Changes from 20.9.2 -> 20.9.3
  *  
- *  1. Style button revived in Weapon type tab
+ *  1. Fixed ender dragon slam particles' texture missing
  *  
- *  2. Added a new game rule that enables/disables the drop effect of Nether star (/gamerule epicDrop true/false)
+ *  2. Fixed the player's saturation decreasing faster
  *  
- *  3. Fixed missing particles created when cast meteor slam on the block with no block below
+ *  3. Fixed extendable enums from addons not being registered
  *  
- *  4. Now Block entities are not affected by the slam fracture
+ *  4. Added parchment library
  *  
  *  --- TO DO ---
  *  
@@ -118,6 +118,8 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  Add UI for execution resistance
  *  
  *  Add functionality to blooming effect (resists wither effect)
+ *  
+ *  Add a screen for setting animation properties in datapack editor
  *  
  *  First person animation system by adding /data/ folder in the path, and few samples
  *  
@@ -222,11 +224,11 @@ public class EpicFightMod {
      * FML Lifecycle Events
      */
     private void constructMod(final FMLConstructModEvent event) {
-    	LivingMotion.ENUM_MANAGER.loadEnum();
-    	SkillCategory.ENUM_MANAGER.loadEnum();
-    	SkillSlot.ENUM_MANAGER.loadEnum();
-    	Style.ENUM_MANAGER.loadEnum();
-    	WeaponCategory.ENUM_MANAGER.loadEnum();
+    	event.enqueueWork(LivingMotion.ENUM_MANAGER::loadEnum);
+    	event.enqueueWork(SkillCategory.ENUM_MANAGER::loadEnum);
+    	event.enqueueWork(SkillSlot.ENUM_MANAGER::loadEnum);
+    	event.enqueueWork(Style.ENUM_MANAGER::loadEnum);
+    	event.enqueueWork(WeaponCategory.ENUM_MANAGER::loadEnum);
     }
     
 	private void doCommonStuff(final FMLCommonSetupEvent event) {

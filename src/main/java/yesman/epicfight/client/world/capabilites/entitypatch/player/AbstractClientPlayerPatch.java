@@ -101,7 +101,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 					else
 						currentLivingMotion = LivingMotions.WALK;
 
-					animator.baseLayer.animationPlayer.setReversed(original.zza < 0);
+					animator.baseLayer.animationPlayer.setReversed(this.dz < 0);
 					
 				} else {
 					animator.baseLayer.animationPlayer.setReversed(false);
@@ -191,7 +191,7 @@ public class AbstractClientPlayerPatch<T extends AbstractClientPlayer> extends P
 	}
 	
 	protected boolean isMoving() {
-		return Math.abs(this.original.xxa) > 0.01F || Math.abs(this.original.zza) > 0.01F;
+		return Math.abs(this.dx) > 0.01F || Math.abs(this.dz) > 0.01F;
 	}
 	
 	public void updateHeldItem(CapabilityItem mainHandCap, CapabilityItem offHandCap) {

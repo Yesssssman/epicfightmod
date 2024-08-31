@@ -5,21 +5,22 @@ import java.util.function.Supplier;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraftforge.network.NetworkEvent;
+import yesman.epicfight.world.capabilities.EpicFightCapabilities;
+import yesman.epicfight.world.capabilities.entitypatch.player.PlayerPatch;
 
 public class SPUpdatePlayerInput {
 	private int entityId;
-	private float forwardImpulse;
-	private float leftImpulse;
+	private float forward;
+	private float strafe;
 
 	public SPUpdatePlayerInput() {
 	}
 
-	public SPUpdatePlayerInput(int entityId, float forwardImpulse, float leftImpulse) {
+	public SPUpdatePlayerInput(int entityId, float forward, float strafe) {
 		this.entityId = entityId;
-		this.forwardImpulse = forwardImpulse;
-		this.leftImpulse = leftImpulse;
+		this.forward = forward;
+		this.strafe = strafe;
 	}
 
 	public static SPUpdatePlayerInput fromBytes(FriendlyByteBuf buf) {
@@ -28,8 +29,8 @@ public class SPUpdatePlayerInput {
 
 	public static void toBytes(SPUpdatePlayerInput msg, FriendlyByteBuf buf) {
 		buf.writeInt(msg.entityId);
-		buf.writeFloat(msg.forwardImpulse);
-		buf.writeFloat(msg.leftImpulse);
+		buf.writeFloat(msg.forward);
+		buf.writeFloat(msg.strafe);
 	}
 	
 	public static void handle(SPUpdatePlayerInput msg, Supplier<NetworkEvent.Context> ctx) {
@@ -37,10 +38,12 @@ public class SPUpdatePlayerInput {
 			Minecraft mc = Minecraft.getInstance();
 			Entity entity = mc.player.level().getEntity(msg.entityId);
 			
-			if (entity instanceof LivingEntity livingentity) {
-				livingentity.xxa = msg.leftImpulse;
-				livingentity.zza = msg.forwardImpulse;
-			}
+			entity.getCapability(EpicFightCapabilities.CAPABILITY_ENTITY).ifPresent((entitypatch) -> {
+				if (entitypatch instanceof PlayerPatch<?> plyaerpatch) {
+					plyaerpatch.dx = msg.strafe;
+					plyaerpatch.dz = msg.forward;
+				}
+			});
 		});
 		ctx.get().setPacketHandled(true);
 	}

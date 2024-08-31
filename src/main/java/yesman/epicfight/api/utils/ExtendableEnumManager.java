@@ -62,6 +62,8 @@ public class ExtendableEnumManager<T extends ExtendableEnum> {
 			EpicFightMod.LOGGER.warn("Error while loading extendable enum " + cls.getCanonicalName());
 			e.printStackTrace();
 		}
+		
+		EpicFightMod.LOGGER.debug("All enums are loaded: " + this.enumName +" "+ this.enumMapByName.values());
 	}
 	
 	public int assign(T value) {

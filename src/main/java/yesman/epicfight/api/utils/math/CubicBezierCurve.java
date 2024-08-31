@@ -38,7 +38,7 @@ public class CubicBezierCurve {
 		
 		if (storedConstsSize < coordSize - 1) {
 			for (int i = 0; i < (coordSize - 1) - storedConstsSize; i++) {
-				double lastConst = MATRIX_CONSTANTS.getDouble(storedConstsSize - 1);
+				double lastConst = MATRIX_CONSTANTS.getDouble(MATRIX_CONSTANTS.size() - 1);
 				MATRIX_CONSTANTS.add(1.0D / (4.0D - lastConst));
 			}
 		}
@@ -49,9 +49,9 @@ public class CubicBezierCurve {
 			if (idx == 0) {
 				convertedResults.add(results.getDouble(idx) * 0.5D);
 			} else if (idx == coordSize - 1) {
-				convertedResults.add((results.getDouble(idx) - 2 * convertedResults.getDouble(idx - 1)) * (1.0D / (7.0D - MATRIX_CONSTANTS.getDouble(idx - 1) * 2.0D)));
+				convertedResults.add((results.getDouble(idx) - 2 * convertedResults.getDouble(idx - 1)) / (7.0D - 2.0 * MATRIX_CONSTANTS.getDouble(idx - 1)));
 			} else {
-				convertedResults.add((results.getDouble(idx) - convertedResults.getDouble(idx - 1)) * MATRIX_CONSTANTS.getDouble(idx));
+				convertedResults.add((results.getDouble(idx) - convertedResults.getDouble(idx - 1)) / (4.0D - MATRIX_CONSTANTS.getDouble(idx - 1)));
 			}
 		}
 		
@@ -59,7 +59,7 @@ public class CubicBezierCurve {
 			if (idx == coordSize - 1) {
 				aList.add(0, convertedResults.getDouble(idx));
 			} else {
-				aList.add(0, convertedResults.getDouble(idx) - convertedResults.getDouble(idx + 1) * MATRIX_CONSTANTS.getDouble(idx));
+				aList.add(0, convertedResults.getDouble(idx) - aList.getDouble(0) * MATRIX_CONSTANTS.getDouble(idx));
 			}
 		}
 		

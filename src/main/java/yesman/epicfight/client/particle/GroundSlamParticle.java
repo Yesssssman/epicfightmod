@@ -26,8 +26,16 @@ public class GroundSlamParticle extends NoRenderParticle {
 		BlockPos blockpos = new BlockPos.MutableBlockPos(x, y, z);
 		BlockState blockstate = level.getBlockState(blockpos);
 		
+		if (blockstate.isAir()) {
+			blockstate = level.getBlockState(blockpos.below());
+		}
+		
 		if (blockstate instanceof FractureBlockState fractureBlockState) {
 			blockstate = fractureBlockState.getOriginalBlockState(blockpos);
+		}
+		
+		if (!blockstate.shouldSpawnParticlesOnBreak()) {
+			return;
 		}
 		
 		Minecraft mc = Minecraft.getInstance();

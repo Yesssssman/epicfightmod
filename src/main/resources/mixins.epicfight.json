@@ -27,7 +27,6 @@
 		"MixinLivingEntity",
 		"MixinMob",
 		"MixinPlayer",
-		"MixinServerPlayer",
 		"MixinThrownTrident"
 	],
 	"injector": {
