@@ -256,7 +256,7 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		StaticAnimation animation = InstantiateInvoker.invoke(invocationCommand, StaticAnimation.class).getResult();
 		this.userAnimations.put(animation.getRegistryName(), animation);
 		
-		JsonElement propertiesElement = json.getAsJsonObject().get("properties");
+		JsonElement propertiesElement = json.get("properties");
 		
 		if (propertiesElement != null) {
 			JsonObject propertiesObject = propertiesElement.getAsJsonObject();
