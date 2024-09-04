@@ -38,7 +38,6 @@ import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.QuaternionUtils;
 import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec3f;
-import yesman.epicfight.client.ClientEngine;
 import yesman.epicfight.client.mesh.HumanoidMesh;
 
 @OnlyIn(Dist.CLIENT)
@@ -62,7 +61,8 @@ public class VanillaModelTransformer extends HumanoidModelTransformer {
 			return entityMesh.getHumanoidArmorModel(slot);
 		}
 		
-		if (!ClientEngine.getInstance().isVanillaModelDebuggingMode()) {
+		//if (!ClientEngine.getInstance().isVanillaModelDebuggingMode()) {
+		/**
 			humanoidModel.setAllVisible(false);
 			
 			switch (slot) {
@@ -86,7 +86,8 @@ public class VanillaModelTransformer extends HumanoidModelTransformer {
 			}
 			default -> {}
 			}
-		}
+		**/
+		//}
 		
 		List<VanillaModelPartition> boxes = Lists.newArrayList();
 		
@@ -99,13 +100,33 @@ public class VanillaModelTransformer extends HumanoidModelTransformer {
 		humanoidModel.leftLeg.loadPose(humanoidModel.leftLeg.getInitialPose());
 		humanoidModel.rightLeg.loadPose(humanoidModel.rightLeg.getInitialPose());
 		
-		boxes.add(new VanillaModelPartition(HEAD, humanoidModel.head, "head"));
-		boxes.add(new VanillaModelPartition(HEAD, humanoidModel.hat, "hat"));
-		boxes.add(new VanillaModelPartition(CHEST, humanoidModel.body, "body"));
-		boxes.add(new VanillaModelPartition(RIGHT_ARM, humanoidModel.rightArm, "rightArm"));
-		boxes.add(new VanillaModelPartition(LEFT_ARM, humanoidModel.leftArm, "leftArm"));
-		boxes.add(new VanillaModelPartition(LEFT_LEG, humanoidModel.leftLeg, "leftLeg"));
-		boxes.add(new VanillaModelPartition(RIGHT_LEG, humanoidModel.rightLeg, "rightLeg"));
+		if (humanoidModel.head.visible) {
+			boxes.add(new VanillaModelPartition(HEAD, humanoidModel.head, "head"));
+		}
+		
+		if (humanoidModel.hat.visible) {
+			boxes.add(new VanillaModelPartition(HEAD, humanoidModel.hat, "hat"));
+		}
+		
+		if (humanoidModel.body.visible) {
+			boxes.add(new VanillaModelPartition(CHEST, humanoidModel.body, "body"));
+		}
+		
+		if (humanoidModel.rightArm.visible) {
+			boxes.add(new VanillaModelPartition(RIGHT_ARM, humanoidModel.rightArm, "rightArm"));
+		}
+		
+		if (humanoidModel.leftArm.visible) {
+			boxes.add(new VanillaModelPartition(LEFT_ARM, humanoidModel.leftArm, "leftArm"));
+		}
+		
+		if (humanoidModel.leftLeg.visible) {
+			boxes.add(new VanillaModelPartition(LEFT_LEG, humanoidModel.leftLeg, "leftLeg"));
+		}
+		
+		if (humanoidModel.rightLeg.visible) {
+			boxes.add(new VanillaModelPartition(RIGHT_LEG, humanoidModel.rightLeg, "rightLeg"));
+		}
 		
 		AnimatedMesh mesh = bakeMeshFromCubes(boxes);
 		Meshes.addMesh(modelLocation, mesh);

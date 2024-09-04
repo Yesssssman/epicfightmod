@@ -213,6 +213,11 @@ public class WearableItemLayer<E extends LivingEntity, T extends LivingEntityPat
 				JsonModelLoader modelLoader = new JsonModelLoader(resourceManager, rl);
 				animatedMesh = modelLoader.loadAnimatedMesh(AnimatedMesh::new);
 			} else {
+				PoseStack ps = new PoseStack();
+				ps.translate(0, 0, 10000);
+				//Render armor to get information about visibility
+				originalRenderer.render(ps, Minecraft.getInstance().renderBuffers().bufferSource(), 0, entityliving, 0, 0, 0, 0, 0, 0);
+				
 				animatedMesh = CustomModelBakery.bakeArmor(entityliving, itemstack, armorItem, slot, originalModel, forgeModel, originalRenderer.getParentModel(), this.mesh.get());
 			}
 			
