@@ -166,11 +166,13 @@ public class CapabilityItem {
 				return component;
 			}
 			// check all arguments.
-			for (Object arg : contents.getArgs()) {
-				if (arg instanceof Component argComponent) {
-					Object ret = this.findComponentArgument(argComponent, key);
-					if (ret != null) {
-						return ret;
+			if (contents.getArgs() != null) {
+				for (Object arg : contents.getArgs()) {
+					if (arg instanceof Component argComponent) {
+						Object ret = this.findComponentArgument(argComponent, key);
+						if (ret != null) {
+							return ret;
+						}
 					}
 				}
 			}

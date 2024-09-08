@@ -26,7 +26,7 @@ public class ItemSkins extends SimpleJsonResourceReloadListener {
 	}
 	
 	public ItemSkins() {
-		super((new GsonBuilder()).create(), "item_skins");
+		super(new GsonBuilder().create(), "item_skins");
 	}
 	
 	@Override

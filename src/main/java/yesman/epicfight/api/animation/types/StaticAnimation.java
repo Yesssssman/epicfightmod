@@ -235,8 +235,8 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 						ItemStack stack = entitypatch.getOriginal().getItemInHand(trailInfo.hand);
 						ItemSkin itemSkin = ItemSkins.getItemSkin(stack.getItem());
 						
-						if (itemSkin != null) {
-							trailInfo = itemSkin.trailInfo.overwrite(trailInfo);
+						if (itemSkin != null && itemSkin.trailInfo() != null) {
+							trailInfo = itemSkin.trailInfo().overwrite(trailInfo);
 						}
 					}
 					

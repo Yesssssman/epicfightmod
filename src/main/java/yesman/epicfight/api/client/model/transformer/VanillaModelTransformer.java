@@ -61,34 +61,6 @@ public class VanillaModelTransformer extends HumanoidModelTransformer {
 			return entityMesh.getHumanoidArmorModel(slot);
 		}
 		
-		//if (!ClientEngine.getInstance().isVanillaModelDebuggingMode()) {
-		/**
-			humanoidModel.setAllVisible(false);
-			
-			switch (slot) {
-			case HEAD -> {
-				humanoidModel.head.visible = true;
-				humanoidModel.hat.visible = true;
-			}
-			case CHEST -> {
-				humanoidModel.body.visible = true;
-				humanoidModel.rightArm.visible = true;
-				humanoidModel.leftArm.visible = true;
-			}
-			case LEGS -> {
-				humanoidModel.body.visible = true;
-				humanoidModel.rightLeg.visible = true;
-				humanoidModel.leftLeg.visible = true;
-			}
-			case FEET -> {
-				humanoidModel.rightLeg.visible = true;
-				humanoidModel.leftLeg.visible = true;
-			}
-			default -> {}
-			}
-		**/
-		//}
-		
 		List<VanillaModelPartition> boxes = Lists.newArrayList();
 		
 		//Remove entity animation

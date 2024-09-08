@@ -392,8 +392,8 @@ public class TrailParticle extends TextureSheetParticle {
 					ItemStack stack = entitypatch.getOriginal().getItemInHand(result.hand);
 					ItemSkin itemSkin = ItemSkins.getItemSkin(stack.getItem());
 					
-					if (itemSkin != null) {
-						result = itemSkin.trailInfo.overwrite(result);
+					if (itemSkin != null && itemSkin.trailInfo() != null) {
+						result = itemSkin.trailInfo().overwrite(result);
 					}
 				}
 				

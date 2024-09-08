@@ -68,6 +68,8 @@ import net.minecraftforge.registries.ForgeRegistries;
 import yesman.epicfight.api.client.forgeevent.PatchedRenderersEvent;
 import yesman.epicfight.api.client.forgeevent.RenderEnderDragonEvent;
 import yesman.epicfight.api.client.model.AnimatedMesh;
+import yesman.epicfight.api.client.model.ItemSkin;
+import yesman.epicfight.api.client.model.ItemSkins;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec3f;
@@ -683,12 +685,18 @@ public class RenderEngine {
 				boolean isBattleMode = playerpatch.isBattleMode();
 				
 				if ((isBattleMode || !EpicFightMod.CLIENT_CONFIGS.filterAnimation.getValue()) && EpicFightMod.CLIENT_CONFIGS.firstPersonModel.getValue()) {
-					if (event.getHand() == InteractionHand.MAIN_HAND) {
-						renderEngine.firstPersonRenderer.render(playerpatch.getOriginal(), playerpatch, (LivingEntityRenderer)renderEngine.minecraft.getEntityRenderDispatcher().getRenderer(playerpatch.getOriginal()),
-																event.getMultiBufferSource(), event.getPoseStack(), event.getPackedLight(), event.getPartialTick());
-					}
+					ItemSkin mainhandItemSkin = ItemSkins.getItemSkin(playerpatch.getOriginal().getMainHandItem().getItem());
+					ItemSkin offhandItemSkin = ItemSkins.getItemSkin(playerpatch.getOriginal().getOffhandItem().getItem());
+					boolean useEpicFightModel = (mainhandItemSkin == null || !mainhandItemSkin.forceVanillaFirstPerson()) && (offhandItemSkin == null || !offhandItemSkin.forceVanillaFirstPerson());
 					
-					event.setCanceled(true);
+					if (useEpicFightModel) {
+						if (event.getHand() == InteractionHand.MAIN_HAND) {
+							renderEngine.firstPersonRenderer.render(playerpatch.getOriginal(), playerpatch, (LivingEntityRenderer)renderEngine.minecraft.getEntityRenderDispatcher().getRenderer(playerpatch.getOriginal()), event.getMultiBufferSource(),
+																	event.getPoseStack(), event.getPackedLight(), event.getPartialTick());
+						}
+						
+						event.setCanceled(true);
+					}
 				}
 			}
 		}
