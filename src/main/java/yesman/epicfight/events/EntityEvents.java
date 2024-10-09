@@ -370,7 +370,7 @@ public class EntityEvents {
 			if (!result.resultType.dealtDamage()) {
 				event.setCanceled(true);
 			} else if (event.getAmount() != result.damage) {
-				EpicFightDamageSource deflictedDamage = EpicFightDamageSources.copy(damageSource);
+				EpicFightDamageSource deflictedDamage = (damageSource instanceof EpicFightDamageSource epicfightDamageSource) ? epicfightDamageSource : EpicFightDamageSources.copy(damageSource);
 				deflictedDamage.addRuntimeTag(EpicFightDamageType.PARTIAL_DAMAGE);
 				
 				event.setCanceled(true);
