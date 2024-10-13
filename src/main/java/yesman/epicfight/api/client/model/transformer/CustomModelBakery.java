@@ -37,9 +37,10 @@ import yesman.epicfight.main.EpicFightMod;
 public class CustomModelBakery {
 	static final Map<ResourceLocation, AnimatedMesh> BAKED_MODELS = Maps.newHashMap();
 	static final List<HumanoidModelTransformer> MODEL_TRANSFORMERS = Lists.newArrayList();
-	static final HumanoidModelTransformer VANILLA_TRANSFORMER = new VanillaModelTransformer();
 	static final Set<ArmorItem> EXCEPTIONAL_MODELS = Sets.newHashSet();
 	static final Set<ModelPart> MODEL_PARTS = Sets.newHashSet();
+	
+	public static final HumanoidModelTransformer VANILLA_TRANSFORMER = new VanillaModelTransformer();
 	
 	@OnlyIn(Dist.CLIENT)
 	public interface ModelProvider {
@@ -80,11 +81,15 @@ public class CustomModelBakery {
 		AnimatedMesh animatedArmorModel = null;
 		
 		if (!EXCEPTIONAL_MODELS.contains(armorItem)) {
+			if (forgeModel == originalModel || !(forgeModel instanceof HumanoidModel humanoidModel)) {
+				return entityMesh.getHumanoidArmorModel(slot);
+			}
+			
 			ResourceLocation modelName = new ResourceLocation(ForgeRegistries.ITEMS.getKey(armorItem).getNamespace(), "armor/" + ForgeRegistries.ITEMS.getKey(armorItem).getPath());
 			
 			for (HumanoidModelTransformer modelTransformer : MODEL_TRANSFORMERS) {
 				try {
-					animatedArmorModel = modelTransformer.transformArmorModel(modelName, entityLiving, itemstack, armorItem, slot, originalModel, forgeModel, entityModel, entityMesh);
+					animatedArmorModel = modelTransformer.transformArmorModel(modelName, humanoidModel);
 				} catch (Exception e) {
 					EpicFightMod.LOGGER.warn("Can't transform the model of " + ForgeRegistries.ITEMS.getKey(armorItem) + " because of :");
 					e.printStackTrace();
@@ -97,7 +102,7 @@ public class CustomModelBakery {
 			}
 			
 			if (animatedArmorModel == null) {
-				animatedArmorModel = VANILLA_TRANSFORMER.transformArmorModel(modelName, entityLiving, itemstack, armorItem, slot, originalModel, forgeModel, entityModel, entityMesh);
+				animatedArmorModel = VANILLA_TRANSFORMER.transformArmorModel(modelName, humanoidModel);
 			}
 		}
 		

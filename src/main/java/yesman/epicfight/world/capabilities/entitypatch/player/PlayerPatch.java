@@ -26,6 +26,7 @@ import yesman.epicfight.api.animation.Animator;
 import yesman.epicfight.api.animation.LivingMotions;
 import yesman.epicfight.api.animation.types.ActionAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
+import yesman.epicfight.api.forgeevent.BattleModeSustainableEvent;
 import yesman.epicfight.api.forgeevent.ChangePlayerModeEvent;
 import yesman.epicfight.api.utils.AttackResult;
 import yesman.epicfight.api.utils.math.MathUtils;
@@ -70,6 +71,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	protected static final float PLAYER_SCALE = 0.9375F;
 	protected PlayerEventListener eventListeners;
 	protected PlayerMode playerMode = PlayerMode.MINING;
+	protected boolean battleModeRestricted;
 	
 	protected float modelYRotO;
 	protected float modelYRot;
@@ -84,7 +86,7 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	protected double yo;
 	protected double zo;
 	
-	// Manager the player's horizontal delta movement here instead of directly modifying entity#xxa, entity#zza (it causes potential issues)
+	// Manage the player's horizontal delta movement here instead of directly modifying entity#xxa, entity#zza (it causes potential issues in terms of mod compatibility)
 	public double dx;
 	public double dz;
 	
@@ -218,6 +220,23 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	
 	@Override
 	public void tick(LivingEvent.LivingTickEvent event) {
+		if (this.playerMode == PlayerMode.BATTLE || this.battleModeRestricted) {
+			BattleModeSustainableEvent battleModeSustainableEvent = new BattleModeSustainableEvent(this);
+			MinecraftForge.EVENT_BUS.post(battleModeSustainableEvent);
+			
+			if (battleModeSustainableEvent.isCanceled()) {
+				if (this.playerMode == PlayerMode.BATTLE) {
+					this.toMiningMode(false);
+					this.battleModeRestricted = true;
+				}
+			} else {
+				if (this.battleModeRestricted) {
+					this.battleModeRestricted = false;
+					this.toBattleMode(false);
+				}
+			}
+		}
+		
 		if (this.original.getVehicle() == null) {
 			for (SkillContainer container : this.getSkillCapability().skillContainers) {
 				if (container != null) {
@@ -559,6 +578,14 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	public void toMiningMode(boolean synchronize) {
+		if (this.playerMode == PlayerMode.MINING) {
+			return;
+		}
+		
+		if (this.battleModeRestricted) {
+			this.battleModeRestricted = false;
+		}
+		
 		ChangePlayerModeEvent prepareModelEvent = new ChangePlayerModeEvent(this, PlayerMode.MINING);
 		
 		if (!MinecraftForge.EVENT_BUS.post(prepareModelEvent)) {
@@ -567,6 +594,10 @@ public abstract class PlayerPatch<T extends Player> extends LivingEntityPatch<T>
 	}
 	
 	public void toBattleMode(boolean synchronize) {
+		if (this.playerMode == PlayerMode.BATTLE) {
+			return;
+		}
+		
 		ChangePlayerModeEvent prepareModelEvent = new ChangePlayerModeEvent(this, PlayerMode.BATTLE);
 		
 		if (!MinecraftForge.EVENT_BUS.post(prepareModelEvent)) {

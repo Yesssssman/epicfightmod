@@ -19,7 +19,9 @@
 		"IrisMixinPipelineManager",
 		"SkinLayer3DMixinSkinUtil",
 		"SkinLayer3DMixinCustomModelPart",
-		"SkinLayer3DMixinCustomizableCubeWrapper$SkinLayer3DMixinCustomModelCube"
+		"SkinLayer3DMixinCustomizableCubeWrapper$SkinLayer3DMixinCustomModelCube",
+		"VampirismMixinVampirePlayerHeadLayer",
+		"WerewolvesMixinHumanWerewolfLayer"
 	],
 	"mixins": [
 		"MixinEndCrystal",

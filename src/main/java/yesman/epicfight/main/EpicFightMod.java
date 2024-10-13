@@ -22,7 +22,6 @@ import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.DistExecutor;
 import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
@@ -52,12 +51,14 @@ import yesman.epicfight.client.gui.screen.config.IngameConfigurationScreen;
 import yesman.epicfight.client.renderer.patched.item.EpicFightItemProperties;
 import yesman.epicfight.compat.AzureLibArmorCompat;
 import yesman.epicfight.compat.AzureLibCompat;
-import yesman.epicfight.compat.CuriosCompat;
 import yesman.epicfight.compat.FirstPersonCompat;
 import yesman.epicfight.compat.GeckolibCompat;
 import yesman.epicfight.compat.ICompatModule;
 import yesman.epicfight.compat.IRISCompat;
+import yesman.epicfight.compat.IceAndFireCompat;
 import yesman.epicfight.compat.SkinLayer3DCompat;
+import yesman.epicfight.compat.VampirismCompat;
+import yesman.epicfight.compat.WerewolvesCompat;
 import yesman.epicfight.config.ConfigManager;
 import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.data.conditions.EpicFightConditions;
@@ -189,35 +190,41 @@ public class EpicFightMod {
         ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> new ConfigScreenHandler.ConfigScreenFactory(IngameConfigurationScreen::new));
         ModLoadingContext.get().registerExtensionPoint(EpicFightExtensions.class, () -> new EpicFightExtensions(EpicFightCreativeTabs.ITEMS.get()));
         
-        DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> () -> {
-        	if (ModList.get().isLoaded("geckolib")) {
-    			ICompatModule.loadCompatModule(GeckolibCompat.class);
-    		}
-    		
-    		if (ModList.get().isLoaded("azurelib")) {
-    			ICompatModule.loadCompatModule(AzureLibCompat.class);
-    		}
-    		
-    		if (ModList.get().isLoaded("azurelibarmor")) {
-    			ICompatModule.loadCompatModule(AzureLibArmorCompat.class);
-    		}
-    		
-    		if (ModList.get().isLoaded("curios")) {
-    			ICompatModule.loadCompatModule(CuriosCompat.class);
-    		}
-    		
-    		if (ModList.get().isLoaded("firstperson")) {
-    			ICompatModule.loadCompatModule(FirstPersonCompat.class);
-    		}
-    		
-    		if (ModList.get().isLoaded("skinlayers3d")) {
-    			ICompatModule.loadCompatModule(SkinLayer3DCompat.class);
-    		}
-    		
-    		if (ModList.get().isLoaded("oculus")) {
-    			ICompatModule.loadCompatModule(IRISCompat.class);
-    		}
-		});
+    	if (ModList.get().isLoaded("geckolib")) {
+			ICompatModule.loadCompatModule(GeckolibCompat.class);
+		}
+		
+		if (ModList.get().isLoaded("azurelib")) {
+			ICompatModule.loadCompatModule(AzureLibCompat.class);
+		}
+		
+		if (ModList.get().isLoaded("azurelibarmor")) {
+			ICompatModule.loadCompatModule(AzureLibArmorCompat.class);
+		}
+		
+		if (ModList.get().isLoaded("firstperson")) {
+			ICompatModule.loadCompatModule(FirstPersonCompat.class);
+		}
+		
+		if (ModList.get().isLoaded("skinlayers3d")) {
+			ICompatModule.loadCompatModule(SkinLayer3DCompat.class);
+		}
+		
+		if (ModList.get().isLoaded("oculus")) {
+			ICompatModule.loadCompatModule(IRISCompat.class);
+		}
+		
+		if (ModList.get().isLoaded("vampirism")) {
+			ICompatModule.loadCompatModule(VampirismCompat.class);
+		}
+        
+        if (ModList.get().isLoaded("werewolves")) {
+			ICompatModule.loadCompatModule(WerewolvesCompat.class);
+		}
+        
+        if (ModList.get().isLoaded("iceandfire")) {
+			ICompatModule.loadCompatModule(IceAndFireCompat.class);
+		}
 	}
     
     /**

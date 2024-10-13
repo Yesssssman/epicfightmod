@@ -25,15 +25,11 @@ import mod.azure.azurelib.core.state.BoneSnapshot;
 import mod.azure.azurelib.renderer.GeoArmorRenderer;
 import mod.azure.azurelib.util.RenderUtils;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.Model;
 import net.minecraft.client.model.geom.ModelPart;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Vec3i;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.api.distmarker.Dist;
@@ -47,7 +43,6 @@ import yesman.epicfight.api.client.model.transformer.GeoModelTransformer.GeoMesh
 import yesman.epicfight.api.utils.math.OpenMatrix4f;
 import yesman.epicfight.api.utils.math.Vec2f;
 import yesman.epicfight.api.utils.math.Vec3f;
-import yesman.epicfight.client.mesh.HumanoidMesh;
 
 @OnlyIn(Dist.CLIENT)
 public class AzureModelTransformer extends HumanoidModelTransformer {
@@ -82,11 +77,11 @@ public class AzureModelTransformer extends HumanoidModelTransformer {
 				event.setResultLocation(geoArmorRenderer.getTextureLocation(geoAnimatable));
 			}
 		}
-	}
+	}	
 	
 	@Override
-	public AnimatedMesh transformArmorModel(ResourceLocation modelLocation, LivingEntity entityLiving, ItemStack itemstack, ArmorItem armorItem, EquipmentSlot slot, HumanoidModel<?> originalModel, Model forgeModel, HumanoidModel<?> entityModel, HumanoidMesh entityMesh) {
-		if (!(forgeModel instanceof GeoArmorRenderer<?> geoModel)) {
+	public AnimatedMesh transformArmorModel(ResourceLocation modelLocation, HumanoidModel<?> humanoidModel) {
+		if (!(humanoidModel instanceof GeoArmorRenderer<?> geoModel)) {
 			return null;
 		}
 		

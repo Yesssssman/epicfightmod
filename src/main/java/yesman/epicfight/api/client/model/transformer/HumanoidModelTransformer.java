@@ -8,22 +8,16 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
 import it.unimi.dsi.fastutil.ints.IntList;
 import net.minecraft.client.model.HumanoidModel;
-import net.minecraft.client.model.Model;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ArmorItem;
-import net.minecraft.world.item.ItemStack;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.MeshPartDefinition;
 import yesman.epicfight.api.client.model.SingleGroupVertexBuilder;
-import yesman.epicfight.client.mesh.HumanoidMesh;
 
 @OnlyIn(Dist.CLIENT)
 public abstract class HumanoidModelTransformer {
-	protected abstract AnimatedMesh transformArmorModel(ResourceLocation modelLocation, LivingEntity entityLiving, ItemStack itemstack, ArmorItem armorItem, EquipmentSlot slot, HumanoidModel<?> originalModel, Model forgeModel, HumanoidModel<?> entityModel, HumanoidMesh entityMesh);
+	public abstract AnimatedMesh transformArmorModel(ResourceLocation modelLocation, HumanoidModel<?> humanoidModel);
 	
 	@OnlyIn(Dist.CLIENT)
 	public static abstract class PartTransformer<T> {
