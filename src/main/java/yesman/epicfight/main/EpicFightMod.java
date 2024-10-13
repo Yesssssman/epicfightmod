@@ -308,9 +308,12 @@ public class EpicFightMod {
 		public static void doServerStuff(final FMLDedicatedServerSetupEvent event) {
 			EpicFightMod.getInstance().animatorProvider = ServerAnimator::getAnimator;
 		}
-		
+    }
+	
+	@Mod.EventBusSubscriber(modid = EpicFightMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.DEDICATED_SERVER)
+    public static class ServerForgeEvents {
 		@SubscribeEvent
-		public static  void addReloadListnerEvent(final AddReloadListenerEvent event) {
+		public static void addReloadListnerEvent(final AddReloadListenerEvent event) {
 			event.addListener(AnimationManager.getInstance());
 		}
     }

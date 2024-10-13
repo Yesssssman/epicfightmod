@@ -32,6 +32,7 @@ import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class CuriosCompat implements ICompatModule {
 	@SuppressWarnings("unchecked")
+	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void onModEventBusClient(IEventBus eventBus) {
 		eventBus.<PatchedRenderersEvent.Modify>addListener((event) -> {
@@ -41,6 +42,7 @@ public class CuriosCompat implements ICompatModule {
 		});
 	}
 	
+	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void onForgeEventBusClient(IEventBus eventBus) {
 	}

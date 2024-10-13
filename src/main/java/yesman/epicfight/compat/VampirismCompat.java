@@ -34,7 +34,8 @@ public class VampirismCompat implements ICompatModule {
 	public void onForgeEventBus(IEventBus eventBus) {
 		
 	}
-
+	
+	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void onModEventBusClient(IEventBus eventBus) {
 		eventBus.<PatchedRenderersEvent.Modify>addListener((event) -> {
@@ -43,7 +44,8 @@ public class VampirismCompat implements ICompatModule {
 			}
 		});
 	}
-
+	
+	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void onForgeEventBusClient(IEventBus eventBus) {
 		

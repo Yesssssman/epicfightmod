@@ -1,7 +1,5 @@
 package yesman.epicfight.world.entity;
 
-import java.util.List;
-
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.Packet;
@@ -43,26 +41,24 @@ public class DeathHarvestOrb extends Entity {
 	
 	@Override
 	public void tick() {
-		super.baseTick();
+		this.noPhysics = true;
 		
 		if (!this.level().isClientSide()) {
 			double scaleFactor = Math.pow(Math.max(0.0D, (this.tickCount - 10) / 10.0D), 2);
-			Vec3 v1 = this.dest.position().add(0.0D, this.dest.getBbHeight() * 0.5D, 0.0D).subtract(this.position()).scale(scaleFactor);
+			Vec3 destCenter = this.dest.position().add(0.0D, this.dest.getBbHeight() * 0.5D, 0.0D);
+			Vec3 v1 = destCenter.subtract(this.position()).scale(scaleFactor);
 			Vec3 v2 = this.randVec.scale(1.0D - scaleFactor);
 			this.move(MoverType.SELF, v1.add(v2).scale(0.23D));
-			List<Entity> list = this.level().getEntities(this, this.getBoundingBox());
 			
-			for (Entity e : list) {
-				if (e.is(this.dest)) {
-					ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(this.dest, ServerPlayerPatch.class);
-					
-					if (playerpatch != null) {
-						SkillContainer container = playerpatch.getSkill(SkillSlots.WEAPON_INNATE);
-						container.getSkill().setConsumptionSynchronize(playerpatch, container.getResource() + this.value);
-					}
-					
-					this.discard();
+			if (this.position().distanceToSqr(destCenter) < 0.5625D || this.tickCount > 40) {
+				ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(this.dest, ServerPlayerPatch.class);
+				
+				if (playerpatch != null) {
+					SkillContainer container = playerpatch.getSkill(SkillSlots.WEAPON_INNATE);
+					container.getSkill().setConsumptionSynchronize(playerpatch, container.getResource() + this.value);
 				}
+				
+				this.discard();
 			}
 		} else {
 			this.level().addParticle(ParticleTypes.SMOKE, this.getX(), this.getY(), this.getZ(), 0.0D, 0.0D, 0.0D);

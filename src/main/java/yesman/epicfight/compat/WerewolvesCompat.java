@@ -5,6 +5,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import de.teamlapen.werewolves.api.entities.werewolf.WerewolfForm;
 import de.teamlapen.werewolves.client.model.WerewolfEarsModel;
 import de.teamlapen.werewolves.client.render.layer.HumanWerewolfLayer;
+import de.teamlapen.werewolves.entities.player.werewolf.WerewolfPlayer;
 import de.teamlapen.werewolves.util.Helper;
 import de.teamlapen.werewolves.util.REFERENCE;
 import net.minecraft.client.model.HumanoidModel;
@@ -19,6 +20,7 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.eventbus.api.IEventBus;
 import yesman.epicfight.api.client.forgeevent.PatchedRenderersEvent;
+import yesman.epicfight.api.client.forgeevent.RenderEpicFightPlayerEvent;
 import yesman.epicfight.api.client.model.AnimatedMesh;
 import yesman.epicfight.api.client.model.transformer.CustomModelBakery;
 import yesman.epicfight.api.forgeevent.BattleModeSustainableEvent;
@@ -38,12 +40,15 @@ public class WerewolvesCompat implements ICompatModule {
 	@Override
 	public void onForgeEventBus(IEventBus eventBus) {
 		eventBus.<BattleModeSustainableEvent>addListener((event) -> {
-			if (Helper.isWerewolf(event.getPlayerPatch().getOriginal())) {
+			WerewolfForm form = WerewolfPlayer.get(event.getPlayerPatch().getOriginal()).getForm();
+			
+			if (form == WerewolfForm.SURVIVALIST || form == WerewolfForm.BEAST) {
 				event.setCanceled(true);
 			}
 		});
 	}
-
+	
+	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void onModEventBusClient(IEventBus eventBus) {
 		eventBus.<PatchedRenderersEvent.Modify>addListener((event) -> {
@@ -52,10 +57,17 @@ public class WerewolvesCompat implements ICompatModule {
 			}
 		});
 	}
-
+	
+	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void onForgeEventBusClient(IEventBus eventBus) {
-		
+		eventBus.<RenderEpicFightPlayerEvent>addListener((event) -> {
+			WerewolfForm form = WerewolfPlayer.get(event.getPlayerPatch().getOriginal()).getForm();
+			
+			if (form == WerewolfForm.SURVIVALIST || form == WerewolfForm.BEAST) {
+				event.setShouldRender(false);
+			}
+		});
 	}
 	
 	@OnlyIn(Dist.CLIENT)

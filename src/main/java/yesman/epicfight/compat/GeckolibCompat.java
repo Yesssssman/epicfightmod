@@ -18,11 +18,13 @@ import yesman.epicfight.world.gamerule.EpicFightGamerules;
 
 public class GeckolibCompat implements ICompatModule {
 	@Override
+	@OnlyIn(Dist.CLIENT)
 	public void onModEventBusClient(IEventBus eventBus) {
 		CustomModelBakery.registerNewTransformer(new GeoModelTransformer());
 	}
 	
 	@Override
+	@OnlyIn(Dist.CLIENT)
 	public void onForgeEventBusClient(IEventBus eventBus) {
 		eventBus.addListener(GeoModelTransformer::getGeoArmorTexturePath);
 		eventBus.addListener(this::geoEntityRenderPreEvent);

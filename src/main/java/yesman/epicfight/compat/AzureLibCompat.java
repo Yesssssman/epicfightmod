@@ -26,11 +26,13 @@ public class AzureLibCompat implements ICompatModule {
 	}
 	
 	@Override
+	@OnlyIn(Dist.CLIENT)
 	public void onModEventBusClient(IEventBus eventBus) {
 		CustomModelBakery.registerNewTransformer(new AzureModelTransformer());
 	}
 	
 	@Override
+	@OnlyIn(Dist.CLIENT)
 	public void onForgeEventBusClient(IEventBus eventBus) {
 		eventBus.addListener(AzureModelTransformer::getGeoArmorTexturePath);
 		eventBus.addListener(this::geoEntityRenderPreEvent);

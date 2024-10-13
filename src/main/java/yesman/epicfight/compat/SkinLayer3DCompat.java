@@ -70,7 +70,8 @@ public class SkinLayer3DCompat implements ICompatModule {
 	public void onForgeEventBus(IEventBus eventBus) {
 		
 	}
-
+	
+	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void onModEventBusClient(IEventBus eventBus) {
 		SKIN_LAYER_3D_CAPABILITY = CapabilityManager.get(new CapabilityToken<>(){});
@@ -82,6 +83,7 @@ public class SkinLayer3DCompat implements ICompatModule {
 		});
 	}
 	
+	@OnlyIn(Dist.CLIENT)
 	@Override
 	public void onForgeEventBusClient(IEventBus eventBus) {
 		eventBus.addGenericListener(Entity.class, this::onCapabilityRegister);
