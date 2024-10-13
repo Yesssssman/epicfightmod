@@ -475,7 +475,6 @@ public abstract class Skill {
 		return this.getRegistryName().toString();
 	}
 	
-	@OnlyIn(Dist.CLIENT)
 	public Component getDisplayName() {
 		return Component.translatable(String.format("%s.%s.%s", "skill", this.getRegistryName().getNamespace(), this.getRegistryName().getPath()));
 	}
