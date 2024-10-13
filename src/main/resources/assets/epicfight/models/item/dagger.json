@@ -20,6 +20,10 @@
       		"rotation": [45,-90,0],
       		"scale": [1.0, 1.0, 0.7]
     	},
+    	"fixed": {
+			"rotation": [0, 0, 90],
+			"translation": [-1, -1, 0]
+		},
     	"firstperson_righthand":
     	{
       		"translation": [2, 2.5, 0],

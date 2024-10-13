@@ -17,8 +17,11 @@ public abstract class MixinLocalPlayer {
 	private void epicfight_tick(CallbackInfo ci) {
 		LocalPlayer epicfight$entity = (LocalPlayer)(Object)this;
 		LocalPlayerPatch localPlayerPatch = EpicFightCapabilities.getEntityPatch(epicfight$entity, LocalPlayerPatch.class);
-		localPlayerPatch.dx = epicfight$entity.xxa;
-		localPlayerPatch.dz = epicfight$entity.zza;
+		
+		if (localPlayerPatch != null) {
+			localPlayerPatch.dx = epicfight$entity.xxa;
+			localPlayerPatch.dz = epicfight$entity.zza;
+		}
 		
 		EpicFightNetworkManager.sendToServer(new CPUpdatePlayerInput(epicfight$entity.getId(), epicfight$entity.xxa, epicfight$entity.zza));
 	}

@@ -102,7 +102,7 @@ public abstract class Collider {
 			animation.modifyPose(animation, prevPose, entitypatch, prevElapsedTime, 0.0F);
 			animation.modifyPose(animation, currentPose, entitypatch, elapsedTime, 1.0F);
 		} else {
-			prevPose = animation.getPoseByTime(entitypatch, partialTicks, 0.0F);
+			prevPose = animation.getPoseByTime(entitypatch, prevElapsedTime, 0.0F);
 			currentPose = animation.getPoseByTime(entitypatch, elapsedTime, 1.0F);
 		}
 		

@@ -298,7 +298,7 @@
 	"key.epicfight.config": "Open Configuration Screen",
 	
 	"skill.epicfight.dancing_edge": "Dancing Edge",
-	"skill.epicfight.dancing_edge.tooltip": "Cut down enemies with a lethal flourish!",
+	"skill.epicfight.dancing_edge.tooltip": "Cut down enemies with a lethal flourish! It strikes 3 times",
 	"skill.epicfight.battojutsu": "Battojutsu",
 	"skill.epicfight.battojutsu.tooltip": "Unleash your blade at blinding speeds! If cast while sprinting, You slash forwards, slicing enemies in your path.",
 	"skill.epicfight.steel_whirlwind": "Steel Whirlwind",
