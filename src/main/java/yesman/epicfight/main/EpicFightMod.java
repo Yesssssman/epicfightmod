@@ -20,6 +20,7 @@ import net.minecraftforge.event.AddPackFindersEvent;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.BuildCreativeModeTabContentsEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
@@ -312,7 +313,7 @@ public class EpicFightMod {
 	
 	@Mod.EventBusSubscriber(modid = EpicFightMod.MODID, bus = Mod.EventBusSubscriber.Bus.FORGE, value = Dist.DEDICATED_SERVER)
     public static class ServerForgeEvents {
-		@SubscribeEvent
+		@SubscribeEvent(priority = EventPriority.HIGHEST)
 		public static void addReloadListnerEvent(final AddReloadListenerEvent event) {
 			event.addListener(AnimationManager.getInstance());
 		}
