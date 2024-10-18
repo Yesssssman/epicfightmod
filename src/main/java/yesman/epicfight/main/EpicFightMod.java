@@ -112,6 +112,8 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  
  *  5. Added an alert message when you trying to use blade rush without targeting an entity
  *  
+ *  6. Fixed a tooltip error when sweeping edge enchantment applied
+ *  
  *  --- TO DO ---
  *  
  *  Update language files (always)
