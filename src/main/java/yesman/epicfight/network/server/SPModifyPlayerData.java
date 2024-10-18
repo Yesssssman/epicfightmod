@@ -57,7 +57,7 @@ public class SPModifyPlayerData {
 	}
 	
 	public static SPModifyPlayerData fromBytes(FriendlyByteBuf buf) {
-		PacketType packetType = PacketType.values()[buf.readInt()];
+		PacketType packetType = buf.readEnum(PacketType.class);
 		SPModifyPlayerData packet = new SPModifyPlayerData(packetType, buf.readInt());
 		packetType.decoder.accept(packet, buf);
 		
@@ -65,7 +65,7 @@ public class SPModifyPlayerData {
 	}
 
 	public static void toBytes(SPModifyPlayerData msg, FriendlyByteBuf buf) {
-		buf.writeInt(msg.packetType.ordinal());
+		buf.writeEnum(msg.packetType);
 		buf.writeInt(msg.entityId);
 		msg.packetType.encoder.accept(msg, buf);
 	}

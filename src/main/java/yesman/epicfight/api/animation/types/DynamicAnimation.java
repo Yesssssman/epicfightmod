@@ -92,7 +92,7 @@ public abstract class DynamicAnimation {
 	}
 	
 	public TransformSheet getCoord() {
-		return this.getTransfroms().get("Root");
+		return this.getTransfroms().containsKey("Root") ? this.getTransfroms().get("Root") : ActionAnimation.EMPTY_SHEET;
 	}
 	
 	public DynamicAnimation getRealAnimation() {

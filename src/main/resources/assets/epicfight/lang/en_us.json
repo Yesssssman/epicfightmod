@@ -40,6 +40,10 @@
 	"commands.epicfight.skill.clear.success.multiple": "Removed all skills from %s targets",
 	"commands.epicfight.skill.clear.failed": "Target has no skills to remove",
 	
+	"commands.epicfight.stamina.success.self": "Successfully Modified %s's stamina to %s",
+	"commands.epicfight.stamina.success.other": "Successfully Modified stamina from %s targets",
+	"commands.epicfight.stamina.success.failed": "Failed at modifying stamina",
+	
 	"death.attack.wither_beam": "%1$s was vaporized by wither beam",
 	"death.attack.shockwave": "%1$s was teared up by Shockwave",
 	"debug.vanilla_model_debugging.on": "Vanilla model debugging: On",
@@ -243,6 +247,9 @@
 	
 	"gui.epicfight.select": "%s List",
 	"gui.epicfight.available_weapon_types": "Available Weapon Types",
+	
+	"gui.epicfight.warn.no_target": "No targeted entity",
+	"gui.epicfight.warn.animation_unsync": "Below animations are missing or don't exist in the server\n\n%s\nPlease check the resource packs that you're missing or unload the packs that the server doesn't have",
 	
 	"item.epicfight.bokken": "Bokken",
 	"item.epicfight.uchigatana": "Uchigatana",

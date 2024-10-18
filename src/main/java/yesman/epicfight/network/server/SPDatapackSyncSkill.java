@@ -31,7 +31,7 @@ public class SPDatapackSyncSkill extends SPDatapackSync {
 	}
 	
 	public static SPDatapackSyncSkill fromBytes(FriendlyByteBuf buf) {
-		SPDatapackSyncSkill msg = new SPDatapackSyncSkill(buf.readInt(), SPDatapackSync.Type.values()[buf.readInt()]);
+		SPDatapackSyncSkill msg = new SPDatapackSyncSkill(buf.readInt(), buf.readEnum(SPDatapackSyncSkill.Type.class));
 		
 		for (int i = 0; i < msg.count; i++) {
 			msg.tags[i] = buf.readNbt();
@@ -49,7 +49,7 @@ public class SPDatapackSyncSkill extends SPDatapackSync {
 	
 	public static void toBytes(SPDatapackSyncSkill msg, FriendlyByteBuf buf) {
 		buf.writeInt(msg.count);
-		buf.writeInt(msg.type.ordinal());
+		buf.writeEnum(msg.type);
 		
 		for (CompoundTag tag : msg.tags) {
 			buf.writeNbt(tag);

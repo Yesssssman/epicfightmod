@@ -148,6 +148,14 @@ public abstract class Skill {
 	}
 	
 	/**
+	 * Notify the executor unmet conditions to cast the skill
+	 */
+	@OnlyIn(Dist.CLIENT)
+	public void validationFeedback(LocalPlayerPatch playerpatch) {
+		
+	}
+	
+	/**
 	 * Get a packet to send to the server
 	 */
 	@OnlyIn(Dist.CLIENT)

@@ -35,14 +35,14 @@ public class SPAddOrRemoveSkillData {
 		int slot = buf.readInt();
 		Object value = SkillDataKey.byId(id).readFromBuffer(buf);
 		
-		return new SPAddOrRemoveSkillData(SkillDataKey.byId(id), slot, value, AddRemove.values()[buf.readInt()], buf.readInt());
+		return new SPAddOrRemoveSkillData(SkillDataKey.byId(id), slot, value, buf.readEnum(AddRemove.class), buf.readInt());
 	}
 	
 	public static void toBytes(SPAddOrRemoveSkillData msg, FriendlyByteBuf buf) {
 		buf.writeInt(msg.keyId);
 		buf.writeInt(msg.slot);
 		SkillDataKey.byId(msg.keyId).writeToBuffer(buf, msg.value);
-		buf.writeInt(msg.workType.ordinal());
+		buf.writeEnum(msg.workType);
 		buf.writeInt(msg.entityId);
 	}
 	

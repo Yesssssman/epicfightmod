@@ -46,7 +46,7 @@ public class SPSkillExecutionFeedback {
 	}
 	
 	public static SPSkillExecutionFeedback fromBytes(FriendlyByteBuf buf) {
-		SPSkillExecutionFeedback msg = new SPSkillExecutionFeedback(buf.readInt(), FeedbackType.values()[buf.readInt()]);
+		SPSkillExecutionFeedback msg = new SPSkillExecutionFeedback(buf.readInt(), buf.readEnum(FeedbackType.class));
 
 		while (buf.isReadable()) {
 			msg.buffer.writeByte(buf.readByte());
@@ -57,7 +57,7 @@ public class SPSkillExecutionFeedback {
 
 	public static void toBytes(SPSkillExecutionFeedback msg, FriendlyByteBuf buf) {
 		buf.writeInt(msg.skillSlot);
-		buf.writeInt(msg.feedbackType.ordinal());
+		buf.writeEnum(msg.feedbackType);
 
 		while (msg.buffer.isReadable()) {
 			buf.writeByte(msg.buffer.readByte());
@@ -70,21 +70,20 @@ public class SPSkillExecutionFeedback {
 			
 			if (playerpatch != null) {
 				switch(msg.feedbackType) {
-				case EXECUTED:
+				case EXECUTED -> {
 					playerpatch.getSkill(msg.skillSlot).getSkill().executeOnClient(playerpatch, msg.getBuffer());
-					break;
-				case CHARGING_BEGIN:
+				}
+				case CHARGING_BEGIN -> {
 					SkillContainer skillContainer = playerpatch.getSkill(msg.skillSlot);
 					
 					if (skillContainer.getSkill() instanceof ChargeableSkill chargeableSkill) {
 						playerpatch.startSkillCharging(chargeableSkill);
 						ClientEngine.getInstance().controllEngine.setChargingKey(skillContainer.getSlot(), chargeableSkill.getKeyMapping());
 					}
-					
-					break;
-				case EXPIRED:
+				}
+				case EXPIRED -> {
 					playerpatch.getSkill(msg.skillSlot).getSkill().cancelOnClient(playerpatch, msg.getBuffer());
-					break;
+				}
 				}
 			}
 		});

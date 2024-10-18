@@ -44,7 +44,7 @@ public class CPExecuteSkill {
 	}
 
 	public static CPExecuteSkill fromBytes(FriendlyByteBuf buf) {
-		CPExecuteSkill msg = new CPExecuteSkill(buf.readInt(), WorkType.values()[buf.readInt()]);
+		CPExecuteSkill msg = new CPExecuteSkill(buf.readInt(), buf.readEnum(WorkType.class));
 
 		while (buf.isReadable()) {
 			msg.buffer.writeByte(buf.readByte());
@@ -55,7 +55,7 @@ public class CPExecuteSkill {
 
 	public static void toBytes(CPExecuteSkill msg, FriendlyByteBuf buf) {
 		buf.writeInt(msg.skillSlot);
-		buf.writeInt(msg.workType.ordinal());
+		buf.writeEnum(msg.workType);
 		
 		while (msg.buffer.isReadable()) {
 			buf.writeByte(msg.buffer.readByte());

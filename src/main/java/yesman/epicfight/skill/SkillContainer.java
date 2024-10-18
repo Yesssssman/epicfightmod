@@ -155,6 +155,11 @@ public class SkillContainer {
 	@OnlyIn(Dist.CLIENT)
 	public SkillExecuteEvent sendExecuteRequest(LocalPlayerPatch executor, ControllEngine controllEngine) {
 		SkillExecuteEvent event = new SkillExecuteEvent(executor, this);
+		
+		if (this.containingSkill == null) {
+			return event;
+		}
+		
 		Object packet = null;
 		
 		if (this.containingSkill instanceof ChargeableSkill chargeableSkill && this.containingSkill.getActivateType() == Skill.ActivateType.CHARGING) {
@@ -165,6 +170,7 @@ public class SkillContainer {
 				executor.resetSkillCharging();
 			} else {
 				if (!this.canExecute(executor, event)) {
+					this.containingSkill.validationFeedback(executor);
 					return event;
 				}
 				
@@ -174,6 +180,7 @@ public class SkillContainer {
 			}
 		} else {
 			if (!this.canExecute(executor, event)) {
+				this.containingSkill.validationFeedback(executor);
 				return event;
 			}
 			

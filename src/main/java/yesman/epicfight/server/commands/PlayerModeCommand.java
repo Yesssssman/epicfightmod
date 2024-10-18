@@ -60,6 +60,5 @@ public class PlayerModeCommand {
 			}
 			command.sendSuccess(() -> Component.translatable("commands.gamemode.success.other", serverPlayer.getDisplayName(), component), true);
 		}
-
 	}
 }

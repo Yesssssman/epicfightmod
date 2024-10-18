@@ -137,7 +137,7 @@ public class LiechtenauerSkill extends WeaponInnateSkill {
 		} else {
 			super.executeOnServer(executer, args);
 			executer.getSkill(this).activate();
-			executer.modifyLivingMotionByCurrentItem();
+			executer.modifyLivingMotionByCurrentItem(false);
 			executer.playAnimationSynchronized(Animations.BIPED_LIECHTENAUER_READY, 0.0F);
 		}
 	}
@@ -146,7 +146,7 @@ public class LiechtenauerSkill extends WeaponInnateSkill {
 	public void cancelOnServer(ServerPlayerPatch executer, FriendlyByteBuf args) {
 		executer.getSkill(this).deactivate();
 		super.cancelOnServer(executer, args);
-		executer.modifyLivingMotionByCurrentItem();
+		executer.modifyLivingMotionByCurrentItem(false);
 	}
 	
 	@Override

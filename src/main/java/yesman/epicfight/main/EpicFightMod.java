@@ -71,6 +71,7 @@ import yesman.epicfight.network.EpicFightNetworkManager;
 import yesman.epicfight.particle.EpicFightParticles;
 import yesman.epicfight.server.commands.PlayerModeCommand;
 import yesman.epicfight.server.commands.PlayerSkillCommand;
+import yesman.epicfight.server.commands.PlayerStaminaCommand;
 import yesman.epicfight.server.commands.arguments.EpicFightCommandArgumentTypes;
 import yesman.epicfight.skill.SkillCategories;
 import yesman.epicfight.skill.SkillCategory;
@@ -99,15 +100,17 @@ import yesman.epicfight.world.level.block.EpicFightBlocks;
 import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
 
 /**
- *  Changes from 20.9.2 -> 20.9.3
+ *  Changes from 20.9.4 -> 20.9.5
  *  
- *  1. Fixed ender dragon slam particles' texture missing
+ *  1. Fixed massive tracing distance when attacking
  *  
- *  2. Fixed the player's saturation decreasing faster
+ *  2. Fixed the player not turning to the jump direction of Phantom ascent
  *  
- *  3. Fixed extendable enums from addons not being registered
+ *  3. Fixed unsynchronized data with a dedicated server using resource pack from third party URL
  *  
- *  4. Added parchment library
+ *  4. Added validation process for animation registry when entering the server
+ *  
+ *  5. Added an alert message when you trying to use blade rush without targeting an entity
  *  
  *  --- TO DO ---
  *  
@@ -256,7 +259,8 @@ public class EpicFightMod {
 	 */
 	private void command(final RegisterCommandsEvent event) {
 		PlayerModeCommand.register(event.getDispatcher());
-		PlayerSkillCommand.register(event.getDispatcher(), event.getBuildContext());
+		PlayerSkillCommand.register(event.getDispatcher());
+		PlayerStaminaCommand.register(event.getDispatcher());
     }
 	
 	public void addPackFindersEvent(AddPackFindersEvent event) {

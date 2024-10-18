@@ -1,6 +1,7 @@
 package yesman.epicfight.api.animation.types;
 
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,6 +34,8 @@ import yesman.epicfight.config.EpicFightOptions;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class ActionAnimation extends MainFrameAnimation {
+	public static final TransformSheet EMPTY_SHEET = new TransformSheet(List.of(new Keyframe(0.0F, JointTransform.empty()), new Keyframe(Float.MAX_VALUE, JointTransform.empty())));
+	
 	public ActionAnimation(float convertTime, String path, Armature armature) {
 		this(convertTime, Float.MAX_VALUE, path, armature);
 	}
@@ -54,7 +57,6 @@ public class ActionAnimation extends MainFrameAnimation {
 			.addState(EntityState.UPDATE_LIVING_MOTION, false)
 			.addState(EntityState.CAN_BASIC_ATTACK, false)
 			.addState(EntityState.CAN_SKILL_EXECUTION, false)
-			.newTimePair(0.01F, postDelay)
 			.addState(EntityState.TURNING_LOCKED, true)
 			.newTimePair(0.0F, Float.MAX_VALUE)
 			.addState(EntityState.INACTION, true);
@@ -257,26 +259,13 @@ public class ActionAnimation extends MainFrameAnimation {
 		MoveCoordSetter moveCoordsetter = isCoordUpdateTime ? this.getProperty(ActionAnimationProperty.COORD_SET_TICK).orElse(null) : MoveCoordFunctions.RAW_COORD;
 		
 		if (moveCoordsetter != null) {
-			TransformSheet transformSheet = animation.isLinkAnimation() ? animation.getCoord() : entitypatch.getArmature().getActionAnimationCoord();
-			moveCoordsetter.set(animation, entitypatch, transformSheet);
-		}
-		
-		TransformSheet rootCoord;
-		
-		if (animation.isLinkAnimation()) {
-			rootCoord = animation.getCoord();
-		} else {
-			rootCoord = entitypatch.getArmature().getActionAnimationCoord();
-			
-			if (rootCoord == null) {
-				rootCoord = animation.getCoord();
-			}
+			moveCoordsetter.set(animation, entitypatch, entitypatch.getArmature().getActionAnimationCoord());
 		}
 		
 		boolean hasNoGravity = entitypatch.getOriginal().isNoGravity();
 		boolean moveVertical = this.getProperty(ActionAnimationProperty.MOVE_VERTICAL).orElse(this.getProperty(ActionAnimationProperty.COORD).isPresent());
 		MoveCoordGetter moveGetter = isCoordUpdateTime ? this.getProperty(ActionAnimationProperty.COORD_GET).orElse(MoveCoordFunctions.DIFF_FROM_PREV_COORD) : MoveCoordFunctions.DIFF_FROM_PREV_COORD;
-		Vec3f move = moveGetter.get(animation, entitypatch, rootCoord);
+		Vec3f move = moveGetter.get(animation, entitypatch, entitypatch.getArmature().getActionAnimationCoord());
 		LivingEntity livingentity = entitypatch.getOriginal();
 		Vec3 motion = livingentity.getDeltaMovement();
 		

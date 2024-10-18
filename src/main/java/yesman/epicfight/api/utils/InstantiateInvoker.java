@@ -18,6 +18,7 @@ import net.minecraft.world.InteractionHand;
 import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.Joint;
 import yesman.epicfight.api.collider.Collider;
+import yesman.epicfight.api.exception.AnimationInvokeException;
 import yesman.epicfight.api.model.Armature;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.gameasset.ColliderPreset;
@@ -78,7 +79,7 @@ public class InstantiateInvoker {
 				return Result.of(type, (T)STRING_TO_OBJECT_PARSER.get(type).apply(sValue));
 			}
 			
-			throw new IllegalArgumentException("Can't find the matching type for the command " + invocationCommand);
+			throw new AnimationInvokeException("Can't find the matching type for the command " + invocationCommand);
 		}
 	}
 	
@@ -96,7 +97,7 @@ public class InstantiateInvoker {
 		Class<?> type = param$type.length > 1 ? Class.forName(param$type[1]) : hint;
 		
 		if (type == null) {
-			throw new IllegalArgumentException("Can't find the type in command " + invocationCommand);
+			throw new AnimationInvokeException("Can't find the type in command " + invocationCommand);
 		}
 		
 		String[] params = splitExceptWrapper(sParams, ',', false);
@@ -137,7 +138,7 @@ public class InstantiateInvoker {
 	@SuppressWarnings("unchecked")
 	public static <T> Result<T[]> invokeArray(String invocationCommand, @Nullable Class<?> hint) throws Exception {
 		if (!invocationCommand.matches("\\[.+\\]") && !invocationCommand.matches("\\[.+\\]\\#.+")) {
-			throw new IllegalStateException("Invalid array invocation command: " + invocationCommand);
+			throw new AnimationInvokeException("Invalid array invocation command: " + invocationCommand);
 		}
 		
 		String[] param$type = splitExceptWrapper(invocationCommand, '#', true);
@@ -145,7 +146,7 @@ public class InstantiateInvoker {
 		Class<?> type = param$type.length > 1 ? Class.forName(param$type[1]) : hint;
 		
 		if (type == null) {
-			throw new IllegalArgumentException("Can't find the type in command " + invocationCommand);
+			throw new AnimationInvokeException("Can't find the type in command " + invocationCommand);
 		}
 		
 		String[] params = splitExceptWrapper(sParams, ',', false);
@@ -156,7 +157,7 @@ public class InstantiateInvoker {
 			T obj = (T)invoke(params[i], type).result;
 			
 			if (obj.getClass() != type) {
-				throw new IllegalStateException("Heterogeneous array elements for the command " + invocationCommand);
+				throw new AnimationInvokeException("Heterogeneous array elements for the command " + invocationCommand);
 			}
 			
 			resultArray.add(obj);

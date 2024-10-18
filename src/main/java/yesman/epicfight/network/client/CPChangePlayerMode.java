@@ -19,11 +19,11 @@ public class CPChangePlayerMode {
 	}
 
 	public static CPChangePlayerMode fromBytes(FriendlyByteBuf buf) {
-		return new CPChangePlayerMode(PlayerPatch.PlayerMode.values()[buf.readInt()]);
+		return new CPChangePlayerMode(buf.readEnum(PlayerPatch.PlayerMode.class));
 	}
 
 	public static void toBytes(CPChangePlayerMode msg, FriendlyByteBuf buf) {
-		buf.writeInt(msg.mode.ordinal());
+		buf.writeEnum(msg.mode);
 	}
 	
 	public static void handle(CPChangePlayerMode msg, Supplier<NetworkEvent.Context> ctx) {

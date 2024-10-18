@@ -364,6 +364,10 @@ public class LocalPlayerPatch extends AbstractClientPlayerPatch<LocalPlayer> {
 	
 	@Override
 	public void correctRotation() {
+		if (!this.useModelYRot) {
+			this.modelYRot = this.getOriginal().getYRot();
+		}
+		
 		if (this.targetLockedOn) {
 			if (this.rayTarget != null && !this.rayTarget.isRemoved()) {
 				Vec3 playerPosition = this.original.position();

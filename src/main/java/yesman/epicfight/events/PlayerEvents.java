@@ -119,7 +119,7 @@ public class PlayerEvents {
 		Player player = event.getEntity();
 		ServerPlayerPatch playerpatch = EpicFightCapabilities.getEntityPatch(player, ServerPlayerPatch.class);
 		playerpatch.getAnimator().resetLivingAnimations();
-		playerpatch.modifyLivingMotionByCurrentItem();
+		playerpatch.modifyLivingMotionByCurrentItem(true);
 		
 		EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.WEIGHT_PENALTY, player.level().getGameRules().getInt(EpicFightGamerules.WEIGHT_PENALTY)), (ServerPlayer)player);
 		EpicFightNetworkManager.sendToPlayer(new SPChangeGamerule(SPChangeGamerule.SynchronizedGameRules.DIABLE_ENTITY_UI, player.level().getGameRules().getBoolean(EpicFightGamerules.DISABLE_ENTITY_UI)), (ServerPlayer)player);

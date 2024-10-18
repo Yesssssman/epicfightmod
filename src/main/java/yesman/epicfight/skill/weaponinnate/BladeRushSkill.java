@@ -7,6 +7,7 @@ import java.util.UUID;
 import com.google.common.collect.Maps;
 
 import io.netty.buffer.Unpooled;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -170,5 +171,13 @@ public class BladeRushSkill extends WeaponInnateSkill {
 	@Override
 	public void onScreen(LocalPlayerPatch playerpatch, float resolutionX, float resolutionY) {
 		
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	@Override
+	public void validationFeedback(LocalPlayerPatch playerpatch) {
+		if (!this.checkExecuteCondition(playerpatch)) {
+			Minecraft.getInstance().gui.setOverlayMessage(Component.translatable("gui.epicfight.warn.no_target"), false);
+		}
 	}
 }

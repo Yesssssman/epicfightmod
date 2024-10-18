@@ -29,7 +29,8 @@
 		"MixinLivingEntity",
 		"MixinMob",
 		"MixinPlayer",
-		"MixinThrownTrident"
+		"MixinThrownTrident",
+		"MixinServerGamePacketListenerImpl"
 	],
 	"injector": {
 		"defaultRequire": 1

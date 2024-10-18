@@ -1,9 +1,12 @@
 package yesman.epicfight.api.animation;
 
+import java.util.HashSet;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
@@ -13,10 +16,15 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.SimpleJsonResourceReloadListener;
 import net.minecraft.util.profiling.ProfilerFiller;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.fml.ModLoader;
 import yesman.epicfight.api.animation.property.AnimationProperty;
 import yesman.epicfight.api.animation.types.StaticAnimation;
@@ -24,10 +32,12 @@ import yesman.epicfight.api.animation.types.datapack.ClipHoldingAnimation;
 import yesman.epicfight.api.client.animation.ClientAnimationDataReader;
 import yesman.epicfight.api.data.reloader.SkillManager;
 import yesman.epicfight.api.forgeevent.AnimationRegistryEvent;
-import yesman.epicfight.api.utils.ClearableIdMapper;
 import yesman.epicfight.api.utils.InstantiateInvoker;
 import yesman.epicfight.gameasset.Armatures;
 import yesman.epicfight.main.EpicFightMod;
+import yesman.epicfight.network.EpicFightNetworkManager;
+import yesman.epicfight.network.client.CPCheckAnimationRegistrySync;
+import yesman.epicfight.network.server.SPDatapackSync;
 
 public class AnimationManager extends SimpleJsonResourceReloadListener {
 	private static final AnimationManager INSTANCE = new AnimationManager();
@@ -40,7 +50,8 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	private final Map<StaticAnimation, AnimationClip> animationClips = Maps.newHashMap();
 	private final Map<ResourceLocation, StaticAnimation> animationRegistry = Maps.newHashMap();
 	private final Map<ResourceLocation, StaticAnimation> userAnimations = Maps.newHashMap();
-	private final ClearableIdMapper<StaticAnimation> animationIdMap = new ClearableIdMapper<> ();
+	private final Map<ResourceLocation, String> userAnimationInvocationCommands = Maps.newHashMap();
+	private final Map<Integer, StaticAnimation> animationIdMap = Maps.newHashMap();
 	private String currentWorkingModid;
 	
 	public AnimationManager() {
@@ -48,11 +59,11 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	}
 	
 	public StaticAnimation byId(int animationId) {
-		if (!this.animationIdMap.contains(animationId)) {
+		if (!this.animationIdMap.containsKey(animationId)) {
 			throw new NoSuchElementException("No animation id " + animationId);
 		}
 		
-		return this.animationIdMap.byId(animationId);
+		return this.animationIdMap.get(animationId);
 	}
 	
 	public StaticAnimation byKeyOrThrow(String resourceLocation) {
@@ -101,7 +112,7 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 			
 			this.animationRegistry.put(staticAnimation.getRegistryName(), staticAnimation);
 			int id = this.animationRegistry.size();
-			this.animationIdMap.addMapping(staticAnimation, id);
+			this.animationIdMap.put(id, staticAnimation);
 			
 			return id;
 		}
@@ -163,6 +174,8 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		
 		this.animationIdMap.clear();
 		this.animationRegistry.clear();
+		this.userAnimations.clear();
+		this.userAnimationInvocationCommands.clear();
 		
 		Map<String, Runnable> registryMap = Maps.newLinkedHashMap();
 		ModLoader.get().postEvent(new AnimationRegistryEvent(registryMap));
@@ -240,6 +253,96 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		return EpicFightMod.isPhysicalClient() ? Minecraft.getInstance().getResourceManager() : resourceManager;
 	}
 	
+	public int getUserAnimationsCount() {
+		return this.userAnimations.size();
+	}
+	
+	public Stream<CompoundTag> getUserAnimationStream() {
+		return this.userAnimations.values().stream().sorted((a1, a2) -> a1.getRegistryName().toString().compareTo(a2.getRegistryName().toString())).map((animation) -> {
+			CompoundTag compTag = new CompoundTag();
+			
+			compTag.putString("registry_name", animation.getRegistryName().toString());
+			compTag.putString("invoke_command", this.userAnimationInvocationCommands.get(animation.getRegistryName()));
+			
+			return compTag;
+		});
+	}
+	
+	/**
+	 * @param createDummyAnimations : creates dummy animations for server side animations without animation clips when the server has mandatory resource pack.
+	 *                                custom weapon types & mob capabilities won't be created because they won't be able to find the animations from the server
+	 *                                dummy animations will be automatically removed right after reloading resourced as the server forces using resource pack
+	 */
+	@OnlyIn(Dist.CLIENT)
+	public void processServerPacket(SPDatapackSync packet, boolean createDummyAnimations) {
+		if (createDummyAnimations) {
+			for (CompoundTag tag : packet.getTags()) {
+				String invocationCommand = tag.getString("invoke_command");
+				ResourceLocation registryName = new ResourceLocation(tag.getString("registry_name"));
+				
+				if (this.animationRegistry.containsKey(registryName)) {
+					continue;
+				}
+				
+				try {
+					this.currentWorkingModid = registryName.getNamespace();
+					StaticAnimation animation = InstantiateInvoker.invoke(invocationCommand, StaticAnimation.class).getResult();
+					
+					this.userAnimations.put(registryName, animation);
+					this.currentWorkingModid = null;
+				} catch (Exception e) {
+					EpicFightMod.LOGGER.warn("Failed at creating animation from server resource pack");
+					e.printStackTrace();
+				}
+			}
+		}
+		
+		this.sendAnimationRegistrySyncCheck();
+	}
+	
+	@OnlyIn(Dist.CLIENT)
+	private void sendAnimationRegistrySyncCheck() {
+		int animationCount = this.animationRegistry.size();
+		String[] registryNames = new String[animationCount];
+		
+		for (int i = 0; i < animationCount; i++) {
+			String registryName = this.animationIdMap.get(i + 1).getRegistryName().toString();
+			registryNames[i] = registryName;
+		}
+		
+		CPCheckAnimationRegistrySync packet = new CPCheckAnimationRegistrySync(animationCount, registryNames);
+		EpicFightNetworkManager.sendToServer(packet);
+	}
+	
+	public void validateClientAnimationRegistry(CPCheckAnimationRegistrySync msg, ServerGamePacketListenerImpl connection) {
+		StringBuilder builder = new StringBuilder();
+		Set<String> clientAnimationRegistry = new HashSet<> (Set.of(msg.registryNames));
+		
+		for (String registryName : this.animationRegistry.keySet().stream().map((rl) -> rl.toString()).toList()) {
+			if (!clientAnimationRegistry.contains(registryName)) {
+				// Animations that don't exist in client
+				builder.append(registryName);
+				builder.append("\n");
+			} else {
+				clientAnimationRegistry.remove(registryName);
+			}
+		}
+		
+		// Animations that don't exist in server
+		for (String registryName : clientAnimationRegistry) {
+			if (registryName.equals("empty")) {
+				continue;
+			}
+			
+			builder.append(registryName);
+			builder.append("\n");
+		}
+		
+		if (!builder.isEmpty()) {
+			connection.disconnect(Component.translatable("gui.epicfight.warn.animation_unsync", builder.toString()));
+		}
+	}
+	
 	/**************************************************
 	 * User-animation loader
 	 **************************************************/
@@ -255,6 +358,7 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		String invocationCommand = constructorObject.get("invocation_command").getAsString();
 		StaticAnimation animation = InstantiateInvoker.invoke(invocationCommand, StaticAnimation.class).getResult();
 		this.userAnimations.put(animation.getRegistryName(), animation);
+		this.userAnimationInvocationCommands.put(animation.getRegistryName(), invocationCommand);
 		
 		JsonElement propertiesElement = json.get("properties");
 		

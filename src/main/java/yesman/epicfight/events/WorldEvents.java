@@ -10,6 +10,7 @@ import net.minecraftforge.event.LootTableLoadEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
+import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.data.reloader.ItemCapabilityReloadListener;
 import yesman.epicfight.api.data.reloader.MobPatchReloadListener;
 import yesman.epicfight.api.data.reloader.SkillManager;
@@ -61,7 +62,7 @@ public class WorldEvents {
 		}
     }
 	
-	private static void synchronizeWorldData(ServerPlayer player) {
+	public static void synchronizeWorldData(ServerPlayer player) {
 		ServerPlayerPatch serverplayerpatch = EpicFightCapabilities.getEntityPatch(player, ServerPlayerPatch.class);
 		CapabilitySkill skillCapability = serverplayerpatch.getSkillCapability();
 		
@@ -84,16 +85,19 @@ public class WorldEvents {
 		skillParams.forEach(skillParamsPacket::write);
 		EpicFightNetworkManager.sendToPlayer(skillParamsPacket, player);
 		
+		SPDatapackSync animationPacket = new SPDatapackSync(AnimationManager.getInstance().getUserAnimationsCount(), player.getServer().isResourcePackRequired() ? SPDatapackSync.Type.ANIMATION_IN_MANDATORY_RESOURCE_PACK : SPDatapackSync.Type.ANIMATION_IN_RESOURCE_PACK);
 		SPDatapackSync armorPacket = new SPDatapackSync(ItemCapabilityReloadListener.armorCount(), SPDatapackSync.Type.ARMOR);
 		SPDatapackSync weaponPacket = new SPDatapackSync(ItemCapabilityReloadListener.weaponCount(), SPDatapackSync.Type.WEAPON);
 		SPDatapackSync mobPatchPacket = new SPDatapackSync(MobPatchReloadListener.getTagCount(), SPDatapackSync.Type.MOB);
 		SPDatapackSync weaponTypePacket = new SPDatapackSync(WeaponTypeReloadListener.getTagCount(), SPDatapackSync.Type.WEAPON_TYPE);
 		
+		AnimationManager.getInstance().getUserAnimationStream().forEach(animationPacket::write);
 		ItemCapabilityReloadListener.getArmorDataStream().forEach(armorPacket::write);
 		ItemCapabilityReloadListener.getWeaponDataStream().forEach(weaponPacket::write);
 		MobPatchReloadListener.getDataStream().forEach(mobPatchPacket::write);
 		WeaponTypeReloadListener.getWeaponTypeDataStream().forEach(weaponTypePacket::write);
 		
+		EpicFightNetworkManager.sendToPlayer(animationPacket, player);
 		EpicFightNetworkManager.sendToPlayer(weaponTypePacket, player);
 		EpicFightNetworkManager.sendToPlayer(armorPacket, player);
 		EpicFightNetworkManager.sendToPlayer(weaponPacket, player);

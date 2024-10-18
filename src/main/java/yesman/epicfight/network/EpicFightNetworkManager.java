@@ -11,6 +11,7 @@ import net.minecraftforge.network.simple.SimpleChannel;
 import yesman.epicfight.main.EpicFightMod;
 import yesman.epicfight.network.client.CPChangePlayerMode;
 import yesman.epicfight.network.client.CPChangeSkill;
+import yesman.epicfight.network.client.CPCheckAnimationRegistrySync;
 import yesman.epicfight.network.client.CPExecuteSkill;
 import yesman.epicfight.network.client.CPModifyEntityModelYRot;
 import yesman.epicfight.network.client.CPModifySkillData;
@@ -85,6 +86,7 @@ public class EpicFightNetworkManager {
 		INSTANCE.registerMessage(id++, CPSetPlayerTarget.class, CPSetPlayerTarget::toBytes, CPSetPlayerTarget::fromBytes, CPSetPlayerTarget::handle);
 		INSTANCE.registerMessage(id++, CPChangeSkill.class, CPChangeSkill::toBytes, CPChangeSkill::fromBytes, CPChangeSkill::handle);
 		INSTANCE.registerMessage(id++, CPModifySkillData.class, CPModifySkillData::toBytes, CPModifySkillData::fromBytes, CPModifySkillData::handle);
+		INSTANCE.registerMessage(id++, CPCheckAnimationRegistrySync.class, CPCheckAnimationRegistrySync::toBytes, CPCheckAnimationRegistrySync::fromBytes, CPCheckAnimationRegistrySync::handle);
 		
 		INSTANCE.registerMessage(id++, SPChangeSkill.class, SPChangeSkill::toBytes, SPChangeSkill::fromBytes, SPChangeSkill::handle);
 		INSTANCE.registerMessage(id++, SPSkillExecutionFeedback.class, SPSkillExecutionFeedback::toBytes, SPSkillExecutionFeedback::fromBytes, SPSkillExecutionFeedback::handle);

@@ -32,8 +32,8 @@ public class SPPotion {
 		MobEffectInstance effectInstance = new MobEffectInstance(effect, 0, buf.readInt());
 		
 		int entityId = buf.readInt();
-		Action action = Action.getAction(buf.readInt());
-
+		Action action = buf.readEnum(Action.class);
+		
 		return new SPPotion(effectInstance, action, entityId);
 	}
 
@@ -41,7 +41,7 @@ public class SPPotion {
 		buf.writeInt(MobEffect.getId(msg.effectInstance.getEffect()));
 		buf.writeInt(msg.effectInstance.getAmplifier());
 		buf.writeInt(msg.entityId);
-		buf.writeInt(msg.action.getSymb());
+		buf.writeEnum(msg.action);
 	}
 	
 	public static void handle(SPPotion msg, Supplier<NetworkEvent.Context> ctx) {
@@ -50,14 +50,13 @@ public class SPPotion {
 			Entity entity = mc.level.getEntity(msg.entityId);
 			
 			if (entity != null && entity instanceof LivingEntity livEntity) {
-
 				switch (msg.action) {
-				case ACTIVATE:
+				case ACTIVATE -> {
 					livEntity.addEffect(msg.effectInstance);
-					break;
-				case REMOVE:
+				}
+				case REMOVE -> {
 					livEntity.removeEffect(msg.effectInstance.getEffect());
-					break;
+				}
 				}
 			}
 		});
@@ -66,22 +65,6 @@ public class SPPotion {
 	}
 	
 	public enum Action {
-		ACTIVATE(0), REMOVE(1);
-
-		int action;
-
-		Action(int action) {
-			this.action = action;
-		}
-
-		public int getSymb() {
-			return action;
-		}
-
-		private static Action getAction(int symb) {
-			if(symb == 0) return ACTIVATE;
-			else if(symb == 1) return REMOVE;
-			else return null;
-		}
+		ACTIVATE, REMOVE;
 	}
 }

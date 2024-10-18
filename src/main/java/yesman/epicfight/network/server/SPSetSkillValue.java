@@ -28,11 +28,11 @@ public class SPSetSkillValue {
 	}
 	
 	public static SPSetSkillValue fromBytes(FriendlyByteBuf buf) {
-		return new SPSetSkillValue(Target.values()[buf.readInt()], buf.readInt(), buf.readFloat(), buf.readBoolean());
+		return new SPSetSkillValue(buf.readEnum(Target.class), buf.readInt(), buf.readFloat(), buf.readBoolean());
 	}
 	
 	public static void toBytes(SPSetSkillValue msg, FriendlyByteBuf buf) {
-		buf.writeInt(msg.target.ordinal());
+		buf.writeEnum(msg.target);
 		buf.writeInt(msg.index);
 		buf.writeFloat(msg.floatType);
 		buf.writeBoolean(msg.booleanType);

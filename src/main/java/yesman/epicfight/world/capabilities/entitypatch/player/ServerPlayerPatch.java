@@ -159,13 +159,16 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 			}
 		}
 		
-		this.modifyLivingMotionByCurrentItem();
+		this.modifyLivingMotionByCurrentItem(true);
 		
 		super.updateHeldItem(fromCap, toCap, from, to, hand);
 	}
 	
-	public void modifyLivingMotionByCurrentItem() {
-		if (this.updatedMotionCurrentTick) {
+	/**
+	 * @param checkOldAnimations: when true, it compares the animations and send the packet if it has any changes
+	 */
+	public void modifyLivingMotionByCurrentItem(boolean checkOldAnimations) {
+		if (this.updatedMotionCurrentTick && checkOldAnimations) {
 			return;
 		}
 		
@@ -197,7 +200,7 @@ public class ServerPlayerPatch extends PlayerPatch<ServerPlayer> {
 			}
 		}
 		
-		if (this.updatedMotionCurrentTick) {
+		if (this.updatedMotionCurrentTick || !checkOldAnimations) {
 			this.getAnimator().resetLivingAnimations();
 			newLivingAnimations.forEach(this.getAnimator()::addLivingAnimation);
 			
