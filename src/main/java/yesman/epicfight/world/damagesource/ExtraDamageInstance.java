@@ -11,9 +11,7 @@ public class ExtraDamageInstance {
 	public static final ExtraDamage TARGET_LOST_HEALTH = new ExtraDamage((attacker, itemstack, target, baseDamage, params) -> {
 			return (target.getMaxHealth() - target.getHealth()) * params[0];
 		}, (itemstack, tooltips, baseDamage, params) -> {
-			tooltips.append(Component.translatable("damage_source.epicfight.target_lost_health",
-					Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(params[0] * 100F) + "%").withStyle(ChatFormatting.RED)
-				).withStyle(ChatFormatting.DARK_GRAY));
+			tooltips.append(Component.translatable("damage_source.epicfight.target_lost_health", Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(params[0] * 100F) + "%").withStyle(ChatFormatting.RED)).withStyle(ChatFormatting.DARK_GRAY));
 		});
 	
 	public static final ExtraDamage SWEEPING_EDGE_ENCHANTMENT = new ExtraDamage((attacker, itemstack, target, baseDamage, params) -> {
@@ -28,9 +26,8 @@ public class ExtraDamageInstance {
 				double modifier = (double)i / (i + 1.0D);
 				double damage = baseDamage * modifier;
 				
-				tooltips.append(Component.translatable("damage.epicfight.sweeping_edge_enchant_level",
-						Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(damage)).withStyle(ChatFormatting.DARK_PURPLE), i
-					).withStyle(ChatFormatting.DARK_GRAY));
+				MutableComponent sweepedgetooltip = Component.translatable("damage_source.epicfight.sweeping_edge_enchant_level", Component.literal(ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(damage)).withStyle(ChatFormatting.DARK_PURPLE), i).withStyle(ChatFormatting.DARK_GRAY);
+				tooltips.append(sweepedgetooltip);
 			}
 		});
 	
