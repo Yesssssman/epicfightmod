@@ -3,12 +3,14 @@ package yesman.epicfight.api.animation.types;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
 import com.google.common.collect.Maps;
 
+import io.netty.util.internal.StringUtil;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.item.ItemStack;
@@ -61,6 +63,7 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 	protected final ResourceLocation registryName;
 	protected final StateSpectrum stateSpectrum = new StateSpectrum();
 	protected ResourceLocation resourceLocation;
+	private final String filehash;
 	
 	public StaticAnimation() {
 		super(0.0F, true);
@@ -68,6 +71,7 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		this.registryName = null;
 		this.armature = null;
 		this.animationId = -1;
+		this.filehash = StringUtil.EMPTY_STRING;
 	}
 	
 	public StaticAnimation(boolean repeatPlay, String path, Armature armature) {
@@ -85,6 +89,17 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		this.registryName = new ResourceLocation(modid, folderPath);
 		this.armature = armature;
 		this.animationId = AnimationManager.getInstance().registerAnimation(this);
+		
+		String fileHash;
+		
+		try {
+			JsonModelLoader jsonfile = new JsonModelLoader(AnimationManager.getAnimationResourceManager(), this.resourceLocation);
+			fileHash = jsonfile.getFileHash();
+		} catch (NoSuchElementException e) {
+			fileHash = StringUtil.EMPTY_STRING;
+		}
+		
+		this.filehash = fileHash;
 	}
 	
 	public StaticAnimation(float convertTime, boolean repeatPlay, String path, Armature armature, boolean noRegister) {
@@ -100,8 +115,20 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		
 		if (noRegister) {
 			this.animationId = -1;
+			this.filehash = StringUtil.EMPTY_STRING;
 		} else {
 			this.animationId = AnimationManager.getInstance().registerAnimation(this);
+			
+			String fileHash;
+			
+			try {
+				JsonModelLoader jsonfile = new JsonModelLoader(AnimationManager.getAnimationResourceManager(), this.resourceLocation);
+				fileHash = jsonfile.getFileHash();
+			} catch (NoSuchElementException e) {
+				fileHash = StringUtil.EMPTY_STRING;
+			}
+			
+			this.filehash = fileHash;
 		}
 	}
 	
@@ -113,6 +140,7 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		this.registryName = new ResourceLocation(registryName);
 		this.armature = armature;
 		this.animationId = -1;
+		this.filehash = StringUtil.EMPTY_STRING;
 	}
 	
 	public static void loadClip(ResourceManager resourceManager, StaticAnimation animation) throws Exception {
@@ -413,6 +441,10 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 	
 	public Armature getArmature() {
 		return this.armature;
+	}
+	
+	public String getFileHash() {
+		return this.filehash;
 	}
 	
 	@Override

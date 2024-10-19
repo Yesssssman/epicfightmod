@@ -28,6 +28,10 @@ public class PlayerStaminaCommand {
 	public static void register(CommandDispatcher<CommandSourceStack> dispatcher) {
 		LiteralArgumentBuilder<CommandSourceStack> builder = Commands.literal("stamina").requires((commandSourceStack) -> commandSourceStack.hasPermission(2));
 		
+		builder.then(Commands.literal("get").then(Commands.argument("target", EntityArgument.player()).executes((command) -> {
+			return getStamina(command.getSource(), EntityArgument.getPlayer(command, "target"));
+		})));
+		
 		for (Operation operation : Operation.values()) {
 			builder.then(Commands.literal(operation.name().toLowerCase(Locale.ROOT)).then(Commands.argument("value", DoubleArgumentType.doubleArg()).executes((command) -> {
 				return setStamina(command, Collections.singleton(command.getSource().getPlayerOrException()), operation, DoubleArgumentType.getDouble(command, "value"));
@@ -37,6 +41,24 @@ public class PlayerStaminaCommand {
 		}
 		
 		dispatcher.register(Commands.literal("epicfight").then(builder));
+	}
+	
+	private static int getStamina(CommandSourceStack command, ServerPlayer serverplayer) {
+		ServerPlayerPatch serverplayerpatch = EpicFightCapabilities.getEntityPatch(serverplayer, ServerPlayerPatch.class);
+		
+		if (serverplayerpatch == null) {
+			command.sendFailure(Component.translatable("commands.epicfight.stamina.failed.no_stamina"));
+			
+			return 0;
+		} else {
+			double stamina = serverplayerpatch.getStamina();
+			
+			command.sendSuccess(() -> {
+				return Component.translatable("commands.epicfight.stamina.value.get.success", serverplayer.getName(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(stamina));
+			}, false);
+			
+			return (int)stamina;
+		}
 	}
 	
 	private static int setStamina(CommandContext<CommandSourceStack> command, Collection<ServerPlayer> players, Operation operation, double value) {

@@ -134,6 +134,8 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  
  *  Add toasts & achievements to guide beginners
  *  
+ *  Add resource hashing for animation file to prevent client modifying animation by resource pack
+ *  
  *  @author yesman
  */
 @Mod("epicfight")

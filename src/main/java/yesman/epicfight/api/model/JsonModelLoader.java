@@ -4,8 +4,9 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -20,6 +21,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.internal.Streams;
 import com.google.gson.stream.JsonReader;
 
+import io.netty.util.internal.StringUtil;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
@@ -60,6 +62,7 @@ public class JsonModelLoader {
 	private JsonObject rootJson;
 	private ResourceManager resourceManager;
 	private ResourceLocation resourceLocation;
+	private final String filehash;
 	
 	public JsonModelLoader(ResourceManager resourceManager, ResourceLocation resourceLocation) throws IllegalStateException {
 		JsonReader jsonReader = null;
@@ -69,7 +72,10 @@ public class JsonModelLoader {
 		try {
 			try {
 				Resource resource = resourceManager.getResource(resourceLocation).orElseThrow();
-				jsonReader = new JsonReader(new InputStreamReader(resource.open(), StandardCharsets.UTF_8));
+				InputStream inputStream = resource.open();
+				InputStreamReader isr = new InputStreamReader(inputStream, StandardCharsets.UTF_8);
+				
+				jsonReader = new JsonReader(isr);
 				jsonReader.setLenient(true);
 				this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
 			} catch (NoSuchElementException e) {
@@ -82,7 +88,8 @@ public class JsonModelLoader {
 				}
 				
 				BufferedInputStream bufferedInputStream = new BufferedInputStream(inputStream);
-				Reader reader = new InputStreamReader(bufferedInputStream, StandardCharsets.UTF_8);
+				InputStreamReader reader = new InputStreamReader(bufferedInputStream, StandardCharsets.UTF_8);
+				
 				jsonReader = new JsonReader(reader);
 				jsonReader.setLenient(true);
 				this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
@@ -98,7 +105,31 @@ public class JsonModelLoader {
 				}
 			}
 		}
+		
+		this.filehash = getSHA256Hash(this.rootJson.toString());
 	}
+	
+	public static String getSHA256Hash(String str){
+		String hashStream = "";
+		
+		try {
+			MessageDigest sh = MessageDigest.getInstance("SHA-256");
+			sh.update(str.getBytes());
+			byte byteData[] = sh.digest();
+			StringBuffer sb = new StringBuffer();
+			
+			for (int i = 0; i < byteData.length; i++) {
+				sb.append(Integer.toString((byteData[i] & 0xFF) + 0x100, 16).substring(1));
+			}
+			
+			hashStream = sb.toString();
+		} catch (NoSuchAlgorithmException e) {
+			e.printStackTrace();
+			hashStream = null;
+		}
+		
+		return hashStream;
+    }
 	
 	@OnlyIn(Dist.CLIENT)
 	public JsonModelLoader(InputStream inputstream, ResourceLocation resourceLocation) throws IOException {
@@ -110,6 +141,8 @@ public class JsonModelLoader {
 		jsonReader.setLenient(true);
 		this.rootJson = Streams.parse(jsonReader).getAsJsonObject();
 		jsonReader.close();
+		
+		this.filehash = StringUtil.EMPTY_STRING;
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -117,6 +150,7 @@ public class JsonModelLoader {
 		this.resourceManager = Minecraft.getInstance().getResourceManager();
 		this.rootJson = rootJson;
 		this.resourceLocation = rl;
+		this.filehash = StringUtil.EMPTY_STRING;
 	}
 	
 	@OnlyIn(Dist.CLIENT)
@@ -498,6 +532,10 @@ public class JsonModelLoader {
 	
 	public JsonObject getRootJson() {
 		return this.rootJson;
+	}
+	
+	public String getFileHash() {
+		return this.filehash;
 	}
 	
 	public AnimationClip loadAnimationClip(Armature armature) {

@@ -41,7 +41,7 @@ import yesman.epicfight.network.server.SPDatapackSync;
 
 public class AnimationManager extends SimpleJsonResourceReloadListener {
 	private static final AnimationManager INSTANCE = new AnimationManager();
-	private static ResourceManager resourceManager = null;
+	private static ResourceManager serverResourceManager = null;
 	
 	public static AnimationManager getInstance() {
 		return INSTANCE;
@@ -84,7 +84,7 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	
 	public AnimationClip getStaticAnimationClip(StaticAnimation animation) {
 		if (!this.animationClips.containsKey(animation)) {
-			animation.loadAnimation(resourceManager);
+			animation.loadAnimation(getAnimationResourceManager());
 		}
 		
 		return this.animationClips.get(animation);
@@ -162,14 +162,17 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 	public static void readAnimationProperties(StaticAnimation animation) {
 		ResourceLocation dataLocation = getAnimationDataFileLocation(animation.getLocation());
 		
-		resourceManager.getResource(dataLocation).ifPresent((rs) -> {
+		getAnimationResourceManager().getResource(dataLocation).ifPresent((rs) -> {
 			ClientAnimationDataReader.readAndApply(animation, rs);
 		});
 	}
 	
 	@Override
 	protected Map<ResourceLocation, JsonElement> prepare(ResourceManager resourceManager, ProfilerFiller profilerIn) {
-		reloadResourceManager(resourceManager);
+		if (!EpicFightMod.isPhysicalClient() && serverResourceManager == null) {
+			serverResourceManager = resourceManager;
+		}
+		
 		Armatures.build(resourceManager);
 		
 		this.animationIdMap.clear();
@@ -243,14 +246,12 @@ public class AnimationManager extends SimpleJsonResourceReloadListener {
 		return new ResourceLocation(location.getNamespace(), String.format("%s/data%s", location.getPath().substring(0, splitIdx), location.getPath().substring(splitIdx)));
 	}
 	
-	private static void reloadResourceManager(ResourceManager pResourceManager) {
-		if (resourceManager != pResourceManager) {
-			resourceManager = pResourceManager;
-		}
+	public static void setServerResourceManager(ResourceManager pResourceManager) {
+		serverResourceManager = pResourceManager;
 	}
 	
 	public static ResourceManager getAnimationResourceManager() {
-		return EpicFightMod.isPhysicalClient() ? Minecraft.getInstance().getResourceManager() : resourceManager;
+		return EpicFightMod.isPhysicalClient() ? Minecraft.getInstance().getResourceManager() : serverResourceManager;
 	}
 	
 	public int getUserAnimationsCount() {

@@ -44,6 +44,9 @@
 	"commands.epicfight.stamina.success.other": "Successfully Modified stamina from %s targets",
 	"commands.epicfight.stamina.success.failed": "Failed at modifying stamina",
 	
+	"commands.epicfight.stamina.value.get.success": "Value of stamina for player %s is %s",
+	"commands.epicfight.stamina.failed.no_stamina": "Player %s has no stamina",
+	
 	"death.attack.wither_beam": "%1$s was vaporized by wither beam",
 	"death.attack.shockwave": "%1$s was teared up by Shockwave",
 	"debug.vanilla_model_debugging.on": "Vanilla model debugging: On",
