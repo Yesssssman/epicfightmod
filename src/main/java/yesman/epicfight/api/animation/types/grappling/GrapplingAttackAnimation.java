@@ -58,8 +58,8 @@ public class GrapplingAttackAnimation extends AttackAnimation {
 		AnimationPlayer player = entitypatch.getAnimator().getPlayerFor(this);
 		float elapsedTime = player.getElapsedTime();
 		float prevElapsedTime = player.getPrevElapsedTime();
-		EntityState state = this.getState(entitypatch, animation, elapsedTime);
-		EntityState prevState = this.getState(entitypatch, animation, prevElapsedTime);
+		EntityState state = animation.getState(entitypatch, elapsedTime);
+		EntityState prevState = animation.getState(entitypatch, prevElapsedTime);
 		Phase phase = this.getPhaseByTime(elapsedTime);
 		
 		if (prevState.attacking() || state.attacking() || (prevState.getLevel() < 2 && state.getLevel() > 2)) {

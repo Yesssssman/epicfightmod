@@ -54,6 +54,10 @@ public class EntityState {
 		return this.stateMap.getOrDefault(stateFactor);
 	}
 	
+	public TypeFlexibleHashMap<StateFactor<?>> getStateMap() {
+		return this.stateMap;
+	}
+	
 	public boolean turningLocked() {
 		return this.getState(EntityState.TURNING_LOCKED);
 	}

@@ -43,17 +43,35 @@ public class LinkAnimation extends DynamicAnimation {
 	
 	@Override
 	public TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
-		return this.toAnimation.getStatesMap(entitypatch, this, 0.0F);
+		TypeFlexibleHashMap<StateFactor<?>> map = this.toAnimation.getStatesMap(entitypatch, Math.max(time - this.getTotalTime(), 0.0F));
+		
+		for (Map.Entry<StateFactor<?>, Object> entry : map.entrySet()) {
+			Object val = this.toAnimation.getModifiedLinkState(entry.getKey(), entry.getValue(), entitypatch, time);
+			map.put(entry.getKey(), val);
+		}
+		
+		return map;
 	}
 	
 	@Override
 	public EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
-		return this.toAnimation.getState(entitypatch, this, 0.0F);
+		EntityState state = this.toAnimation.getState(entitypatch, Math.max(time - this.getTotalTime(), 0.0F));
+		TypeFlexibleHashMap<StateFactor<?>> map = state.getStateMap();
+		
+		for (Map.Entry<StateFactor<?>, Object> entry : map.entrySet()) {
+			Object val = this.toAnimation.getModifiedLinkState(entry.getKey(), entry.getValue(), entitypatch, time);
+			map.put(entry.getKey(), val);
+		}
+		
+		return state;
 	}
 	
+	@SuppressWarnings("unchecked")
 	@Override
 	public <T> T getState(StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
-		return this.toAnimation.getState(stateFactor, entitypatch, this, 0.0F);
+		T state = this.toAnimation.getState(stateFactor, entitypatch, Math.max(time - this.getTotalTime(), 0.0F));
+		
+		return (T)this.toAnimation.getModifiedLinkState(stateFactor, state, entitypatch, time);
 	}
 	
 	@Override

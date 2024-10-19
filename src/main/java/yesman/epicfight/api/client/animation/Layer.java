@@ -107,7 +107,9 @@ public class Layer {
 			entitypatch.updateMotion(true);
 		}
 		
-		this.animationPlayer.getAnimation().tick(entitypatch);
+		if (!this.animationPlayer.isEnd()) {
+			this.animationPlayer.getAnimation().tick(entitypatch);
+		}
 		
 		if (!this.paused && this.animationPlayer.isEnd()) {
 			if (this.nextAnimation != null) {

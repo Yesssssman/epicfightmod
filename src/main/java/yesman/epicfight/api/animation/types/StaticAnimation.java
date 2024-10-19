@@ -330,31 +330,19 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		});
 	}
 	
-	protected EntityState getState(LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
+	@Override
+	public EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
 		return new EntityState(this.getStatesMap(entitypatch, time));
 	}
 	
-	protected TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
+	@Override
+	public TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
 		return this.stateSpectrum.getStateMap(entitypatch, time);
 	}
 	
-	protected <T> T getState(StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
+	@Override
+	public <T> T getState(StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
 		return this.stateSpectrum.getSingleState(stateFactor, entitypatch, time);
-	}
-	
-	@Override
-	public final EntityState getState(LivingEntityPatch<?> entitypatch, float time) {
-		return this.getState(entitypatch, this, time);
-	}
-	
-	@Override
-	public final TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
-		return this.getStatesMap(entitypatch, this, time);
-	}
-	
-	@Override
-	public final <T> T getState(StateFactor<T> stateFactor, LivingEntityPatch<?> entitypatch, float time) {
-		return this.getState(stateFactor, entitypatch, this, time);
 	}
 	
 	@Override
@@ -542,7 +530,11 @@ public class StaticAnimation extends DynamicAnimation implements AnimationProvid
 		this.stateSpectrumBlueprint.addStateIfNotExist(factor, val);
 		return this;
 	}
-
+	
+	public Object getModifiedLinkState(StateFactor<?> factor, Object val, LivingEntityPatch<?> entitypatch, float elapsedTime) {
+		return val;
+	}
+	
 	@Override
 	public AnimationClip getAnimationClip() {
 		return AnimationManager.getInstance().getStaticAnimationClip(this);

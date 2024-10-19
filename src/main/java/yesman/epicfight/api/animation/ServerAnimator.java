@@ -62,7 +62,6 @@ public class ServerAnimator extends Animator {
 		
 		this.animationPlayer.tick(this.entitypatch);
 		this.entitypatch.updateEntityState();
-		this.animationPlayer.getAnimation().tick(this.entitypatch);
 		
 		if (this.animationPlayer.isEnd()) {
 			DynamicAnimation nextAnimation = this.nextPlaying == null ? Animations.DUMMY_ANIMATION : this.nextPlaying;
@@ -79,6 +78,8 @@ public class ServerAnimator extends Animator {
 				this.nextPlaying.putOnPlayer(this.animationPlayer, this.entitypatch);
 				this.nextPlaying = null;
 			}
+		} else {
+			this.animationPlayer.getAnimation().tick(this.entitypatch);
 		}
 	}
 	

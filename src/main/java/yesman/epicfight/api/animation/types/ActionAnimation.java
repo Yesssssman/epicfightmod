@@ -107,7 +107,7 @@ public class ActionAnimation extends MainFrameAnimation {
 			return;
 		}
 		
-		if (this.getState(EntityState.INACTION, entitypatch, animation, entitypatch.getAnimator().getPlayerFor(this).getElapsedTime())) {
+		if (this.getState(EntityState.INACTION, entitypatch, entitypatch.getAnimator().getPlayerFor(this).getElapsedTime())) {
 			LivingEntity livingentity = entitypatch.getOriginal();
 			Vec3 vec3 = this.getCoordVector(entitypatch, animation);
 			livingentity.move(MoverType.SELF, vec3);

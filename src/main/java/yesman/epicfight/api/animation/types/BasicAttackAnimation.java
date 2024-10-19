@@ -95,8 +95,8 @@ public class BasicAttackAnimation extends AttackAnimation {
 	}
 	
 	@Override
-	protected TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, DynamicAnimation animation, float time) {
-		TypeFlexibleHashMap<StateFactor<?>> stateMap = super.getStatesMap(entitypatch, animation, time);
+	public TypeFlexibleHashMap<StateFactor<?>> getStatesMap(LivingEntityPatch<?> entitypatch, float time) {
+		TypeFlexibleHashMap<StateFactor<?>> stateMap = super.getStatesMap(entitypatch, time);
 		
 		if (!entitypatch.getOriginal().level().getGameRules().getRule(EpicFightGamerules.STIFF_COMBO_ATTACKS).get()) {
 			stateMap.put(EntityState.MOVEMENT_LOCKED, (Object)false);
