@@ -7,9 +7,13 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import org.joml.Matrix4f;
+
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.blaze3d.platform.Window;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.VertexSorting;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
@@ -105,6 +109,8 @@ public class SkillBookScreen extends Screen {
 	protected final AttributeIconList consumptionList;
 	protected final AttributeIconList providingAttributesList;
 	
+	private double customScale;
+	
 	public SkillBookScreen(Player opener, ItemStack stack, InteractionHand hand) {
 		this(opener, SkillBookItem.getContainSkill(stack), hand, null);
 	}
@@ -177,7 +183,17 @@ public class SkillBookScreen extends Screen {
 			}
 		}
 		
-		Button changeButton = Button.builder(Component.translatable("gui." + EpicFightMod.MODID + (isUsing ? ".applied" : condition ? ".learn" : ".unusable")), (button) -> {
+		Window window = Minecraft.getInstance().getWindow();
+		
+		if (window.getGuiScaledHeight() < 270 && window.getGuiScale() > 1.0F) {
+			this.customScale = window.getGuiScale() - 1.0F;
+			this.width = (int)(window.getWidth() / this.customScale);
+			this.height = (int)(window.getHeight() / this.customScale);
+		} else {
+			this.customScale = window.getGuiScale();
+		}
+		
+		Button learnButton = Button.builder(Component.translatable("gui." + EpicFightMod.MODID + (isUsing ? ".applied" : condition ? ".learn" : ".unusable")), (button) -> {
 			Set<SkillContainer> skillContainers = this.playerpatch.getSkillCapability().getSkillContainersFor(this.skill.getCategory());
 			
 			if (skillContainers.size() == 1) {
@@ -189,11 +205,11 @@ public class SkillBookScreen extends Screen {
 		}).bounds((this.width) / 2 + 54, (this.height) / 2 + 90, 67, 21).tooltip(Tooltip.create(tooltip, null)).build(LearnButton::new);
 		
 		if (isUsing || !condition) {
-			changeButton.active = false;
+			learnButton.active = false;
 		}
 		
 		if (this.hand == null) {
-			changeButton.visible = false;
+			learnButton.visible = false;
 		}
 		
 		this.availableWeaponCategoryList.setX(this.width / 2 + 21);
@@ -210,7 +226,7 @@ public class SkillBookScreen extends Screen {
 		this.providingAttributesList.updateSize(140, 300, consumptionEndPos, consumptionEndPos + 60);
 		this.providingAttributesList.setLeftPos(this.width / 2 - 160);
 		
-		this.addRenderableWidget(changeButton);
+		this.addRenderableWidget(learnButton);
 		this.addRenderableWidget(this.skillTooltipList);
 		this.addRenderableWidget(this.availableWeaponCategoryList);
 		
@@ -242,6 +258,30 @@ public class SkillBookScreen extends Screen {
 	}
 	
 	@Override
+	public boolean mouseClicked(double x, double y, int button) {
+		Window window = Minecraft.getInstance().getWindow();
+		return super.mouseClicked((int)(x * window.getGuiScale() / this.customScale), (int)(y * window.getGuiScale() / this.customScale), button);
+	}
+	
+	@Override
+	public boolean mouseReleased(double x, double y, int button) {
+		Window window = Minecraft.getInstance().getWindow();
+		return super.mouseReleased((int)(x * window.getGuiScale() / this.customScale), (int)(y * window.getGuiScale() / this.customScale), button);
+	}
+	
+	@Override
+	public boolean mouseDragged(double mouseX, double mouseY, int button, double dx, double dy) {
+		Window window = Minecraft.getInstance().getWindow();
+		return super.mouseDragged((int)(mouseX * window.getGuiScale() / this.customScale), (int)(mouseY * window.getGuiScale() / this.customScale), button, dx, dy);
+	}
+	
+	@Override
+	public boolean mouseScrolled(double pMouseX, double pMouseY, double pDelta) {
+		Window window = Minecraft.getInstance().getWindow();
+		return super.mouseScrolled((int)(pMouseX * window.getGuiScale() / this.customScale), (int)(pMouseY * window.getGuiScale() / this.customScale), pDelta);
+	}
+	
+	@Override
 	public void render(GuiGraphics guiGraphics, int mouseX, int mouseY, float partialTicks) {
 		this.render(guiGraphics, mouseX, mouseY, partialTicks, false);
 	}
@@ -251,6 +291,16 @@ public class SkillBookScreen extends Screen {
 			this.renderBackground(guiGraphics);
 		}
 		
+		guiGraphics.pose().pushPose();
+		
+		Window window = Minecraft.getInstance().getWindow();
+		double originalScale = window.getGuiScale();
+		
+		window.setGuiScale(this.customScale);
+		
+		Matrix4f matrix4f = (new Matrix4f()).setOrtho(0.0F, (float)((double)window.getWidth() / window.getGuiScale()), (float)((double)window.getHeight() / window.getGuiScale()), 0.0F, 1000.0F, net.minecraftforge.client.ForgeHooksClient.getGuiFarPlane());
+        RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
+        
 		int posX = (this.width - 284) / 2;
 		int posY = (this.height - 165) / 2;
 		
@@ -294,13 +344,20 @@ public class SkillBookScreen extends Screen {
 		
 		String skillCategory = String.format("(%s)", Component.translatable("skill." + EpicFightMod.MODID + "." + this.skill.getCategory().toString().toLowerCase() + ".category").getString());
 		width = this.font.width(skillCategory);
+		
 		guiGraphics.drawString(font, skillCategory, posX + 56 - width / 2, posY + 90, 0, false);
 		
-		super.render(guiGraphics, mouseX, mouseY, partialTicks);
+		super.render(guiGraphics, (int)(mouseX * originalScale / this.customScale), (int)(mouseY * originalScale / this.customScale), partialTicks);
 		
 		if (asBackground) {
 			this.renderBackground(guiGraphics);
 		}
+		
+		guiGraphics.pose().popPose();
+		
+		window.setGuiScale(originalScale);
+		matrix4f = (new Matrix4f()).setOrtho(0.0F, (float)((double)window.getWidth() / window.getGuiScale()), (float)((double)window.getHeight() / window.getGuiScale()), 0.0F, 1000.0F, net.minecraftforge.client.ForgeHooksClient.getGuiFarPlane());
+        RenderSystem.setProjectionMatrix(matrix4f, VertexSorting.ORTHOGRAPHIC_Z);
 	}
 	
 	@OnlyIn(Dist.CLIENT)

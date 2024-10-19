@@ -108,11 +108,15 @@ import yesman.epicfight.world.level.block.entity.EpicFightBlockEntities;
  *  
  *  3. Fixed unsynchronized data with a dedicated server using resource pack from third party URL
  *  
- *  4. Added validation process for animation registry when entering the server
+ *  4. Added animation registry validation process when entering a dedicated server (player will be kicked if unsynchronized)
  *  
  *  5. Added an alert message when you trying to use blade rush without targeting an entity
  *  
- *  6. Fixed a tooltip error when sweeping edge enchantment applied
+ *  5. Fixed skill book screen exceeds the screen bound when it's too small
+ *  
+ *  8. Fixed innate skill tooltip error when sweeping edge enchantment applied
+ *  
+ *  9. Added a command for modifying, getting stamina value from player
  *  
  *  --- TO DO ---
  *  
