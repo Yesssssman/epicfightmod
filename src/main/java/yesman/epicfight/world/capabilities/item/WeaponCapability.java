@@ -60,7 +60,6 @@ public class WeaponCapability extends CapabilityItem {
 		this.weaponCollider = weaponBuilder.collider;
 		this.canBePlacedOffhand = weaponBuilder.canBePlacedOffhand;
 		this.comboCancel = weaponBuilder.comboCancel;
-		this.attributeMap.putAll(weaponBuilder.attributeMap);
 		this.zoomInType = weaponBuilder.zoomInType;
 	}
 	

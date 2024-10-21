@@ -86,19 +86,18 @@ public class WeaponTypeReloadListener extends SimpleJsonResourceReloadListener {
 		clear();
 		
 		for (Map.Entry<ResourceLocation, JsonElement> entry : packEntry.entrySet()) {
-			CompoundTag nbt = null;
+			CompoundTag compTag = null;
 			
 			try {
-				nbt = TagParser.parseTag(entry.getValue().toString());
+				compTag = TagParser.parseTag(entry.getValue().toString());
 			} catch (CommandSyntaxException e) {
 				e.printStackTrace();
 			}
 			
 			try {
-				WeaponCapability.Builder builder = deserializeWeaponCapabilityBuilder(entry.getKey(), nbt);
-				
-				PRESETS.put(entry.getKey(), (itemstack) -> builder);
-				TAGMAP.put(entry.getKey(), nbt);
+				final CompoundTag comptagFinal = compTag;
+				PRESETS.put(entry.getKey(), (itemstack) -> deserializeWeaponCapabilityBuilder(entry.getKey(), comptagFinal));
+				TAGMAP.put(entry.getKey(), compTag);
 			} catch (Exception e) {
 				EpicFightMod.LOGGER.warn("Error while deserializing weapon type datapack: " + entry.getKey());
 				e.printStackTrace();

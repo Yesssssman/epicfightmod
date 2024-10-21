@@ -9,6 +9,7 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 import com.google.common.collect.HashMultimap;
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
@@ -92,7 +93,14 @@ public class CapabilityItem {
 	
 	protected CapabilityItem(CapabilityItem.Builder builder) {
 		this.weaponCategory = builder.category;
-		this.attributeMap = builder.attributeMap;
+		
+		ImmutableMap.Builder<Style, Map<Attribute, AttributeModifier>> attributeMapbuilder = ImmutableMap.builder();
+		
+		for (Map.Entry<Style, Map<Attribute, AttributeModifier>> entry : builder.attributeMap.entrySet()) {
+			attributeMapbuilder.put(entry.getKey(), (entry.getValue()));
+		}
+		
+		this.attributeMap = attributeMapbuilder.build();
 	}
 	
 	public void modifyItemTooltip(ItemStack itemstack, List<Component> itemTooltip, LivingEntityPatch<?> entitypatch) {
@@ -280,7 +288,7 @@ public class CapabilityItem {
 	
 	public final Map<Attribute, AttributeModifier> getDamageAttributesInCondition(Style style) {
 		Map<Attribute, AttributeModifier> attributes = this.attributeMap.getOrDefault(style, Maps.newHashMap());
-		this.attributeMap.getOrDefault(Styles.COMMON, Maps.newHashMap()).forEach(attributes::putIfAbsent);
+		//this.attributeMap.getOrDefault(Styles.COMMON, Maps.newHashMap()).forEach(attributes::putIfAbsent);
 		
 		return attributes;
 	}
