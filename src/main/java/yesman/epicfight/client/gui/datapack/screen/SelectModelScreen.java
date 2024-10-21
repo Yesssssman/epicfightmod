@@ -4,6 +4,8 @@ import java.util.function.BiConsumer;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
+
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
@@ -27,8 +29,9 @@ public class SelectModelScreen extends Screen {
 	private final ModelPreviewer modelPreviewer;
 	private final EditBox searchBox;
 	private final BiConsumer<String, MeshProvider<AnimatedMesh>> selectCallback;
+	private final BiConsumer<String, MeshProvider<AnimatedMesh>> cancelCallback;
 	
-	public SelectModelScreen(Screen parentScreen, BiConsumer<String, MeshProvider<AnimatedMesh>> selectCallback) {
+	public SelectModelScreen(Screen parentScreen, BiConsumer<String, MeshProvider<AnimatedMesh>> selectCallback, BiConsumer<String, MeshProvider<AnimatedMesh>> cancelCallback) {
 		super(Component.translatable("gui.epicfight.select.models"));
 		
 		this.modelPreviewer = new ModelPreviewer(10, 20, 36, 60, null, null, null, null);
@@ -38,6 +41,7 @@ public class SelectModelScreen extends Screen {
 		this.searchBox = new EditBox(parentScreen.getMinecraft().font, this.width / 2, 12, this.width / 2 - 12, 16, Component.literal("datapack_edit.keyword"));
 		this.searchBox.setResponder(this.modelList::refreshModelList);
 		this.selectCallback = selectCallback;
+		this.cancelCallback = cancelCallback;
 		
 		this.modelList.refreshModelList(null);
 	}
@@ -84,6 +88,7 @@ public class SelectModelScreen extends Screen {
 			
 		}).pos(this.width / 2 - 162, this.height - 28).size(160, 21).build());
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, (button) -> {
+			this.cancelCallback.accept(StringUtils.EMPTY, null);
 			this.onClose();
 		}).pos(this.width / 2 + 2, this.height - 28).size(160, 21).build());
 	}

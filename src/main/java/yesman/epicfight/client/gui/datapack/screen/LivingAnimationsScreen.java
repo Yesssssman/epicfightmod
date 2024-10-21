@@ -15,7 +15,6 @@ import net.minecraft.client.gui.navigation.ScreenRectangle;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.CommonComponents;
 import net.minecraft.network.chat.Component;
@@ -29,6 +28,7 @@ import yesman.epicfight.api.animation.types.MainFrameAnimation;
 import yesman.epicfight.api.animation.types.StaticAnimation;
 import yesman.epicfight.api.client.model.Meshes;
 import yesman.epicfight.api.utils.ParseUtil;
+import yesman.epicfight.api.utils.datastruct.ModifiablePair;
 import yesman.epicfight.client.gui.datapack.widgets.Grid;
 import yesman.epicfight.client.gui.datapack.widgets.Grid.GridBuilder.RowEditButton;
 import yesman.epicfight.client.gui.datapack.widgets.ModelPreviewer;
@@ -48,7 +48,7 @@ public class LivingAnimationsScreen extends Screen {
 	private Grid animationsGrid;
 	private final ModelPreviewer modelPreviewer;
 	
-	private final List<PackEntry<String, CompoundTag>> styles = Lists.newArrayList();
+	private final List<PackEntry<String, List<ModifiablePair<String, String>>>> styles = Lists.newArrayList();
 	private final CompoundTag rootTag;
 	
 	public LivingAnimationsScreen(Screen parentScreen, CompoundTag rootTag) {
@@ -72,8 +72,8 @@ public class LivingAnimationsScreen extends Screen {
 								.rowpositionChanged((rowposition, values) -> {
 									Grid.PackImporter importer = new Grid.PackImporter();
 									
-									for (Map.Entry<String, Tag> entry : this.styles.get(rowposition).getValue().tags.entrySet()) {
-										importer.newRow().newValue("living_motion", LivingMotion.ENUM_MANAGER.get(entry.getKey())).newValue("living_animation", DatapackEditScreen.animationByKey(entry.getValue().getAsString()));
+									for (ModifiablePair<String, String> entry : this.styles.get(rowposition).getValue()) {
+										importer.newRow().newValue("living_motion", LivingMotion.ENUM_MANAGER.get(entry.getFirst())).newValue("living_animation", DatapackEditScreen.animationByKey(entry.getSecond()));
 									}
 									
 									this.animationsGrid._setActive(true);
@@ -83,7 +83,7 @@ public class LivingAnimationsScreen extends Screen {
 												.valueChanged((event) -> this.styles.get(event.rowposition).setPackKey(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT)))
 												.defaultVal(Styles.ONE_HAND))
 								.pressAdd((grid, button) -> {
-									this.styles.add(PackEntry.of("", CompoundTag::new));
+									this.styles.add(PackEntry.ofValue("", Lists.newArrayList()));
 									int rowposition = grid.addRow();
 									grid.setGridFocus(rowposition, "style");
 								})
@@ -107,11 +107,8 @@ public class LivingAnimationsScreen extends Screen {
 									.addColumn(Grid.combo("living_motion", List.of(LivingMotions.IDLE, LivingMotions.WALK, LivingMotions.RUN, LivingMotions.SNEAK, LivingMotions.SWIM, LivingMotions.FLOAT, LivingMotions.KNEEL, LivingMotions.FALL,
 											LivingMotions.SIT, LivingMotions.FLY, LivingMotions.CREATIVE_FLY, LivingMotions.CREATIVE_IDLE, LivingMotions.BLOCK, LivingMotions.RELOAD, LivingMotions.AIM, LivingMotions.SHOT))
 													.valueChanged((event) -> {
-														CompoundTag tag = this.styles.get(this.stylesGrid.getRowposition()).getValue();
-														String oldMotion = ParseUtil.nullParam(event.prevValue).toLowerCase(Locale.ROOT);
-														Tag animationTag = tag.get(oldMotion);
-														tag.remove(oldMotion);
-														tag.put(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT), animationTag == null ? StringTag.valueOf("") : animationTag);
+														List<ModifiablePair<String, String>> styleAnimations = this.styles.get(this.stylesGrid.getRowposition()).getValue();
+														styleAnimations.get(event.rowposition).setFirst(ParseUtil.nullParam(event.postValue).toLowerCase(Locale.ROOT));
 														
 														this.modelPreviewer.clearAnimations();
 														this.modelPreviewer.getAnimator().getEntityPatch().currentLivingMotion = event.postValue;
@@ -134,8 +131,8 @@ public class LivingAnimationsScreen extends Screen {
 														this.modelPreviewer.clearAnimations();
 														
 														LivingMotion livingMotion = event.grid.getValue(event.rowposition, "living_motion");
-														CompoundTag tag = this.styles.get(this.stylesGrid.getRowposition()).getValue();
-														tag.put(ParseUtil.nullParam(livingMotion).toLowerCase(Locale.ROOT), StringTag.valueOf(ParseUtil.nullOrToString(event.postValue, (animation) -> animation.getRegistryName().toString())));
+														List<ModifiablePair<String, String>> styleAnimations = this.styles.get(this.stylesGrid.getRowposition()).getValue();
+														styleAnimations.get(event.rowposition).setSecond(ParseUtil.nullOrToString(event.postValue, (animation) -> animation.getRegistryName().toString()));
 														
 														if (LIVING_ANIMTIONS.containsKey(livingMotion)) {
 															this.modelPreviewer.addAnimationToPlay(LIVING_ANIMTIONS.get(livingMotion));
@@ -148,12 +145,12 @@ public class LivingAnimationsScreen extends Screen {
 													.toDisplayText((animation) -> animation == null ? "" : animation.getRegistryName().toString())
 													.width(150))
 									.pressAdd((grid, button) -> {
-										this.styles.get(this.stylesGrid.getRowposition()).getValue().put("", StringTag.valueOf(""));
+										this.styles.get(this.stylesGrid.getRowposition()).getValue().add(ModifiablePair.of("", ""));
 										int rowposition = grid.addRow();
 										grid.setGridFocus(rowposition, "living_animation");
 									})
 									.pressRemove((grid, button) -> {
-										this.styles.get(this.stylesGrid.getRowposition()).getValue().remove(ParseUtil.nullParam(grid.getValue(grid.getRowposition(), "living_motion")).toLowerCase(Locale.ROOT));
+										this.styles.get(this.stylesGrid.getRowposition()).getValue().remove(grid.getRowposition());
 										grid.removeRow();
 									})
 									.rowpositionChanged((rowposition, values) -> {
@@ -179,7 +176,13 @@ public class LivingAnimationsScreen extends Screen {
 		Grid.PackImporter packImporter = new Grid.PackImporter();
 		
 		for (Map.Entry<String, Tag> entry : rootTag.tags.entrySet()) {
-			this.styles.add(PackEntry.of(entry.getKey(), () -> (CompoundTag)entry.getValue()));
+			List<ModifiablePair<String, String>> list = Lists.newArrayList();
+			
+			for (Map.Entry<String, Tag> entry$2 : ((CompoundTag)entry.getValue()).tags.entrySet()) {
+				list.add(ModifiablePair.of(entry$2.getKey(), entry$2.getValue().getAsString()));
+			}
+			
+			this.styles.add(PackEntry.ofValue(entry.getKey(), list));
 			
 			packImporter.newRow();
 			packImporter.newValue("style", Style.ENUM_MANAGER.get(entry.getKey()));
@@ -199,7 +202,7 @@ public class LivingAnimationsScreen extends Screen {
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_DONE, (button) -> {
 			Set<String> styles = Sets.newHashSet();
 			
-			for (PackEntry<String, CompoundTag> entry : this.styles) {
+			for (PackEntry<String, List<ModifiablePair<String, String>>> entry : this.styles) {
 				if (styles.contains(entry.getKey())) {
 					this.minecraft.setScreen(new MessageScreen<>("Save Failed", "Unable to save because of duplicated style: " + entry.getKey(), this, (button2) -> {
 						this.minecraft.setScreen(this);
@@ -214,10 +217,10 @@ public class LivingAnimationsScreen extends Screen {
 			String style = null;
 			
 			exit:
-			for (PackEntry<String, CompoundTag> entry : this.styles) {
-				for (Tag tag : entry.getValue().tags.values()) {
-					if (AnimationManager.getInstance().byKey(new ResourceLocation(tag.getAsString())) == null) {
-						animation = tag.getAsString();
+			for (PackEntry<String, List<ModifiablePair<String, String>>> entry : this.styles) {
+				for (ModifiablePair<String, String> pair : entry.getValue()) {
+					if (AnimationManager.getInstance().byKey(new ResourceLocation(pair.getSecond())) == null) {
+						animation = pair.getSecond();
 						style = entry.getKey();
 						allTagsNormal = false;
 						break exit;
@@ -232,8 +235,14 @@ public class LivingAnimationsScreen extends Screen {
 			} else {
 				this.rootTag.tags.clear();
 				
-				for (PackEntry<String, CompoundTag> entry : this.styles) {
-					this.rootTag.put(entry.getKey(), entry.getValue());
+				for (PackEntry<String, List<ModifiablePair<String, String>>> entry : this.styles) {
+					CompoundTag compTag = new CompoundTag();
+					
+					for (ModifiablePair<String, String> pair : entry.getValue()) {
+						compTag.putString(pair.getFirst(), pair.getSecond());
+					}
+					
+					this.rootTag.put(entry.getKey(), compTag);
 				}
 				
 				this.onClose();

@@ -29,10 +29,11 @@ public class SelectAnimationScreen extends Screen {
 	private final AnimationList animationList;
 	private final ModelPreviewer modelPreviewer;
 	private final Consumer<StaticAnimation> selectCallback;
+	private final Consumer<StaticAnimation> cancelCallback;
 	private final Predicate<StaticAnimation> filter;
 	private final EditBox searchBox;
 	
-	public SelectAnimationScreen(Screen parentScreen, Consumer<StaticAnimation> selectCallback, Predicate<StaticAnimation> filter, Armature armature, MeshProvider<AnimatedMesh> mesh) {
+	public SelectAnimationScreen(Screen parentScreen, Consumer<StaticAnimation> selectCallback, Consumer<StaticAnimation> cancelCallback, Predicate<StaticAnimation> filter, Armature armature, MeshProvider<AnimatedMesh> mesh) {
 		super(Component.translatable("gui.epicfight.select.animations"));
 		
 		this.modelPreviewer = new ModelPreviewer(10, 20, 36, 60, null, null, armature, mesh);
@@ -41,6 +42,7 @@ public class SelectAnimationScreen extends Screen {
 		this.animationList.setRenderTopAndBottom(false);
 		this.parentScreen = parentScreen;
 		this.selectCallback = selectCallback;
+		this.cancelCallback = cancelCallback;
 		this.filter = filter;
 		this.searchBox = new EditBox(parentScreen.getMinecraft().font, this.width / 2, 12, this.width / 2 - 12, 16, Component.literal("datapack_edit.keyword"));
 		this.searchBox.setResponder(this.animationList::refreshAniamtionList);
@@ -89,6 +91,7 @@ public class SelectAnimationScreen extends Screen {
 			this.onClose();
 		}).pos(this.width / 2 - 162, this.height - 28).size(160, 21).build());
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, (button) -> {
+			this.cancelCallback.accept(null);
 			this.onClose();
 		}).pos(this.width / 2 + 2, this.height - 28).size(160, 21).build());
 	}

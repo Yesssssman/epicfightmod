@@ -1,4 +1,4 @@
-package yesman.epicfight.api.utils;
+package yesman.epicfight.api.utils.datastruct;
 
 import net.minecraft.core.IdMapper;
 

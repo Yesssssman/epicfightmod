@@ -17,7 +17,7 @@ import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryInternal;
 import net.minecraftforge.registries.RegistryManager;
 import yesman.epicfight.api.data.reloader.SkillManager;
-import yesman.epicfight.api.utils.ClearableIdMapper;
+import yesman.epicfight.api.utils.datastruct.ClearableIdMapper;
 import yesman.epicfight.api.utils.math.Vec3f;
 import yesman.epicfight.main.EpicFightMod;
 

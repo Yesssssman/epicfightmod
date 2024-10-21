@@ -676,7 +676,20 @@ public class ImportAnimationsScreen extends Screen {
 					
 					this.modelPreviewer.setCollider(pair.getSecond(), colliderJoint._getValue());
 				} else {
-					this.modelPreviewer.setCollider(ColliderPreset.FIST);
+					ListTag phases = this.fakeAnimations.get(this.animationGrid.getRowposition()).getParameter("phases");
+					CompoundTag phaseTag = phases.getCompound(phasesGrid.getRowposition());
+					
+					if (phaseTag.contains("collider")) {
+						colliderCount.setValue("");
+						colliderCenterX.setValue("");
+						colliderCenterY.setValue("");
+						colliderCenterZ.setValue("");
+						colliderSizeX.setValue("");
+						colliderSizeY.setValue("");
+						colliderSizeZ.setValue("");
+					}
+					
+					this.modelPreviewer.setCollider(null);
 				}
 			});
 			

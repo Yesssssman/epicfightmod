@@ -4,7 +4,7 @@ import java.util.function.Function;
 
 import net.minecraft.world.damagesource.DamageSource;
 import yesman.epicfight.api.utils.AttackResult;
-import yesman.epicfight.api.utils.TypeFlexibleHashMap;
+import yesman.epicfight.api.utils.datastruct.TypeFlexibleHashMap;
 
 public class EntityState {
 	public static class StateFactor<T> implements TypeFlexibleHashMap.TypeKey<T> {

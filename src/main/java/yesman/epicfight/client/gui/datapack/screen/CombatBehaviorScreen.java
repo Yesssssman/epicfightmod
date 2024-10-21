@@ -216,7 +216,7 @@ public class CombatBehaviorScreen extends Screen {
 				
 				this.setDataBindingComponenets(new Object[] {
 					tag.contains("weight") ? ParseUtil.valueOfOmittingType(tag.getDouble("weight")) : "",
-					tag.contains("cooldown") ? ParseUtil.valueOfOmittingType(tag.getDouble("cooldown")) : "",
+					tag.contains("cooldown") ? ParseUtil.valueOfOmittingType(tag.getInt("cooldown")) : "",
 					tag.getBoolean("canBeInterrupted"),
 					tag.getBoolean("looping"),
 					null,

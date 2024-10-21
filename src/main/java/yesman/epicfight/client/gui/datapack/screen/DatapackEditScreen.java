@@ -730,7 +730,7 @@ public class DatapackEditScreen extends Screen {
 												this.packList.add(rowposition, PackEntry.of(new ResourceLocation(registryName), CompoundTag::new));
 												grid.setGridFocus(rowposition, "pack_item");
 												grid.setValueChangeEnabled(true);
-											}, filter));
+											}, (registryName, selItem) -> {}, filter));
 										} else {
 											grid.setValueChangeEnabled(false);
 											int rowposition = grid.addRowWithDefaultValues("pack_item", EpicFightMod.MODID + ":");
@@ -1025,6 +1025,16 @@ public class DatapackEditScreen extends Screen {
 																									colliderSizeX.setValue(String.valueOf(sizeVec.getDouble(0)));
 																									colliderSizeY.setValue(String.valueOf(sizeVec.getDouble(1)));
 																									colliderSizeZ.setValue(String.valueOf(sizeVec.getDouble(2)));
+																								} else {
+																									if (this.packList.get(this.packListGrid.getRowposition()).getValue().contains("collider")) {
+																										colliderCount.setValue("");
+																										colliderCenterX.setValue("");
+																										colliderCenterY.setValue("");
+																										colliderCenterZ.setValue("");
+																										colliderSizeX.setValue("");
+																										colliderSizeY.setValue("");
+																										colliderSizeZ.setValue("");
+																									}
 																								}
 																								
 																								this.modelPreviewer.setCollider(pair.getSecond());
@@ -1223,6 +1233,8 @@ public class DatapackEditScreen extends Screen {
 			Screen parentScreen = DatapackEditScreen.this;
 			
 			this.modelPreviewer = new ModelPreviewer(20, 15, 0, 150, HorizontalSizing.LEFT_RIGHT, null, Armatures.BIPED, () -> Meshes.BIPED);
+			this.modelPreviewer.setColliderJoint(Armatures.BIPED.searchJointByName("Tool_R"));
+			
 			this.responder = (itemType) -> {
 				CompoundTag tag = this.packList.get(this.packListGrid.getRowposition()).getValue();
 				tag.tags.clear();
@@ -1570,9 +1582,19 @@ public class DatapackEditScreen extends Screen {
 																										colliderSizeX.setValue(String.valueOf(sizeVec.getDouble(0)));
 																										colliderSizeY.setValue(String.valueOf(sizeVec.getDouble(1)));
 																										colliderSizeZ.setValue(String.valueOf(sizeVec.getDouble(2)));
-																										
-																										this.modelPreviewer.setCollider(pair.getSecond());
+																									} else {
+																										if (this.packList.get(this.packListGrid.getRowposition()).getValue().contains("collider")) {
+																											colliderCount.setValue("");
+																											colliderCenterX.setValue("");
+																											colliderCenterY.setValue("");
+																											colliderCenterZ.setValue("");
+																											colliderSizeX.setValue("");
+																											colliderSizeY.setValue("");
+																											colliderSizeZ.setValue("");
+																										}
 																									}
+																									
+																									this.modelPreviewer.setCollider(pair.getSecond());
 																								}).applyFilter((collider) -> collider instanceof OBBCollider || collider instanceof MultiOBBCollider));
 				
 				this.inputComponentsList.newRow();
@@ -2207,7 +2229,7 @@ public class DatapackEditScreen extends Screen {
 			};
 			
 			this.modelPreviewer = new ModelPreviewer(9, 15, 0, 140, HorizontalSizing.LEFT_RIGHT, null, Armatures.BIPED, () -> Meshes.BIPED);
-			this.modelPreviewer.setColliderJoint(Armatures.BIPED.searchJointByName("Tool_R"));
+			this.modelPreviewer.setColliderJoint(Armatures.BIPED.toolR);
 			
 			this.meshPopupBox = new PopupBox.MeshPopupBox(DatapackEditScreen.this, DatapackEditScreen.this.font, 0, 15, 130, 15, HorizontalSizing.LEFT_RIGHT, null, Component.translatable("datapack_edit.weapon_type.model"), (pair) -> {
 				if (this.armaturePopupBox._getValue() != null && pair.getSecond() != null && pair.getSecond().get().getMaxJointCount() > this.armaturePopupBox._getValue().getJointNumber()) {

@@ -11,7 +11,7 @@ import yesman.epicfight.api.animation.AnimationManager;
 import yesman.epicfight.api.animation.property.AnimationEvent;
 import yesman.epicfight.api.animation.property.AnimationProperty.StaticAnimationProperty;
 import yesman.epicfight.api.client.animation.Layer;
-import yesman.epicfight.api.utils.TypeFlexibleHashMap.TypeKey;
+import yesman.epicfight.api.utils.datastruct.TypeFlexibleHashMap.TypeKey;
 import yesman.epicfight.world.capabilities.entitypatch.LivingEntityPatch;
 
 public class SelectiveAnimation extends StaticAnimation {

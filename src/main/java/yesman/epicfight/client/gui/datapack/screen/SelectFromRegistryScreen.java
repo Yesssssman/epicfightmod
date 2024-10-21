@@ -8,6 +8,8 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.StringUtils;
+
 import com.google.common.collect.Maps;
 import com.mojang.datafixers.util.Pair;
 
@@ -33,12 +35,13 @@ public class SelectFromRegistryScreen<T> extends Screen {
 	private final Screen parentScreen;
 	private final Consumer<T> onPressRow;
 	private final BiConsumer<String, T> onAccept;
+	private final BiConsumer<String, T> onCancel;
 	
-	public SelectFromRegistryScreen(Screen parentScreen, IForgeRegistry<T> registry, BiConsumer<String, T> onAccept, Predicate<T> filter) {
-		this(parentScreen, registry, onAccept, (select) -> {}, filter);
+	public SelectFromRegistryScreen(Screen parentScreen, IForgeRegistry<T> registry, BiConsumer<String, T> onAccept, BiConsumer<String, T> onCancel, Predicate<T> filter) {
+		this(parentScreen, registry, onAccept, onCancel, (select) -> {}, filter);
 	}
 	
-	public SelectFromRegistryScreen(Screen parentScreen, IForgeRegistry<T> registry, BiConsumer<String, T> onAccept, Consumer<T> onPressRow, Predicate<T> filter) {
+	public SelectFromRegistryScreen(Screen parentScreen, IForgeRegistry<T> registry, BiConsumer<String, T> onAccept, BiConsumer<String, T> onCancel, Consumer<T> onPressRow, Predicate<T> filter) {
 		super(Component.translatable("gui.epicfight.select", ParseUtil.snakeToSpacedCamel(registry.getRegistryName().getPath())));
 		
 		final Map<ResourceLocation, T> filteredItems = Maps.newHashMap();
@@ -48,9 +51,10 @@ public class SelectFromRegistryScreen<T> extends Screen {
 		this.parentScreen = parentScreen;
 		this.onPressRow = onPressRow;
 		this.onAccept = onAccept;
+		this.onCancel = onCancel;
 	}
 	
-	public SelectFromRegistryScreen(Screen parentScreen, Set<Pair<ResourceLocation, T>> entries, String title, BiConsumer<String, T> onAccept, Consumer<T> onPressRow, Predicate<T> filter) {
+	public SelectFromRegistryScreen(Screen parentScreen, Set<Pair<ResourceLocation, T>> entries, String title, BiConsumer<String, T> onAccept, BiConsumer<String, T> onCancel, Consumer<T> onPressRow, Predicate<T> filter) {
 		super(Component.translatable("gui.epicfight.select", ParseUtil.snakeToSpacedCamel(title)));
 		
 		Map<ResourceLocation, T> filteredItems = entries.stream().filter((entry) -> filter.test(entry.getSecond())).reduce(Maps.newHashMap(), (map, element) -> {
@@ -65,6 +69,7 @@ public class SelectFromRegistryScreen<T> extends Screen {
 		this.parentScreen = parentScreen;
 		this.onPressRow = onPressRow;
 		this.onAccept = onAccept;
+		this.onCancel = onCancel;
 	}
 	
 	@Override
@@ -93,6 +98,7 @@ public class SelectFromRegistryScreen<T> extends Screen {
 		}).pos(this.width / 2 - 162, this.height - 28).size(160, 21).build());
 		
 		this.addRenderableWidget(Button.builder(CommonComponents.GUI_CANCEL, (button) -> {
+			this.onCancel.accept(StringUtils.EMPTY, null);
 			this.minecraft.setScreen(this.parentScreen);
 		}).pos(this.width / 2 + 2, this.height - 28).size(160, 21).build());
 	}
